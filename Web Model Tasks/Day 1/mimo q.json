@@ -1,0 +1,93 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is a rich topic I can discuss substantively. Here's my knowledge on expert-interview elicitation for engineering decision case studies:
+
+---
+
+**Opening Questions (surfacing good candidate stories)**
+
+1. "Think back to a project where something went wrong during design closure — a timing failure, a routing disaster, a tapeout scare — and you had to figure out what to do under real schedule pressure. What comes to mind?" This selects for failure-and-recovery with stakes, not polished success narratives.
+
+2. "Was there a time when the 'obvious fix' didn't work or was rejected, and you had to find a less obvious path? What was the situation?" This specifically surfaces the rejected-alternatives dimension, which is the hardest material to elicit.
+
+3. "What's the closest you've come to missing a tapeout deadline because of a physical-design problem? What happened?" The word "closest" gives permission to talk about near-failures without embarrassment.
+
+---
+
+**Decompression Questions**
+
+1. "Before this problem appeared, what did the metrics look like — timing slack, congestion, utilization? What were the numbers?" Extracts: prior_state. Follow-up if vague: "Can you give me an order-of-magnitude — were things tight or comfortable?" Leading risk: asking "was timing already bad?" presupposes the answer; neutral phrasing: "what was the state of things before you noticed the problem?"
+
+2. "How did you first notice something was wrong? What did you see in the reports or on your screen?" Extracts: observation. Follow-up: "Was there a specific number or visual pattern that caught your eye?" Leading risk: "did the timing report show violations?" is too leading; ask "what drew your attention."
+
+3. "What did you think was causing it when you first saw the problem?" Extracts: hypothesis. Follow-up: "Was that your first instinct or did you consider other explanations first?" Leading risk: suggesting a cause contaminates the engineer's actual reasoning.
+
+4. "What did you actually try first? And what happened?" Extracts: chosen_intervention and initial outcome. Follow-up: "Was that the first thing you tried, or had you attempted something else before that?" Leading risk: "did you try X?" injects an option that may not have been considered.
+
+5. "After you applied the fix, what did the numbers look like? How much did things improve — or did they get worse before they got better?" Extracts: post_state. Follow-up: "Do you remember the actual slack or overflow numbers, even approximately?" Leading risk: suggesting a magnitude ("did it improve by 100ps?") pressures agreement.
+
+6. "Looking back, was that the right call? Would you do the same thing again?" Extracts: expert_assessment. Follow-up: "Would that approach work on a different block or a different node?" Leading risk: "you made the right call, didn't you?" is pure leading.
+
+7. "How long did the whole episode take — from noticing the problem to having it resolved?" Extracts: timeline context. Follow-up: "Days? Weeks? A couple of hours?"
+
+8. "What was the schedule pressure like at that point? How much time did you have left?" Extracts: context for stakes and decision pressure.
+
+9. "Did anyone else on the team suggest a different approach that you didn't follow?" Extracts: candidates_considered (social dimension). Follow-up: "What was their reasoning, and why did you go a different way?"
+
+10. "What would have happened if you'd done nothing — or done the obvious fix?" Extracts: counterfactual reasoning that surfaces rejected alternatives.
+
+---
+
+**Rejected Paths Questions (recovering alternatives-considered)**
+
+1. "You mentioned you went with [chosen approach]. What else was on the table at that point? Even options you dismissed quickly." This is the direct elicitation. Memory-jogging technique: "Sometimes engineers keep a mental list — 'we could do A, B, or C' — even if C was obviously wrong. What was on your list?"
+
+2. "Was there an approach that someone suggested or that you considered but decided against? What was the specific reason it didn't work?" Follow-up: "Was it a technical reason (it wouldn't have worked) or a practical reason (too risky, too slow, couldn't get approval)?"
+
+3. "Think about the path you DIDN'T take. If you'd gone that way, what do you think would have happened?" This is a counterfactual probe from the Critical Decision Method — it forces the expert to articulate the reasoning they may have compressed away.
+
+4. Memory-jogging technique: "I'm going to list some common approaches to this kind of problem — tell me if any of these were discussed, even briefly: [list 2-3 generic approaches for the failure class]. Were any of these on the table?" This uses recognition rather than recall, which surfaces forgotten alternatives. Leading risk: the listed approaches must be genuinely generic, not suggestive of the "right" answer.
+
+---
+
+**Numbers Questions (recovering metrics honestly)**
+
+1. "Can you give me the numbers, even if they're approximate? I'd rather have 'around 200ps' than nothing. And 'I don't remember the exact number but it was in the hundreds of picoseconds range' is perfectly useful." This explicitly gives permission for imprecision.
+
+2. "If you had to put an order of magnitude on it — was the overflow 1%? 5%? 20%? — what would you say?" This uses bounded options to recover approximate values without pressuring false precision.
+
+3. "Were the numbers surprising to you at the time, or about what you expected?" This recovers whether the observation was anomalous, which is important context.
+
+---
+
+**Verification Questions (testing internal consistency)**
+
+1. "Let me make sure I have the timeline right — you said the problem appeared after CTS but before route, and you applied the fix during [stage]. Does that sequence sound right?" This tests whether the story's chronology is consistent.
+
+2. "You mentioned the overflow was X% and the DRC count was Y — does that ratio seem right to you? In my experience, X% overflow usually produces [range] DRCs." This is the polite version of "that number seems too good" — it uses the interviewer's domain knowledge to probe suspicious claims without accusing.
+
+3. "You said the fix improved WNS by [amount] with no area cost. That's a great result — was there any downside at all? Any timing degradation elsewhere, or hold violations, or congestion increase?" This probes for omitted negative consequences, which are often compressed out of success narratives.
+
+---
+
+**Closing Questions (surfacing the next story)**
+
+1. "Before we wrap up — is there another episode from your career that comes to mind now, maybe something this conversation reminded you of? Doesn't have to be the same failure class." The "now" is important — the first story primes memory for related episodes.
+
+2. "What's the hardest physical-design problem you've ever faced that we haven't talked about today?" This surfaces the engineer's self-ranked most important story.
+
+---
+
+**Anti-Patterns (interviewer mistakes that corrupt episodes)**
+
+1. **Suggesting the cause.** Symptom: the engineer's hypothesis matches the interviewer's pet theory word-for-word. The interviewer asks "was it a congestion problem?" and the episode records a congestion hypothesis that may not have been the engineer's actual first instinct.
+
+2. **Accepting the first answer on rejected alternatives.** Symptom: the episode has a chosen intervention but no candidates_considered, or the rejections are generic ("too risky"). Veterans compress away the roads not taken; the interviewer must probe specifically for them, not accept "I just knew what to do."
+
+3. **Pressuring for exact numbers.** Symptom: suspiciously precise metrics that the engineer couldn't plausibly remember years later (e.g., "WNS was -247ps"). The interviewer asked "what was the exact number?" instead of accepting an order-of-magnitude estimate.
+
+4. **Asking leading "why" questions.** Symptom: the rationale in the episode sounds like a textbook answer rather than the engineer's actual reasoning. "Why did you choose pin-swap over floorplan rework?" invites post-hoc rationalization; "what was going through your mind when you decided?" invites honest recall.
+
+5. **Not probing the negative outcome.** Symptom: every episode shows a clean improvement with no downsides. Real engineering decisions have tradeoffs — the fix cost timing, or area, or schedule time. If the interviewer doesn't ask "what did this cost you?", the episode becomes success theater.
+
+---
+
+This reflects my knowledge of elicitation techniques from cognitive interviewing, the Critical Decision Method (developed by Klein et al.), and knowledge engineering practices. The specific application to ASIC physical-design episodes is my synthesis of these techniques with the domain.

@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Optimize server throughput rather than single-thread performance",
+    "where_in_paper": "Introduction / design goals",
+    "decision": "Design Niagara for maximum chip-level throughput on commercial server and network-facing workloads, accepting lower single-thread speed than a complex high-IPC processor.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper’s premise is that the target workloads have abundant thread-level parallelism and are limited by memory and system behavior more than by instruction-level parallelism, so chip resources should buy concurrency rather than deeper speculation.",
+    "outcome": "The resulting organization is a 32-thread chip: eight relatively simple cores, each supporting four hardware threads, aimed at throughput per die area and per watt.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The page guess is only approximate, and the exact wording of the rejected single-thread-performance path should be verified.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Use many simple in-order cores instead of a few complex out-of-order cores",
+    "where_in_paper": "Design philosophy / processor organization",
+    "decision": "Build the chip as a chip multiprocessor with eight small in-order cores rather than one or a few aggressive out-of-order cores.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper argues that out-of-order machinery improves single-thread latency but costs area, power, and design complexity that can be better spent on additional threads and memory bandwidth for the intended workloads.",
+    "outcome": "The simple-core choice made room for 32 hardware threads and a shared on-chip memory system while keeping the design point oriented to throughput and power efficiency.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am confident in the direction but not in whether the paper explicitly names out-of-order execution as the rejected alternative or only implies it.",
+    "confidence": 0.88
+  },
+  {
+    "title": "Four-way fine-grained multithreading per core",
+    "where_in_paper": "Core microarchitecture / multithreading",
+    "decision": "Give each core four hardware threads and interleave their instruction streams through a simple in-order pipeline rather than pursuing wide simultaneous issue from many threads.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Multiple strands hide pipeline, cache, and memory latency without requiring register renaming, large issue queues, or complex speculation; the design favors continuous utilization of a narrow pipeline over high ILP from a single thread.",
+    "outcome": "Each of the eight cores can keep a simple pipeline occupied across latency events, yielding 32-way multithreading at the chip level.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly contrasts this with SMT, or only describes the chosen interleaving, needs verification.",
+    "confidence": 0.86
+  },
+  {
+    "title": "Shared L2, crossbar, and integrated memory controllers over private cache-centric scaling",
+    "where_in_paper": "Memory subsystem / cache and interconnect",
+    "decision": "Use a shared on-chip L2 cache with an on-chip interconnect/crossbar and integrated memory controllers, with modest per-core L1 caches, rather than relying mainly on larger private caches or an off-chip memory path.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The throughput workloads need high aggregate bandwidth and tolerance of memory latency; a shared L2 exploits common data across threads while integrated controllers reduce dependence on an external northbridge-style memory path.",
+    "outcome": "The memory system becomes a central part of the throughput design rather than an afterthought, supporting the many-thread core organization.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact capacities, bank counts, number of memory controllers, and whether private-L2 or L3 alternatives are explicitly rejected should be checked against the text.",
+    "confidence": 0.72
+  },
+  {
+    "title": "Spend area and power on integer throughput, not per-core floating-point capability",
+    "where_in_paper": "Core implementation / area and power trade-offs",
+    "decision": "Keep floating-point hardware minimal and shared rather than giving every core a full-performance FPU, concentrating area and power on integer cores, threads, caches, and memory bandwidth.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The target server/network workloads are integer-dominated, so duplicating floating-point hardware would add little expected throughput while consuming area and power better used elsewhere.",
+    "outcome": "The paper presents the resulting chip as strong for its intended throughput role, with floating-point performance deliberately not the design center.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The shared-FPU/topology claim is true for the Niagara/UltraSPARC T1 family, but I am least certain this IEEE Micro paper states it as an explicit decision with this rationale.",
+    "confidence": 0.58
+  }
+]

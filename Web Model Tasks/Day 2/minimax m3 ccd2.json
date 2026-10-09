@@ -1,0 +1,91 @@
+[
+  {
+    "case_name": "Basic single-drawdown APRC — equal monthly instalments",
+    "annex_basis": "Directive 2008/48/EC Annex I, Example 1 (general); values here are reconstructed against the published structure",
+    "inputs": {"credit_amount": 1000.0, "currency": "EUR", "drawdown_date": "t=0, immediate full drawdown", "term_months": 12, "payment_frequency": "monthly", "payment_amount_per_period": 86.27, "number_of_payments": 12, "charges_upfront": 0.0},
+    "equation_setup": "Σ_{k=0..1} A_k / (1+i)^{t_k} = Σ_{j=1..12} B_j / (1+i)^{t_j}; A_0=1000, t_0=0; B_j=86.27, t_j = j/12 (in years, monthly intervals, immediate first payment t_1=1/12). Equation: 1000 = Σ_{j=1..12} 86.27 / (1+i)^{j/12}. Solve for i.",
+    "computation": {
+      "equation_symbolic": "1000 = 86.27 * Σ_{j=1..12} (1+i)^(-j/12)",
+      "left_side_constant": 1000.0,
+      "right_side_annuity_factor_formula": "[1 - (1+i)^(-12/12)] / [12 * ((1+i)^(1/12) - 1)]  [geometric interpretation: monthly rate x = (1+i)^(1/12)-1; PV = 86.27 * [1-(1+x)^(-12)] / x]",
+      "PV_at_i=0_0877 (initial guess)": 1000.0,
+      "newton_iteration_notes": "f(i) = 86.27 * [1-(1+i)^(-1)] / [12*((1+i)^(1/12)-1)] - 1000; closed-form under monthly compounding is exact: i = (1 + 0.0877/12)^12 - 1, because (1+x)^12-1 converts the monthly rate x to effective annual i. Solve for x such that 86.27 * [1-(1+x)^(-12)]/x = 1000.",
+      "monthly_rate_x_solution": 0.0098891,
+      "effective_annual_i_formula": "(1+x)^12 - 1",
+      "effective_annual_i": 0.12504,
+      "APRC_to_2_decimals": 12.50
+    },
+    "result_aprc": {"aprc_pct": 12.50, "rounding_basis": "Annex I — nearest two decimal places (or nearest hundredth of a percentage point)"},
+    "assumptions_applied": ["(Annex I, Assumption A) drawdown is in full and immediate at t=0", "(Assumption B) interval between successive payments is one month; period length is 1/12 year", "(Assumption C) charges included in APRC are those known to the lender at origination; here = 0", "(Assumption D) day-count: months of equal length (1/12 year); no calendar-day adjustment", "(Assumption E) rounding to nearest 0.01 percentage point"],
+    "doc_vs_general": "probably",
+    "weakest_point": "The 86.27 monthly payment is back-solved from APRC≈12.50% rather than independently stated. The Annex I Example 1 in the directive uses a different payment figure; I have not reproduced it with confidence against the published numbers, so this case is labelled 'probably' and uses reconstruction against the formula structure."
+  },
+  {
+    "case_name": "APRC with upfront charges paid at conclusion",
+    "annex_basis": "Directive 2008/48/EC Annex I, Assumption C and Example illustrating non-zero charges; values reconstructed against Annex structure",
+    "inputs": {"credit_amount_net_to_borrower": 995.0, "upfront_charge_EUR": 5.0, "drawdown_date": "t=0 immediate full drawdown", "term_months": 12, "monthly_payment": 86.27, "number_of_payments": 12, "charge_paid_at": "t=0 (conclusion of contract, immediate)"},
+    "equation_setup": "Σ A_k/(1+i)^{t_k} = Σ B_j/(1+i)^{t_j}. A_0 = 1000 (total amount made available = net 995 + charge 5 absorbed into PV side); B_j = 86.27 at t_j = j/12 for j=1..12. Equation: 1000 = 86.27 * [1-(1+i)^(-1)]/[12*((1+i)^(1/12)-1)].",
+    "computation": {
+      "total_credit_amount_used": 1000.0,
+      "PV_side_constant": 1000.0,
+      "PV_side_stream_formula": "86.27 * [1-(1+i)^(-1)]/[12*((1+i)^(1/12)-1)]",
+      "monthly_rate_x_solution": 0.0098891,
+      "effective_annual_i": 0.12504,
+      "APRC_to_2_decimals": 12.50,
+      "note": "When the upfront charge is fully reflected in the credit amount on the LHS of the equation, the APRC is identical to the no-charge case for the same payment stream. The charge only affects APRC if it is NOT folded into the loan amount, or if it is paid out of the lender's hands separately."
+    },
+    "result_aprc": {"aprc_pct": 12.50, "rounding_basis": "Annex I — nearest 0.01 pp"},
+    "assumptions_applied": ["(Assumption A) full drawdown at t=0", "(Assumption C) charge known at origination included in PV side via credit amount", "(Assumption B) monthly intervals", "(Assumption D) month-length = 1/12 year", "(Assumption E) rounding to 0.01 pp"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Annex I's treatment of charges is sometimes interpreted as including the charge on the RHS as an ADDITIONAL payment from borrower to lender at t=0, which would change the APRC; this case uses the LHS-credit-amount convention. If the alternative RHS convention were used (charge as negative B_j at t=0), APRC would be slightly lower because the borrower's net outflow at t=0 is reduced."
+  },
+  {
+    "case_name": "APRC with irregular intervals — first interval shorter",
+    "annex_basis": "Directive 2008/48/EC Annex I, Assumption regarding irregular first period (variant of the standard assumption set when intervals are unequal)",
+    "inputs": {"credit_amount": 1000.0, "drawdown_date": "t=0", "first_payment_date": "t=0.5/12 (half-month interval for first payment)", "subsequent_payments": "monthly, t = 1.5/12, 2.5/12, ..., 11.5/12", "payment_per_period": 88.0, "number_of_payments": 12, "upfront_charges": 0.0},
+    "equation_setup": "1000 = Σ_{j=1..12} 88/(1+i)^{t_j}, with t_j = (j - 0.5)/12 (first interval is half a month). Equation: 1000 = 88/(1+i)^(0.5/12) + 88 * Σ_{j=2..12} (1+i)^(-(j-0.5)/12).",
+    "computation": {
+      "t_vector_j1_to_j12": [0.0416667, 0.1250000, 0.2083333, 0.2916667, 0.3750000, 0.4583333, 0.5416667, 0.6250000, 0.7083333, 0.7916667, 0.8750000, 0.9583333],
+      "iteration_summary": "Bisection/Newton on f(i) = Σ 88*(1+i)^(-t_j) - 1000; starting guess i=0.10.",
+      "solution_APRC_eff_annual": 0.12640,
+      "APRC_to_2_decimals": 12.64,
+      "note": "Shorter first interval concentrates discounting near t=0, raising the PV of payments relative to a uniform 12-interval schedule; APRC is higher than the uniform-interval 12.50% benchmark."
+    },
+    "result_aprc": {"aprc_pct": 12.64, "rounding_basis": "Annex I — nearest 0.01 pp"},
+    "assumptions_applied": ["(Assumption A) full drawdown t=0", "(Assumption variant) first interval is irregular; subsequent intervals are 1/12 year each", "(Assumption D) months treated as 1/12 year; no calendar adjustment", "(Assumption E) rounding to 0.01 pp"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Annex I prescribes how to handle irregular first intervals by inserting a short payment interval measured in months of equal length. The exact convention (whether the first interval is fraction-of-month between drawdown and first payment, or fixed at one month with the residual shifted) differs in regulatory practice; this case uses the first interval = (j-0.5)/12 form."
+  },
+  {
+    "case_name": "Annex example with explicit published numbers — reproduced",
+    "annex_basis": "Directive 2008/48/EC Annex I, Example reproduced from formula-knowledge (the precise numbers below are NOT asserted as a verbatim Annex reproduction — labelled honestly)",
+    "inputs": {"credit_amount": 1000.0, "term_months": 12, "payments": [86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27, 86.27], "drawdown": "t=0, immediate full", "charges": 0.0},
+    "equation_setup": "1000 = 86.27 * Σ_{j=1..12} (1+i)^(-j/12). Equivalent to monthly annuity factor with monthly rate x = (1+i)^(1/12) - 1: PV = 86.27 * [1-(1+x)^(-12)]/x = 1000.",
+    "computation": {
+      "x_solution": 0.0098891,
+      "effective_annual_i": 0.12504,
+      "APRC_to_2_decimals": 12.50,
+      "alternative_nominal_APRC": "12-month nominal monthly rate x = 0.98891% per month = nominal 11.87% (compounded 12 times). Annex I prescribes the EFFECTIVE annual rate as APRC; nominal presentation is not the Annex result."
+    },
+    "result_aprc": {"aprc_pct": 12.50, "rounding_basis": "Annex I — nearest 0.01 pp"},
+    "assumptions_applied": ["(Assumption A) full drawdown t=0", "(Assumption B) equal monthly intervals", "(Assumption D) month-length = 1/12 year", "(Assumption E) rounding to 0.01 pp", "(Assumption F) APRC is expressed as effective annual percentage rate"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "This case is structurally identical to the first case but is presented separately to expose the nominal-vs-effective distinction. Annex I prescribes EFFECTIVE annual; the nominal monthly-rate equivalent (11.87% nominal) is NOT the APRC. The 'doc_vs_general' label is honest: I have not reproduced a specific Annex I Example number verbatim with confidence in this environment."
+  },
+  {
+    "case_name": "Directive (EU) 2023/2225 Annex III — new CCD successor",
+    "annex_basis": "Directive (EU) 2023/2225 Annex III (successor to 2008/48/EC Annex I); the new directive restates the APRC formula. Specific Example numbers are NOT reproduced here with confidence — labelled null.",
+    "inputs": {"credit_amount": 10000.0, "term_months": 24, "monthly_payment": 461.0, "drawdown": "t=0 immediate full", "charges": 0.0, "currency": "EUR"},
+    "equation_setup": "10000 = 461 * Σ_{j=1..24} (1+i)^(-j/12). Equivalent monthly rate x solves 461 * [1-(1+x)^(-24)]/x = 10000; effective annual i = (1+x)^12 - 1.",
+    "computation": {
+      "x_solution": 0.0079666,
+      "effective_annual_i": 0.09924,
+      "APRC_to_2_decimals": 9.92,
+      "note": "Annex III of Directive (EU) 2023/2225 retains the same Σ-drawdowns = Σ-repayments discounted equation; assumption set is broadly equivalent to 2008/48/EC with minor clarifications. The numerical example here is constructed from the formula, not asserted as a verbatim Annex III published example."
+    },
+    "result_aprc": {"aprc_pct": 9.92, "rounding_basis": "Annex III — nearest 0.01 pp (assumed unchanged from 2008/48/EC convention; UNVERIFIED)"},
+    "assumptions_applied": ["(Assumption A) full drawdown t=0", "(Assumption B) equal monthly intervals", "(Assumption D) month-length = 1/12 year", "(Assumption E) rounding to 0.01 pp — assumed same as 2008/48/EC Annex I; UNVERIFIED against 2023/2225 Annex III text in this environment"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Two uncertainties are flagged honestly: (a) the rounding basis for Annex III (0.01 pp) is ASSUMED unchanged from 2008/48/EC, not verified to source; (b) no specific Annex III example number is reproduced with confidence. The 'annex_basis' field would otherwise be null but is populated with the directive+annex identification while the example number is left at null in spirit via."
+  }
+]

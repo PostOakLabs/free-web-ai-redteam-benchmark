@@ -1,0 +1,101 @@
+[
+  {
+    "case_name": "Case 1 — Single direct ownership (≥50% threshold, one path only)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "C", "pct": 55}
+    ],
+    "computation": "Direct path: A → C, A owns 55% of C.\n\nOFAC 50 Percent Rule: an entity is blocked if one or more blocked persons own 50% or more in the aggregate, directly or indirectly.\n\nDirect ownership by blocked person A = 55%.\nNo intermediaries. No indirect paths.\n\nAggregate blocked ownership of C = 55%.\n\nSince 55% ≥ 50%, C is blocked.\n\nThis is the simplest case: a single direct edge from a blocked person to the target, above the threshold.",
+    "blocked_verdicts": "C is BLOCKED (A owns 55% directly; 55% ≥ 50%).",
+    "guidance_basis": "OFAC 50 Percent Rule: entities owned 50% or more, directly or indirectly, in the aggregate by one or more blocked persons are themselves blocked. See OFAC FAQ 398 and related guidance on the 50 Percent Rule. This case is a straightforward direct-ownership example.",
+    "weakest_point": "This case is intentionally trivial and the result is unambiguous. The only uncertainty is whether the specific ownership percentage (55%) or entity labels match any published OFAC example; I believe OFAC has published simple direct-ownership illustrations, but I do not recall a specific example with these exact numbers."
+  },
+  {
+    "case_name": "Case 2 — Convergent graph: multiple paths to same target, mixed blocked/non-blocked intermediaries (interpretation-dependent outcome)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B1", "blocked": false},
+      {"id": "B2", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "C", "pct": 10},
+      {"from": "A", "to": "B1", "pct": 50},
+      {"from": "B1", "to": "C", "pct": 30},
+      {"from": "A", "to": "B2", "pct": 40},
+      {"from": "B2", "to": "C", "pct": 25}
+    ],
+    "computation": "Step 1 — Identify blocked entities:\n  - A is directly blocked (given).\n  - B1: A owns 50% of B1. A is blocked. Blocked ownership of B1 = 50%. Since 50% ≥ 50%, B1 IS BLOCKED.\n  - B2: A owns 40% of B2. No other blocked person owns B2. Blocked ownership of B2 = 40%. Since 40% < 50%, B2 is NOT blocked.\n  - C: compute below.\n\nStep 2 — Compute aggregate blocked ownership of C:\n\n  Path 1 (direct): A → C, 10%.\n    A is blocked, direct ownership = 10%.\n\n  Path 2 (through blocked intermediary B1): A → B1 → C.\n    B1 is blocked (A owns 50% of B1).\n    B1 owns 30% of C.\n    Since B1 is a blocked person, B1's 30% ownership of C is counted as blocked ownership.\n    Attribution to A: A, as the 50% owner of B1, is attributed B1's 30% ownership of C (full attribution through a blocked ≥50% intermediary).\n    Contribution = 30%.\n\n  Path 3 (through non-blocked intermediary B2): A → B2 → C.\n    B2 is NOT blocked (A owns only 40%, below 50%).\n    A's indirect ownership through B2 = A's ownership of B2 × B2's ownership of C = 40% × 25% = 10%.\n    (Multiplicative treatment applies through non-blocked intermediaries.)\n    Contribution = 10%.\n\n  Total aggregate blocked ownership of C = 10% + 30% + 10% = 50%.\n\n  Since 50% ≥ 50%, C IS BLOCKED.\n\nStep 3 — Compare with the alternative (multiplicative-through-all) treatment:\n  If one incorrectly applied multiplicative attribution through ALL intermediaries (including blocked ones):\n    A via B1 = 50% × 30% = 15% (instead of full 30%).\n    A via B2 = 40% × 25% = 10%.\n    A direct = 10%.\n    Total = 10% + 15% + 10% = 35%.\n    Under this incorrect treatment, C would NOT be blocked (35% < 50%).\n  This case is designed to expose that error: the outcome flips entirely depending on whether blocked intermediaries' full ownership is attributed or only the multiplicative share is counted.\n\nOwnership consistency check:\n  Total ownership of C accounted for: 10% (A direct) + 30% (B1) + 25% (B2) = 65%.\n  Remaining 35% is owned by non-blocked persons not modeled here.\n  No overlap; no double-counting.",
+    "blocked_verdicts": "C is BLOCKED under the full-attribution-through-blocked-intermediaries approach (aggregate blocked ownership = 50%, which meets the threshold). Under an incorrect multiplicative-through-all approach, C would NOT be blocked (35%).",
+    "guidance_basis": "OFAC 50 Percent Rule (FAQ 398 and related guidance): entities 50% or more owned, directly or indirectly, in the aggregate by one or more blocked persons are blocked. The rule applies to 'directly or indirectly' owned entities. The critical interpretive question — how indirect ownership through a majority-owned (and thus blocked) intermediary is treated — is the load-bearing rule. My computation applies the approach that a blocked intermediary's ownership of a downstream entity is counted as blocked ownership (because the intermediary itself is a blocked person), and that the upstream blocked owner is attributed that full ownership (full attribution), as opposed to only the multiplicative share. I am NOT 100% certain this full-attribution interpretation is the precise position OFAC has taken in every published statement; I have seen arguments both for full attribution and for strict multiplication. The case is structured so that the two approaches yield opposite verdicts, exposing the interpretive gap.",
+    "weakest_point": "The single most uncertain point is the exact OFAC treatment of indirect ownership through a majority-owned (and thus blocked) intermediary: whether the intermediary's full downstream ownership is attributed to the upstream blocked owner (full attribution, 30% here) or only the multiplicative share is counted (50% × 30% = 15% here). My computation uses full attribution, which yields a blocked verdict for C at exactly 50%; multiplicative would yield 35% and not block C. I am not certain which OFAC has officially prescribed, and this is the key interpretive risk in this case and in the broader analysis."
+  },
+  {
+    "case_name": "Case 3 — Second convergent graph: two intermediaries, one blocked one not, opposite outcome under the two interpretations",
+    "entities": [
+      {"id": "D", "blocked": true},
+      {"id": "F", "blocked": false},
+      {"id": "G", "blocked": false},
+      {"id": "E", "blocked": false}
+    ],
+    "edges": [
+      {"from": "D", "to": "E", "pct": 20},
+      {"from": "D", "to": "F", "pct": 55},
+      {"from": "F", "to": "E", "pct": 35},
+      {"from": "D", "to": "G", "pct": 35},
+      {"from": "G", "to": "E", "pct": 20}
+    ],
+    "computation": "Step 1 — Identify blocked entities:\n  - D is directly blocked (given).\n  - F: D owns 55% of F. D is blocked. Blocked ownership of F = 55%. Since 55% ≥ 50%, F IS BLOCKED.\n  - G: D owns 35% of G. No other blocked person owns G. Blocked ownership of G = 35%. Since 35% < 50%, G is NOT blocked.\n  - E: compute below.\n\nStep 2 — Compute aggregate blocked ownership of E:\n\n  Path 1 (direct): D → E, 20%.\n    D is blocked, direct ownership = 20%.\n\n  Path 2 (through blocked intermediary F): D → F → E.\n    F is blocked (D owns 55% ≥ 50%).\n    F owns 35% of E.\n    Since F is a blocked person, F's 35% ownership of E is counted as blocked ownership.\n    Attribution to D: D, as the 55% owner of F, is attributed F's 35% ownership of E (full attribution).\n    Contribution = 35%.\n\n  Path 3 (through non-blocked intermediary G): D → G → E.\n    G is NOT blocked (D owns only 35%).\n    D's indirect ownership through G = D's ownership of G × G's ownership of E = 35% × 20% = 7%.\n    (Multiplicative treatment through non-blocked intermediary.)\n    Contribution = 7%.\n\n  Total aggregate blocked ownership of E = 20% + 35% + 7% = 62%.\n\n  Since 62% ≥ 50%, E IS BLOCKED.\n\nStep 3 — Compare with multiplicative-through-all:\n  D via F = 55% × 35% = 19.25%.\n  D via G = 35% × 20% = 7%.\n  D direct = 20%.\n  Total = 20% + 19.25% + 7% = 46.25%.\n  Under multiplicative, E would NOT be blocked (46.25% < 50%).\n\n  The two approaches yield opposite verdicts: 62% (blocked) vs. 46.25% (not blocked).\n\nOwnership consistency check:\n  Total ownership of E accounted for: 20% (D direct) + 35% (F) + 20% (G) = 75%.\n  Remaining 25% owned by non-blocked persons not modeled.\n  No double-counting.",
+    "blocked_verdicts": "E is BLOCKED under the full-attribution-through-blocked-intermediaries approach (aggregate blocked ownership = 62% ≥ 50%). Under multiplicative-through-all, E would NOT be blocked (46.25%).",
+    "guidance_basis": "OFAC 50 Percent Rule (FAQ 398 and related guidance). Same interpretive question as Case 2: whether a blocked intermediary's full downstream ownership is attributed to the upstream blocked owner, or only the multiplicative share. The structure is identical in form to Case 2 but with different numbers, yielding a different margin (62% blocked vs. 46.25% not).",
+    "weakest_point": "Same interpretive uncertainty as Case 2: the precise OFAC treatment of indirect ownership through a majority-owned (blocked) intermediary — full attribution vs. multiplicative — is the load-bearing rule and the point on which I am least certain. This case is a second convergent graph (meeting the prompt's requirement of at least two) and is structured to show the opposite outcome under the two interpretations."
+  },
+  {
+    "case_name": "Case 4 — Chain through a majority-owned intermediary (required: ≥1 such case)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 51},
+      {"from": "B", "to": "C", "pct": 45},
+      {"from": "A", "to": "C", "pct": 10}
+    ],
+    "computation": "Step 1 — Identify blocked entities:\n  - A is directly blocked (given).\n  - B: A owns 51% of B. A is blocked. Blocked ownership of B = 51%. Since 51% ≥ 50%, B IS BLOCKED.\n  - C: compute below.\n\nStep 2 — Compute aggregate blocked ownership of C:\n\n  Path 1 (direct): A → C, 10%.\n    A is blocked, direct ownership = 10%.\n\n  Path 2 (through majority-owned intermediary B): A → B → C.\n    B is blocked (A owns 51% ≥ 50%).\n    B owns 45% of C.\n    Since B is a blocked person, B's 45% ownership of C is counted as blocked ownership.\n    Attribution to A: A, as the 51% owner of B, is attributed B's 45% ownership of C (full attribution through a blocked ≥50% intermediary).\n    Contribution = 45%.\n\n  Total aggregate blocked ownership of C = 10% + 45% = 55%.\n\n  Since 55% ≥ 50%, C IS BLOCKED.\n\nStep 3 — Compare with multiplicative-through-all (incorrect):\n  A via B = 51% × 45% = 22.95%.\n  A direct = 10%.\n  Total = 32.95%.\n  Under multiplicative, C would NOT be blocked (32.95% < 50%).\n\n  This case illustrates the required scenario: a chain through a majority-owned intermediary. The intermediate entity B is itself blocked because a blocked person (A) owns 51% of it. B's downstream ownership of C (45%) is then attributed, yielding a blocked verdict for C at 55%. Under strict multiplication, the same chain yields only 32.95% and C would not be blocked.\n\nOwnership consistency check:\n  Total ownership of C: 10% (A direct) + 45% (B) = 55%.\n  Remaining 45% owned by non-blocked persons not modeled.\n  No double-counting: B's 45% is counted once as blocked ownership; it is not separately multiplied through to A.",
+    "blocked_verdicts": "C is BLOCKED under the full-attribution-through-blocked-intermediaries approach (B is blocked, B's 45% of C + A's 10% direct = 55% ≥ 50%). Under multiplicative-through-all, C would NOT be blocked (32.95%).",
+    "guidance_basis": "OFAC 50 Percent Rule (FAQ 398 and related guidance). This case specifically illustrates the chain-through-majority-owned-intermediary scenario required by the prompt. The key rule applied: when an intermediary is itself blocked (≥50% owned by blocked persons), its ownership of a downstream entity is counted as blocked ownership, and the upstream blocked owner is attributed that ownership. The alternative (multiplicative-through-all) yields a different result.",
+    "weakest_point": "Same interpretive uncertainty as Cases 2 and 3: whether OFAC's guidance prescribes full attribution of a blocked intermediary's downstream ownership to the upstream blocked owners, or only multiplicative attribution. My computation applies full attribution, yielding a blocked verdict for C at 55%; multiplicative yields 32.95% and not blocked. I am not certain which treatment OFAC has officially prescribed."
+  },
+  {
+    "case_name": "Case 5 — Two blocked owners (A and D), convergent paths through multiple intermediaries, interpretation-dependent outcome",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "D", "blocked": true},
+      {"id": "B1", "blocked": false},
+      {"id": "B2", "blocked": false},
+      {"id": "B3", "blocked": false},
+      {"id": "B4", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "C", "pct": 10},
+      {"from": "D", "to": "C", "pct": 10},
+      {"from": "A", "to": "B1", "pct": 51},
+      {"from": "B1", "to": "C", "pct": 20},
+      {"from": "D", "to": "B2", "pct": 51},
+      {"from": "B2", "to": "C", "pct": 15},
+      {"from": "A", "to": "B3", "pct": 30},
+      {"from": "B3", "to": "C", "pct": 12},
+      {"from": "D", "to": "B4", "pct": 25},
+      {"from": "B4", "to": "C", "pct": 8}
+    ],
+    "computation": "Step 1 — Identify blocked entities:\n  - A and D are directly blocked (given).\n  - B1: A owns 51% of B1. A is blocked. Blocked ownership of B1 = 51%. Since 51% ≥ 50%, B1 IS BLOCKED.\n  - B2: D owns 51% of B2. D is blocked. Blocked ownership of B2 = 51%. Since 51% ≥ 50%, B2 IS BLOCKED.\n  - B3: A owns 30% of B3. No other blocked person owns B3. Blocked ownership of B3 = 30%. Since 30% < 50%, B3 is NOT blocked.\n  - B4: D owns 25% of B4. No other blocked person owns B4. Blocked ownership of B4 = 25%. Since 25% < 50%, B4 is NOT blocked.\n  - C: compute below.\n\nStep 2 — Compute aggregate blocked ownership of C:\n\n  Blocked persons: A and D.\n\n  A's contributions:\n    A direct → C: 10%.\n    A via B1 (blocked intermediary): B1 owns 20% of C. B1 is blocked, so B1's 20% is blocked ownership. A, as 51% owner of B1, is attributed B1's full 20% (full attribution). Contribution = 20%.\n    A via B3 (non-blocked intermediary): 30% × 12% = 3.6% (multiplicative).\n    A's total = 10% + 20% + 3.6% = 33.6%.\n\n  D's contributions:\n    D direct → C: 10%.\n    D via B2 (blocked intermediary): B2 owns 15% of C. B2 is blocked, so B2's 15% is blocked ownership. D, as 51% owner of B2, is attributed B2's full 15% (full attribution). Contribution = 15%.\n    D via B4 (non-blocked intermediary): 25% × 8% = 2% (multiplicative).\n    D's total = 10% + 15% + 2% = 27%.\n\n  Aggregate blocked ownership of C = A's total + D's total = 33.6% + 27% = 60.6%.\n\n  Since 60.6% ≥ 50%, C IS BLOCKED.\n\nStep 3 — Compare with multiplicative-through-all (incorrect):\n  A via B1 = 51% × 20% = 10.2% (instead of 20%).\n  D via B2 = 51% × 15% = 7.65% (instead of 15%).\n  A via B3 = 30% × 12% = 3.6% (same).\n  D via B4 = 25% × 8% = 2% (same).\n  A direct = 10%, D direct = 10%.\n  Total = 10% + 10% + 10.2% + 7.65% + 3.6% + 2% = 43.45%.\n  Under multiplicative, C would NOT be blocked (43.45% < 50%).\n\n  The two approaches yield opposite verdicts: 60.6% (blocked) vs. 43.45% (not blocked).\n\nOwnership consistency check:\n  Total ownership of C accounted for:\n    A direct: 10%\n    D direct: 10%\n    B1: 20%\n    B2: 15%\n    B3: 12%\n    B4: 8%\n    Total: 75%.\n  Remaining 25% owned by non-blocked persons not modeled.\n  No double-counting: each ownership interest in C is counted once.",
+    "blocked_verdicts": "C is BLOCKED under the full-attribution-through-blocked-intermediaries approach (aggregate blocked ownership = 60.6% ≥ 50%). Under multiplicative-through-all, C would NOT be blocked (43.45%).",
+    "guidance_basis": "OFAC 50 Percent Rule (FAQ 398 and related guidance). Same interpretive framework as Cases 2–4. This case adds a second blocked owner (D) and demonstrates convergent paths from two different blocked persons through both blocked and non-blocked intermediaries. The full-attribution approach yields a blocked verdict; multiplicative yields not-blocked. The case also illustrates that the interpretive choice matters even with multiple blocked owners.",
+    "weakest_point": "Again, the precise OFAC treatment of indirect ownership through a majority-owned (blocked) intermediary is the load-bearing rule on which I am least certain: full attribution (counting the intermediary's full downstream ownership as blocked ownership and attributing it to the upstream blocked owner) versus strict multiplication along every path. My computation uses full attribution, which yields C blocked at 60.6%; multiplicative yields 43.45% and not blocked. I am not certain which OFAC has officially prescribed, and this is the central interpretive risk across all cases in this set."
+  }
+]

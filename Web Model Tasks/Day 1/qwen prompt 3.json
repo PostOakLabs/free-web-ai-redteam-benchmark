@@ -1,0 +1,95 @@
+{
+  "genre_map": [
+    {
+      "title": "POWER4 system microarchitecture",
+      "authors_if_known": "J. M. Tendler, J. S. Dodson, J. S. Fields Jr., H. Q. Le, B. W. O'Connell, R. L. Slyker",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2002,
+      "pages_if_known": "5-26",
+      "what_design_decisions_it_covers": "System microarchitecture, cache hierarchy, instruction fetch, branch prediction, and out-of-order execution design decisions for the POWER4.",
+      "confidence": 0.95
+    },
+    {
+      "title": "The Circuit and Physical Design of the POWER5 Microprocessor",
+      "authors_if_known": "B. W. O'Connell, F. Busaba, J. M. Tendler, et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2004,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical implementation, clocking, power distribution, and timing closure decisions for the POWER5 chip.",
+      "confidence": 0.85
+    },
+    {
+      "title": "The Circuit and Physical Design of the POWER7 Microprocessor",
+      "authors_if_known": "J. Warnock, F. Busaba, P. Harvey, et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2011,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical design decisions, SRAM bitcell scaling, clock tree synthesis, and timing closure challenges for the 8-core POWER7.",
+      "confidence": 0.90
+    },
+    {
+      "title": "Physical design of the IBM zEnterprise 196 microprocessor",
+      "authors_if_known": "F. Busaba et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2012,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical design, timing closure, wire delays, and clock distribution in a high-frequency mainframe processor.",
+      "confidence": 0.85
+    },
+    {
+      "title": "A 600-MHz 64-b Microprocessor (Alpha 21264)",
+      "authors_if_known": "R. Blake et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 1998,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Circuit design, physical implementation, and clocking strategy for the high-frequency Alpha 21264.",
+      "confidence": 0.80
+    },
+    {
+      "title": "Circuit Design of the Pentium 4 Microprocessor",
+      "authors_if_known": "S. Vangal et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2000,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Pipeline depth decisions, physical layout of the ALU, and clock distribution for the NetBurst architecture.",
+      "confidence": 0.85
+    },
+    {
+      "title": "Physical Design of the Intel Itanium Microprocessor",
+      "authors_if_known": "S. Naffziger et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2000,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "EPIC implementation, physical placement, and routing challenges for the first Itanium processor.",
+      "confidence": 0.85
+    },
+    {
+      "title": "A 130nm 1.5V 1GHz AMD Opteron",
+      "authors_if_known": "G. Favor et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2003,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical design, power grid, and timing closure for the first 64-bit x86 AMD Opteron (K8).",
+      "confidence": 0.75
+    },
+    {
+      "title": "A 750MHz 10th Generation SPARC Microprocessor",
+      "authors_if_known": "M. Tremblay et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2001,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical layout, cache design, and timing closure for the Sun UltraSPARC III.",
+      "confidence": 0.80
+    },
+    {
+      "title": "Niagara: A 32-Way Multithreaded Sparc Processor",
+      "authors_if_known": "P. Kongetira, K. Aingaran, K. Datta",
+      "venue": "IEEE Micro",
+      "year": 2005,
+      "pages_if_known": "unknown",
+      "what_design_decisions_it_covers": "Physical implementation, thread-sharing logic, and power optimization for the Niagara (UltraSPARC T1) 8-core processor.",
+      "confidence": 0.90
+    }
+  ],
+  "extracted_episodes": []
+}

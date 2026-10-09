@@ -1,0 +1,89 @@
+[
+{
+"case_name": "Convergent Ownership Paths (Direct + Indirect Multiplicative/Proportional)",
+"entities": [
+{"id": "SDN_A", "blocked": true},
+{"id": "Entity_B", "blocked": false},
+{"id": "Target_C", "blocked": false}
+],
+"edges": [
+{"from": "SDN_A", "to": "Entity_B", "pct": 60.0},
+{"from": "SDN_A", "to": "Target_C", "pct": 20.0},
+{"from": "Entity_B", "to": "Target_C", "pct": 50.0}
+],
+"computation": "1. Entity_B check: SDN_A holds 60.0% directly in Entity_B. Since 60.0% >= 50%, Entity_B is blocked per the 50% Rule. 2. Target_C evaluation: Path 1 (Direct from SDN_A): 20.0%. Path 2 (Indirect through Entity_B): OFAC's standard 50 Percent Rule applies proportional/multiplicative calculation for voting/equity interest unless controlled or full attribution applies under specific sanctions regimes. Under standard OFAC guidance (Revised Guidance on Entities Owned by Persons Whose Property and Interests in Property are Blocked, Aug 13, 2014), indirect ownership is computed by multiplying the ownership percentages along the chain. Path 2 indirect interest = 60.0% * 50.0% = 30.0%. 3. Total aggregate ownership in Target_C = Path 1 + Path 2 = 20.0% + 30.0% = 50.0%. Since total aggregate ownership is 50.0% (>= 50%), Target_C is blocked.",
+"blocked_verdicts": {
+"Entity_B": true,
+"Target_C": true
+},
+"guidance_basis": "OFAC Revised Guidance on Entities Owned by Persons Whose Property and Interests in Property Are Blocked (August 13, 2014); FAQ 398, FAQ 401.",
+"weakest_point": "Assumes standard OFAC equity/ownership multiplication rather than strict full control attribution (which is used in EU sanctions regimes but not standard US OFAC 50% equity math unless contractually specified)."
+},
+{
+"case_name": "Multiple Blocked Persons Convergent Graph",
+"entities": [
+{"id": "SDN_X", "blocked": true},
+{"id": "SDN_Y", "blocked": true},
+{"id": "Entity_HoldCo", "blocked": false},
+{"id": "Target_Z", "blocked": false}
+],
+"edges": [
+{"from": "SDN_X", "to": "Entity_HoldCo", "pct": 40.0},
+{"from": "SDN_Y", "to": "Entity_HoldCo", "pct": 20.0},
+{"from": "Entity_HoldCo", "to": "Target_Z", "pct": 60.0},
+{"from": "SDN_X", "to": "Target_Z", "pct": 25.0}
+],
+"computation": "1. Entity_HoldCo check: SDN_X (40.0%) + SDN_Y (20.0%) = 60.0% total blocked ownership. Since 60.0% >= 50%, Entity_HoldCo is blocked. 2. Target_Z check: Path 1 (Direct from SDN_X): 25.0%. Path 2 (Indirect via HoldCo from SDN_X): 40.0% * 60.0% = 24.0%. Path 3 (Indirect via HoldCo from SDN_Y): 20.0% * 60.0% = 12.0%. Total indirect via HoldCo = (40.0% + 20.0%) * 60.0% = 60.0% * 60.0% = 36.0%. Total aggregate blocked interest in Target_Z = Direct (25.0%) + Indirect (36.0%) = 61.0%. Since 61.0% >= 50%, Target_Z is blocked.",
+"blocked_verdicts": {
+"Entity_HoldCo": true,
+"Target_Z": true
+},
+"guidance_basis": "OFAC FAQ 398 (Aggregation of multiple blocked persons' holdings) and FAQ 401.",
+"weakest_point": "Order of aggregation vs multiplication across multiple SDNs."
+},
+{
+"case_name": "Chain Through Majority-Owned Intermediary (Non-Blocked Target)",
+"entities": [
+{"id": "SDN_1", "blocked": true},
+{"id": "Intermediary_1", "blocked": false},
+{"id": "Intermediary_2", "blocked": false},
+{"id": "Target_Final", "blocked": false}
+],
+"edges": [
+{"from": "SDN_1", "to": "Intermediary_1", "pct": 100.0},
+{"from": "Intermediary_1", "to": "Intermediary_2", "pct": 70.0},
+{"from": "Intermediary_2", "to": "Target_Final", "pct": 60.0}
+],
+"computation": "1. Intermediary_1 check: SDN_1 holds 100.0% -> Blocked. 2. Intermediary_2 check: Indirect ownership by SDN_1 = 100.0% * 70.0% = 70.0%. Since 70.0% >= 50%, Intermediary_2 is blocked. 3. Target_Final check: Indirect ownership by SDN_1 = 100.0% * 70.0% * 60.0% = 42.0%. Since 42.0% < 50%, Target_Final is NOT blocked under OFAC's 50% Rule. Note: Under OFAC rules, percentage ownership is multiplied down the tier chain; full 100% attribution is NOT passed through majority-owned entities for pure ownership calculations unless specified by control provisions.",
+"blocked_verdicts": {
+"Intermediary_1": true,
+"Intermediary_2": true,
+"Target_Final": false
+},
+"guidance_basis": "OFAC Revised Guidance (2014) - Multiplicative tier approach for indirect equity ownership.",
+"weakest_point": "Distinction between US OFAC multiplicative approach and EU sanctions approach (where 50%+ ownership at any node can pass 100% control down the chain)."
+},
+{
+"case_name": "Complex Multi-Path Below Threshold",
+"entities": [
+{"id": "SDN_Alpha", "blocked": true},
+{"id": "Entity_Mid1", "blocked": false},
+{"id": "Entity_Mid2", "blocked": false},
+{"id": "Target_Omega", "blocked": false}
+],
+"edges": [
+{"from": "SDN_Alpha", "to": "Entity_Mid1", "pct": 45.0},
+{"from": "SDN_Alpha", "to": "Entity_Mid2", "pct": 80.0},
+{"from": "Entity_Mid1", "to": "Target_Omega", "pct": 50.0},
+{"from": "Entity_Mid2", "to": "Target_Omega", "pct": 30.0}
+],
+"computation": "1. Entity_Mid1 check: SDN_Alpha holds 45.0% (< 50%) -> Not blocked. 2. Entity_Mid2 check: SDN_Alpha holds 80.0% (>= 50%) -> Blocked. 3. Target_Omega check: Path 1 (via Mid1) = 45.0% * 50.0% = 22.5%. Path 2 (via Mid2) = 80.0% * 30.0% = 24.0%. Total indirect ownership in Target_Omega = 22.5% + 24.0% = 46.5%. Since 46.5% < 50%, Target_Omega is NOT blocked.",
+"blocked_verdicts": {
+"Entity_Mid1": false,
+"Entity_Mid2": true,
+"Target_Omega": false
+},
+"guidance_basis": "OFAC Revised Guidance (2014); FAQ 398.",
+"weakest_point": "Ensuring non-blocked intermediary (Mid1) indirect contribution is still included in aggregate calculation."
+}
+]

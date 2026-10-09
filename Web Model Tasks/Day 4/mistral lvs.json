@@ -1,0 +1,51 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {"check": "Verify net exists in both schematic and layout databases", "why_first": "rules out missing net in one domain", "check_cost": "minutes"},
+      {"check": "Visual inspection of reported location in layout viewer", "why_first": "cheapest confirmation of real vs false positive", "check_cost": "minutes"},
+      {"check": "Re-run LVS with different extraction seeds", "why_first": "rules out merge artefacts from parallel processing", "check_cost": "minutes"},
+      {"check": "Review extraction deck layer mappings for suspect layers", "why_first": "rules out extraction configuration errors", "check_cost": "minutes"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "Run LVS with single-threaded extraction (disable parallel runs)", "rules_in": "Short disappears → merge artefact from parallel processing", "rules_out": "Short persists → real short in layout"},
+      {"experiment": "Run LVS with selective layer extraction (exclude one layer at a time)", "rules_in": "Short disappears when a specific layer is excluded → extraction deck error for that layer", "rules_out": "Short persists across all layer combinations → real connectivity issue"},
+      {"experiment": "Create minimal layout with only the problematic net and its neighbors", "rules_in": "Short disappears in isolation → interaction effect with distant geometry", "rules_out": "Short persists in isolation → fundamental connectivity error"},
+      {"experiment": "Run LVS with a different extraction tool or version", "rules_in": "Short disappears with different tool → tool-specific bug or limitation", "rules_out": "Short persists across tools → real layout issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "Missing via or metal gap causing open net", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "Accidental metal merge causing short (e.g., overlapping shapes)", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "Extraction deck layer misconfiguration (wrong layer type or connectivity)", "recalled_frequency": "occasional", "recall_confidence": 0.8},
+      {"cause": "LVS tool false positive due to complex geometry (e.g., jagged edges, dense routing)", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "Design rule violation causing extraction failure (e.g., minimum spacing not met)", "recalled_frequency": "rare", "recall_confidence": 0.7}
+    ],
+    "classic_trap": "Assuming a reported short is a real layout error when it is actually a tool artefact from parallel extraction or complex geometry handling",
+    "node_era_note": "7nm-and-below: more false shorts/opens from complex multi-patterning and finFET extraction rules"
+  },
+
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {"check": "Verify device parameters (W/L, fingers) in LVS report", "why_first": "rules out simple parameter mismatches", "check_cost": "minutes"},
+      {"check": "Compare schematic symbol cell reference vs layout cell reference", "why_first": "rules out library cell reference errors", "check_cost": "minutes"},
+      {"check": "Check if device is in a parameterized block (memory, repeated logic)", "why_first": "rules out parameterization errors", "check_cost": "minutes"},
+      {"check": "Verify library mapping between schematic and layout databases", "why_first": "rules out library version mismatches", "check_cost": "minutes"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "Run LVS with alternative library mapping file", "rules_in": "Size mismatch disappears → library mapping error", "rules_out": "Size mismatch persists → real device size difference"},
+      {"experiment": "Directly compare device properties (W, L, fingers, type) in layout vs schematic", "rules_in": "Properties differ → actual layout modification or wrong cell", "rules_out": "Properties match in both → LVS tool misinterpretation"},
+      {"experiment": "Run LVS on a minimal testcase with only the problematic device", "rules_in": "Mismatch disappears in isolation → interaction with other devices or hierarchy", "rules_out": "Mismatch persists in isolation → fundamental device property error"},
+      {"experiment": "Check if mismatch is consistent across all instances of the device", "rules_in": "Mismatch consistent across all → parameterized cell issue", "rules_out": "Mismatch unique to one instance → manual editing or local error"}
+    ],
+    "common_root_causes": [
+      {"cause": "Wrong cell reference in layout (using different variant of the same logical cell)", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "Parameterized cell instantiated with incorrect parameters", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "Library version mismatch between schematic and layout", "recalled_frequency": "occasional", "recall_confidence": 0.8},
+      {"cause": "Manual layout editing changing device size or adding extra device", "recalled_frequency": "rare", "recall_confidence": 0.7},
+      {"cause": "LVS tool misinterpreting device geometry (e.g., fin counting error)", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Assuming a device size mismatch is a layout error when it is actually a library mapping or parameterization issue",
+    "node_era_note": "7nm-and-below: more parameterized cells and complex library structures increase frequency of mapping errors"
+  }
+]

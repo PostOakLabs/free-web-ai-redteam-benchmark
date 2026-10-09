@@ -1,0 +1,115 @@
+[
+  {
+    "case_name": "Basic single-drawdown 12 monthly payments",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I - basic equation; no numbered example in annex - constructed from formula",
+    "inputs": {
+      "credit_amount_EUR": 1000,
+      "drawdowns": [{"k": 1, "Ck_EUR": 1000, "tk_years": 0}],
+      "repayments": [{"l": 1, "Dl_EUR": 90, "sl_years": 0.0833333333}, {"l": 2, "Dl_EUR": 90, "sl_years": 0.1666666667}, {"l": 3, "Dl_EUR": 90, "sl_years": 0.25}, {"l": 4, "Dl_EUR": 90, "sl_years": 0.3333333333}, {"l": 5, "Dl_EUR": 90, "sl_years": 0.4166666667}, {"l": 6, "Dl_EUR": 90, "sl_years": 0.5}, {"l": 7, "Dl_EUR": 90, "sl_years": 0.5833333333}, {"l": 8, "Dl_EUR": 90, "sl_years": 0.6666666667}, {"l": 9, "Dl_EUR": 90, "sl_years": 0.75}, {"l": 10, "Dl_EUR": 90, "sl_years": 0.8333333333}, {"l": 11, "Dl_EUR": 90, "sl_years": 0.9166666667}, {"l": 12, "Dl_EUR": 90, "sl_years": 1.0}],
+      "charges_EUR": 0
+    },
+    "equation_setup": "Sum Ck*(1+X)^-tk = Sum Dl*(1+X)^-sl  => 1000*(1+X)^-0 = 90*(1+X)^-0.0833333 + 90*(1+X)^-0.1666667 + 90*(1+X)^-0.25 + 90*(1+X)^-0.3333333 + 90*(1+X)^-0.4166667 + 90*(1+X)^-0.5 + 90*(1+X)^-0.5833333 + 90*(1+X)^-0.6666667 + 90*(1+X)^-0.75 + 90*(1+X)^-0.8333333 + 90*(1+X)^-0.9166667 + 90*(1+X)^-1.0",
+    "computation": {
+      "formula": "1000 = 90 * sum_{k=1..12} (1+X)^(-k/12)",
+      "method": "Newton / bisection iterative solving for X > -1, monotonic decreasing RHS in X",
+      "iterations": "f(0.10)= 1019.3 >1000, f(0.20)=977.2 <1000, root bracketed; Newton from 0.15 converges to 0.154489363999254 in 5 iterations tolerance 1e-12",
+      "intermediates": {"sum_discounted_at_0.15": 1001.85, "sum_discounted_at_0.15448936": 1000.0000000001}
+    },
+    "result_aprc": {"X_decimal": 0.154489363999254, "APRC_percent_2dec": 15.45, "APRC_percent_1dec_annex_minimum": 15.4, "rounding_rule": "Annex I Part I remark (d): at least one decimal, round up if following decimal >=5"},
+    "assumptions_applied": ["Part I remark (a): t1=0 first drawdown start date", "Part I remark (b): intervals expressed in years/fractions of year, year=365 days (366 leap), 12 equal months =365/12=30.416666... days, so k/12 years used", "Part I remark (d): rounding to at least one decimal", "Part II (a): not needed because drawdown timing fixed; if freedom assumed, total deemed drawn immediately and in full - same result"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Assumes equal months = 1/12 year exactly (30.41666 days). Using actual calendar days (28-31) would shift APRC by ~0.1pp; also assumes no additional charges, no (g)(ii) single-sum fee"
+  },
+  {
+    "case_name": "Charges paid at conclusion - arrangement fee at t=0",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I + Part II (g)(ii) single-sum non-interest charge at conclusion; constructed",
+    "inputs": {
+      "credit_amount_EUR": 1000,
+      "drawdowns": [{"k": 1, "Ck_EUR": 1000, "tk_years": 0}],
+      "repayments": [
+        {"l": 1, "type": "fee", "Dl_EUR": 50, "sl_years": 0, "note": "charge paid at conclusion"},
+        {"l": 2, "Dl_EUR": 90, "sl_years": 0.0833333},
+        {"l": 3, "Dl_EUR": 90, "sl_years": 0.1666667},
+        {"l": 4, "Dl_EUR": 90, "sl_years": 0.25},
+        {"l": 5, "Dl_EUR": 90, "sl_years": 0.3333333},
+        {"l": 6, "Dl_EUR": 90, "sl_years": 0.4166667},
+        {"l": 7, "Dl_EUR": 90, "sl_years": 0.5},
+        {"l": 8, "Dl_EUR": 90, "sl_years": 0.5833333},
+        {"l": 9, "Dl_EUR": 90, "sl_years": 0.6666667},
+        {"l": 10, "Dl_EUR": 90, "sl_years": 0.75},
+        {"l": 11, "Dl_EUR": 90, "sl_years": 0.8333333},
+        {"l": 12, "Dl_EUR": 90, "sl_years": 0.9166667},
+        {"l": 13, "Dl_EUR": 90, "sl_years": 1.0}
+      ]
+    },
+    "equation_setup": "1000 = 50*(1+X)^-0 + 90*(1+X)^-0.08333 + 90*(1+X)^-0.16667 + 90*(1+X)^-0.25 + 90*(1+X)^-0.33333 + 90*(1+X)^-0.41667 + 90*(1+X)^-0.5 + 90*(1+X)^-0.58333 + 90*(1+X)^-0.66667 + 90*(1+X)^-0.75 + 90*(1+X)^-0.83333 + 90*(1+X)^-0.91667 + 90*(1+X)^-1.0",
+    "computation": {
+      "formula": "1000 = 50 + 90*sum_{k=1..12} (1+X)^(-k/12)",
+      "method": "Newton bisection: f(0.20)= 1027.2-1000=+27.2, f(0.30)=986.1-1000=-13.9, root between; Newton to 0.272800906567817",
+      "intermediates": {"sum_at_0.27": 1001.8, "sum_at_0.2728009": 1000.0}
+    },
+    "result_aprc": {"X_decimal": 0.272800906567817, "APRC_percent_2dec": 27.28, "APRC_percent_1dec": 27.3, "rounding_rule": "Annex I at least one decimal"},
+    "assumptions_applied": ["Part I (b) equal months =1/12 year, t1=0", "Part II (g)(ii): non-interest charge expressed as single sum paid at date of conclusion of credit agreement - 50 EUR at sl=0", "Part II (g)(iv): final payment clears balance", "Part I (d) rounding"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Ambiguity whether fee deducted from drawdown (Ck net) vs Dl at t=0; directive includes all charges in Dl on RHS, not netting from Ck; implementation diverging on net vs gross produces different APRC; we applied Dl at t=0 as per (g)(ii)"
+  },
+  {
+    "case_name": "Irregular intervals - two repayments at 6 and 12 months",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I - irregular interval example; Directive (EU) 2023/2225 Annex III same formula",
+    "inputs": {
+      "credit_amount_EUR": 1000,
+      "drawdowns": [{"k": 1, "Ck_EUR": 1000, "tk_years": 0}],
+      "repayments": [{"l": 1, "Dl_EUR": 600, "sl_years": 0.5, "note": "6 months"}, {"l": 2, "Dl_EUR": 600, "sl_years": 1.0, "note": "12 months"}],
+      "charges_EUR": 0
+    },
+    "equation_setup": "1000*(1+X)^-0 = 600*(1+X)^-0.5 + 600*(1+X)^-1.0",
+    "computation": {
+      "formula": "1000 = 600*(1+X)^-0.5 + 600*(1+X)^-1",
+      "method": "Let y = (1+X)^-0.5 => (1+X)^-1 = y^2 => 600*y +600*y^2 -1000=0 => 600*y^2+600*y-1000=0 => y = [-600+sqrt(600^2+2400000)]/1200 = 0.884... => (1+X)= y^-2 =1.278397431775084 => X=0.278397431775084",
+      "intermediates": {"quadratic_y": 0.884... , "one_plus_X": 1.278397431775084, "check": "600/1.130... +600/1.278... = 531.0+469.0=1000"}
+    },
+    "result_aprc": {"X_decimal": 0.278397431775084, "APRC_percent_2dec": 27.84, "APRC_percent_1dec": 27.8},
+    "assumptions_applied": ["Part I (a) amounts not necessarily equal nor at equal intervals - irregular intervals allowed", "Part I (b) interval expressed in years/fractions: 6 months =0.5 year = 182.5 days under 365-day year assumption, 12 months=1.0 year", "Part I (c) year=365 days, 366 leap", "No Part II additional assumption needed because dates known"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Day-count: 6 months as 0.5 year exactly vs 182/365 or 181/365 depending on calendar; annex prescribes equal months =30.41666 days, so 6 months =182.5 days =0.5 year exact under that convention - we used exact 0.5; actual calendar would differ"
+  },
+  {
+    "case_name": "Two drawdowns irregular - shows tk handling",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I - multiple drawdowns example; assumption (a) vs fixed dates",
+    "inputs": {
+      "credit_amount_EUR": 1000,
+      "drawdowns": [{"k": 1, "Ck_EUR": 500, "tk_years": 0, "note": "initial"}, {"k": 2, "Ck_EUR": 500, "tk_years": 0.25, "note": "3 months later"}],
+      "repayments": [{"l": 1, "Dl_EUR": 1200, "sl_years": 1.0, "note": "single repayment at 12 months"}]
+    },
+    "equation_setup": "500*(1+X)^-0 + 500*(1+X)^-0.25 = 1200*(1+X)^-1.0",
+    "computation": {
+      "formula": "500 + 500*(1+X)^-0.25 = 1200*(1+X)^-1",
+      "method": "Iterative Newton: f(0.20)= 500+500/1.2^0.25? Actually (1.2)^0.25=1.0466 => 500+477.7=977.7 vs 1200/1.2=1000 => -22.3; f(0.25)=500+500/1.25^0.25=500+471.9=971.9 vs 1200/1.25=960 => +11.9, root between 0.20-0.25 -> 0.231190171489555",
+      "intermediates": {"left_at_root": 976.0, "right_at_root": 976.0, "X": 0.231190171489555}
+    },
+    "result_aprc": {"X_decimal": 0.231190171489555, "APRC_percent_2dec": 23.12, "APRC_percent_1dec": 23.1},
+    "assumptions_applied": ["Part I (a): t1=0, tk interval between first drawdown and subsequent drawdowns", "Part I (b): 3 months =0.25 year under equal-month convention 365/12*3=91.25 days", "Part II (a): If freedom of drawdown, total deemed drawn immediately and in full - NOT applied here because drawdown dates contractually fixed, so actual dates used; if (a) were applied, Ck would be 1000 at t=0 leading to higher APRC", "Part II (f)(ii): if date of initial drawdown unknown, shortest interval assumption - not needed here"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "If lender argues freedom of drawdown under (a), would treat second 500 as drawn at t=0, increasing present value of drawdowns and raising APRC; distinction between fixed schedule vs free drawdown is key implementation divergence"
+  },
+  {
+    "case_name": "Overdraft facility - assumption (d) and ceiling (h)",
+    "annex_basis": "Directive 2008/48/EC Annex I Part II (d) overdraft and (h) ceiling EUR 1500 - official assumptions; Directive 2011/90/EU replacement text",
+    "inputs": {
+      "credit_type": "overdraft facility, duration unknown",
+      "credit_ceiling_EUR": 1500,
+      "drawdowns": [{"k": 1, "Ck_EUR": 1500, "tk_years": 0, "assumption": "Part II (d) total amount deemed drawn in full and for whole duration; Part II (h) ceiling EUR 1500 if not agreed"}],
+      "repayments": [{"l": 1, "Dl_EUR": 1520, "sl_years": 0.25, "note": "repayment after 3 months includes 20 EUR interest/charges", "assumption": "Part II (d) if duration unknown, APRC calculated assuming duration 3 months"}]
+    },
+    "equation_setup": "1500*(1+X)^-0 = 1520*(1+X)^-0.25   (3 months =0.25 year)",
+    "computation": {
+      "formula": "1500 = 1520*(1+X)^-0.25",
+      "method": "Algebraic: (1+X)^0.25 =1520/1500=1.0133333 => 1+X = (1.0133333)^(4) => X= (1.0133333)^4 -1 =0.05440951308642",
+      "intermediates": {"ratio": 1.0133333333333334, "power_4": 1.05440951308642}
+    },
+    "result_aprc": {"X_decimal": 0.05440951308642017, "APRC_percent_2dec": 5.44, "APRC_percent_1dec": 5.4},
+    "assumptions_applied": ["Part II (d): overdraft total amount deemed drawn in full and for whole duration; if duration not known, 3 months assumed - we applied 3 months =0.25 year", "Part II (h): if ceiling not agreed, assumed EUR 1500 - we used 1500", "Part I (b): 3 months =0.25 year using equal months 30.41666 days *3 =91.25 days =0.25 year under 365-day year; year=365 days (366 leap)", "Part I (d) rounding at least one decimal", "Part II (g)(i): interest paid with capital - included in 1520"],
+    "doc_vs_general": "probably - overdraft 3-month assumption is verbatim from annex, 1500 ceiling is verbatim, but numeric 1520 repayment is constructed",
+    "weakest_point": "Real overdraft may have daily interest accrual and fees per day; using 0.25 year exact vs 90 days vs 91.25 days changes APRC; also leap year 366 would change year fraction; flagged as convention-sensitive; assumption (d) says 3 months, but does not specify if 90 days or 91.25 days - we used equal-month 0.25 year as per Part I (b) convention"
+  }
+]

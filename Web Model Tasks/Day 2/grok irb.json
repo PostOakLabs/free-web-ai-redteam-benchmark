@@ -1,0 +1,82 @@
+[
+  {
+    "case_name": "corporate_PD_0.5pct_LGD45_M2.5",
+    "inputs": {"pd": 0.005, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "R": 0.21345609396856857,
+      "Phi_inv_PD": -2.575829303548901,
+      "Phi_inv_0.999": 3.090232306167813,
+      "inner_Phi_arg": -1.2945499461336967,
+      "Phi_of_arg": 0.0977377644373505,
+      "K_before_maturity_adj": 0.04173199399680772,
+      "b_PD": 0.16708622985488109,
+      "maturity_adj_factor": 1.3344531081344764,
+      "K_after_maturity_adj": 0.055689389097689376,
+      "risk_weight": 0.6961173637211172
+    },
+    "result": {"k_pct": 5.568938909768938, "risk_weight_pct": 69.61173637211172},
+    "formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*[1 - (1-exp(-50*PD))/(1-exp(-50))]; b=(0.11852-0.05478*ln(PD))^2; K = [LGD*Φ(Φ^{-1}(PD)/√(1-R) + √(R/(1-R))*Φ^{-1}(0.999)) - PD*LGD] * (1+(M-2.5)*b)/(1-1.5*b); RW=K*12.5",
+    "known_benchmark": "CRE99 / HKMA / literature illustrative RW ≈69.6% at PD=0.5%, LGD=45%, M=2.5; matches",
+    "weakest_point": "Floating-point precision of Φ^{-1} and exp(-50*PD) near machine epsilon for the correlation term"
+  },
+  {
+    "case_name": "corporate_PD_1pct_LGD45_M2.5",
+    "inputs": {"pd": 0.01, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "R": 0.192783679165516,
+      "Phi_inv_PD": -2.3263478740408408,
+      "Phi_inv_0.999": 3.090232306167813,
+      "inner_Phi_arg": -1.0790950517201592,
+      "Phi_of_arg": 0.14027267845651592,
+      "K_before_maturity_adj": 0.05862270530543216,
+      "b_PD": 0.13748613089693737,
+      "maturity_adj_factor": 1.2598095009238282,
+      "K_after_maturity_adj": 0.07385344111364114,
+      "risk_weight": 0.9231680139205143
+    },
+    "result": {"k_pct": 7.385344111364114, "risk_weight_pct": 92.31680139205143},
+    "formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*[1 - (1-exp(-50*PD))/(1-exp(-50))]; b=(0.11852-0.05478*ln(PD))^2; K = [LGD*Φ(Φ^{-1}(PD)/√(1-R) + √(R/(1-R))*Φ^{-1}(0.999)) - PD*LGD] * (1+(M-2.5)*b)/(1-1.5*b); RW=K*12.5",
+    "known_benchmark": "Basel calibration / CRE99-family illustrative ≈92% (exactly 92.32% in HKMA/literature tables) at PD=1%, LGD=45%, M=2.5; matches",
+    "weakest_point": "Exact placement of the square-root terms √R and √(1-R) in the argument of Φ (common implementation error)"
+  },
+  {
+    "case_name": "corporate_PD_3pct_LGD45_M2.5",
+    "inputs": {"pd": 0.03, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "R": 0.14677561921781157,
+      "Phi_inv_PD": -1.880793608151251,
+      "Phi_inv_0.999": 3.090232306167813,
+      "inner_Phi_arg": -0.7544485702827219,
+      "Phi_of_arg": 0.2252899580603288,
+      "K_before_maturity_adj": 0.08788048112714797,
+      "b_PD": 0.09647810097676261,
+      "maturity_adj_factor": 1.1692038507647522,
+      "K_after_maturity_adj": 0.10275019694092054,
+      "risk_weight": 1.2843774617615067
+    },
+    "result": {"k_pct": 10.275019694092054, "risk_weight_pct": 128.43774617615067},
+    "formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*[1 - (1-exp(-50*PD))/(1-exp(-50))]; b=(0.11852-0.05478*ln(PD))^2; K = [LGD*Φ(Φ^{-1}(PD)/√(1-R) + √(R/(1-R))*Φ^{-1}(0.999)) - PD*LGD] * (1+(M-2.5)*b)/(1-1.5*b); RW=K*12.5",
+    "known_benchmark": "Literature / HKMA illustrative RW ≈128.4% at PD=3%, LGD=45%, M=2.5; matches",
+    "weakest_point": "Sensitivity of b(PD) and the subsequent maturity scaling to the precise value of ln(PD)"
+  },
+  {
+    "case_name": "corporate_PD_10pct_LGD45_M2.5",
+    "inputs": {"pd": 0.10, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "R": 0.12080855363989025,
+      "Phi_inv_PD": -1.2815515655446004,
+      "Phi_inv_0.999": 3.090232306167813,
+      "inner_Phi_arg": -0.22125829429620225,
+      "Phi_of_arg": 0.4124456607660609,
+      "K_before_maturity_adj": 0.14060054734472738,
+      "b_PD": 0.05985636818667657,
+      "maturity_adj_factor": 1.098640989344795,
+      "K_after_maturity_adj": 0.15446952443723097,
+      "risk_weight": 1.9308690554653871
+    },
+    "result": {"k_pct": 15.446952443723097, "risk_weight_pct": 193.08690554653871},
+    "formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*[1 - (1-exp(-50*PD))/(1-exp(-50))]; b=(0.11852-0.05478*ln(PD))^2; K = [LGD*Φ(Φ^{-1}(PD)/√(1-R) + √(R/(1-R))*Φ^{-1}(0.999)) - PD*LGD] * (1+(M-2.5)*b)/(1-1.5*b); RW=K*12.5",
+    "known_benchmark": "Literature / HKMA illustrative RW ≈193.1% at PD=10%, LGD=45%, M=2.5; matches",
+    "weakest_point": "At higher PD the asset-correlation R approaches its floor of 0.12; small differences in the exponential term affect the final RW only modestly"
+  }
+]

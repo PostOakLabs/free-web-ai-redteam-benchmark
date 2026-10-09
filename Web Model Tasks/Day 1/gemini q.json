@@ -1,0 +1,88 @@
+{
+"opening": [
+"Think back to a block where you hit a wall during physical synthesis or routing—a moment where the standard automated flow gave you an unacceptable result and you had to intervene manually. What project or node was that?",
+"Can you tell me about a time when a signoff tool gave you a disastrous metric—like a routing DRC explosion or a massive setup timing tail—that initially looked like a floorplan or netlist disaster?",
+"Describe a scenario where you made a call to reject the 'textbook' or tool-recommended fix because of schedule or tapeout risk, and took a less obvious path instead."
+],
+"decompression": [
+{
+"question": "Before this crisis hit, what did the block look like—specifically, what node, instance count, macro count, and baseline metrics were you seeing?",
+"extracts": "prior_state",
+"follow_up_if_vague": "If you don't recall exact numbers, what range were you in for utilization percentage, clock frequency, and WNS/TNS?",
+"leading_risk": "Asking 'Was this a high-utilization 7nm block?' forces assumptions about node and density; phrase neutrally as 'What node and approximate size or utilization were you dealing with?'"
+},
+{
+"question": "What was the exact symptom or metric shape that triggered your alarm, and how did it present in the tool reports?",
+"extracts": "observation",
+"follow_up_if_vague": "Was it a wall of failing paths, a localized DRC cluster, or a global overflow percentage? What numbers were in the log?",
+"leading_risk": "Asking 'Did you see a congestion spike in the macro channels?' leads the witness toward channel congestion; phrase neutrally as 'Where and how was the anomaly distributed in the report?'"
+},
+{
+"question": "When you saw that report profile, what was your initial diagnosis of the root cause before running any experiments?",
+"extracts": "hypothesis",
+"follow_up_if_vague": "What causal mechanism did you suspect was connecting the report signature to the underlying physical layout or SDC?",
+"leading_risk": "Asking 'Did you assume it was a CTS buffer stacking issue?' suggests a specific cause; phrase neutrally as 'What did you suspect was causing this behavior?'"
+},
+{
+"question": "Walk me through the options you brainstormed or evaluated. What was the first option that came to mind or that a junior engineer would have tried?",
+"extracts": "candidates_considered",
+"follow_up_if_vague": "What other two or three potential fixes did you discuss or test before making a final decision?",
+"leading_risk": "Asking 'Why didn't you just widen the macro channels?' introduces an option they may not have evaluated; phrase as 'What other potential fixes did you consider?'"
+},
+{
+"question": "What action did you ultimately execute on the design, and what specific steps or tool commands did it require?",
+"extracts": "chosen_intervention",
+"follow_up_if_vague": "If another physical design engineer had to repeat this intervention on a similar block tomorrow, what exact steps would they take?",
+"leading_risk": "Asking 'Did you add placement keepouts?' presumes the intervention type; phrase neutrally as 'What specific change did you make to the layout or constraints?'"
+},
+{
+"question": "Once you applied that fix and re-ran the flow, what were the updated metrics in the post-run report?",
+"extracts": "measured_outcome",
+"follow_up_if_vague": "What did WNS, DRC count, or overflow drop to, and did the fix create any secondary trade-offs in power or timing?",
+"leading_risk": "Asking 'Did DRCs drop to zero?' suggests perfection; phrase neutrally as 'What were the resulting numbers across timing, DRCs, and area after the pass?'"
+},
+{
+"question": "Looking back at that decision, what is the core lesson or rule of thumb you took away, and when would that approach fail?",
+"extracts": "lessons",
+"follow_up_if_vague": "In what design context or process node would you explicitly advise someone NOT to use this same trick?",
+"leading_risk": "Asking 'So the lesson is always use soft keepouts?' generalizes too broadly; ask 'Under what circumstances would this intervention be the wrong choice?'"
+}
+],
+"rejected_paths": [
+"Critical Decision Method (CDM) probe: What was the obvious 'textbook' or tool-default fix for this issue, and why did you deliberately choose not to do it?",
+"Cognitive Interviewing Option-Elimination probe: Think about the solution you rejected because of schedule or tapeout risk—what specific cost (runtime, area, IR drop, downstream churn) made it prohibitive?",
+"Reverse-Elimination probe: If someone on your team had insisted on trying the second-best candidate fix, what would have gone wrong downstream in the flow?"
+],
+"numbers": [
+"For the key metrics before and after—like WNS, TNS, DRC count, or overflow percentage—what were the exact numbers, or the order of magnitude if you are estimating?",
+"If you are giving an estimate for a metric like slack improvement or DRC reduction, is that number an exact log memory or an order-of-magnitude approximation based on typical flow behavior?",
+"What was the delta between the pre-intervention metric and post-intervention metric—even if expressed as a percentage or order-of-magnitude range?"
+],
+"verification": [
+"You mentioned WNS improved by [X] ps while utilization stayed flat—physically, where did the tool find the timing slack without adding buffers or increasing area?",
+"If detailed route DRCs dropped from [X] to [Y] instantly, did that intervention introduce any secondary trade-offs in cross-corner setup timing or dynamic IR drop?",
+"When you shifted those clock buffers or wires out of that region, did that shift create secondary congestion or skew issues in adjacent blocks?"
+],
+"closing": [
+"This episode covered a crisis on a [node] block—what is another block from your past where a similar symptom turned out to have a completely different root cause?",
+"What's another signoff war story you remember where an SDC constraint or floorplan assumption almost caused a missed tapeout deadline?"
+],
+"anti_patterns": [
+{
+"mistake": "Asking leading questions that suggest specific technical fixes (e.g., 'Did you use soft blockages?')",
+"symptom_in_record": "The candidates_considered array lacks authentic alternative options, and the chosen_intervention mirrors textbook answers rather than the engineer's actual memory."
+},
+{
+"mistake": "Accepting compressed narrative shortcuts without probing for rejected alternatives (e.g., accepting 'we just fixed the floorplan')",
+"symptom_in_record": "The candidates_considered field is empty or contains generic placeholders like 're-ran placement', missing concrete rejection rationale."
+},
+{
+"mistake": "Pressuring the interviewee for hyper-precise numbers when they only recall orders of magnitude",
+"symptom_in_record": "Numerically inconsistent prior_state and post_state transitions that look artificially precise but fail physical self-consistency checks."
+},
+{
+"mistake": "Failing to ask verification probes on dramatic metric improvements",
+"symptom_in_record": "Unrealistic post_state metrics (e.g., 500ps setup WNS recovery from a pin swap) without noting trade-offs, logic changes, or secondary effects."
+}
+]
+}

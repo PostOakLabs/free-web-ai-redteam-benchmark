@@ -1,0 +1,38 @@
+[
+  {
+    "case_name": "Reserve_Coverage_Test",
+    "inputs": {"outstanding_tokens": 10000000, "outstanding_tokens_units": "EUR", "reserve_assets": {"EUR_Cash": 6000000, "EU_Sovereign_Bonds_AA": 2500000, "EU_Corp_Bonds_IG": 1800000}, "total_reserve_value": 10300000, "total_reserve_units": "EUR"},
+    "computation": {"coverage_ratio_formula": "Total_Reserve_Value / Outstanding_Tokens", "coverage_ratio_computation": "€10,300,000 / €10,000,000", "coverage_ratio": 1.03, "coverage_ratio_pct": 103.0, "full_backing_threshold": 1.0, "pass_threshold": "Coverage ≥ 100%"},
+    "result": {"coverage_ratio": 1.03, "regulatory_verdict": "ADEQUATE", "test_passed": true, "against_test": "Full backing requirement (Article 36(1)) — reserve must be at least equal to outstanding tokens"},
+    "article_basis": "MiCA Article 36(1): issuers of asset-referenced tokens shall ensure that the reserve assets are at all times at least equal in value to the outstanding amount of tokens issued",
+    "tail_convention": "LOW coverage is adverse. Higher coverage = more safe. This test examines whether coverage ≥ 1.0 (the left/lower tail of the coverage distribution is relevant — reserve depletion is the stress scenario).",
+    "weakest_point": "Nominal coverage ignores mark-to-market haircuts, liquidity risk, and settlement timing mismatches. A €10M reserve in EU sovereign bonds may face haircut risk in stress — see Case 3 for stressed coverage."
+  },
+  {
+    "case_name": "Own_Funds_Requirement",
+    "inputs": {"average_reserve": 9800000, "average_reserve_units": "EUR", "own_funds_available": 350000, "own_funds_units": "EUR", "parameterized_pct_ART": "3% (verify Art 35)", "parameterized_fixed_min_ART": "€300,000 (UNKNOWN-CURRENT-VALUE — verify Art 35)", "parameterized_pct_EMT": "3% (verify Art 45)", "parameterized_fixed_min_EMT": "€250,000 (UNKNOWN-CURRENT-VALUE — verify Art 45)"},
+    "computation": {"ART_required_pct_component": 294000.0, "ART_required_fixed_min": 300000, "ART_required": 300000, "ART_formula": "max(3% × avg_reserve, fixed_min)", "EMT_required_pct_component": 294000.0, "EMT_required_fixed_min": 250000, "EMT_required": 294000.0, "EMT_formula": "max(3% × avg_reserve, €250k_min)"},
+    "result": {"ART_own_funds_required": 300000, "ART_verdict": "ADEQUATE", "EMT_own_funds_required": 294000.0, "EMT_verdict": "ADEQUATE", "test_passed": true, "against_tests": "Article 35 (ARTs) and Article 45 (EMTs) own-funds requirements"},
+    "article_basis": "MiCA Article 35 (ART own funds) and Article 45 (EMT own funds). Exact percentages and fixed minima require verification against current RTS/itself — parameterized here as UNKNOWN-CURRENT-VALUE.",
+    "tail_convention": "Own funds adequacy: LOW own funds is adverse (insufficient capital cushion). The test checks whether own_funds ≥ required. Higher own funds relative to requirement = safer. Adverse tail is below the requirement threshold.",
+    "weakest_point": "The own-funds requirement is a separate capital buffer from the reserve. It protects against operational/reserve-management failures, not token value risk. The 3%/fixed-min formula may not scale appropriately for large issuers — a €10B reserve still only requires ~€300M own funds, which may be insufficient for systemic institutions."
+  },
+  {
+    "case_name": "Stressed_Coverage_Haircuts",
+    "inputs": {"outstanding_tokens": 10000000, "outstanding_tokens_units": "EUR", "stress_haircuts_applied": {"EUR_Cash": 0.0, "EU_Sovereign_Bonds_AA": 0.05, "EU_Corp_Bonds_IG": 0.12}, "haircut_basis": "Stressed market conditions (spread widening, sovereign yield spikes)"},
+    "computation": {"original_reserve": 10300000, "stressed_reserve_breakdown": {"EUR_Cash": {"original_value": 6000000, "haircut_pct": 0.0, "haircut_amount": 0.0, "stressed_value": 6000000.0}, "EU_Sovereign_Bonds_AA": {"original_value": 2500000, "haircut_pct": 0.05, "haircut_amount": 125000.0, "stressed_value": 2375000.0}, "EU_Corp_Bonds_IG": {"original_value": 1800000, "haircut_pct": 0.12, "haircut_amount": 216000.0, "stressed_value": 1584000.0}}, "total_stressed_reserve": 9959000.0, "total_haircut_amount": 341000.0, "stressed_coverage_computation": "€9,959,000 / €10,000,000", "stressed_coverage": 0.9959},
+    "result": {"stressed_coverage_ratio": 0.9959, "regulatory_verdict": "INADEQUATE", "test_passed": false, "against_test": "Stressed full backing — reserve assets must maintain ≥100% coverage even under adverse market conditions", "coverage_after_stress": "Coverage fell from 103.00% to 99.59% under stress"},
+    "article_basis": "MiCA Article 36 — same full-backing requirement applies under stressed conditions. Additionally, Article 38 requires reserve assets to be invested in low-risk, diversified assets, with stress testing implied by prudent valuation requirements.",
+    "tail_convention": "LOW stressed coverage is adverse. This test applies NEGATIVE stress (haircuts reduce reserve value) and checks whether the stressed coverage ≥ 1.0. The adverse tail is reserve depletion scenarios (falling asset values). Higher stressed coverage is better.",
+    "weakest_point": "Haircuts applied here are illustrative. MiCA does not prescribe specific stress haircuts — it requires 'prudent valuation' and 'diversified' low-risk assets. The actual stress scenarios should be calibrated to historical stressed periods (e.g., 2008 GFC, 2020 COVID) per the issuer's risk management framework. No standardized stress scenario is mandated by MiCA."
+  },
+  {
+    "case_name": "Redemptions_At_Par_Obligation",
+    "inputs": {"outstanding_tokens_before": 10000000, "reserve_before_redemption": 10300000, "redemption_requests": 5000000, "redemption_requests_units": "EUR", "redemption_price_per_token": 1.0, "redemption_price_basis": "at par (face value)"},
+    "computation": {"redemption_obligation_computation": "5,000,000 tokens × €1.00", "total_redemption_obligation": 5000000.0, "reserve_after_redemption": 5300000.0, "tokens_outstanding_after_redemption": 5000000, "coverage_after_redemption_computation": "€5,300,000 / 5,000,000", "coverage_after_redemption": 1.06, "remaining_reserve": 5300000.0, "remaining_tokens": 5000000},
+    "result": {"redemption_obligation": 5000000.0, "coverage_after_redemption": 1.06, "regulatory_verdict": "ADEQUATE", "test_passed": true, "against_test": "Post-redemption coverage must remain ≥100% to maintain full backing for remaining tokenholders (Article 36)", "par_redemption_obligation": "€5,000,000 at par — unconditional obligation per MiCA Art 39/46"},
+    "article_basis": "MiCA Article 39 (ART redemption) and Article 46 (EMT redemption): issuers shall redeem at par and without charging any fees, on request of token holders. Obligation is unconditional upon valid redemption request.",
+    "tail_convention": "LOW post-redemption coverage is adverse. Mass redemptions deplete reserve assets. The issuer must maintain ≥100% coverage for remaining tokenholders. Adverse tail: scenarios where redemption requests exceed available liquid reserve, forcing asset fire sales at losses.",
+    "weakest_point": "This case assumes orderly redemption (sufficient liquid assets). In a stress run scenario, redemption requests may far exceed liquid reserve components, forcing sales of less-liquid assets at distressed prices. MiCA requires 'liquid' reserve assets but does not define a minimum liquidity buffer — this is a systemic risk gap."
+  }
+]

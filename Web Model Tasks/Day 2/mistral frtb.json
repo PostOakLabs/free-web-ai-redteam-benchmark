@@ -1,0 +1,75 @@
+```json
+[
+  {
+    "case_name": "Parametric_ES_97.5%",
+    "inputs": {
+      "confidence_level": 0.975,
+      "z": 1.96,
+      "phi_z": 0.05844
+    },
+    "computation": {
+      "alpha": 0.025,
+      "φ(z)": 0.05844,
+      "ES_multiplier": 2.3376,
+      "VaR_multiplier": 40.0
+    },
+    "result": {
+      "ES_multiplier": 2.3376,
+      "VaR_multiplier": 40.0
+    },
+    "formula_basis": "ES = μ + σ * (φ(z_α) / α), VaR = μ + σ * z_α",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Parametric_ES_99%",
+    "inputs": {
+      "confidence_level": 0.99,
+      "z": 2.3263,
+      "phi_z": 0.02665
+    },
+    "computation": {
+      "alpha": 0.01,
+      "φ(z)": 0.02665,
+      "ES_multiplier": 2.665,
+      "VaR_multiplier": 100.0
+    },
+    "result": {
+      "ES_multiplier": 2.665,
+      "VaR_multiplier": 100.0
+    },
+    "formula_basis": "ES = μ + σ * (φ(z_α) / α), VaR = μ + σ * z_α",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Liquidity_Horizon_Scaled_ES",
+    "inputs": {
+      "LH": 20
+    },
+    "computation": {
+      "scale_factor": 1.4142
+    },
+    "result": {
+      "scale_factor": 1.4142
+    },
+    "formula_basis": "ES_scaled = ES * √(LH / 10)",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Historical_Simulation_ES",
+    "inputs": {
+      "pnl_values": [1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12, 13, -14, 15, -16, 17, -18, 19, -20],
+      "confidence_level": 0.975
+    },
+    "computation": {
+      "sorted_pnl": [-20, -18, -16, -14, -12, -10, -8, -6, -4, -2, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+      "tail_observations": [-20],
+      "tail_size": 1
+    },
+    "result": {
+      "ES": -20.0
+    },
+    "formula_basis": "ES = Average of the worst α% of P&L observations",
+    "weakest_point": "Fractional-observation treatment: rounded to nearest integer"
+  }
+]
+```

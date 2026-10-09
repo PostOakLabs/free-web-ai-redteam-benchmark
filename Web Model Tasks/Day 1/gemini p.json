@@ -1,0 +1,46 @@
+[
+{
+"title": "Dual-Core Single-Chip Monolithic Integration (CMP)",
+"where_in_paper": "System Microarchitecture / Executive Summary & Overall Processor Chip Architecture",
+"decision": "Integrate two identical 64-bit symmetric execution cores onto a single monolithic silicon die.",
+"alternatives_or_rejected": "Designing a single, larger, highly complex single-core processor occupying the full die area.",
+"rationale": "Commercial SMP server workloads scale better with thread-level parallelism (TLP) and high instruction throughput than with marginal single-thread IPC gains. Placing two cores on one die doubles processing density per socket and enables ultra-low-latency, high-bandwidth on-chip communication between cores.",
+"outcome": "Pioneered commercial multi-core enterprise processors, providing significantly higher throughput per socket for multi-threaded workloads.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "The exact wording of the section heading where the core count trade-off is introduced.",
+"provenance_note": "Core concept and rationale are explicitly stated in the paper's overview and architecture sections."
+},
+{
+"title": "Shared On-Chip L2 Cache Between Cores",
+"where_in_paper": "Memory Subsystem / L2 Cache Architecture",
+"decision": "Implement a 1.44MB 8-way set-associative on-chip L2 cache that is unified and shared between both processing cores on the die.",
+"alternatives_or_rejected": "Partitioning the on-chip L2 cache area into two separate, dedicated private L2 caches for each core.",
+"rationale": "A shared L2 cache dynamically adapts to asymmetric workloads where one core requires more cache capacity than the other, simplifies on-chip cache coherence protocols, and allows fast data sharing between the two cores without accessing external interconnects.",
+"outcome": "Improved cache hit rates for asymmetric workloads and enabled rapid inter-core data transfers.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "The precise bandwidth numbers specified for the inter-core L2 transfer paths.",
+"provenance_note": "L2 sharing structure is a key architectural feature detailed in Section 3 of the paper."
+},
+{
+"title": "Instruction Grouping for Tracking and In-Order Completion",
+"where_in_paper": "Processor Core / Instruction Pipeline and Completion",
+"decision": "Bundle up to five instructions into an 'Instruction Group' (I-group) at dispatch, tracking and retiring the group as a single atomic unit throughout the execution pipeline.",
+"alternatives_or_rejected": "Tracking, renaming, and retiring each out-of-order instruction individually using a conventional flat reorder buffer.",
+"rationale": "Individual instruction tracking across deep out-of-order pipelines creates massive control logic complexity, high power consumption, and area overhead. Grouping instructions simplifies completion logic tracking while sustaining high instruction throughput.",
+"outcome": "Allowed high-frequency, wide-issue out-of-order execution with manageable completion logic overhead.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Whether the maximum group size is strictly 5 instructions in all operational modes or varies under specific branch conditions.",
+"provenance_note": "Instruction group dispatch and completion is detailed in the pipeline description of the paper."
+},
+{
+"title": "Four-Chip Multi-Chip Module (MCM) Building Block Packaging",
+"where_in_paper": "System Packaging / MCM Topology and SMP Scalability",
+"decision": "Package four POWER4 dual-core dies (8 cores total) along with L3 cache chips onto a dense multi-chip module (MCM) as the core building block for large SMP systems.",
+"alternatives_or_rejected": "Using single-chip modules (SCMs) mounted individually on standard printed circuit boards connected via backplane wiring.",
+"rationale": "MCM packaging drastically reduces inter-chip trace lengths, enabling extremely high interconnect frequencies, low latency, and high pin density required to scale up to 32-processor SMP configurations.",
+"outcome": "Enabled 8-way processing nodes per MCM module that could be interconnected into 32-way enterprise SMP servers with high system interconnect bandwidth.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact substrate wiring layer count or dielectric material specifications.",
+"provenance_note": "MCM system topology is extensively discussed in the system packaging and SMP structure sections."
+}
+]

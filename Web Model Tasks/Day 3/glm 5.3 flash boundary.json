@@ -1,0 +1,53 @@
+[
+  {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {"below": "NO FIRE", "at": "NO FIRE", "above": "FIRE"},
+    "reasoning": "The operative phrase 'can exceed, in total, more than 2 percent of the amount prepaid' uses strict 'more than,' so exactly 2.00% sits outside the trigger and only 2.01% fires."
+  },
+  {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {"below": "NO FIRE", "at": "NO FIRE", "above": "FIRE"},
+    "reasoning": "'More than 36 months after consummation' is strict, so 36 months exactly is outside the trigger and only 37 months fires."
+  },
+  {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {"below": "NO FIRE", "at": "FIRE", "above": "FIRE"},
+    "reasoning": "'Exceeds the average prime offer rate ... by 1.5 or more percentage points' is inclusive via 'or more,' so a spread of exactly 1.50 itself fires."
+  },
+  {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {"below": "PASS", "at": "FAIL", "above": "FAIL"},
+    "reasoning": "The fail-side comparator '2.25 or more percentage points' is inclusive, so the pass condition holds strictly below 2.25 and a spread of exactly 2.25 fails to pass."
+  },
+  {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {"below": "(9.9M, 0.9M): FIRE", "at": "(10.0M, 0.9M): NO FIRE on the revenue leg; (9.9M, 1.0M): NO FIRE on the income leg", "above": "n/a — no listed pair exceeds a cap, and any pair with a leg at or above its cap yields NO FIRE"},
+    "reasoning": "Both legs use strict 'less than,' so a pair qualifies only when strictly below both caps — 10.0M revenue is not less than 10M and 1.0M income is not less than 1M, so both boundary pairs fail while (9.9M, 0.9M) fires."
+  },
+  {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {"below": "NO FIRE", "at": "FIRE", "above": "FIRE"},
+    "reasoning": "'Equal to or greater than' the transition rate is inclusive, so a simplified ETR of exactly 16.00% clears the test."
+  },
+  {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {"below": "FAIL", "at": "PASS", "above": "PASS"},
+    "reasoning": "'At least equal to' 50% of SCR is inclusive, so a ratio of exactly 50.00% satisfies the Tier 1 floor."
+  },
+  {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {"below": "NO FIRE", "at": "FIRE", "above": "FIRE"},
+    "reasoning": "The 'equal to or greater than' framing of the affected-users minimum is inclusive, so the threshold value itself fires."
+  },
+  {
+    "weakest_point": "Rule 8: the final NIS2 Directive (EU) 2022/2555 defines 'significant incident' qualitatively (severe operational disruption, financial loss, or considerable material/non-material damage to other persons) with no numeric affected-users minimum in the operative text, so the 'equal to or greater than the minimum' users phrasing likely derives from the Commission proposal, impact-assessment thresholds, or a national transposition rather than text I can quote verbatim; a secondary caveat is rule 6, where the 16% rate depends on the transitional safe harbour's fiscal-year banding (15/16/17%) and the mapping of '2026 fiscal year' to 16% is taken as stipulated rather than verified."
+  }
+]

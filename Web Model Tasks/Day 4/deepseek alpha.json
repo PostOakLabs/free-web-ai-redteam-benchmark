@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Clustered Integer Execution Core with Replicated Register Files",
+    "where_in_paper": "Integer Execution Unit / Clustered Pipeline section",
+    "decision": "Implemented a clustered integer execution core with two clusters (U0 and U1), each with its own replicated register file, execution units, and load/store unit, rather than a single unified integer core.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper's stated reasoning was to reduce wire delays and improve cycle time. Clustering allowed critical paths to stay within a cluster, reducing the need for long-distance communication. Results were broadcast to both register files to keep them consistent without explicit transfer instructions.",
+    "outcome": "Two clusters (U0 and U1) each with an 80-entry register file (32 architectural, 40 rename, 8 PAL shadow), capable of issuing up to four instructions per cycle total.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact quote and page number are not available; the decision is well-documented in other sources but I am not 100% certain the paper explicitly frames it as a trade-off vs. a unified core.",
+    "confidence": 0.75
+  },
+  {
+    "title": "Out-of-Order and Speculative Execution Pipeline",
+    "where_in_paper": "Pipeline Overview / Out-of-Order Execution section",
+    "decision": "Adopted an out-of-order and speculative execution pipeline, allowing instructions to execute as soon as operands are ready and to fetch/execute down predicted paths.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To maximize instruction-level parallelism and performance. Out-of-order execution starts critical path computations as soon as possible, and speculative execution extracts parallelism from branches.",
+    "outcome": "A pipeline capable of fetching four instructions per cycle, with 80 in-flight instructions and an out-of-order issue queue.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper likely describes this as a given design choice rather than a debated decision with alternatives.",
+    "confidence": 0.85
+  },
+  {
+    "title": "High-Bandwidth Memory System with Parallel Cache Access",
+    "where_in_paper": "Memory System section",
+    "decision": "Designed a high-performance memory system with parallel access to on-chip and off-chip caches, and a high-bandwidth data path.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To quickly deliver data values to the execution core and provide robust performance for applications without cache locality.",
+    "outcome": "A 64KB two-way set-associative instruction cache and a 64KB data cache, with many memory references serviced in parallel.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The paper's specific discussion of parallel access vs. alternatives is not confirmed from the abstract.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Aggressive 600 MHz Cycle Time in 0.35 µm CMOS",
+    "where_in_paper": "Introduction / Technology section",
+    "decision": "Targeted and achieved a 600 MHz cycle time in a 0.35 µm CMOS process, maintaining Alpha's tradition of leadership clock frequencies.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To continue the Alpha tradition of an unequalled cycle time, facilitated by a clean RISC architecture and advanced design techniques.",
+    "outcome": "A 500-600 MHz operating frequency, delivering 2.0-2.4 billion instructions per second.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper likely presents this as a result rather than a debated decision with trade-offs against lower frequency.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Integration of Advanced Branch Prediction (Tournament Predictor)",
+    "where_in_paper": "Branch Prediction section",
+    "decision": "Integrated a sophisticated two-level tournament branch predictor to support speculative execution.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To maximize performance by accurately predicting branch directions and enabling speculative execution down the predicted path.",
+    "outcome": "A hybrid two-level branch predictor (tournament predictor) that enables high accuracy and performance.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The specific term 'tournament predictor' is widely associated with the 21264 but I am not certain it is detailed as a decision with alternatives in this specific IEEE Micro paper.",
+    "confidence": 0.65
+  }
+]

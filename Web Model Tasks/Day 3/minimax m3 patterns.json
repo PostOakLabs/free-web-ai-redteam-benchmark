@@ -1,0 +1,112 @@
+[
+  {
+    "pattern_name": "Block-boundary I/O delay budget split (set_input_delay / set_output_delay)",
+    "situation": "Constraining a block whose timing closure must be feasible without knowing the internal implementation of the launch block, the internal implementation of the capture block, or the exact wire delay between them.",
+    "derivation": "Start with the system clock period T. Reserve a margin M for clock skew, jitter, and OCV. Reserve a margin K for setup/hold checks. Split the remainder (T − M − K) into three parts: launch-block internal data-path budget L, interconnect budget I, and capture-block internal data-path budget C. Typical split in practice is L ≈ I ≈ C ≈ (T − M − K) / 3, but in advanced nodes I shrinks and L/C grow. The set_input_delay is set to T − C − margin, and set_output_delay is set to L + I + margin from the capturing clock. Drive the values from the system spec, not the block's own internal path reports.",
+    "wrong_way": "Setting set_input_delay / set_output_delay to a single absolute number with no breakdown; or deriving them from the actual measured path of THIS block rather than from the agreed budget. Silently breaks because the same boundary value gets reused by the partner block, and when both sides are individually tight, the sum exceeds the period, causing timing signoff to fail or, worse, to pass with one side 'borrowing' from the other.",
+    "defense": "Cite the system timing budget spreadsheet and the agreed margin policy (skew/jitter, OCV, margin). The budget is system-level, not block-level; defense is that both block owners use the same boundary number.",
+    "signoff_risk": "Too tight (over-constrained): internal paths of the block over-optimize for an unrealistic external delay, leading to over-buffering, congestion, and area/power waste; downstream partner block may under-build thinking it has more budget than it does. Too loose: this block appears to have timing margin and is signed off, but the partner block now must absorb the leftover; at system integration the path failsew/jitter/OCV) ≈ 10–15% of T (confidence 0.5)",
+      "K (margin) ≈ 5–10% of T (confidence 0.5)",
+      "L:I:C split 1:1:1 is a starting heuristic only; advanced nodes bias toward more L and C, less I (confidence 0.6)"
+    ],
+    "node_era_note": "At 7nm-and-below, interconnect delay is a smaller fraction of the period and the bulk is in cell delay, so I shrinks and L/C dominate; OCV margin also rises, taking a bigger share of T."
+  },
+  {
+    "pattern_name": "False path vs multicycle path (decision rule)",
+    "situation": "Two clocks/edges interact on a path, but the design intent is that the path does not need to close in one cycle (or ever), or that a multi-cycle handshake is intentional.",
+    "derivation": "First, ask: does the design protocol guarantee that the data is consumed in a defined number of clock cycles? If the data is guaranteed to be held stable for N cycles, set_multicycle_path -setup N and the matching -hold N−1 (not N). If the data is never sampled in a functional mode (e.g., scan-only or test-only path, or a path physically broken by muxing), set_false_path and document the structural reason. The N−1 hold derivation is critical: the hold check otherwise assumes the next-cycle launch, but with N-cycle setup the launch is N cycles later, so the hold check is N−1, not N.",
+    "wrong_way": "Setting multicycle_path N for both setup and hold, or setting multicycle N for setup and forgetting the matching -hold. The hold then fires on a real capture edge, fails, and the engineer adds hold buffers; downstream, the design intent (N-cycle handshake) is silently violated because the data is over-constrained to also be stable one cycle earlier than needed.",
+    "defense": "Cite the protocol spec or architecture doc that says data is held for N cycles; show the waveform. For false path, cite the structural reason (e.g., the path is broken by a mux in functional mode, or is test-only).",
+    "signoff_risk": "Wrong direction on setup: too tight (N=1 used where N=2 is intended) → timing tool over-optimizes a path that does not need to close in one cycle, wasting area/power. Too loose (N used where N=1 is correct) → real functional path closes only at N cycles and fails at speed. Wrong hold direction is even more dangerous because tools auto-derive hold from setup; a missed N−1 hold gives silent corruption in silicon.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "per_number_confidence": [],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Clock-domain crossing (CDC) constraint",
+    "situation": "Data crosses between two asynchronous clocks; need to prevent metastability and avoid timing-closure noise from false paths being checked at full speed.",
+    "derivation": "set_false_path -from [get_clocks clkA] -to [get_clocks clkB] (and the reverse) to suppress timing checks between truly asynchronous domains. This does NOT silence the CDC; it is documented in a CDC spec file. The CDC itself is enforced structurally by 2-flop synchronizers, handshake, or FIFO. The exception is the convention: if the two clocks are derived from the same source and have a known integer ratio and phase, they are NOT asynchronous; they are treated as related clocks and timed normally with multicycle if appropriate.",
+    "wrong_way": "Either (a) timing the CDC path as if it were synchronous, which forces timing closure on a path the design does not depend on, or (b) blanket false_path -from [all_registers] -to [all_registers], which hides real timing issues in unrelated paths. The CDC synchronizer is a structural guarantee; the timing constraint is just to prevent the tool from chasing noise.",
+    "defense": "Cite the CDC architecture document; show the synchronizer cells in the netlist and their recognition by the CDC tool; show the clock-relationship proof (PLL configuration, integer ratio, etc.).",
+    "signoff_risk": "Too tight (timed as synchronous): no functional bug but the tool inserts buffers on a path that does not exist functionally, and the CDC synchronizer cells are de-optimized, weakening the metastability margin. Too loose (false path applied to actually-related clocks): real setup failures are hidden, downstream chip fails at speed with no signoff warning.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "per_number_confidence": [],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Inter-block budget before both blocks exist",
+    "situation": "Two blocks need SDC constraints for top-level integration, but neither block has its implementation started yet. The boundary values are placeholders that must be correct enough to not poison either block's implementation.",
+    "derivation": "Treat the system budget T as a fixed pie. Split into launch-budget + interconnect-budget + capture-budget as in the boundary-budget pattern. Set both blocks' set_input_delay and set_output_delay to the same shared boundary value. Reserve a 'true-up' pass at integration: as soon as one block has measured internal slack, the boundary is re-derived from the actual measured value. Until then, all blocks use the agreed placeholder.",
+    "wrong_way": "Setting the boundary value from one block's actual measured path before the other block is implemented, or letting each block owner pick their own boundary value. The first approach over-fits one side; the second leads to double-counting slack where the sum of both sides' measurements exceeds the period.",
+    "defense": "Cite the system budget spreadsheet and the placeholder-to-actual protocol (e.g., 'at first integration, the boundary is updated from the slowest measured path on either side').",
+    "signoff_risk": "Too tight placeholder: blocks over-build to an unrealistic external delay. Too loose: blocks under-build; at integration, no slack to redistribute and the signoff fails late. The bigger risk is placeholder-staleness: the value is never re-derived and at integration the assumed value no longer matches the real path.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "per_number_confidence": [],
+    "node_era_note": "At 7nm-and-below, the placeholders must be updated more often because cell-delay variation is higher, and a placeholder that is 5% off is more likely to be wrong by signoff."
+  },
+  {
+    "pattern_name": "Over-constraining early then relaxing",
+    "situation": "A block must start implementation with a target frequency, but the block internals are not yet stable. Early constraints are written aggressively to force worst-case thinking; later, as the design matures, the constraints are relaxed to the agreed final value.",
+    "derivation": "Write the SDC at the target frequency Ftarget (typically the same as the rest of the chip). Optionally write a separate 'aggressive' corner SDC at Ftarget × 1.10 (10% margin) for early synthesis/place-and-route to push the implementation. At pre-layout signoff of the block, switch back to Ftarget for the actual signoff. Document the version of SDC used at each stage. The relaxation step is explicit; it is not 'let the tool fix it'.",
+    "wrong_way": "Leaving the aggressive over-constraint in place through signoff, or removing the over-constraint too early (before the implementation has hardened). The first gives false signoff; the second gives a block that does not close on the real constraint because the synthesis optimized for the wrong target.",
+    "defense": "Cite the implementation plan and the signoff SDC version. The plan should state: 'implementation runs on aggressive SDC; signoff uses the system SDC.'",
+    "signoff_risk": "If over-constraint is not relaxed, the block appears to have more timing margin than it does in production, and system integration fails. If it is relaxed too early, the block does not meet Ftarget because it was built against a tighter number.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "per_number_confidence": [
+      "Aggressive SDC at Ftarget × 1.10 is a common starting margin (confidence 0.5)"
+    ],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Virtual clock for off-chip I/O",
+    "situation": "An output pad drives a downstream device whose clock is not in the FPGA/ASIC netlist, or an input pad is sampled by a clock that is not visible in the design (e.g., external source-synchronous clock).",
+    "derivation": "Create a virtual clock: create_clock -name VCLK -period T_ext (or -waveform for non-50% duty). Use set_output_delay -clock [get_clocks VCLK] -max [expr launch_internal + T_co + flight] to model the delay from the source clock to the pad and beyond; set_input_delay -clock [get_clocks VCLK] -max [expr external_T_co + flight + capture_setup] to model the delay from off-chip into the pad. The virtual clock's period is the external clock period, not the internal one, even if the protocol is source-synchronous.",
+    "wrong_way": "Using the internal clock for set_output_delay and adding a flat offset; this double-counts launch latency or misses the external relationship. Another wrong way is to set the virtual clock period equal to the internal period when the source-synchronous clock has a different frequency, leading to incorrect multicycle/false-path derivation.",
+    "defense": "Cite the interface spec; the virtual clock period and waveform are taken directly from the spec. The set_output_delay / set_input_delay values are the sum of the off-chip components and the chip-internal launch/capture portion.",
+    "signoff_risk": "Wrong direction on set_output_delay: too tight, pad drivers over-sized; too loose, off-chip capture misses setup. The interface failing at speed is the most common downstream symptom.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.8,
+    "per_number_confidence": [],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Generated/divided clock constraint",
+    "situation": "A clock is generated on-chip (e.g., divided by 2 from a system clock, or output of a PLL/MMCM) and the derived SDC must reflect its relationship to the source.",
+    "derivation": "Let the source clock be CLK_SRC with period T_src. If the generated clock is CLK_GEN = CLK_SRC / N (integer division, in-phase), then create_clock on the generated clock pin with period N × T_src and -name CLK_GEN. If the generated clock has a known phase offset relative to the source (e.g., from a PLL with a fixed phase), include the phase in the waveform. The relationship to the source is captured by the period/phase, not by an additional SDC command. For derived clocks from PLL/MMCM with fractional-N, period may not be a clean multiple, and the tool may need -multiply/-divide flags or explicit period.",
+    "wrong_way": "Defining the generated clock with the source period T_src instead of N × T_src; this causes the tool to time paths inside the generated-clock domain as if they were at the source frequency, leading to over-tightening. Another wrong way: forgetting to define the generated clock at all, which makes the downstream logic unconstrained and the tool uses inferred constraints that may be wrong.",
+    "defense": "Cite the PLL/MMCM configuration register; the divider and phase come from there. The waveform comes from the data sheet or measurement.",
+    "signoff_risk": "Wrong period: tool either over-constrains the generated-clock domain (waste) or under-constrains it (signoff passes but silicon fails at the generated-clock frequency).",
+    "provenance": "tool-default-idiom",
+    "recall_confidence": 0.75,
+    "per_number_confidence": [],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Asynchronous interface constraint (e.g., SRAM/DRAM/flash)",
+    "situation": "An interface to an external device that is not clocked in the design's own clock domain; the interface is asynchronous and the design must meet setup/hold against the device's published timing parameters.",
+    "derivation": "Define a virtual clock VDEV with period equal to the interface's timing reference. Use set_input_delay / set_output_delay relative to VDEV, with values derived from the device's published AC characteristics (T_co, T_setup, T_hold) plus the board-level flight time. The internal design's launch clock is NOT used for the set_output_delay; the virtual clock represents the device's clock relationship. For source-synchronous interfaces, the virtual clock and the launch clock may share a phase relationship captured via waveform.",
+    "wrong_way": "Using the internal launch clock for the interface's set_output_delay without including the device's T_co and the flight time, which gives an under-budgeted external path. Another wrong way is to set the virtual clock period equal to the interface's bus frequency but ignore the device's data-valid window, leading to over-tight or over-loose constraints.",
+    "defense": "Cite the device's datasheet; the AC characteristics are taken directly. The flight time is calculated from board trace length and propagation velocity.",
+    "signoff_risk": "Too tight: the interface drivers are over-built and area grows. Too loose: at-speed the device misses setup/hold, leading to data corruption in production.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "per_number_confidence": [],
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Generated clock with frequency multiplication and known phase",
+    "situation": "A PLL/MMCM generates a clock that is M × source frequency, with a known output phase (e.g., 0°, 90°, 180°, 270°), used to align internal edges to source edges.",
+    "derivation": "create_clock on the PLL output pin, period = T_src / M. -waveform defines the rising edge phase relative to the source: e.g., -waveform {T_src/(2M) T_src/(2M) + T_gen/2} for 90° phase. The relationship to the source is captured in period and waveform, so no set_multicycle_path is needed between source and generated clock for the phase relationship. If the generated clock is also used in inter-domain paths, treat it as a normal clock with its own create_clock definition.",
+    "wrong_way": "Defining the generated clock with the source period (instead of divided) and using a multicycle path to compensate; this conflates two SDC mechanisms and the tool will mis-handle the inter-domain paths. Another wrong way: not setting the waveform, which loses the phase information.",
+    "defense": "Cite the PLL configuration (M, N, phase) and the architecture doc. The waveform is derived from the phase register.",
+    "signoff_risk": "Wrong period or waveform: paths to/from the generated domain are timed against the wrong edges, leading to false signoff or over-constrained paths.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "per_number_confidence": [],
+    "node_era_note": "At 7nm-and-below, jitter on the generated clock is a larger fraction of the period, so the waveform needs to include measured jitter; pure ideal waveform is less safe."
+  }
+]

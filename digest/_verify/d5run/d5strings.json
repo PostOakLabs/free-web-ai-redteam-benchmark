@@ -1,0 +1,114 @@
+{
+ "chatgpt": {
+  "gradable": false,
+  "note": "salvage recovered no case-shaped records",
+  "parse": "harvest-skip-broken-element"
+ },
+ "deepseek": {
+  "cases_seen": 4,
+  "correct": 3,
+  "gradable": true,
+  "parse": "clean",
+  "right_answer_wrong_rule": []
+ },
+ "gemini": {
+  "cases_seen": 4,
+  "correct": 2,
+  "gradable": true,
+  "parse": "clean+fence-close+fenced",
+  "right_answer_wrong_rule": []
+ },
+ "glm 5.3 flash": {
+  "cases_seen": 4,
+  "correct": 3,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "grok": {
+  "cases_seen": 4,
+  "correct": 4,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "kimi": {
+  "cases_seen": 4,
+  "correct": 4,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "longcat": {
+  "cases_seen": 4,
+  "correct": 3,
+  "gradable": true,
+  "parse": "clean+fenced+trailing-content",
+  "right_answer_wrong_rule": [
+   1
+  ]
+ },
+ "meta": {
+  "cases_seen": 4,
+  "correct": 4,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "mimo": {
+  "cases_seen": 4,
+  "correct": 2,
+  "gradable": true,
+  "parse": "clean+fence-close+fenced",
+  "right_answer_wrong_rule": []
+ },
+ "minara": {
+  "cases_seen": 4,
+  "correct": 4,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "minimax 2.7": {
+  "cases_seen": 4,
+  "correct": 2,
+  "gradable": true,
+  "parse": "clean",
+  "right_answer_wrong_rule": []
+ },
+ "mistral": {
+  "cases_seen": 4,
+  "correct": 1,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "qwen": {
+  "cases_seen": 4,
+  "correct": 2,
+  "gradable": true,
+  "parse": "clean+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "solar": {
+  "cases_seen": 4,
+  "correct": 3,
+  "gradable": true,
+  "parse": "clean",
+  "right_answer_wrong_rule": []
+ },
+ "sonnet": {
+  "cases_seen": 4,
+  "correct": 4,
+  "gradable": true,
+  "parse": "clean+fenced+trailing-content",
+  "right_answer_wrong_rule": []
+ },
+ "yuanbao": {
+  "cases_seen": 4,
+  "correct": 3,
+  "gradable": true,
+  "parse": "clean",
+  "right_answer_wrong_rule": []
+ }
+}

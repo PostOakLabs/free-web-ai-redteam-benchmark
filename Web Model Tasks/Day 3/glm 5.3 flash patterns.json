@@ -1,0 +1,92 @@
+```json
+[
+  {
+    "pattern_name": "Inter-block boundary I/O budget split (input/output delay between two blocks on a shared clock)",
+    "situation": "Two blocks not yet integrated (or one being revised) must each sign off against a boundary path; someone has to decide how the period divides between launch logic, interconnect, and capture logic.",
+    "derivation": "1) Fix shared-clock period T for the boundary path. 2) Reserve interconnect margin I as a fraction of T — order of 10-20% at 28nm, tightened where repeaters/latency are explicitly modeled (confidence 0.5 on the range). 3) Split the remaining (T − I) between launch logic L and capture logic C: default 50/50 when both sides are of similar depth, reweighted (e.g., 70/30 toward the deeper side) when one side is a register directly at the pin (confidence 0.5 on the 70/30 shape). 4) Charge half the interconnect to each side: on the launch block set_output_delay −max = C + I/2; on the capture block set_input_delay −max = L + I/2. Self-check: internal budget left in the launch block = T − (C + I/2) = L + I/2, which matches the capture block's assumed input budget. 5) Derive −min values so the integrated hold check covers interconnect plus capture-side hold margin; set −min near the fast-corner interconnect estimate rather than zero-by-default (confidence 0.5). 6) Exchange a budget table with the neighboring block owner before either block freezes; both sign the same table.",
+    "wrong_way": "Setting output_delay to the full period (zero internal budget for the launch block, unclosable) or input_delay to zero (capture block must absorb everything). Subtler: forgetting the interconnect reserve — each block signs off clean and the path fails at integration by exactly the reserved margin, discovered weeks later.",
+    "defense": "The budget table itself: both boundary reports shown side by side at review, each matching the agreed split; the split re-derived whenever either side's logic depth changes materially.",
+    "signoff_risk": "Too tight: over-design (buffers, area) on the budgeted side, or fake failures that erode trust in the budget process. Too loose: integration failure at top level, forcing rework of a block already signed off — the most expensive failure mode in this list.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "node_era_note": "at 28nm the margin was a flat percentage of period; at 7nm-and-below budgets carry explicit source-latency and repeater terms, so pure-percentage splits under-budget long routes"
+  },
+  {
+    "pattern_name": "Primary/IO budget via virtual clocks from external device timing",
+    "situation": "Constraining chip-level input/output ports against an external device's datasheet timing using a clock defined with no port.",
+    "derivation": "1) create_clock on a virtual (portless) object with the external/system period T. 2) Input side: set_input_delay −max = external Tco(max) + board trace max; −min = external Tco(min) + board trace min (confidence 0.7 — standard common-clock formulation). 3) Output side: set_output_delay −max = external Tsu + trace max; the −min value encodes the external hold requirement adjusted by board clock skew between our clock pin and the device clock pin. Sign conventions for the −min term differ between tools' IO timing equations — verify the direction empirically: increasing −min must tighten the hold check (confidence 0.6 on the verification recipe; no universal formula quoted). 4) If the board clock is common to both chips, the clock-trace skew enters once, against the clock relationship — the classic error is double-counting it into both clock and data numbers (confidence 0.5).",
+    "wrong_way": "Treating the IO delays as free knobs inflated until timing passes — silently exporting the failure to the board, where it appears as a system-margin problem nobody traces back to the SDC.",
+    "defense": "The external device datasheet page and the board trace estimate attached to the constraint file header; every IO delay number traceable to one of those two documents.",
+    "signoff_risk": "Too tight: over-design at the IO ring and fake failures on real interfaces. Too loose: the chip passes signoff but the board fails system timing, with the defect invisible in any single-chip report.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.7,
+    "node_era_note": "at 7nm-and-below on-die variation and derates make the min-side and corner scoping matter more, but the datasheet arithmetic shape is unchanged"
+  },
+  {
+    "pattern_name": "False path vs multicycle adjudication (with the hold adjustment)",
+    "situation": "A path misses timing and someone proposes an exception; the decision is whether the path legitimately takes N cycles, or is architecturally unreachable, or is neither and must be fixed.",
+    "derivation": "1) Find the architectural qualifier: capture flop enabled every N cycles (enable from a counter or divided clock); N = enable period / clock period. 2) set_multicycle_path N −setup on the launch→capture scope (explicit −end when clocks differ). 3) Immediately add set_multicycle_path (N−1) −hold on the same scope — without it the tool checks hold across N−1 cycles, an impossible requirement (this adjustment mechanism itself is textbook-standard; the adjudication discipline is the practice part). 4) Choose false path only when the path cannot be exercised at all: proven mutually exclusive selects, static configuration straps, or clocks already declared asynchronous. 5) Review heuristic: any proposed false path in a datapath defaults to multicycle unless a formal exclusivity argument exists; 'the path is hard to close' is never, by itself, a false-path justification.",
+    "wrong_way": "False path used as a closure tool — the path goes unchecked and silicon fails with no signoff warning. Second classic: MPC applied without the hold adjustment, flooding signoff with impossible hold violations, whereupon someone false-paths the path to clean the report — compounding one error into a silent one.",
+    "defense": "Waveform or RTL enable tree showing the N-cycle validity window for multicycle; exclusivity proof for any false path; the exception report showing the shifted check edges.",
+    "signoff_risk": "Too tight (multicycle on a truly single-cycle path): real failures get N-cycle leniency they don't deserve and escape. Too loose (false path on a live path): zero coverage, silicon failure with no report ever flagging it — the worst asymmetry in constraint practice.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.6,
+    "node_era_note": "no-era-difference-recalled — the mechanics are node-independent; only the closure pressure that tempts false paths varies"
+  },
+  {
+    "pattern_name": "CDC constraint package: asynchronous clock groups plus bounded crossings plus synchronizer audit",
+    "situation": "Two or more unrelated clock domains exchange data; every crossing needs a documented synchronizer scheme and the constraints must protect, not erase, those crossings.",
+    "derivation": "1) Enumerate clocks; set_clock_groups −asynchronous only between pairs where EVERY crossing has a documented synchronizer. 2) Classify each crossing: 1-bit level → 2-flop sync; multi-bit counter → gray code; data bus → handshake or async FIFO. 3) Bound every crossing with set_max_delay −from [source flops] −to [first sync flop] of order one period of the faster clock (confidence 0.5 on the one-period idiom; intent is only to keep the transition from smearing across multiple receive edges), preserving gray-bus coherency and the MTBF assumptions. 4) Run a crossing audit: every path between asynchronous groups must map to the synchronizer inventory; an unmapped path is a bug in constraints or RTL — decide which, don't ignore it.",
+    "wrong_way": "Blanket false_path or clock_groups with no max_delay bounds — gray-code counters sampled non-coherently (silent state corruption visible only in gated-delay simulation or silicon), handshakes with no stable-window enforcement, and no report anywhere that flags it.",
+    "defense": "Synchronizer inventory table diffed against the crossing audit report; gray-code property check on the RTL; MTBF calculation for deep asynchronous paths.",
+    "signoff_risk": "Too loose: metastability or coherency escapes to silicon — the worst post-silicon debug class there is. Too tight: fabricated max_delay failures on crossings invite engineers to strip the bounds to converge, destroying the protection at exactly the moment it matters.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.6,
+    "node_era_note": "at 7nm-and-below the crossing inventory is increasingly machine-checked by formal CDC tools fed from the same constraints, rather than only reviewed by hand"
+  },
+  {
+    "pattern_name": "Generated/divided clock definition (including gated-clock outputs)",
+    "situation": "A clock is divided by a register, split through a clock-gating cell, or produced by a PLL; the constraint must preserve the parent-child relationship.",
+    "derivation": "1) At each clock-splitting element, define create_generated_clock with −source at the driving clock pin and the true relationship: −divide_by N for clean dividers, an explicit −edges list for irregular duty or odd division. 2) For an integrated clock-gating cell, define the generated clock at its output pin, 1:1, source = the cell's clock input pin, so tree latency beyond the gate stays comparable with ungated sibling branches. 3) Do not declare a separate primary clock on the divided net: the generated definition keeps parent↔child paths checked (setup into the divider register, gating arcs) and keeps source latency continuous through the hierarchy. 4) Verify via the clock report that source tracing shows one root, then set latency/uncertainty on the generated clock, not the parent, for leaf budgeting.",
+    "wrong_way": "create_clock on the divided net: parent and child become 'unrelated' clocks — parent-to-child data paths silently drop into the false/asynchronous bucket, the parent's source insertion delay never enters the child's budget, and balancing gated against ungated siblings becomes impossible.",
+    "defense": "Clock report showing the generated relationship and traced source; divider/ICG schematic in review; the leaf latency arithmetic reconciled against the tree report.",
+    "signoff_risk": "Too tight (extra checks from a correct generated definition): some real gating-logic arcs show up and must be handled, but nothing is silently lost. Too loose (separate primary clock): entire path classes vanish from signoff without any violation to argue about — the failure is the absence of a report.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.75,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Pre-CTS over-constraint via clock uncertainty with scheduled relaxation",
+    "situation": "Before CTS the clock network is ideal (zero skew by default), so early implementation must inject the skew/jitter/margin that will exist later — and must later give it back.",
+    "derivation": "1) Pre-CTS: set_clock_uncertainty −setup U where U ≈ expected post-CTS skew + jitter + ECO residue; order of 5-10% of period or ~20-80ps depending on tree size (confidence 0.4), with ECO residue ~10-20ps (confidence 0.4). 2) Hold side: smaller uncertainty pre-route, order of expected hold-fix skew (confidence 0.35), fully replaced by real propagated skew after CTS. 3) Optional early-phase data over-constraint: tighten boundary budgets by a small fixed margin, order 5-10% of the block budget (confidence 0.4), released at integration. 4) Relaxation gates: after CTS, replace setup U with (measured skew + jitter + small residue); after route, uncertainty is jitter plus mandated signoff margin only. Every relaxation step cites the skew histogram from the stage that earned it.",
+    "wrong_way": "Leaving pre-CTS uncertainty in the signoff scenario — the design closes against a phantom budget, paying area and power for margin that does not exist, or failing to close at all on paths that were never really late. Opposite error: relaxing everything at once post-CTS with no skew data, and discovering the truth at route signoff.",
+    "defense": "A documented uncertainty schedule tied to named flow stages; each relaxation justified by the previous stage's skew report; the schedule reviewed like any other constraint artifact.",
+    "signoff_risk": "Too tight: buffer bloat and possibly unclosable paths, plus erosion of trust ('just add uncertainty' culture). Too loose: late-stage timing surprises when real skew appears, at the point where the fix costs the most.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "at 28nm pre-CTS uncertainty was tens of ps against a ~1GHz-class clock; at 7nm-and-below it is a larger fraction of a shorter period and is corner-specific, so a single schedule no longer suffices"
+  },
+  {
+    "pattern_name": "Mode-scoped case analysis and per-mode exception scoping",
+    "situation": "The chip has functional, scan-shift, scan-capture, bist, and low-power modes with constant pins; exceptions that are true in one mode are wrong in another.",
+    "derivation": "1) Build the mode table from the spec: each mode with its constant pins (test_se, scan_en, bist_run, power-mode straps). 2) Per mode scenario: set_case_analysis on the constants, then scope exceptions to that mode only — the exception file is generated from the table, not accumulated by hand over revisions. 3) Exclusivity rule: any claimed-false path must cite mode + constant value + why the endpoint is unreachable in that mode; a path false in functional mode but live in scan mode may NOT be false-pathed in the test scenario. 4) Regression guard: audit each mode's exceptions — any false path firing without an active case-analysis justification is an error, not noise.",
+    "wrong_way": "A global false-path list inherited across all modes: a path structurally dead in functional mode but live in scan-shift escapes test-mode checking and fails at bring-up. The mirror error: missing case analysis forces the engine to time impossible paths, closure time explodes, and someone then adds false paths to cope — compounding the first error.",
+    "defense": "The mode table reviewed jointly with DFT; per-mode exception diffs between releases; the automated audit proving every exception cites a mode.",
+    "signoff_risk": "Too loose: silicon fails in the unscoped mode, typically scan or a power-mode entry, after full functional signoff looked clean. Too tight: closure drowned in impossible paths, and the pressure response (more false paths) converts a nuisance into the too-loose failure.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.6,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Asynchronous reset constraint: assertion async by construction, deassertion synchronized and bounded",
+    "situation": "An asynchronous reset distributes to flops; assertion is intentionally asynchronous while deassertion must be synchronized, and the constraints must keep the recovery/removal checks alive.",
+    "derivation": "1) Treat assertion (async pin assert vs clock) as asynchronous by construction — the checks that matter are recovery (deassert) and removal (assert), which the tools apply to timed reset signals. 2) Synchronize deassertion: route the async reset through a reset synchronizer (two-flop) clocked by the destination domain. 3) Constrain the crossing INTO the reset synchronizer with bounded set_max_delay of order one destination period (confidence 0.4) rather than a blanket false path or a domain-wide clock group that swallows it — the bounded crossing preserves recovery/removal checks on the synchronizer flops; a domain-wide exception deletes them silently. 4) Bound reset distribution after the synchronizer (set_max_delay on the reset net, order of one destination period, confidence 0.4) so all flops exit reset within one cycle and removal skew stays inside a known window.",
+    "wrong_way": "set_false_path from the reset source everywhere: recovery/removal checks vanish on the very flops that synchronize deassertion, metastable exit from reset passes signoff, and the chip fails as random bring-up crashes that look like software bugs.",
+    "defense": "Reset-tree schematic; a report demonstrating recovery/removal checks present on the synchronizer flops; the removal-window arithmetic for the distribution bound.",
+    "signoff_risk": "Too tight: aggressive distribution bounds create fake removal failures on large trees, tempting their removal. Too loose: no report flags the missing synchronizer checks — the escape is invisible until silicon, in the most intermittent failure class.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.5,
+    "node_era_note": "no-era-difference-recalled"
+  }
+]
+```

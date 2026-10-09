@@ -1,0 +1,154 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Examine the LVS log for the specific failing net names, port names, and the exact mismatch type (missing / shorted / open) per instance",
+        "why_first": "Cheapest action — no run needed; categorizes the failure and rules out multiple hypotheses simultaneously",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect power (VDD) and ground (VSS) nets in the failing region — are all expected rails present and continuous in both schematic and layout netlist?",
+        "why_first": "Power/ground mismatches are the most common source of cascading missing-net failures; verifying rail integrity early avoids chasing downstream ghosts",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check for unconnected or floating pins in the schematic side of the LVS comparison — pins that are intentionally NC in one view but not the other create false opens",
+        "why_first": "NC-pin convention mismatches between schematic and layout are extremely common; cheap to rule out before any re-extraction",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review DRC marker layers in the failing region — DRC violations that are not waived can produce real shorts/opens that LVS will then correctly report",
+        "why_first": "DRC markers that overlap routing create real shorts; LVS is not wrong — the layout is — and chasing LVS when the real problem is a DRC miss is the most time-wasting detour",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run hierarchical LVS with all cell boundaries preserved, then re-run with the failing block flattened — compare whether the failure appears only in flat mode",
+        "rules_in": "Hierarchy or subcell merge artefact is the cause if the mismatch vanishes in flat mode or appears only in flat mode",
+        "rules_out": "Real layout defect if the mismatch persists regardless of hierarchy/flat mode"
+      },
+      {
+        "experiment": "Run the same LVS runset on a second LVS tool (different vendor) against the same layout database — compare the failure list",
+        "rules_in": "Tool-specific extraction bug if the same net fails on tool A but not tool B and the layout geometry genuinely supports both readings",
+        "rules_out": "Real layout defect if the same failure reproduces across both tools on the same geometry"
+      },
+      {
+        "experiment": "Toggle the LVS 'merge parallel devices' option — re-run and check whether the short/open count changes",
+        "rules_in": "Parallel device merge artefact if toggling this option makes a false short appear or disappear without any layout change",
+        "rules_out": "Real geometry short if the failure persists across merge settings"
+      },
+      {
+        "experiment": "Visually inspect the layout mask data in the failing region with the layout source view (not just the abstract) — look for overlapping polygons that DRC might not have flagged",
+        "rules_in": "Overlay or merge artefact in the GDS/OASIS if the polygons are genuinely separate and non-overlapping; rules in a real short if the polygons are physically overlapping",
+        "rules_out": "The polygon inspection is definitive if the layout geometry is the source of truth"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Overlapping routing polygons in adjacent cells or in the top-level routing creating an unintended short",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Missing via or contact at the endpoint of a net — the routing is physically broken",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Net naming mismatch between schematic pin name and layout pin name (e.g., VDD vs. DVDD, or case sensitivity on net vs. NET)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "NC (no-connect) pin convention applied in schematic but not recognized by the LVS tool on the layout side, or vice versa",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Subcell pin order changed by layout editor without updating the schematic symbol — hierarchical LVS reports the subcell port as missing or reordered",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Assuming a short reported by LVS is a real layout overlap when it is actually a merge artefact from the LVS tool combining two physically separate nets into one — engineers spend days looking for the non-existent overlap before re-running with a different merge setting and finding it was a tool artefact",
+    "node_era_note": "Below 7nm, multi-patterning mask decomposition conflicts can create topology in the layout that appears as shorts under one split-color assignment but not another — the LVS tool must be run with the same mask color rules as thefab, otherwise phantom shorts appear that are artefacts of the decomposition check, not real layout shorts"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Record the magnitude of the size mismatch (percentage) and whether it affects every device of that type or only specific instances",
+        "why_first": "A systematic factor-of-2 or half-width discrepancy almost always means a unit-interpretation problem; a random-instance mismatch almost always means a schematic/layout edit that got out of sync",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect the extracted layout view directly — use the layout tool to query the exact drawn geometry (width, length, fingers, parallel devices) of the failing device and compare to what the LVS tool is reporting",
+        "why_first": "Rules out whether the LVS tool is misinterpreting the geometry versus whether the geometry itself is wrong; this is the single fastest way to split extraction-bug from layout-error hypotheses",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare the schematic netlist to the extracted netlist for the failing device — is the size in the schematic what you expect, and does the LVS tool's schematic reading match?",
+        "why_first": "The LVS tool reads a schematic netlist that may itself have been regenerated from a stale view — verify the schematic source the LVS tool consumed",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Run LVS with verbose device extraction output enabled and check whether the LVS tool is splitting one intended device into multiple parallel extracted devices (or merging multiple into one)",
+        "why_first": "Multi-finger devices, shared wells, and guard-ring geometries confuse extraction tools into splitting or merging devices — verbose output makes this visible without any layout change",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-extract the layout using a different extraction deck (or toggle the 'ignore dummy devices' and 'poly resizing compensation' options in the same tool) and re-run LVS",
+        "rules_in": "Extraction deck or option issue if the device count or size changes when extraction settings are altered without any layout edit",
+        "rules_out": "Real schematic/layout mismatch if the LVS result is identical across extraction settings and the extracted geometry matches the drawn layout"
+      },
+      {
+        "experiment": "Flatten the failing block and re-run LVS — compare whether the extra-device or size error appears only in hierarchical mode",
+        "rules_in": "Subcell abstraction or port mismatch if the error disappears or changes character in flat mode; the error is in the child-cell boundary definitions",
+        "rules_out": "Cell interior problem if flattening makes no difference — the mismatch is inside the cell, not at its boundary"
+      },
+      {
+        "experiment": "Toggle 'parameterized device' resolution in the LVS tool (for parameterized cells where device size comes from a parameter) — re-run and compare",
+        "rules_in": "Parameter propagation failure in LVS if toggling the parameter resolution mode changes the device size that LVS reports; indicates the tool is using a default value instead of the passed parameter",
+        "rules_out": "Real size mismatch in both schematic and layout if parameter resolution makes no difference"
+      },
+      {
+        "experiment": "Run a layout versus schematic XOR or geometry compare on the exact failing device's drawn shapes — compare width, length, number of fingers, and source/drain diffusion area against what LVS extracted",
+        "rules_in": "Extraction tool error if the drawn geometry is correct but LVS reports a different size — the tool is miscounting fingers, misinterpreting well boundaries, or applying an incorrect default length",
+        "rules_out": "Layout geometry error if the drawn shapes themselves are wrong — the device in the layout is actually different from what was intended"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Extraction deck misinterpreting multi-finger MOSFET layout geometry — splitting one intended finger into multiple devices or vice versa",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Unit or scale mismatch between schematic and extraction tool (e.g., schematic uses microns, extraction defaults to nanometers, or vice versa — leading to a 1000x or 0.001x discrepancy)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Schematic was edited (device size changed or device added) but the layout cell was not updated — the two views have genuinely drifted",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Dummy fill devices or stress-relaxation dummy poly segments being extracted as real devices by the tool because fill-suppression options are not enabled in the extraction deck",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Well proximity effect or stress liner geometry being counted by the extraction tool as part of the active device area, inflating the effective device width",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "Assuming an 'extra device' in the extracted netlist is a schematic/layout mismatch (and spending days hunting a phantom layout edit) when it is actually the extraction tool counting a dummy fill or OD-resistor structure that the schematic correctly excludes — enabling fill suppression in the extraction deck clears it in minutes",
+    "node_era_note": "Below 7nm, well proximity effects and stress engineering create context-dependent device electrical parameters that older extraction decks do not model — an extraction that was correct at 28nm can report wrong effective widths at 7nm because the deck does not know to subtract stress-liner encroachment from the active area; conversely, fins that are intentionally broken or merged by OPC may be extracted as wrong device counts unless the extraction deck is fin-aware"
+  }
+]

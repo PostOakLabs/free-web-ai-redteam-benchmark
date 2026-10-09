@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Integrate two processor cores on one POWER4 chip",
+    "where_in_paper": "Introduction / system overview",
+    "decision": "Make the basic POWER4 processor a single chip containing two complete processor cores.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper presents dual-core integration as a way to increase processor density and system throughput while staying within practical chip, power, and packaging limits.",
+    "outcome": "POWER4 became a dual-core chip and the core building block for POWER4 systems.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The stated rationale wording may be inferred rather than quoted; the paper may not explicitly discuss rejected single-core alternatives.",
+    "confidence": 0.72
+  },
+  {
+    "title": "Use an eight-processor MCM building block",
+    "where_in_paper": "System overview / packaging",
+    "decision": "Package four dual-core POWER4 chips, with associated cache chips, in a multichip module as the basic eight-processor building block.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper describes the MCM as a way to obtain high processor density and short, fast chip-to-chip interconnects in a scalable building block.",
+    "outcome": "The MCM provided an eight-core building block from which larger POWER4 systems could be constructed.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly gives the short-interconnect rationale or simply describes the MCM configuration.",
+    "confidence": 0.62
+  },
+  {
+    "title": "Balance clock frequency with instructions-per-cycle",
+    "where_in_paper": "Design objectives / clock-frequency philosophy",
+    "decision": "Design for high frequency but keep the pipeline and microarchitecture balanced so that IPC is not sacrificed solely for frequency.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper's design discussion treats frequency as an important lever for performance, but not one to be pursued in isolation from useful work per cycle and system balance.",
+    "outcome": "The resulting POWER4 microarchitecture combined a wide out-of-order core with a high-frequency design target.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames this as a trade-off decision rather than simply describing the chosen pipeline and frequency.",
+    "confidence": 0.52
+  },
+  {
+    "title": "Make RAS features pervasive in the POWER4 system",
+    "where_in_paper": "Reliability, availability, and serviceability",
+    "decision": "Include error detection, correction, logging, and serviceability mechanisms across caches, buses, memory, and logic.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper presents RAS as necessary for enterprise-class availability, fault containment, and field service in POWER4 systems.",
+    "outcome": "POWER4 systems include ECC/parity/redundancy/error-handling features intended to reduce failures and downtime.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 20,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact list of mechanisms and whether the paper uses the term 'pervasive' may be generalized.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Provide hardware-coherent shared-memory interconnect for scaling",
+    "where_in_paper": "System interconnect / fabric",
+    "decision": "Use a coherent shared-memory interconnect so multiple POWER4 chips/MCMs can operate as a single SMP system.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper treats hardware coherence and a shared-address-space model as the way to scale processor count while preserving SMP usability.",
+    "outcome": "POWER4 chips/MCMs can be connected into larger cache-coherent shared-memory systems.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 13,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper frames this as an explicit design decision or simply describes the coherent interconnect implementation.",
+    "confidence": 0.55
+  }
+]

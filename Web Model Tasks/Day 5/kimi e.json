@@ -1,0 +1,98 @@
+[
+  {
+    "calculation": "ISO 26262 hardware architectural metric set for a safety goal: SPFM, LFM, and PMHF status versus ASIL B/C/D targets",
+    "formula_or_test": "SPFM = 1 - (sum(lambda_SPF) + sum(lambda_RF)) / (sum(lambda_SPF) + sum(lambda_RF) + sum(lambda_DP)); LFM = 1 - sum(lambda_MPF_latent) / (sum(lambda_MPF) - sum(lambda_SPF)); PMHF is an estimated average probability per hour of safety-goal violation from random hardware failures, normally by FMEDA/FTA and therefore not a safe one-line closed form. Targets commonly cited from Part 5: SPFM >= 90% ASIL B, >= 97% ASIL C, >= 99% ASIL D; LFM >= 60% ASIL B, >= 80% ASIL C, >= 90% ASIL D; PMHF < 1e-7/h for ASIL B and C and < 1e-8/h for ASIL D, with edition/wording differences for whether ASIL B PMHF is a target or recommendation; ASIL A has no quantitative target. NOTE: verify denominator fault-class conventions in the exact edition before coding.",
+    "inputs": [
+      "lambda_SPF per relevant element",
+      "lambda_RF per relevant element",
+      "lambda_DP or total safety-related FIT per the edition's fault model",
+      "lambda_MPF_latent and lambda_MPF",
+      "ASIL of the safety goal",
+      "diagnostic coverage and latent-fault interval assumptions for PMHF"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles - Functional safety - Part 5: Product development at the hardware level",
+    "clause_locator": "ISO 26262-5:2018 clauses 8-9",
+    "publicly_retrievable": "authoritative text is paywalled; targets and formulas are widely reproduced in vendor/academic summaries",
+    "volatility": "low for formula structure; medium for PMHF requirement/recommendation wording across editions",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "IEC 61508 SIL classification from quantitative target failure measure",
+    "formula_or_test": "Low demand mode: map PFDavg to SIL as SIL 1 for [1e-2, 1e-1), SIL 2 for [1e-3, 1e-2), SIL 3 for [1e-4, 1e-3), SIL 4 for [1e-5, 1e-4). High demand or continuous mode: map PFH in failures per hour to SIL as SIL 1 for [1e-6, 1e-5), SIL 2 for [1e-7, 1e-6), SIL 3 for [1e-8, 1e-7), SIL 4 for [1e-9, 1e-8). Interval notation means greater than or equal to the lower bound and strictly less than the upper bound.",
+    "inputs": [
+      "mode of operation: low demand versus high demand/continuous",
+      "PFDavg for low demand",
+      "PFH for high demand/continuous"
+    ],
+    "authority": "IEC 61508-1:2010, Functional safety of electrical/electronic/programmable electronic safety-related systems - Part 1: General requirements",
+    "clause_locator": "IEC 61508-1:2010 7.6.2.9, Tables 2-3",
+    "publicly_retrievable": "authoritative text is paywalled; tables are reproduced in many functional-safety papers and vendor SIL guides",
+    "volatility": "low",
+    "confidence": 0.94
+  },
+  {
+    "calculation": "EAR advanced-computing IC control test for ECCN 3A090 class items using total processing performance and performance density",
+    "formula_or_test": "TPP = sum over processing units of 2 * MacTOPS * bit length of the multiply-accumulate operation, where MacTOPS is theoretical peak tera multiply-accumulate operations per second and bit length is the largest input bit length to the multiply; aggregate all processing units on the IC. Performance density = TPP / applicable die area in mm^2. Control thresholds after the 2023/2025 advanced-computing rules: 3A090.a if TPP >= 4800, or TPP >= 1600 and performance density >= 5.92; 3A090.b if TPP >= 2400 and < 4800 with performance density >= 1.6 and < 5.92, or TPP >= 1600 with performance density >= 3.2 and < 5.92; Note 2 also excludes certain non-datacenter ICs below TPP 4800. NOTE: EAR thresholds and exceptions are highly volatile; confirm current CCL before use.",
+    "inputs": [
+      "per-processing-unit MacTOPS",
+      "operation bit length per processing unit",
+      "number of processing units",
+      "applicable die area",
+      "whether designed or marketed for data-center use"
+    ],
+    "authority": "Export Administration Regulations, 15 CFR parts 730-774, Commerce Control List Supplement No. 1 to part 774, Category 3, ECCN 3A090 and Technical Notes; related computers in ECCN 4A090",
+    "clause_locator": "15 CFR part 774 Supp. No. 1, Category 3, ECCN 3A090 and Notes",
+    "publicly_retrievable": "authoritative EAR/CCL and Federal Register rules are free via eCFR and federalregister.gov",
+    "volatility": "high",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "US advanced manufacturing investment credit for semiconductor and semiconductor manufacturing equipment facilities",
+    "formula_or_test": "credit = 35% of qualified investment for the taxable year with respect to an advanced manufacturing facility of an eligible taxpayer, for current post-2025 law; qualified investment is the basis of qualified property placed in service during the taxable year as part of the facility; qualified property must be tangible, depreciable/amortizable, original-use or constructed/reconstructed/erected by the taxpayer, integral to operation of the facility, and the facility's primary purpose must be manufacturing semiconductors or semiconductor manufacturing equipment; statutory termination test disallows credit for property whose construction begins after Dec. 31, 2026. Prior law was 25% for property placed in service after Dec. 31, 2022 and through Dec. 31, 2025.",
+    "inputs": [
+      "basis of qualified property placed in service in the taxable year",
+      "facility primary-purpose test",
+      "construction-begun date",
+      "eligible taxpayer / foreign entity of concern status",
+      "applicable-transaction recapture screen"
+    ],
+    "authority": "Internal Revenue Code section 48D, Advanced manufacturing investment credit, as added by Pub. L. 117-167 and amended by Pub. L. 119-21",
+    "clause_locator": "26 U.S.C. §48D(a)-(e)",
+    "publicly_retrievable": "free via U.S. Code, IRS pages, and Federal Register/Treasury regulations",
+    "volatility": "medium; rate changed from 25% to 35% by 2025 legislation",
+    "confidence": 0.96
+  },
+  {
+    "calculation": "AEC-Q100 qualification acceptance test for major environmental and lifetime stress groups",
+    "formula_or_test": "For applicable AEC-Q100 Table 2 stresses such as temperature cycling, THB/HAST, autoclave/unbiased HAST, HTOL, and NVM endurance/data retention: sample size per lot = 77, number of lots = 3, total n = 231, acceptance criterion = 0 failures. AEC-Q100 describes this as LTPD = 1, i.e., a maximum of 1% failures at 90% confidence for c = 0. Other rows differ, e.g., HTSL/PTC commonly use 45 devices from 1 lot, and ELFR commonly uses 800 devices from 3 lots; code the row-specific sample/lot/fail columns rather than assuming 231 everywhere.",
+    "inputs": [
+      "stress abbreviation from Table 2",
+      "sample size per lot",
+      "number of lots",
+      "observed failures",
+      "applicability flags H/P/B/D/G/E/etc."
+    ],
+    "authority": "Automotive Electronics Council AEC-Q100 Rev-J, Failure Mechanism Based Stress Test Qualification for Integrated Circuits",
+    "clause_locator": "AEC-Q100 Rev-J Table 2; sample-size rules around §2.5; LTPD statement in Appendix 7",
+    "publicly_retrievable": "AEC base document is publicly retrievable from the AEC document site",
+    "volatility": "medium; revised periodically, current widely used base revision is J/K-era",
+    "confidence": 0.88
+  },
+  {
+    "calculation": "JEDEC early-life failure rate upper confidence bound in FIT from accelerated ELF tests under constant failure-rate assumption",
+    "formula_or_test": "For exponential distribution single ELF test: upper c%-confidence failure rate lambda = chi-square(c, d) / (2 * A * N * tA), with d = 2*f + 2, A = acceleration factor often A_T * A_V, N = sample size, tA = accelerated ELF test hours, f = observed failures. ELFR in FIT = 1e9 * lambda = 1e9 * chi-square(c,d) / (2 * A * N * tA). For ppm over early-life period tELF, use ELFR_ppm = tELF * 1e-3 * ELFR_FIT when ELFR_FIT is constant over that period. NOTE: chi-square convention must match the standard's table/degrees-of-freedom convention.",
+    "inputs": [
+      "confidence level c",
+      "observed failures f",
+      "acceleration factor A and its temperature/voltage model",
+      "sample size N",
+      "accelerated test hours tA",
+      "optional early-life period tELF for ppm conversion"
+    ],
+    "authority": "JEDEC JESD74A, Early Life Failure Rate Calculation Procedure",
+    "clause_locator": "JESD74A clause 5.1.1, equations [5]-[6] as reproduced in public excerpts",
+    "publicly_retrievable": "authoritative JEDEC text is paywalled; substantial equation excerpts circulate publicly, but primary text should be purchased",
+    "volatility": "low to medium; revision-dependent equations and confidence tables",
+    "confidence": 0.84
+  }
+]

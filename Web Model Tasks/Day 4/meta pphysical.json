@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Hybrid H-tree driving sector buffers that drive global clock grid with tunable deskew",
+    "where_in_paper": "Clock design and distribution",
+    "decision": "Use a buffered H-tree from central PLL to drive distributed sector buffers which then drive a chip-wide global clock mesh, with programmable delay at sector buffers and local clock buffers regenerating local clocks",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Large ~400mm2 die and SOI process variation make pure balanced tree too skew-sensitive; global grid lowers local skew and allows post-silicon tuning to correct systematic skew while containing insertion delay",
+    "outcome": "Achieved low global skew enabling >1 GHz target, with tunable delay providing measured deskew range and robust distribution to two cores and caches",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact terminology sector buffer vs clock sector and whether programmable delay was at sector buffer or earlier tree stage",
+    "confidence": 0.7
+  },
+  {
+    "title": "Predominantly static CMOS implementation with restricted selective dynamic circuits",
+    "where_in_paper": "Circuit design methodology",
+    "decision": "Implement the chip primarily in static CMOS, allowing dynamic Domino only in highly critical datapath macros under strict noise and keeper rules",
+    "alternatives_or_rejected": "Widespread dynamic Domino logic as used in earlier high-frequency designs",
+    "rationale": "SOI floating-body increases noise sensitivity, history effect, and leakage concerns; static improves noise margin, LSSD testability, and reduces extensive noise analysis burden",
+    "outcome": "Met frequency target with manageable noise verification and full LSSD coverage, avoiding SOI-specific dynamic instabilities",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 36,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether paper explicitly frames alternative as widespread Domino or just says limited use of dynamic without naming full dynamic as rejected alternative",
+    "confidence": 0.65
+  },
+  {
+    "title": "SOI history effect bounded by early/late timing corners with body-voltage extremes",
+    "where_in_paper": "Technology - SOI device considerations and Timing methodology",
+    "decision": "Model SOI threshold variation due to floating-body history by timing every path twice with worst-case body at high and low voltage for late and early modes",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Body potential depends on switching history and cannot be predicted cycle-accurately at static timing time; conservative bounding guarantees operation across all possible histories",
+    "outcome": "Incorporated into EinsTimer as dual-corner SOI analysis, adding systematic guardband but ensuring hardware works over history variation and parasitic bipolar effects",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Specific tool name EinsTimer and exact early/late body voltage polarity mapping could be swapped or belong to companion methodology description",
+    "confidence": 0.75
+  },
+  {
+    "title": "Pulsed L1/L2 LSSD latches with local clock choppers for time borrowing",
+    "where_in_paper": "Latch design and local clocking",
+    "decision": "Use IBM L1/L2 LSSD level-sensitive latches driven by locally generated narrow pulses from clock choppers in local clock blocks, permitting limited cycle stealing",
+    "alternatives_or_rejected": "Edge-triggered flip-flops or traditional non-overlapping two-phase clocks without pulse narrowing",
+    "rationale": "Reduces latch insertion delay and clocking overhead, improves cycle time, allows absorption of local path variation and imbalance while preserving LSSD scan testability",
+    "outcome": "Lower latch delay contributed to frequency target, retained full DC scan, enabled controlled time borrowing across critical paths",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 37,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Direction of decision - whether pulse was on L1 only vs both L1/L2, and exact amount of borrowing allowed",
+    "confidence": 0.62
+  }
+]

@@ -1,0 +1,85 @@
+```json
+[
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Realistic mid-range distribution, meets ASIL D by a narrow margin",
+    "inputs": {"lambda_SPF": "30 FIT", "lambda_RF": "15 FIT", "lambda_MPF_latent": "100 FIT", "lambda_safe": "5000 FIT"},
+    "computation": "λ_total = λ_SPF + λ_RF + λ_MPF_latent + λ_safe = 30 + 15 + 100 + 5000 = 5145 FIT. Numerator = λ_SPF + λ_RF = 30 + 15 = 45 FIT. Ratio = 45 / 5145 = 0.0087463. SPFM = 1 - 0.0087463 = 0.9912537.",
+    "expected_output": {"SPFM": "0.99125 (99.13%)"},
+    "discriminates": "A realistic, non-boundary case with all four fault categories populated at plausible relative magnitudes (safe faults dominating, as in a real design) — tests ordinary arithmetic correctness rather than an edge case.",
+    "known_uncertainty": "None significant for this vector — the SPFM formula structure is standard and the arithmetic is simple; confidence is high."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Exact ASIL B threshold boundary (SPFM = 90.0% exactly)",
+    "inputs": {"lambda_SPF": "70 FIT", "lambda_RF": "30 FIT", "lambda_MPF_latent": "50 FIT", "lambda_safe": "850 FIT"},
+    "computation": "λ_total = 70 + 30 + 50 + 850 = 1000 FIT. Numerator = 70 + 30 = 100 FIT. Ratio = 100 / 1000 = 0.10. SPFM = 1 - 0.10 = 0.90.",
+    "expected_output": {"SPFM": "0.90 (90.0%)"},
+    "discriminates": "Lands EXACTLY on the ASIL B target (≥90%), engineered so the numerator/denominator ratio is a clean 0.10 — this tests threshold-equal semantics (does the calculator treat exactly-90% as meeting ASIL B, given the target is stated as '≥90%'?) and also tests that it correctly reports ASIL B met but ASIL C (≥97%) and ASIL D (≥99%) NOT met.",
+    "known_uncertainty": "The ASIL target values themselves (90%/97%/99% for B/C/D) are the part I'm least certain of with full precision — I believe these are correct but have not re-verified them against the current published standard text in this session; the arithmetic given the stated targets is otherwise exact."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Degenerate case: zero single-point and residual faults (SPFM = 100%)",
+    "inputs": {"lambda_SPF": "0 FIT", "lambda_RF": "0 FIT", "lambda_MPF_latent": "20 FIT", "lambda_safe": "980 FIT"},
+    "computation": "λ_total = 0 + 0 + 20 + 980 = 1000 FIT. Numerator = 0 + 0 = 0 FIT. Ratio = 0 / 1000 = 0. SPFM = 1 - 0 = 1.0.",
+    "expected_output": {"SPFM": "1.00 (100%)"},
+    "discriminates": "Tests the zero-numerator edge case (no single-point or residual faults at all) — SPFM should cleanly evaluate to exactly 1.0 with no division issue, unlike a zero-DENOMINATOR case which would be a genuine error condition. Also confirms all three ASIL targets are trivially met when SPFM=100%.",
+    "known_uncertainty": "Same ASIL-target-value caveat as vector 2 above; the arithmetic itself is trivial and not in question."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Realistic mid-range case, r=2 failures, clean 20 FIT result",
+    "inputs": {"n_devices": "1000", "test_hours_at_stress": "2000 h", "r_failures": "2", "CL": "60%", "Ea": "0.7 eV", "T_use": "55°C (328.15 K)", "T_stress": "125°C (398.15 K)"},
+    "computation": "Step 1 (device-hours at stress): TDH_stress = n × t = 1000 × 2000 = 2,000,000 device-hours. Step 2 (Arrhenius AF): Ea/k = 0.7 / 8.617e-5 = 8123.0 K. 1/T_use = 1/328.15 = 0.0030474 /K. 1/T_stress = 1/398.15 = 0.0025116 /K. Δ(1/T) = 0.0030474 - 0.0025116 = 0.0005358 /K. Exponent = 8123.0 × 0.0005358 = 4.352. AF = exp(4.352) ≈ 77.6. Step 3 (equivalent use-hours): TDH_eq = TDH_stress × AF = 2,000,000 × 77.6 = 155,200,000 device-hours. Step 4 (chi-square FIT): df = 2r+2 = 2(2)+2 = 6. χ²(CL=0.60, df=6) = 6.21 (looked-up table value). λ = χ² / (2 × TDH_eq) = 6.21 / (2 × 155,200,000) = 6.21 / 310,400,000 = 2.00×10^-8 per device-hour. FIT = λ × 10^9 = 20.0 FIT.",
+    "expected_output": {"AF": "≈77.6", "TDH_equivalent": "155,200,000 device-hours", "FIT": "20.0 FIT (point estimate at 60% CL)"},
+    "discriminates": "A non-boundary, non-degenerate mid-range case exercising every step of the pipeline (Arrhenius conversion, then chi-square FIT) with realistic sample size (n=1000) and test duration (2000h), r>1 failures — the 'ordinary' case the other two vectors are contrasted against.",
+    "known_uncertainty": "The chi-square critical value χ²(0.60, 6) = 6.21 is stated from recollection of standard chi-square distribution tables, NOT independently recomputed via the chi-square CDF in this session — this is the single number in the vector I'm least confident is exactly correct and it should be checked against an actual chi-square table or function before being treated as ground truth. Ea = 0.7 eV is a commonly-used generic default, not a value verified for any specific real failure mechanism."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Threshold-boundary case: engineered to land exactly at a named FIT target constant",
+    "inputs": {"n_devices": "1000", "test_hours_at_stress": "2606 h", "r_failures": "1", "CL": "60%", "Ea": "0.7 eV", "T_use": "55°C (328.15 K)", "T_stress": "125°C (398.15 K)", "FIT_TARGET_constant": "10 FIT (named placeholder — I do not know a single universal 'the' regulatory FIT ceiling; 10 FIT is used here only as a commonly-seen commercial/automotive component reliability budget figure, parameterized rather than asserted as a regulatory number)"},
+    "computation": "Step 1: TDH_stress = 1000 × 2606 = 2,606,000 device-hours. Step 2: AF = 77.6 (same Arrhenius conditions and arithmetic as the prior vector — Ea/k=8123.0K, Δ(1/T)=0.0005358/K, exponent=4.352, AF=exp(4.352)≈77.6). Step 3: TDH_eq = 2,606,000 × 77.6 = 202,225,600 device-hours. Step 4: df = 2(1)+2 = 4. χ²(CL=0.60, df=4) = 4.045 (looked-up table value). λ = 4.045 / (2 × 202,225,600) = 4.045 / 404,451,200 = 1.0001×10^-8 per device-hour. FIT = 10.0 FIT.",
+    "expected_output": {"AF": "≈77.6", "TDH_equivalent": "202,225,600 device-hours", "FIT": "10.0 FIT — lands exactly at the named FIT_TARGET_constant"},
+    "discriminates": "Deliberately engineered (via test duration) so the computed FIT lands exactly at a named boundary constant, to test threshold-equal handling (does '10.0 FIT result vs. a 10 FIT target' get classified as pass, fail, or exactly-at-limit, per whatever comparison convention the calculator uses?) — distinct from vector 1's ordinary mid-range case and vector 3's zero-failure degenerate case.",
+    "known_uncertainty": "Same chi-square table-value caveat as vector 1 (χ²(0.60,4)=4.045 is recalled, not recomputed here). Additionally, and more importantly: I do NOT have a confident, specific 'current regulatory' FIT ceiling to cite — 10 FIT is explicitly a placeholder constant per the hard rule, not a verified regulatory or standards-body number, and should be replaced with whatever real spec limit the calculator is meant to check against."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Degenerate case: zero observed failures (upper-bound-only estimate)",
+    "inputs": {"n_devices": "500", "test_hours_at_stress": "1000 h", "r_failures": "0", "CL": "60%", "Ea": "0.7 eV", "T_use": "55°C (328.15 K)", "T_stress": "125°C (398.15 K)"},
+    "computation": "Step 1: TDH_stress = 500 × 1000 = 500,000 device-hours. Step 2: AF = 77.6 (identical Arrhenius conditions/arithmetic as vectors 1 and 2 above). Step 3: TDH_eq = 500,000 × 77.6 = 38,800,000 device-hours. Step 4: df = 2(0)+2 = 2. χ²(CL=0.60, df=2) = 1.833 (looked-up table value). λ = 1.833 / (2 × 38,800,000) = 1.833 / 77,600,000 = 2.362×10^-8 per device-hour. FIT = 23.6 FIT.",
+    "expected_output": {"AF": "≈77.6", "TDH_equivalent": "38,800,000 device-hours", "FIT": "23.6 FIT (one-sided upper-confidence-bound estimate, since r=0)"},
+    "discriminates": "Zero-failure input (r=0) — this is the degenerate case where there is no 'point estimate' in the ordinary sense, only a one-sided upper confidence bound; also uses a smaller sample size (n=500) and shorter duration (1000h) than the other two vectors, testing that the calculator scales TDH and the resulting FIT correctly with smaller inputs and correctly labels the result as upper-bound-only rather than a symmetric point estimate.",
+    "known_uncertainty": "Same chi-square lookup caveat (χ²(0.60,2)=1.833 recalled, not recomputed from the CDF in this session) — flagged as the least-certain number in this vector."
+  },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "Realistic mid-range case, clearly controlled under 3A090.a on TPP alone",
+    "inputs": {"MacTOPS": "800 (INT8 peak multiply-accumulate TOPS)", "bit_length": "8 bits", "processing_units": "1", "die_area": "600 mm²"},
+    "computation": "Step 1 (TPP): TPP = 2 × MacTOPS × bit_length = 2 × 800 × 8 = 12,800. Step 2 (Performance Density): PD = TPP / die_area = 12,800 / 600 = 21.33.",
+    "expected_output": {"TPP": "12,800", "PD": "21.33", "classification": "3A090.a — controlled, since TPP (12,800) ≥ 4800 (satisfies the TPP-alone test independent of PD; PD of 21.33 also independently exceeds the TPP≥1600-and-PD≥5.92 alternate test)"},
+    "discriminates": "An ordinary, clearly-above-threshold case on BOTH qualifying tests simultaneously — the case a calculator should get right without any boundary subtlety, used as the baseline against which the boundary and below-threshold vectors are contrasted.",
+    "known_uncertainty": "The TPP/PD formulas and the 3A090.a threshold values (TPP≥4800, or TPP≥1600 and PD≥5.92) were verified via a fresh web search against multiple current legal/export-control sources in this session, so confidence is relatively high — but I have not personally read the raw 15 CFR text, only secondary summaries quoting it, and BIS has signaled these thresholds are reviewed periodically as new chip generations emerge, so they should be reconfirmed against the current CFR text before production use."
+    },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "Threshold-boundary case: TPP exactly equal to the 3A090.a limit of 4800",
+    "inputs": {"MacTOPS": "150 (peak multiply-accumulate TOPS at stated precision)", "bit_length": "16 bits", "processing_units": "1", "die_area": "400 mm²"},
+    "computation": "Step 1 (TPP): TPP = 2 × MacTOPS × bit_length = 2 × 150 × 16 = 4800. Step 2 (PD): PD = TPP / die_area = 4800 / 400 = 12.0.",
+    "expected_output": {"TPP": "4800 (exactly at the 3A090.a threshold)", "PD": "12.0", "classification": "3A090.a — controlled, since the regulation's test is 'TPP of 4800 OR MORE' (≥), so TPP exactly equal to 4800 satisfies the threshold rather than falling just short of it"},
+    "discriminates": "Engineered so TPP lands EXACTLY on the regulatory boundary (4800), specifically testing whether a calculator correctly implements '≥' (inclusive) rather than '>' (exclusive) semantics at the threshold — the single most common off-by-one-style bug risk in a threshold calculator.",
+    "known_uncertainty": "Same threshold-value confidence note as vector 1 — the 4800 figure and the '≥' (inclusive, 'or more') wording were confirmed via current search results using that exact phrasing, so confidence in the inclusive-boundary reading is reasonably high, but not independently verified against the primary CFR text in this session."
+  },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "Below-threshold case: not controlled under any 3A090 paragraph",
+    "inputs": {"MacTOPS": "50 (peak multiply-accumulate TOPS)", "bit_length": "8 bits", "processing_units": "1", "die_area": "100 mm²"},
+    "computation": "Step 1 (TPP): TPP = 2 × MacTOPS × bit_length = 2 × 50 × 8 = 800. Step 2 (PD): PD = TPP / die_area = 800 / 100 = 8.0. Step 3 (threshold check): 3A090.a requires TPP≥4800 (fails: 800<4800) OR (TPP≥1600 AND PD≥5.92) (fails on TPP: 800<1600, so this branch fails regardless of PD). 3A090.b requires (TPP≥2400 and <4800 AND PD≥1.6 and <5.92) (fails: TPP=800<2400) OR (TPP≥1600 AND PD≥3.2 and <5.92) (fails on TPP: 800<1600).",
+    "expected_output": {"TPP": "800", "PD": "8.0", "classification": "NOT controlled under 3A090.a or 3A090.b — TPP falls below the 1600 floor required by every alternate test path, so a high performance-density value (8.0) is irrelevant to the outcome"},
+    "discriminates": "The only one of the three EAR vectors that resolves to 'not controlled' — tests that the calculator doesn't over-trigger on a high performance-density figure alone when TPP is too low to qualify under any branch of either subparagraph, i.e. that it correctly implements the AND logic in the compound threshold tests rather than treating PD and TPP as independently sufficient.",
+    "known_uncertainty": "Same threshold-value sourcing caveat as the other two EAR vectors in this set."
+  }
+]
+```

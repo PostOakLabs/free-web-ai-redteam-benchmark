@@ -1,0 +1,244 @@
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      "Global-route overflow report shows overflow concentrated in one or two rectangular regions (macro channels, between memory banks, around IO pads) vs spread uniformly across the core area — the SHAPE is the first read",
+      "Detailed-route DRC count is dominated by one layer (e.g. 90% of shorts on M4/M5) vs distributed across many layers — pin-access and track-supply problems concentrate on one layer",
+      "Post-CTS placement-utilization map is locally >85% in hot spots even when block-average utilization is in the 60s — local density, not global density, is the driver",
+      "Congestion worsens monotonically as placement utilization target is raised, but the SAME hotspot stays in the same place persistence tells you it is geometry/IO-driven, not density-driven"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Macro pin-access fan-in (many macros on both sides of a channel escape pins onto the same track rows)",
+        "distinguishing_check": "Plot the per-track overflow heatmap against macro-pin landing positions; if overflow tracks coincide with macro pin rows, this is the cause; if overflow sits between macros in cell-only regions, it is something else",
+        "check_cost": "minutes",
+        "typical_fix": "Pin-spreading on bounding macros + asymmetric channel widening toward a movable side",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Local placement density too high (cell-spreading not aggressive enough, or density screen off)",
+        "dist "If overflow regions show cell density >85% with no macro-pin coincidence, density is the driver; check placement density screenshots layer-by-layer",
+        "check_cost": "minutes",
+        "typical_fix": "Lower placement utilization target (typical: 5-10% drop), re-place, re-route",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Preferred-direction / layer-assignment mismatch between cell library and routing stackinguishing_check": "If overflow appears on layer X even with low density, check whether the cell library's preferred direction for layer X is the bottleneck; also more pronounced at advanced nodes where the routing preferred-direction",
+        "check_cost": "minutes",
+        "typical_fix": "Layer-assignment swap (where allowed) or library swap",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Feedthrough congestion from one block to another across a narrow channel",
+        "distinguishing_check": "If overflow tracks align with long routes going A-to-B across the chip and not with local logic density, trace the long routes; this is feedthrough, not local density",
+        "check_cost": "hours",
+        "typical_fix": "Insert feedthrough buffers repower routes through wider corridors, or reshape floorplan channels",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Hold-fix buffer insertions that were not placement-legalized",
+        "distinguishing_check": "If congestion appears late in the flow after a hold-fixing pass, compare pre-hold-fix and post-hold-fix density maps; hold-fix buffers often cluster near flops and create new hot spots",
+        "check_cost": "minutes",
+        "typical_fix": "Re-run placement with hold buffers treated as soft macros, or constrain buffer regions",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Wrong congestion model vs detailed route (global route says clean, detailed route fails)",
+        "distinguishing_check": "If GR overflow is <1% but DR fails badly, the global-route model is underestimating pin access or layer cost; run a quick route with a tighter model parameter",
+        "check_cost": "hours",
+        "typical_fix": "Tighten GR model or do trial route earlier in the flow to surface the mismatch",
+        "fix_cost": "hours to days"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: GR overflow heatmaps and density screenshots take minutes and discriminate macro-pin vs density vs feedthrough causes before any-run is launched.",
+    "classic_trap": "Lowering placement utilization when the cause is macro pin-access — wastes a 3-5 day placement re-run and does not relieve pin escape, so the next detailed route fails the same way.",
+    "confidence": 0.78
+  },
+  {
+    "failure_class": "FAIL_TIMING (setup)",
+    "symptoms": [
+      "Slack distribution across failing paths: tight cluster on a shared endpoint with low sigma (~5-15 ps) vs wide spread with high sigma (>30 ps) — the SHAPE of the histogram discriminates constraint causes",
+      "Number of failing paths sharing a single endpoint, common source hierarchy, common clock, or common cell type — sharing reveals where to look first",
+      "Logic depth uniformity across failures (all paths through ~N levels, or all through one specific macro/IP) vs mixed depth — uniform depth with violations points at SDC; mixed points at placement/wire",
+      "Whether violations appeared suddenly after a specific flow step (CTS, opt, route) or were present from initial placement localizes the cause"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "SDC / constraint error (over-constrained output_delay, under-constrained input arrival, propagated hierarchical margin, wrong clock, wrong MCP/false-path categorization)",
+        "distinguishing_check": "If failing paths cluster tightly on a shared endpoint with uniform logic depth, audit the SDC at that endpoint ( load, output_delay, input_delay, clock definition); a single SDC fix often clears many paths at once",
+        "check_cost": "minutes to hours",
+        "typical_fix": "Correct the SDC entry; document with spec cross-reference",
+        "fix_cost": "minutes to hours (excluding re-validation)"
+      },
+      {
+        "cause": "Logic-depth / architecture problem (combinational depth genuinely too long for the cycle time)",
+        "distinguishing_check": "If failing paths through one IP/macro consistently have higher depth than neighboring logic, dump the schematic and compute available slack per gate vs worst-case path delay; architectural depth shows as uniform excess delay across many paths through the same hierarchy",
+        "check_cost": "hours",
+        "typical_fix": "Logic restructuring, retiming, or pipeline insertion (architectural change, may not be in scope)",
+        "fix_cost": "days to weeks"
+      },
+      {
+        "cause": "Placement / wire-delay problem (cells placed too far apart, especially on critical-path nets with poor Steiner estimation)",
+        "distinguishing_check": "If failing paths have wide slack spread and wire delays on the order of the cycle time, check placed wire length on the worst nets vs estimated; particularly telling at advanced nodes where wire RC dominates",
+        "check_cost": "hours",
+        "typical_fix": "Timing-driven placement re-run, or targeted cell moves on the failing nets",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Clock skew / pessimism on the relevant clock domain",
+        "distinguishing_check": "If all failures share a clock domain and onset correlates with the CTS step, dump clock skew on the failing paths; skew pessimism usually produces a uniform shift, not a per-path pattern",
+        "check_cost": "minutes",
+        "typical_fix": "CTS-only adjustment or clock-buffer rebalancing (CPPR / OCV derate tuning)",
+        "fix_cost to days"
+      },
+      {
+        "cause": "SI / crosstalk delay degradation (glitch on aggressor nets pushes victim delay over budget)",
+        "distinguishing_check": "If failures appear or worsen after SI analysis is enabled and cluster on nets with high coupled length / aggressor count, run with SI off and compare; SI typically adds path-correlated pessimism",
+        "check_cost": "hours",
+        "typical_fix": "Shielding, net spacing, or driver strengthening on aggressors",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Voltage / IR-drop derate pessimism (path meets timing at nominal V but not at the signoff corner with derate)",
+        "distinguishing_check": "If failures only appear at the signoff corner with derate, compare nominal vs derate slack on a failing path; the gap tells you whether it is IR/derate or a real slack problem",
+        "check_cost": "minutes",
+        "typical_fix": "Reduce local IR drop (decaps, wider stripes) or relax derate assumptions with signoff justification",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Cheapest-to-expensive AND highest-payoff-first: a 5-minute SDC audit that clears 300 paths beats a 3-day placement re-run; shape-of-report discrimination comes before any re-run is launched.",
+    "classic_trap": "Launching a timing-driven ECO / re-placement pass before checking the SDC shape — fixes that should be 30 minutes of SDC editing become multi-day placement iterations that do not actually close the gap.",
+    "confidence": 0.82
+  },
+  {
+    "failure_class": "FAIL_TIMING (hold)",
+    "symptoms": [
+      "Hold violations cluster on a single clock domain's launch-capture pair (skew imbalance) vs scatter across many domains (setup-fixing-induced short paths, or scan-shift issues)",
+      "Small negative slack (a few ps to tens of ps) vs large negative slack (hundreds of ps); small is usually clock-skew, large is usually a logic-level or routing problem",
+      "Violations appear or worsen immediately after a setup-fixing buffer insertion pass — setup fixes shorten long paths but can shorten already-short paths into hold violation",
+      "Onset correlates with a CTS update, a placement legalization, or a route update — onset localizes the responsible step"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock skew imbalance between launch andops (skew is too positive on capture side vs launch side)",
+        "distinguishing_check": "Dump per-path skew on failing paths; if all violations have skew imbalance pointing in the same direction and of similar magnitude, it is a CTS / clock-buffer-balancing problem; the fix is clock-tree adjustment, not data-path buffering",
+        "check_cost": "minutes",
+        "typical_fix": "CTS rebalancing (move/add clock buffers) or useful-skew optimization",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Setup-fix ECO inserted buffers on near-critical paths that were also near-critical for hold (the same path is both barely-meets-setup and barely-violates-hold)",
+        "distinguishing_check": "Diff the netlist before/after the most recent setup-fixing pass; if the hold-failing paths are exactly the ones that got new buffers, this is the cause",
+        "check_cost": "minutes",
+        "typical_fix": "Constrain the setup-fixing pass to only insert on paths with sufficient hold margin; or add hold buffers separately on the now-shortened paths",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Short combinational path between flops (genuine logic-depth; combinational depth is too small for the clock skew + library delay)",
+        "distinguishing_check": "If a hold-failing path has very few logic levels (1-2) and adding a delay buffer is the only way to close it, this is the architecture; not usually a candidate for restructuring at this stage",
+        "check_cost": "minutes",
+        "typical_fix": "Insert hold-fixing delay buffers",
+        "fix_cost": "hours (per pass; may need iteration)"
+      },
+      {
+        "cause": "Hold-fixing pass using wrong corner / wrong delay cells (hold cells inserted with insufficient drive strength, or signed off at wrong corner)",
+        "distinguishing_check": "Compare hold-fixing run settings across PVT corners; if violations clear at one corner but not another, the corner model or cell choice is wrong",
+        "check_cost": "minutes",
+        "typical_fix": "Re-run hold fix with correct corner and stronger / appropriately-sized hold cells",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Scan-shift hold failures on the scan chain (capture-mode is fine; violates because of scan-only paths)",
+        "distinguishing_check": "If failures occur only in shift mode (look at the mode-specific failure report), they routing or scan-buffer-balance issues, distinct from functional hold",
+        "check_cost": "minutes",
+        "typical_fix": "Scan chain reordering or scan-buffer rebalancing",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Cross-clock hold (CDC path treated as synchronous; actually needs a synchronizer or CDC-aware hold analysis)",
+        "distinguishing_check": "If failures cross async clock domains and are flagged synchronously, they should be reclassified as CDC paths and excluded from hold fixing",
+        "check_cost": "minutes",
+        "typical_fix": "Reclassify as CDC, exclude from hold report",
+        "fix_cost": "minutes"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: per-path skew dump and netlist diff are minutes and discriminate CTS-skew vs setup-fix-induced vs architecture vs scan vs CDC any buffer-insertion pass is launched.",
+    "classic_trap": "Inserting hold buffers on paths where the root cause is clock-skew imbalance — wastes hold cells, doesn't fix the failure regress setup on the same path.",
+    "confidence": 0.8
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      "Setup slack degradation localized to one area of the die (vs uniform across the die — uniform points at PVT corner, local points at IR)",
+      "Dynamic IR drop correlates with switching activity hot spots (a specific clock or bus toggling heavily)",
+      "Static IR drop visible as a voltage gradient across the die from pad ring to core; the failing region is downstream of resistive power mesh",
+      "Onset correlates with a step that increased current draw (clock buffer insertion, wider buses, scan-shift activity)"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "In density in the failing region (decoupling capacitance inadequate for instantaneous current demand)",
+        "distinguishing_check": "Look at decap density map in the failing region; if decap/mm^2 is well below typical the block type, this is the cause; IR drop recovery is sensitive to decap placement, not just total",
+        "check_cost": "hours",
+        "typical_fix": "Add decap cells (preferred), or widen power stripes in the region",
+        "fix"
+      },
+      {
+        "cause": "Power stripe / rail resistance too high between the failing region and the nearest power pad",
+        "distinguishing_check": "Static IR drop map shows voltage drop accumulating along a stripe from pad to failing cell; widening or shortening the path relieves it",
+        "check_cost": "hours",
+        "typical_fix": "Widen stripes, add power straps, or move power pads (latter is high cost)",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Excessive simultaneous switching on a bus / clock / control net crossing the failing region",
+        "distinguishing_check": "Dynamic IR drop map peaks coincide with switching-activity hot spots; check toggle rates on the dominant nets",
+        "check_cost": "hours",
+        "typical_fix": "Spread switching across clock phases, add bus splitting, or insert current-shaping buffers",
+        "fix_cost": "days"
+      },
+      {
+        " mesh pitch too coarse for the local current demand (typical at advanced nodes where mesh was sized for average but not peak demand)",
+        "distinguishing_check": "Mesh pitch and current density in the region; advanced-node IR problems are more often mesh-pitch-limited than at mature nodes",
+        "check_cost": "hours",
+        "typical_fix": "Tighten mesh pitch locally, or add a higher metal layer strap",
+        "fix_cost": "days to weeks"
+      },
+      {
+        "cause": "Wrong activity assumptions in IR analysis (vector set or switching probability was optimistic vs real workload)",
+        "distinguishing_check": "Compare assumed toggle rates against measured / expected worst-case workload; if real workload is more demanding, IR is being underestimated",
+        "check_cost": "hours",
+        "typical_fix": "Re-run IR analysis with realistic vectors or workload, then size stripes/mesh accordingly",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: decap density map and static IR map discriminate decap vs stripe vs switching causes within an hour; only after localizing the cause do you invest in a stripe or mesh rework (days).",
+    "classic_trap": "Adding decap everywhere globally when the cause is a single resistive stripe — wastes cell area and may not fix the voltage gradient.",
+    "confidence": 0.72
+  },
+  {
+    "failure_class": "FAIL_CTS (clock tree)",
+    "symptoms": [
+      "Clock skew on a specific clock domain exceeds its target while other domains are clean — points at one tree, not global methodology",
+      "Skew distribution across a single clock domain has long tails (a few flops much worse than median) — points at placement issues (isolated flops), not the tree structure",
+      "Onset after a major placement change or a macro move — CTS usually has not been re-tuned",
+      "Hold violations concentrated on the long-skew paths of the affected domain — CTS problem shows as hold violations through skew"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock buffer placement / legalization problem (buffers placed in congested regions and pushed apart, degrading skew)",
+        "distinguishing_check": "Check clock buffer region congestion; if clock buffers are in or near hot spots and their positions drifted from ideal, skew will be skewed",
+        "check_cost": "minutes",
+        "typical_fix": "Add placement constraints / keepouts for clock buffers; re-run CTS",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Macro / block placement unbalanced (one side of the clock domain has longer wire to flops than the other)",
+        "distinguishing_check": "If flop-to-clock-buffer distances form a bimodal distribution across the tree, the source placement is unbalanced; macro / pin placement is the cause, not the tree",
+        "check_cost": "hours",
+        "typical_fix": "Re-balance macro / block placement, then re-run CTS",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Wrong clock-tree topology choice for the floorplan (mesh vs tree vs H-tree vs fishbone)",
+        "distinguishing_check": "If skew is fundamentally limited by geometry (e.g. flops at very different distances from any single root), the topology itself is the limit; compare to alternative topologies on a subset",
+        "check_cost": "

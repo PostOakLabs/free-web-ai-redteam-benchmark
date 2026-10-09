@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clock-frequency philosophy",
+    "where_in_paper": "Guiding principles / Design objectives",
+    "decision": "Target clock frequency chosen as a balanced trade-off against power and die area rather than maximized",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Optimize overall processor efficiency and performance through a balanced design point among frequency, power, and area",
+    "outcome": "Competitive frequency achieved within the intended power and thermal envelope",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames higher frequency as a rejected alternative or only states the balanced objective",
+    "confidence": 0.65
+  },
+  {
+    "title": "Comprehensive RAS hardware checking",
+    "where_in_paper": "Reliability, availability, and serviceability",
+    "decision": "Extensive parity and ECC protection on arrays and data paths, plus hardware instruction retry",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Enable transparent hardware recovery from transient errors without requiring software intervention",
+    "outcome": "High system availability with automatic detection and correction of errors",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 18,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact scope of protection claimed and whether instruction retry is detailed in this paper versus follow-on literature",
+    "confidence": 0.7
+  },
+  {
+    "title": "Shared L2 cache between dual cores",
+    "where_in_paper": "Storage hierarchy",
+    "decision": "Two processor cores on the die share a single unified L2 cache",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Conserve die area and efficiently maintain cache coherence between the two cores",
+    "outcome": "Reduced total cache area with high-bandwidth sharing between the paired cores",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 10,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly lists coherence simplification as a stated rationale or only describes the shared structure",
+    "confidence": 0.8
+  },
+  {
+    "title": "Off-chip L3 cache in MCM",
+    "where_in_paper": "Storage hierarchy / Physical design",
+    "decision": "L3 cache implemented on separate dedicated chips within the multi-chip module rather than on the processor die",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Provide large cache capacity without consuming excessive processor die area, enabled by MCM technology",
+    "outcome": "Large L3 accessible via high-bandwidth MCM interconnect without growing the processor die",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 12,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page and whether MCM bandwidth is explicitly cited as part of the rationale",
+    "confidence": 0.75
+  },
+  {
+    "title": "SMP packet-switched interconnect",
+    "where_in_paper": "Symmetric multiprocessing",
+    "decision": "Distributed packet-switched interconnect for multi-processor scaling instead of a shared bus",
+    "alternatives_or_rejected": "Shared bus architecture used in prior POWER systems",
+    "rationale": "Eliminate bus bandwidth bottleneck and enable scalable multi-processor systems",
+    "outcome": "SMP configurations scalable to 32 processors",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 15,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly contrasts the switch with a rejected bus alternative or merely describes the chosen architecture",
+    "confidence": 0.55
+  }
+]
+```

@@ -1,0 +1,210 @@
+{
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Mid-range SPFM with mixed fault distribution",
+    "inputs": {
+        "λ_SPF": {"value": 95, "units": "FIT"},
+        "λ_RF": {"value": 2, "units": "FIT"},
+        "λ_MPF_latent": {"value": 3, "units": "FIT"},
+        "λ_safe": {"value": 0, "units": "FIT"},
+        "total_fault_rate": {"value": 100, "units": "FIT"}
+    },
+    "computation": [
+        "Sum of fault rates: λ_SPF + λ_RF + λ_MPF_latent + λ_safe = 95 + 2 + 3 + 0 = 100 FIT",
+        "SPFM = λ_SPF / (λ_SPF + λ_RF + λ_MPF_latent + λ_safe) = 95 / 100 = 0.95"
+    ],
+    "expected_output": {
+        "SPFM": {"value": 0.95, "units": "unitless"},
+        "ASIL_targets_met": ["ASIL B (≥ 90%)"]
+    },
+    "discriminates": "Realistic mid-range case with SPFM below ASIL C but above ASIL B threshold",
+    "known_uncertainty": "ASIL target values assumed as ≥ 90% for B, ≥ 97% for C, ≥ 99% for D; verify against ISO 26262-5:2018"
+},
+
+{
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Threshold-boundary SPFM at ASIL C",
+    "inputs": {
+        "λ_SPF": {"value": 97, "units": "FIT"},
+        "λ_RF": {"value": 1, "units": "FIT"},
+        "λ_MPF_latent": {"value": 2, "units": "FIT"},
+        "λ_safe": {"value": 0, "units": "FIT"},
+        "total_fault_rate": {"value": 100, "units": "FIT"}
+    },
+    "computation": [
+        "Sum of fault rates: λ_SPF + λ_RF + λ_MPF_latent + λ_safe = 97 + 1 + 2 + 0 = 100 FIT",
+        "SPFM = λ_SPF / (λ_SPF + λ_RF + λ_MPF_latent + λ_safe) = 97 / 100 = 0.97"
+    ],
+    "expected_output": {
+        "SPFM": {"value": 0.97, "units": "unitless"},
+        "ASIL_targets_met": ["ASIL B (≥ 90%)", "ASIL C (≥ 97%)"]
+    },
+    "discriminates": "THRESHOLD-BOUNDARY case: SPFM exactly at ASIL C target (97%)",
+    "known_uncertainty": "ASIL C target assumed as 97%; verify against ISO 26262-5:2018"
+},
+
+{
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Degenerate SPFM with high latent faults",
+    "inputs": {
+        "λ_SPF": {"value": 50, "units": "FIT"},
+        "λ_RF": {"value": 25, "units": "FIT"},
+        "λ_MPF_latent": {"value": 25, "units": "FIT"},
+        "λ_safe": {"value": 0, "units": "FIT"},
+        "total_fault_rate": {"value": 100, "units": "FIT"}
+    },
+    "computation": [
+        "Sum of fault rates: λ_SPF + λ_RF + λ_MPF_latent + λ_safe = 50 + 25 + 25 + 0 = 100 FIT",
+        "SPFM = λ_SPF / (λ_SPF + λ_RF + λ_MPF_latent + λ_safe) = 50 / 100 = 0.50"
+    ],
+    "expected_output": {
+        "SPFM": {"value": 0.50, "units": "unitless"},
+        "ASIL_targets_met": []
+    },
+    "discriminates": "Degenerate case: SPFM far below all ASIL targets due to high latent faults",
+    "known_uncertainty": "ASIL target values assumed as ≥ 90% for B, ≥ 97% for C, ≥ 99% for D; verify against ISO 26262-5:2018"
+},
+
+{
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Zero-failure FIT with high confidence",
+    "inputs": {
+        "device_hours": {"value": 100000, "units": "hours"},
+        "failures": {"value": 0, "units": "count"},
+        "confidence_level": {"value": 0.90, "units": "unitless"},
+        "χ²_value": {"value": 4.605, "units": "unitless"},
+        "Ea": {"value": 0.7, "units": "eV"},
+        "T_use": {"value": 358, "units": "K"},
+        "T_test": {"value": 473, "units": "K"},
+        "k": {"value": 8.617333262145e-5, "units": "eV/K"}
+    },
+    "computation": [
+        "Acceleration Factor (AF) = exp[(Ea / k) * (1/T_use - 1/T_test)] = exp[(0.7 / 8.617333262145e-5) * (1/358 - 1/473)]",
+        "1/358 ≈ 0.002793, 1/473 ≈ 0.002114 → Difference = 0.000679",
+        "0.7 / 8.617333262145e-5 ≈ 8122.6 → 8122.6 * 0.000679 ≈ 5.52 → AF ≈ exp(5.52) ≈ 250.0",
+        "FIT = (χ²_value / (2 * AF * device_hours)) * 10^9 = (4.605 / (2 * 250 * 100000)) * 10^9",
+        "Denominator = 2 * 250 * 100000 = 50,000,000 → 4.605 / 50,000,000 = 9.21e-8",
+        "FIT = 9.21e-8 * 10^9 = 92.1"
+    ],
+    "expected_output": {
+        "FIT": {"value": 92.1, "units": "FIT"},
+        "AF": {"value": 250.0, "units": "unitless"}
+    },
+    "discriminates": "Realistic zero-failure case with Arrhenius acceleration factor calculation",
+    "known_uncertainty": "χ²_value for 90% confidence and 2 degrees of freedom assumed as 4.605; verify against chi-square table"
+},
+
+{
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "THRESHOLD-BOUNDARY FIT at 100 FIT",
+    "inputs": {
+        "device_hours": {"value": 230250, "units": "hours"},
+        "failures": {"value": 0, "units": "count"},
+        "confidence_level": {"value": 0.90, "units": "unitless"},
+        "χ²_value": {"value": 4.605, "units": "unitless"},
+        "Ea": {"value": 0.7, "units": "eV"},
+        "T_use": {"value": 358, "units": "K"},
+        "T_test": {"value": 473, "units": "K"},
+        "k": {"value": 8.617333262145e-5, "units": "eV/K"}
+    },
+    "computation": [
+        "Acceleration Factor (AF) = exp[(Ea / k) * (1/T_use - 1/T_test)] = exp[(0.7 / 8.617333262145e-5) * (1/358 - 1/473)] ≈ 250.0 (same as above)",
+        "FIT = (χ²_value / (2 * AF * device_hours)) * 10^9 = (4.605 / (2 * 250 * 230250)) * 10^9",
+        "Denominator = 2 * 250 * 230250 = 115,125,000 → 4.605 / 115,125,000 = 4.000e-8",
+        "FIT = 4.000e-8 * 10^9 = 100.0"
+    ],
+    "expected_output": {
+        "FIT": {"value": 100.0, "units": "FIT"},
+        "AF": {"value": 250.0, "units": "unitless"}
+    },
+    "discriminates": "THRESHOLD-BOUNDARY case: FIT exactly at 100 FIT, a common industry benchmark",
+    "known_uncertainty": "χ²_value for 90% confidence and 2 degrees of freedom assumed as 4.605; verify against chi-square table"
+},
+
+{
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Non-zero failure FIT with moderate acceleration",
+    "inputs": {
+        "device_hours": {"value": 50000, "units": "hours"},
+        "failures": {"value": 2, "units": "count"},
+        "confidence_level": {"value": 0.60, "units": "unitless"},
+        "χ²_value": {"value": 3.665, "units": "unitless"},
+        "Ea": {"value": 0.5, "units": "eV"},
+        "T_use": {"value": 343, "units": "K"},
+        "T_test": {"value": 423, "units": "K"},
+        "k": {"value": 8.617333262145e-5, "units": "eV/K"}
+    },
+    "computation": [
+        "Acceleration Factor (AF) = exp[(Ea / k) * (1/T_use - 1/T_test)] = exp[(0.5 / 8.617333262145e-5) * (1/343 - 1/423)]",
+        "1/343 ≈ 0.002915, 1/423 ≈ 0.002364 → Difference = 0.000551",
+        "0.5 / 8.617333262145e-5 ≈ 5802.3 → 5802.3 * 0.000551 ≈ 3.197 → AF ≈ exp(3.197) ≈ 24.4",
+        "FIT = (χ²_value / (2 * AF * device_hours)) * 10^9 = (3.665 / (2 * 24.4 * 50000)) * 10^9",
+        "Denominator = 2 * 24.4 * 50000 = 2,440,000 → 3.665 / 2,440,000 = 1.502e-6",
+        "FIT = 1.502e-6 * 10^9 = 1,502"
+    ],
+    "expected_output": {
+        "FIT": {"value": 1502.0, "units": "FIT"},
+        "AF": {"value": 24.4, "units": "unitless"}
+    },
+    "discriminates": "Non-zero failure case with moderate acceleration factor and realistic device-hours",
+    "known_uncertainty": "χ²_value for 60% confidence and 4 degrees of freedom assumed as 3.665; verify against chi-square table"
+},
+
+{
+    "calculation": "EAR TPP",
+    "vector_name": "Below-threshold TPP for 8-bit processors",
+    "inputs": {
+        "N": {"value": 100, "units": "unitless"},
+        "P": {"value": 40, "units": "TOPS"},
+        "U": {"value": 1.0, "units": "unitless"},
+        "bit_width": {"value": 8, "units": "bits"}
+    },
+    "computation": [
+        "TPP = N * P * U = 100 * 40 * 1.0 = 4,000 TOPS"
+    ],
+    "expected_output": {
+        "TPP": {"value": 4000, "units": "TOPS"},
+        "threshold_comparison": "Below ECCN 3A090 threshold (assumed threshold: UNKNOWN-CURRENT-VALUE)"
+    },
+    "discriminates": "Below-threshold case for 8-bit processors; tests calculator handling of sub-threshold values",
+    "known_uncertainty": "ECCN 3A090 threshold for 8-bit processors assumed as UNKNOWN-CURRENT-VALUE; verify against current EAR regulations"
+},
+
+{
+    "calculation": "EAR TPP",
+    "vector_name": "THRESHOLD-BOUNDARY TPP at 4800 TOPS for 8-bit processors",
+    "inputs": {
+        "N": {"value": 100, "units": "unitless"},
+        "P": {"value": 48, "units": "TOPS"},
+        "U": {"value": 1.0, "units": "unitless"},
+        "bit_width": {"value": 8, "units": "bits"}
+    },
+    "computation": [
+        "TPP = N * P * U = 100 * 48 * 1.0 = 4,800 TOPS"
+    ],
+    "expected_output": {
+        "TPP": {"value": 4800, "units": "TOPS"},
+        "threshold_comparison": "At ECCN 3A090 threshold (assumed threshold: 4,800 TOPS)"
+    },
+    "discriminates": "THRESHOLD-BOUNDARY case: TPP exactly at assumed ECCN 3A090 threshold for 8-bit processors",
+    "known_uncertainty": "ECCN 3A090 threshold for 8-bit processors assumed as 4,800 TOPS; verify against current EAR regulations"
+},
+
+{
+    "calculation": "EAR TPP",
+    "vector_name": "Above-threshold TPP for 8-bit processors",
+    "inputs": {
+        "N": {"value": 120, "units": "unitless"},
+        "P": {"value": 50, "units": "TOPS"},
+        "U": {"value": 1.0, "units": "unitless"},
+        "bit_width": {"value": 8, "units": "bits"}
+    },
+    "computation": [
+        "TPP = N * P * U = 120 * 50 * 1.0 = 6,000 TOPS"
+    ],
+    "expected_output": {
+        "TPP": {"value": 6000, "units": "TOPS"},
+        "threshold_comparison": "Above ECCN 3A090 threshold (assumed threshold: 4,800 TOPS)"
+    },
+    "discriminates": "Above-threshold case for 8-bit processors; tests calculator handling of super-threshold values",
+    "known_uncertainty": "ECCN 3A090 threshold for 8-bit processors assumed as 4,800 TOPS; verify against current EAR regulations"
+}

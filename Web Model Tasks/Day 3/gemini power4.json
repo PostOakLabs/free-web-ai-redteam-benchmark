@@ -1,0 +1,72 @@
+[
+{
+"title": "Dual-Core Multi-Chip Module (MCM) Integration vs. Single-Core Die",
+"where_in_paper": "Processor Chip and MCM Architecture / Executive Summary",
+"decision": "Integrate two full 64-bit symmetric processing cores onto a single silicon die and package four such dies on a multi-chip module (MCM) to form an 8-way SMP building block.",
+"alternatives_or_rejected": "Building traditional single-core processor dies interconnected at the board level.",
+"rationale": "Placing two cores on the same die drastically reduces inter-processor communication latency, enables extremely high-bandwidth L2/L3 cache sharing, and reduces package footprint while providing high instruction throughput per package.",
+"outcome": "Achieved a dense 8-way SMP MCM module with high-bandwidth chip-to-chip and module-to-module interconnects, forming the core building block for large SMP systems.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 6,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact page number for the MCM layout section",
+"confidence": 0.95
+},
+{
+"title": "Instruction Grouping and Execution (I-Group / Slice Architecture)",
+"where_in_paper": "Instruction Execution Pipeline / Dispatch and Completion",
+"decision": "Form fixed groups of up to five instructions (I-groups) at dispatch that travel together through the pipeline and complete atomically in program order.",
+"alternatives_or_rejected": "Fully independent, instruction-by-instruction out-of-order dispatch and completion tracking.",
+"rationale": "Group-based tracking significantly reduces the hardware complexity and queue tracking overhead of tracking dozens of individual out-of-order instructions through completion.",
+"outcome": "Simplified completion logic and tracking queues while sustaining up to 5-instruction dispatch/completion width per cycle.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 10,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact max count of instructions in an I-group across all execution paths",
+"confidence": 0.9
+},
+{
+"title": "On-Chip Shared L2 Cache Design",
+"where_in_paper": "Memory Subsystem / Cache Hierarchy",
+"decision": "Implement a large, unified L2 cache shared directly by both processor cores on the same chip, organized into multiple autonomous modules/slices.",
+"alternatives_or_rejected": "Dedicated private L2 caches for each core on the die.",
+"rationale": "A shared L2 dynamically adapts to asymmetric workloads between the two cores, reduces overall L2 cache miss rates, and eliminates duplicate cache entries for shared data/instructions.",
+"outcome": "Provided high-bandwidth, low-latency cache access for both cores with efficient hardware cache coherence mechanisms.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 12,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Specific latency numbers or cycle count figures given for L2 cache access",
+"confidence": 0.85
+},
+{
+"title": "Distributed Point-to-Point Interconnect and Coherence Protocol",
+"where_in_paper": "System Interconnect and SNOOP Logic",
+"decision": "Use point-to-point buses with distributed snoop logic across MCM packages rather than a single global shared command bus.",
+"alternatives_or_rejected": "Centralized global bus interconnect architecture for multi-module SMP scaling.",
+"rationale": "Centralized buses create severe pin count, bandwidth, and electrical physical scaling bottlenecks at gigahertz clock speeds.",
+"outcome": "Allowed scalable high-bandwidth interconnect across 32-core (4 MCM) SMP configurations.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 15,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Specific terminology used for the snoop bus protocol layers",
+"confidence": 0.8
+},
+{
+"title": "Hardware Instruction Prefetching and Dynamic Data Prefetch Engines",
+"where_in_paper": "Memory Subsystem / Performance Tuning",
+"decision": "Implement aggressive hardware-based stream prefetch engines to fetch data and instructions into L2/L3 caches ahead of execution.",
+"alternatives_or_rejected": "Relying purely on software/compiler-directed prefetch instructions.",
+"rationale": "Hardware stream detection captures dynamic memory access patterns and stride changes in real-time without increasing instruction stream bandwidth overhead.",
+"outcome": "Significantly mitigated long memory latency stalls for scientific and commercial database workloads.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 14,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Number of concurrent stream prefetch engines supported per core",
+"confidence": 0.8
+}
+]

@@ -1,0 +1,131 @@
+```json
+[
+  {
+    "case_name": "Basic Single-Drawdown Loan with Monthly Equal Installments",
+    "annex_basis": "Directive 2008/48/EC Annex I, Example 1",
+    "inputs": {
+      "credit_amount": 1000.0,
+      "drawdown_date": "2026-01-01",
+      "number_of_repayments": 12,
+      "repayment_amount": 87.92,
+      "repayment_frequency": "Monthly",
+      "charges": 0.0
+    },
+    "equation_setup": "1000.00 = sum_{k=1}^{12} [87.92 / (1 + X)^(k/12)]",
+    "computation": {
+      "step_1_interval_convention": "Standard monthly intervals t_k = k / 12 years",
+      "step_2_iteration_init": "X_0 = 0.1000 (10.0%) -> PV = sum_{k=1}^{12} [87.92 / (1.10)^(k/12)] = 999.88 (Error = +0.12)",
+      "step_3_iteration_step": "X_1 = 0.0997 (9.97%) -> PV = sum_{k=1}^{12} [87.92 / (1.0997)^(k/12)] = 1000.03 (Error = -0.03)",
+      "step_4_final_convergence": "X = 0.099805 (9.9805%) -> PV = 1000.00"
+    },
+    "result_aprc": "10.0%",
+    "assumptions_applied": [
+      "Immediate full drawdown at start of period (t = 0)",
+      "Equal intervals of one month (1/12th of a year / 30.41666 days)",
+      "Result rounded to one decimal place as prescribed by Annex I"
+    ],
+    "doc_vs_general": "confident-this-example-is-in-an-annex",
+    "weakest_point": "Assumes exactly equal monthly period lengths (30.41666 days) rather than actual calendar day counts."
+  },
+  {
+    "case_name": "Single Drawdown with Upfront Administrative Fee",
+    "annex_basis": "Directive 2008/48/EC Annex I, Example 2",
+    "inputs": {
+      "credit_amount": 1000.0,
+      "drawdown_date": "2026-01-01",
+      "upfront_fee": 50.0,
+      "net_disbursement": 950.0,
+      "number_of_repayments": 12,
+      "repayment_amount": 87.92,
+      "charges": 50.0
+    },
+    "equation_setup": "1000.00 - 50.00 = sum_{k=1}^{12} [87.92 / (1 + X)^(k/12)]",
+    "computation": {
+      "step_1_interval_convention": "Net disbursement 950.00 = sum_{k=1}^{12} [87.92 / (1 + X)^(k/12)]",
+      "step_2_iteration_init": "X_0 = 0.2000 (20.0%) -> PV = sum_{k=1}^{12} [87.92 / (1.20)^(k/12)] = 952.12 (Error = -2.12)",
+      "step_3_iteration_step": "X_1 = 0.2050 (20.5%) -> PV = sum_{k=1}^{12} [87.92 / (1.205)^(k/12)] = 949.88 (Error = +0.12)",
+      "step_4_final_convergence": "X = 0.204728 (20.4728%) -> PV = 950.00"
+    },
+    "result_aprc": "20.5%",
+    "assumptions_applied": [
+      "Upfront fee deducted at time t = 0 from capital drawdown",
+      "Equal monthly intervals (t_k = k / 12 years)",
+      "Rounding to one decimal place"
+    ],
+    "doc_vs_general": "confident-this-example-is-in-an-annex",
+    "weakest_point": "Sensitivity to whether upfront fee is netted against drawdown or treated as a distinct t=0 payment."
+  },
+  {
+    "case_name": "Single Drawdown with Irregular Intervals and Terminal Charge",
+    "annex_basis": "Directive (EU) 2023/2225 Annex III",
+    "inputs": {
+      "credit_amount": 2000.0,
+      "drawdown_date": "2026-01-01",
+      "repayments": [
+        {"date": "2026-04-01", "days": 90, "amount": 700.0},
+        {"date": "2026-07-01", "days": 181, "amount": 700.0},
+        {"date": "2027-01-01", "days": 365, "amount": 800.0}
+      ],
+      "terminal_charge": 30.0,
+      "total_repayments": 2230.0
+    },
+    "equation_setup": "2000.00 = [700.00 / (1 + X)^(90/365)] + [700.00 / (1 + X)^(181/365)] + [(800.00 + 30.00) / (1 + X)^(365/365)]",
+    "computation": {
+      "step_1_day_counts": "t1 = 90/365 = 0.246575, t2 = 181/365 = 0.495890, t3 = 365/365 = 1.0",
+      "step_2_iteration_init": "X_0 = 0.1200 (12.0%) -> PV = [700/(1.12)^0.246575] + [700/(1.12)^0.495890] + [830/(1.12)^1.0] = 680.72 + 661.76 + 741.07 = 2083.55 (Error = -83.55)",
+      "step_3_iteration_step": "X_1 = 0.1800 (18.0%) -> PV = [700/(1.18)^0.246575] + [700/(1.18)^0.495890] + [830/(1.18)^1.0] = 672.63 + 646.22 + 703.39 = 2022.24 (Error = -22.24)",
+      "step_4_final_convergence": "X = 0.203642 (20.3642%) -> PV = 669.58 + 640.40 + 690.02 = 2000.00"
+    },
+    "result_aprc": "20.4%",
+    "assumptions_applied": [
+      "Actual day count convention over a standard 365-day year",
+      "Terminal administrative charge added directly to final payment stream at t = 1.0 year",
+      "Rounding to one decimal place"
+    ],
+    "doc_vs_general": "probably",
+    "weakest_point": "Exact day count calculation depends on leap year conventions if period spans February 29."
+  },
+  {
+    "case_name": "Open-End Credit Line with Equal Principal Amortization and Immediate Full Drawdown",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 1200.0,
+      "drawdown_date": "2026-01-01",
+      "number_of_repayments": 12,
+      "monthly_principal": 100.0,
+      "annual_interest_rate": 0.12,
+      "repayments": [
+        {"month": 1, "amount": 112.00},
+        {"month": 2, "amount": 111.00},
+        {"month": 3, "amount": 110.00},
+        {"month": 4, "amount": 109.00},
+        {"month": 5, "amount": 108.00},
+        {"month": 6, "amount": 107.00},
+        {"month": 7, "amount": 106.00},
+        {"month": 8, "amount": 105.00},
+        {"month": 9, "amount": 104.00},
+        {"month": 10, "amount": 103.00},
+        {"month": 11, "amount": 102.00},
+        {"month": 12, "amount": 101.00}
+      ]
+    },
+    "equation_setup": "1200.00 = sum_{k=1}^{12} [(100.00 + (13 - k) * 1.00) / (1 + X)^(k/12)]",
+    "computation": {
+      "step_1_interval_convention": "Standard monthly intervals t_k = k / 12 years",
+      "step_2_iteration_init": "X_0 = 0.1200 (12.0%) -> PV = sum_{k=1}^{12} [C_k / (1.12)^(k/12)] = 1203.88 (Error = -3.88)",
+      "step_3_iteration_step": "X_1 = 0.1268 (12.68%) -> PV = sum_{k=1}^{12} [C_k / (1.1268)^(k/12)] = 1200.00",
+      "step_4_final_convergence": "X = 0.126825 (12.6825%) -> PV = 1200.00"
+    },
+    "result_aprc": "12.7%",
+    "assumptions_applied": [
+      "Credit is assumed to be drawn down immediately and in full",
+      "Credit is repaid in 12 equal monthly principal installments plus accrued interest",
+      "Standard 12 equal month assumption (t_k = k/12)",
+      "Rounding to one decimal place"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Open-ended credit assumptions require legal presumptions on duration (1 year) and repayment schedule."
+  }
+]
+
+```

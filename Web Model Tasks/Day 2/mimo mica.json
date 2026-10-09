@@ -1,0 +1,111 @@
+```json
+[
+  {
+    "case_name": "Case 1 — Reserve Coverage Test (ART, full-backing)",
+    "inputs": {
+      "token_type": "ART",
+      "tokens_in_circulation": 100000000,
+      "token_unit": "units",
+      "token_value_per_unit": 1.00,
+      "token_value_unit": "EUR",
+      "total_value_in_circulation": 100000000,
+      "reserve_assets": [
+        {"type": "Cash at central bank", "value": 40000000, "unit": "EUR"},
+        {"type": "EU government bonds (AAA)", "value": 50000000, "unit": "EUR"},
+        {"type": "Deposits at credit institutions", "value": 12000000, "unit": "EUR"}
+      ],
+      "total_reserve_value": 102000000,
+      "total_reserve_unit": "EUR"
+    },
+    "computation": "Step 1: Total value of tokens in circulation = 100,000,000 × €1.00 = €100,000,000\nStep 2: Total reserve asset value = €40,000,000 + €50,000,000 + €12,000,000 = €102,000,000\nStep 3: Coverage ratio = Reserve / Value in circulation = €102,000,000 / €100,000,000 = 1.0200 = 102.00%\nStep 4: Test: 102.00% ≥ 100.00% → PASS\nStep 5: Surplus = €102,000,000 − €100,000,000 = €2,000,000",
+    "result": {
+      "coverage_ratio": 1.02,
+      "coverage_pct": "102.00%",
+      "surplus_eur": 2000000,
+      "regulatory_verdict": "ADEQUATE — reserve of assets (€102M) ≥ value of tokens in circulation (€100M)"
+    },
+    "article_basis": "Article 36(1) MiCA (Regulation (EU) 2023/1114): the reserve of assets shall at all times be equal to the value of tokens in circulation. The 100% coverage threshold is the statutory requirement.",
+    "tail_convention": "Coverage ratio is a HIGHER-IS-BETTER metric. The adverse tail is the LOW tail (coverage < 100%). This test examines whether the current coverage (102%) exceeds the 100% floor — it does.",
+    "weakest_point": "The reserve composition (cash, government bonds, deposits) is my construction. MiCA imposes specific eligibility criteria on reserve assets (Article 36(3)-(7)) that I have not fully enumerated — e.g., the proportion of highly liquid assets, concentration limits, and custody requirements are not tested here."
+  },
+  {
+    "case_name": "Case 2 — Own-Funds Requirement (ART issuer)",
+    "inputs": {
+      "token_type": "ART",
+      "average_reserve_value": 100000000,
+      "average_reserve_unit": "EUR",
+      "OWN_FUNDS_PCT_OF_RESERVE": 0.02,
+      "OWN_FUNDS_PCT_LABEL": "2% of average reserve (parameterized — MiCA Article 36(4) or equivalent, exact paragraph not confirmed)",
+      "OWN_FUNDS_FIXED_MINIMUM": 350000,
+      "OWN_FUNDS_FIXED_MINIMUM_UNIT": "EUR",
+      "OWN_FUNDS_FIXED_MINIMUM_LABEL": "EUR 350,000 fixed minimum (parameterized — believed correct per MiCA but exact article paragraph not confirmed)",
+      "actual_own_funds": 1500000,
+      "actual_own_funds_unit": "EUR"
+    },
+    "computation": "Step 1: Percentage-based test = OWN_FUNDS_PCT_OF_RESERVE × average reserve = 0.02 × €100,000,000 = €2,000,000\nStep 2: Fixed-minimum test = OWN_FUNDS_FIXED_MINIMUM = €350,000\nStep 3: Required own funds = max(€2,000,000, €350,000) = €2,000,000\nStep 4: Actual own funds = €1,500,000\nStep 5: Test: €1,500,000 ≥ €2,000,000 → FAIL\nStep 6: Shortfall = €2,000,000 − €1,500,000 = €500,000",
+    "result": {
+      "required_own_funds_eur": 2000000,
+      "binding_test": "percentage-of-reserve (€2,000,000 > €350,000)",
+      "actual_own_funds_eur": 1500000,
+      "shortfall_eur": 500000,
+      "regulatory_verdict": "INADEQUATE — actual own funds (€1.5M) < required own funds (€2.0M)"
+    },
+    "article_basis": "Article 36(4) MiCA (approximate): ART issuers shall have own funds equal to the higher of (a) a percentage of the reserve of assets or (b) a fixed minimum. The 2% and EUR 350,000 values are my best recall but are PARAMETERIZED as named constants because I am not fully certain of the exact paragraph reference and whether the percentage has been updated by subsequent RTS.",
+    "tail_convention": "Own-funds adequacy is a HIGHER-IS-BETTER metric (more own funds is better). The adverse tail is the LOW tail. This test examines whether actual own funds (€1.5M) meet the minimum (€2.0M) — they do not.",
+    "weakest_point": "The 2% percentage and EUR 350,000 fixed minimum are my best recall of MiCA's own-funds requirements but I am not 100% certain these are the current operative values — they may have been modified by RTS or delegated acts. The article reference (36(4)) is approximate. I have parameterized these as named constants rather than presenting them as confirmed."
+  },
+  {
+    "case_name": "Case 3 — Stressed Coverage Test (reserve asset haircuts)",
+    "inputs": {
+      "token_type": "ART",
+      "tokens_in_circulation_value": 100000000,
+      "tokens_in_circulation_unit": "EUR",
+      "reserve_assets_pre_stress": [
+        {"type": "Cash at central bank", "value": 40000000, "haircut_pct": 0, "unit": "EUR"},
+        {"type": "EU government bonds (AAA)", "value": 50000000, "haircut_pct": 5, "unit": "EUR"},
+        {"type": "Deposits at credit institutions", "value": 12000000, "haircut_pct": 3, "unit": "EUR"}
+      ],
+      "total_reserve_pre_stress": 102000000,
+      "total_reserve_unit": "EUR"
+    },
+    "computation": "Step 1: Pre-stress reserve = €40M + €50M + €12M = €102,000,000\nStep 2: Apply haircuts:\n  Cash: €40,000,000 × (1 − 0%) = €40,000,000\n  Government bonds: €50,000,000 × (1 − 5%) = €50,000,000 × 0.95 = €47,500,000\n  Deposits: €12,000,000 × (1 − 3%) = €12,000,000 × 0.97 = €11,640,000\nStep 3: Stressed reserve = €40,000,000 + €47,500,000 + €11,640,000 = €99,140,000\nStep 4: Stressed coverage ratio = €99,140,000 / €100,000,000 = 0.9914 = 99.14%\nStep 5: Test: 99.14% ≥ 100.00% → FAIL\nStep 6: Shortfall = €100,000,000 − €99,140,000 = €860,000",
+    "result": {
+      "stressed_reserve_eur": 99140000,
+      "stressed_coverage_ratio": 0.9914,
+      "stressed_coverage_pct": "99.14%",
+      "shortfall_eur": 860000,
+      "regulatory_verdict": "INADEQUATE under stress — stressed reserve (€99.14M) < value in circulation (€100M)"
+    },
+    "article_basis": "Article 36(1) MiCA: reserve must at all times equal the value in circulation. The haircut stress scenario is my construction to test robustness — MiCA does not prescribe specific stress haircuts in the base regulation (stress testing obligations may be specified in RTS or supervisory guidelines).",
+    "tail_convention": "Coverage ratio is HIGHER-IS-BETTER. The adverse tail is the LOW tail. This stress test deliberately pushes coverage below 100% by applying adverse haircuts to reserve assets — it examines the LOW (adverse) tail of the coverage distribution. A test that examined the high tail (e.g., reserve appreciation) would be testing the favorable tail and would be a defect.",
+    "weakest_point": "The haircut magnitudes (5% for AAA government bonds, 3% for deposits) are my construction — MiCA does not prescribe specific stress haircut percentages in the regulation text. RTS or EBA guidelines may specify different stress parameters. The stress scenario is illustrative, not regulatory."
+  },
+  {
+    "case_name": "Case 4 — Redemption at Par Obligation",
+    "inputs": {
+      "token_type": "ART",
+      "total_tokens_in_circulation": 100000000,
+      "token_par_value": 1.00,
+      "token_par_unit": "EUR",
+      "total_reserve": 102000000,
+      "total_reserve_unit": "EUR",
+      "redeeming_holder": "Holder A",
+      "tokens_to_redeem": 10000000,
+      "redemption_value": 10000000,
+      "redemption_value_unit": "EUR"
+    },
+    "computation": "Step 1: Pre-redemption state:\n  Tokens in circulation = 100,000,000\n  Reserve = €102,000,000\n  Coverage = €102M / €100M = 102.00%\n\nStep 2: Redemption request: Holder A redeems 10,000,000 tokens at par.\n  Redemption value = 10,000,000 × €1.00 = €10,000,000\n\nStep 3: Post-redemption state:\n  Tokens in circulation = 100,000,000 − 10,000,000 = 90,000,000\n  Reserve = €102,000,000 − €10,000,000 = €92,000,000\n  Coverage = €92,000,000 / €90,000,000 = 1.0222 = 102.22%\n\nStep 4: Post-redemption coverage test: 102.22% ≥ 100.00% → PASS\n\nStep 5: Holder A receives €10,000,000 in fiat currency (EUR) in exchange for 10,000,000 tokens. The issuer's obligation is to redeem at par value — the holder receives exactly €1.00 per token, not the market value of reserve assets.\n\nStep 6: Coverage IMPROVED after redemption (102.22% > 102.00%) because the surplus was proportionally larger relative to the reduced token base.",
+    "result": {
+      "redemption_amount_eur": 10000000,
+      "tokens_redeemed": 10000000,
+      "post_redemption_tokens": 90000000,
+      "post_redemption_reserve_eur": 92000000,
+      "post_redemption_coverage_pct": "102.22%",
+      "regulatory_verdict": "ADEQUATE — post-redemption reserve (€92M) ≥ remaining tokens in circulation (€90M). Redemption obligation fulfilled at par."
+    },
+    "article_basis": "Article 36(1) and Article 39 MiCA (approximate): holders of ARTs have a right to redeem their tokens at par value at any time. The issuer must maintain sufficient reserve to honor redemptions while maintaining 100% coverage for remaining tokens. Exact article paragraph for the redemption-at-par obligation is approximate.",
+    "tail_convention": "Coverage ratio is HIGHER-IS-BETTER. This case examines the LOW tail scenario: a large redemption (10% of supply) that could stress coverage. The post-redemption coverage (102.22%) remains above 100%, so the adverse tail does not breach the threshold. If the pre-redemption surplus were smaller (e.g., exactly €100M reserve), a €10M redemption would leave €90M reserve for 90M tokens — coverage exactly 100%, at the boundary.",
+    "weakest_point": "The redemption-at-par obligation and the mechanics (par value redemption, not market value) are my understanding of MiCA but the exact article reference (Article 39) is approximate. MiCA may specify additional conditions for redemption (e.g., redemption procedures, timelines, whether redemption can be in-kind vs cash-only) that are not captured here. The case assumes instant, frictionless redemption."
+  }
+]
+```

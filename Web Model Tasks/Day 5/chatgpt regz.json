@@ -1,0 +1,32 @@
+[
+{
+"task": 1,
+"steps": "Tier A: 130461 / 124331 = 1.0493038743354433, so to 6 decimals = 1.049304; implied percentage increase = (1.0493038743354433 - 1) × 100 = 4.9303874335%. Tier B: 3914 / 3730 = 1.0493297587131367, so to 6 decimals = 1.049330; implied increase = 4.9329758713%. Tier C: 26092 / 24866 = 1.0493042708919810, so to 6 decimals = 1.049304; implied increase = 4.9304270892%. Tier D: 1305 / 1243 = 1.0498793242156075, so to 6 decimals = 1.049879; implied increase = 4.9879324216%. The factors are not exactly identical, so the displayed dollar values are not mutually consistent with one single rounded 4.9% multiplier. The first three are tightly clustered around 1.049304 (about 4.9304%), while Tier D is materially higher at about 4.9879%. This is consistent with the official explanation that the 4.9% is the rounded CPI-U percentage and that the resulting thresholds are rounded to whole dollars; the underlying CPI index ratio, rather than exactly 1.049, therefore governs the calculations. The CFPB expressly says the 2024 adjustment reflects a 4.9% CPI-U increase and is rounded to whole dollars. ([Federal Register Public Inspection][1])",
+"answer": "No: the four observed factors are not exactly mutually consistent with one uniform factor, and they are not exactly 1.049000. The first three are consistent with an underlying factor near 1.049304 after whole-dollar rounding; Tier D's small-dollar rounding makes its implied factor noticeably less reliable.",
+"evidence_level": "computed"
+},
+{
+"task": 2,
+"steps": "Use the stated 2025 increase of 3.4%, so the stated-factor multiplier is 1 + 0.034 = 1.034. Infer the operational rounding rule as nearest whole dollar: the CFPB states that annual Regulation Z thresholds are adjusted using the CPI index and the resulting adjustment is rounded to whole dollars for ease of compliance. Tier A: 130461 × 1.034 = 130461 + (130461 × 0.034) = 130461 + 4435.674 = 134896.674; nearest whole dollar = $134,897. Tier B: 3914 × 1.034 = 3914 + (3914 × 0.034) = 3914 + 133.076 = 4047.076; nearest whole dollar = $4,047. Tier C: 26092 × 1.034 = 26092 + (26092 × 0.034) = 26092 + 887.128 = 26979.128; nearest whole dollar = $26,979. Tier D: 1305 × 1.034 = 1305 + (1305 × 0.034) = 1305 + 44.37 = 1349.37; nearest whole dollar = $1,349. The official 2025 rule indeed describes the adjustment as reflecting a 3.4% CPI-U increase. ([Consumer Financial Protection Bureau][2])",
+"answer": "Projected 2025 values using exactly the stated 3.4% factor and nearest-dollar rounding: Tier A $134,897; Tier B $4,047; Tier C $26,979; Tier D $1,349.",
+"evidence_level": "computed"
+},
+{
+"task": 3,
+"steps": "Official Tier A = $134,841. Projection = $134,897. Difference = 134897 - 134841 = $56, so the projection is $56 too high. Exact multiplier required to transform the 2024 value into the official 2025 value: 134841 / 130461 = 1.033573251776393. Exact percentage increase = (1.033573251776393 - 1) × 100 = 3.357325177639292%. Difference from the stated 3.4% = 3.357325177639292% - 3.4% = -0.042674822360708 percentage points. In basis points, -0.042674822360708 × 100 = -4.2674822360708 basis points. Thus the exact factor producing the official value is 1.033573251776393, corresponding to a 3.3573251776% increase, which is 4.2674822 bp below 3.4%. The official 2025 Tier A threshold is $134,841 and the CFPB identifies the adjustment as a 3.4% CPI-U increase. ([Consumer Financial Protection Bureau][2])",
+"answer": "The projection is $134,897 versus the official $134,841, an overstatement of $56. The exact factor is 1.033573251776393 (3.3573251776%), which is 4.2674822 basis points below the stated 3.4%.",
+"evidence_level": "computed"
+},
+{
+"task": 4,
+"steps": "The 2024 rule provides the key mechanism: the CFPB says the adjustment reflects a 4.9% increase in CPI-U, but the actual adjustment is based on the CPI-U index in effect on June 1 and the resulting amount is rounded to whole dollars. Therefore, '3.4%' is a rounded public description of the underlying CPI-U index change, not necessarily an instruction to multiply the prior threshold by exactly 1.034. Applying exactly 1.034 to $130,461 gives $134,896.674, whereas the official result is $134,841. The implied exact factor is 1.033573251776393. The concrete mechanism is therefore the precision/vintage of the underlying CPI-U index ratio used by the CFPB: the published 3.4% is rounded, while the agency calculation uses the underlying index values before rounding the dollar threshold. ([Federal Register Public Inspection][1])",
+"answer": "The strongest reason is factor precision: 3.4% is a rounded representation of the underlying CPI-U index change used by the CFPB. Using exactly 1.034 therefore does not reproduce the agency's calculation; the underlying CPI-U index ratio is 1.033573251776393 for Tier A.",
+"evidence_level": "computed"
+},
+{
+"weakest_point": "The projection treats the published 3.4% CPI-U change as an exact multiplier (1.034), but the CFPB's actual methodology uses the underlying CPI-U index values as of the specified reference dates and only then rounds the resulting dollar threshold to whole dollars. The 3.4% figure is rounded, so its displayed precision is insufficient to reproduce $134,841 exactly. ([Federal Register Public Inspection][1])"
+}
+]
+
+[1]: https://public-inspection.federalregister.gov/2023-20476.pdf?utm_source=chatgpt.com "The CFPB bases the 2024 adjustment to the loan amounts applicable to the pricing thresholds for the General QM loan definition and the points and fees limits for all categories of QM on the CPI-U index in effect on June 1, 2023, as reported by BLS on May 10, 2023. As a result, the adjustment reflects the percentage change in CPI-U from April 2022 to April 2023, which is an increase of 4.9 percent. The 2024 adjustment¹⁰ adopted here reflects a 4.9 percent increase in the CPI-U index for this period rounded to whole dollars for ease of compliance."
+[2]: https://www.consumerfinance.gov/rules-policy/regulations/1026/2024-01-01/43/?utm_source=chatgpt.com "§ 1026.43 Minimum standards for transactions secured by a dwelling. | Consumer Financial Protection Bureau"

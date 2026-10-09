@@ -1,0 +1,83 @@
+```json
+[
+  {
+    "example_id": null,
+    "article": "Article 5.2 (Top-up Tax computation) with Article 5.5 (SBIE)",
+    "fact_pattern": {
+      "jurisdiction": "Constructed Jurisdiction X, Fiscal Year 2024",
+      "net_GloBE_income": "1,000,000",
+      "adjusted_covered_taxes": "100,000",
+      "eligible_payroll_costs": "200,000",
+      "carrying_value_eligible_tangible_assets": "150,000",
+      "payroll_carve_out_rate_2024": "9.8%",
+      "tangible_asset_carve_out_rate_2024": "7.8%",
+      "minimum_rate": "15%"
+    },
+    "computation": [
+      "ETR = Adjusted Covered Taxes / Net GloBE Income = 100,000 / 1,000,000 = 10%",
+      "Payroll carve-out = 9.8% x 200,000 = 19,600",
+      "Tangible asset carve-out = 7.8% x 150,000 = 11,700",
+      "SBIE = 19,600 + 11,700 = 31,300",
+      "Excess Profit = Net GloBE Income - SBIE = 1,000,000 - 31,300 = 968,700",
+      "Top-up Tax % = Minimum Rate - ETR = 15% - 10% = 5%",
+      "Jurisdictional Top-up Tax = 5% x 968,700 = 48,435"
+    ],
+    "result": "Jurisdictional Top-up Tax = 48,435 (before any Qualified Domestic Minimum Top-up Tax offset)",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The 9.8%/7.8% transitional carve-out rates for FY2024 are recalled from the Article 9.2 transition schedule but I am not fully confident these exact decimals (vs. neighboring years' rates) are correct."
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.2 (transitional SBIE rates for payroll and tangible assets)",
+    "fact_pattern": {
+      "fiscal_year": "2025",
+      "carrying_value_eligible_tangible_assets": "500,000",
+      "tangible_asset_carve_out_rate_2025": "7.6%"
+    },
+    "computation": [
+      "Tangible asset carve-out = 7.6% x 500,000 = 38,000"
+    ],
+    "result": "Tangible asset SBIE component for 2025 = 38,000",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The direction of the schedule (glide-down from 8% in 2023 to 5% by 2033, roughly -0.2 points/year for the first several years) is what I'm confident about; the specific 7.6% figure assigned to 2025 rather than 2026 could be off by one year."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.5 (De minimis exclusion)",
+    "fact_pattern": {
+      "jurisdiction": "Constructed Jurisdiction Y",
+      "three_year_average_GloBE_revenue": "9,000,000 EUR",
+      "three_year_average_GloBE_income": "800,000 EUR",
+      "revenue_threshold": "10,000,000 EUR",
+      "income_threshold": "1,000,000 EUR"
+    },
+    "computation": [
+      "Test 1: average revenue 9,000,000 < 10,000,000 threshold -> satisfied",
+      "Test 2: average income 800,000 < 1,000,000 threshold -> satisfied",
+      "Both tests satisfied -> de minimis election available",
+      "If elected, Jurisdictional Top-up Tax is deemed to be zero for the fiscal year, regardless of the ETR/Excess Profit calculation that would otherwise apply"
+    ],
+    "result": "Top-up tax for Jurisdiction Y = 0 (by election), even though a positive top-up tax might otherwise arise",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "I am confident the two thresholds (EUR 10m revenue / EUR 1m income, averaged over the current and prior two years) and the annual-election mechanic are correctly stated, but this specific numeric scenario is invented, not drawn from a published example."
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.1 (Transition rules - deferred tax attributes)",
+    "fact_pattern": {
+      "temporary_difference_at_transition": "400,000",
+      "domestic_statutory_rate_at_recognition": "25%",
+      "originally_recorded_DTL_at_25pct": "100,000",
+      "GloBE_minimum_rate": "15%"
+    },
+    "computation": [
+      "Article 9.1.1 caps deferred tax amounts taken into account at transition at the lower of the domestic rate or the 15% minimum rate",
+      "Since domestic rate (25%) > minimum rate (15%), the DTL is recast at 15%: 15% x 400,000 = 60,000",
+      "Recast Deferred Tax Liability for GloBE transition purposes = 60,000 (rather than the originally recorded 100,000)"
+    ],
+    "result": "Transition DTL taken into account = 60,000; this lower amount is what unwinds through covered taxes in the year(s) the temporary difference reverses",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "I am reasonably confident of the direction (recast down to 15% when the domestic rate exceeds the minimum rate), but I'm not fully certain whether the rule is a strict cap of 'lower of domestic rate or 15%' versus a more nuanced treatment for certain categories of DTAs/DTLs (e.g. those Article 9.1.3 excludes entirely), so this could oversimplify an exception."
+  }
+]
+```

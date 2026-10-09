@@ -1,0 +1,54 @@
+[
+{
+"case": 1,
+"assumptions_invoked": [
+"The €100 arrangement fee is paid by the borrower at t=0, so the net amount received at t=0 is €9,900.",
+"The 24 repayments of €450 occur at monthly intervals t=1/12 through t=24/12 years.",
+"APRC X is an annual actuarial rate, so each monthly cash flow is discounted by (1+X)^(m/12)."
+],
+"equation": "9900 = 450/(1+X)^(1/12) + 450/(1+X)^(2/12) + ... + 450/(1+X)^(24/12)",
+"iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-2625.3856938; iteration 2 X=0.2500000000, f(X)=-1268.8682561; iteration 3 X=0.1250000000, f(X)=-324.9330215; converged X=0.08836422310 with PV residual approximately 0; APRC=(1+X), since X itself is the annual actuarial rate in the equation, so APRC=8.8%.",
+"aprc_pct": 8.8
+},
+{
+"case": 2,
+"assumptions_invoked": [
+"Full €3,000 credit limit is assumed drawn immediately and remains outstanding for the assumed 3-month duration.",
+"The borrowing rate of 12% nominal per annum is charged monthly, giving €30 interest per month on €3,000.",
+"The €25 monthly account fee is charged at the end of each of the three months.",
+"At month 3 the €3,000 principal is also repaid.",
+"The 3-month duration is used as the stipulated/default assumption where the duration is not otherwise determinable."
+],
+"equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3090/(1+X)^(3/12)",
+"iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-53.59299525; iteration 2 X=0.2500000000, f(X)=81.33615608; iteration 3 X=0.3750000000, f(X)=10.03998220; converged X=0.39383397314 with PV residual approximately 0; APRC=39.4%.",
+"aprc_pct": 39.4
+},
+{
+"case": 3,
+"assumptions_invoked": [
+"The full €1,500 limit is assumed drawn immediately.",
+"Because the open-end credit repayment pattern is otherwise unspecified, repayment is assumed to occur in 12 equal monthly instalments, following the directive's assumption-logic for an indeterminable repayment schedule.",
+"The nominal rate is 18% per annum with monthly compounding, so the monthly rate is 1.5%.",
+"There are no additional fees or charges."
+],
+"equation": "1500 = 137.51998936/(1+X)^(1/12) + 137.51998936/(1+X)^(2/12) + ... + 137.51998936/(1+X)^(12/12), where 137.51998936 = 1500*0.015/(1-(1.015)^(-12))",
+"iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-166.1268240; iteration 2 X=0.2500000000, f(X)=-34.62574620; iteration 3 X=0.1250000000, f(X)=49.13306940; converged X=0.19561817146 with PV residual approximately 0; APRC=19.6%.",
+"aprc_pct": 19.6
+},
+{
+"case": 4,
+"assumptions_invoked": [
+"Because the amount of drawdown is otherwise unascertainable, the full €5,000 limit is assumed drawn at t=0.",
+"The €200 broker fee is financed into the balance at t=0 rather than paid separately in cash at t=0.",
+"The resulting financed balance is €5,200.",
+"The €5,200 balance accrues the stated 8% nominal annual rate for one year, so the single repayment at t=12 months is €5,616.",
+"The APRC equation treats €5,000 as the amount actually advanced to the consumer; the financed €200 fee increases the repayment balance rather than reducing the t=0 cash proceeds."
+],
+"equation": "5000 = 5616/(1+X), where 5616 = 5200*1.08 = (5000+200)*1.08",
+"iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-1256.0000000; iteration 2 X=0.2500000000, f(X)=-507.2000000; iteration 3 X=0.1250000000, f(X)=-8.0000000; converged X=0.12320000000 with PV residual approximately 0; APRC=12.3%.",
+"aprc_pct": 12.3
+},
+{
+"weakest_point": "Case 2 is the most assumption-sensitive. The supplied task fixes a 3-month duration but does not fully specify the exact timing/settlement convention for monthly overdraft interest, monthly account fees, and principal repayment. The calculation assumes monthly interest and fees are cash repayments at months 1, 2, and 3, with the €3,000 principal repaid at month 3; a different directive-prescribed cash-flow convention would change the APRC."
+}
+]

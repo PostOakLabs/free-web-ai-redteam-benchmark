@@ -1,0 +1,21 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But I can discuss what I know about this specific paper with honest attribution.
+
+The Kessler paper in IEEE Micro is one of the most widely cited Alpha 21264 references. Here's what I recall, with honest confidence flags:
+
+**What I'm fairly confident is in this paper:**
+
+1. **Direct-mapped L1 caches:** The paper discusses the choice of 64KB direct-mapped caches for both instruction and data, arguing that the lower hit latency of direct-mapped (one cycle faster access than 2-way associative at the same size) was critical for the high-frequency pipeline. The alternative (set-associative) was considered but rejected because the latency penalty would have forced an extra pipeline stage.
+
+2. **Out-of-order execution window size:** The paper describes the large instruction window (up to 80 instructions in-flight) and the register renaming scheme. The tradeoff between window size, register file access time, and clock frequency is discussed.
+
+3. **High-frequency design philosophy:** The paper discusses the aggressive clock frequency target (500MHz+ at 0.35μm) and how this drove many microarchitectural decisions — shorter pipeline stages, simpler cache access, and the need for out-of-order execution to hide latency.
+
+4. **Streaming buffers / victim cache:** The paper discusses the use of streaming buffers for the L1 data cache to handle cache misses more efficiently.
+
+**What I'm less confident about:**
+
+5. **Cache size tradeoffs:** I believe the paper discusses the 64KB size choice and the diminishing returns of larger caches, but I'm less certain of the specific numbers cited.
+
+**Honesty note:** Some of these themes overlap with other Alpha 21264 publications (conference papers, technical reports). I'm fairly confident the Kessler IEEE Micro paper covers all of the above, but I cannot guarantee that specific details (exact numbers, specific alternatives discussed) are from this paper vs. other Alpha 21264 sources. The `paper_vs_general` distinction is genuinely difficult for me to make with high confidence on some details.
+
+If you'd like, I can share what I know in a more conversational format where I can flag uncertainty more naturally.

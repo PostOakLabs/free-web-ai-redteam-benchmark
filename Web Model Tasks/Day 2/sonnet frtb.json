@@ -1,0 +1,72 @@
+```json
+[
+  {
+    "case_name": "Parametric ES at 97.5% (normal P&L)",
+    "inputs": {"mean_pl": 0, "sigma_pl": 1000000, "confidence_level_ES": 0.975, "unit": "USD, 1-day P&L std dev"},
+    "computation": {
+      "alpha": 0.975,
+      "one_minus_alpha": 0.025,
+      "z_alpha_quantile": 1.9600,
+      "phi_of_z_density": 0.05844,
+      "ES_multiplier": "phi(z_alpha) / (1 - alpha) = 0.05844 / 0.025 = 2.3376",
+      "VaR_multiplier": "z_alpha = 1.9600 (this is the quantile, NOT a tail-average factor)",
+      "ES_value": "sigma * ES_multiplier = 1,000,000 * 2.3376 = 2,337,600",
+      "VaR_value": "sigma * VaR_multiplier = 1,000,000 * 1.9600 = 1,960,000",
+      "distinction_note": "VaR_0.975 is the 97.5th percentile loss (a single quantile point); ES_0.975 is the mean of all losses beyond that quantile in the tail, which for a normal distribution equals sigma*phi(z)/(1-alpha) and is always >= VaR at the same confidence level"
+    },
+    "result": {"ES_97.5_pct": 2337600, "VaR_97.5_pct": 1960000, "unit": "USD"},
+    "formula_basis": "For X ~ N(mean, sigma^2): ES_alpha = mean + sigma * phi(Phi^-1(alpha)) / (1-alpha); VaR_alpha = mean + sigma * Phi^-1(alpha). MAR33 anchor: BCBS FRTB standard specifies ES calibrated at the 97.5% confidence level for the internal models approach, replacing the 99% VaR under Basel II.5.",
+    "weakest_point": "phi(1.9600) taken as the supplied value 0.05844 rather than independently recomputed from (1/sqrt(2*pi))*exp(-1.96^2/2)=0.058360; the two differ in the 4th decimal (0.05844 vs 0.05836), which is a rounding convention choice, not an error in the ES/VaR structure itself."
+  },
+  {
+    "case_name": "Parametric ES at 99% (normal P&L)",
+    "inputs": {"mean_pl": 0, "sigma_pl": 1000000, "confidence_level_ES": 0.99, "unit": "USD, 1-day P&L std dev"},
+    "computation": {
+      "alpha": 0.99,
+      "one_minus_alpha": 0.01,
+      "z_alpha_quantile": 2.3263,
+      "phi_of_z_density": 0.02665,
+      "ES_multiplier": "phi(z_alpha) / (1 - alpha) = 0.02665 / 0.01 = 2.6650",
+      "VaR_multiplier": "z_alpha = 2.3263 (quantile only)",
+      "ES_value": "sigma * ES_multiplier = 1,000,000 * 2.6650 = 2,665,000",
+      "VaR_value": "sigma * VaR_multiplier = 1,000,000 * 2.3263 = 2,326,300",
+      "distinction_note": "Same tail-mean-vs-quantile distinction as the 97.5% case; note ES_99 (2,665,000) > ES_97.5 (2,337,600) despite the tail being thinner, because the tail is farther out and the multiplier phi(z)/(1-alpha) still exceeds z_alpha itself at both confidence levels"
+    },
+    "result": {"ES_99_pct": 2665000, "VaR_99_pct": 2326300, "unit": "USD"},
+    "formula_basis": "ES_alpha = sigma * phi(Phi^-1(alpha))/(1-alpha) for zero-mean normal P&L; same structural formula as case 1, evaluated at alpha=0.99. This case is not itself an MAR33-mandated calibration point (FRTB fixes ES at 97.5%) but is included to isolate the confidence-level sensitivity of the ES/VaR multiplier ratio.",
+    "weakest_point": "Same rounding-source caveat as case 1 for phi(2.3263)=0.02665 (independently computed value is 0.026655, matching to 4dp here); larger residual risk is that 99% is not the FRTB-mandated level, so this case has no direct MAR33 anchor and is a pure normality-assumption illustration, not a regulatory benchmark."
+  },
+  {
+    "case_name": "Liquidity-horizon-scaled ES (GIRR general, LH=20d from base 10d ES)",
+    "inputs": {"risk_factor_category": "General interest rate risk (GIRR)", "base_ES_10day_97.5": 500000, "base_horizon_days": 10, "target_liquidity_horizon_days": 20, "unit": "USD"},
+    "computation": {
+      "LH_ratio": "LH_j / LH_0 = 20 / 10 = 2",
+      "sqrt_LH_ratio": "sqrt(2) = 1.414214",
+      "scaling_step": "ES_LH = ES_10day * sqrt(LH_j / 10) = 500,000 * 1.414214",
+      "ES_LH_value": 707107
+    },
+    "result": {"ES_20day_pct": 707107, "unit": "USD"},
+    "formula_basis": "MAR33's liquidity-horizon scaling uses a square-root-of-time rule applied per risk-factor bucket's assigned liquidity horizon: ES(LH_j) = ES(base=10 days) * sqrt(LH_j / 10). GIRR general (non-basis, non-vega) is assigned a 20-day liquidity horizon under the MAR33 liquidity horizon table. Note: the full regulatory ES formula (MAR33.6) actually combines liquidity-horizon buckets via a nested sum of squared incremental ES differences across bucket boundaries (ES_R = sqrt[ ES(T,0)^2 + sum_j (ES(T,j)^2 - ES(T,j-1)^2)*(LH_j/T) ]) rather than a single flat sqrt(LH/10) rescale; this case applies the simplified single-bucket √(LH/10) structure the prompt specified, not the full multi-bucket nested formula.",
+    "weakest_point": "This is a simplified single-horizon rescaling, not the full MAR33.6 nested nested nested liquidity-horizon nested formula (which requires ES computed under multiple shock horizons T, 2T, 3T... and combines them with overlapping bucket differences); presenting a flat sqrt(20/10) scale-up of a single base ES understates the structural complexity of the actual regulatory formula, which was explicitly flagged rather than silently simplified."
+  },
+  {
+    "case_name": "Historical simulation ES at 97.5% from 20 P&L observations",
+    "inputs": {
+      "sample_size": 20,
+      "confidence_level": 0.975,
+      "pl_values_sorted_ascending": [-1850000, -1200000, -950000, -800000, -650000, -600000, -550000, -500000, -450000, -300000, -200000, -100000, 50000, 150000, 300000, 450000, 600000, 800000, 1100000, 1400000],
+      "unit": "USD"
+    },
+    "computation": {
+      "tail_probability": "1 - alpha = 1 - 0.975 = 0.025",
+      "raw_tail_count": "0.025 * 20 = 0.5 observations",
+      "fractional_observation_treatment": "0.5 is not a whole number of observations; convention chosen (text is silent on rounding): round UP via ceiling, n_tail = ceil(0.025*20) = 1. This is named explicitly as an assumed convention, not a stated MAR33 rule -- an alternative convention (e.g. linear interpolation between the 1st and 2nd worst observations, weighting the 1st by 1.0 and effectively ignoring the 2nd since only 0.5 of an observation's weight exists) would give a different numeric result and is NOT used here.",
+      "selected_tail_observations": [-1850000],
+      "tail_average_computation": "mean of selected tail observations = -1,850,000 / 1 = -1,850,000"
+    },
+    "result": {"historical_ES_97.5_pct": -1850000, "loss_magnitude": 1850000, "unit": "USD", "num_observations_in_tail": 1},
+    "formula_basis": "Historical simulation ES_alpha = (1/k) * sum of the k worst P&L observations, where k = number of observations falling in the (1-alpha) tail of the empirical distribution, here k=ceil((1-alpha)*N) under the stated convention. This directly implements the tail-averaging (not single-quantile) definition of ES that MAR33 requires, distinguishing it from historical VaR which would instead take a single order statistic (e.g., the 1st worst observation as the empirical 95th... here interpolated 97.5th percentile point) rather than averaging.",
+    "weakest_point": "With only 20 observations, a 97.5% tail (0.5 of an observation) is not cleanly defined by the sample size, so the ES estimate collapses to a single worst observation (-1,850,000) regardless of the shape of the rest of the tail -- this is a known small-sample degeneracy of historical ES at high confidence levels, and the ceiling-vs-interpolation convention choice materially changes the result (interpolation would blend the worst two observations, -1,850,000 and -1,200,000, producing a smaller-magnitude ES)."
+  }
+]
+```

@@ -1,0 +1,38 @@
+[
+{
+"example_id": "Example 5.2.1-1",
+"article": "Article 5.2",
+"fact_pattern": "Constituent Entity A in Jurisdiction X has Net GloBE Income of €100,000,000 and Adjusted Covered Taxes of €10,000,000 for the Fiscal Year. The Substance-Based Income Exclusion (SBIE) is €0. Minimum Rate is 15%.",
+"computation": "Step 1: Effective Tax Rate (ETR) = Adjusted Covered Taxes / Net GloBE Income = €10,000,000 / €100,000,000 = 10.0%. Step 2: Top-up Tax Percentage = Minimum Rate - ETR = 15.0% - 10.0% = 5.0%. Step 3: Excess Profit = Net GloBE Income - SBIE = €100,000,000 - €0 = €100,000,000. Step 4: Jurisdictional Top-up Tax = Top-up Tax Percentage * Excess Profit = 5.0% * €100,000,000 = €5,000,000.",
+"result": "Jurisdictional Top-up Tax is €5,000,000.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "Exact entity labels or tax currency in the original publication may differ slightly from the stylized € values used here."
+},
+{
+"example_id": "Example 5.3.1-1",
+"article": "Article 5.3",
+"fact_pattern": "Constituent Entity B in Jurisdiction Y has Net GloBE Income of €100,000,000 and Adjusted Covered Taxes of €10,000,000 (ETR = 10%). Eligible Payroll Costs = €20,000,000; Eligible Tangible Assets = €40,000,000. Full carve-out rates apply (5% for payroll, 5% for tangible assets). Minimum Rate = 15%.",
+"computation": "Step 1: Payroll Carve-out = 5.0% * €20,000,000 = €1,000,000. Step 2: Tangible Asset Carve-out = 5.0% * €40,000,000 = €2,000,000. Step 3: Total SBIE = €1,000,000 + €2,000,000 = €3,000,000. Step 4: Excess Profit = Net GloBE Income - SBIE = €100,000,000 - €3,000,000 = €97,000,000. Step 5: ETR = €10,000,000 / €100,000,000 = 10.0%. Step 6: Top-up Tax Percentage = 15.0% - 10.0% = 5.0%. Step 7: Jurisdictional Top-up Tax = 5.0% * €97,000,000 = €4,850,000.",
+"result": "Jurisdictional Top-up Tax is reduced by SBIE from €5,000,000 to €4,850,000.",
+"doc_vs_general": "probably-in-the-document",
+"weakest_point": "Assumes standard non-transitional 5% carve-out rates rather than specific transition period rates (e.g., 10% payroll / 8% asset tapering down)."
+},
+{
+"example_id": null,
+"article": "Article 5.5",
+"fact_pattern": "MNE Group has Constituent Entities in Jurisdiction Z with GloBE Revenues and GloBE Income/(Loss) for 3 consecutive fiscal years: Year 1 (Revenue: €6,000,000; Income: €400,000), Year 2 (Revenue: €7,000,000; Income: €500,000), Year 3 (Revenue: €8,000,000; Income: €600,000). De minimis threshold: Average GloBE Revenue < €10,000,000 AND Average GloBE Income < €1,000,000.",
+"computation": "Step 1: Average GloBE Revenue = (€6,000,000 + €7,000,000 + €8,000,000) / 3 = €21,000,000 / 3 = €7,000,000. Step 2: Check Revenue Threshold: €7,000,000 < €10,000,000 (Satisfied). Step 3: Average GloBE Income = (€400,000 + €500,000 + €600,000) / 3 = €1,500,000 / 3 = €500,000. Step 4: Check Income Threshold: €500,000 < €1,000,000 (Satisfied). Step 5: De Minimis Exclusion applies, Top-up Tax = €0.",
+"result": "Top-up Tax for Jurisdiction Z is deemed to be €0 for the current fiscal year.",
+"doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+"weakest_point": "This exact numeric fact pattern is synthesized from Article 5.5 rules rather than directly cited from a numbered OECD publication example."
+},
+{
+"example_id": null,
+"article": "Article 9.1",
+"fact_pattern": "Constituent Entity C holds a Deferred Tax Asset (DTA) arising from a net operating loss of €100,000,000 incurred in a pre-regime transition year. Local statutory corporate income tax rate is 30%. The DTA recorded in financial accounts prior to transition is €30,000,000 (€100,000,000 * 30%). Minimum Rate is 15%.",
+"computation": "Step 1: Identify Article 9.1.1 restriction requiring DTAs recorded at a tax rate higher than the Minimum Rate to be recast at the Minimum Rate. Step 2: Recast DTA Rate = min(30%, 15%) = 15%. Step 3: Adjusted GloBE DTA = Loss Amount * Recast Rate = €100,000,000 * 15% = €15,000,000.",
+"result": "The opening Deferred Tax Asset brought into the GloBE transition rules is capped at €15,000,000.",
+"doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+"weakest_point": "Omits potential impact of valuation allowances or specific Article 9.1.2 transition modifications."
+}
+]

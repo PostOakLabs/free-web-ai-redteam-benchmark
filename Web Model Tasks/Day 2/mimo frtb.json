@@ -1,0 +1,61 @@
+```json
+[
+  {
+    "case_name": "Case 1 — Parametric ES at 97.5% (normal P&L)",
+    "inputs": {
+      "distribution": "Normal",
+      "mu": 0,
+      "mu_unit": "$millions",
+      "sigma": 10,
+      "sigma_unit": "$millions",
+      "confidence_level": 0.975
+    },
+    "computation": "Step 1: z_{0.975} = Φ⁻¹(0.975) = 1.9600\nStep 2: φ(1.9600) = (1/√(2π)) × exp(−1.9600²/2)\n  1.9600² = 3.8416; 3.8416/2 = 1.9208\n  exp(−1.9208) = 0.14645\n  φ(1.9600) = 0.39894 × 0.14645 = 0.05844\nStep 3: Tail probability: 1 − α = 1 − 0.975 = 0.025\nStep 4: ES multiplier = φ(z)/(1−α) = 0.05844 / 0.025 = 2.3376\nStep 5: VaR multiplier = z = 1.9600\nStep 6: ES_{0.975} = μ + σ × 2.3376 = 0 + 10 × 2.3376 = $23.376 million\nStep 7: VaR_{0.975} = μ + σ × 1.9600 = 0 + 10 × 1.9600 = $19.600 million\nStep 8: ES/VaR ratio = 2.3376 / 1.9600 = 1.1927 — ES exceeds VaR by 19.3%\n  ES is the TAIL MEAN (average of all losses beyond VaR); VaR is the QUANTILE (single threshold). They are distinct measures.",
+    "result": "ES_{0.975} = $23.376 million; VaR_{0.975} = $19.600 million",
+    "formula_basis": "ES_α = μ + σ · φ(z_α)/(1−α), VaR_α = μ + σ · z_α, where z_α = Φ⁻¹(α). MAR33.7 (ES definition as average of losses exceeding VaR), MAR33.12 (97.5% one-tailed confidence level for the IMA).",
+    "weakest_point": "Parametric normal assumption; MAR33 requires ES from the actual (possibly non-normal, time-varying) P&L distribution. The normal formula is a benchmark only."
+  },
+  {
+    "case_name": "Case 2 — Parametric ES at 99% (normal P&L, for comparison)",
+    "inputs": {
+      "distribution": "Normal",
+      "mu": 0,
+      "mu_unit": "$millions",
+      "sigma": 10,
+      "sigma_unit": "$millions",
+      "confidence_level": 0.99
+    },
+    "computation": "Step 1: z_{0.99} = Φ⁻¹(0.99) = 2.3263\nStep 2: φ(2.3263) = (1/√(2π)) × exp(−2.3263²/2)\n  2.3263² = 5.4117; 5.4117/2 = 2.7058\n  exp(−2.7058) = 0.06682\n  φ(2.3263) = 0.39894 × 0.06682 = 0.02665\nStep 3: Tail probability: 1 − α = 0.01\nStep 4: ES multiplier = φ(z)/(1−α) = 0.02665 / 0.01 = 2.665\nStep 5: VaR multiplier = z = 2.3263\nStep 6: ES_{0.99} = μ + σ × 2.665 = 0 + 10 × 2.665 = $26.650 million\nStep 7: VaR_{0.99} = μ + σ × 2.3263 = 0 + 10 × 2.3263 = $23.263 million\nStep 8: ES/VaR ratio = 2.665 / 2.3263 = 1.1456 — ES exceeds VaR by 14.6%\n  Note: ES/VaR ratio DECREASES from 1.1927 (at 97.5%) to 1.1456 (at 99%) because φ(z) falls faster than z rises in the normal tail.",
+    "result": "ES_{0.99} = $26.650 million; VaR_{0.99} = $23.263 million",
+    "formula_basis": "Same parametric normal formula as Case 1. FRTB mandates 97.5% ES (MAR33.12), not 99%; this case is for pedagogical comparison of the two confidence levels.",
+    "weakest_point": "Same parametric normal caveat as Case 1. Also, 99% is not the FRTB-mandated level — this case exists only to show how the ES/VaR ratio changes with confidence level."
+  },
+  {
+    "case_name": "Case 3 — Liquidity-horizon-scaled ES (equity small-cap, LH = 20 days)",
+    "inputs": {
+      "risk_factor_category": "Equity — small-cap",
+      "ES_10day": 5.0,
+      "ES_10day_unit": "$millions",
+      "liquidity_horizon_days": 20,
+      "base_horizon_days": 10
+    },
+    "computation": "Step 1: MAR33 Table 2 assigns LH = 20 days for equity (small-cap) risk factors.\nStep 2: Scaling factor = √(LH / 10) = √(20 / 10) = √2 = 1.4142\nStep 3: Scaled ES = ES_{10} × √(LH/10) = 5.0 × 1.4142 = $7.071 million\nStep 4: Interpretation: the 41.4% increase from $5.0M to $7.07M reflects the longer time needed to liquidate a small-cap equity position versus the 10-day base horizon.\nStep 5: For comparison — equity large-cap (LH=10): factor = √(10/10) = 1.000 (no scaling); rates (LH=60): factor = √(60/10) = √6 = 2.449.",
+    "result": "Scaled ES = $7.071 million",
+    "formula_basis": "ES_scaled = ES_{10-day} × √(LH/10). MAR33.40–43 (liquidity horizon adjustment structure), MAR33.60+ Table 2 (LH values by risk factor class).",
+    "weakest_point": "The √(LH/10) scaling assumes i.i.d. returns (variance proportional to time). MAR33 prescribes this structure but acknowledges it is an approximation. The LH=20 value for equity small-cap is from my recollection of Table 2 and may not match the exact published figure."
+  },
+  {
+    "case_name": "Case 4 — Historical-simulation ES from 20 observations at 97.5%",
+    "inputs": {
+      "n_observations": 20,
+      "confidence_level": 0.975,
+      "PnL_unsorted_thousands": [15, -33, 7, -52, 2, -12, 28, -41, 10, -8, 0, 48, -25, 4, -1, 37, -18, 20, -5, -3],
+      "unit": "$thousands"
+    },
+    "computation": "Step 1: Sort P&L from worst (most negative) to best:\n  r_(1)=-52, r_(2)=-41, r_(3)=-33, r_(4)=-25, r_(5)=-18,\n  r_(6)=-12, r_(7)=-8, r_(8)=-5, r_(9)=-3, r_(10)=-1,\n  r_(11)=0, r_(12)=2, r_(13)=4, r_(14)=7, r_(15)=10,\n  r_(16)=15, r_(17)=20, r_(18)=28, r_(19)=37, r_(20)=48\n\nStep 2: Compute expected tail count: n × (1−α) = 20 × 0.025 = 0.5\n  This is less than 1 — the tail is thinner than one full observation.\n\nStep 3: Convention choice — ceiling: k = ⌈0.5⌉ = 1\n  Observations entering the tail average: {r_(1)} = {−52}\n  ES = (1/1) × (−52) = −$52 thousand\n\nStep 4: Alternative convention (k = 2, rounding up to next integer ≥ 2):\n  Observations entering the tail average: {r_(1), r_(2)} = {−52, −41}\n  ES = (−52 + (−41)) / 2 = −93 / 2 = −$46.5 thousand\n\nStep 5: VaR_{0.975} by linear interpolation:\n  Position from worst end = 0.5, falling between rank 1 and rank 2.\n  VaR = r_(1) + 0.5 × (r_(2) − r_(1)) = −52 + 0.5 × 11 = −$46.5 thousand\n  (As a positive loss: $46.5 thousand)\n\nStep 6: ES vs VaR distinction:\n  Under k=1: ES = $52k loss > VaR = $46.5k loss ✓ (ES ≥ VaR holds)\n  Under k=2: ES = $46.5k loss = VaR (coincidental equality — thin-tail artifact)\n  The k=1 convention is more consistent with the ES ≥ VaR property.\n  ES is the TAIL MEAN; VaR is the QUANTILE. They must not be conflated.\n\nStep 7: With only 20 observations, the 97.5% tail contains 0.5 expected observations. The ES estimate is dominated by a single data point and is extremely sample-dependent. In practice, banks use ≥250 observations (yielding ≥6.25 tail observations).",
+    "result": "ES_{0.975} = −$52 thousand (k=1, ceiling convention) or −$46.5 thousand (k=2 convention). Primary result uses ceiling convention: ES = −$52 thousand.",
+    "formula_basis": "ES_α = (1/k) Σ_{i=1}^{k} L_{(i)} where L_{(i)} are sorted losses (most negative P&L first) and k = ⌈n(1−α)⌉. MAR33.7 (ES as average of losses exceeding VaR). The ceiling convention for fractional tail observations is my explicit choice — MAR33 does not prescribe a treatment for fractional observations.",
+    "weakest_point": "The ceiling convention (k=1) is not mandated by MAR33; the text is silent on fractional-observation treatment. With n=20, the ES reduces to the single worst observation, which is a poor estimator. The alternative k=2 convention yields a materially different result ($46.5k vs $52k). This ambiguity and small-sample instability are the main weaknesses."
+  }
+]
+```

@@ -1,0 +1,107 @@
+```json
+[
+  {
+    "case_name": "Single Blocked Person – Simple Indirect Chain (FAQ 401 Example 1)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "A", "to": "B", "pct": 50}
+    ],
+    "computation": "1. X owns 50% of A directly. Under the 50% Rule, A is blocked because X owns ≥50% of A.\n2. Because A is blocked (and A owns 50% of B), X is considered to indirectly own 50% of B through A.\n3. Alternatively, the indirect ownership is calculated as: X's ownership of A (50%) × A's ownership of B (50%) = 25%? No — OFAC does not multiply. Since A is ≥50%-owned by X, A is blocked, and A's 50% stake in B is attributed fully to X. Thus X's indirect ownership in B = 50%.\n4. Aggregate ownership of B by blocked persons = 50% (indirect via A).",
+    "blocked_verdicts": {
+      "A": "Blocked (50% direct ownership by X).",
+      "B": "Blocked (50% indirect ownership by X through A)."
+    },
+    "guidance_basis": "FAQ 401, Example 1. OFAC states: 'Blocked Person X owns 50 percent of Entity A, and Entity A owns 50 percent of Entity B. Entity B is considered to be blocked. This is so because Blocked Person X owns, indirectly, 50% of Entity B.'",
+    "weakest_point": "The calculation does not multiply percentages (50% × 50% = 25%) because the intermediary (A) is itself blocked; the attribution is full."
+  },
+  {
+    "case_name": "Single Blocked Person – Convergent Paths (FAQ 401 Example 2)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 50},
+      {"from": "A", "to": "C", "pct": 25},
+      {"from": "B", "to": "C", "pct": 25}
+    ],
+    "computation": "1. X owns 50% of A directly → A is blocked.\n2. X owns 50% of B directly → B is blocked.\n3. Because A is blocked, X is considered to indirectly own 25% of C through A (A's 25% stake in C is attributed to X).\n4. Because B is blocked, X is considered to indirectly own another 25% of C through B (B's 25% stake in C is attributed to X).\n5. Total indirect ownership of C by X = 25% + 25% = 50%.\n6. Aggregate ownership of C by blocked persons = 50%.",
+    "blocked_verdicts": {
+      "A": "Blocked (50% direct ownership by X).",
+      "B": "Blocked (50% direct ownership by X).",
+      "C": "Blocked (50% aggregate indirect ownership by X through A and B; also blocked due to 50% aggregate ownership by blocked entities A and B)."
+    },
+    "guidance_basis": "FAQ 401, Example 2. OFAC states: 'Blocked Person X owns 50 percent of Entity A and 50 percent of Entity B. Entities A and B each own 25 percent of Entity C. Entity C is considered to be blocked. This is so because, through its 50 percent ownership of Entity A, Blocked Person X is considered to indirectly own 25 percent of Entity C; and through its 50 percent ownership of Entity B, Blocked Person X is considered to indirectly own another 25 percent of Entity C. When Blocked Person X's indirect ownership of Entity C through Entity A and Entity B is totaled, it equals 50 percent.'",
+    "weakest_point": "The convergent paths are summed (25% + 25% = 50%), not multiplied or averaged."
+  },
+  {
+    "case_name": "Single Blocked Person – Mixed Direct and Indirect (FAQ 401 Example 3)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 10},
+      {"from": "A", "to": "B", "pct": 40}
+    ],
+    "computation": "1. X owns 50% of A directly → A is blocked.\n2. Because A is blocked, X is considered to indirectly own 40% of B through A (A's 40% stake in B is attributed to X).\n3. X also directly owns 10% of B.\n4. Total ownership of B by X = direct 10% + indirect 40% = 50%.\n5. Aggregate ownership of B by blocked persons = 50%.",
+    "blocked_verdicts": {
+      "A": "Blocked (50% direct ownership by X).",
+      "B": "Blocked (50% aggregate direct and indirect ownership by X)."
+    },
+    "guidance_basis": "FAQ 401, Example 3. OFAC states: 'Blocked Person X owns 50 percent of Entity A and 10 percent of Entity B. Entity A also owns 40 percent of Entity B. Entity B is considered to be blocked. This is so because, through its 50 percent ownership of Entity A, Blocked Person X is considered to indirectly own 40 percent of Entity B. When added to Blocked Person X's direct 10 percent ownership of Entity B, Blocked Person X's total ownership (direct and indirect) of Entity B is 50 percent.'",
+    "weakest_point": "The indirect ownership through A is attributed fully (40%), not multiplied (50% × 40% = 20%), because A is blocked."
+  },
+  {
+    "case_name": "Multiple Blocked Persons – Aggregate Direct Ownership (FAQ 399)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "Y", "blocked": true},
+      {"id": "Z", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "Z", "pct": 25},
+      {"from": "Y", "to": "Z", "pct": 25}
+    ],
+    "computation": "1. X owns 25% of Z directly.\n2. Y owns 25% of Z directly.\n3. Aggregate ownership of Z by blocked persons = 25% + 25% = 50%.",
+    "blocked_verdicts": {
+      "Z": "Blocked (50% aggregate direct ownership by X and Y)."
+    },
+    "guidance_basis": "FAQ 399. OFAC states: 'if Blocked Person X owns 25 percent of Entity A, and Blocked Person Y owns another 25 percent of Entity A, Entity A is considered to be blocked. This is so because Entity A is owned 50 percent or more in the aggregate by one or more blocked persons.'",
+    "weakest_point": "The ownership interests of blocked persons under different sanctions programs are aggregated."
+  },
+  {
+    "case_name": "Convergent Paths with Non-Blocked Intermediary (FAQ 401 Example 4)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 25},
+      {"from": "A", "to": "C", "pct": 25},
+      {"from": "B", "to": "C", "pct": 25}
+    ],
+    "computation": "1. X owns 50% of A directly → A is blocked.\n2. Because A is blocked, X is considered to indirectly own 25% of C through A (A's 25% stake in C is attributed to X).\n3. X owns 25% of B directly. Since X does not own ≥50% of B, B is not blocked.\n4. Because B is not blocked, X is NOT considered to indirectly own any of C through B. The 25% stake that B holds in C is not attributed to X.\n5. Total indirect ownership of C by X = 25% (through A) + 0% (through B) = 25%.\n6. Aggregate ownership of C by blocked persons = 25%.",
+    "blocked_verdicts": {
+      "A": "Blocked (50% direct ownership by X).",
+      "B": "Not blocked (25% ownership by X, below 50%).",
+      "C": "Not blocked (25% aggregate indirect ownership by X, below 50%)."
+    },
+    "guidance_basis": "FAQ 401, Example 4. OFAC states: 'Blocked Person X owns 50 percent of Entity A and 25 percent of Entity B. Entities A and B each own 25 percent of Entity C. Entity C is not considered to be blocked. This is so because, even though Blocked Person X is considered to indirectly own 25 percent of Entity C through its 50 percent ownership of Entity A, Entity B is not 50 percent or more owned by Blocked Person X, and therefore Blocked Person X is not considered to indirectly own any of Entity C through its part ownership of Entity B. Blocked Person X's total ownership (direct and indirect) of Entity C therefore does not equal or exceed 50 percent.'",
+    "weakest_point": "The crucial point is that indirect ownership is only recognized through intermediaries that are themselves ≥50% owned by blocked persons. A non-blocked intermediary does not pass through ownership for the 50% Rule."
+  }
+]
+```

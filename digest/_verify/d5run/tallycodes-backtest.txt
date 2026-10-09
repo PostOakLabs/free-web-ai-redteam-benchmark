@@ -1,0 +1,13 @@
+BACK-TEST: codebook re-derives the settled Day-5 Track D numbers from raw JSON
+
+  red1: verdicts {'S-W-RES': 15, 'SUSPECT': 1}
+        calibration {'consistent': 15, 'SCHEMA-ANOMALY-reservations-without-objections': 1}
+        UNCODED: none
+
+  red3: verdicts {'S-W-RES': 9, 'SOUND': 6, 'NOT-GRADABLE': 1}
+        calibration {'consistent': 9, 'MISCALIBRATED-bare-SOUND': 5, 'SCHEMA-ANOMALY-SOUND-with-objections': 1}
+        UNCODED: none
+
+SETTLED VALUES for comparison:
+  red1: 15 S-W-RES + 1 SUSPECT; 0 bare-SOUND; 1 reservations-without-objections
+  red3: 9 S-W-RES + 6 SOUND; 5 bare-SOUND; 1 SOUND-with-objections; 1 NOT-GRADABLE

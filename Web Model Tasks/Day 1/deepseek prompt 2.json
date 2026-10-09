@@ -1,0 +1,59 @@
+[
+  {
+    "title": "Late congestion in macro channels resolved by local pin-swap and route-guide, not by floorplan revision",
+    "design_context": "node: 28nm, instance_count: ~1.1M, macro_count: 80 (SRAMs), clock_domains: 4, tool_family: \"commercial P&R with detailed routing\"",
+    "prior_state": "utilization: 74%, global route overflow: 7.2% (concentrated in three macro channels), WNS: -45 ps, TNS: -320 ps, DRC count: 87",
+    "observation": "After post-CTS optimization, detailed routing showed overflow concentrated in channels between SRAM macros (localized >10% in those bins), with 87 DRC violations (mostly min-spacing). Severity: HIGH.",
+    "hypothesis": "The overflow is due to high pin density at macro edges and excessive feedthrough wires crossing the channels; the global placement is otherwise balanced.",
+    "candidates_considered": [
+      {"action": "Redo floorplan to widen macro channels by 2 µm each", "rejected_because": "schedule: would require re-initializing placement and clock-tree synthesis, adding 5 days to the tapeout timeline, which is not acceptable."},
+      {"action": "Increase cell density target to 78% to push logic away from channels", "rejected_because": "would increase global congestion elsewhere and likely worsen overall DRC count, with negligible effect on channel-specific overflow."},
+      {"action": "Add a dedicated metal-layer route guide to restrict the channels to use only M2–M4", "rejected_because": "would reduce routing resources in those areas and could increase via count, leading to IR-drop issues; not a net gain."}
+    ],
+    "chosen_intervention": "Swapped the pin assignments of 20 high-fanout nets on the macros to reduce feedthrough crossings; added placement blockages on the top 5% congested bins to push cells inward by 1 µm; applied a partial route guide allowing only M3–M5 in the channels while keeping M2 for local connections.",
+    "post_state": "global route overflow: 1.4% (channel peaks <4%), WNS: -30 ps (slight timing degradation), TNS: -210 ps, DRC count: 12",
+    "expert_assessment": "The pin-swap and targeted blockages addressed the root cause without risking the schedule. The small timing degradation is acceptable; the general lesson is to always run macro-pin density analysis before detailed routing. This fix would not transfer to cases where congestion is caused by global logic density, where floorplan changes are unavoidable.",
+    "confidence": 0.80,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The reduction from 7.2% to 1.4% overflow via only 20 pin swaps and local blockages might be optimistic; the reviewer should check the actual pin-swap impact and the route-guide effectiveness."
+  },
+  {
+    "title": "Timing violation shape reveals clock skew mis-modeling rather than logic depth",
+    "design_context": "node: 16nm, instance_count: 0.9M, macro_count: 40, clock_domains: 2 (1.2 GHz and 600 MHz), tool_family: \"commercial STA\"",
+    "prior_state": "WNS: -120 ps, TNS: -1800 ps, failing paths: 410, slack distribution: most failing by 80–150 ps, all share the same last three clock tree buffers.",
+    "observation": "A total of 410 paths failed setup, with 95% sharing a common clock path from the last clock buffer to the flip-flop clock pins; the data paths are diverse. Severity: MODERATE.",
+    "hypothesis": "The common clock path introduces systematic skew due to an over-pessimistic OCV derate applied to that buffer chain; this is a constraint modeling error, not a logic-depth or placement problem.",
+    "candidates_considered": [
+      {"action": "Upsize 150 cells along the data paths to gain 90 ps", "rejected_because": "area +3% and power +4%, with marginal improvement and risk of new hold violations."},
+      {"action": "Swap to lower-Vt libraries for all failing paths", "rejected_because": "leakage power would exceed the standby budget by 12%, causing thermal issues."},
+      {"action": "Re-synthesize the clock tree to balance the skew", "rejected_because": "would require 2 days of clock tree re-build and full STA re-run, delaying other signoff tasks."}
+    ],
+    "chosen_intervention": "Reduced the derate factor on the shared clock buffer chain by 5% after cross-checking with silicon characterization data for that corner; applied a per-buffer derate adjustment in the SDC for that clock domain.",
+    "post_state": "WNS: -25 ps, TNS: -110 ps, failing paths: 23",
+    "expert_assessment": "Correct diagnosis because the signature pointed clearly to a systematic skew issue. The adjustment is safe if backed by real silicon data. The general lesson is to always analyze the path-sharing pattern before applying brute-force upsizing. This would not transfer to designs without characterization data; in that case, more conservative margining would be preferred.",
+    "confidence": 0.84,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 5% derate reduction is an assumed value; the reviewer must verify the actual silicon measurements and ensure other corners are not impacted."
+  },
+  {
+    "title": "SDC multicycle exception chosen over clock period tightening for cross-domain control signals",
+    "design_context": "node: 28nm, instance_count: 0.6M, macro_count: 30, clock_domains: 2 (1.5 GHz and 750 MHz), tool_family: \"commercial synthesis and STA\"",
+    "prior_state": "Cross-boundary setup WNS: -85 ps, TNS: -450 ps for paths from 1.5 GHz to 750 MHz (control signals, sampled by a synchronizer).",
+    "observation": "All violated paths are control signals that are functionally allowed 2 clock cycles for settling; the SDC currently treats them as single-cycle. Severity: MODERATE.",
+    "hypothesis": "The constraint is overly aggressive; these paths should be multicycle (2 cycles) because the downstream logic only samples after the second edge of the slow clock.",
+    "candidates_considered": [
+      {"action": "Reduce the inter-block budget from 2.5 ns to 2.2 ns to force faster logic", "rejected_because": "would require resizing ~80 cells in both blocks, adding 5% area and 6% power, and delaying integration by 1 week for re-synthesis."},
+      {"action": "Increase the fast clock period to 1.0 GHz (from 1.5 GHz) to create margin", "rejected_because": "would reduce CPU performance by 33%, failing the performance target."},
+      {"action": "Insert a pipelined register at the boundary", "rejected_because": "would add a full cycle of latency that breaks the handshake protocol; not functional."}
+    ],
+    "chosen_intervention": "Added `set_multicycle_path -setup 2 -hold 1` to the cross-domain control paths in the SDC, and set `set_clock_groups -asynchronous` for the synchronizer's meta-stability flops to avoid false hold checks.",
+    "post_state": "All cross-boundary setup violations cleared (WNS: 0 ps, TNS: 0 ps); timing met.",
+    "expert_assessment": "This is the right call because it aligns the constraint with the functional behavior without area or schedule costs. The lesson is to always validate the functional specification before applying conservative timing fixes. This would not transfer to data paths that are truly single-cycle, where multicycle would hide real timing failures.",
+    "confidence": 0.87,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The assumption that the handshake allows exactly 2 cycles must be confirmed against the RTL specification; the reviewer should check the synchronizer design to ensure no hold or metastability issues."
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Dual-core on a single die as the POWER4 organizing principle",
+    "where_in_paper": "Introduction / overview; 'guiding principles' framing early in the paper",
+    "decision": "Implement POWER4 as two identical processor cores on a single die, sharing an L2 controller and L3 directory interface, rather than as a single larger monolithic core at the same frequency.",
+    "alternatives_or_rejected": "The paper argues against a single large monolithic core on frequency/area/yield grounds and frames the dual-core SMP-on-a-d approach as the way to scale system throughput within a fixed frequency and power envelope.",
+    "rationale": "Area, frequency, and yield trade-offs make a single large monolithic core less attractive than two moderate-complexity cores delivering higher aggregate throughput at the same clock.",
+    "outcome": "The paper reports a 1.3 GHz target frequency a dual-core die that fits within the available frequency/power/yield envelope, positioning POWER4 as an SMP building block.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.55
+  },
+  {
+    "title": "Modest clock-frequency target chosen over highest possible frequency",
+    "where_in_paper": "Introduction / clock-frequency philosophy discussion",
+    "decision": "Target a clock frequency that balanced against complexity, frequency ramp, and design-for-testability, rather than pushing for the absolute highest frequency at the expense of other goals.",
+    "alternatives_or_rejected": "A more aggressive single-frequency target; the paper explicitly discusses choosing a frequency the design could robustly meet across process and operating conditions.",
+    "rationale": "Robust frequency across voltage/temperature and across process variation, plus DFM/DFT headroom, was preferred over a headline frequency number.",
+    "outcome": "1.3 GHz chosen as the target; the paper frames this as a deliberate trade.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Distributed on-chip L2 with a shared L3 controller and directory",
+    "where_in_paper": "Memory hierarchy / interconnect section",
+    "decision": "Use a distributed on-chip L2 (per-core L2 with shared controller) coordinated with an on-chip L3 controller and directory, rather than a single monolithic L2.",
+    "alternatives_or_rejected": "A single unified L2 cache was implicitly the alternative being argued against; the paper argues for distributed L2 plus a shared controller/directory for SMP scaling.",
+    "rationale": "Distributed L2 enables per-core latency/hit-rate characteristics while a shared controller/directory provides coherency and SMP scalability.",
+    "outcome": "The paper describes the resulting L2/L3 organization and its role in the dual protocol.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.5
+  },
+  {
+    "title": "RAS-first design philosophy-retry and error isolation",
+    "where_in_paper": "RAS / reliability section",
+    "decision": "Treat-availability-serviceability (RAS) as a first-class design goal, with mechanisms for error detection, isolation, and recovery (hardware retry, fault isolation between cores, redundant structures where needed).",
+    "alternatives_or_rejected": "A leaner implementation without these RAS hooks; the paper argues these are necessary for the server-class target.",
+    "rationale": "Server workloads demand continued correct operation in the presence of soft errors; RAS features must be designed in, not bolted on.",
+    "outcome": "The paper describes specific RAS mechanisms built into the dual-core die, including isolation between cores and recovery paths.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Chip-to-chip interconnect organized around a directory-based coherence protocol",
+    "where_in_paper": "Interconnect / SMP scaling section",
+    "decision": "Use a directory-based coherence protocol for chip-to-chip SMP scaling rather than a snoop-based protocol, given the shared L3 controller and projected system sizes.",
+    "alternatives_or_rejected": "Snoop-based coherence; the paper argues against pure snoop at the projected system scale in favor of directory-based coherence with the on-chip L3 directory.",
+    "rationale": "Snoop traffic scales poorly with system size; directory-based coherence with an on-chip directory scales more cleanly.",
+    "outcome": "The paper describes the interconnect protocol and how the on-chip directory participates in chip-to-chip coherence.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  }
+]

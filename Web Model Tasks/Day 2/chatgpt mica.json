@@ -1,0 +1,123 @@
+[
+{
+"case_name": "Reserve-coverage test",
+"inputs": {
+"token_type": "asset-referenced_token",
+"token_supply": 10000000,
+"token_unit_value_eur": 1,
+"claims_against_issuer_eur": 10000000,
+"reserve_assets_eur": 10200000
+},
+"computation": {
+"token_claim_value": "10,000,000 × EUR 1 = EUR 10,000,000",
+"reserve_value": "EUR 10,200,000",
+"coverage_ratio": "10,200,000 / 10,000,000 = 1.02 = 102%",
+"surplus": "10,200,000 - 10,000,000 = EUR 200,000",
+"full_backing_test": "102% >= 100% => PASS"
+},
+"result": {
+"coverage_ratio": 1.02,
+"coverage_pct": 102,
+"regulatory_verdict": "adequate against the Article 36(7) aggregate-value test",
+"test": "reserve aggregate value must be at least equal to aggregate value of claims against the issuer from holders of tokens in circulation"
+},
+"article_basis": "Article 36(7). MiCA requires the aggregate value of the reserve, determined using market prices, to be at least equal to the aggregate value of claims against the issuer from holders of the token in circulation. ([EUR-Lex][1])",
+"tail_convention": "Coverage is a higher-is-better metric, so the LOW tail is adverse. This deterministic test evaluates the adverse direction by asking whether coverage falls below 100%. ",
+"weakest_point": "This numerical example tests the aggregate-value requirement only; Article 36 also imposes composition, risk, liquidity, segregation, custody and management requirements that are not captured by a single coverage ratio."
+},
+{
+"case_name": "Own-funds computation for an asset-referenced token",
+"inputs": {
+"token_type": "asset-referenced_token",
+"average_reserve_assets_eur": 50000000,
+"fixed_overheads_preceding_year_eur": 4000000,
+"own_funds_available_eur": 1200000,
+"minimum_fixed_amount_eur": 350000,
+"reserve_percentage": 0.02
+},
+"computation": {
+"fixed_minimum_test": "EUR 350,000",
+"percentage_of_average_reserve": "0.02 × EUR 50,000,000 = EUR 1,000,000",
+"fixed_overheads_test": "EUR 4,000,000 / 4 = EUR 1,000,000",
+"required_own_funds": "max(EUR 350,000, EUR 1,000,000, EUR 1,000,000) = EUR 1,000,000",
+"available_minus_required": "EUR 1,200,000 - EUR 1,000,000 = EUR 200,000",
+"own_funds_coverage": "1,200,000 / 1,000,000 = 1.20 = 120%",
+"compliance_test": "EUR 1,200,000 >= EUR 1,000,000 => PASS"
+},
+"result": {
+"required_own_funds_eur": 1000000,
+"available_own_funds_eur": 1200000,
+"regulatory_verdict": "adequate against the Article 35(1) minimum own-funds test"
+},
+"article_basis": "Article 35(1) requires own funds equal to at least the highest of EUR 350,000, 2% of the average reserve of assets, or one quarter of the preceding year's fixed overheads. The average reserve is based on daily reserve amounts over the preceding six months. ([EUR-Lex][2])",
+"tail_convention": "No percentile or stress statistic is used. For this higher-is-better own-funds ratio, the adverse direction is the LOW tail, represented here by available own funds falling below the required amount. ",
+"weakest_point": "The calculation assumes EUR 50 million is the applicable six-month average reserve and EUR 4 million is the relevant preceding-year fixed overhead figure; actual regulatory determination requires the prescribed underlying data and eligible own-funds composition."
+},
+{
+"case_name": "Stressed reserve-coverage test using adverse low-tail haircuts",
+"inputs": {
+"token_type": "asset-referenced_token",
+"token_supply_claims_eur": 120000000,
+"cash_reserve_eur": 60000000,
+"government_bond_reserve_eur": 40000000,
+"corporate_bond_reserve_eur": 20000000,
+"cash_haircut": 0,
+"government_bond_haircut": 0.05,
+"corporate_bond_haircut": 0.2,
+"coverage_requirement": 1
+},
+"computation": {
+"unstressed_reserve": "60,000,000 + 40,000,000 + 20,000,000 = EUR 120,000,000",
+"cash_stressed_value": "60,000,000 × (1 - 0.00) = EUR 60,000,000",
+"government_bond_stressed_value": "40,000,000 × (1 - 0.05) = EUR 38,000,000",
+"corporate_bond_stressed_value": "20,000,000 × (1 - 0.20) = EUR 16,000,000",
+"stressed_reserve": "60,000,000 + 38,000,000 + 16,000,000 = EUR 114,000,000",
+"stressed_coverage_ratio": "114,000,000 / 120,000,000 = 0.95 = 95%",
+"coverage_shortfall": "120,000,000 - 114,000,000 = EUR 6,000,000",
+"stressed_test": "95% < 100% => FAIL"
+},
+"result": {
+"stressed_coverage_ratio": 0.95,
+"stressed_coverage_pct": 95,
+"regulatory_verdict": "inadequate against the Article 36(7) full-backing aggregate-value test under the specified stress scenario",
+"shortfall_eur": 6000000
+},
+"article_basis": "Article 36(1) requires the reserve to address risks associated with referenced assets and liquidity risks; Article 36(7) requires aggregate reserve value to be at least the aggregate value of claims, using market prices. Article 35(5) separately requires regular severe-but-plausible stress testing for asset-referenced-token issuers. ([EUR-Lex][1])",
+"tail_convention": "Coverage is higher-is-better. The adverse tail is therefore the LOW coverage tail. This case deliberately applies downward asset-value shocks and evaluates the resulting low-coverage outcome rather than a favorable high-coverage scenario. ",
+"weakest_point": "The haircut percentages are illustrative stress assumptions, not MiCA-prescribed universal haircut thresholds. Passing or failing this constructed stress scenario should not be represented as a standalone statutory stress-test threshold."
+},
+{
+"case_name": "E-money-token redemption at par",
+"inputs": {
+"token_type": "e_money_token",
+"tokens_outstanding": 8000000,
+"par_value_per_token_eur": 1,
+"redemption_request_tokens": 2500000,
+"reserve_or_safeguarded_funds_available_eur": 3000000,
+"redemption_fee_eur": 0
+},
+"computation": {
+"redemption_claim": "2,500,000 × EUR 1 = EUR 2,500,000",
+"funds_available_before_redemption": "EUR 3,000,000",
+"funds_after_redemption": "3,000,000 - 2,500,000 = EUR 500,000",
+"post_redemption_unredeemed_tokens": "8,000,000 - 2,500,000 = 5,500,000 tokens",
+"redemption_coverage_before": "3,000,000 / 2,500,000 = 1.20 = 120%",
+"redemption_shortfall": "max(0, 2,500,000 - 3,000,000) = EUR 0",
+"redemption_fee": "EUR 0",
+"redemption_test": "EUR 3,000,000 >= EUR 2,500,000 => PASS"
+},
+"result": {
+"redemption_obligation_eur": 2500000,
+"funds_remaining_eur": 500000,
+"regulatory_verdict": "adequate for the stated redemption request against the Article 49(4) at-par redemption obligation",
+"redemption_coverage_pct": 120
+},
+"article_basis": "Article 49(3) requires e-money tokens to be issued at par on receipt of funds; Article 49(4) requires redemption at any time and at par value, without a redemption fee under Article 49(6). ([EUR-Lex][1])",
+"tail_convention": "No percentile or stress statistic is used. For redemption coverage, the adverse direction is the LOW tail: available funds below the at-par redemption obligation. ",
+"weakest_point": "This is an e-money-token example because MiCA expressly specifies at-par redemption for e-money tokens. Asset-referenced tokens instead have the Article 39 redemption mechanism based on the market value of the referenced assets or delivery of those assets. ([EUR-Lex][3])"
+}
+]
+
+[1]: https://eur-lex.europa.eu/eli/reg/2023/1114/2024-01-09/eng?utm_source=chatgpt.com "EUR-Lex - 02023R1114-20240109 - EN - EUR-Lex"
+[2]: https://eur-lex.europa.eu/eli/reg/2023/1114/oj/eng?utm_source=chatgpt.com "Regulation - 2023/1114 - EN - MiCA - EUR-Lex"
+[3]: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32023R1114&utm_source=chatgpt.com "Regulation - 2023/1114 - DA - MiCA - EUR-Lex"

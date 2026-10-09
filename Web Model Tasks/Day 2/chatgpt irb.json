@@ -1,0 +1,138 @@
+[
+{
+"case_name": "PD 0.5%, LGD 45%, M 2.5",
+"inputs": {
+"pd": 0.005,
+"lgd": 0.45,
+"m": 2.5,
+"ead": 1
+},
+"computation": {
+"correlation_R": 0.21345609396856857,
+"R_steps": {
+"x": "(1-exp(-50*0.005))/(1-exp(-50)) = 0.221283153",
+"R": "0.12*0.221283153 + 0.24*(1-0.221283153) = 0.213456094"
+},
+"phi_inverse_PD": -2.5758293035489,
+"phi_inverse_0_999": 3.090232306167813,
+"inner_phi_argument": "-2.575829304/sqrt(1-0.213456094) + sqrt(0.213456094/(1-0.213456094))*3.090232306 = -1.294549946",
+"phi_inner": 0.09773776443735055,
+"b_PD": "(0.11852 - 0.05478*ln(0.005))^2 = 0.16708622985488109",
+"full_maturity_adjustment": "(1+(2.5-2.5)*0.167086229855)/(1-1.5*0.167086229855) = 1.3344531081344764",
+"K_before_maturity_adjustment": "0.45*0.09773776443735055 - 0.005*0.45 = 0.04173199399680775",
+"K_after_maturity_adjustment": "0.04173199399680775*1.3344531081344764 = 0.05568938909768941",
+"risk_weight": "0.05568938909768941*12.5*1 = 0.6961173637211177"
+},
+"result": {
+"k_pct": 5.568938909768941,
+"risk_weight_pct": 69.61173637211177
+},
+"formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD) = [0.11852-0.05478*ln(PD)]^2; K = [LGD*N(G(PD)/sqrt(1-R) + sqrt(R/(1-R))*G(0.999)) - PD*LGD] * [1+(M-2.5)*b]/[1-1.5*b]; RWA = K*12.5*EAD. This is the CRE31 structure.  ([Bank for International Settlements][1])",
+"known_benchmark": null,
+"weakest_point": "The benchmark parameter set does not have a specific published benchmark value supplied in the task; the computation uses M=2.5 explicitly."
+},
+{
+"case_name": "PD 1%, LGD 45%, M 2.5",
+"inputs": {
+"pd": 0.01,
+"lgd": 0.45,
+"m": 2.5,
+"ead": 1
+},
+"computation": {
+"correlation_R": 0.192783679165516,
+"R_steps": {
+"x": "(1-exp(-50*0.01))/(1-exp(-50)) = 0.3934693402873666",
+"R": "0.12*0.3934693402873666 + 0.24*(1-0.3934693402873666) = 0.192783679165516"
+},
+"phi_inverse_PD": -2.3263478740408408,
+"phi_inverse_0_999": 3.090232306167813,
+"inner_phi_argument": "-2.326347874040841/sqrt(1-0.192783679166) + sqrt(0.192783679166/(1-0.192783679166))*3.090232306168 = -1.0790950517201594",
+"phi_inner": 0.14027267845651592,
+"b_PD": "(0.11852 - 0.05478*ln(0.01))^2 = 0.13748613089693737",
+"full_maturity_adjustment": "(1+(2.5-2.5)*0.137486130897)/(1-1.5*0.137486130897) = 1.2598095009238282",
+"K_before_maturity_adjustment": "0.45*0.14027267845651592 - 0.01*0.45 = 0.05862270530543216",
+"K_after_maturity_adjustment": "0.05862270530543216*1.2598095009238282 = 0.07385344111364114",
+"risk_weight": "0.07385344111364114*12.5*1 = 0.9231680139205143"
+},
+"result": {
+"k_pct": 7.385344111364114,
+"risk_weight_pct": 92.31680139205143
+},
+"formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD) = [0.11852-0.05478*ln(PD)]^2; K = [LGD*N(G(PD)/sqrt(1-R) + sqrt(R/(1-R))*G(0.999)) - PD*LGD] * [1+(M-2.5)*b]/[1-1.5*b]; RWA = K*12.5*EAD.  ([OSFI][2])",
+"known_benchmark": {
+"published_benchmark": "approximately 92% risk weight for PD 1%, LGD 45%, M=2.5",
+"computed_value": "92.31680139205143%",
+"matches": true,
+"assessment": "The mechanical computation matches the approximately 92% benchmark."
+},
+"weakest_point": "The published benchmark is rounded; the computed value is 92.3168%, so agreement is assessed against the rounded ≈92% figure rather than an asserted exact benchmark."
+},
+{
+"case_name": "PD 3%, LGD 45%, M 2.5",
+"inputs": {
+"pd": 0.03,
+"lgd": 0.45,
+"m": 2.5,
+"ead": 1
+},
+"computation": {
+"correlation_R": 0.14677561921781157,
+"R_steps": {
+"x": "(1-exp(-50*0.03))/(1-exp(-50)) = 0.7768698398515702",
+"R": "0.12*0.7768698398515702 + 0.24*(1-0.7768698398515702) = 0.14677561921781157"
+},
+"phi_inverse_PD": -1.8807936081512509,
+"phi_inverse_0_999": 3.090232306167813,
+"inner_phi_argument": "-1.880793608151251/sqrt(1-0.146775619218) + sqrt(0.146775619218/(1-0.146775619218))*3.090232306168 = -0.7544485702827215",
+"phi_inner": 0.22528995806032898,
+"b_PD": "(0.11852 - 0.05478*ln(0.03))^2 = 0.09647810097676261",
+"full_maturity_adjustment": "(1+(2.5-2.5)*0.096478100977)/(1-1.5*0.096478100977) = 1.1692038507647522",
+"K_before_maturity_adjustment": "0.45*0.22528995806032898 - 0.03*0.45 = 0.08788048112714804",
+"K_after_maturity_adjustment": "0.08788048112714804*1.1692038507647522 = 0.10275019694092062",
+"risk_weight": "0.10275019694092062*12.5*1 = 1.2843774617615078"
+},
+"result": {
+"k_pct": 10.275019694092062,
+"risk_weight_pct": 128.43774617615078
+},
+"formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD) = [0.11852-0.05478*ln(PD)]^2; K = [LGD*N(G(PD)/sqrt(1-R) + sqrt(R/(1-R))*G(0.999)) - PD*LGD] * [1+(M-2.5)*b]/[1-1.5*b]; RWA = K*12.5*EAD.  ([OSFI][2])",
+"known_benchmark": null,
+"weakest_point": "No specific published benchmark for this exact parameter set was identified in the supplied task or web research."
+},
+{
+"case_name": "PD 10%, LGD 45%, M 2.5",
+"inputs": {
+"pd": 0.1,
+"lgd": 0.45,
+"m": 2.5,
+"ead": 1
+},
+"computation": {
+"correlation_R": 0.12080855363989025,
+"R_steps": {
+"x": "(1-exp(-50*0.1))/(1-exp(-50)) = 0.9932620530009145",
+"R": "0.12*0.9932620530009145 + 0.24*(1-0.9932620530009145) = 0.12080855363989025"
+},
+"phi_inverse_PD": -1.2815515655446008,
+"phi_inverse_0_999": 3.090232306167813,
+"inner_phi_argument": "-1.281551565545/sqrt(1-0.120808553640) + sqrt(0.120808553640/(1-0.120808553640))*3.090232306168 = -0.2212582942962027",
+"phi_inner": 0.4124456607660607,
+"b_PD": "(0.11852 - 0.05478*ln(0.1))^2 = 0.05985636818667657",
+"full_maturity_adjustment": "(1+(2.5-2.5)*0.059856368187)/(1-1.5*0.059856368187) = 1.098640989344795",
+"K_before_maturity_adjustment": "0.45*0.4124456607660607 - 0.1*0.45 = 0.14060054734472732",
+"K_after_maturity_adjustment": "0.14060054734472732*1.098640989344795 = 0.15446952443723092",
+"risk_weight": "0.15446952443723092*12.5*1 = 1.9308690554653865"
+},
+"result": {
+"k_pct": 15.446952443723092,
+"risk_weight_pct": 193.08690554653864
+},
+"formula_basis": "R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD) = [0.11852-0.05478*ln(PD)]^2; K = [LGD*N(G(PD)/sqrt(1-R) + sqrt(R/(1-R))*G(0.999)) - PD*LGD] * [1+(M-2.5)*b]/[1-1.5*b]; RWA = K*12.5*EAD.  ([OSFI][2])",
+"known_benchmark": null,
+"weakest_point": "No specific published benchmark for this exact parameter set was identified in the supplied task or web research."
+}
+]
+
+[1]: https://www.bis.org/committees/bcbs/basel-framework/standard/cre?utm_source=chatgpt.com "Calculation of RWA for credit risk | Bank for International Settlements"
+[2]: https://www.osfi-bsif.gc.ca/en/guidance/guidance-library/capital-adequacy-requirements-car-2026-chapter-5-credit-risk-internal-ratings-based-approach?utm_source=chatgpt.com "Capital Adequacy Requirements (CAR) (2026) – Chapter 5 – Credit Risk – Internal Ratings-Based Approach - Office of the Superintendent of Financial Institutions"

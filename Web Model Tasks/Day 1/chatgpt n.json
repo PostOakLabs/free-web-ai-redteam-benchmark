@@ -1,0 +1,55 @@
+[
+{
+"title": "Keep a single global clock domain rather than use multiple clock domains",
+"where_in_paper": "Clock distribution",
+"decision": "The POWER4 design retained a single global clock domain and a single full-chip clock grid, with no active or programmable de-skew circuitry.",
+"alternatives_or_rejected": "The paper explicitly considers multiple global clock domains. Such a design could permit active or programmable de-skewing, coarse clock gating, and potentially lower skew inside each smaller domain.",
+"rationale": "The authors concluded from extensive simulation and test-chip measurements that multiple domains would introduce greater inter-domain skew and uncertainty, complicate both early- and late-mode timing, and degrade critical paths crossing domain boundaries. The single-domain grid also had useful waveform-smoothing behavior that made across-chip variation less damaging. ([ResearchGate][1])",
+"outcome": "The implemented single-domain distribution used 64 tuned trees driving a common grid and required no programmable or active skew-reduction circuitry. The reported measured global skew was about 25 ps in one set of measurements, with the clock-distribution work ultimately meeting its performance and schedule targets. ([ResearchGate][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Use a tuned-tree-to-grid clock topology",
+"where_in_paper": "Clock distribution",
+"decision": "The design extended the previously successful topology of multiple tuned clock trees feeding a single full-chip clock grid.",
+"alternatives_or_rejected": "The paper discusses the topology as a deliberate choice combining the properties of tree distribution with those of a grid; it does not present a separate named topology as the final rejected alternative in the material I could verify.",
+"rationale": "The topology allowed the distribution to tolerate substantial buffer-delay and process variation while maintaining acceptable local skew. The grid's multiple drive points provided waveform smoothing, while the trees could be tuned using detailed load information. The methodology was also chosen to minimize the effect of clock design on the overall schedule. ([ResearchGate][1])",
+"outcome": "The network contained 64 tuned trees driving the grid at 1024 points and distributed the clock to roughly 15,200 global clock pins. Measurements reported roughly 25 ps maximum skew in one measurement set, while the companion clock-distribution publication reports 20 ps skew and 35 ps jitter. ([ResearchGate][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.97
+},
+{
+"title": "Combine top-down global clock routing with bottom-up local clock routing",
+"where_in_paper": "Clock distribution / physical-design methodology",
+"decision": "The clock methodology used a top-down strategy for the PLL-to-grid global network and a bottom-up strategy for detailed local or 'twig' routing inside functional units.",
+"alternatives_or_rejected": "The paper does not describe an all-top-down or all-bottom-up scheme as a rejected alternative; instead, it explicitly adopts the hybrid approach to reduce schedule impact while preserving optimization opportunities at both levels.",
+"rationale": "Global clock wiring and trees were designed and optimized at chip level, while local routing connected the functional units to the common grid from the bottom up. Short local clock wires and clock pins placed near local buffers made the chip-level wiring problem more tractable and allowed detailed load capacitances to be passed upward for tree tuning. ([ResearchGate][1])",
+"outcome": "The resulting methodology supported optimization of the global network while allowing local designers to complete their clock connections, ultimately producing a clock distribution that met the stated performance and schedule requirements. ([ResearchGate][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.97
+},
+{
+"title": "Use an aggressively iterative timing-closure flow rather than a late one-time timing analysis",
+"where_in_paper": "Timing / physical-design methodology",
+"decision": "Timing closure was made a daily, iterative physical-design activity, with extraction, static timing, reporting, capacitance adjustment, and uplift analysis repeatedly fed back into the design.",
+"alternatives_or_rejected": "The paper does not state a single named rejected timing methodology. Its described flow instead emphasizes concurrent iteration rather than waiting for a final, isolated timing pass.",
+"rationale": "The enormous size of the design made timing closure dependent on extracted physical information. The flow was structured to provide roughly 24-hour chip-integration turnaround, with static timing itself taking about 2.5–3 hours and report generation taking another 5–6 hours. This enabled timing information to influence the physical design continuously rather than arrive too late to act on. ([CiteSeerX][2])",
+"outcome": "The process was iterated daily during physical design and produced the final path-delay distribution shown in the paper. Pre-final full-frequency LBIST/ABIST testing nevertheless found several macros slower than static timing predicted; their critical paths were then sped up in the final design. ([CiteSeerX][2])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Use silicon full-frequency testing as a final timing-validation mechanism",
+"where_in_paper": "Timing / circuit validation",
+"decision": "The design incorporated LBIST and ABIST specifically so the logic and arrays could be tested at full operating frequency, using actual silicon behavior to expose timing problems not caught by static timing.",
+"alternatives_or_rejected": "The paper does not frame this as a direct either/or choice against another test methodology. What it does explicitly demonstrate is that static timing alone was insufficient to predict the speed of every circuit macro.",
+"rationale": "Pre-final POWER4 chips showed that several circuit macros ran slower than static timing had predicted. Full-frequency built-in self-test therefore supplied a practical silicon check of the timing model and exposed critical paths requiring improvement.",
+"outcome": "The critical paths in the affected macros were increased in speed in the final design, and the paper reports typical fast-AC LBIST laboratory results after those improvements. ([CiteSeerX][2])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98
+}
+]
+
+[1]: https://www.researchgate.net/publication/3941882_The_clock_distribution_of_the_Power4_microprocessor?utm_source=chatgpt.com "(PDF) The clock distribution of the Power4 microprocessor"
+[2]: https://citeseerx.ist.psu.edu/document?doi=7cfc583fbfcc230735b43b4d6fc22697dfb8aa45&repid=rep1&type=pdf&utm_source=chatgpt.com "by J. D. Warnock"

@@ -1,0 +1,57 @@
+{
+  "rules": [
+    {
+      "rule": 1,
+      "phrase_inclusivity": "strict",
+      "verdicts": {"below": "NO FIRE", "at": "NO FIRE", "above": "FIRE"},
+      "reasoning": "The operative phrase 'more than 2 percent' is strict (> 1.99% and 2.00% do not exceed it, while 2.01% does."
+    },
+    {
+      "rule": 2,
+      "phrase_inclusivity": "strict",
+      "verdicts": {"below": "NO FIRE", "at": "NO FIRE", "above": "FIRE"},
+      "reasoning": "The phrase 'more than 36 months after consummation' is strict (>36); 35 and 36 months do not exceed it, while 37 months does."
+    },
+    {
+      "rule": 3,
+      "phrase_inclusivity": "inclusive",
+      "verdicts": {"below": "at": "FIRE", "above": "FIRE"},
+      "reasoning": "The phrase 'by 1.5 or more percentage points' is inclusive (>=1.5); 1.49 does not meet it, while 1.50 and 1.51 do."
+    },
+    {
+      "rule": 4,
+      "phrase_inclusivity": "inclusive",
+      "verdicts": {"below": "PASS", "at": "PASS", "above": "NO PASS"},
+      "reasoning": "The pass condition 'does not exceed ... by 2.25 or more percentage points' is inclusive at the upper bound (<=2.25); 2.24 and 2.25 pass, while 2.26 fails."
+    },
+    {
+      "rule": 5,
+      "phrase_inclusivity": "strict",
+      "verdicts": {
+        "below": "NO DE-MINIMIS",
+        "at": "NO DE-MINIMIS",
+        "above": "DE-MINIMIS"
+      },
+      "reasoning": "Both conditions use 'less than' (strict): (10.0M, 0.9M) fails the revenue prong, (9.9M, 1.0M) fails the income prong, and (9.9M, 0.9M) meets both prongs."
+    },
+    {
+      "rule": 6,
+      "phrase_inclusivity": "inclusive",
+      "verdicts": {"below": "NO SAFE HARBOUR", "at": "SAFE HARBOUR", "above": "SAFE HARBOUR"},
+      "reasoning": "The phrase 'equal to or greater than 16%' is inclusive (>=16%); 15.99% fails, while 16.00% and 16.01% satisfy the simplified ETR test."
+    },
+    {
+      "rule": 7,
+      "phrase_inclusivity": "inclusive",
+      "verdicts": {"below": "NO COMPLIANCE", "at": "COMPLIANCE", "above": "COMPLIANCE"},
+      "reasoning": "The Tier 1 floor 'at least equal to 50% of SCR' is inclusive (>=50%); 49.99% breaches the floor, while 50.00% and 50.01% satisfy it."
+    },
+    {
+      "rule": 8,
+      "phrase_inclusivity": "inclusive",
+      "verdicts": {"below": "NO FIRE", "at": "FIRE", "above": "FIRE"},
+      "reasoning": "The threshold 'equal to or greater than the minimum' is inclusive (>=threshold); threshold-1 does not meet it, while threshold and threshold+1 do."
+    }
+  ],
+  "weakest_point": "Rule 5 (GloBE de-minimis): the inputs are expressed as currency figures rather than the precise EUR-denominated averages the OECD Model Rules specify, and the joint AND/OR structure between the two legs at the boundary depends on whether either failing leg disqual carve-out — the verdict assumes both legs must strictly hold, which is correct per Art. 1.1.2 but I am not fully certain the inputs map one-to-one to the rule's averaging semantics."
+}

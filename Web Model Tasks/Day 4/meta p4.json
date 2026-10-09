@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Execution Trace Cache as primary L1I storing decoded uops",
+    "where_in_paper": "Trace Cache section",
+    "decision": "Use Execution Trace Cache as primary Level 1 instruction cache between decode and execution core, storing already-decoded uops (12K uops capacity) assembled into traces of 6 uops per line, delivering up to 3 uops per clock",
+    "alternatives_or_rejected": "Conventional instruction cache that provides instructions up to and including a taken branch but none after it that cycle, and adds a clock delay getting to target due to branch predictor and I-cache access",
+    "rationale": "IA-32 instructions are variable-length and cumbersome to decode; high-bandwidth decoder for several per clock takes several stages; caching decoded uops removes IA-32 decoding from main execution loop, shortens misprediction recovery, allows decoder to be simplified to one IA-32 per clock, and allows branch target to be in same trace line even if thousands of bytes apart",
+    "outcome": "Similar hit rate to 8K to 16K byte conventional I-cache, but front-end bypasses decoder most of time; IA-32 decoder only used on Trace Cache miss to L2; misprediction latency reduced",
+    "quote_as_recalled": "The Trace Cache is the primary or Level 1 (L1) instruction cache of the Pentium 4 processor",
+    "page_guess": 4,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact capacity 12K uops vs 12K byte-equivalent and delivery rate 3 uops per clock placement in same sentence may be combined from two sentences",
+    "confidence": 0.94
+  },
+  {
+    "title": "Deep pipeline for frequency target about 2x P6",
+    "where_in_paper": "CLOCK RATES section and Overview",
+    "decision": "Design NetBurst with even deeper pipeline about two times P6 microarchitecture, with fewer gates per stage, resulting in 20-stage mispredicted branch pipeline versus 10-stage P6 pipeline, targeting greater than 1.6 times higher frequency than P6 on same process",
+    "alternatives_or_rejected": "Keep pipeline depth similar to 286, 386, 486, P5 and P6 era which had similar gates per clock and similar frequency if on same process",
+    "rationale": "Higher clock rates need deeper pipelines so efficiency at same clock rate goes down; deeper pipelines make branches and cache misses take more cycles but frequency increase still buys net performance (e.g., 50% frequency increase buys 30% net performance) and depends on circuit design, skew, jitter, latch delay, buffering",
+    "outcome": "At introduction Pentium 4 at 1.5 times frequency of Pentium III (1.5GHz vs 1GHz) on same 0.18u process, with path to increase delta as design matures; allows industry-leading clock rate",
+    "quote_as_recalled": "Higher clock rates need deeper pipelines so the efficiency at the same clock rate goes down",
+    "page_guess": 3,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact 1.6x frequency target vs 1.5x achieved may conflate two different sentences; 20-stage vs 10-stage numbers are from Figure 3 caption not main text",
+    "confidence": 0.9
+  },
+  {
+    "title": "Double-pumped Rapid Execution ALUs with staggered 16-bit add",
+    "where_in_paper": "Integer and Floating-Point Execution Units - Low Latency Integer ALU",
+    "decision": "Implement low-latency integer ALUs that run at twice main clock rate (fast clock, 3GHz) with effective latency of one-half clock cycle, using staggered add in three fast cycles: low 16 bits, high 16 bits with carry, flags in third cycle, keeping high-speed core small with only essential hardware",
+    "alternatives_or_rejected": "Include infrequent integer operations like multiplier, shifts, flag logic, and branch processing in the high-speed ALU bypass loop, which would increase metal length and loading",
+    "rationale": "ALU bypass loop is key closed loop; approximately 60-70% of all uops in typical integer programs use this loop; minimizing metal length and loading critical at high frequency; doing ALU in half cycle does not buy 2x but improves most integer applications; only 16-bit adder and input muxes need to complete in fast cycle",
+    "outcome": "Processor can do fully dependent ALU operations at twice main clock rate; low 16-bit result immediately available to feed low 16-bits of dependent operation next fast clock, upper 16-bit result available when needed",
+    "quote_as_recalled": "The Pentium 4 processor can do fully dependent ALU operations at twice the main clock rate",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Fast clock 3GHz figure may be from abstract vs execution section; staggered add cycle count exactly three may be misremembered as two",
+    "confidence": 0.88
+  },
+  {
+    "title": "Small 8KB low-latency L1 data cache with replay and deep buffering",
+    "where_in_paper": "Low Latency Level 1 (L1) Data Cache",
+    "decision": "Use 8Kbyte 4-way set-associative writethrough L1 data cache with 64 bytes per line, capable of one load and one store per clock, 2-clock load-use latency for integer and 6-clock for FP/SSE, backed by large 256KB 8-way L2 with medium latency, using new access algorithms",
+    "alternatives_or_rejected": "Larger L1 data cache with higher latency and lower bandwidth but higher hit rate",
+    "rationale": "Load latency is key for IA-32 due to limited registers and many loads/stores; almost all accesses hit L1 and DTLB, so small very low latency L1 plus large high-bandwidth L2 gives lower net load-access latency and higher performance than bigger slower L1; at high frequency distance from scheduler to execution longer than load latency, so schedulers dispatch dependent ops assuming hit",
+    "outcome": "2-clock integer load-use enables higher performance; on L1 miss dependent ops get temporarily incorrect data and are replayed via replay mechanism; up to 4 outstanding L1 misses, 126 uops in flight, 48 loads and 24 stores in pipeline; L2 provides 48GB/s peak",
+    "quote_as_recalled": "The Level 1 (LI) data cache is an 8Kbyte cache that is used for both integer and floatingpoint/SSE loads and stores",
+    "page_guess": 9,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Write-through vs write-back and exact outstanding miss count 4 may belong to later memory subsystem section",
+    "confidence": 0.84
+  },
+  {
+    "title": "Optimized FP/SSE cluster with one full port plus move/store port vs two full units",
+    "where_in_paper": "FP/SSE Execution Units",
+    "decision": "Replace early plan of two full FP/SSE execution units with cost/performance optimized cluster: one 128-bit general execution port plus second port that does only FP/SSE moves and store data primitives, with double-pumped SRT radix-2 divider producing two bits per clock",
+    "alternatives_or_rejected": "Two full FP/SSE execution units that cost a lot of hardware and did not buy very much performance for most FP/SSE applications",
+    "rationale": "FP/multimedia need balanced capabilities and deep buffering rather than more units; deep window of 126 uops and 48 loads allows dynamic unrolling of inner loops to overlap long-latency ops; many applications have balanced mix of multiplies and adds, so interleaving multiply and add every two clocks is sufficient at much less die and power",
+    "outcome": "FP adder executes one EP addition, one DP addition, or two SP additions per clock, completing 128-bit packed SP or DP add every two clocks; FP multiplier completes 128-bit packed multiply every two clocks; peak 6 GFLOPS single precision or 3 GFLOPS double precision at 1.5GHz",
+    "quote_as_recalled": "we had two full FP/SSE execution units, but this cost a lot of hardware and did not buy very much performance for most FP/SSE applications",
+    "page_guess": 10,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact GFLOPS numbers and every-two-clocks throughput may be from adjacent paragraph not directly tied to tradeoff sentence",
+    "confidence": 0.86
+  }
+]

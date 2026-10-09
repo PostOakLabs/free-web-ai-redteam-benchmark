@@ -1,0 +1,9 @@
+TIER TALLY (quote_as_recalled, all paper families)
+  T0-absent                    1
+  T0-declined                  189
+  T1-verbatim                  49
+  T1-verbatim-hyphen-variant   5
+  T2-paraphrase-consistent     11
+  T3-contradicts-CANDIDATE     1
+  T4-not-found                 16
+  TOTAL                        272

@@ -1,0 +1,54 @@
+```json
+[
+  {
+    "title": "Deep pipeline for high frequency",
+    "where_in_paper": "Overview of NetBurst microarchitecture (likely early section)",
+    "decision": "Implement a deeply pipelined architecture (20 stages) to achieve very high clock frequencies, targeting 1.5 GHz and beyond.",
+    "alternatives_or_rejected": "The paper contrasts this with the P6 family's shorter pipeline, which had lower frequency but better IPC. The alternative would have been to optimize for IPC per clock rather than raw frequency, but the goal was to scale frequency aggressively.",
+    "rationale": "The paper states that the NetBurst microarchitecture was designed for 'significantly higher clock rates' and that the deep pipeline allows the processor to reach frequencies that would be impossible with a shorter pipeline, as the work per stage is reduced.",
+    "outcome": "The Pentium 4 was introduced at 1.5 GHz and scaled to higher frequencies, with the architecture designed to scale to 10 GHz in principle, as noted in the paper and other sources.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Execution Trace Cache",
+    "where_in_paper": "Frontend section",
+    "decision": "Replace a traditional instruction cache with an Execution Trace Cache that stores decoded micro-operations (uops) in the order of execution, rather than instruction fetch order.",
+    "alternatives_or_rejected": "The paper discusses the trade-off between a traditional instruction cache and the trace cache. The alternative would have been a larger, more conventional cache, but the trace cache offers better fetch bandwidth and reduces the penalty of branch mispredictions by storing uops along predicted paths.",
+    "rationale": "The trace cache improves instruction fetch bandwidth and reduces decode latency by storing already-decoded uops, which is crucial for feeding the wide out-of-order execution engine. The paper describes it as a 'new form of instruction cache' that is a key feature of the NetBurst microarchitecture.",
+    "outcome": "The Execution Trace Cache was a defining feature of the Pentium 4, enabling high instruction throughput despite the deep pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Rapid Execution Engine (double-pumped ALU)",
+    "where_in_paper": "Execution engine section",
+    "decision": "Implement the Arithmetic Logic Unit (ALU) to run at twice the core clock frequency (double-pumped), creating a 'Rapid Execution Engine'.",
+    "alternatives_or_rejected": "The paper likely considered the alternative of a single-speed ALU, which would be simpler but would limit the throughput of integer operations. Double-pumping allows the ALU to execute two operations per core clock cycle, effectively doubling the integer execution bandwidth.",
+    "rationale": "To compensate for the deep pipeline's higher branch misprediction penalty and to provide high integer performance, the ALU was designed to run at 3 GHz while the core ran at 1.5 GHz, as mentioned in the abstract. This allows two ALU operations per cycle, improving performance.",
+    "outcome": "The Rapid Execution Engine was a key differentiator for the Pentium 4, providing high integer performance despite the deep pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Out-of-order execution engine with large scheduler",
+    "where_in_paper": "Out-of-order execution engine section",
+    "decision": "Implement a large, out-of-order execution engine with a significant reorder buffer (ROB) and scheduler to exploit instruction-level parallelism (ILP).",
+    "alternatives_or_rejected": "The paper contrasts this with simpler in-order designs. The alternative would have been a smaller, more power-efficient out-of-order window, but the goal was to extract maximum ILP to feed the execution units.",
+    "rationale": "To keep the deep pipeline filled and to overcome the high branch misprediction penalty, a large out-of-order window is necessary to find independent instructions to execute. The paper describes the out-of-order engine as a key component of the NetBurst microarchitecture.",
+    "outcome": "The out-of-order engine, with its large schedulers, allowed the Pentium 4 to achieve high performance on a wide range of workloads, despite the deep pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Low-latency Level 1 data cache",
+    "where_in_paper": "Memory subsystem section",
+    "decision": "Design a Level 1 data cache with a very low access latency of just two clock cycles.",
+    "alternatives_or_rejected": "The paper likely considered a larger, but slower, L1 data cache. The trade-off was between cache hit latency and miss rate. A two-cycle latency is extremely aggressive and requires careful design, but it reduces the penalty of L1 misses.",
+    "rationale": "To support the high-frequency, wide-issue core, the L1 data cache must provide data quickly. The paper highlights the 'very low latency Level 1 data cache that is accessed in just two clock cycles' as a key feature to feed the execution units.",
+    "outcome": "The low-latency L1 data cache contributed to the overall performance of the Pentium 4, especially for integer and memory-intensive workloads.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  }
+]
+```

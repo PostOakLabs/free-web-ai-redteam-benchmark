@@ -1,0 +1,86 @@
+```json
+[
+  {
+    "case_name": "Zero-Tolerance Bucket Only",
+    "fees": [
+      {"name": "Appraisal Fee", "bucket": "zero_tolerance", "le_amount": 500, "cd_amount": 500},
+      {"name": "Credit Report Fee", "bucket": "zero_tolerance", "le_amount": 30, "cd_amount": 30}
+    ],
+    "computation": {
+      "step_1": {"description": "Sum of LE amounts for zero-tolerance bucket.", "calculation": "500 + 30 = 530"},
+      "step_2": {"description": "Sum of CD amounts for zero-tolerance bucket.", "calculation": "500 + 30 = 530"},
+      "step_3": {"description": "Check for zero-tolerance violations.", "calculation": "All fees match LE to CD exactly → No violations."}
+    },
+    "violations": [],
+    "clause_basis": "12 CFR §1026.19(e)(3)(i)",
+    "weakest_point": "Assumed all fees are in zero-tolerance bucket; may not cover all scenarios."
+  },
+  {
+    "case_name": "10% Aggregate-Tolerance Bucket with Mixed Directions",
+    "fees": [
+      {"name": "Title Insurance", "bucket": "ten_pct_aggregate", "le_amount": 1000, "cd_amount": 1100},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 150},
+      {"name": "Transfer Taxes", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 350}
+    ],
+    "computation": {
+      "step_1": {"description": "Sum of LE amounts for 10% bucket.", "calculation": "1000 + 200 + 300 = 1500"},
+      "step_2": {"description": "Sum of CD amounts for 10% bucket.", "calculation": "1100 + 150 + 350 = 1600"},
+      "step_3": {"description": "Calculate 10% threshold for LE sum.", "calculation": "1500 * 0.10 = 150"},
+      "step_4": {"description": "Compare aggregate CD sum to LE sum + 10% threshold.", "calculation": "1600 - 1500 = 100 ≤ 150 → No violation."}
+    },
+    "violations": [],
+    "clause_basis": "12 CFR §1026.19(e)(3)(ii)",
+    "weakest_point": "Mixed directions in 10% bucket; aggregate comparison is correct."
+  },
+  {
+    "case_name": "No-Limit Bucket",
+    "fees": [
+      {"name": "Prepaid Interest", "bucket": "no_limit", "le_amount": 800, "cd_amount": 850},
+      {"name": "Property Insurance", "bucket": "no_limit", "le_amount": 1200, "cd_amount": 1150}
+    ],
+    "computation": {
+      "step_1": {"description": "No tolerance limit for these fees.", "calculation": "No comparison required."}
+    },
+    "violations": [],
+    "clause_basis": "12 CFR §1026.19(e)(3)(iii)",
+    "weakest_point": "Assumed all fees are in no-limit bucket; may not cover all scenarios."
+  },
+  {
+    "case_name": "Mixed Buckets with 10% Aggregate-Tolerance",
+    "fees": [
+      {"name": "Appraisal Fee", "bucket": "zero_tolerance", "le_amount": 500, "cd_amount": 500},
+      {"name": "Title Insurance", "bucket": "ten_pct_aggregate", "le_amount": 1000, "cd_amount": 1200},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 100},
+      {"name": "Prepaid Interest", "bucket": "no_limit", "le_amount": 800, "cd_amount": 900}
+    ],
+    "computation": {
+      "step_1": {"description": "Sum of LE amounts for 10% bucket.", "calculation": "1000 + 200 = 1200"},
+      "step_2": {"description": "Sum of CD amounts for 10% bucket.", "calculation": "1200 + 100 = 1300"},
+      "step_3": {"description": "Calculate 10% threshold for LE sum.", "calculation": "1200 * 0.10 = 120"},
+      "step_4": {"description": "Compare aggregate CD sum to LE sum + 10% threshold.", "calculation": "1300 - 1200 = 100 ≤ 120 → No violation."},
+      "step_5": {"description": "Check zero-tolerance bucket.", "calculation": "Appraisal Fee: 500 == 500 → No violation."}
+    },
+    "violations": [],
+    "clause_basis": "12 CFR §1026.19(e)(3)(ii)",
+    "weakest_point": "Mixed directions in 10% bucket; aggregate comparison is correct."
+  },
+  {
+    "case_name": "10% Aggregate-Tolerance Violation with Cure Amount",
+    "fees": [
+      {"name": "Title Insurance", "bucket": "ten_pct_aggregate", "le_amount": 1000, "cd_amount": 1300},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 100},
+      {"name": "Transfer Taxes", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 400}
+    ],
+    "computation": {
+      "step_1": {"description": "Sum of LE amounts for 10% bucket.", "calculation": "1000 + 200 + 300 = 1500"},
+      "step_2": {"description": "Sum of CD amounts for 10% bucket.", "calculation": "1300 + 100 + 400 = 1800"},
+      "step_3": {"description": "Calculate 10% threshold for LE sum.", "calculation": "1500 * 0.10 = 150"},
+      "step_4": {"description": "Compare aggregate CD sum to LE sum + 10% threshold.", "calculation": "1800 - 1500 = 300 > 150 → Violation."},
+      "step_5": {"description": "Calculate cure amount.", "calculation": "300 - 150 = 150"}
+    },
+    "violations": [{"bucket": "ten_pct_aggregate", "cure_amount": 150}],
+    "clause_basis": "12 CFR §1026.19(e)(3)(ii)",
+    "weakest_point": "Assumed cure amount is the excess over the 10% threshold."
+  }
+]
+```

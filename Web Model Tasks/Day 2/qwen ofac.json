@@ -1,0 +1,115 @@
+[
+  {
+    "case_name": "Convergent paths: direct interest plus majority-owned intermediary",
+    "entities": [
+      { "id": "BP1", "blocked": true },
+      { "id": "Holdco", "blocked": false },
+      { "id": "Target", "blocked": false }
+    ],
+    "edges": [
+      { "from": "BP1", "to": "Holdco", "pct": 60 },
+      { "from": "BP1", "to": "Target", "pct": 30 },
+      { "from": "Holdco", "to": "Target", "pct": 25 }
+    ],
+    "computation": "Rule applied: full attribution through an intermediary owned 50 percent or more by blocked persons; do not multiply BP1's 60 percent ownership in Holdco by Holdco's 25 percent ownership in Target. Round 0 blocked set = {BP1}. Round 1: Holdco receives 60 from BP1, so Holdco is blocked; Target receives 30 directly from BP1, so Target is not yet blocked. Round 2: because Holdco is blocked, Holdco's 25 percent holding in Target counts as blocked-person ownership; Target aggregate = 30 + 25 = 55, so Target is blocked. If one incorrectly multiplied, indirect ownership would be 0.60 * 25 = 15 and Target aggregate would be 45; the OFAC treatment applied here produces 55.",
+    "blocked_verdicts": {
+      "BP1": true,
+      "Holdco": true,
+      "Target": true
+    },
+    "guidance_basis": "OFAC 50 Percent Rule guidance and FAQ 398/401 family, as best recalled: aggregate direct and indirect ownership; holdings of a >=50%-owned entity count as blocked-person ownership.",
+    "weakest_point": "I am applying full attribution through a 60%-owned intermediary rather than multiplicative attribution; exact FAQ numbering and scope are from memory."
+  },
+  {
+    "case_name": "Convergent paths through two majority-owned intermediaries",
+    "entities": [
+      { "id": "BP1", "blocked": true },
+      { "id": "A", "blocked": false },
+      { "id": "B", "blocked": false },
+      { "id": "Target", "blocked": false }
+    ],
+    "edges": [
+      { "from": "BP1", "to": "A", "pct": 70 },
+      { "from": "BP1", "to": "B", "pct": 90 },
+      { "from": "A", "to": "Target", "pct": 20 },
+      { "from": "B", "to": "Target", "pct": 30 }
+    ],
+    "computation": "Rule applied: once an intermediary is blocked because owned 50 percent or more by a blocked person, the intermediary's downstream holding counts in full; no multiplication by the blocked person's stake in the intermediary. Round 0 blocked set = {BP1}. Round 1: A receives 70 from BP1 and is blocked; B receives 90 from BP1 and is blocked; Target receives no direct BP1 ownership. Round 2: Target receives 20 from blocked A and 30 from blocked B; Target aggregate = 20 + 30 = 50, so Target is blocked. The same blocked owner, BP1, reaches Target through two paths and the path contributions are summed. If one incorrectly multiplied, BP1's indirect ownership would be 0.70 * 20 + 0.90 * 30 = 14 + 27 = 41, but that is not the rule applied.",
+    "blocked_verdicts": {
+      "BP1": true,
+      "A": true,
+      "B": true,
+      "Target": true
+    },
+    "guidance_basis": "OFAC 50 Percent Rule guidance and FAQ 398/401 family, as best recalled: blocked persons' direct and indirect ownership is aggregated; majority-owned intermediaries' holdings count.",
+    "weakest_point": "The result depends on full attribution through 70%- and 90%-owned intermediaries rather than multiplication; exact citation is recalled imprecisely."
+  },
+  {
+    "case_name": "Majority-owned intermediary chain below the 50 percent target threshold",
+    "entities": [
+      { "id": "BP1", "blocked": true },
+      { "id": "Midco", "blocked": false },
+      { "id": "Target", "blocked": false }
+    ],
+    "edges": [
+      { "from": "BP1", "to": "Midco", "pct": 51 },
+      { "from": "Midco", "to": "Target", "pct": 49 }
+    ],
+    "computation": "Rule applied: a blocked person's indirect ownership includes the full holding of an intermediary owned 50 percent or more by blocked persons. Round 0 blocked set = {BP1}. Round 1: Midco receives 51 from BP1, so Midco is blocked. Round 2: Midco's 49 percent holding in Target is treated as blocked-person ownership; Target aggregate = 49. Because 49 is less than 50, Target is not blocked. This shows the intermediary's holding counts, but the aggregate still must reach 50 percent or more.",
+    "blocked_verdicts": {
+      "BP1": true,
+      "Midco": true,
+      "Target": false
+    },
+    "guidance_basis": "OFAC 50 Percent Rule guidance and FAQ 398/401 family, as best recalled: aggregate ownership reaches blocked status only at 50 percent or more.",
+    "weakest_point": "I am assuming Midco's downstream 49 percent holding is attributed in full once Midco is blocked; exact FAQ treatment of attribution below the target threshold is from memory."
+  },
+  {
+    "case_name": "Convergent direct and indirect paths plus a second blocked person",
+    "entities": [
+      { "id": "BP1", "blocked": true },
+      { "id": "BP2", "blocked": true },
+      { "id": "Holdco", "blocked": false },
+      { "id": "Target", "blocked": false }
+    ],
+    "edges": [
+      { "from": "BP1", "to": "Holdco", "pct": 80 },
+      { "from": "BP1", "to": "Target", "pct": 5 },
+      { "from": "BP2", "to": "Target", "pct": 20 },
+      { "from": "Holdco", "to": "Target", "pct": 25 }
+    ],
+    "computation": "Rule applied: ownership of all blocked persons is aggregated; a majority-owned intermediary's holding counts in full once the intermediary is blocked. Round 0 blocked set = {BP1, BP2}. Round 1: Holdco receives 80 from BP1 and is blocked; Target receives 5 from BP1 and 20 from BP2, for aggregate 25, so Target is not yet blocked. Round 2: Holdco's 25 percent holding in Target counts as blocked-person ownership; Target aggregate = 5 + 20 + 25 = 50, so Target is blocked. BP1 reaches Target through both a direct path and the Holdco path; those contributions are summed with BP2's direct contribution. If one incorrectly multiplied BP1's indirect path, it would be 0.80 * 25 = 20, producing aggregate 45; that multiplicative method is not the rule applied here.",
+    "blocked_verdicts": {
+      "BP1": true,
+      "BP2": true,
+      "Holdco": true,
+      "Target": true
+    },
+    "guidance_basis": "OFAC 50 Percent Rule guidance and FAQ 398/401 family, as best recalled: aggregate ownership by multiple blocked persons and indirect ownership through majority-owned entities.",
+    "weakest_point": "The case assumes Holdco becomes a blocked person once BP1 owns 80 percent and that Holdco's downstream holding then counts fully; exact FAQ citation is uncertain."
+  },
+  {
+    "case_name": "Intermediary blocked by aggregate ownership downstream; edge-order invariant",
+    "entities": [
+      { "id": "BP1", "blocked": true },
+      { "id": "BP2", "blocked": true },
+      { "id": "Midco", "blocked": false },
+      { "id": "Target", "blocked": false }
+    ],
+    "edges": [
+      { "from": "BP1", "to": "Midco", "pct": 30 },
+      { "from": "BP2", "to": "Midco", "pct": 25 },
+      { "from": "BP1", "to": "Target", "pct": 5 },
+      { "from": "Midco", "to": "Target", "pct": 60 }
+    ],
+    "computation": "Rule applied: blocked-person ownership is aggregated at each entity; once an entity is blocked by aggregate ownership of 50 percent or more, its downstream holdings count as blocked-person ownership. The computation is a fixed-point computation, so edge serialization must not change the result. Round 0 blocked set = {BP1, BP2}. Round 1: Midco receives 30 from BP1 and 25 from BP2, aggregate 55, so Midco is blocked; Target receives 5 from BP1, so Target is not yet blocked. Round 2: Midco's 60 percent holding in Target counts as blocked-person ownership; Target aggregate = 5 + 60 = 65, so Target is blocked. Final blocked set is independent of the order in which the edges are processed.",
+    "blocked_verdicts": {
+      "BP1": true,
+      "BP2": true,
+      "Midco": true,
+      "Target": true
+    },
+    "guidance_basis": "OFAC 50 Percent Rule guidance and FAQ 398/401 family, as best recalled: aggregate blocked ownership determines status, and blocked entities' holdings are relevant to lower-tier entities.",
+    "weakest_point": "Midco is blocked by aggregate ownership, even though no single blocked person owns 50 percent or more of Midco; I am assuming Midco's downstream 60 percent holding then counts fully, but I am not completely certain of the exact FAQ wording."
+  }
+]

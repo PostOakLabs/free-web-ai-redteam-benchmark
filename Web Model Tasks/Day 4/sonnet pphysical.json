@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Global clock distribution approach",
+    "where_in_paper": "Clock distribution section",
+    "decision": "Use a grid-based, deterministically-driven global clock distribution network to minimize clock skew across the chip",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Large multi-core chip required tight control of skew between the two cores and across functional units for timing closure at target frequency",
+    "outcome": "Reported low skew across the die enabling the target cycle time",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain of the exact clock grid topology (mesh vs tree-of-grids) described, and may be blending in general knowledge of POWER-series clocking",
+    "confidence": 0.35
+  },
+  {
+    "title": "Use of custom circuit design in critical macros",
+    "where_in_paper": "Circuit design methodology section",
+    "decision": "Critical high-frequency macros (e.g., execution units, register files) were hand-crafted using custom circuit design rather than relying solely on synthesized logic",
+    "alternatives_or_rejected": "Fully synthesized/automated logic design for these macros was considered less able to meet the aggressive cycle time targets",
+    "rationale": "Achieving the target GHz-class frequency required circuit-level optimization beyond what synthesis tools of the era could deliver",
+    "outcome": "Custom macros allowed the chip to hit its frequency targets in critical paths",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The specific balance between custom and synthesized logic, and which units were called out, may not match the paper's actual wording",
+    "confidence": 0.3
+  },
+  {
+    "title": "Latch/pipeline circuit style for timing closure",
+    "where_in_paper": "Circuit design / latch design section",
+    "decision": "Adopted a pulsed-latch (LSSD-compatible) based pipeline latch design to reduce clock-to-Q overhead and support high-frequency operation",
+    "alternatives_or_rejected": "Conventional master-slave latch structures were viewed as adding too much overhead per pipeline stage for the target frequency",
+    "rationale": "Reducing latch overhead was essential given the short target cycle time and deep pipelining of the design",
+    "outcome": "Enabled shorter effective cycle times while retaining LSSD testability",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "I am not confident this specific latch-style rationale and comparison is explicitly stated in this paper versus being inferred from general POWER4/IBM circuit knowledge",
+    "confidence": 0.25
+  },
+  {
+    "title": "Hierarchical floorplanning and timing closure methodology",
+    "where_in_paper": "Physical design / timing closure section",
+    "decision": "A hierarchical, unit-based floorplanning and timing-closure methodology was used, with independent timing budgets assigned to each macro/unit before chip-level integration",
+    "alternatives_or_rejected": "A flat, full-chip timing approach was implicitly rejected as impractical given chip complexity",
+    "rationale": "Chip-level complexity and the need for many engineers to work in parallel required decomposing timing closure into unit-level budgets that could later be integrated",
+    "outcome": "Enabled the design team to close timing across the chip through iterative unit-level and chip-level convergence",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 40,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Details of the specific budgeting/closure flow (tool names, iteration counts) are not something I can recall verbatim and may be generic to IBM ASIC methodology rather than paper-specific",
+    "confidence": 0.3
+  },
+  {
+    "title": "Power/density management via circuit and physical design choices",
+    "where_in_paper": "Power management / physical design section",
+    "decision": "Power-conscious circuit techniques (e.g., selective use of lower-power circuit families, gated clocks) and floorplan-level power density management were employed to keep the chip within thermal/power budgets",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "High transistor density and clock frequency created power density concerns that had to be managed at both circuit and physical design levels",
+    "outcome": "Paper reports the design met its power/thermal targets for the given technology",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 45,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "This entry is fairly generic and I cannot confidently attribute specific rejected alternatives or exact rationale phrasing to this paper specifically",
+    "confidence": 0.2
+  }
+]
+```

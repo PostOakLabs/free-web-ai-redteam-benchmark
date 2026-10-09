@@ -1,0 +1,223 @@
+[
+  {
+    "symptom": "congestion-driven routing DRCs with clean placement density",
+    "first_checks": [
+      {"check": "Run congestion map and identify hotspots", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify pin access in hotspot regions", "why_first": "rules out local blockages", "check_cost": "minutes"},
+      {"check": "Review macro placement for tight clusters", "why_first": "rules out macro-induced congestion", "check_cost": "hours"},
+      {"check": "Check power grid density in congested areas", "why_first": "rules out power grid under-design", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If congestion map shows hotspots aligned with specific macros, check macro placement spacing", "rules_in": "macro placement too tight", "rules_out": "global placement issue"},
+      {"experiment": "If hotspots are concentrated at power ring edges, verify power grid width and pitch", "rules_in": "power grid under-design", "rules_out": "macro placement issue"},
+      {"experiment": "If hotspots are random and widespread, run global placement with higher congestion weight", "rules_in": "global placement algorithm issue", "rules_out": "localized congestion"}
+    ],
+    "common_root_causes": [
+      {"cause": "macro placement too tight", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "power grid under-design", "recalled_frequency": "occasional", "recall_confidence": 0.8},
+      {"cause": "pin access blocked by fill or other macros", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "global placement algorithm not accounting for routing congestion", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Blame global placement when the root cause is macro placement or power grid design",
+    "node_era_note": "7nm-and-below: more routing layers reduce congestion severity, but power grid density requirements increase"
+  },
+  {
+    "symptom": "setup (max-delay) violations after CTS",
+    "first_checks": [
+      {"check": "Check timing report for top failing paths and their clock domains", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify clock latency and skew in failing clock domains", "why_first": "rules out clock network issues", "check_cost": "minutes"},
+      {"check": "Review wireload models for accuracy against actual routing", "why_first": "rules out wireload overestimation", "check_cost": "hours"},
+      {"check": "Inspect clock network for missing buffers or excessive fanout", "why_first": "rules out clock network weaknesses", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If all failing paths share one common clock domain, check clock latency in that domain", "rules_in": "clock network delay issue", "rules_out": "combinational logic delay issue"},
+      {"experiment": "If failing paths are in the same hierarchy and share long wires, verify wireload model vs actual routing capacitance", "rules_in": "wireload overestimation", "rules_out": "clock network issue"},
+      {"experiment": "If failing paths are spread across unrelated hierarchies but share a common clock root, check clock tree insertion delay", "rules_in": "clock tree insertion delay violation", "rules_out": "localized combinational delay"}
+    ],
+    "common_root_causes": [
+      {"cause": "clock network delays due to excessive fanout or missing buffers", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "wireload model overestimation for global routes", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "placement congestion forcing detours in critical paths", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "library characterization mismatch for late-stage timing", "recalled_frequency": "rare", "recall_confidence": 0.5}
+    ],
+    "classic_trap": "Optimize combinational logic when the real issue is clock network latency or wireload modeling",
+    "node_era_note": "7nm-and-below: more buffer stages in clock network make latency more sensitive to fanout"
+  },
+  {
+    "symptom": "hold (min-delay) violations after CTS",
+    "first_checks": [
+      {"check": "Check hold margins on failing paths in timing report", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify clock skew between launch and capture flops in failing paths", "why_first": "rules out clock skew as root cause", "check_cost": "minutes"},
+      {"check": "Inspect fanout and net capacitance on short paths", "why_first": "rules out excessive fanout on short nets", "check_cost": "hours"},
+      {"check": "Review clock gating cells on failing paths for excessive delay", "why_first": "rules out clock gating induced hold issues", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If all failing paths share one common clock-gating cell, check its insertion delay", "rules_in": "clock gating delay issue", "rules_out": "combinational logic hold issue"},
+      {"experiment": "If failing paths are short and local to a single hierarchy, verify fanout and net capacitance", "rules_in": "excessive fanout on short nets", "rules_out": "clock network issue"},
+      {"experiment": "If failing paths spread across unrelated hierarchies but share launch/capture clock domains, check clock skew between domains", "rules_in": "clock skew between domains", "rules_out": "localized hold issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "clock skew between launch and capture flops", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "clock gating cells with insufficient delay buffering", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "excessive fanout on short nets in critical paths", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "library hold margins too tight for process variation", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Add hold buffers on data paths when the real issue is clock skew or clock gating delay",
+    "node_era_note": "28nm: more hold issues due to fewer clock buffer stages; 7nm-and-below: finer clock network reduces skew but increases gating complexity"
+  },
+  {
+    "symptom": "IR-drop-induced timing failure",
+    "first_checks": [
+      {"check": "Run IR-drop analysis and map to failing timing paths", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify power grid resistance and voltage drop in failing regions", "why_first": "rules out power grid under-design", "check_cost": "hours"},
+      {"check": "Check timing at low VDD corners for same paths", "why_first": "rules out non-IR-drop timing issues", "check_cost": "hours"},
+      {"check": "Review power consumption of logic in failing regions", "why_first": "rules out excessive current draw", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If timing fails only at low VDD corners but passes at nominal, check IR-drop values in those regions", "rules_in": "IR-drop-induced timing failure", "rules_out": "intrinsic timing violation"},
+      {"experiment": "If failing paths are clustered in high-current-density regions, verify power grid width and via count", "rules_in": "power grid resistance too high", "rules_out": "logic-induced current spike"},
+      {"experiment": "If IR-drop is uniform but timing fails only in specific logic blocks, check decap placement in those blocks", "rules_in": "insufficient decap in critical blocks", "rules_out": "global power grid issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "power grid resistance too high for current demand", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "high current density in switching logic", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "VDD too low for timing at low corners", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "insufficient decap in critical timing paths", "recalled_frequency": "occasional", "recall_confidence": 0.75},
+      {"cause": "library characterization not accounting for IR-drop", "recalled_frequency": "rare", "recall_confidence": 0.5}
+    ],
+    "classic_trap": "Blame timing optimization when the root cause is IR-drop in power grid",
+    "node_era_note": "7nm-and-below: finer power grids and more decap options, but higher current density"
+  },
+  {
+    "symptom": "clock skew / CTS divergence (sinks missing insertion-delay targets)",
+    "first_checks": [
+      {"check": "Check clock latency report for sinks with worst insertion delay", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify clock tree topology for imbalanced branches", "why_first": "rules out topology-induced skew", "check_cost": "hours"},
+      {"check": "Inspect buffer sizes and fanout in failing clock branches", "why_first": "rules out buffer sizing issues", "check_cost": "hours"},
+      {"check": "Review clock constraints and exceptions for failing sinks", "why_first": "rules out constraint-induced skew", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If all failing sinks share a common clock branch, check buffer sizes and wire lengths in that branch", "rules_in": "buffer sizing or wire length issue in branch", "rules_out": "global clock tree issue"},
+      {"experiment": "If failing sinks are in the same region, check for local congestion blocking ideal clock tree routing", "rules_in": "local congestion blocking clock tree", "rules_out": "buffer sizing issue"},
+      {"experiment": "If failing sinks are spread across chip but share a common clock root, verify clock tree synthesis constraints", "rules_in": "clock tree synthesis constraints too loose", "rules_out": "localized congestion"}
+    ],
+    "common_root_causes": [
+      {"cause": "buffer sizing not optimal for clock tree branches", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "clock tree topology not balanced for all sinks", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "congestion blocking ideal clock tree routing", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "clock constraints not accounting for process variation", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Add more buffers to clock tree when the real issue is topology imbalance or congestion blocking",
+    "node_era_note": "7nm-and-below: more automated CTS with stricter skew targets, less manual topology tweaking"
+  },
+  {
+    "symptom": "LVS mismatch: missing / shorted / open nets",
+    "first_checks": [
+      {"check": "Run LVS and categorize mismatches by type (missing/short/open)", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify netlist vs layout connectivity for failing nets", "why_first": "rules out netlist vs layout discrepancies", "check_cost": "hours"},
+      {"check": "Check DRC hotspots in regions with LVS mismatches", "why_first": "rules out DRC-induced connectivity issues", "check_cost": "hours"},
+      {"check": "Review fill cell insertion in failing regions", "why_first": "rules out fill-induced shorts or opens", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If missing nets are concentrated in regions with fill cells, check fill cell connectivity to power/ground", "rules_in": "fill cell causing missing net to power/ground", "rules_out": "netlist vs layout mismatch"},
+      {"experiment": "If shorted nets are between power and signal, verify power grid to macro connections", "rules_in": "power grid short to signal net", "rules_out": "signal-to-signal short"},
+      {"experiment": "If open nets are at vias, check via connectivity in DRC", "rules_in": "via failure causing open net", "rules_out": "netlist error"}
+    ],
+    "common_root_causes": [
+      {"cause": "fill cell insertion creating unintended shorts or opens", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "DRC violations causing shorts or opens", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "via failures due to misalignment or missing vias", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "netlist vs layout mismatch in hierarchical blocks", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Blame layout for LVS mismatches when the root cause is a netlist error or fill cell issue",
+    "node_era_note": "7nm-and-below: more complex fill rules increase likelihood of fill-induced LVS issues"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {"check": "Run LVS and categorize mismatches by device type and location", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify device sizes in layout vs schematic for failing devices", "why_first": "rules out device sizing errors", "check_cost": "hours"},
+      {"check": "Check device list in netlist vs layout for extra devices", "why_first": "rules out netlist vs layout discrepancies", "check_cost": "hours"},
+      {"check": "Review fill cell insertion for unintended device creation", "why_first": "rules out fill-induced extra devices", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If wrong device sizes are in regions with fill cells, check fill cell parameters", "rules_in": "fill cell altering device sizes", "rules_out": "layout device sizing error"},
+      {"experiment": "If extra devices are at power rings or ends of rows, verify fill cell insertion rules", "rules_in": "fill cell insertion creating extra devices", "rules_out": "netlist error"},
+      {"experiment": "If wrong device sizes are random and not in fill regions, check layout vs schematic device parameters", "rules_in": "layout device sizing mismatch", "rules_out": "fill cell issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "fill cell insertion modifying device sizes or adding devices", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "layout device sizing not matching schematic", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "netlist vs layout discrepancy in hierarchical blocks", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "incorrect device parameters in layout database", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Blame schematic for device size mismatches when the root cause is fill cell insertion or layout parameter errors",
+    "node_era_note": "28nm: more manual device sizing; 7nm-and-below: automated fill insertion increases risk of unintended device modifications"
+  },
+  {
+    "symptom": "antenna (process-antenna-effect) violations at signoff",
+    "first_checks": [
+      {"check": "Run antenna report and categorize violations by metal layer", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify antenna rules for each metal layer in failing regions", "why_first": "rules out rule misconfiguration", "check_cost": "hours"},
+      {"check": "Check diode insertion for missing or misplaced diodes", "why_first": "rules out diode insertion failures", "check_cost": "hours"},
+      {"check": "Review metal connectivity and via placement in failing regions", "why_first": "rules out connectivity-induced antenna issues", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If violations are on the same metal layer, check antenna rule for that layer", "rules_in": "antenna rule too strict for that layer", "rules_out": "missing diode"},
+      {"experiment": "If violations are at the same location across layers, check diode insertion at that location", "rules_in": "missing or misplaced diode", "rules_out": "rule misconfiguration"},
+      {"experiment": "If violations are random and not at diode locations, verify antenna rule thresholds", "rules_in": "antenna rule thresholds too low", "rules_out": "diode insertion issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "missing antenna diodes in critical nets", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "antenna rules too strict for process node", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "diode insertion failure due to placement or routing blockages", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "metal layer connectivity issues causing false antenna violations", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Add antenna diodes everywhere when the real issue is antenna rule misconfiguration for the process",
+    "node_era_note": "7nm-and-below: more metal layers and stricter antenna rules, requiring more systematic diode insertion"
+  },
+  {
+    "symptom": "detailed-routing DRC hotspots after clean global routing",
+    "first_checks": [
+      {"check": "Run DRC on detailed routing and identify hotspot locations", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify global routing in hotspot regions for accuracy", "why_first": "rules out global routing issues", "check_cost": "hours"},
+      {"check": "Check congestion map for hotspot regions", "why_first": "rules out congestion-induced DRC violations", "check_cost": "hours"},
+      {"check": "Review pin access in hotspot regions", "why_first": "rules out pin access blockages", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If hotspots are at the same location as pin access violations, check pin shapes and spacing", "rules_in": "pin access blockage causing DRC violation", "rules_out": "global routing issue"},
+      {"experiment": "If hotspots are in regions with high congestion in global routing, verify detailed router settings", "rules_in": "detailed router settings inadequate for congestion", "rules_out": "pin access issue"},
+      {"experiment": "If hotspots are random and not correlated with global routing, check detailed router version and options", "rules_in": "detailed router bug or misconfiguration", "rules_out": "global routing or pin access issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "pin access blocked by other nets or shapes", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "congestion in global routing forcing detours in detailed routing", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "detailed router settings not aggressive enough for DRC fixes", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "global routing not accounting for detailed routing DRC constraints", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Blame detailed router when the root cause is pin access blockage or global routing congestion",
+    "node_era_note": "7nm-and-below: more routing layers reduce DRC hotspots but increase complexity of pin access"
+  },
+  {
+    "symptom": "unroutable placement (global placement diverges or overflows)",
+    "first_checks": [
+      {"check": "Check placement density map for overflow regions", "why_first": "cheapest", "check_cost": "minutes"},
+      {"check": "Verify macro placement for tight clusters or overlaps", "why_first": "rules out macro-induced overflow", "check_cost": "hours"},
+      {"check": "Review global routing congestion map for overflow regions", "why_first": "rules out routing congestion as cause", "check_cost": "hours"},
+      {"check": "Inspect placement constraints for overly restrictive rules", "why_first": "rules out constraint-induced overflow", "check_cost": "hours"}
+    ],
+    "discriminating_experiments": [
+      {"experiment": "If overflow is concentrated around specific macros, check macro placement spacing and alignment", "rules_in": "macro placement too tight or misaligned", "rules_out": "global placement algorithm issue"},
+      {"experiment": "If overflow regions match high congestion areas in global routing, verify global placement congestion awareness", "rules_in": "global placement not accounting for routing congestion", "rules_out": "macro placement issue"},
+      {"experiment": "If overflow is at power ring edges, check power grid density and placement keepout zones", "rules_in": "power grid or keepout constraints too restrictive", "rules_out": "macro or global placement issue"}
+    ],
+    "common_root_causes": [
+      {"cause": "macro placement too tight or overlapping", "recalled_frequency": "common", "recall_confidence": 0.9},
+      {"cause": "global placement algorithm not accounting for routing congestion or placement constraints", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "placement constraints (keepouts, alignments) too restrictive", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "power grid density or keepout zones blocking placement", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Blame global placement algorithm when the root cause is macro placement or overly restrictive constraints",
+    "node_era_note": "7nm-and-below: more complex design rules increase likelihood of constraint-induced overflow"
+  }
+]

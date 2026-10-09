@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Two-clustered integer execution architecture",
+    "where_in_paper": "Integer execution units / cluster organization section",
+    "decision": "Integer execution units are partitioned into two clusters, each with its own integer register file, connected by a crossbar; instructions are scheduled to clusters based on resource availability",
+    "alternatives_or_rejected": "a single monolithic integer execution cluster with all ALUs sharing one register file",
+    "rationale": "at 600 MHz, wire delays across a single large cluster would consume a significant fraction of the clock cycle; partitioning into two clusters reduces the maximum wire distance that any single-cycle operation must traverse, preserving cycle time while allowing high-issue-width execution; the paper explicitly frames this as a wire-delay-driven decision at this clock frequency",
+    "outcome": "the dual-cluster design sustains 4-way issue (2 integer ops per cluster per cycle) while keeping the cycle time achievable at 600 MHz on the 0.35-micron process; the crossbar handles inter-cluster communication for instructions that need results from the opposite register file",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am uncertain whether the paper explicitly frames the cluster design as a clock-frequency trade-off vs. a wire-delay-specific decision — my recollection may conflate the two rationales from general Alpha 21264 knowledge",
+    "confidence": 0.65
+  },
+  {
+    "title": "Large reorder buffer (80 entries) for deep out-of-order execution",
+    "where_in_paper": "Out-of-order execution / reorder buffer section",
+    "decision": "The reorder buffer holds 80 entries (plus 32 load and 32 store queue entries), enabling the processor to track up to 80 in-flight instructions",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "larger instruction windows extract more instruction-level parallelism by allowing the scheduler to look further ahead for ready instructions to issue; the paper argues that the performance gain from a larger window outweighs the cycle-time cost of the larger CAM (content-addressable memory) structure needed to implement it, at this specific clock frequency and process technology",
+    "outcome": "the 80-entry ROB enables sustained out-of-order execution across a wide instruction window; the paper presents performance data showing the 21264's IPC advantage over prior Alpha implementations on integer workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am not certain the paper explicitly quantifies the cycle-time cost of the larger ROB or describes it as a deliberate trade-off — this framing may come from later analysis of the paper rather than the paper's own stated reasoning",
+    "confidence": 0.55
+  },
+  {
+    "title": "Instruction cache replication (Icache and Jcache split)",
+    "where_in_paper": "Instruction cache / branch target instruction cache section",
+    "decision": "The instruction cache is organized as two separate structures: a standard Icache holding sequential instruction stream and a Jcache (branch target instruction cache) holding the first cache line of taken-branch targets",
+    "alternatives_or_rejected": "a single unified instruction cache without branch-target caching",
+    "rationale": "taken branches cause the instruction fetch to jump to a non-sequential address; the Jcache eliminates the delay of fetching a branch target from the main Icache by caching the target line separately; this keeps the front-end pipeline fed without stalling on every taken branch",
+    "outcome": "the Icache/Jcache split reduces branch misprediction penalty and improves instruction fetch bandwidth, particularly for code with frequent taken branches; the paper notes that this structure improves effective fetch bandwidth compared to a single unified cache",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am uncertain whether the paper frames the Jcache as a specific wire-delay or physical-layout decision (placement near the front-end pipeline) vs. purely a performance optimization; I may be inferring the physical motivation from general knowledge",
+    "confidence": 0.5
+  },
+  {
+    "title": "Four-way superscalar issue with explicit cluster assignment",
+    "where_in_paper": "Instruction issue / cluster assignment section",
+    "decision": "The 21264 issues up to four instructions per cycle (two integer, one floating-point, one memory) with a heuristic that assigns integer instructions to clusters to balance load",
+    "alternatives_or_rejected": "dynamic scheduling that fully exposes cluster assignment to the out-of-order scheduler without any heuristic guidance",
+    "rationale": "fully dynamic cluster assignment would require the scheduler to track inter-cluster communication costs and register file availability simultaneously, increasing scheduler complexity and cycle time; a simple heuristic that assigns instructions to the cluster with available resources reduces scheduler complexity while maintaining high utilization of both clusters",
+    "outcome": "the cluster assignment heuristic achieves close to the theoretical 50/50 balance of integer instructions across the two clusters on typical workloads; the paper presents utilization data showing the heuristic rarely causes significant cluster imbalance",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully confident that the paper describes the cluster assignment heuristic explicitly as a cycle-time trade-off rather than just a performance heuristic — the cycle-time rationale may be from my general understanding of why clustered architectures are used rather than from the paper's specific text",
+    "confidence": 0.5
+  },
+  {
+    "title": "Exceeding sequential execution CPI via high-issue-width out-of-order execution",
+    "where_in_paper": "Performance / CPI analysis section",
+    "decision": "The 21264 achieves an effective CPI better than 1.0 on many integer workloads by combining out-of-order execution with 4-way superscalar issue, exceeding one instruction per cycle despite maintaining in-order retirement",
+    "alternatives_or_rejected": "strict in-order execution (as in earlier Alpha processors like the 21064)",
+    "rationale": "the paper argues that in-order execution leaves instruction-level parallelism untapped on code with data-dependent branches and memory latency; out-of-order execution allows the processor to issue instructions from the large reorder buffer while waiting for long-latency operations, achieving better-than-1.0 CPI on integer code that has sufficient parallelism to exploit",
+    "outcome": "the paper reports integer CPI figures below 1.0 on benchmarks with sufficient ILP, demonstrating that the combination of large window, wide issue, and out-of-order scheduling achieves CPI performance that in-order designs cannot match at the same clock frequency",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am not certain the paper explicitly contrasts itself against the 21064 as an in-order predecessor — I may be importing that historical framing from general Alpha architecture knowledge; the paper's CPI analysis may be presented without explicit reference to the 21064",
+    "confidence": 0.6
+  }
+]
+```

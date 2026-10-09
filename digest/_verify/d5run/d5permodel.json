@@ -1,0 +1,1415 @@
+{
+ "chatgpt": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 10,
+   "entries": 10,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 7,
+   "gradable": true,
+   "locator_null": 0,
+   "needs_retrieval": 3,
+   "parse": "clean+trailing-content",
+   "shape_bad": 4,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis: \"The GRT routing-layer adjustment of 0.45 (originally deri",
+    "hypothesis: \"A separate suspected cause named in the thread is a globa",
+    "chosen_intervention: \"we could finish GRT by changing the routing laye",
+    "post_state: \"GRT was reported to complete ... after reducing the layer"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 2,
+   "minor": 2,
+   "objections": 4,
+   "parse": "structural-quote-repair",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "alternatives_or_rejected: \"Single-thread/ILP optimization (multiple in",
+    "rationale: \"Commercial server workloads are dominated by TLP\"",
+    "outcome: \"application performance is increased by improving throughput",
+    "gaps: \"The paper does not quantify the measured power or performance d",
+    "gaps: \"It does not state the target clock frequency for the thread-ric",
+    "gaps: \"It does not give quantitative ILP-vs-TLP performance comparison",
+    "rationale: \"Diminishing returns from single-thread focus because of li"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 5,
+   "objections": 7,
+   "parse": "structural-quote-repair",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+trailing-content",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "chatgpt"
+  ],
+  "strings": {
+   "gradable": false,
+   "note": "salvage recovered no case-shaped records",
+   "parse": "harvest-skip-broken-element"
+  }
+ },
+ "deepseek": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 8,
+   "entries": 8,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 4,
+   "gradable": true,
+   "locator_null": 2,
+   "needs_retrieval": 4,
+   "parse": "clean",
+   "shape_bad": 4,
+   "shape_ok": 4
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "chosen_intervention: reducing layer adjustment and increasing iteratio",
+    "confidence: 0.8",
+    "post_state: 'GRT was reported to complete'"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "confidence: 0.95",
+    "alternatives: 'simply running ILP processors at lower clock frequencie",
+    "gaps: 'The paper does not state the target clock frequency'"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 3,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 8,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": false
+  },
+  "spellings_as_collected": [
+   "deepseek"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 3,
+   "gradable": true,
+   "parse": "clean",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "gemini": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 9,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "LFM",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 6,
+   "gradable": true,
+   "locator_null": 3,
+   "needs_retrieval": 3,
+   "parse": "clean",
+   "shape_bad": 3,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis & chosen_intervention: reducing global routing layer adjust"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 1,
+   "objections": 1,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "MISCALIBRATED-bare-SOUND",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+trailing-content",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "gemini"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 2,
+   "gradable": true,
+   "parse": "clean+fence-close+fenced",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "glm 5.3 flash": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 10,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 6,
+   "gradable": true,
+   "locator_null": 3,
+   "needs_retrieval": 4,
+   "parse": "clean+fence-close+fenced",
+   "shape_bad": 2,
+   "shape_ok": 8
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis + chosen_intervention: layer adjustment 0.45→0.2 (plus 30→3",
+    "post_state: treating 'complete BoomTile' as a completion report",
+    "gaps[3]: 'We (eder-matheus) note the layer-adjustment is documented at"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "gaps[1]: 'It does not state the target clock frequency for the thread-",
+    "gaps[2]: 'It does not give quantitative ILP-vs-TLP performance compari",
+    "rationale: 'inherently low ILP of applications'"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+fence-close+fenced",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "glm 5.3 flash"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 3,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "grok": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 12,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 7,
+   "gradable": true,
+   "locator_null": 3,
+   "needs_retrieval": 5,
+   "parse": "clean",
+   "shape_bad": 5,
+   "shape_ok": 7
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis + chosen_intervention: routing-layer adjustment of 0.45 is ",
+    "prior_state / observation: 20k routing congestion DRCs at only 0.24 pl"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 1,
+   "objections": 2,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "MISCALIBRATED-bare-SOUND",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "grok"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 4,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "kimi": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 4,
+   "entries": 6,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 3,
+   "gradable": true,
+   "locator_null": 0,
+   "needs_retrieval": 1,
+   "parse": "clean",
+   "shape_bad": 0,
+   "shape_ok": 4
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis: default 30 congestion iterations were also insufficient",
+    "chosen_intervention attaches both parameter changes to direct_quote",
+    "confidence: 0.8"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 3,
+   "minor": 0,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "outcome: \"application performance is increased by improving throughput",
+    "rationale: \"commercial server workloads are dominated by TLP\"",
+    "alternatives_or_rejected: \"simply running ILP processors at lower cloc",
+    "confidence: 0.95 despite gaps list omitting target clock and measured "
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 3,
+   "objections": 4,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "kimi"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 4,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "longcat": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 12,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 6,
+   "gradable": true,
+   "locator_null": 2,
+   "needs_retrieval": 6,
+   "parse": "clean",
+   "shape_bad": 5,
+   "shape_ok": 7
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis + chosen_intervention + post_state: macro-loop cause named ",
+    "chosen_intervention: routing-layer-adjustment change mechanism"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 1,
+   "objections": 2,
+   "parse": "clean",
+   "verdict": "SUSPECT",
+   "verdict_short": "SUSPECT"
+  },
+  "red3": {
+   "calibration": "SCHEMA-ANOMALY-SOUND-with-objections",
+   "claims_attacked": [
+    "rationale - 'inherently low ILP of applications'",
+    "confidence - 0.95"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 2,
+   "objections": 2,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "longcat"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 3,
+   "gradable": true,
+   "parse": "clean+fenced+trailing-content",
+   "right_answer_wrong_rule": [
+    1
+   ]
+  }
+ },
+ "meta": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 8,
+   "entries": 10,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 4,
+   "gradable": true,
+   "locator_null": 5,
+   "needs_retrieval": 4,
+   "parse": "clean",
+   "shape_bad": 2,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "chosen_intervention conflates two simultaneous changes"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 1,
+   "objections": 1,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "MISCALIBRATED-bare-SOUND",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "meta"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 4,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "mimo": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 6,
+   "entries": 11,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 3,
+   "gradable": true,
+   "locator_null": 1,
+   "needs_retrieval": 3,
+   "parse": "clean",
+   "shape_bad": 2,
+   "shape_ok": 4
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "direct_quote.date: '2024-11-14'",
+    "prior_state: 'BoomTile (Megaboom-derived)'",
+    "hypothesis: groups 'routing-layer adjustment too aggressive' and 'insu",
+    "direct_quote.text: ellipsis truncation loses the congestion-iteration "
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 3,
+   "objections": 4,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "section_or_page_locator: 'page 1 (introduction)'",
+    "alternatives_or_rejected: includes 'simply running ILP processors at l",
+    "rationale: 'inherently low ILP of applications'",
+    "outcome: 'Niagara supports 32 hardware threads in hardware; applicatio"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 3,
+   "objections": 4,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+fence-close+fenced",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "mimo"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 2,
+   "gradable": true,
+   "parse": "clean+fence-close+fenced",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "minara": {
+  "dual_spelled": true,
+  "e": {
+   "classified": 8,
+   "entries": 10,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 4,
+   "gradable": true,
+   "locator_null": 2,
+   "needs_retrieval": 4,
+   "parse": "clean",
+   "shape_bad": 2,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "chosen_intervention: attribution of both the 0.2 layer adjustment and "
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 1,
+   "objections": 1,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "gaps[1]: \"It does not state the target clock frequency for the thread-"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 0,
+   "objections": 1,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "minara",
+   "minaria"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 4,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "minimax 2.7": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 7,
+   "entries": 7,
+   "families": [
+    "Arrhenius",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 4,
+   "gradable": true,
+   "locator_null": 0,
+   "needs_retrieval": 3,
+   "parse": "elementwise-truncation",
+   "shape_bad": 3,
+   "shape_ok": 4
+  },
+  "red1": {
+   "calibration": "SCHEMA-ANOMALY-reservations-without-objections",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "MISCALIBRATED-bare-SOUND",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+fence-close+fenced",
+   "score": 5,
+   "t1": 1,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": false
+  },
+  "spellings_as_collected": [
+   "minimax 2.7"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 2,
+   "gradable": true,
+   "parse": "clean",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "mistral": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 7,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 2,
+   "gradable": true,
+   "locator_null": 3,
+   "needs_retrieval": 5,
+   "parse": "clean+fence-close+fenced",
+   "shape_bad": 4,
+   "shape_ok": 3
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "post_state: 'GRT was reported to complete ('could finish GRT', 'comple",
+    "hypothesis: 'A separate suspected cause named in the thread is a globa"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 1,
+   "objections": 2,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "rationale: 'Diminishing returns from single-thread focus because of li",
+    "outcome: 'Niagara supports 32 hardware threads in hardware; applicatio",
+    "gaps: 'It does not give quantitative ILP-vs-TLP performance comparison"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean+fence-close+fenced",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "raw-newline-escape",
+   "score": 2,
+   "t1": 1,
+   "t2": 1,
+   "t3_bp": false,
+   "t3_factor": false
+  },
+  "spellings_as_collected": [
+   "mistral"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 1,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "qwen": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 8,
+   "entries": 10,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 3,
+   "gradable": true,
+   "locator_null": 7,
+   "needs_retrieval": 5,
+   "parse": "clean",
+   "shape_bad": 2,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "post_state: GRT was reported to complete ('could finish GRT', 'complet"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 1,
+   "objections": 1,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "MISCALIBRATED-bare-SOUND",
+   "claims_attacked": [],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 0,
+   "objections": 0,
+   "parse": "clean",
+   "verdict": "SOUND",
+   "verdict_short": "SOUND"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "qwen"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 2,
+   "gradable": true,
+   "parse": "clean+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "solar": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 7,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 3,
+   "gradable": true,
+   "locator_null": 6,
+   "needs_retrieval": 4,
+   "parse": "clean",
+   "shape_bad": 1,
+   "shape_ok": 6
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "post_state — 'GRT was reported to complete ('could finish GRT', 'compl",
+    "hypothesis — 'The GRT routing-layer adjustment of 0.45 (originally der",
+    "chosen_intervention — attributed causal fix: layer adjustment 0.45 -> "
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "gradable": false,
+   "parse": "elementwise-truncation"
+  },
+  "regz": {
+   "gradable": false,
+   "note": "PROSE-NOT-JSON",
+   "parse": "FAILED",
+   "score": null,
+   "t1": null,
+   "t2": null,
+   "t3_bp": null,
+   "t3_factor": null
+  },
+  "spellings_as_collected": [
+   "solar"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 3,
+   "gradable": true,
+   "parse": "clean",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "sonnet": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 12,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "LFM",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 6,
+   "gradable": true,
+   "locator_null": 9,
+   "needs_retrieval": 6,
+   "parse": "clean+fence-close+fenced",
+   "shape_bad": 4,
+   "shape_ok": 8
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "hypothesis: \"the default 30 congestion iterations were also insufficie",
+    "post_state: \"GRT was reported to complete... after reducing the layer ",
+    "gaps: \"We (eder-matheus) note the layer-adjustment is documented at se"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 0,
+   "minor": 3,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "gaps[1]: \"It does not state the target clock frequency for the thread-",
+    "alternatives_or_rejected: \"Also rejected: simply running ILP processor",
+    "decision: \"rather than for single- or dual-thread performance\""
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 2,
+   "objections": 3,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "clean+fenced+trailing-content",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "sonnet"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 4,
+   "gradable": true,
+   "parse": "clean+fenced+trailing-content",
+   "right_answer_wrong_rule": []
+  }
+ },
+ "yuanbao": {
+  "dual_spelled": false,
+  "e": {
+   "classified": 10,
+   "entries": 12,
+   "families": [
+    "Arrhenius",
+    "CHIPS-48D",
+    "DO-254-DAL",
+    "PMHF",
+    "SPFM",
+    "TPP"
+   ],
+   "free_gradable": 5,
+   "gradable": true,
+   "locator_null": 5,
+   "needs_retrieval": 5,
+   "parse": "clean",
+   "shape_bad": 1,
+   "shape_ok": 9
+  },
+  "red1": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "prior_state + observation, i.e. the incident's central framing: 'place",
+    "chosen_intervention -> post_state: that a global routing-layer capacit",
+    "hypothesis, 'the default 30 congestion iterations were also insufficie",
+    "hypothesis, 'The GRT routing-layer adjustment of 0.45 ... is too aggre",
+    "post_state, 'GRT was reported to complete ... after reducing the layer",
+    "confidence: 0.8"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "mechanism_check",
+    "evidence_check",
+    "attribution_check",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 4,
+   "minor": 2,
+   "objections": 6,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "red3": {
+   "calibration": "consistent",
+   "claims_attacked": [
+    "gaps[1]: 'It does not state the target clock frequency for the thread-",
+    "gaps[2]: 'only a qualitative figure and Table 1 (application ILP/TLP c",
+    "alternatives_or_rejected: 'Also rejected: simply running ILP processor",
+    "outcome: 'Niagara supports 32 hardware threads in hardware; applicatio"
+   ],
+   "extra_review_objects": 0,
+   "fatal": 0,
+   "fields_missing": [],
+   "fields_present": [
+    "direction_check",
+    "quote_plausibility",
+    "missing_from_story",
+    "most_defensible_part"
+   ],
+   "gradable": true,
+   "major": 1,
+   "minor": 3,
+   "objections": 4,
+   "parse": "clean",
+   "verdict": "SOUND-WITH-RESERVATIONS",
+   "verdict_short": "S-W-RES"
+  },
+  "regz": {
+   "gradable": true,
+   "max": 9,
+   "parse": "raw-newline-escape",
+   "score": 9,
+   "t1": 4,
+   "t2": 4,
+   "t3_bp": true,
+   "t3_factor": true
+  },
+  "spellings_as_collected": [
+   "yuanbao"
+  ],
+  "strings": {
+   "cases_seen": 4,
+   "correct": 3,
+   "gradable": true,
+   "parse": "clean",
+   "right_answer_wrong_rule": []
+  }
+ }
+}

@@ -1,0 +1,156 @@
+```json
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Scan LVS report for bus naming/index mismatches (e.g., <0:31> vs <31:0>) and case sensitivity issues",
+        "why_first": "cheapest check that rules out the majority of net mismatches",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify text objects exist on correct layers for all net labels, especially power/ground",
+        "why_first": "rules out common text-layer issues that cause missing nets",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check for opens at hierarchy boundaries and IP pin mismatches",
+        "why_first": "rules out black-box interface issues that cause missing nets",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect shorted nets on metal layers vs text layers",
+        "why_first": "rules out text-layer artefacts vs real shorts",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run LVS in serial mode vs parallel mode; if the short disappears in serial mode, it is a merge artefact from parallel processing",
+        "rules_in": "merge artefact from parallel processing",
+        "rules_out": "real short from routing"
+      },
+      {
+        "experiment": "For a short between two nets, check schematic connectivity; if they are connected in schematic, the short is a missing connection in schematic",
+        "rules_in": "schematic connectivity error",
+        "rules_out": "real layout short"
+      },
+      {
+        "experiment": "For an open net, isolate the specific instance where the open occurs; check if that instance's pin layer matches schematic pin layer",
+        "rules_in": "pin layer mismatch at instance",
+        "rules_out": "global net naming issue"
+      },
+      {
+        "experiment": "For missing nets, check if net name has different bus indexing (e.g., <0:31> vs <31:0>) or naming convention",
+        "rules_in": "bus naming/index convention mismatch",
+        "rules_out": "missing instance or connectivity"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Bus naming/index reversal between schematic and layout",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.9
+      },
+      {
+        "cause": "Missing text objects or text on wrong layer for net labels",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "IP/block pin mismatch or missing pins at hierarchy boundaries",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Merge artefacts from parallel LVS processing",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Real shorts from routing or DRC violations",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      }
+    ],
+    "classic_trap": "Assuming all shorts are real and spending days on DRC when it is actually a text/naming issue",
+    "node_era_note": "At 7nm and below, double patterning makes real shorts more common, but text/naming issues remain equally prevalent"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Compare parameter names and units between schematic and layout (e.g., W/L values, finger counts)",
+        "why_first": "cheapest check that rules out parameter mismatches",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify finger/multiplier counts match between schematic instances and layout",
+        "why_first": "rules out common device splitting/merging issues",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check for extra instances or missing instances in layout vs schematic hierarchy",
+        "why_first": "rules out hierarchical instance count mismatches",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review property calculation settings and extraction tool options",
+        "why_first": "rules out calculation errors that cause wrong sizes",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run extraction with different property calculation settings; if wrong size disappears, it is a calculation issue",
+        "rules_in": "property calculation error",
+        "rules_out": "schematic/layout parameter mismatch"
+      },
+      {
+        "experiment": "For extra devices, check if they appear only in specific extraction corners; if yes, it is a parasitic device",
+        "rules_in": "parasitic device from extraction",
+        "rules_out": "real extra instance in layout"
+      },
+      {
+        "experiment": "For device count mismatch, check hierarchy boundaries; if mismatch is at black box boundary, check black box contents",
+        "rules_in": "black box vs actual contents mismatch",
+        "rules_out": "global instance count error"
+      },
+      {
+        "experiment": "For W/L mismatches, check if schematic uses different parameter names or units than layout",
+        "rules_in": "parameter name/unit mismatch",
+        "rules_out": "finger/multiplier count error"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Parameter name mismatch between schematic and layout",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Finger/multiplier count mismatch between schematic and layout",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Parasitic devices from extraction in advanced nodes",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Missing or extra instances in hierarchy",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "PDK version mismatch between schematic and layout",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Assuming the layout is wrong when it is actually a schematic parameter issue",
+    "node_era_note": "At 7nm and below, parasitic extraction is more complex, making parasitic devices more common"
+  }
+]
+```

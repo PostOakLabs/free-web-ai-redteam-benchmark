@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Clustered integer execution with duplicated 80-entry register files",
+    "where_in_paper": "Execution engine / Figure 6 integer pipes",
+    "decision": "Split integer register file into two clusters each containing duplicates of 80-entry register file, two pipes per cluster, combining to support four-way integer issue, with one extra cycle latency to broadcast results from one cluster to the other",
+    "alternatives_or_rejected": "Idealized unclustered implementation with single 80-entry file and full bypass network for four-way issue",
+    "rationale": "Clustering makes design simpler and faster, lower risk, higher speed of two-issue machine with performance benefits of four-way issue; static slotting by fetch position equalizes utilization, critical-path computations tend to stay on same cluster, loads/stores only executable in upper or lower pipelines so static assignment not a restriction",
+    "outcome": "Provides much of implementation simplicity, lower risk, and higher speed of two-issue machine with performance benefits of four-way issue; performance cost only a few percent or less compared to idealized unclustered implementation in most applications",
+    "quote_as_recalled": "This clustering makes the design simpler and faster, although it costs an extra cycle of latency",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact duplicate size 80-entry vs 72 for FP may be swapped; extra cycle penalty direction (broadcast vs result forwarding) wording",
+    "confidence": 0.88
+  },
+  {
+    "title": "Line and way prediction to keep I-cache off critical fetch loop",
+    "where_in_paper": "Instruction pipeline - Fetch / Figure 3 instruction fetch",
+    "decision": "Implement line and way prediction that predicts next four-instruction block and which way of two-way 64-Kbyte I-cache, using wraparound fast path to read next instructions while in parallel completing validity check; train predictors on I-cache fill including direct jump targets",
+    "alternatives_or_rejected": "Conventional set-associative I-cache lookup with tag compare and branch prediction in critical fetch loop, or 8-Kbyte direct-mapped I-cache like 21164 with lower hit rate",
+    "rationale": "Combines advantages of set-associative behavior and elimination of fetch bubble with fast access time of direct-mapped cache; extra logic levels - instruction decode, branch prediction, and cache tag comparison - are outside critical fetch loop; predictors correct 85% to 100% for most apps, mispredict cost single cycle, avoids misfetch penalty for loop terminators and indirect jumps",
+    "outcome": "Very high bandwidth instruction fetch even when not in I-cache, can saturate L2 bandwidth with instruction prefetches; 64-Kbyte two-way set-associative offers much-improved hit rates vs 8-Kbyte direct-mapped in 21164",
+    "quote_as_recalled": "extra logic levels—instruction decode, branch prediction, and cache tag comparison—are outside the critical fetch loop",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact predictor accuracy 85% to 100% vs 90% to 100% for branch predictor may be conflated; two-way vs four-way associativity",
+    "confidence": 0.86
+  },
+  {
+    "title": "Double-pumped 64KB data cache to provide two ports",
+    "where_in_paper": "Internal memory system / Data path / Figure 7",
+    "decision": "Double-pump data cache referenced twice each cycle once per clock phase, effectively operating at twice processor clock frequency, to support any combination of two loads or stores per cycle without conflict, with read-modify-write for SECDED ECC and speculative store dumps merging two stores into one 128-bit dump",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Memory system must service up to two memory references from integer execution pipes every cycle out-of-order; double-pumping implements necessary two ports with single-ported array, maintaining low latency and high bandwidth, enabling parallel fills, victim handling, and store forwarding",
+    "outcome": "Supports any combination of two loads or stores per cycle without conflict; 3-cycle integer load latency, 4-cycle floating-point load latency; tracks 32 inflight loads, 32 inflight stores, 8 inflight cache misses; peak L2 transfer 16 bytes every 1.5 cycles",
+    "quote_as_recalled": "The data cache is doublepumped to implement the necessary two ports",
+    "page_guess": 31,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact latency numbers 3-cycle integer vs 4-cycle FP may be swapped with Table 2; SECDED vs parity detail",
+    "confidence": 0.84
+  },
+  {
+    "title": "Speculative issue of load consumers with minirestart and load hit/miss prediction",
+    "where_in_paper": "Dynamic execution examples - Load hit/miss prediction / Figure 11",
+    "decision": "Speculatively issue consumers of integer load data three cycles after load before hit/miss known, allowing beneficiaries to also issue; on load miss squash two integer issue cycles on all four pipes and pull instructions back into issue queue for reissue (minirestart) rather than full pipeline restart; add 4-bit saturating counter predictor that decrements by two on miss else increments by one to predict hit/miss",
+    "alternatives_or_rejected": "Rely on general speculative execution mechanisms to abort consumers requiring restarting entire instruction pipeline",
+    "rationale": "Early issue allows consumers to receive bypassed data at earliest time; full restart too expensive because load misses frequent in some applications; two-cycle window still expensive for miss-heavy apps, so predictor minimizes latency for hit-heavy apps and avoids cost of overspeculation for miss-heavy apps; floating-point loads have four-cycle latency so enough time to resolve without speculation",
+    "outcome": "Minimum three-cycle integer load hit latency achieved; on miss only two cycles squashed; effective latency five cycles when hit predicted as miss but actually hits; more unrelated instructions allowed to issue in slots not taken; avoids large pipeline flush penalty",
+    "quote_as_recalled": "two integer issue cycles (on all four integer pipes) are squashed",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact counter width 4-bit and decrement-by-two increment-by-one rule may be from text vs sidebar; number of squashed cycles two vs one",
+    "confidence": 0.82
+  },
+  {
+    "title": "Tournament branch predictor plus store-wait/load-wait dynamic memory disambiguation",
+    "where_in_paper": "Branch prediction / Figure 4 tournament predictor and Store/load memory ordering Figure 10",
+    "decision": "Implement tournament branch predictor with 1024-entry 10-bit pattern local history table and 1024 prediction counters, 4096-entry global table indexed by 12-branch path history, and 4096-entry chooser to select local vs global per invocation; for memory, implement store-wait table and load-wait table that remember readafterwrite misspeculation and delay marked loads until prior stores issued, periodically cleared",
+    "alternatives_or_rejected": "Larger tables of either individual local or global method alone, or static memory dependence causing repeated wrong-data squashes",
+    "rationale": "Local and global correlation minimize mispredicts, 90% to 100% success on most benchmarks, chooser dynamically selects best method per branch; for memory, first misspeculation where load issues before older store to same address squashes load, then training sets bit to delay load on subsequent executions allowing speculative store buffer bypass, producing same result as inorder while capturing out-of-order benefits",
+    "outcome": "Branch mispredict cost single cycle, line and way predictors correct 85% to 100%; memory system dynamically adapts to avoid repeated store/load violations, eliminates unnecessary waits via periodic clear; enables 80 instructions inflight, 50% to 200% faster than 21164 despite same four-wide fetch",
+    "quote_as_recalled": "tournament branch predictor with better prediction accuracy than larger tables of either individual method",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact table sizes 1024x10, 4096x2, chooser 4096x2 may be swapped with later EV6 docs; load-wait vs store-wait naming may be reversed",
+    "confidence": 0.78
+  }
+]

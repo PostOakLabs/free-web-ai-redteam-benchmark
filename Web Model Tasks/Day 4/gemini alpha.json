@@ -1,0 +1,72 @@
+[
+{
+"title": "Clustered Integer Execution Pipeline vs. Centralized Register File",
+"where_in_paper": "Instruction Execution / Integer Execution Pipeline",
+"decision": "Split the 4-way integer execution engine into two distinct 2-way clusters (Cluster Upper and Cluster Lower), duplicating the integer register file across both clusters.",
+"alternatives_or_rejected": "A single centralized integer register file with 8 read ports and 4 write ports supplying all four integer execution units.",
+"rationale": "A single 8-read/4-write ported register file would require excessive wire area, long cross-chip routing delays, and high parasitic capacitance that would severely limit the cycle time / target clock frequency.",
+"outcome": "Enabled a fast clock frequency by keeping local bypass loops within each cluster fast, accepting a 1-cycle latency penalty for inter-cluster operand transfers.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 28,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact formal naming of the clusters (e.g., Cluster 0/1 vs Cluster U/L) in the text figure labels.",
+"confidence": 0.95
+},
+{
+"title": "Dual-Bank Instruction Cache Duplication for Multi-Read Bandwidth",
+"where_in_paper": "Instruction Fetch / Cache Subsystem",
+"decision": "Replicate the 64-KB 2-way set-associative I-cache into two identical physical copies (I-Cache Set A and B) to allow reading two instruction fetch blocks simultaneously.",
+"alternatives_or_rejected": "Building a multi-ported single-copy instruction cache.",
+"rationale": "Multi-porting a single cache array substantially increases cell area, wiring overhead, and access time, whereas replicating the entire array requires less area and achieves lower access latency.",
+"outcome": "Allowed fetching up to 4 instructions per cycle across branch boundaries with low access latency.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 26,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact page location of the instruction cache structure breakdown.",
+"confidence": 0.9
+},
+{
+"title": "Out-of-Order Instruction Scheduling Window Sizing vs Clock Frequency",
+"where_in_paper": "Instruction Mapper and Issue / Execution Window",
+"decision": "Limit the out-of-order issue queue window size to 80 instructions total (20-entry integer issue queue, 15-entry floating-point issue queue) rather than scaling to a larger monolithic queue.",
+"alternatives_or_rejected": "Larger unified issue queues capable of holding more instructions to expose more instruction-level parallelism (ILP).",
+"rationale": "Issue queue wake-up and select logic is on the critical timing path; larger queues increase circuit delay and degrade the core clock frequency, which nets worse overall performance.",
+"outcome": "Sustained high execution throughput and fast cycle time while maintaining high instruction-level parallelism.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 27,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact allocation numbers for active instructions versus pending issue queue slots.",
+"confidence": 0.85
+},
+{
+"title": "Speculative Execution with Hardware Memory Orientation / Store Sets",
+"where_in_paper": "Memory System / Load-Store Unit",
+"decision": "Implement speculative load execution ahead of stores, using a dynamic memory disambiguation prediction mechanism (Store Sets) to predict load-store aliases.",
+"alternatives_or_rejected": "Stalling loads until all preceding store addresses are fully calculated and resolved.",
+"rationale": "Strictly waiting for store address resolution limits memory-level parallelism; predicting non-aliasing allows memory loads to issue speculatively with high accuracy, recovering via pipeline flush if a misprediction occurs.",
+"outcome": "Significantly reduced effective load latency and improved memory pipeline utilization on complex workloads.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 31,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Whether the paper explicitly names the algorithm 'Store Sets' or describes the predictor structurally without using the term 'Store Sets'.",
+"confidence": 0.8
+},
+{
+"title": "Out-of-Order Memory Access Engine with On-Chip L1 Data Cache",
+"where_in_paper": "Cache Subsystem / Memory Hierarchy",
+"decision": "Build a 64-KB 2-way set-associative dual-ported L1 data cache using a hit-under-miss non-blocking structure supporting up to 8 outstanding cache misses.",
+"alternatives_or_rejected": "Blocking L1 cache structure or single-ported data cache array.",
+"rationale": "High-frequency out-of-order instruction execution requires continuous memory supply; blocking on the first L1 cache miss would collapse the out-of-order issue queue.",
+"outcome": "Sustained execution around cache misses and provided the necessary load/store memory bandwidth for dual integer/FP pipelines.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 30,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact maximum count of outstanding L1 data cache misses supported by the MSHR logic.",
+"confidence": 0.85
+}
+]

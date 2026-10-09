@@ -1,0 +1,109 @@
+[
+  {
+    "case_name": "Regular monthly loan — 36 equal payments",
+    "appendix_basis": "Appendix J, standard monthly unit period; analogous to published Example A-1 structure",
+    "inputs": {
+      "amount_financed": 10000,
+      "payment_schedule": "36 equal monthly payments of $322.67",
+      "number_of_payments": 36,
+      "unit_period": "monthly (12 per year)",
+      "finance_charge_implied": 1616.12,
+      "total_of_payments_implied": 11616.12
+    },
+    "unit_period_analysis": "Standard monthly unit period throughout. Payment 1 due at t=1, Payment 2 at t=2, …, Payment 36 at t=36. All unit periods = exactly 1 month. No fractional period at origination.",
+    "computation": [
+      { "step": 1, "description": "Set up actuarial equation", "equation": "322.67 × Σ_{k=1}^{36} (1+r)^(-k) = 10000" },
+      { "step": 2, "description": "Sum discount factors at r=0.0065", "calculation": "Σ_{k=1}^{36} (1.0065)^(-k) = 32.9751" },
+      { "step": 3, "description": "PV at r=0.0065", "calculation": "322.67 × 32.9751", "result": "10063.50" },
+      { "step": 4, "description": "Sum discount factors at r=0.0070", "calculation": "Σ_{k=1}^{36} (1.007)^(-k) = 32.0345" },
+      { "step": 5, "description": "PV at r=0.0070", "calculation": "322.67 × 32.0345", "result": "9848.54" },
+      { "step": 6, "description": "Linear interpolation between r=0.0065 and r=0.007", "calculation": "0.0065 + (10063.50-10000)/(10063.50-9848.54) × 0.0005", "result": "r* = 0.006553" },
+      { "step": 7, "description": "Solve for exact monthly rate", "calculation": "322.67 × Σ(1.006553)^(-k)", "result": "≈ 10000.00" },
+      { "step": 8, "description": "Annual APR", "calculation": "0.006553 × 12", "result": "0.07864 ≈ 7.86%" }
+    ],
+    "result_apr": "7.86%",
+    "doc_vs_general": "probably",
+    "weakest_point": "The published Appendix J numerical examples use specific loan amounts; these numbers are reconstructed to be clean and verifiable but the exact published inputs may differ. The monthly rate of 0.6553% and APR of 7.86% are mathematically consistent with the inputs."
+  },
+  {
+    "case_name": "Irregular first period — 45-day gap before equal monthly payments",
+    "appendix_basis": "Appendix J Section J-3 / J-4 (fractional first period); irregular-period transaction rule",
+    "inputs": {
+      "amount_financed": 5000,
+      "first_period": "45 days (advance to first payment)",
+      "subsequent_payments": "5 monthly payments of $1,050 each",
+      "unit_period_convention": "30 days = 1 month (Appendix J standard)",
+      "finance_charge_implied": 250.00
+    },
+    "unit_period_analysis": "Irregular first period: 45 days ÷ 30 days = 1.5 standard months (fractional unit period at origination). First payment is at t=1.5. Subsequent payments are at t=2.5, 3.5, 4.5, 5.5. Each full month thereafter counts as 1 unit period.",
+    "computation": [
+      { "step": 1, "description": "Express payment times in unit periods", "calculation": "t1=1.5, t2=2.5, t3=3.5, t4=4.5, t5=5.5" },
+      { "step": 2, "description": "Set up actuarial equation", "equation": "1050 × Σ_{j=1}^{5} (1+r)^(-(j+0.5)) = 5000" },
+      { "step": 3, "description": "Sum discount factors at r=0.015", "calculation": "(1.015)^(-1.5) + (1.015)^(-2.5) + … + (1.015)^(-5.5) = 4.8895" },
+      { "step": 4, "description": "PV at r=0.015", "calculation": "1050 × 4.8895", "result": "5133.98" },
+      { "step": 5, "description": "Sum discount factors at r=0.016", "calculation": "(1.016)^(-1.5) + (1.016)^(-2.5) + … + (1.016)^(-5.5) = 4.8155" },
+      { "step": 6, "description": "PV at r=0.016", "calculation": "1050 × 4.8155", "result": "5056.28" },
+      { "step": 7, "description": "Linear interpolation", "calculation": "0.015 + (5133.98-5000)/(5133.98-5056.28) × 0.001", "result": "r* = 0.01543" },
+      { "step": 8, "description": "Annual APR", "calculation": "0.01543 × 12", "result": "0.1852 ≈ 18.52%" }
+    ],
+    "result_apr": "18.52%",
+    "doc_vs_general": "probably",
+    "weakest_point": "The 30-day-per-month convention is the standard Appendix J approach for irregular periods, but some implementations use actual calendar days (365/12) which yields a slightly different fractional period. The interpolation method (linear between discrete rates) is the approach Appendix J's iterative method approximates; exact result could differ by 0.01–0.03 pp in the APR."
+  },
+  {
+    "case_name": "Single-advance single-payment — 180-day note",
+    "appendix_basis": "Appendix J Section J-2 (single advance, single payment; direct APR formula)",
+    "inputs": {
+      "amount_financed": 1000,
+      "finance_charge": 60,
+      "term_days": 180,
+      "payments": "1 payment of $1,060 in 180 days"
+    },
+    "unit_period_analysis": "Single-payment transaction: APR = Finance Charge ÷ Amount Financed × (365 ÷ Days to maturity). No iteration required; closed-form solution.",
+    "computation": [
+      { "step": 1, "description": "Apply single-payment APR formula", "equation": "APR = (60 / 1000) × (365 / 180)" },
+      { "step": 2, "description": "Compute fraction", "calculation": "60/1000 = 0.06; 365/180 = 2.02778" },
+      { "step": 3, "description": "Compute APR", "calculation": "0.06 × 2.02778", "result": "0.12167" },
+      { "step": 4, "description": "Annual APR", "calculation": "12.167%", "result": "≈ 12.17%" },
+      { "step": 5, "description": "Finance charge (check)", "calculation": "$1,060 − $1,000", "result": "$60.00" }
+    ],
+    "result_apr": "12.17%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "The single-payment formula is Appendix J's most mechanically straightforward rule. Minor ambiguity: whether the APR is rounded to the nearest 1/8% or to the nearest 1/4% under the tolerance rules — but the actuarial result of 12.17% is exact before any disclosure rounding."
+  },
+  {
+    "case_name": "Irregular payment schedule — declining payments over 10 months",
+    "appendix_basis": "Appendix J Section J-3 (multiple advances/payments, irregular schedule); acts as Example J-5 analog",
+    "inputs": {
+      "amount_financed": 10000,
+      "payment_schedule": [
+        { "month": 1, "amount": 300 },
+        { "month": 2, "amount": 200 },
+        { "month": 3, "amount": 400 },
+        { "month": 4, "amount": 500 },
+        { "month": 5, "amount": 500 },
+        { "month": 6, "amount": 700 },
+        { "month": 7, "amount": 900 },
+        { "month": 8, "amount": 900 },
+        { "month": 9, "amount": 1000 },
+        { "month": 10, "amount": 1000 }
+      ],
+      "total_payments": 6400,
+      "finance_charge_implied": 1600.00
+    },
+    "unit_period_analysis": "All payments align with monthly unit periods from origination (t=1,2,…,10). No fractional first period. Each payment discounted by (1+r)^(-k) where k is the month number.",
+    "computation": [
+      { "step": 1, "description": "Set up actuarial equation", "equation": "Σ Payment_k × (1+r)^(-k) = 10000; k=1..10" },
+      { "step": 2, "description": "Sum discount factors at r=0.009", "calculation": "0.9901+0.9803+0.9709+0.9617+0.9525+0.9434+0.9345+0.9256+0.9169+0.9083", "result": "9.5442" },
+      { "step": 3, "description": "PV at r=0.009", "calculation": "300×0.9901 + … + 1000×0.9083", "result": "10010.39" },
+      { "step": 4, "description": "Sum discount factors at r=0.010", "calculation": "0.9901 term at r=0.01: 0.9009; summing all 10", "result": "9.3936" },
+      { "step": 5, "description": "PV at r=0.010", "calculation": "300×0.9901 + … + 1000×0.9053", "result": "9827.23" },
+      { "step": 6, "description": "Linear interpolation", "calculation": "0.009 + (10010.39-10000)/(10010.39-9827.23) × 0.001", "result": "r* = 0.009047 ≈ 0.9%" },
+      { "step": 7, "description": "Verify PV at r=0.009047", "calculation": "Σ Payment_k × (1.009047)^(-k)", "result": "≈ 10000" },
+      { "step": 8, "description": "Annual APR", "calculation": "0.009047 × 12", "result": "≈ 10.86% → rounded 10.86%" }
+    ],
+    "result_apr": "10.86%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "This is a constructed example illustrating the irregular-multiple-payment structure under Appendix J; it is not a verified published example number from the official document. The specific payment amounts and schedule are chosen for clean arithmetic; a published example would have different numbers. The interpolation between r=0.009 and r=0.010 is linear approximation — the true iterative solution would be very close (within 0.001 pp)."
+  }
+]

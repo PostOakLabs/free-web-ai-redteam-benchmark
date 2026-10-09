@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Adoption of a full-system design approach over a chip-only focus",
+    "where_in_paper": "Section 2: Guiding Principles",
+    "decision": "Designed the entire system—processor, memory, and I/O bridge chips—together from the outset, rather than designing a chip in isolation.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To optimize the system, the team started with the full design in mind up front, marrying process technology, packaging, and microarchitecture to allow software to exploit them; a new high-performance processor needs a new subsystem to effectively feed it.",
+    "outcome": "The processor core was designed to fit effectively in this environment, and the system was built as a cohesive whole.",
+    "quote_as_recalled": "To optimize the system, we started with the full design in mind up front.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote may be slightly paraphrased.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Prioritization of very high frequency design with system balance",
+    "where_in_paper": "Section 2: Guiding Principles",
+    "decision": "Committed from the outset to deliver best-of-breed operating frequencies, revamping chip design with new transistor-level tools and transforming complex control logic into regular data-flow constructs.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To maintain a leadership position in operating frequency, and to permit system balance to be preserved as technology improvements allow even higher frequencies.",
+    "outcome": "The system was designed so that bus frequencies scale proportionately with processor frequency, maintaining system balance as frequencies increase.",
+    "quote_as_recalled": "To maintain a leadership position, we planned, from the outset, to deliver best-of-breed operating frequencies.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote may be slightly paraphrased.",
+    "confidence": 0.95
+  },
+  {
+    "title": "RAS philosophy: proactive error elimination and redundancy over mere error correction",
+    "where_in_paper": "Section 2: Guiding Principles (and RAS discussion)",
+    "decision": "Adopted a RAS approach that eliminates outages and provides redundancy where errors cannot be eliminated, transforming hard machine stops into synchronous machine interrupts where possible.",
+    "alternatives_or_rejected": "The paper explicitly rejects the approach of achieving reliability by only choosing reliable parts and building ECC into major arrays.",
+    "rationale": "Servers require continuous operation; outages are not tolerated. High reliability requires an approach that goes beyond error correction to proactively eliminate failures.",
+    "outcome": "RAS attributes previously seen only in mainframe systems were designed into POWER4 systems pervasively.",
+    "quote_as_recalled": "With POWER4, we accepted the principle that one does not achieve high levels of reliability by only choosing reliable parts and building error correction codes (ECC) into major arrays.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote may be slightly paraphrased.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Single-chip design to serve both pSeries and iSeries workloads",
+    "where_in_paper": "Section 2: Guiding Principles",
+    "decision": "Created a single design to address both commercial (iSeries) and technical (pSeries) application requirements, rather than separate chips for each.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The need to satisfy high-performance computing requirements (high bandwidth) and commercial requirements (data sharing and SMP scaling) dictated a single design to address both environments.",
+    "outcome": "A single POWER4 design met the needs of both IBM @server pSeries and iSeries systems.",
+    "quote_as_recalled": "The need to satisfy high performance computing requirements with its historical high bandwidth demands and commercial requirements with its data sharing and SMP scaling requirements dictated a single design to address both environments.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote may be slightly paraphrased.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Maintenance of binary compatibility with prior PowerPC/PowerPC-AS systems",
+    "where_in_paper": "Section 2: Guiding Principles",
+    "decision": "Accepted the absolute requirement of maintaining binary compatibility for both 32-bit and 64-bit applications with prior PowerPC and PowerPC-AS systems.",
+    "alternatives_or_rejected": "The paper implies an alternative of breaking compatibility for architectural change, but this was rejected.",
+    "rationale": "Internal IBM task forces found no technical impediment to scaling PowerPC to higher frequencies, and to protect customers' software investment, compatibility was deemed absolute.",
+    "outcome": "Binary compatibility was maintained from a hardware perspective.",
+    "quote_as_recalled": "With no technical reason to change, in order to keep our customers software investment in tact, we accepted the absolute requirement of maintaining binary compatibility.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote may be slightly paraphrased.",
+    "confidence": 0.95
+  }
+]
+```

@@ -1,0 +1,124 @@
+```json
+[
+    {
+        "calculation": "Single-Point Fault Metric (SPFM)",
+        "formula_or_test": "SPFM = (Number of single-point faults detected by safety mechanisms) / (Total number of single-point faults)",
+        "inputs": ["Number of single-point faults detected by safety mechanisms", "Total number of single-point faults"],
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Section 7.4.10",
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.95
+    },
+    {
+        "calculation": "Latent Fault Metric (LFM)",
+        "formula_or_test": "LFM = (Number of latent faults detected by safety mechanisms) / (Total number of latent faults)",
+        "inputs": ["Number of latent faults detected by safety mechanisms", "Total number of latent faults"],
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Section 7.4.11",
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.95
+    },
+    {
+        "calculation": "Probabilistic Metric for Hardware Failure (PMHF)",
+        "formula_or_test": "PMHF = Sum over all fault combinations of (Probability of fault combination * Probability of violation of safety goal given the fault combination)",
+        "inputs": ["Probability of fault combination", "Probability of violation of safety goal given the fault combination"],
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Section 7.4.12",
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.9
+    },
+    {
+        "calculation": "ASIL Decomposition Targets",
+        "formula_or_test": "ASIL D (highest) requires SPFM ≥ 90%, LFM ≥ 60%, PMHF ≤ 10^-8 /h; ASIL C requires SPFM ≥ 80%, LFM ≥ 60%, PMHF ≤ 10^-7 /h; ASIL B requires SPFM ≥ 60%, LFM ≥ 60%, PMHF ≤ 10^-6 /h; ASIL A requires SPFM ≥ 0%, LFM ≥ 0%, PMHF ≤ 10^-5 /h",
+        "inputs": ["ASIL level (A, B, C, D)", "SPFM", "LFM", "PMHF"],
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Table 2",
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.95
+    },
+    {
+        "calculation": "DO-254 Design Assurance Level (DAL) Objective Mapping",
+        "formula_or_test": "DAL A (Catastrophic) requires < 10^-9 failures/hour; DAL B (Hazardous) requires < 10^-7 failures/hour; DAL C (Major) requires < 10^-5 failures/hour; DAL D (Minor) requires < 10^-3 failures/hour; DAL E (No Effect) requires no specific requirement",
+        "inputs": ["DAL level (A, B, C, D, E)", "Failure rate"],
+        "authority": "RTCA/DO-254",
+        "clause_locator": null,
+        "publicly_retrievable": false,
+        "volatility": "Low",
+        "confidence": 0.85
+    },
+    {
+        "calculation": "CHIPS Act Incentive Percentage for Semiconductor Manufacturing",
+        "formula_or_test": "Incentive = 25% of capital expenditures for semiconductor manufacturing projects (up to $3 billion per project)",
+        "inputs": ["Capital expenditures for semiconductor manufacturing"],
+        "authority": "CHIPS Act of 2022, Section 9902",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Medium",
+        "confidence": 0.9
+    },
+    {
+        "calculation": "EAR ECCN 3A090 Threshold for Total Processing Performance",
+        "formula_or_test": "Export control applies if total processing performance ≥ 0.5 TOPS (Tera Operations Per Second) for AI accelerators",
+        "inputs": ["Total processing performance (TOPS)"],
+        "authority": "EAR ECCN 3A090",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Medium",
+        "confidence": 0.8
+    },
+    {
+        "calculation": "EAR ECCN 4A090 Threshold for Logic ICs",
+        "formula_or_test": "Export control applies if logic ICs have a performance ≥ 14 nm node or below",
+        "inputs": ["Logic IC process node (nm)"],
+        "authority": "EAR ECCN 4A090",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Medium",
+        "confidence": 0.8
+    },
+    {
+        "calculation": "FIT Rate Calculation (Failures In Time)",
+        "formula_or_test": "FIT = (Number of failures) / (Total device-hours) * 10^9",
+        "inputs": ["Number of failures", "Total device-hours"],
+        "authority": "JEDEC JESD85",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.95
+    },
+    {
+        "calculation": "Arrhenius Model for Accelerated Testing",
+        "formula_or_test": "Acceleration Factor (AF) = exp[(Ea/k) * (1/T_use - 1/T_stress)] where Ea = activation energy, k = Boltzmann constant, T_use = use temperature, T_stress = stress temperature",
+        "inputs": ["Activation energy (Ea)", "Boltzmann constant (k)", "Use temperature (T_use)", "Stress temperature (T_stress)"],
+        "authority": "JEDEC JESD47",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.9
+    },
+    {
+        "calculation": "Eyring Model for Reliability Prediction",
+        "formula_or_test": "Failure Rate = A * exp[(-Ea/kT) + (B * S)] where A = constant, Ea = activation energy, k = Boltzmann constant, T = temperature, B = stress coefficient, S = stress level",
+        "inputs": ["Constant (A)", "Activation energy (Ea)", "Boltzmann constant (k)", "Temperature (T)", "Stress coefficient (B)", "Stress level (S)"],
+        "authority": "JEDEC JESD91",
+        "clause_locator": null,
+        "publicly_retrievable": true,
+        "volatility": "Low",
+        "confidence": 0.85
+    },
+    {
+        "calculation": "IEC 61508 SIL Verification (Hardware Fault Tolerance)",
+        "formula_or_test": "SIL 4 requires Hardware Fault Tolerance (HFT) ≥ 2; SIL 3 requires HFT ≥ 1; SIL 2 requires HFT ≥ 0; SIL 1 requires HFT ≥ 0",
+        "inputs": ["SIL level (1, 2, 3, 4)", "Hardware Fault Tolerance (HFT)"],
+        "authority": "IEC 61508-2:2010",
+        "clause_locator": "Table 2",
+        "publicly_retrievable": false,
+        "volatility": "Low",
+        "confidence": 0.9
+    }
+]
+```

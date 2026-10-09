@@ -1,0 +1,32 @@
+[
+  {
+    "title": "L1 Data Cache Access Method",
+    "where_in_paper": "Memory System / Cache Hierarchy",
+    "decision": "Cycle the L1 data cache array at twice the core processor clock frequency to provide two load/store accesses per cycle.",
+    "alternatives_or_rejected": "Building a true multi-ported SRAM or using complex banking with conflict resolution logic.",
+    "rationale": "Multi-ported SRAMs consume excessive die area and have slower access times; banking introduces stalls. Double-pumping trades clocking complexity for area and speed.",
+    "outcome": "The data cache effectively operates at double frequency, supporting the high-bandwidth out-of-order engine without the area penalty of multi-porting.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Issue Queue Organization",
+    "where_in_paper": "Instruction Window / Out-of-Order Engine",
+    "decision": "Implement physically separate, distributed issue queues for Integer and Floating-Point instructions.",
+    "alternatives_or_rejected": "A single, large centralized unified issue queue or reservation station.",
+    "rationale": "A single large queue would have wire-delay and access-time penalties that limit maximum clock frequency. Separating them keeps arrays smaller, faster, and closer to execution units.",
+    "outcome": "Enabled higher clock frequencies and reduced issue latency, though it required duplicating some control logic.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.80
+  },
+  {
+    "title": "Tournament Branch Predictor",
+    "where_in_paper": "Front-end / Branch Prediction",
+    "decision": "Implement a tournament branch predictor that dynamically selects between a local-history predictor and a global-history predictor for each branch.",
+    "alternatives_or_rejected": "A simple gshare predictor, a pure bimodal predictor, or a single global-history table.",
+    "rationale": "Different branches exhibit different correlation behaviors; some correlate strongly with their own local history, while others correlate with the global execution path. A tournament predictor adapts to both without the aliasing problems of forcing all branches into one history scheme.",
+    "outcome": "High branch prediction accuracy that was critical for the deep pipeline and high clock frequency of the 21264.",
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "confidence": 0.60
+  }
+]

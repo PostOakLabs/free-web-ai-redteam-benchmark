@@ -1,0 +1,122 @@
+[
+  {
+    "calculation": "ISO 26262 single-point fault metric (SPFM) — fraction of the safety-related hardware failure rate that is neither single-point nor residual, tested against an ASIL-dependent target",
+    "formula_or_test": "SPFM = 1 - [SUM_SR_HW(lambda_SPF + lambda_RF)] / [SUM_SR_HW(lambda_total)] = SUM_SR_HW(lambda_MPF + lambda_S) / SUM_SR_HW(lambda_total), where for each safety-related hardware element lambda_total = lambda_SPF + lambda_RF + lambda_MPF + lambda_S. Pass test: SPFM >= 90% (ASIL B), >= 97% (ASIL C), >= 99% (ASIL D); no ASIL A target. ASIL B values are advisory ('possible source for derivation of the target'), ASIL C/D required. Quality-managed (QM) / non-safety-related elements are excluded from both sums. Diagnostic-coverage shortcut given in the standard: lambda_RF <= lambda_RF,est = lambda * (1 - K_DC,RF/100%).",
+    "inputs": ["lambda_SPF (FIT or /h) per safety-related hardware element", "lambda_RF per element", "lambda_MPF (detected, perceived, latent) per element", "lambda_S (safe) per element", "ASIL of the safety goal", "diagnostic coverage K_DC per safety mechanism (Annex D tables)", "FMEDA fault classification of every failure mode"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level (hardware architectural metrics)",
+    "clause_locator": "Target values: Table 4 ('Possible source for the derivation of the target single-point fault metric value'); formula text: 2011 edition Annex C.2.2, Equation (C.5) (verbatim: '1 - SUM(lambda_SPF + lambda_RF)/SUM(lambda)'). The 2018-edition clause number for the formula is NOT verified — do not cite 8.4.x/9.x without checking the primary text.",
+    "publicly_retrievable": "paywalled (ISO/ANSI webstore, ~CHF/USD purchase); no free authoritative text",
+    "volatility": "static within an edition; 2011 -> 2018 renumbered clauses and moved the metrics, numeric targets unchanged",
+    "confidence": 0.86
+  },
+  {
+    "calculation": "ISO 26262 latent-fault metric (LFM) — coverage of latent multiple-point faults, tested against an ASIL-dependent target",
+    "formula_or_test": "LFM = 1 - [SUM_SR_HW(lambda_MPF_L)] / [SUM_SR_HW(lambda_total - lambda_SPF - lambda_RF)], i.e. 1 - latent-multi-point failure rate divided by the residual-eligible denominator (the same denominator equals lambda_MPF_DP + lambda_MPF_L + lambda_S). Pass test: LFM >= 60% (ASIL B), >= 80% (ASIL C), >= 90% (ASIL D); no ASIL A target. QM elements excluded. Shortcut in the standard: lambda_MPF_L <= lambda_MPF_L,est = lambda * (1 - K_DC,MPF,L/100%).",
+    "inputs": ["lambda_MPF_L (latent multi-point) per safety-related element", "lambda_SPF and lambda_RF per element", "lambda_MPF_DP (detected/perceived multi-point) and lambda_S per element", "ASIL of the safety goal", "diagnostic coverage for latent faults", "multi-point fault detection interval (MPFDI) if using time-dependent arguments"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level (hardware architectural metrics)",
+    "clause_locator": "Target values: Table 5 ('Possible source for the derivation of the target latent-fault metric value'). Formula clause/equation number NOT verified (2011 ed. carries the LFM derivation in Annex C alongside the SPFM equations); one secondary source citing GB/T 34590.5 (MOD of ISO 26262-5:2018) points to 8.4.6 for LFM targets — treat as unverified.",
+    "publicly_retrievable": "paywalled (ISO/ANSI webstore)",
+    "volatility": "static within an edition",
+    "confidence": 0.84
+  },
+  {
+    "calculation": "ISO 26262 probabilistic metric for random hardware failures (PMHF) — average probability per hour that random hardware failures violate a safety goal, tested against an ASIL target",
+    "formula_or_test": "No single normative closed-form is prescribed; PMHF = dP(top-event)/dt from the quantitative FTA/FMEDA of the safety-goal violation, evaluated over the item lifetime. Common implementation for constant failure rates: PMHF ~= SUM over single-point/residual contributions [lambda_x  (1 - DC_x)] + SUM over dual-point cut sets [lambda_A  lambda_B * T_MPFDI] (+ residual-rate/order-2 and higher terms), where T_MPFDI is the multiple-point fault detection interval. Alternative normative route: EEC (evaluation of each cause) per-cut-set accept/reject instead of a numeric PMHF. Pass test: PMHF < 1e-7 /h (100 FIT) for ASIL B and ASIL C; < 1e-8 /h (10 FIT) for ASIL D. ASIL A ~1e-6 /h appears in secondary sources as informative only. NOTE: the decomposition above is industry practice, not verbatim standard text — verify before encoding.",
+    "inputs": ["per-element failure rates lambda (FIT)", "diagnostic coverage per safety mechanism", "FTA cut sets / FMEDA classification", "mission or vehicle lifetime and MPFDI", "ASIL of the safety goal", "whether the PMHF route or the EEC route is used"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level (evaluation of safety goal violations due to random hardware failures)",
+    "clause_locator": null,
+    "publicly_retrievable": "paywalled (ISO/ANSI webstore)",
+    "volatility": "static within an edition",
+    "confidence": 0.78
+  },
+  {
+    "calculation": "RTCA DO-254 / ED-80 design assurance level (DAL) assignment and the resulting objective/applicability mapping for airborne electronic hardware",
+    "formula_or_test": "Deterministic mapping from failure-condition severity (from the FHA/PSSA under ARP4754A/ARP4761) to DAL: Catastrophic -> DAL A; Hazardous/Severe-Major -> DAL B; Major -> DAL C; Minor -> DAL D; No Safety Effect -> DAL E (no DO-254 objectives). Applicability rules: FAA AC 20-152A applies to hardware at DAL A, B, and C; for DAL D hardware that follows DO-254, the FAA does not expect to examine the life-cycle data (Order 8110.105A / AC 20-152A), and AC 20-152A adds 29 objectives beyond those in DO-254. DAL A and B additionally invoke DO-254 Appendix B advanced verification (elemental analysis, safety-specific analysis, formal methods, architectural mitigation); DAL A must justify coverage targets. NOTE: objective counts widely circulated on vendor sites as A=71, B=69, C=62, D=26 are the DO-178C software counts — I could not verify any DO-254 objective count against the primary text (a FAA job-aid breakdown organizes DO-254 objectives into Appendix B Tables B-1..B-4, ~31-35 objectives). Do not encode counts without checking.",
+    "inputs": ["failure condition severity from FHA/PSSA", "item vs functional DAL (IDAL vs FDAL)", "simple vs complex hardware classification", "whether AC 20-152A or EASA AMC 20-152A applies", "appendix B advanced-verification triggers (DAL A/B)"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80, Design Assurance Guidance for Airborne Electronic Hardware (April 19, 2000), as recognized by FAA Advisory Circular AC 20-152A (2022) and EASA AMC 20-152A",
+    "clause_locator": null,
+    "publicly_retrievable": "partly free — DO-254 itself is paywalled (RTCA/EUROCAE store); AC 20-152A is a free FAA PDF and restates scope, DAL A/B/C applicability and the DAL D relief",
+    "volatility": "static since 2000; DO-254A in preparation, and AC 20-152A (2022) materially expanded the applicable objective set",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "DO-254 simple vs complex electronic hardware classification test (determines whether the full DO-254 life-cycle objective set applies)",
+    "formula_or_test": "Test: an item is SIMPLE iff a comprehensive combination of deterministic tests and analyses appropriate to the design assurance level ensures correct functional performance under all foreseeable operating conditions with no anomalous behavior. If the item is not simple, it is COMPLEX (complex hardware item = all items that are not simple) and the full DO-254 life cycle applies; a collection of simple items may itself be complex, and a device containing an ASIC or PLD can still be simple if it meets the test. For complex items the proposed design-assurance method must be agreed with the certification authority early in the life cycle.",
+    "inputs": ["set of deterministic tests and analyses performed", "design assurance level of the item", "foreseeable operating conditions enumerated", "evidence of no anomalous behavior", "device type (ASIC/PLD/FPGA vs discrete), untestable modes, hidden states in state machines"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80, Design Assurance Guidance for Airborne Electronic Hardware, paragraph 1.6 ('Complexity considerations'), as quoted verbatim in FAA Order 8110.105A, Chapter 1 (definitions section)",
+    "clause_locator": "DO-254 paragraph 1.6 (quoted verbatim as 'Source: RTCA/DO-254, paragraph 1.6' in FAA Order 8110.105A)",
+    "publicly_retrievable": "paywalled original, but the operative definition is reproduced verbatim in the free FAA Order 8110.105A PDF (faa.gov)",
+    "volatility": "static since 2000",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "US export-control classification test for advanced computing integrated circuits: total processing performance (TPP) and performance density (PD) versus ECCN 3A090 thresholds",
+    "formula_or_test": "TPP = 2 x MacTOPS x (bit length of the operation), aggregated over all processing units: TPP = TPP1 + TPP2 + ... + TPPn. MacTOPS = theoretical peak 10^12 multiply-accumulate operations/second (D = A x B + C), taken at its maximum theoretically possible rate (highest value the manufacturer claims in manual/brochure); bit length of the operation = largest bit length of the inputs to the multiply operation; for chips supporting several bit lengths evaluate the HIGHEST TPP; for sparse+dense capable parts use the dense (no-sparsity) values. PD = TPP / applicable die area, area in mm^2 including all die area of logic dies made on a non-planar transistor architecture process node. Classification: 3A090.a if TPP >= 4800 OR (TPP >= 1600 AND PD >= 5.92); 3A090.b if (2400 <= TPP < 4800 AND 1.6 <= PD < 5.92) OR (TPP >= 1600 AND 3.2 <= PD < 5.92); 3A090.c covers HBM with memory bandwidth density > 2 GB/s/mm^2 (bandwidth in GB/s divided by package-or-stack area in mm^2). Carve-out: 3A090.a/b do not apply to items not designed or marketed for datacenters AND with TPP < 4800 (see license exceptions NAC and ACA).",
+    "inputs": ["MacTOPS per processing unit (peak, theoretical, per datasheet)", "bit length of the multiply inputs per unit", "number of processing units n", "applicable die area in mm^2 (non-planar logic dies)", "whether designed or marketed for datacenter use", "for 3A090.c: HBM bandwidth (GB/s) and package/stack area (mm^2)"],
+    "authority": "Export Administration Regulations (EAR), 15 CFR parts 730-774, Commerce Control List Category 3 — Electronics, ECCN 3A090 (Supplement No. 1 to Part 774), as amended (notably the Oct 2022, Oct 17 2023, Dec 2024 and Feb 14 2025 BIS rules)",
+    "clause_locator": "ECCN 3A090.a and 3A090.b, Technical Note 2 to 3A090.a and 3A090.b (TPP definition, items 1.a-1.d, 2, 3, 4), Technical Note 1 to 3A090.c; Notes 2-4 to 3A090.a and 3A090.b. Threshold text verified verbatim in 90 FR (Feb 14, 2025) FR Doc. 2025-02655 / BIS rule text.",
+    "publicly_retrievable": "free (eCFR 15 CFR 774 Supp. No. 1; Federal Register at govinfo.gov; BIS bis.doc.gov PDFs)",
+    "volatility": "high — thresholds and notes have been rewritten repeatedly (Oct 2022, Oct 2023, Dec 2024, Jan 2025 AI-diffusion rule later rescinded, Feb 2025); always pull current eCFR text",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "EAR 'advanced-node integrated circuit' definition test (triggers advanced-node SME/end-use controls and 0% de minimis for certain lithography equipment)",
+    "formula_or_test": "An integrated circuit is an 'advanced-node integrated circuit' if ANY of: (1) logic IC using a non-planar transistor architecture OR with a production technology node of 16/14 nanometers or less; (2) NOT-AND (NAND) memory IC with 128 layers or more; (3) DRAM IC using a production technology node of 18 nanometer half-pitch or less. Related deterministic threshold (not verified against current eCFR text): 0% de minimis applies to certain lithography equipment in ECCN 3B001.f.1.b.2.b when destined for development or production of advanced-node ICs meeting criterion (1). NOTE: sourced from a law-firm summary of the Oct 17 2023 SME rule; later rules may have amended the definition — verify in 15 CFR 772.1 before use.",
+    "inputs": ["device type (logic / NAND / DRAM)", "transistor architecture (planar vs non-planar/FinFET/GAA)", "production technology node (nm) or DRAM half-pitch (nm)", "NAND layer count"],
+    "authority": "Export Administration Regulations (EAR), 15 CFR 772.1 (definitions) — 'advanced-node integrated circuit'; related de minimis rule at 15 CFR 734.4(a)(3)",
+    "clause_locator": "15 CFR 772.1 (definition added by the Oct 17 2023 'Export Controls on Semiconductor Manufacturing Items' rule; 88 FR)",
+    "publicly_retrievable": "free (eCFR / govinfo Federal Register)",
+    "volatility": "high — definitions added/amended with each SME and advanced-computing rule package",
+    "confidence": 0.74
+  },
+  {
+    "calculation": "CHIPS Act advanced manufacturing investment credit amount (US semiconductor fab / semiconductor manufacturing equipment investment tax credit)",
+    "formula_or_test": "Credit = 25% x qualified investment for the taxable year with respect to an advanced manufacturing facility, where qualified investment = basis of qualified property placed in service during the year. Qualified property = tangible depreciable/amortizable property integral to the operation of the facility, constructed/reconstructed/erected by the taxpayer or acquired with original use commencing with the taxpayer (buildings and structural components qualify unless used for offices/administrative or other non-manufacturing functions). Conditions: property must be placed in service after 2022-12-31; for construction begun before 2023-01-01 only the basis attributable to construction after 2022-08-09 counts; no credit for property whose construction begins after 2026-12-31 (sunset). IRS guidance states the rate is 25% for property placed in service through 2025-12-31 and 35% for property placed in service thereafter (attributed by IRS to the Working Families Tax Cuts Act of 2025; a trade source calls the same change the One Big Beautiful Bill Act — name not independently verified). Treasury regs add a >50% test for 'primary purpose' (final regs T.D. 10009).",
+    "inputs": ["tax basis of each qualified property", "placed-in-service date", "construction-start date", "portion of basis attributable to construction after 2022-08-09 (if pre-2023 start)", "whether property is integral to semiconductor or semiconductor-equipment manufacturing", "whether taxpayer is a foreign entity of concern / made an applicable transaction under IRC 50(a)", "election to treat credit as a payment of tax (IRC 48D(d))"],
+    "authority": "Internal Revenue Code section 48D (26 U.S.C. 48D), added by section 107(a) of the CHIPS Act of 2022 (Division A of Pub. L. 117-167); implemented by Treas. Reg. T.D. 10009 (26 CFR 1.48D-1 et seq., effective 2024-12-23)",
+    "clause_locator": "IRC 48D(a) (25% rate), 48D(b)(1)-(5) (qualified investment/property/facility), 48D(c) (eligible taxpayer), 48D(d) (elective payment), 48D(e) (construction-begin deadline); CHIPS Act sec. 107(f)(1) (placed-in-service/post-2022-08-09 basis limitation)",
+    "publicly_retrievable": "free (IRS.gov credit page; govinfo for T.D. 10009 and Pub. L. 117-167; 26 U.S.C. 48D on uscode.house.gov/LII)",
+    "volatility": "low for the statutory 25%; medium for the rate/termination dates (the 2025 reconciliation act raised the post-2025 rate to 35% and bipartisan bills would extend the 2026 sunset)",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "CHIPS guardrails 'material expansion' test — whether a planned expansion of semiconductor manufacturing capacity in a foreign country of concern triggers the Expansion Clawback / notification duty",
+    "formula_or_test": "Material expansion means: (1) with respect to an existing facility, an increase of the semiconductor manufacturing capacity of that facility by MORE THAN FIVE PERCENT of the capacity memorialized in the required agreement, due to addition of a cleanroom, production line or other physical space (or a series of such additions); OR (2) any construction of a new facility for semiconductor manufacturing. Test: delta_capacity / capacity_memorialized_in_agreement > 0.05 -> material expansion; new facility -> material expansion per se. Consequence: during the 10-year period from the award date, a covered entity (and its affiliated group, per 26 U.S.C. 1504 80% ownership) may not engage in a significant transaction involving material expansion in a foreign country of concern, with narrow exceptions for existing legacy-semiconductor facilities and for legacy capacity predominantly serving the market of that country; notification to notifications@chips.gov required regardless; remedy can be recovery of the full award. Secondary-source caveats (NOT verified against eCFR): a 10% capacity threshold is applied to legacy-semiconductor facilities, 'significant transaction' is commonly cited as >= $100,000, and the legacy exception is cited as >=85% of output consumed in the country of concern.",
+    "inputs": ["capacity memorialized in the required agreement (baseline)", "planned incremental capacity from the addition", "whether the addition is a cleanroom/production line/physical space", "whether a new facility is being constructed", "legacy vs non-legacy semiconductor classification (28nm-or-older logic, DRAM >18nm half-pitch, NAND <128 layers, wafer size, packaging technology)", "country of concern status (China, Russia, Iran, North Korea per 10 U.S.C. 4872(d))", "years elapsed since award (<10)"],
+    "authority": "15 CFR 231.108 (CHIPS Program, NIST, 'Preventing the Improper Use of CHIPS Act Funding'), issued under 15 U.S.C. 4651 et seq.; prohibition at 15 CFR 231.202; notification at 15 CFR 231.301-231.303",
+    "clause_locator": "15 CFR 231.108 ('Material expansion.'), as revised at 88 FR 89574, Dec. 28, 2023 (also printed at 88 FR 61614/65600, Sept. 2023 final rule)",
+    "publicly_retrievable": "free (eCFR; Federal Register at govinfo.gov; NIST CHIPS FAQ page)",
+    "volatility": "medium — definition revised once already (Dec 2023) and guardrails are politically live; verify current eCFR and any amended required agreement",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "JEDEC FIT (failures in time) rate from accelerated life-test data, including the upper-confidence-bound chi-square estimator",
+    "formula_or_test": "1 FIT = 1 failure per 10^9 device-hours. Point estimate: FIT = (number of failures f) x 10^9 / (N x H x AF). Upper-confidence-bound form used in qualification reports: FIT_CL = chi2(CL, 2f+2) x 10^9 / (2 x N x H x AF), where N = number of units on test, H = test hours, AF = acceleration factor; for f = 0 and CL = 60%, chi2(60%, 2)/2 = 0.92 (i.e. chi2 = 1.833). Worked industry example: 231 units x 1000 h, 0 failures, AF = 259 -> FIT ~= 1.833e9 / (2 x 231 x 1000 x 259) = 15.3 FIT at 60% CL. MTTF(hours) = 10^9 / FIT. NOTE: the chi-square estimator and its 60% CL convention are the form published in JEDEC-member qualification reports attributed to JESD85; I have not read JESD85 itself, so the section numbering and exact CL defaults are unverified.",
+    "inputs": ["number of failures f", "sample size N", "test duration H (hours)", "acceleration factor AF (stress -> use)", "confidence level CL (60% typical industrial, 90%/95% stricter)", "use junction temperature for AF", "failure distribution assumption (exponential / Weibull)"],
+    "authority": "JEDEC JESD85 (JESD85A), Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": null,
+    "publicly_retrievable": "paywalled (JEDEC store); the applied formula is reproduced in many free vendor qualification reports/datasheets (e.g. AOS reliability reports)",
+    "volatility": "static (method stable; revision letters JESD85 -> JESD85A)",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "JEDEC stress-test-driven qualification of integrated circuits: HTOL (high-temperature operating life) pass/fail test and sample-size rule",
+    "formula_or_test": "Qualification test: stress sample at junction temperature Tj >= 125 C (JESD22-A108 sets ambient/chamber conditions, +/-5 C tolerance) with Vcc >= Vccmax (max operating voltage up to absolute maximum rating), for 1000 hours, with readpoints typically at 168 / 500 / 1000 h. Sample size: 3 non-consecutive lots x 77 units each = 231 units (LTPD-based sampling, JESD47). Acceptance criterion: 0 failures at 1000 h. The 0/231 result is then converted to a FIT number via JESD85 with an Arrhenius AF (see JEP122 entry).",
+    "inputs": ["number of lots (>=3, non-consecutive)", "units per lot (>=77)", "junction temperature during stress (K or C)", "stress voltage vs Vccmax / absolute max", "stress duration and readpoints", "observed failures (must be 0)", "use-condition junction temperature and Ea for the FIT conversion"],
+    "authority": "JEDEC JESD47 (Stress-Test-Driven Qualification of Integrated Circuits, e.g. JESD47K) with the HTOL stress method in JEDEC JESD22-A108 (Temperature, Bias, and Operating Life, e.g. JESD22-A108F)",
+    "clause_locator": null,
+    "publicly_retrievable": "paywalled (JEDEC store); values widely reproduced in free vendor qualification reports and reliability-appnote PDFs",
+    "volatility": "low — 1000 h / 125 C / 77 x 3 / 0-fail convention has been stable for decades; automotive overlays (AEC-Q100) add stricter conditions",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "JEDEC thermal acceleration factor (Arrhenius) and activation-energy selection for converting accelerated test time to use-condition life; plus Black's equation for electromigration",
+    "formula_or_test": "Arrhenius: Rate = A0  exp(-Ea/kT) (equivalently exp(Ea/kT) form for time-to-fail), k = 8.617e-5 eV/K. Thermal acceleration factor: AF = exp[(Ea/k) x (1/T_use - 1/T_stress)] with T in kelvin. Field-equivalent hours = test hours x AF; equivalently lambda_use = lambda_stress / AF. Ea selection (first-order JEP122 table as reproduced in NASA NEPP SSB-1): surface/oxide 1.0 eV; charge loss (dynamic memory) 0.6; dielectric breakdown field >0.04 micron 0.3, field <=0.04 micron 0.7; metallization electromigration (Al and Al alloys) 0.6; corrosion with chlorine 0.70, with phosphorus 0.53; chemical contamination 1.00; silicon/crystal defects 0.50. A second widely used JEP122-derived table gives EM activation energies of ~0.48-0.72 eV by metallurgy (AlCu ~0.70) and TDDB ~0.3 (thin) / ~0.7 (thick). Industry default when the mechanism is unknown: Ea = 0.7 eV (e.g., 1000 h at 125 C vs 55 C use -> AF ~259). Electromigration (Black): MTTF = A  J^(-n) * exp(Ea/kT), with current-density exponent n typically taken as 2 (reported range 1-2) and Cu-damascene Ea ~0.8-1.0 eV vs Al ~0.5-0.7 eV. NOTE: Ea tables differ between JEP122 editions/secondary reproductions — pick the edition you cite.",
+    "inputs": ["stress temperature (K)", "use temperature (K)", "activation energy Ea (eV) for the dominant failure mechanism", "Boltzmann constant k = 8.617e-5 eV/K", "test duration and observed failures", "for EM: current density J, exponent n, metallization type"],
+    "authority": "JEDEC publication JEP122 (Failure Mechanisms and Models for Semiconductor Devices); first-order activation-energy table reproduced in NASA NEPP SSB-1, Guidelines for Using Plastic Encapsulated Microcircuits (citing EIA/JEP122)",
+    "clause_locator": null,
+    "publicly_retrievable": "paywalled (JEDEC store — check whether the specific JEP122 revision is a free download); the first-order Ea table is reproduced free in the NASA NEPP SSB-1 PDF",
+    "volatility": "low-medium — stable physics; edition-to-edition Ea tables and Cu-vs-Al values shift with new metallization data",
+    "confidence": 0.7
+  }
+]

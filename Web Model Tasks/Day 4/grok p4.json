@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Deep pipeline for high clock rate",
+    "where_in_paper": "CLOCK RATES section",
+    "decision": "Design an even deeper pipeline (about two times the P6 microarchitecture) with fewer gates of logic per clock cycle",
+    "alternatives_or_rejected": "Shallower pipelines comparable to P6 / prior Intel pipelines that would yield lower frequency on the same process",
+    "rationale": "The final frequency depends heavily on how deeply the processor is pipelined; deeper pipelining with fewer gates per stage enables industry-leading clock rates",
+    "outcome": "Pentium 4 targeted greater than 1.6 times higher frequency than P6 family on the same process; 20-stage misprediction pipeline versus P6's 10-stage",
+    "quote_as_recalled": "The NetBurst microarchitecture was designed to have an even deeper pipeline (about two times the P6 microarchitecture)",
+    "page_guess": 3,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page number within the journal issue",
+    "confidence": 0.85
+  },
+  {
+    "title": "Execution Trace Cache instead of conventional L1I",
+    "where_in_paper": "Front-end / Trace Cache description",
+    "decision": "Replace a conventional instruction cache with an Execution Trace Cache that stores already-decoded uops and sits between the decoders and the execution core",
+    "alternatives_or_rejected": "Conventional instruction cache that stores raw IA-32 instruction bytes (requiring decode on every fetch from the L1I)",
+    "rationale": "IA-32 instructions are cumbersome to decode (variable length, many options); storing already-decoded uops removes decoding from the main execution loop and supplies high bandwidth to the out-of-order core",
+    "outcome": "Trace Cache holds up to 12K uops, delivers up to three uops per clock, has hit rate similar to an 8K-16K byte conventional I-cache; most instructions execute from the Trace Cache",
+    "quote_as_recalled": "Unlike conventional instruction caches, the Trace Cache sits between the instruction decode logic and the execution core",
+    "page_guess": 2,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly quantifies decode complexity as the primary rejected alternative motivation",
+    "confidence": 0.88
+  },
+  {
+    "title": "Double-pumped (2x) ALUs for low-latency integer execution",
+    "where_in_paper": "Execution units / Rapid Execution Engine discussion",
+    "decision": "Run the simple integer ALUs at twice the core clock frequency (double-pumped) so that basic ALU operations have very low effective latency",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Enable high throughput and low latency for the most common integer operations while the rest of the machine runs at the main clock rate",
+    "outcome": "ALUs can start a new operation every half-cycle of the main clock; staggered add makes the lower half of the result available early to dependent operations",
+    "quote_as_recalled": "extremely low latency double-pumped Arithmetic Logic Unit (ALU)",
+    "page_guess": 1,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Precise wording of the staggered-add description may be slightly off",
+    "confidence": 0.8
+  },
+  {
+    "title": "Small low-latency L1 data cache backed by large L2",
+    "where_in_paper": "Memory subsystem / L1 data cache discussion",
+    "decision": "Use a small, very low-latency 8 KB L1 data cache optimized for lowest overall load-access latency, backed by a large high-bandwidth L2",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Optimize for the lowest overall load-access latency; for most IA-32 programs a small very-low-latency L1 followed by a large medium-latency L2 is effective",
+    "outcome": "L1 data cache accessed in two clock cycles; configuration described as giving good overall latency characteristics",
+    "quote_as_recalled": "optimizes for the lowest overall load-access latency with a small, very low latency 8K byte cache",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact size and cycle count wording may blend with general P4 knowledge",
+    "confidence": 0.65
+  },
+  {
+    "title": "Deeper buffering for out-of-order window",
+    "where_in_paper": "Out-of-order execution engine section",
+    "decision": "Provide much deeper buffering than the P6 microarchitecture (up to 126 instructions in flight, 48 loads, 24 stores)",
+    "alternatives_or_rejected": "P6-scale buffering that limits the number of in-flight instructions",
+    "rationale": "By looking at a larger number of instructions at once the out-of-order engine can usually find more ready-to-execute independent instructions each cycle",
+    "outcome": "Machine can have up to 126 instructions in flight and allocate up to 48 loads and 24 stores simultaneously",
+    "quote_as_recalled": "The NetBurst microarchitecture has much deeper buffering than the P6 microarchitecture to allow this.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact buffer counts may be recalled with slight error",
+    "confidence": 0.75
+  }
+]

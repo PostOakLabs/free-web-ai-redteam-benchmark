@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clustered integer execution: replicated register file and split issue queues",
+    "where_in_paper": "Integer execution / issue sections (cluster organization discussion)",
+    "decision": "The integer core is split into two identical clusters. Each cluster holds its own copy of the integer physical register file (80 entries, duplicated) and its own 10-entry issue queue (20 entries total). Instructions are assigned to the two queues at issue; a queue can issue to the other cluster's ALUs, and results are broadcast to both clusters, with cross-cluster communication costing extra cycle(s).",
+    "alternatives_or_rejected": "A centralized, multi-ported register file feeding all four integer ALUs from one large queue — argued against because the wire delay and port complexity of a centralized structure would undermine the clock-frequency target (recalled as the paper's motivation; the explicit 'we considered and rejected' wording is not verbatim-certain).",
+    "rationale": "At the target frequency, wire delay across a central structure is the limiter; replicating the register file and localizing each cluster's issue logic keeps critical wires short and preserves 4-wide integer issue without multi-porting.",
+    "outcome": "Two clusters each execute roughly half the integer instruction stream at high clock rate; the scheduler balances load between queues and pays cross-cluster latency only when operands or units are on opposite sides.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "the exact penalty for cross-cluster issue (one extra cycle for results crossing clusters) and any port-count figures",
+    "confidence": 0.8
+  },
+  {
+    "title": "Duplicated data cache instead of multi-porting",
+    "where_in_paper": "Data cache / memory hierarchy section",
+    "decision": "The 64KB, 2-way-set-associative data cache is physically duplicated: two identical copies, one per integer cluster. Every store and fill writes both copies; each cluster's load/store unit reads only its own copy, permitting two simultaneous L1 data accesses per cycle.",
+    "alternatives_or_rejected": "Multi-porting or banking a single cache to serve both clusters — recalled as what the paper argues duplication avoids (explicit rejection sentence not verbatim-certain).",
+    "rationale": "A multi-ported cache is too complex and too slow at the target frequency; duplication costs die area (roughly doubling the D-cache array) but keeps wires local and the access timing simple, and coherence between copies is trivial since both are written on every write.",
+    "outcome": "Two loads (or a load and a store) per cycle from L1 at high frequency, at the cost of the duplicated array area.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 31,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "whether the paper explicitly names multi-porting as the rejected alternative or only motivates duplication by frequency and simplicity",
+    "confidence": 0.8
+  },
+  {
+    "title": "Frequency-first philosophy combined with out-of-order execution",
+    "where_in_paper": "Introduction / design goals",
+    "decision": "The 21264 targets the highest achievable clock frequency (over 500 MHz class on 0.35-micron CMOS) while adding full out-of-order execution — continuing the Alpha tradition of frequency leadership rather than trading frequency for issue width or in-order simplicity.",
+    "alternatives_or_rejected": "The in-order, high-frequency approach of the 21164 — implicitly argued insufficient because memory latency in processor cycles grows with clock rate; and, implicitly, out-of-order designs that sacrifice frequency (the exact framing of the 21164 contrast in the text is the uncertain part).",
+    "rationale": "The paper's argument is that at high clock rates, cache-miss latency is many tens of cycles, and only a large out-of-order instruction window can hide it; conversely, frequency multiplies whatever IPC is achieved, so both must be pursued together.",
+    "outcome": "The 21264 is presented as the first Alpha with out-of-order execution that still leads in clock rate; large queues and reorder buffer (order of 20-entry integer queue, 80-entry reorder buffer) back the latency-hiding claim.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "the exact wording and placement of the frequency-vs-IPC design-goal statement and the 21164/in-order contrast",
+    "confidence": 0.75
+  },
+  {
+    "title": "No on-chip second-level cache; external L2 with window-based latency tolerance",
+    "where_in_paper": "Memory hierarchy / system interface section",
+    "decision": "The 21264 carries only 64KB I + 64KB D on-chip and places the second-level cache off-chip (multi-megabyte external L2), relying on a large out-of-order window, non-blocking caches with multiple outstanding misses, and very high off-chip bandwidth to tolerate the longer access latency.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "As recalled: the external L2 provides large capacity and bandwidth, and on-chip resources go to the large L1s and the execution core; the OoO window plus memory-level parallelism covers the elevated latency in cycles. (Confidence in this attribution is moderate — the hierarchy facts are certain, the stated reasoning less so.)",
+    "outcome": "Very high sustained off-chip memory bandwidth; performance maintained despite off-chip L2 latency through speculation and concurrency rather than on-chip capacity.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "the attribution of an explicit on-chip-vs-off-chip L2 trade-off argument to this paper, and the contrast with the preceding 21164's on-chip secondary cache",
+    "confidence": 0.55
+  },
+  {
+    "title": "Aggressive memory-dependence speculation for loads",
+    "where_in_paper": "Out-of-order memory execution / load-store section",
+    "decision": "Loads are issued speculatively before the addresses of all older stores are resolved. A per-register predictor (recalled as the 'mismatch memory' in the register scoreboard) marks registers whose values may have been produced by a not-yet-executed store; if a conflict is later detected, the load and its dependents replay.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Requiring all prior store addresses before a load issues would serialize memory operations and waste much of the out-of-order window; speculation recovers memory-level parallelism, and mis-speculations are rare enough that replay handles them.",
+    "outcome": "Loads proceed aggressively ahead of stores; the occasional mis-speculation is corrected by replay without stalling the general issue stream.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "the 'mismatch memory' terminology and the exact replay/predictor mechanics as described in the paper versus my paraphrase",
+    "confidence": 0.65
+  }
+]
+```

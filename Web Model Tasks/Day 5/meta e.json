@@ -1,0 +1,102 @@
+[
+  {
+    "calculation": "ISO 26262-5 Single-Point Fault Metric (SPFM)",
+    "formula_or_test": "SPFM = [ 1 - ( sum(lambda_SPF) + sum(lambda_RF) ) / sum(lambda_total) ] * 100% where lambda_SPF = single-point fault failure rate, lambda_RF = residual fault failure rate, lambda_total = total hardware failure rate of safety-related item. Pass if >= ASIL target: ASIL B >=90%, ASIL C >=97%, ASIL D >=99%",
+    "inputs": ["lambda_SPF", "lambda_RF", "lambda_total", "ASIL_target"],
+    "authority": "ISO 26262-5:2018 Road vehicles - Functional safety - Part 5 Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low - targets stable since 2011 edition, values unchanged in 2018",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "ISO 26262-5 Latent-Fault Metric (LFM)",
+    "formula_or_test": "LFM = [ 1 - sum(lambda_MPF_L) / sum(lambda_total - lambda_SPF - lambda_RF) ] * 100% where lambda_MPF_L = latent multiple-point fault failure rate. Pass if >= ASIL target: ASIL B >=60%, ASIL C >=80%, ASIL D >=90%",
+    "inputs": ["lambda_MPF_L", "lambda_SPF", "lambda_RF", "lambda_total", "ASIL_target"],
+    "authority": "ISO 26262-5:2018 Road vehicles - Functional safety - Part 5 Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low",
+    "confidence": 0.93
+  },
+  {
+    "calculation": "ISO 26262-5 Probabilistic Metric for Random Hardware Failures (PMHF)",
+    "formula_or_test": "PMHF = sum(lambda_SPF + lambda_RF + lambda_MPF_L) for item [h-1]. Deterministic target test: ASIL B and C: <1.0e-7 /h, ASIL D: <1.0e-8 /h. ASIL A no PMHF target but SPFM/LFM not required.",
+    "inputs": ["lambda_SPF", "lambda_RF", "lambda_MPF_L", "ASIL"],
+    "authority": "ISO 26262-5:2018 Road vehicles - Functional safety - Part 5 Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "EAR ECCN 3A090 Total Processing Performance threshold for advanced computing ICs",
+    "formula_or_test": "Item controlled under 3A090.a if Total Processing Performance (TPP) >= 4800. TPP = sum_i ( MAC_i * 2 ) where MAC_i = number of multiply-accumulate operations per cycle for processor i, adjusted by operating frequency normalization per BIS Technical Notes. Test: TPP >= 4800 => license required to China/Macau per 744.23",
+    "inputs": ["MAC_per_core", "number_of_cores", "operating_frequency", "architecture_factor"],
+    "authority": "US Export Administration Regulations, 15 CFR Part 774 Supplement No. 1 - Commerce Control List, ECCN 3A090",
+    "clause_locator": "ECCN 3A090.a",
+    "publicly_retrievable": true,
+    "volatility": "high - thresholds added Oct 2022, revised Oct 2023, Dec 2024",
+    "confidence": 0.88
+  },
+  {
+    "calculation": "EAR ECCN 3A090.b Performance Density threshold",
+    "formula_or_test": "Controlled if Performance Density > 1.6 AND TPP between 1600 and 4800. Performance Density = TPP / die_area_mm2 . Test: IF 1600 <= TPP < 4800 AND (TPP / die_area) > 5.92? Note: BIS revised density threshold to 5.92 in 2023 update - earlier rule used 1.6. Calculator must implement versioned threshold.",
+    "inputs": ["TPP", "die_area_mm2", "threshold_version_date"],
+    "authority": "US Export Administration Regulations, 15 CFR Part 774 Supplement No. 1 - Commerce Control List, ECCN 3A090",
+    "clause_locator": "ECCN 3A090.b",
+    "publicly_retrievable": true,
+    "volatility": "high",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "JEDEC FIT rate point estimate",
+    "formula_or_test": "FIT = ( number_of_failures / total_device_hours ) * 1e9 . Upper confidence limit with chi-square: FIT_60% = ( chi2(60%, 2f+2) / (2 * device_hours) ) *1e9 where f = failures. Units: failures per 1e9 device-hours.",
+    "inputs": ["number_of_failures", "total_device_hours", "confidence_level_chi2"],
+    "authority": "JEDEC JESD85 Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.96
+  },
+  {
+    "calculation": "JEDEC Arrhenius thermal acceleration factor for reliability stress",
+    "formula_or_test": "AF = exp[ (Ea / k) * (1/T_use - 1/T_stress) ] where Ea = activation energy in eV, k = Boltzmann constant 8.617333262e-5 eV/K, T = absolute temperature Kelvin. Used in JESD47, JESD22, JESD91.",
+    "inputs": ["Ea_eV", "T_use_K", "T_stress_K"],
+    "authority": "JEDEC JESD91 Method for Developing Acceleration Models for Electronic Component Failure Mechanisms",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.97
+  },
+  {
+    "calculation": "CHIPS Act Advanced Manufacturing Investment Credit rate",
+    "formula_or_test": "Credit = 0.25 * qualified_investment_in_advanced_manufacturing_facility . Test: facility must have primary purpose manufacturing semiconductors or semiconductor manufacturing equipment per 48D(b). Credit applies to property placed in service after 2022-12-31.",
+    "inputs": ["qualified_investment_USD", "facility_qualifies_boolean", "placed_in_service_date"],
+    "authority": "US CHIPS Act of 2022, Division A, codified as 26 U.S.C. Section 48D Advanced Manufacturing Investment Credit",
+    "clause_locator": "26 U.S.C. 48D(a)",
+    "publicly_retrievable": true,
+    "volatility": "low - statutory 25% rate",
+    "confidence": 0.92
+  },
+  {
+    "calculation": "DO-254 Design Assurance Level (DAL) objective compliance count",
+    "formula_or_test": "Deterministic mapping: Level A = all objectives required, Level B = 68/71 objectives (exceptions noted), Level C = 51 objectives, Level D = 26 objectives, Level E = 0 objectives. Pass = number_of_satisfied_objectives >= required_for_claimed_DAL per Appendix A Table A-1.",
+    "inputs": ["claimed_DAL", "satisfied_objectives_count", "objective_evidence_list"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80 Design Assurance Guidance for Airborne Electronic Hardware",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "very low - unchanged since 2000",
+    "confidence": 0.78
+  },
+  {
+    "calculation": "JEDEC HBM ESD classification threshold test",
+    "formula_or_test": "Device classified by lowest withstand voltage V that passes JS-001 HBM test (positive and negative). Test step: V_test in {50,100,200,500,1000,1500,2000,4000,8000}. Classes: 0 = <250V, 1A=250-499V, 1B=500-999V, 1C=1000-1999V, 2=2000-3999V, 3A=4000-7999V, 3B>=8000V.",
+    "inputs": ["V_withstand_positive", "V_withstand_negative", "test_result_per_voltage"],
+    "authority": "JEDEC JS-001 Human Body Model Testing, ANSI/ESDA/JEDEC Joint Standard",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.9
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "task": 1,
+    "steps": "A: 130461 / 124331 = 1.049303874335443 -> 1.049304. B: 3914 / 3730 = 1.049329758713137 -> 1.049330. C: 26092 / 24866 = 1.049304270891981 -> 1.049304. D: 1305 / 1243 = 1.049879324215607 -> 1.049879. Pairwise using the 6-decimal factors: B-A = 1.049330-1.049304 = 0.000026; C-A = 1.049304-1.049304 = 0.000000; D-A = 1.049879-1.049304 = 0.000575; max-min = 1.049879-1.049304 = 0.000575. Stated 4.9% factor = 1 + 0.049 = 1.049000. Deviations from stated: A = 1.049303874335443-1.049 = 0.000303874335443 = 3.038743 bp; B = 1.049329758713137-1.049 = 0.000329758713137 = 3.297587 bp; C = 1.049304270891981-1.049 = 0.000304270891981 = 3.042709 bp; D = 1.049879324215607-1.049 = 0.000879324215607 = 8.793242 bp.",
+    "answer": "Not exactly. A and C are mutually consistent to 6 decimals at 1.049304. B is only 0.000026 higher, about 0.26 bp. D is 0.000575 higher than A/C, about 5.75 bp. None equals the stated 4.9% factor 1.049000 exactly; all four implied factors are higher, with D about 8.79 bp high, plausibly amplified by the small $1,243 denominator.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 2,
+    "steps": "Inferred rounding rule: round the post-adjustment amount to the nearest whole dollar, because the published 2023 and 2024 thresholds are whole-dollar outputs and exact chained multiplication by 1.049000 does not reproduce 2024: 124331*1.049 = 124331 + 124331*0.049 = 124331 + 6092.219 = 130423.219 -> 130423, not 130461; 3730*1.049 = 3730 + 3730*0.049 = 3730 + 182.770 = 3912.770 -> 3913, not 3914. So the rounded prior-year values should not be treated as exact unrounded bases. For 2025 use stated 3.4% = factor 1.034000. A: 130461*1.034 = 130461 + 130461*0.034; 130461*0.034 = 4435.674; total = 134896.674 -> nearest dollar = 134897. B: 3914*1.034 = 3914 + 3914*0.034; 3914*0.034 = 133.076; total = 4047.076 -> 4047. C: 26092*1.034 = 26092 + 26092*0.034; 26092*0.034 = 887.128; total = 26979.128 -> 26979. D: 1305*1.034 = 1305 + 1305*0.034; 1305*0.034 = 44.370; total = 1349.370 -> 1349. No product is exactly n.5, so half-up versus half-even does not change any rounded result.",
+    "answer": "Projected 2025 values: tier A $134,897; tier B $4,047; tier C $26,979; tier D $1,349.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 3,
+    "steps": "Projected tier A from task 2 = 134897. Actual official tier A = 134841. Difference = 134897-134841 = 56, so the projection is high by $56. Exact factor that would produce actual from 2024 tier A: F = 134841 / 130461. Cross-check versus stated factor: 130461*1.034 = 134896.674; shortfall = 134896.674-134841 = 55.674; shortfall/base = 55.674 / 130461 = 0.000426748223607; F = 1.034 - 0.000426748223607 = 1.033573251776393. Direct division gives the same: 134841 / 130461 = 1.033573251776393 -> 1.033573 to 6 decimals, or 1.033573252 to 9 decimals. Implied percentage = (1.033573251776393-1)*100 = 3.3573251776393%. Discrepancy versus stated 3.4% factor 1.034000 = (1.033573251776393-1.034000)*10000 = -4.26748223607 bp. Negative sign means the actual-required factor is 4.267482 bp below the stated 3.4% factor.",
+    "answer": "The projection overshoots official tier A by $56. The exact factor is 134841/130461 = 1.033573251776393, implying 3.357325%, which is 4.267482 basis points below the stated 3.4% factor.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 4,
+    "steps": "From task 3, the actual tier-A ratio implies CPI = 3.3573251776393%. Rounded to one decimal, 3.357325% becomes 3.4%. Using the one-decimal value as an exact factor changes the rate from 3.357325% to 3.400000%, a gap of 3.3573251776393-3.4 = -0.042674823607 percentage points = -4.26748223607 bp, equivalent to about $56 on a $130,461 base after rounding.",
+    "answer": "The strongest concrete mechanism is one-decimal CPI factor precision: the exact implied 2025 factor is 1.033573252, not 1.034000, and 3.357325% was apparently communicated as 3.4%.",
+    "evidence_level": "computed"
+  },
+  {
+    "weakest_point": "One-decimal CPI-U rounding/factor precision in the stated 3.4%: 134841/130461 = 1.033573252, i.e. 3.357325%, so applying exactly 1.034000 overstates the factor by 4.267482 bp and by about $56 on tier A."
+  }
+]

@@ -1,0 +1,42 @@
+[
+{
+"title": "Clustered Integer Register File Architecture",
+"where_in_paper": "Instruction Execution / Execution Core",
+"decision": "Split the 4-way out-of-order integer execution engine into two 2-way execution clusters (Cluster 0 and Cluster 1), each containing an independently accessed, replicated copy of the 8-read/4-write port integer register file.",
+"alternatives_or_rejected": "A single centralized 16-read-port and 8-write-port integer register file supplying all four execution pipelines simultaneously.",
+"rationale": "The physical area and RC interconnect delay of a centralized 16-read/8-write port register file would have compromised the 500+ MHz cycle time goal. Replicating the register file into two smaller 8-read/4-write port files reduced access latency and wire congestion, trading off a 1-cycle inter-cluster register bypass penalty when a result from one cluster is needed in the other.",
+"outcome": "Achieved target high-frequency clock execution (500+ MHz) while incurring less than a 1% overall IPC performance degradation from inter-cluster bypass delays.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.95
+},
+{
+"title": "Hybrid Tournament Branch Prediction Mechanism",
+"where_in_paper": "Instruction Fetch and Branch Prediction",
+"decision": "Implemented a dynamic tournament branch predictor combining a 2-Kentry local history predictor and a 4-Kentry global history predictor, dynamically selected per branch using a 4-Kentry choice predictor.",
+"alternatives_or_rejected": "A single static branch predictor or relying solely on a conventional single-scheme 2-level adaptive branch predictor (either purely local or purely global).",
+"rationale": "No single prediction algorithm optimal for all program behaviors; local predictors excel at repetitive loop patterns while global predictors excel at correlated control flow across multiple branches. The tournament predictor dynamically routes predictions to whichever scheme demonstrates better history for that branch.",
+"outcome": "Achieved greater than 90–95% branch prediction accuracy across complex integer and floating-point workloads, mitigating the 7-cycle branch misprediction penalty.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.95
+},
+{
+"title": "Line- and Set-Predicted 2-Way Set-Associative Instruction Cache",
+"where_in_paper": "Instruction Fetch / I-Cache Architecture",
+"decision": "Implemented line-prediction and set-prediction bits stored directly alongside the 64-KB 2-way set-associative I-cache to predict the target cache line and set for the next fetch cycle.",
+"alternatives_or_rejected": "A standard 2-way set-associative cache requiring full tag matching before data selection (adding a cycle of latency), or a simple 1-cycle direct-mapped cache.",
+"rationale": "Direct-mapped caches suffered high conflict miss rates on large workloads, while standard 2-way set-associative tag checks added delay to the critical instruction fetch path. Next-line and next-set prediction allowed 1-cycle fetch latency (matching direct-mapped performance) while maintaining the lower miss rate of a 2-way set-associative structure.",
+"outcome": "Delivered 4 instructions per cycle at 1-cycle latency with high prediction accuracy, triggering misprediction bubbles only when line/set predictions failed.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.92
+},
+{
+"title": "Speculative Out-of-Order Load Execution Ahead of Unresolved Stores",
+"where_in_paper": "Memory Unit / Out-of-Order Load and Store Processing",
+"decision": "Allowed load instructions to issue speculatively past preceding unresolved store instructions whose addresses were not yet computed, backed by an in-flight store queue trap/replay mechanism.",
+"alternatives_or_rejected": "Strictly ordering load execution behind all prior unaddressed store instructions until all store addresses are fully calculated.",
+"rationale": "Memory access latency is a primary pipeline bottleneck; forcing loads to wait for unresolved store addresses stalls downstream dependent instructions unnecessarily, because true store-to-load address aliasing happens infrequently.",
+"outcome": "Significantly increased memory-level parallelism and pipeline throughput, accepting occasional pipeline traps and replays when a true store-to-load address collision was detected.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.90
+}
+]

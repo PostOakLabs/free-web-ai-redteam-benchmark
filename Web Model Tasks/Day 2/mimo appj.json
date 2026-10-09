@@ -1,0 +1,92 @@
+```json
+[
+  {
+    "case_name": "Regular monthly transaction",
+    "appendix_basis": "Appendix J, Section II — Regular transactions (equal payments at equal intervals)",
+    "inputs": {
+      "amount_financed": 5000,
+      "unit": "USD",
+      "payment_schedule": "24 equal monthly payments, first payment exactly 1 month after advance",
+      "payment_amount": 226.14,
+      "finance_charge": 427.36
+    },
+    "unit_period_analysis": "Unit period = 1 month (interval between successive payments). n = 24 unit periods. All payments fall at integer multiples of the unit period: f_j = j for j = 1, 2, …, 24. No fractional periods arise.",
+    "computation": "Actuarial equation:\nA = P × [1 − (1+i)^(−n)] / i\n\nSubstituting:\n5,000 = 226.14 × [1 − (1+i)^(−24)] / i\n\nIterate at i = 0.006667 (= 8.00% / 12):\n  Step 1: (1.006667)^12 = 1.08300\n  Step 2: (1.006667)^24 = 1.08300² = 1.17289\n  Step 3: 1 − 1/1.17289 = 0.14741\n  Step 4: 0.14741 / 0.006667 = 22.112\n  Step 5: 226.14 × 22.112 = 5,000.0 ✓\n\nAPR = 0.006667 × 12 = 8.00%",
+    "result_apr": "8.00%",
+    "doc_vs_general": "probably",
+    "weakest_point": "The specific inputs ($5,000 financed, 24 payments of $226.14) are my construction; Appendix J's published regular-transaction example likely uses different values, though the annuity method is identical."
+  },
+  {
+    "case_name": "Irregular first period — short (17 days)",
+    "appendix_basis": "Appendix J, Section III — Irregular first period; fractional unit-period treatment",
+    "inputs": {
+      "amount_financed": 5000,
+      "unit": "USD",
+      "payment_schedule": "24 monthly payments of $226.14; advance March 15, first payment April 1 (17 days later), then 1st of each month",
+      "payment_amount": 226.14,
+      "finance_charge": 427.36,
+      "first_period_days": 17
+    },
+    "unit_period_analysis": "Unit period = 1 month. Approximate method (30-day months, 360-day year): f = 17/30 = 0.5667. Exact method (actual days, 365-day year): f = 17/(365/12) = 17/30.4167 = 0.5589. Using approximate method: f = 0.5667. Payments at unit-period positions f, f+1, …, f+23 = 0.5667, 1.5667, …, 23.5667.",
+    "computation": "Actuarial equation (derived by factoring the geometric series):\nA = P × (1+i)^(1−f) × [1 − (1+i)^(−n)] / i\n\nSubstituting (f = 0.5667, so 1−f = 0.4333):\n5,000 = 226.14 × (1+i)^0.4333 × [1 − (1+i)^(−24)] / i\n\nIterate at i = 0.0069 (= 8.28% / 12):\n  Step 1: (1.0069)^12 = 1.08603\n  Step 2: (1.0069)^24 = 1.08603² = 1.17946\n  Step 3: [1 − 1/1.17946] / 0.0069 = 0.15215 / 0.0069 = 22.051\n  Step 4: (1.0069)^0.4333 = e^(0.4333 × ln 1.0069) = e^(0.4333 × 0.006876) = e^0.002979 = 1.002983\n  Step 5: 226.14 × 1.002983 × 22.051 = 226.14 × 22.117 = 5,000.2 ≈ 5,000 ✓\n\nAPR = 0.0069 × 12 = 8.28%",
+    "result_apr": "8.28%",
+    "doc_vs_general": "probably",
+    "weakest_point": "Choice between approximate (f = 0.5667) and exact (f = 0.5589) methods shifts the result slightly; Appendix J permits both but the published example may use a different first-period length or specify one method."
+  },
+  {
+    "case_name": "Single-advance, single-payment transaction",
+    "appendix_basis": "Appendix J, Section II/III — Single-payment transactions; unit period equals the actual period",
+    "inputs": {
+      "amount_financed": 1000,
+      "unit": "USD",
+      "payment_schedule": "Single payment of $1,060 due exactly 6 months after advance",
+      "payment_amount": 1060,
+      "finance_charge": 60,
+      "term_months": 6
+    },
+    "unit_period_analysis": "For a single-payment transaction, the unit period equals the actual time between advance and payment = 6 months. There is exactly 1 unit period. Number of unit periods per year = 12/6 = 2.",
+    "computation": "Actuarial equation:\nA = P / (1+i)^1\n\nSubstituting:\n1,000 = 1,060 / (1+i)\n1 + i = 1,060 / 1,000 = 1.06\ni = 0.06 per 6-month unit period\n\nAPR = i × (unit periods per year) = 0.06 × 2 = 12.00%",
+    "result_apr": "12.00%",
+    "doc_vs_general": "probably",
+    "weakest_point": "The annualization formula APR = i × (periods/year) assumes simple nominal-rate multiplication; if Appendix J prescribes (1+i)^(12/6) − 1 for effective rate, the result would differ. The published example may use a different term or amount."
+  },
+  {
+    "case_name": "Irregular payment schedule — varying amounts at varying intervals",
+    "appendix_basis": "Appendix J, Section III — Irregular payment schedules",
+    "inputs": {
+      "amount_financed": 5000,
+      "unit": "USD",
+      "payment_schedule": [
+        {"month": 3, "amount": 1000},
+        {"month": 6, "amount": 1500},
+        {"month": 9, "amount": 2000},
+        {"month": 12, "amount": 1500}
+      ],
+      "total_payments": 6000,
+      "finance_charge": 1000
+    },
+    "unit_period_analysis": "Unit period = 1 month (the common base interval). Payments occur at months 3, 6, 9, and 12, corresponding to unit-period positions 3, 6, 9, and 12. Payment amounts vary ($1,000, $1,500, $2,000, $1,500), making this an irregular payment schedule under Appendix J.",
+    "computation": "Actuarial equation:\nA = P₁/(1+i)^3 + P₂/(1+i)^6 + P₃/(1+i)^9 + P₄/(1+i)^12\n\nSubstituting:\n5,000 = 1,000/(1+i)³ + 1,500/(1+i)⁶ + 2,000/(1+i)⁹ + 1,500/(1+i)¹²\n\nIterate at i = 0.02338 (= 28.06% / 12):\n  Step 1: (1.02338)^3 = 1.07177\n  Step 2: (1.02338)^6 = 1.07177² = 1.14870\n  Step 3: (1.02338)^9 = 1.14870 × 1.07177 = 1.23115\n  Step 4: (1.02338)^12 = 1.23115 × 1.07177 = 1.31949\n  Step 5: 1,000 / 1.07177 = 933.03\n  Step 6: 1,500 / 1.14870 = 1,305.81\n  Step 7: 2,000 / 1.23115 = 1,624.51\n  Step 8: 1,500 / 1.31949 = 1,136.76\n  Step 9: Sum = 933.03 + 1,305.81 + 1,624.51 + 1,136.76 = 5,000.11 ≈ 5,000 ✓\n\nAPR = 0.02338 × 12 = 28.06%",
+    "result_apr": "28.06%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "The specific payment amounts and intervals are my construction yielding a non-round APR; the equation setup and iteration are mechanically correct per the actuarial method, but Appendix J's published examples (if any cover irregular schedules) likely use different inputs."
+  },
+  {
+    "case_name": "Irregular first period — long (45 days)",
+    "appendix_basis": "Appendix J, Section III — Irregular first period; fractional unit-period treatment (long first period)",
+    "inputs": {
+      "amount_financed": 5000,
+      "unit": "USD",
+      "payment_schedule": "24 monthly payments of $226.14; advance March 1, first payment April 15 (45 days later), then 15th of each month",
+      "payment_amount": 226.14,
+      "finance_charge": 427.36,
+      "first_period_days": 45
+    },
+    "unit_period_analysis": "Unit period = 1 month. Approximate method (30-day months): f = 45/30 = 1.5000. The first payment occurs at 1.5 unit periods from the advance — i.e., the first period is longer than the unit period. Subsequent payments at f+1, f+2, …, f+23 = 2.5, 3.5, …, 24.5.",
+    "computation": "Actuarial equation:\nA = P × (1+i)^(1−f) × [1 − (1+i)^(−n)] / i\n\nSubstituting (f = 1.5, so 1−f = −0.5):\n5,000 = 226.14 × (1+i)^(−0.5) × [1 − (1+i)^(−24)] / i\n\nIterate at i = 0.00638 (= 7.656% / 12):\n  Step 1: (1.00638)^12 = 1.07929\n  Step 2: (1.00638)^24 = 1.07929² = 1.16487\n  Step 3: [1 − 1/1.16487] / 0.00638 = 0.14153 / 0.00638 = 22.183\n  Step 4: (1.00638)^(−0.5) = 1 / √1.00638 = 1 / 1.00318 = 0.99683\n  Step 5: 226.14 × 0.99683 × 22.183 = 226.14 × 22.113 = 5,000.0 ✓\n\nAPR = 0.00638 × 12 = 7.656% ≈ 7.66%\n\nDirection check: longer first period (f > 1) → (1+i)^(1−f) < 1 → lower APR than the regular case (8.00%). Confirmed: 7.66% < 8.00%.",
+    "result_apr": "7.66%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "The exact fraction (45/30 approximate vs 45/30.4167 exact) and the inputs are my construction; the direction of the APR shift (lower for longer first period) is correct, but the precise value depends on the day-count convention Appendix J's published example (if any) uses."
+  }
+]
+```

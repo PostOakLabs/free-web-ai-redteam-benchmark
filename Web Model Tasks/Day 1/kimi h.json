@@ -1,0 +1,92 @@
+[
+  {
+    "pitfall_name": "WebGPU buffer readback synchronization counted as compute time",
+    "what_happens": "Benchmarks that wrap the entire proving function report 2-5x slower 'GPU time' than actual shader execution because the timer includes mapAsync() stalls waiting for GPU→CPU memory copies, PCIe latency, and GPU idle time during synchronization fences.",
+    "why": "WebGPU compute shaders execute asynchronously on the GPU queue. When a proving step requires reading an intermediate commitment back to CPU for Fiat-Shamir hashing (common in SNARKs), mapAsync() inserts a CPU-blocking synchronization point. The GPU may have finished the kernel milliseconds earlier, but the benchmark timer keeps running until the CPU sees the data.",
+    "how_discovered": "Profile shows GPU idle for 60-80% of the measured 'compute' interval; removing the readback and running two back-to-back dispatches without mapping drops the per-proof time by 3x. Typically wastes 1-2 days before someone runs a GPU profiler (Chrome's about:tracing or PIX) and sees the queue gap.",
+    "mitigation": "Measure only the dispatch-to-dispatch interval using GPU timestamp queries (where available), or structure the benchmark to batch multiple proofs between readbacks. Report 'kernel time' and 'end-to-end time' as separate metrics.",
+    "affects": "measurement-validity",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "GPU timestamp-query quantization in Chrome (100 µs default)",
+    "what_happens": "Microbenchmarks of individual GPU kernels report quantized durations in 100 µs buckets, making kernels faster than ~200 µs appear to take identical time regardless of actual shader changes.",
+    "why": "Chrome quantizes GPU timestamp-query results to 100 microseconds by default as a Spectre-class timing-attack mitigation. The 'enable-webgpu-developer-features' flag disables quantization, but most end-user browsers run with it enabled. The quantization granularity is larger than the execution time of many proving subroutines (MSM buckets, NTT butterflies).",
+    "how_discovered": "Repeated runs of a supposedly-optimized kernel show identical durations (e.g., always 0.10 ms or 0.20 ms) while shader compilation changes produce no measurable delta. Usually wastes half a day before the developer notices the distribution is stair-stepped.",
+    "mitigation": "Run benchmarks in Chrome with --enable-features=WebGPUDeveloperFeatures, or accumulate many kernel iterations between queries and divide. Never trust sub-millisecond GPU timings from default Chrome.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WASM JIT tiering distortion (Liftoff → TurboFan in V8)",
+    "what_happens": "The first proving run is 3-8x slower than the second because the initial execution uses the unoptimized Liftoff compiler; subsequent hot-loop recompilation through TurboFan produces vectorized, optimized code.",
+    "why": "V8 compiles WASM modules first through Liftoff (single-pass, fast compile, no optimizations) to minimize startup latency. After a function becomes hot, it is recompiled by TurboFan (optimizing compiler with register allocation, SIMD lowering, and inlining). A cold-start benchmark measures Liftoff performance, which is irrelevant for sustained proving workloads.",
+    "how_discovered": "The second benchmark run is mysteriously 4x faster with no code changes; adding a 5-iteration warmup before measurement stabilizes results. Typically wastes a full day while the developer suspects cache effects or memory allocation.",
+    "mitigation": "Always include an explicit warmup phase (≥5 full proof iterations or ≥30 seconds of compute) before collecting timings. Report whether the benchmark was cold-start or steady-state.",
+    "affects": "measurement-validity",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "JS GC pauses during witness marshalling attributed to proving time",
+    "what_happens": "Benchmarks measuring from JS show sporadic 50-500 ms spikes that are recorded as 'proving time' but are actually V8/SpiderMonkey garbage collection pauses triggered by temporary TypedArray and BigInt allocations during witness serialization.",
+    "why": "When converting a JS witness object (e.g., arrays of decimal strings) into a WASM-readable linear memory buffer, the JS shim often creates many intermediate Uint8Array slices, BigInt temporaries, or ArrayBuffer instances. These allocate on the JS heap; when the heap fills, a mark-and-sweep or generational GC pause freezes the main thread. If performance.now() calls bracket the entire JS→WASM→prove→JS pipeline, the GC pause is counted as proof time.",
+    "how_discovered": "Chrome DevTools Memory profiler shows GC events aligned with the timing spikes; moving witness construction outside the benchmark interval eliminates the spikes. Usually wastes 2-3 days because the developer first suspects WASM memory growth or thread contention.",
+    "mitigation": "Pre-allocate a reusable WASM memory buffer and write witness data into it directly without intermediate JS objects. Measure proving time from inside WASM (or exclude JS marshalling from the timed region).",
+    "affects": "measurement-validity",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "performance.now() clamping without cross-origin isolation",
+    "what_happens": "In non-cross-origin-isolated contexts, performance.now() resolution is clamped to 100 µs or coarser, making it impossible to distinguish between a 1.2 ms and a 1.3 ms proving step.",
+    "why": "Browsers reduce timer resolution as a Spectre mitigation unless the document is cross-origin isolated (COOP/COEP). Proving workloads that have not yet deployed the required headers (or are embedded in contexts that cannot serve them) get coarse timers. The clamping rounds sub-millisecond differences, destroying statistical power for A/B optimization tests.",
+    "how_discovered": "Benchmark histograms show discrete 0.1 ms buckets with no variance; running the same code in a cross-origin-isolated tab restores expected Gaussian noise. Usually wastes a few hours before the developer checks navigator.crossOriginIsolated.",
+    "mitigation": "Ensure COOP: same-origin and COEP: require-corp headers are served. If impossible (e.g., embedded widget), use larger iteration counts and measure total duration to amortize quantization error, or use WASM-side timing via instruction-count approximations.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WASM 32-bit 4 GiB memory ceiling for large circuits",
+    "what_happens": "Proofs for circuits with >100M constraints or large witness vectors crash with RangeError or OOM during memory.grow() because 32-bit WASM is capped at 4 GiB (actually ~2-3 GiB usable due to allocator overhead), and Memory64 is unsupported in Safari.",
+    "why": "WASM MVP uses 32-bit memory indices (i32), limiting linear memory to 4 GiB. The Memory64 proposal extends this to 64-bit, but Safari (both macOS and iOS) does not implement it as of 2026. Even on Chrome/Firefox, Memory64 requires toolchain support (Rust nightly, specific Emscripten flags) that many proving libraries have not adopted. Large proving keys, SRS files, and witness data easily exceed this limit.",
+    "how_discovered": "memory.grow() returns -1 (failure) or the runtime throws RangeError: WebAssembly.Memory.prototype.grow() failed. Developer initially suspects a memory leak before checking memory.buffer.byteLength and realizing it is pinned near 4 GiB. Typically wastes 1-2 days.",
+    "mitigation": "Use Memory64 on supported browsers with a 64-bit toolchain. On Safari, fall back to disk-backed paging or split the proof into smaller recursive circuits. Avoid loading the full SRS into WASM memory; stream or window it.",
+    "affects": "deployment",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "SharedArrayBuffer COOP/COEP deployment friction in embedded contexts",
+    "what_happens": "WASM threads (required for parallel MSM/NTT) cannot spawn because SharedArrayBuffer is unavailable, and the page cannot obtain cross-origin isolation when embedded inside a cross-origin iframe or a CDN that does not allow custom headers.",
+    "why": "SharedArrayBuffer requires cross-origin isolation (COOP + COEP). If the proving application is embedded as a wallet widget in a third-party dApp via cross-origin iframe, the parent page controls the headers. Many hosting platforms (GitHub Pages, default S3, some CDNs) do not support setting COOP/COEP. Without SAB, WASM threads abort at instantiation.",
+    "how_discovered": "WebAssembly.instantiate() throws LinkError: WebAssembly.Memory() cannot be created with maximum size; or the threads polyfill fails. Developer checks console and sees 'SharedArrayBuffer is not defined'. Usually wastes half a day before realizing the iframe parent lacks the headers.",
+    "mitigation": "Use a credentialless iframe (Chromium-only) or require the embedding page to serve COOP/COEP. Alternatively, implement a single-threaded fallback path and detect SAB availability at runtime.",
+    "affects": "deployment",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "SIMD128 misfit with wide prime-field Montgomery multiplication",
+    "what_happens": "Enabling WASM SIMD128 produces no speedup (or a slowdown) for finite-field arithmetic because 254-bit prime-field elements do not align with 128-bit vector lanes, and compilers fail to auto-vectorize carry-handling Montgomery code.",
+    "why": "WASM SIMD128 operates on four 32-bit or two 64-bit lanes per vector. A 254-bit field element requires 4×64-bit limbs or 8×32-bit limbs. Montgomery multiplication involves lane-crossing carries and conditional reductions that do not map to SIMD shuffle/blend patterns. The compiler (LLVM/Emscripten) emits scalar fallback code, and the SIMD instruction fetch/decode overhead slightly regresses performance compared to compact scalar i64 code.",
+    "how_discovered": "Benchmark shows identical cycle count with and without -msimd128; disassembling the WASM reveals no v128 instructions in the hot loop (or inefficient splat/shuffle sequences). Typically wastes 2-3 days of attempted vectorization before accepting scalar i64 is faster for this field width.",
+    "mitigation": "Write hand-optimized SIMD intrinsics only if the field fits in 2×64-bit (e.g., 128-bit fields). For 254-bit fields, prefer scalar i64 with inline assembly or compiler builtins, and profile to confirm SIMD is actually used in the hot loop.",
+    "affects": "performance",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "Safari WebGPU compute shader gaps and TBDR timestamp limitations",
+    "what_happens": "Proving workloads that run on Chrome/Firefox fail or produce incorrect results on Safari because Safari's WebGPU implementation uses Tile-Based Deferred Rendering (TBDR) with compute-shader restrictions, and timestamp-query only supports atStageBoundary sampling.",
+    "why": "Safari implements WebGPU on top of Metal, which is TBDR on Apple Silicon. Compute shaders may have reduced threadgroup memory, different barrier behavior, and dispatch-size limits compared to Chrome's Dawn/Vulkan backend. Additionally, Safari only supports timestamp-query at stage boundaries (not at draw/dispatch boundaries), making kernel-level profiling impossible. Safari also lacks Memory64 support, compounding memory limits.",
+    "how_discovered": "Code works in Chrome but produces wrong commitment hashes or hangs in Safari; Safari GPU process logs show Metal validation errors. Timestamp queries return zero or coarse values. Usually wastes 1-3 days of Safari-specific debugging.",
+    "mitigation": "Test compute shaders on Safari early; avoid relying on dispatch-size tuning from Chrome. Use Metal-specific workgroup sizes (multiples of 32 threads). Do not depend on per-dispatch GPU timestamps in Safari—use CPU wall-clock as fallback.",
+    "affects": "correctness",
+    "confidence": 0.8
+  },
+  {
+    "pitfall_name": "Mobile browser tab memory kills (iOS Safari ~1.5 GiB limit)",
+    "what_happens": "Proving aborts mid-computation on iOS Safari with a generic 'This webpage was reloaded because a problem occurred' or the tab simply reloads, losing all in-progress state.",
+    "why": "iOS Safari imposes a hard per-tab memory limit (approximately 1.5-2 GiB depending on device RAM). Proving workloads with large SRS files, witness vectors, and WebGPU buffers quickly exceed this. Unlike desktop browsers, iOS does not swap; it immediately kills the WebContent process. Android Chrome is more permissive but still kills heavy tabs under memory pressure.",
+    "how_discovered": "Tab reloads reproducibly at the same proof size threshold; Safari Web Inspector shows memory climbing to ~1.4 GiB just before the crash. Desktop Chrome handles the same proof fine. Usually wastes a day before the developer tests on actual hardware instead of simulator.",
+    "mitigation": "Cap circuit size for mobile; use recursive proof composition to keep per-proof memory under ~800 MiB. Monitor performance.memory (where available) and gracefully degrade to a server-side proof or smaller circuit. Never assume desktop memory limits apply to mobile.",
+    "affects": "deployment",
+    "confidence": 0.85
+  }
+]

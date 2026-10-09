@@ -1,0 +1,46 @@
+[
+  {
+    "title": "Balanced server design objectives",
+    "where_in_paper": "Introduction / design objectives or guiding principles",
+    "decision": "POWER4 was targeted at high single-thread performance, high system throughput, and server-grade reliability rather than optimizing only one of those axes.",
+    "alternatives_or_rejected": "I do not recall a specific named rejected architecture. The implicit contrast is a one-dimensional design that chases only frequency, only multiprocessing scaling, or only reliability, which the paper suggests would be insufficient for high-end servers.",
+    "rationale": "Enterprise server workloads need fast response time for individual threads, high aggregate throughput, and high availability; a server microprocessor had to address all three.",
+    "outcome": "The paper presents POWER4 as an out-of-order server processor family with microarchitecture, cache, SMP, and RAS features aimed at those combined objectives.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly states the objectives as a balanced three-way set, or whether I am compressing a broader introduction into that shape.",
+    "provenance_note": "The objective itself is likely from the paper; the phrasing is my reconstruction, not a quotation."
+  },
+  {
+    "title": "On-chip L2 with off-chip L3 capacity",
+    "where_in_paper": "Cache hierarchy / memory subsystem discussion",
+    "decision": "POWER4 used an on-chip L2 cache together with a large off-chip L3 cache, rather than relying on on-chip cache alone for server capacity.",
+    "alternatives_or_rejected": "The implicit alternatives were a much larger on-chip cache, which would cost area and possibly frequency, or too little off-chip cache, which would hurt server workload capacity. I am not certain the paper enumerates these alternatives explicitly.",
+    "rationale": "Server workloads need large cache capacity, but on-chip cache is limited by die area, power, and latency; splitting the hierarchy balances low latency with large effective capacity.",
+    "outcome": "The described cache hierarchy gave POWER4 systems low-latency on-chip caching plus large system-level cache for server workloads.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact cache sizes, sharing structure, and whether the L3 choice is presented as an explicit trade-off rather than a system fact.",
+    "provenance_note": "The hierarchy is from the paper/chip; the explicit trade-off wording may be partly inferred."
+  },
+  {
+    "title": "RAS treated as a first-class design requirement",
+    "where_in_paper": "RAS / reliability, availability, and serviceability section",
+    "decision": "POWER4 incorporated extensive error detection, correction, retry/recovery, and serviceability features as part of the system microarchitecture rather than treating them as optional add-ons.",
+    "alternatives_or_rejected": "A minimal-checking design would reduce complexity, but it would be incompatible with enterprise-server availability goals. I do not recall the paper naming specific rejected RAS architectures.",
+    "rationale": "POWER4 was aimed at high-end servers where availability, fault containment, and serviceability are critical, so RAS had to be designed into the system from the start.",
+    "outcome": "The paper reports a broad set of RAS mechanisms intended to allow detection, recovery, and service without unnecessary system downtime.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Which specific RAS mechanisms are described in this paper versus other POWER4 documentation or the companion physical-design paper.",
+    "provenance_note": "The RAS emphasis is likely from the paper; the mechanism list may be influenced by general POWER4 knowledge."
+  },
+  {
+    "title": "High-frequency target with power/thermal control",
+    "where_in_paper": "Clocking / power management or design-principles discussion",
+    "decision": "POWER4 pursued high clock frequency for single-thread performance while including mechanisms to manage or throttle frequency under power and thermal limits.",
+    "alternatives_or_rejected": "A fixed conservative frequency would simplify thermal and power design but would sacrifice performance. I am not certain the paper explicitly frames that as the rejected alternative.",
+    "rationale": "High frequency improves performance, but server systems must remain within power and thermal envelopes across workloads; dynamic control lets the chip run fast when possible and back off when necessary.",
+    "outcome": "The paper describes POWER4 as able to operate at high frequency while controlling power/thermal conditions, rather than simply choosing a lower fixed frequency.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether clock throttling/power management is discussed in this system-microarchitecture paper or mainly in the companion circuit/physical-design paper.",
+    "provenance_note": "The high-frequency objective is likely from this paper; throttling details may be mixed with general POWER4 knowledge."
+  }
+]

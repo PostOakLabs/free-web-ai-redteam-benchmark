@@ -1,0 +1,196 @@
+  
+  
+ [
+  {
+    "title": "Post-CTS macro-channel congestion resolved by selective repeater relocation without invalidating clock tree",
+    "design_context": {
+      "node": "28nm",
+      "instance_count": 1050000,
+      "macro_count": 82,
+      "clock_domains": 4,
+      "tool_family": "commercial P&R"
+    },
+    "prior_state": {
+      "WNS_ns": -0.02,
+      "TNS_ns": -0.08,
+      "congestion_overflow_pct": 18.0,
+      "utilization_pct": 83.0,
+      "DRC_count": 0
+    },
+    "observation": {
+      "description": "Post-CTS optimization reported clean timing (WNS -0.02ns). First detailed-route attempt aborts with >80,000 shorts. Global-route overflow is 18% and concentrated in three macro channels (between rows of SRAMs), not spread across the core. The channels are 32-40 microns wide with macros at minimum legal spacing. Post-CTS inserted clock buffers and repeaters into these channels.",
+      "severity": "HIGH"
+    },
+    "hypothesis": "The macro channels were sized for legal spacing but not for simultaneous pin access and clock-tree growth. Post-CTS inserted buffers and repeater chains into the channels, consuming routing tracks needed for macro pin access. The global router did not model pin-access blockage accurately for the post-CTS netlist, so it reported 'clean' while detailed route could not resolve the competition between clock routing and macro pin access.",
+    "candidates_considered": [
+      {
+        "action": "Rip up entire placement, increase all macro spacing by 15 microns, and re-run placement through CTS",
+        "rejected_because": "4-week schedule impact; invalidates completed CTS, all clock tree optimization, and extracted parasitics; risks new timing convergence issues and would push tape-out past the hard deadline."
+      },
+      {
+        "action": "Remove all clock buffers from the macro channels via manual ECO and relocate them to the core",
+        "rejected_because": "Would degrade clock skew by approximately 80ps, violating the 50ps skew budget and creating hold violations across more than 200 paths; hold closure would require buffer insertion, re-creating the congestion."
+      },
+      {
+        "action": "Add full placement blockages in all three macro channels to prevent any cell insertion",
+        "rejected_because": "Would push approximately 15,000 cells into already-dense standard-cell regions, raising core utilization above 90% and triggering new congestion hotspots with cascading timing degradation."
+      }
+    ],
+    "chosen_intervention": "Identified that 40% of the repeaters in the three worst channels were non-critical buffer chains (not clock-tree trunk buffers). Down-sized these repeaters to smaller drive strengths and relocated them to nearby less-congested areas outside the channels. Added partial placement blockages (height: 2 standard-cell rows) on the most congested channel edges to prevent new cell insertion during incremental placement. Preserved 100% of clock-tree trunk buffers. Re-ran detailed route on the affected channels only.",
+    "post_state": {
+      "WNS_ns": -0.04,
+      "TNS_ns": -0.15,
+      "congestion_overflow_pct": 4.0,
+      "utilization_pct": 82.5,
+      "DRC_count": 0
+    },
+    "expert_assessment": "The right call for a schedule-constrained late-stage closure. The key insight was distinguishing post-CTS incremental congestion from original floorplan deficiency. General lesson: verify macro pin access with a pin-aware global router using the post-CTS netlist, not the pre-CTS netlist, before final placement lock. Would NOT transfer if congestion were uniform across the core (indicating global utilization issue) or if the channel congestion were caused by data-path routing rather than clock-tree insertion.",
+    "confidence": 0.72,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 40% safe-repeater-removal fraction is an estimate; actual safe removal depends on the specific clock tree topology, max transition constraints, and whether the repeaters are on critical paths or branch buffers, which vary by design."
+  },
+  {
+    "title": "Uniform fanout-violation signature reveals source-side logic-depth problem, avoiding fruitless placement rework",
+    "design_context": {
+      "node": "7nm",
+      "instance_count": 620000,
+      "macro_count": 48,
+      "clock_domains": 3,
+      "tool_family": "commercial P&R"
+    },
+    "prior_state": {
+      "WNS_ns": -0.35,
+      "TNS_ns": -8.5,
+      "congestion_overflow_pct": 3.0,
+      "utilization_pct": 74.0,
+      "DRC_count": 0
+    },
+    "observation": {
+      "description": "Post-route timing report shows 12,000 failing setup paths. ALL paths originate from a single source register and terminate at 12,000 different destination registers distributed across the entire die. Each path violates by 0.33-0.37ns regardless of destination location. Paths to physically adjacent destinations fail by the same magnitude as paths to far corners. Intra-domain paths not involving this source register are clean (WNS +0.08ns).",
+      "severity": "HIGH"
+    },
+    "hypothesis": "The identical violation magnitude (~0.35ns) across all 12,000 paths regardless of destination location or wire length indicates a source-side logic-depth problem, not a placement/wire-delay problem or a constraint error. A constraint error would show uniform violations across unrelated paths; a placement problem would show spatial clustering and length-dependent variation. The common factor is the single source register driving massive fanout with 8 levels of combinational logic versus the budgeted 6 levels.",
+    "candidates_considered": [
+      {
+        "action": "Add a pipeline register to break the 12,000 fanout paths",
+        "rejected_because": "The source register output feeds a protocol state-machine enable signal that must remain single-cycle relative to the data path; adding latency would break functional correctness and require RTL redesign with 3-week verification impact including formal property checking."
+      },
+      {
+        "action": "Rip up placement and spread the 12,000 destinations away from the source to reduce wire delay",
+        "rejected_because": "The violation is identical to both near and far destinations, proving wire delay is not the dominant term. Spreading would increase average wire length, potentially worsening timing, and would require full re-placement (2-week schedule hit) with no expected benefit."
+      },
+      {
+        "action": "Upsize the source register to the largest available drive strength",
+        "rejected_because": "The source is already the largest drive strength (X8) in the standard cell library. Further upsizing is impossible without buffer insertion, which would add gate delay and increase area without resolving the logic-depth deficit."
+      }
+    ],
+    "chosen_intervention": "Used the commercial synthesis tool to re-synthesize the enable-generation logic with a tighter timing constraint on the specific path group. The tool retimed two logic levels from the combinational cloud into a new pipeline stage on the enable path, which was architecturally permissible because the enable is generated one cycle early relative to the main data. The source register now drives a pre-computed enable with 4 logic levels instead of 8. Placement and routing were preserved; only the netlist and cell instances in the local region changed.",
+    "post_state": {
+      "WNS_ns": 0.05,
+      "TNS_ns": 0.0,
+      "congestion_overflow_pct": 3.0,
+      "utilization_pct": 74.2,
+      "DRC_count": 0
+    },
+    "expert_assessment": "Correct diagnosis from the violation signature: identical failure across all fanout paths regardless of physical location is the hallmark of a source-side logic-depth or drive-strength problem. General lesson: when more than 10,000 paths share a single source and fail uniformly, examine the source logic depth and drive strength before considering placement or constraint changes. Would NOT transfer if violations showed spatial clustering or varying magnitudes, which would indicate placement or wire-delay issues requiring physical intervention.",
+    "confidence": 0.78,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The retiming of the enable generation into a pipeline stage assumes the enable is naturally generated one cycle early relative to the data path, which is a specific architectural property not guaranteed in all designs; if the enable were generated in the same cycle, retiming would not be possible without RTL change."
+  },
+  {
+    "title": "Interface budget reallocation from measured parasitics prevents congestion collapse in high-utilization block",
+    "design_context": {
+      "node": "16nm",
+      "instance_count": 1500000,
+      "macro_count": 90,
+      "clock_domains": 5,
+      "tool_family": "commercial synthesis + P&R"
+    },
+    "prior_state": {
+      "WNS_ns": -0.18,
+      "TNS_ns": -2.3,
+      "congestion_overflow_pct": 5.0,
+      "utilization_pct": 80.0,
+      "DRC_count": 0
+    },
+    "observation": {
+      "description": "Top-level timing closure shows -0.18ns on paths from Block A (1.0M instances, 60 macros, 82% utilization, 7% congestion near macro boundaries) to Block B (0.5M instances, 30 macros, 76% utilization, 2% congestion). Block A internal WNS is +0.05ns. Block B internal WNS is +0.02ns. The interface budget was originally set at 0.40ns for Block A output delay and 0.40ns for Block B input delay, with 0.20ns reserved for top-level wire.",
+      "severity": "MODERATE"
+    },
+    "hypothesis": "The equal 0.40ns/0.40ns budget split is arbitrary and ignores physical reality: Block A has higher utilization and macro density, meaning its output drivers face higher local congestion and longer internal routes to the boundary. Block B has lower utilization and can accept tighter constraints without congestion risk. The 0.40ns budget for Block A is too aggressive given its internal congestion headroom.",
+    "candidates_considered": [
+      {
+        "action": "Tighten Block A internal timing target by 0.20ns to force harder optimization on interface paths",
+        "rejected_because": "Block A is already at 82% utilization with 7% congestion near macro boundaries; tightening would force larger drive-strength cells and more aggressive buffering into congested regions, likely pushing congestion above 12% and causing placement legalization failures or routing DRCs, requiring a 2-week iteration cycle."
+      },
+      {
+        "action": "Relax Block B input budget to 0.55ns and absorb the slack into the interface",
+        "rejected_because": "Block B has 30 macros with tight pin access on the interface-facing side; relaxing timing would allow larger cells near those macros, blocking pin-access tracks and creating localized congestion that does not currently exist, risking DRC violations from insufficient routing tracks."
+      },
+      {
+        "action": "Increase the top-level wire budget to 0.35ns by relaxing both block budgets equally",
+        "rejected_because": "The physical distance between Block A and Block B is only 150 microns with ample upper-metal routing layers; 0.20ns is already conservative for the wire. Increasing the wire budget would mask the real problem (Block A's internal congestion) and leave no margin for unexpected detours caused by macro blockages."
+      }
+    ],
+    "chosen_intervention": "Measured actual interface path delays on 20 representative nets using post-route parasitic extraction: Block A output driver plus local route averaged 0.52ns, top-level wire averaged 0.18ns, Block B input setup averaged 0.28ns, totaling 0.98ns against a 1.0ns clock period. Re-derived budget: Block A output 0.55ns (relaxed 0.15ns), Block B input 0.25ns (tightened 0.15ns), wire 0.20ns (unchanged). Updated set_output_delay on Block A and set_input_delay on Block B. Block A internal WNS improved to +0.08ns; Block B internal WNS became -0.03ns but closed after minor placement legalization near two macros (4 hours). Top-level interface closed at +0.01ns.",
+    "post_state": {
+      "WNS_ns": 0.01,
+      "TNS_ns": 0.0,
+      "congestion_overflow_pct": 5.5,
+      "utilization_pct": 80.0,
+      "DRC_count": 0
+    },
+    "expert_assessment": "Correct approach: budgets derived from measured parasitics rather than equal splits prevent the congestion collapse that tightening Block A would have caused. The 0.15ns reallocation is the critical magnitude—large enough to relieve Block A's pressure, small enough that Block B could absorb it with minor legalization. General lesson: interface budgets must be proportional to measured internal delay and block-internal congestion headroom, not allocated by path count or die area. Would NOT transfer if the blocks were in different clock domains (requires CDC budgeting and synchronizer delay) or if wire delay were the dominant term.",
+    "confidence": 0.75,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "The measured delays (0.52ns output, 0.18ns wire, 0.28ns input) are illustrative estimates for 16nm; actual values depend heavily on the specific standard cell library, metal stack, extraction corner, and operating conditions, which can vary by 30-50% between foundries."
+  }
+]
+
+[
+  {
+    "cell": "SharedArrayBuffer + cross-origin isolation (COOP/COEP) — Chrome/Edge/Firefox/Safari stable 2026",
+    "claim": "No change to the core requirement in 2026. All four browsers still require Cross-Origin-Opener-Policy: same-origin AND Cross-Origin-Embedder-Policy: require-corp to enable SharedArrayBuffer. Chrome/Edge additionally support COEP: credentialless since Chrome 96 (Dec 2021); Firefox and Safari do not support credentialless mode. Safari enabled SharedArrayBuffer from 15.2 onward only with cross-origin isolation.",
+    "url": "https://www.testmuai.com/learning-hub/sharedarraybuffer-browser-support/",
+    "retrieved": "2026-08-31",
+    "confidence": "verified from current authoritative page",
+    "notes": "TestMu AI article dated May 1 2026, last updated July 17 2026, explicitly lists Chrome 68+, Edge 79+, Firefox 79+, Safari 15.2+ with cross-origin isolation requirement. COEP:credentialless support from StackBlitz blog (https://blog.stackblitz.com/posts/cross-browser-with-coop-coep/) dated Feb 2022 notes Chromium-only."
+  },
+  {
+    "cell": "WebGPU compute-shader availability + timestamp-query — Chrome/Edge/Firefox/Safari stable 2026",
+    "claim": "Chrome/Edge: WebGPU stable with full compute-shader support since Chrome 113 (May 2023); timestamp-query is an optional adapter feature exposed via adapter.features.has('timestamp-query'), but values are quantized to 100 microseconds by default and require the 'enable-webgpu-developer-features' flag for unquantized precision. Firefox: WebGPU shipped stable on Windows (Firefox 141, July 2025) and macOS (Firefox 145/147, 2026); Linux remains in Nightly, Android behind flag. Real-world telemetry (web3dsurvey.com) shows timestamp-query supported in 99.9% of Firefox reports, suggesting broad availability. Safari: WebGPU stable since Safari 26 (macOS Tahoe 26, iOS 26); timestamp-query has known limitations on TBDR/Apple Silicon architectures where only atStageBoundary sampling is supported, not atDrawBoundary or atDispatchBoundary.",
+    "url": "https://github.com/gpuweb/gpuweb/wiki/Implementation-Status",
+    "retrieved": "2026-08-31",
+    "confidence": "verified from current authoritative page for Chrome/Edge/Safari implementation status; verified from telemetry for Firefox timestamp-query; mixed for Firefox Linux/Android completeness",
+    "notes": "GPUWeb implementation status wiki (authority S) shows Firefox 141 Windows, 145/147 macOS. Safari 26 all platforms. web3dsurvey.com (authority NA but large sample) reports 99.9% Firefox timestamp-query support. Timestamp-query spec from W3C (https://www.w3.org/TR/webgpu/) notes optional feature. Safari TBDR limitation from gpuweb/gpuweb#2046 (https://github.com/gpuweb/gpuweb/issues/2046). Quantization detail from webgpufundamentals.org (https://webgpufundamentals.org/webgpu/lessons/webgpu-timing.html)."
+  },
+  {
+    "cell": "WASM feature status per browser — threads, SIMD128, relaxed-SIMD, JSPI, memory64",
+    "claim": "Threads: Supported in Chrome, Edge, Firefox, Safari with cross-origin isolation (requires SharedArrayBuffer). SIMD128: Chrome 91+, Edge 91+, Firefox 89+, Safari 16.4+. Relaxed SIMD: Chrome 114+, Firefox 120+, Safari 18.4+; webassembly.org lists Full Support for all four browsers. JSPI: Chrome 137+ (stable since May 2025), Safari 27 beta (mid-2026), Firefox Nightly-only behind a preference as of Aug 2026 with default-on intended for Firefox 153 but not yet confirmed in stable. Memory64: Chrome 133+ (Feb 2025), Edge 133+, Firefox 134+ (Jan 2025); Safari and Safari iOS do NOT support Memory64 as of Aug 2026.",
+    "url": "https://webassembly.org/features/",
+    "retrieved": "2026-08-31",
+    "confidence": "verified from current authoritative page for SIMD/Relaxed SIMD; verified from developer-signals issue for Memory64; mixed/secondary for JSPI Firefox status",
+    "notes": "webassembly.org features page shows Memory Operations and Relaxed SIMD Full Support Yes for Chrome/Edge/Firefox/WebKit. Memory64 non-support in Safari confirmed by web-platform-dx developer-signals issue #269 (https://github.com/web-platform-dx/developer-signals/issues/269) and caniuse (https://caniuse.com/wf-wasm-memory64). JSPI status from openreplay blog Aug 2026 (https://blog.openreplay.com/jspi-javascript-wasm-bridge/) and platform.uno Jan 2026 (https://platform.uno/blog/the-state-of-webassembly-2025-2026/). SIMD128 dates from TestMu AI May 2026 (https://www.testmuai.com/learning-hub/wasm-simd-browser-support/)."
+  },
+  {
+    "cell": "Behavior inside a cross-origin iframe — cross-origin isolation / WebGPU access",
+    "claim": "Cross-origin isolation: An embedded page in a cross-origin iframe CAN achieve cross-origin isolation IF the iframe document itself serves COOP: same-origin and COEP: require-corp headers. The parent page must also be cross-origin isolated or use a credentialless iframe. Access additionally requires Permissions-Policy: cross-origin-isolated. WebGPU: A cross-origin iframe with a secure context (HTTPS) CAN access WebGPU; WebGPU does not require cross-origin isolation, only a secure context. However, if the iframe is sandboxed without allow-same-origin, it may not access WebGPU.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/crossOriginIsolated",
+    "retrieved": "2026-08-31",
+    "confidence": "verified from current authoritative page for isolation; widely believed for WebGPU in iframe",
+    "notes": "MDN crossOriginIsolated page (authority S, dated Aug 21 2026) states APIs must be allowed by Permissions-Policy cross-origin-isolated. web.dev article (https://publishing-project.rivendellweb.net/a-deep-dive-into-cross-origin-isolation/) dated Apr 2026 notes iframe must serve COEP header. WICG credentialless iframe explainer (https://wicg.github.io/anonymous-iframe/) notes credentialless iframes can embed in COEP pages without their own COEP header. WebGPU secure context requirement is spec-defined; no authoritative source found specifically addressing cross-origin iframe + WebGPU combination, so marked as widely believed."
+  },
+  {
+    "cell": "Published 2026 measurements of in-browser proving (any proof system) with reproducible harness",
+    "claim": "UNVERIFIED. No 2026-published reproducible harness for in-browser ZK proving was found. The most relevant measurement remains zkSecurity's integration of WebGPU compute shaders with StarkWare's Stwo prover (reported April 2025), claiming 5x improvement for constraint polynomial evaluation and 2x for overall proving pipeline. This was actual speedup on a production-grade ZK system, but the original publication date is 2025, not 2026, and a reproducible harness URL was not identified. ZK Bench (zkbench.dev) lists 'Browser benchmarks' on their roadmap but has not published them. The SitePoint article (Feb 2026) provides reproducible WebGPU vs WASM benchmarks for ML inference (Transformers.js), not ZK proving.",
+    "url": "https://blog.zksecurity.xyz/posts/webgpu/",
+    "retrieved": "2026-08-31",
+    "confidence": "verified from current authoritative page for 2025 zkSecurity work; UNVERIFIED for 2026 reproducible harness",
+    "notes": "zkSecurity blog post dated April 25 2025 (https://blog.zksecurity.xyz/posts/webgpu/) reports 5x/2x numbers. WebGPU.com article Jan 27 2026 (https://www.webgpu.com/news/zk-proofs-webgpu-boost/) references the same zkSecurity work but does not present new 2026 measurements. ZK Bench site (https://zkbench.dev/) dated Oct 2023 lists browser benchmarks as future work. SitePoint benchmark article Feb 2026 (https://www.sitepoint.com/webgpu-vs-webasm-transformers-js/) is ML-focused, not ZK."
+  }
+]
+
+[]

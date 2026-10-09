@@ -1,0 +1,9 @@
+```json
+[
+    {"case": 1, "assumptions_invoked": ["Full drawdown at t=0", "24 equal monthly repayments", "Arrangement fee at t=0"], "equation": "10100 = sum(450 / (1 + X)^(t/12) for t in 1..24)", "iterations": [{"iteration": 0, "rate": 0.5, "pv": 2825.3856937854143}, {"iteration": 1, "rate": 0.25, "pv": 1468.86825609498}, {"iteration": 2, "rate": 0.125, "pv": 524.9330215391637}, {"convergence": 0.06716448755469173}], "aprc_pct": 6.7},
+    {"case": 2, "assumptions_invoked": ["Full €3,000 drawn for 3 months", "12% nominal rate charged monthly", "€25 monthly fee"], "equation": "3000 = (3000 * (1 + 0.01)^3 + 75) / (1 + X)^(0.25)", "iterations": [{"iteration": 0, "rate": 0.5, "pv": 139.2837059655808}, {"iteration": 1, "rate": 0.25, "pv": 5.873802832018555}, {"iteration": 2, "rate": 0.125, "pv": -74.03971304706101}, {"convergence": 0.24023904278874397}], "aprc_pct": 24.0},
+    {"case": 3, "assumptions_invoked": ["Full €1,500 drawn at t=0", "12 equal monthly repayments", "18% nominal rate monthly compounding"], "equation": "1500 = sum(125 / (1 + X)^(t/12) for t in 1..12)", "iterations": [{"iteration": 0, "rate": 0.5, "pv": 287.56428229756943}, {"iteration": 1, "rate": 0.25, "pv": 168.03522470601524}, {"iteration": 2, "rate": 0.125, "pv": 91.90191493223028}, {"convergence": 9.313225746154785e-10}], "aprc_pct": 18.0},
+    {"case": 4, "assumptions_invoked": ["Full €5,000 drawn at t=0", "Single repayment at 12 months", "8% nominal rate", "€200 fee financed at t=0"], "equation": "5200 = 5616 / (1 + X)", "iterations": [{"iteration": 0, "rate": 0.5, "pv": 1456.0}, {"iteration": 1, "rate": 0.25, "pv": 707.1999999999998}, {"iteration": 2, "rate": 0.125, "pv": 208.0}, {"convergence": 0.0800000000745058}], "aprc_pct": 8.0},
+    {"weakest_point": "Assumption of full drawdown for the entire duration in overdraft and open-end credit cases"}
+]
+```

@@ -1,0 +1,66 @@
+[
+  {
+    "case_name": "Case 1 — Zero Tolerance, No Violation",
+    "fees": [
+      {"name": "Origination Fee (paid to creditor)", "bucket": "zero_tolerance", "le_amount": 1000, "cd_amount": 1000},
+      {"name": "Transfer Tax (government-imposed)", "bucket": "zero_tolerance", "le_amount": 2500, "cd_amount": 2500}
+    ],
+    "computation": "Zero-tolerance per-fee check:\n  Origination Fee: CD $1,000 vs LE $1,000 → no increase → PASS\n  Transfer Tax: CD $2,500 vs LE $2,500 → no increase → PASS\n\n10% aggregate bucket: no fees in this bucket — test not applicable.\nNo-limit bucket: no fees in this bucket — test not applicable.",
+    "violations": "None. All buckets pass.",
+    "clause_basis": "§1026.19(e)(3)(i): amounts paid to the creditor and transfer taxes are in the zero-tolerance category; any increase over the LE amount is a tolerance violation. Here no fee increased.",
+    "weakest_point": "Bucket assignments are straightforward for creditor-paid fees and transfer taxes; no ambiguity here."
+  },
+  {
+    "case_name": "Case 2 — Zero Tolerance, One Fee Increased",
+    "fees": [
+      {"name": "Origination Fee (paid to creditor)", "bucket": "zero_tolerance", "le_amount": 1000, "cd_amount": 1200},
+      {"name": "Transfer Tax", "bucket": "zero_tolerance", "le_amount": 2500, "cd_amount": 2400}
+    ],
+    "computation": "Zero-tolerance per-fee check:\n  Origination Fee: CD $1,200 vs LE $1,000 → increase of $200 → VIOLATION\n  Transfer Tax: CD $2,400 vs LE $2,500 → decrease of $100 → PASS (decreases are permitted)\n\nCure amount = $200 (the excess over the LE for the violating fee).\n\n10% aggregate bucket: no fees — not applicable.\nNo-limit bucket: no fees — not applicable.",
+    "violations": "Zero-tolerance bucket violated. Origination Fee increased by $200. Cure = $200, payable to the borrower.",
+    "clause_basis": "§1026.19(e)(3)(i): charges paid to the creditor are zero-tolerance; any increase is a violation regardless of whether other zero-tolerance fees decreased. The decrease in Transfer Tax does not offset the increase in Origination Fee because zero tolerance is checked per fee, not in aggregate.",
+    "weakest_point": "Whether the cure must be credited to the borrower at or before consummation vs. within 30 days — the regulation's cure mechanism timing is not fully specified here."
+  },
+  {
+    "case_name": "Case 3 — 10% Aggregate, Mixed Directions, No Violation (aggregate-vs-aggregate vs. sum-of-increases distinction)",
+    "fees": [
+      {"name": "Appraisal (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 500, "cd_amount": 600},
+      {"name": "Survey (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 400, "cd_amount": 300},
+      {"name": "Title Search (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 350},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 220}
+    ],
+    "computation": "10% aggregate test — CORRECT method (aggregate CD vs aggregate LE + 10%):\n  ΣLE = $500 + $400 + $300 + $200 = $1,400\n  ΣCD = $600 + $300 + $350 + $220 = $1,470\n  10% threshold = $1,400 × 0.10 = $140\n  Tolerance limit = $1,400 + $140 = $1,540\n  $1,470 ≤ $1,540 → PASS\n\nINCORRECT method (sum of individual increases only — this is the common implementation error):\n  Increases: Appraisal +$100, Title Search +$50, Recording +$20 = $170 total increases\n  $170 > $140 threshold → would incorrectly FAIL\n\nThe distinction: the 10% test compares AGGREGATE CD to AGGREGATE LE + 10%. Decreases (Survey −$100) offset increases in the aggregate. The sum-of-increases method ignores offsets and overstates the violation.\n\nZero-tolerance bucket: no fees — not applicable.\nNo-limit bucket: no fees — not applicable.",
+    "violations": "None. The 10% aggregate bucket passes under the correct aggregate-vs-aggregate test. A sum-of-increases implementation would incorrectly flag a violation.",
+    "clause_basis": "§1026.19(e)(3)(ii): the 10% cumulative tolerance is tested by comparing the aggregate of all charges in the category on the CD to the aggregate of all charges in the category on the LE. The regulation does not sum individual increases; it compares totals. Recording fees are explicitly included in this category. Services the borrower was permitted to shop for also fall here.",
+    "weakest_point": "Whether appraisal, survey, and title search are correctly assigned to the 10% bucket depends on whether the creditor required these services AND permitted the borrower to shop — if the creditor required the appraisal but did NOT permit shopping, it would be zero tolerance instead. The bucket assignment assumes borrower was permitted to shop for all three."
+  },
+  {
+    "case_name": "Case 4 — 10% Aggregate, Mixed Directions, Violation",
+    "fees": [
+      {"name": "Appraisal (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 500, "cd_amount": 700},
+      {"name": "Survey (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 400, "cd_amount": 350},
+      {"name": "Title Search (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 400},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 250}
+    ],
+    "computation": "10% aggregate test:\n  ΣLE = $500 + $400 + $300 + $200 = $1,400\n  ΣCD = $700 + $350 + $400 + $250 = $1,700\n  10% threshold = $1,400 × 0.10 = $140\n  Tolerance limit = $1,400 + $140 = $1,540\n  $1,700 > $1,540 → VIOLATION\n  Excess = $1,700 − $1,540 = $160\n\nNote on mixed directions: Survey decreased by $50, which partially offsets the increases in the aggregate. The net aggregate increase is $300 ($1,700 − $1,400), not the sum of increases ($200 + $100 + $50 = $350). Even with the offset, the aggregate exceeds the tolerance limit.\n\nIncorrect sum-of-increases method would yield: $350 > $140, excess = $210 — wrong cure amount.\n\nZero-tolerance bucket: no fees — not applicable.\nNo-limit bucket: no fees — not applicable.",
+    "violations": "10% aggregate bucket violated. Excess = $160. Cure = $160, payable to the borrower.",
+    "clause_basis": "§1026.19(e)(3)(ii): aggregate CD ($1,700) exceeds aggregate LE + 10% ($1,540) by $160. The creditor must cure the $160 excess. The aggregate comparison inherently accounts for mixed directions — decreases offset increases within the aggregate.",
+    "weakest_point": "Whether the cure amount is $160 (correct per aggregate test) or allocated differently across individual fees — the regulation requires a lump-sum cure equal to the aggregate excess, not per-fee cures within the 10% bucket."
+  },
+  {
+    "case_name": "Case 5 — Mixed Buckets: Zero-Tolerance Violation + 10% Aggregate Pass + No-Limit Fees",
+    "fees": [
+      {"name": "Origination Fee (paid to creditor)", "bucket": "zero_tolerance", "le_amount": 1000, "cd_amount": 1000},
+      {"name": "Transfer Tax", "bucket": "zero_tolerance", "le_amount": 3000, "cd_amount": 3100},
+      {"name": "Appraisal (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 500, "cd_amount": 550},
+      {"name": "Survey (borrower permitted to shop)", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 250},
+      {"name": "Recording Fees", "bucket": "ten_pct_aggregate", "le_amount": 150, "cd_amount": 180},
+      {"name": "Homeowner's Insurance (prepaid, not a settlement service)", "bucket": "no_limit", "le_amount": 1200, "cd_amount": 1500},
+      {"name": "Optional Home Warranty (not required by creditor)", "bucket": "no_limit", "le_amount": 400, "cd_amount": 600}
+    ],
+    "computation": "Zero-tolerance per-fee check:\n  Origination Fee: CD $1,000 vs LE $1,000 → no increase → PASS\n  Transfer Tax: CD $3,100 vs LE $3,000 → increase of $100 → VIOLATION\n  Zero-tolerance cure = $100\n\n10% aggregate test:\n  ΣLE = $500 + $300 + $150 = $950\n  ΣCD = $550 + $250 + $180 = $980\n  10% threshold = $950 × 0.10 = $95\n  Tolerance limit = $950 + $95 = $1,045\n  $980 ≤ $1,045 → PASS\n  (Mixed directions: Appraisal +$50, Survey −$50, Recording +$30; net aggregate increase = $30, well within $95 threshold)\n\nNo-limit bucket:\n  Homeowner's Insurance: CD $1,500 vs LE $1,200 → increase of $300 → no tolerance test, no violation\n  Optional Home Warranty: CD $600 vs LE $400 → increase of $200 → no tolerance test, no violation\n\nTotal cure = $100 (zero-tolerance violation only).",
+    "violations": "Zero-tolerance bucket violated: Transfer Tax increased by $100. Cure = $100. The 10% aggregate bucket passes. The no-limit bucket has no tolerance test.",
+    "clause_basis": "§1026.19(e)(3)(i): transfer taxes are zero-tolerance; the $100 increase is a violation. §1026.19(e)(3)(ii): recording fees and borrower-shoppable services are 10% aggregate; the aggregate CD ($980) does not exceed aggregate LE + 10% ($1,045). §1026.19(e)(3)(iii): homeowner's insurance and optional services not required by the creditor have no tolerance limit. Each bucket is tested independently — a violation in one bucket does not affect the others.",
+    "weakest_point": "Whether homeowner's insurance is correctly in the no-limit bucket depends on whether the creditor required a specific insurance provider (which could move it to zero or 10% tolerance). The assignment assumes the borrower freely chose the insurer. Also, whether optional home warranty is truly 'not required' is a factual determination."
+  }
+]

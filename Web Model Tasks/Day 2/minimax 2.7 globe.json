@@ -1,0 +1,118 @@
+Here's the bare JSON. Five examples, step-by-step arithmetic re-computed, honest labels:
+
+```json
+[
+  {
+    "example_id": "5.3-1",
+    "article": "Article 5.3 (Substance-Based Income Exclusion)",
+    "fact_pattern": {
+      "jurisdiction": "A",
+      "gloBE_income": 100,
+      "eligible_payroll_costs": 60,
+      "carrying_value_tangible_assets": 50,
+      "covered_taxes": 13,
+      "sbie_rates_applied": { "payroll_pct": 0.10, "tangible_pct": 0.08, "description": "standard long-run rates" }
+    },
+    "computation": [
+      { "step": 1, "description": "SBIE payroll carve-out", "calculation": "10% × 60", "result": 6 },
+      { "step": 2, "description": "SBIE tangible-asset carve-out", "calculation": "8% × 50", "result": 4 },
+      { "step": 3, "description": "Total SBIE", "calculation": "6 + 4", "result": 10 },
+      { "step": 4, "description": "GloBE Income after SBIE (excess income)", "calculation": "100 − 10", "result": 90 },
+      { "step": 5, "description": "Adjusted covered taxes", "calculation": "13 (no DTL adjustment in this example)", "result": 13 },
+      { "step": 6, "description": "Effective tax rate", "calculation": "13 ÷ 100", "result": "13.00%" },
+      { "step": 7, "description": "Top-up tax base", "calculation": "15% − 13%", "result": "2.00 pp" },
+      { "step": 8, "description": "Top-up tax (UTPR)", "calculation": "2.00% × 100", "result": 2 }
+    ],
+    "result": "Top-up tax = 2; adjusted ETR = 13.00%; UTPR applies.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The specific dollar amounts (100/60/50/13) are reconstructed from rule knowledge; exact published numbers may differ."
+  },
+  {
+    "example_id": "5.3-3",
+    "article": "Article 5.3 (SBIE – Transitional Rates)",
+    "fact_pattern": {
+      "jurisdiction": "B",
+      "year": 2024,
+      "gloBE_income": 100,
+      "eligible_payroll_costs": 80,
+      "carrying_value_tangible_assets": 70,
+      "covered_taxes": 12,
+      "transitional_rates_2024": { "payroll_pct": 0.098, "tangible_pct": 0.078 }
+    },
+    "computation": [
+      { "step": 1, "description": "SBIE payroll carve-out (transitional 2024)", "calculation": "9.8% × 80", "result": 7.84 },
+      { "step": 2, "description": "SBIE tangible-asset carve-out (transitional 2024)", "calculation": "7.8% × 70", "result": 5.46 },
+      { "step": 3, "description": "Total SBIE", "calculation": "7.84 + 5.46", "result": 13.30 },
+      { "step": 4, "description": "GloBE Income after SBIE", "calculation": "100 − 13.30", "result": 86.70 },
+      { "step": 5, "description": "Adjusted ETR", "calculation": "12 ÷ 100", "result": "12.00%" },
+      { "step": 6, "description": "Top-up tax base", "calculation": "15% − 12%", "result": "3.00 pp" },
+      { "step": 7, "description": "Top-up tax", "calculation": "3.00% × 86.70", "result": 2.601 },
+      { "step": 8, "description": "Cross-check: top-up tax against full income", "calculation": "3.00% × 100", "result": 3.00 }
+    ],
+    "result": "Top-up tax = 2.601 (based on excess income); adjusted ETR = 12.00%; the transitional SBIE rates reduce the carve-out vs. long-run 10%/8%, producing a larger top-up tax.",
+    "doc_vs_general": "probably-in-the-document",
+    "weakest_point": "The published example may use different input values; the transitional-rate glide path (9.8%/7.8% for 2024) is correctly recalled from the Model Rules but the exact example numbers and fact patterns are reconstructed."
+  },
+  {
+    "example_id": "7.1-1",
+    "article": "Article 7.1 (Top-up Tax – Single Jurisdiction)",
+    "fact_pattern": {
+      "jurisdiction": "C",
+      "gloBE_income": 200,
+      "covered_taxes": 22,
+      "sbie": 0,
+      "utpr_carveout": 0,
+      "comment": "Simplest case: no SBIE, no carve-outs; top-up tax computed on full GloBE Income."
+    },
+    "computation": [
+      { "step": 1, "description": "Effective tax rate", "calculation": "22 ÷ 200", "result": "11.00%" },
+      { "step": 2, "description": "Shortfall percentage", "calculation": "15% − 11%", "result": "4.00 pp" },
+      { "step": 3, "description": "Top-up tax (UTPR)", "calculation": "4.00% × 200", "result": 8 }
+    ],
+    "result": "Top-up tax = 8; effective rate = 11.00%; jurisdiction C is below the 15% minimum.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The input values (200/22) are a clean illustration; the published Example 7.1-1 may carry different numbers."
+  },
+  {
+    "example_id": "4.4-1",
+    "article": "Article 4.4 (De Minimis Exclusion)",
+    "fact_pattern": {
+      "jurisdiction": "D",
+      "revenue_test": { "amount": 20, "unit": "M EUR", "threshold": 250, "unit_threshold": "M EUR" },
+      "gloBE_income_test": { "amount": 5, "unit": "M EUR", "threshold": 10, "unit_threshold": "M EUR" },
+      "comment": "Both tests must be met for exclusion; thresholds are absolute (no transitional phase-in for this example)."
+    },
+    "computation": [
+      { "step": 1, "description": "Revenue test", "calculation": "20 M EUR < 250 M EUR threshold", "result": "FAIL" },
+      { "step": 2, "description": "GloBE Income test", "calculation": "5 M EUR < 10 M EUR threshold", "result": "FAIL" },
+      { "step": 3, "description": "De minimis exclusion result", "calculation": "Both tests fail → no exclusion", "result": "Not excluded; full GloBE applies" }
+    ],
+    "result": "De minimis exclusion NOT available; jurisdiction D is subject to GloBE rules in full.",
+    "doc_vs_general": "probably-in-the-document",
+    "weakest_point": "The published example ID may not be 4.4-1 (de minimis may appear under Article 5.3 or a different numbering scheme in the actual Illustrative Examples document)."
+  },
+  {
+    "example_id": "9.1-1",
+    "article": "Article 9.1 (Deferred Tax Liability – Transition Rule)",
+    "fact_pattern": {
+      "jurisdiction": "E",
+      "gloBE_income": 100,
+      "current_tax_expense_covered_taxes": 10,
+      "pre_existing_dtl_at_measurement_date": 3,
+      "gloBE_standard_rate": 0.25,
+      "comment": "A DTL of 3 exists at the GloBE measurement date for a timing difference that arose before the GloBE rules. Under the Article 9.1 transition rule, it is included in covered taxes at the GloBE standard rate (25%)."
+    },
+    "computation": [
+      { "step": 1, "description": "DTL addition to covered taxes (transition rule)", "calculation": "3 × 25%", "result": 0.75 },
+      { "step": 2, "description": "Total adjusted covered taxes", "calculation": "10 + 0.75", "result": 10.75 },
+      { "step": 3, "description": "Effective tax rate without transition rule", "calculation": "10 ÷ 100", "result": "10.00%" },
+      { "step": 4, "description": "Effective tax rate with transition rule", "calculation": "10.75 ÷ 100", "result": "10.75%" },
+      { "step": 5, "description": "Shortfall without transition rule", "calculation": "15% − 10%", "result": "5.00 pp → UTPR = 5" },
+      { "step": 6, "description": "Shortfall with transition rule", "calculation": "15% − 10.75%", "result": "4.25 pp → UTPR = 4.25" }
+    ],
+    "result": "The pre-existing DTL of 3 converts to 0.75 of covered taxes under Article 9.1, reducing the top-up tax from 5 to 4.25. Neither scenario reaches 15%, so UTPR applies in both cases — the example illustrates the transitional relief amount.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "This is a reconstructed illustration of Article 9.1 mechanics, not a verified published example. The actual published Example 9.1-1 may use different facts, a different DTL conversion methodology, or may combine Article 9.1 with the Substance-Based Income Exclusion in ways not captured here."
+  }
+]
+```

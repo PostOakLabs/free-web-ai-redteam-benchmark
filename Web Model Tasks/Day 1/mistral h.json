@@ -1,0 +1,103 @@
+```json
+[
+  {
+    "pitfall_name": "JIT Warmup and Tiering Skews Benchmarks",
+    "what_happens": "First invocation of a WASM function runs 2-10x slower than subsequent ones, but benchmarks report the warmed-up speed, hiding the real cold-start latency users experience",
+    "why": "V8 (Chrome/Edge) tiers WASM from unoptimized baseline (Liftoff) to optimized (Turboprop/Turbofan) over multiple invocations; SpiderMonkey (Firefox) has similar tiering. The optimization happens mid-run, so the first N calls are slow while the rest are fast, but averaging hides the cold start.",
+    "how_discovered": "CI reports sub-100ms times but users complain of 1-2s delays on first proof. Typically wastes 1-3 days of profiling before someone notices the first-call vs steady-state difference.",
+    "mitigation": "Run a warmup loop of 100-1000 iterations before measuring, or use `--wasm-tiering-off` in V8 for consistent (but slower) results. Report both cold and warm metrics separately.",
+    "affects": "measurement-validity",
+    "confidence": 0.99
+  },
+  {
+    "pitfall_name": "Browser Timer Resolution Throttling",
+    "what_happens": "performance.now() returns identical values for operations taking 0.1-5ms, making sub-millisecond optimizations appear to have zero effect",
+    "why": "Browsers throttle timer resolution: Firefox with privacy.resistFingerprinting=true clamps to 1ms; Chrome/Edge throttle background tabs to ~1ms; some mobile browsers use 4-5ms. Even in foreground, the resolution can be worse than microseconds.",
+    "how_discovered": "A 500µs optimization shows 0ms improvement in benchmarks. Wastes 1-2 weeks optimizing code that already meets the measurable threshold.",
+    "mitigation": "Use performance.mark() + performance.measure() which has microsecond resolution on most browsers, or WebGPU timestamp queries for GPU workloads. Validate with a high-resolution test loop.",
+    "affects": "measurement-validity",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "WebGPU Timestamp Query Quantization and Unavailability",
+    "what_happens": "GPU timestamp queries return identical values or zero, making GPU compute time appear as 0ms while CPU-GPU sync overhead dominates measurements",
+    "why": "Not all GPU drivers support timestamp queries (e.g., some Intel integrated GPUs). On supported GPUs (e.g., macOS Metal, Adreno), queries are quantized to microseconds. The timestamp is taken at queue submission, not execution, so it excludes sync overhead.",
+    "how_discovered": "GPU 'compute time' is reported as 0ms while total time is 50ms. Wastes 2-3 days before realizing the queries are broken or quantized.",
+    "mitigation": "Check device features for timestamp query support before using. Use CPU timers (performance.now()) as a cross-check and report GPU time + sync overhead separately.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WebGPU Buffer MapAsync Synchronous Stall",
+    "what_happens": "Calling mapAsync() on a large (>1MB) GPU buffer causes the main thread to freeze for 10-100ms despite the promise being 'async'",
+    "why": "In Chrome (and some other browsers), mapAsync() for large buffers may synchronously flush the GPU pipeline and copy data to CPU memory before resolving the promise, blocking the main thread. This is hidden behind the async API.",
+    "how_discovered": "UI becomes unresponsive during proof verification; profiling shows a long task labeled 'GPU map'. Wastes 1-2 days of debugging.",
+    "mitigation": "Use smaller buffers and multiple readback operations, or restructure to keep data on GPU. For Chrome, use readBufferGPU() which is truly async. Avoid mapping on the main thread entirely.",
+    "affects": "performance",
+    "confidence": 0.90
+  },
+  {
+    "pitfall_name": "WASM 32-bit Memory Limit Silent OOM",
+    "what_happens": "WASM module throws 'RuntimeError: memory access out of bounds' when attempting to grow beyond 4GB, or silently fails to allocate",
+    "why": "WASM linear memory uses 32-bit addressing, hard-limited to 4GB (2^32 bytes). Memory growth via `grow_memory` fails if it would exceed this limit. Some runtimes may not report the failure clearly.",
+    "how_discovered": "Proof generation crashes at ~4GB memory usage. Wastes 0.5-1 day to identify the limit.",
+    "mitigation": "Pre-allocate the maximum expected memory (e.g., `--max-memory=8GB` is ignored; you must request growth within 4GB). For larger workloads, use multiple WASM instances with SharedArrayBuffer for shared data, or stream data from JS.",
+    "affects": "deployment",
+    "confidence": 1.0
+  },
+  {
+    "pitfall_name": "SharedArrayBuffer COOP/COEP Header Requirement",
+    "what_happens": "SharedArrayBuffer constructor throws 'TypeError: SharedArrayBuffer is not defined' or 'NotAllowedError' even in modern browsers",
+    "why": "SharedArrayBuffer requires Cross-Origin-Opener-Policy: same-origin AND Cross-Origin-Embedder-Policy: require-corp headers. Without both, the feature is disabled for security (Spectre mitigation). Also blocked in cross-origin iframes regardless of headers.",
+    "how_discovered": "WASM threads fail to start in production despite working locally. Wastes 2-4 hours once you realize it's a header issue, but can take days if the deployment pipeline doesn't surface the error.",
+    "mitigation": "Set both COOP and COEP headers on the server. Avoid cross-origin embedding. Use a service worker if you need to load cross-origin resources with SharedArrayBuffer.",
+    "affects": "deployment",
+    "confidence": 1.0
+  },
+  {
+    "pitfall_name": "WASM SIMD Does Not Auto-Vectorize Scalar Code",
+    "what_happens": "Field arithmetic (e.g., Montgomery multiplication, NTT) shows no performance improvement despite WASM SIMD being enabled and the browser supporting it",
+    "why": "WASM SIMD is explicit: the compiler does NOT auto-vectorize scalar code. Libraries like WASI-polyfill or Emscripten do not insert SIMD intrinsics automatically. You must rewrite hot loops using i32x4, i64x2, etc. intrinsics explicitly.",
+    "how_discovered": "Benchmark shows identical performance with and without --enable-simd flag. Wastes 1-2 weeks of profiling before realizing the code isn't using SIMD at all.",
+    "mitigation": "Rewrite performance-critical kernels (e.g., NTT butterflies, field ops) with explicit SIMD intrinsics. For field arithmetic, use wasm_i32x4_extmul_low_i16x8 for 16-bit limbs. Validate with wasm-objdump or browser devtools to confirm SIMD opcodes.",
+    "affects": "performance",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "Mobile Browser Memory Kill During Long Proofs",
+    "what_happens": "Page silently reloads or crashes during a long proof computation (5-30s), with no error in console or onError handler",
+    "why": "Mobile browsers (iOS Safari, Chrome for Android) aggressively kill pages exceeding memory limits (~500MB-1GB) or background CPU time limits (~10-30s). WASM memory counts toward these limits. iOS Safari may kill tabs when the app is backgrounded.",
+    "how_discovered": "Proof fails consistently on mobile but works on desktop. No logs available. Wastes 1-3 days to correlate with mobile-specific behavior.",
+    "mitigation": "Use the Page Lifecycle API (pagehide event) to detect memory pressure. Chunk proofs into <5s batches. Request persistent storage permission (navigator.storage.persist()). For iOS, use a Web Worker to keep the tab alive.",
+    "affects": "correctness",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "Iframe WASM Compilation Blocked",
+    "what_happens": "WASM instantiation fails with 'TypeError: WebAssembly.instantiate(): Compiling failed' or 'Aborted' in cross-origin or same-origin iframes",
+    "why": "Safari blocks WASM compilation in cross-origin iframes entirely. Chrome/Edge may block it without proper CORS or COOP/COEP headers. Even same-origin iframes can fail if the parent page has restrictive headers.",
+    "how_discovered": "WASM works on the main page but not in an iframe used for isolation. Wastes 1-2 days of debugging iframe contexts.",
+    "mitigation": "Compile WASM on the main page and pass the Module/Instance to the iframe via postMessage. For same-origin iframes, ensure COOP/COEP headers are set. Avoid cross-origin iframes for WASM entirely.",
+    "affects": "deployment",
+    "confidence": 0.90
+  },
+  {
+    "pitfall_name": "Safari WASM JIT Performance Cliff",
+    "what_happens": "WASM runs 3-5x slower on Safari than Chrome/Firefox for compute-heavy proving workloads, with no obvious cause",
+    "why": "Safari's JavaScriptCore has a less sophisticated WASM JIT: no tiering (no baseline→optimized transition), limited inlining, and conservative register allocation. As of 2026, this remains a known limitation for CPU-bound WASM.",
+    "how_discovered": "Consistent Safari slowdown in benchmarks across multiple devices. Wastes ~1 week before accepting it's a Safari-specific issue.",
+    "mitigation": "Fallback to JS for non-critical paths on Safari (detect via navigator.userAgent). For critical paths, reduce WASM usage or accept lower performance. Use Web Workers to avoid blocking the main thread.",
+    "affects": "performance",
+    "confidence": 0.80
+  },
+  {
+    "pitfall_name": "JS↔WASM Marshalling Alignment Traps",
+    "what_happens": "Silent data corruption when passing TypedArrays between JS and WASM, with no immediate error but incorrect proof results",
+    "why": "WASM memory may be allocated at addresses not aligned for the TypedArray type (e.g., Uint32Array requires 4-byte alignment). Creating a TypedArray view on unaligned WASM memory causes silent reads/writes of wrong data due to byte swapping or misalignment.",
+    "how_discovered": "Proof verification fails intermittently; debugging shows specific bytes are corrupted. Wastes 2-5 days to trace to the marshalling boundary.",
+    "mitigation": "Always copy data between JS and WASM for non-byte-aligned accesses. For aligned accesses, use DataView for explicit byte-level control. Validate alignment with (ptr % alignment) == 0 checks in WASM.",
+    "affects": "correctness",
+    "confidence": 0.95
+  }
+]
+```

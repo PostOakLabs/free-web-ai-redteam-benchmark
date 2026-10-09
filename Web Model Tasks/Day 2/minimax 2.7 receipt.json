@@ -1,0 +1,200 @@
+{
+  "receipt_kinds": [
+    {
+      "variant": "composite_receipt",
+      "produced_when": "Default receipt for general zkVM programs. Contains both STARK proof data and the seal. Used for programs requiring the full STARK proof with recursive verification.",
+      "components": ["seal (STARK proof)", "journal", "exit_code", "image_id"],
+      "succinctness": "Not succinct — full STARK proof, large receipt size (~100KB-1MB depending on program)"
+    },
+    {
+      "variant": "succinct_receipt",
+      "produced_when": "Generated when a composite receipt is SNARK recursively verified (recursion_circom or similar). The STARK is proven into a Groth16 proof via a SNARK circuit. Available in risc0 v1.x+ with appropriate recursion setup.",
+      "components": ["groth16_proof (seal)", "journal", "exit_code", "image_id"],
+      "succinctness": "Succinct — Groth16 proof is small (~128 bytes public inputs + 192 bytes proof), but still contains journal and metadata"
+    },
+    {
+      "variant": "groth16_receipt",
+      "produced_when": "When the verifier uses a Groth16 verifying key to verify the receipt. The Groth16 proof (seal) is extracted along with public inputs that encode the claim digest.",
+      "components": ["groth16_seal (Groth16 proof elements)", "public_inputs_hash (claim digest)", "journal_hash", "image_id", "exit_code"],
+      "succinctness": "Most succinct form for on-chain verification — Groth16 proof is ~512 bytes total"
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "a[0], a[1] (Groth16 proof element)",
+      "type_shape": "BN254_G1_affine (two field elements)",
+      "meaning": "First component of the Groth16 proof. Part of the proof (πA in standard Groth16 notation).",
+      "verifier_must_check": "Check that a[0], a[1] are valid BN254 field elements (not 0 unless permitted, within scalar field). Check pairing equation.",
+      "failure_if_skipped": "Invalid proof element could satisfy pairing equations incorrectly, creating a false proof."
+    },
+    {
+      "field": "b[0], b[1], b[2] (Groth16 proof element)",
+      "type_shape": "BN254_G2_affine (three field elements representing one G2 point)",
+      "meaning": "Second component of Groth16 proof. πB in standard notation. G2 point for pairing.",
+      "verifier_must_check": "Verify b is on BN254 G2 curve (y² = x³ + 3). Check b ≠ O (point at infinity). Validate G2 representation.",
+      "failure_if_skipped": "An invalid G2 point could break the pairing product equation, allowing proof forgery."
+    },
+    {
+      "field": "c[0], c[1] (Groth16 proof element)",
+      "type_shape": "BN254_G1_affine",
+      "meaning": "Third component of Groth16 proof. πC in standard notation. Proof evaluation at challenge point.",
+      "verifier_must_check": "Validate as G1 point. Check pairing equation with a, b, c and VK elements.",
+      "failure_if_skipped": "Invalid πC could make the proof pass verification without valid witness."
+    },
+    {
+      "field": "public_inputs[] (Groth16 public input array)",
+      "type_shape": "Array of BN254_Fr (scalar field elements)",
+      "meaning": "Public inputs to the Groth16 circuit. In risc0, encodes: image_id, claim_digest (journal_hash || exit_code || input_hash), post_state_digest, output_hash.",
+      "verifier_must_check": "Verify the public inputs match the expected values from the claim. The claim_digest MUST be reconstructed from received journal (if provided) and exit_code.",
+      "failure_if_skipped": "If verifier doesn't verify public_inputs match the actual claim, an attacker could reuse a valid proof for a different program (different image_id) or different computation result."
+    },
+    {
+      "field": "image_id",
+      "type_shape": "BN254_Fr (scalar field element, 32 bytes typically)",
+      "meaning": "Identifier of the risc0 ELF binary (program) that was executed. Digest of the control流通 hash of the image.",
+      "verifier_must_check": "Verify image_id matches the expected program identifier. This is the primary binding to the specific program.",
+      "failure_if_skipped": "A proof for program A could be accepted as proof of program B if image_id check is skipped. Different programs have different semantics — this breaks soundness."
+    },
+    {
+      "field": "claim_digest / claim_hash",
+      "type_shape": "BN254_Fr (32 bytes)",
+      "meaning": "Digest of the ReceiptClaim: hash(image_id || journal_hash || exit_code || input_hash || output_hash || post_state_hash). Used as public input in Groth16 verification.",
+      "verifier_must_check": "Reconstruct claim_digest from received journal and exit_code, verify it matches the public input. If journal is not provided, use the journal_hash from the claim.",
+      "failure_if_skipped": "Without reconstructing the claim, an attacker could modify the exit_code or journal after proof generation. The proof would still verify against the original claim digest in public inputs."
+    },
+    {
+      "field": "journal / journal_hash",
+      "type_shape": "journal: bytes[], journal_hash: BN254_Fr",
+      "meaning": "The output data of the program execution. Journal_hash is the digest of the journal bytes. The journal itself may or may not be included in the receipt.",
+      "verifier_must_check": "If journal is provided, hash it and verify journal_hash matches claim_digest.journal_hash. If only journal_hash is provided, trust it (or verify against off-chain record).",
+      "failure_if_skipped": "Without verifying journal_hash, an attacker could claim different program outputs. The journal IS the computation result — skipping this check means accepting arbitrary output claims."
+    },
+    {
+      "field": "exit_code",
+      "type_shape": "u32 (unsigned 32-bit integer)",
+      "meaning": "Exit status of the guest program execution. 0 typically means successful completion. Non-zero indicates error/halt with specific reason.",
+      "verifier_must_check": "Verify exit_code matches expected value (typically 0 for success). The exit_code is part of the claim_digest computation.",
+      "failure_if_skipped": "A proof for a failed program execution (exit_code ≠ 0) could be accepted as a successful computation. The exit code is security-relevant — programs MUST exit with success for the claim to be valid."
+    },
+    {
+      "field": "post_state_digest / output_hash",
+      "type_shape": "BN254_Fr (32 bytes)",
+      "meaning": "Digest of the final memory state after execution. Represents the 'output' or 'post state' of the guest VM.",
+      "verifier_must_check": "Verify post_state_digest matches what is claimed. This is part of the claim_digest.",
+      "failure_if_skipped": "Without this check, the post-execution state could be different from what the prover claims. Important for stateful programs."
+    }
+  ],
+  "claim_structure": {
+    "ReceiptClaim_components": {
+      "image_id": "Hash of the risc0 ELF binary (control流通 hash / image ID). Binds the proof to the specific program.",
+      "input_hash": "Hash of the input to the program. The 'input' is the private/public inputs to the guest execution.",
+      "output_hash": "Hash of the output data (same as or derived from journal_hash).",
+      "journal_hash": "Hash of the journal bytes. Identical to output_hash in current risc0 versions.",
+      "exit_code": "Exit status code (u32). 0 = success.",
+      "post_state_hash": "Digest of final memory state. Used in recursive verification scenarios.",
+      "pre_state_hash": "Digest of initial memory state (used in some receipt variants)."
+    },
+    "claim_digest_computation": {
+      "algorithm": "poseidon_hash or sha256 (depending on version and configuration) of the concatenated components",
+      "component_order": "Typically: image_id || input_hash || journal_hash || exit_code || post_state_hash (exact order per risc0 version)",
+      "note": "In risc0 v1.x-2.x, the claim is a Poseidon hash of the struct. In later versions, this may use different hash functions for circuit efficiency."
+    }
+  },
+  "binding_chain": {
+    "step_1_journal_to_claim": {
+      "process": "Prover executes program → produces journal bytes → compute journal_hash = hash(journal)",
+      "inputs": "journal bytes",
+      "output": "journal_hash (BN254_Fr)"
+    },
+    "step_2_claim_digest": {
+      "process": "Construct ReceiptClaim struct from components → compute claim_digest = hash(image_id || input_hash || journal_hash || exit_code || post_state_hash || ...)",
+      "inputs": "image_id, input_hash, journal_hash, exit_code, post_state_hash, [other_components]",
+      "output": "claim_digest (Digest type, typically 32 bytes)"
+    },
+    "step_3_groth16_public_inputs": {
+      "process": "The claim_digest is placed as a public input in the Groth16 circuit. Additional public inputs: image_id, post_state_digest, input_hash (depending on version).",
+      "binding": "claim_digest in public inputs MUST match what the verifier reconstructs from the receipt fields"
+    },
+    "step_4_groth16_seal": {
+      "process": "Groth16 prover takes: (a) circuit proving key (not in receipt), (b) witness (private), (c) public inputs including claim_digest → produces proof (a, b, c)",
+      "what_seal_commits_to": "The Groth16 seal proves: 'There exists a witness such that circuit(public_inputs, witness) = accept', where public_inputs include the claim_digest"
+    },
+    "step_5_verification": {
+      "process": "Verifier checks Groth16 pairing equation using: proof (a,b,c), verifying_key (vk_alpha, vk_beta, vk_gamma, vk_delta, vk_gamma_abc) and public_inputs",
+      "verifying_key_holds": "vk_alpha, vk_beta, vk_gamma, vk_delta are commitments to the circuit's constraint matrices (A, B, C). vk_gamma_abc encodes the circuit's public input layout.",
+      "control_root_or_control_ids": "In risc0, the 'control' is the set of control流通 IDs / control hashes that define which routines are allowed. The control root is a Merkle root binding the allowed code. In Groth16 receipts, the verifying key encodes which specific circuit version (control) was used."
+    }
+  },
+  "version_coupling": {
+    "circuit_version_dependent_components": [
+      {
+        "component": "verifying_key (vk)",
+        "description": "Groth16 verifying key is specific to the circuit version. Different risc0 versions or different programs = different VK.",
+        "breaks_if_wrong": "Using VK from version N to verify proof from version N+1 will FAIL in the pairing check (different circuit = different polynomial commitments). This is caught by verification failure."
+      },
+      {
+        "component": "control_root / control_ids",
+        "description": "The control流通 root or specific control流通 IDs bind the proof to the exact set of allowed guest code routines. This is part of the image_id computation or encoded in the verifying key.",
+        "breaks_if_wrong": "If control changes between versions (new routines added, removed, or modified), an old proof might be accepted for a new program or vice versa. The image_id digest would change, but if only control_root is checked, specific routine bindings could be wrong."
+      },
+      {
+        "component": "image_id",
+        "description": "Hash of the ELF binary + control流通. Changes if program code changes OR if control流通 changes.",
+        "breaks_if_wrong": "image_id mismatch is the primary version check. A proof for program v1 cannot be used for program v2 (different image_id)."
+      },
+      {
+        "component": "claim_struct_layout",
+        "description": "The ReceiptClaim struct field order and hash algorithm (Poseidon vs SHA) may vary across versions.",
+        "breaks_if_wrong": "If claim_digest computation differs (e.g., different field order or hash function), the verifier will compute a different digest than what's in the proof's public inputs."
+      }
+    ],
+    "recommendation": "Always use the verifying key and image_id that correspond to the specific program version being verified. The risc0 protocol encodes version information in these fields."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Skipping image_id verification",
+      "description": "Verifier accepts Groth16 proof without checking that image_id matches the expected program identifier.",
+      "check_that_catches_it": "Explicitly verify: received_image_id == expected_image_id. This check must happen BEFORE accepting the computation result.",
+      "forgery_possible": "Attacker reuses a valid proof for program A to prove execution of program B (with different semantics). The Groth16 proof verifies, but the wrong program ran."
+    },
+    {
+      "bug": "Not reconstructing claim_digest from receipt fields",
+      "description": "Verifier trusts the claim_digest in public inputs without reconstructing it from the journal and exit_code actually received.",
+      "check_that_catches_it": "Reconstruct claim_digest = hash(image_id || hash(journal) || exit_code || ...) and verify it matches the public input. If journal is not included, require it or trust off-chain record.",
+      "forgery_possible": "Prover generates proof → later modifies journal or exit_code → submits modified receipt with original proof. Verification passes but computation result is changed."
+    },
+    {
+      "bug": "Accepting non-zero exit_code as success",
+      "description": "Verifier doesn't check that exit_code == 0 (success). Any exit code is treated as valid computation.",
+      "check_that_catches_it": "Verify exit_code == expected_value (typically 0). Log warning if exit_code != 0.",
+      "forgery_possible": "A program that panicked/failed (exit_code = 1 or other error code) is accepted as a successful computation. The error state becomes 'proven'."
+    },
+    {
+      "bug": "Using wrong verifying key version",
+      "description": "Verifier loads a Groth16 VK from a different risc0 version or different circuit than the one that produced the proof.",
+      "check_that_catches_it": "Verify VK version identifier or hash matches the expected VK for the image_id. The VK hash or version should be part of trusted setup or configuration.",
+      "forgery_possible": "If VKs are not versioned correctly, a proof generated for one circuit could pass verification using a different circuit's VK, potentially breaking circuit soundness."
+    },
+    {
+      "bug": "Not verifying journal_hash when journal is provided",
+      "description": "Receipt includes both journal bytes and journal_hash, but verifier only checks Groth16 proof without hashing the received journal.",
+      "check_that_catches_it": "If journal bytes are included in receipt: compute hash(received_journal) and verify it equals journal_hash from claim. If this check is skipped, journal integrity is not verified.",
+      "forgery_possible": "Attacker modifies journal bytes after proof generation. Without hash verification, the modified journal is accepted as the computation output."
+    },
+    {
+      "bug": "Accepting proof without post_state_hash check in recursive scenarios",
+      "description": "For recursive verification (proof of proof), the post_state_hash must be verified to ensure the inner proof's state is correctly carried forward.",
+      "check_that_catches_it": "In recursive verification, verify that the inner proof's post_state_hash matches the outer proof's expected pre_state_hash or is correctly incorporated in the claim.",
+      "forgery_possible": "State confusion in recursive proofs — an inner computation could be paired with the wrong outer context."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "I am confident in the three-tier structure (composite/succinct/groth16) from risc0 v1.x+ design. The specific naming and when each is produced is based on my knowledge of the risc0 recursion architecture.",
+    "groth16_receipt_fields": "Groth16 field structure (a, b, c proof elements, public inputs array) is standard. The specific fields in risc0's public inputs (image_id, claim_digest, etc.) is from my understanding of the risc0 receipt format. Field names like 'seal' for the proof data are from the actual API.",
+    "claim_structure": "The ReceiptClaim struct components (image_id, journal_hash, exit_code, input_hash, output_hash) are from the risc0 design. The Poseidon hash usage in v1.x is documented. Exact field order and struct layout should be verified against risc0 source (receipt.rs / claim.rs).",
+    "binding_chain": "The binding from journal → claim_digest → public inputs → Groth16 seal follows standard zkSNARK/STARK proof system design. The control流通/control root entering via the verifying key is specific to risc0's architecture.",
+    "version_coupling": "Version-dependent components (VK, control流通, image_id) are core to risc0's design. The specific versioning mechanism (how VK versions are tracked) should be verified against risc0 documentation.",
+    "common_verifier_bugs": "These bugs are plausible from general zk verifier implementation experience and known patterns in zk proof verification. The specific checks (reconstructing claim_digest, verifying image_id) follow directly from the receipt structure described above.",
+    "overall": "I am CONFIDENT in the overall architecture and field structure. Specific field names (e.g., 'post_state_digest' vs 'output_hash'), exact hash function choices (Poseidon vs SHA), and struct serialization formats should be verified against the current risc0 source code and documentation, as these have evolved across versions."
+  }
+}

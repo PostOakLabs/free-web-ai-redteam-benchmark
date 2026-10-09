@@ -1,0 +1,112 @@
+```json
+[
+  {
+    "pitfall_name": "SharedArrayBuffer unavailable in non-isolated contexts",
+    "what_happens": "Attempts to use `SharedArrayBuffer` for WASM threading fail silently or throw; `self.crossOriginIsolated` is `false`; threaded WASM modules fail to initialize.",
+    "why": "Browsers disabled `SharedArrayBuffer` by default due to Spectre/Meltdown mitigations. It requires explicit cross-origin isolation via `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers, and a secure context (HTTPS).",
+    "how_discovered": "The WASM module fails to start or hangs; checking `self.crossOriginIsolated` returns `false`; browser console shows errors about `SharedArrayBuffer` transfer. This can waste hours before the header requirement is identified.",
+    "mitigation": "Ensure the server sends the correct COOP/COEP headers and the page is served over HTTPS. For development, use a local server that supports these headers.",
+    "affects": "deployment",
+    "confidence": 0.98
+  },
+  {
+    "pitfall_name": "COOP/COEP headers ignored in custom protocol handlers (iOS/WKWebView)",
+    "what_happens": "In an iOS app using `WKURLSchemeHandler` with a custom URL scheme, setting COOP/COEP headers has no effect. `crossOriginIsolated` remains `false`, so `SharedArrayBuffer` is unavailable, breaking WASM threads.",
+    "why": "WebKit on iOS does not honor COOP/COEP headers for custom scheme responses served via `WKURLSchemeHandler`. This is a known bug (WebKit bug 314080).",
+    "how_discovered": "The app works in a browser on localhost but fails in the iOS app's WebView. Checking `crossOriginIsolated` reveals `false` despite headers being set. This can waste days if the developer assumes headers are sufficient.",
+    "mitigation": "Workaround: serve content via a local HTTP server (e.g., `localhost`) instead of a custom scheme, though this may introduce security issues. Alternatively, wait for a WebKit fix or use a different approach for threading.",
+    "affects": "deployment",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "WebGPU `timestamp-query` feature not enabled or available",
+    "what_happens": "Calls to `writeTimestamp()` fail or are ignored; `GPUDevice` creation may fail if the feature is requested but not supported.",
+    "why": "The `timestamp-query` feature is not standardized and may be deprecated. It requires explicit enablement when requesting a `GPUDevice` and may not be available in all browsers or secure contexts.",
+    "how_discovered": "Profiling code that relies on timestamps produces no data or throws errors. Checking `GPUDevice.features` reveals `timestamp-query` is missing. This can waste hours debugging why performance measurements are not working.",
+    "mitigation": "Check for `timestamp-query` support via `navigator.gpu.requestAdapter()` and only enable it if available. Have a fallback timing mechanism (e.g., CPU-side `performance.now()`). Be aware it may be removed in future standards.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WASM 32-bit address space limits state vector size",
+    "what_happens": "WASM memory growth fails or causes out-of-memory errors when trying to allocate more than ~2 GB of linear memory, limiting the size of data structures like state vectors for proving.",
+    "why": "WASM uses a 32-bit address space, with a theoretical max of 4 GB, but practical limits are around 2 GB due to browser memory allocation and fragmentation. On 32-bit systems, address space exhaustion can cause OOMs easily.",
+    "how_discovered": "`memory.grow()` fails or the browser tab crashes when trying to allocate large memory. This may only appear when processing large proofs, wasting significant time on memory management before the fundamental limit is understood.",
+    "mitigation": "Design the proving system to work within ~2 GB of memory, or chunk the workload. On 64-bit systems, consider using `memory64` proposal when available. For shared memory, be aware of additional fragmentation issues.",
+    "affects": "correctness",
+    "confidence": 0.92
+  },
+  {
+    "pitfall_name": "LLVM auto-vectorization may not produce SIMD for WASM",
+    "what_happens": "WASM modules compiled with SIMD flags may not actually use SIMD instructions for critical loops, resulting in much slower performance than expected.",
+    "why": "Auto-vectorization is compiler-dependent and can be fragile. Certain code patterns, compiler versions, or target features may prevent vectorization. Even when `-msimd128` is passed, LLVM may not vectorize effectively.",
+    "how_discovered": "Performance benchmarks are far below expected SIMD speedups; inspecting the generated WASM shows scalar instructions. This can waste days profiling and rewriting code before realizing the compiler didn't vectorize.",
+    "mitigation": "Use explicit SIMD intrinsics in the source code (e.g., WASM SIMD intrinsics in C/Rust) rather than relying on auto-vectorization. Test with different compiler versions and flags.",
+    "affects": "performance",
+    "confidence": 0.8
+  },
+  {
+    "pitfall_name": "WebGPU buffer readback causes synchronous pipeline stalls",
+    "what_happens": "Reading back GPU results via `mapAsync()` and `getMappedRange()` blocks the CPU, waiting for GPU work to complete, destroying any overlap between GPU and CPU work.",
+    "why": "Calling `mapAsync()` on a buffer and then immediately waiting for it forces a CPU stall until the GPU finishes all prior commands. This is often done incorrectly in a double-buffering setup, where the readback happens on the same slot just submitted.",
+    "how_discovered": "Performance is much lower than expected; profiling shows the CPU is idle waiting for GPU readback. This can waste significant time optimizing the wrong parts of the pipeline.",
+    "mitigation": "Implement proper producer-consumer pipelining with separate write and read slots. Submit work to one slot, then read from the previous slot. Use non-blocking polling patterns where possible.",
+    "affects": "performance",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "Browser timer resolution fuzzing distorts benchmark measurements",
+    "what_happens": "`performance.now()` has reduced precision (typically floored at 100 µs) due to Spectre mitigations, making short-duration measurements extremely noisy and unreliable.",
+    "why": "Browsers reduce timer precision to mitigate side-channel attacks. This makes it difficult to accurately measure sub-millisecond operations, which is common in cryptographic proving.",
+    "how_discovered": "Benchmark results have high variance and are not reproducible; measurements of small operations show quantization effects. This can waste hours assuming the code is the problem.",
+    "mitigation": "Measure longer-running operations or use multiple iterations. Consider using a high-resolution timer built from `WebAssembly.Memory` shared memory, which can provide ~6 µs resolution even in non-isolated contexts. Be aware this is a hack and may have calibration jitter.",
+    "affects": "measurement-validity",
+    "confidence": 0.88
+  },
+  {
+    "pitfall_name": "JIT warmup and tiering distort benchmark results",
+    "what_happens": "Initial runs of WASM code are slow (interpreted or baseline compiled), and performance improves after several iterations as the JIT optimizes. Benchmarks that don't account for this show misleading results.",
+    "why": "Browsers use tiered compilation for WASM (e.g., Liftoff -> TurboFan in V8). The first few executions are much slower, and it takes time to reach peak performance.",
+    "how_discovered": "Benchmark results improve significantly with repeated runs, or the first run is anomalously slow. This can waste time optimizing cold code.",
+    "mitigation": "Perform a warmup phase before taking measurements. Run the code multiple times and discard the first few results. Ensure benchmarks are run in a fresh context if comparing different implementations.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "GC pauses attributed to the workload",
+    "what_happens": "Garbage collection pauses in the JavaScript engine (or in WASM if using managed languages) cause intermittent spikes in latency, making proving times appear inconsistent and unreliable.",
+    "why": "WASM modules interact with the JS garbage collector through imports/exports and managed objects. Large allocations or frequent crossing of the JS/WASM boundary can trigger GC pauses.",
+    "how_discovered": "Benchmark results show occasional long pauses that are not reproducible. Profiling reveals GC activity during these pauses.",
+    "mitigation": "Minimize allocations and object creation in the hot path. Use techniques like object pooling. For Rust/WASM, use `wee_alloc` or avoid allocations in critical sections.",
+    "affects": "measurement-validity",
+    "confidence": 0.8
+  },
+  {
+    "pitfall_name": "WASM threads hang on iPhone 16 with `ALLOW_MEMORY_GROWTH`",
+    "what_happens": "WASM applications using pthread workers with `ALLOW_MEMORY_GROWTH=1` experience random hangs on iPhone 16 (A18 chip). Worker threads stop processing while the main thread waits indefinitely.",
+    "why": "Likely a race condition between `memory.grow()` and JavaScript HEAP view updates (HEAP8, HEAP32, etc.) on the A18 chip's more aggressive out-of-order execution.",
+    "how_discovered": "The application hangs on iPhone 16 but works on other devices. This can waste days debugging platform-specific concurrency issues.",
+    "mitigation": "Disable memory growth and use a fixed initial memory: `-sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=512MB`.",
+    "affects": "correctness",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WebGPU compute shaders may not be faster than CPU for small workloads",
+    "what_happens": "Offloading a small or insufficiently parallel workload to WebGPU results in slower performance than running it on the CPU due to kernel launch overhead and memory transfer costs.",
+    "why": "GPUs excel at highly parallel workloads. A single-threaded GPU version can be slower than single-threaded Rust because GPUs are designed for thousands of threads.",
+    "how_discovered": "The WebGPU version of a proving step is slower than the WASM CPU version. Profiling reveals the GPU is underutilized.",
+    "mitigation": "Ensure the workload is sufficiently parallel (e.g., thousands of independent operations). Restructure algorithms to use workgroup memory and maximize parallelism. Use the GPU only for the most computationally intensive, parallel parts of the proof.",
+    "affects": "performance",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "Cross-origin iframes cannot obtain cross-origin isolation or WebGPU access",
+    "what_happens": "A page embedded in a cross-origin iframe cannot enable cross-origin isolation (`crossOriginIsolated` remains `false`), and WebGPU may not be available, even if the top-level page has the correct headers.",
+    "why": "Cross-origin isolation requires the entire browsing context to be isolated. An iframe from a different origin cannot be isolated unless the top-level page and all ancestors also opt-in and have the proper COOP/COEP policies.",
+    "how_discovered": "WASM threading or WebGPU fails in an iframe context but works when loaded directly. Debugging this can be confusing as the headers appear correct.",
+    "mitigation": "Ensure the top-level page and all iframes are served with the correct COOP/COEP headers and are same-origin if isolation is required. Avoid using cross-origin iframes for critical proving workloads.",
+    "affects": "deployment",
+    "confidence": 0.8
+  }
+]
+```

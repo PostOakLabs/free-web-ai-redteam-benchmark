@@ -1,0 +1,628 @@
+```python
+# Family 1 calculations
+lambda_total = 1000.0 # total FIT
+lambda_spf = 5.0      # single point faults FIT
+lambda_rf = 15.0     # residual faults FIT
+lambda_mpf_det = 700.0 # detected multiple point faults FIT
+lambda_mpf_lat = 80.0  # latent multiple point faults FIT
+lambda_safe = 200.0    # safe faults FIT
+
+# Check total sum
+sum_lambda = lambda_spf + lambda_rf + lambda_mpf_det + lambda_mpf_lat + lambda_safe
+print("sum_lambda:", sum_lambda)
+
+# SPFM = 1 - (lambda_spf + lambda_rf) / lambda_total
+spfm = 1.0 - (lambda_spf + lambda_rf) / lambda_total
+print("SPFM:", spfm, f"{spfm*100}%")
+
+# LFM = 1 - (lambda_mpf_lat) / (lambda_total - lambda_spf - lambda_rf)
+# Note ISO definition: LFM = 1 - sum(lambda_MPF_latent) / sum(lambda - lambda_SPF - lambda_RF)
+lfm = 1.0 - (lambda_mpf_lat) / (lambda_total - lambda_spf - lambda_rf)
+print("LFM:", lfm, f"{lfm*100}%")
+
+# PMHF
+# PMHF ≈ lambda_SPF + lambda_RF + lambda_MPF_lat * lambda_MPF_det * T_lifetime (with T_lifetime in hours, e.g. 15000 hours = 1.5e4 h)
+# If expressed in FIT (failures / 10^9 h):
+# lambda in h^-1: lambda_spf_h = 5e-9, lambda_rf_h = 15e-9, lambda_lat_h = 80e-9, lambda_det_h = 700e-9
+# T_lifetime = 15000 h
+t_lifetime = 15000.0
+pmhf_h = (lambda_spf + lambda_rf)*1e-9 + (lambda_mpf_lat*1e-9) * (lambda_mpf_det*1e-9) * t_lifetime
+pmhf_fit = pmhf_h * 1e9
+print("PMHF (h^-1):", pmhf_h)
+print("PMHF (FIT):", pmhf_fit)
+
+
+```
+
+```text
+sum_lambda: 1000.0
+SPFM: 0.98 98.0%
+LFM: 0.9183673469387755 91.83673469387756%
+PMHF (h^-1): 2.084e-08
+PMHF (FIT): 20.84
+
+
+```
+
+```python
+import math
+from scipy.stats import chi2
+
+# Given inputs for Family 2:
+E_a = 0.7 # eV
+k_B = 8.617333262e-5 # eV/K
+T_use_C = 55.0 # Celsius
+T_stress_C = 125.0 # Celsius
+
+T_use_K = T_use_C + 273.15 # 328.15 K
+T_stress_K = T_stress_C + 273.15 # 398.15 K
+
+AF = math.exp((E_a / k_B) * ((1.0 / T_use_K) - (1.0 / T_stress_K)))
+print("AF:", AF)
+
+r = 0 # 0 failures
+N = 100 # 100 units
+t = 1000 # 1000 hours
+conf = 0.60 # 60% confidence
+
+# Chi-square value for df = 2*r + 2 = 2, cumulative prob = conf = 0.60
+# chi2.ppf(0.60, 2)
+chi2_val = chi2.ppf(conf, 2*r + 2)
+print("chi2_val:", chi2_val)
+
+total_dev_hours = N * t
+equiv_dev_hours = total_dev_hours * AF
+
+fit_rate = (chi2_val / (2.0 * equiv_dev_hours)) * 1e9
+print("FIT rate:", fit_rate)
+
+
+```
+
+```text
+AF: 77.6453820553027
+chi2_val: 1.83258146374831
+FIT rate: 118.00968809987046
+
+
+```
+
+```python
+# Family 3 Worked Example
+# Tensor processing chip with INT8 peak performance of 300 MacTOPS (600 TOPS) and FP16 peak performance of 150 MacTOPS (300 TOPS).
+# Die area = 400 mm^2.
+
+# TPP for INT8: 2 * 300 * 8 = 4800
+tpp_int8 = 2 * 300 * 8
+# TPP for FP16: 2 * 150 * 16 = 4800
+tpp_fp16 = 2 * 150 * 16
+
+# Suppose MacTOPS_INT8 = 250 MacTOPS (500 TOPS).
+mactops_int8 = 250
+b_int8 = 8
+tpp = 2 * mactops_int8 * b_int8 # 2 * 250 * 8 = 4000
+
+die_area_mm2 = 500.0 # mm^2
+pd = tpp / die_area_mm2 # 4000 / 500 = 8.0
+
+print("TPP:", tpp)
+print("Performance Density:", pd)
+print("3A090.a controlled? (TPP >= 4800 OR (TPP >= 1600 AND PD >= 5.92)):", (tpp >= 4800 or (tpp >= 1600 and pd >= 5.92)))
+
+
+```
+
+```text
+TPP: 4000
+Performance Density: 8.0
+3A090.a controlled? (TPP >= 4800 OR (TPP >= 1600 AND PD >= 5.92)): True
+
+
+```
+
+```python
+# Family 4 Worked Example
+basis_qualified_property = 500_000_000 # $500,000,000 (500M USD)
+credit_rate = 0.25 # 25% under 26 U.S.C. § 48D(a)
+
+credit_amount = basis_qualified_property * credit_rate
+print("Qualified Basis ($):", basis_qualified_property)
+print("Credit Amount ($):", credit_amount)
+
+
+```
+
+```text
+Qualified Basis ($): 500000000
+Credit Amount ($): 125000000.0
+
+
+```
+
+```python
+import json
+
+data = [
+  {
+    "family": "ISO 26262-5 hardware architectural metrics",
+    "formulas": [
+      {
+        "name": "Single-Point Fault Metric (SPFM)",
+        "expression": "SPFM = 1 - (sum(lambda_SPF) + sum(lambda_RF)) / sum(lambda_total) = (sum(lambda_MPF_detected) + sum(lambda_MPF_perceived) + sum(lambda_MPF_latent) + sum(lambda_S)) / sum(lambda_total)",
+        "variables": [
+          {"symbol": "lambda_total", "meaning": "Total rate of random hardware failures", "units": "FIT (failures / 10^9 hours) or h^-1"},
+          {"symbol": "lambda_SPF", "meaning": "Failure rate of single-point faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_RF", "meaning": "Failure rate of residual faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_MPF", "meaning": "Failure rate of multiple-point faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_S", "meaning": "Failure rate of safe faults", "units": "FIT or h^-1"}
+        ],
+        "worked_example": "Given total hardware failure rate sum(lambda_total) = 1000 FIT, composed of lambda_SPF = 5 FIT, lambda_RF = 15 FIT, lambda_MPF_detected = 700 FIT, lambda_MPF_latent = 80 FIT, and lambda_S = 200 FIT. Step 1: Calculate total single-point and residual failure rate = lambda_SPF + lambda_RF = 5 + 15 = 20 FIT. Step 2: Calculate SPFM = 1 - (20 / 1000) = 1 - 0.02 = 0.98 or 98.0%. Target evaluation: ASIL B (>= 90%): PASS; ASIL C (>= 97%): PASS; ASIL D (>= 99%): FAIL.",
+        "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+        "clause_locator": "Clause 8.4.5, Table 4",
+        "known_uncertainty": "Formula is standardized; minor variations exist if safe faults are excluded from total failure rate definition in specialized sub-systems."
+      },
+      {
+        "name": "Latent Fault Metric (LFM)",
+        "expression": "LFM = 1 - sum(lambda_MPF_latent) / (sum(lambda_total) - sum(lambda_SPF) - sum(lambda_RF)) = (sum(lambda_MPF_detected) + sum(lambda_MPF_perceived) + sum(lambda_S)) / (sum(lambda_MPF) + sum(lambda_S))",
+        "variables": [
+          {"symbol": "lambda_MPF_latent", "meaning": "Failure rate of latent multiple-point faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_MPF_detected", "meaning": "Failure rate of detected multiple-point faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_S", "meaning": "Failure rate of safe faults", "units": "FIT or h^-1"},
+          {"symbol": "lambda_total", "meaning": "Total rate of random hardware failures", "units": "FIT or h^-1"}
+        ],
+        "worked_example": "Using the same system parameters: sum(lambda_total) = 1000 FIT, lambda_SPF = 5 FIT, lambda_RF = 15 FIT, lambda_MPF_latent = 80 FIT. Step 1: Calculate denominator = sum(lambda_total) - lambda_SPF - lambda_RF = 1000 - 5 - 15 = 980 FIT. Step 2: Calculate LFM = 1 - (80 / 980) = 1 - 0.0816326 = 0.918367 or 91.84%. Target evaluation: ASIL B (>= 60%): PASS; ASIL C (>= 80%): PASS; ASIL D (>= 90%): PASS.",
+        "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+        "clause_locator": "Clause 8.4.6, Table 5",
+        "known_uncertainty": "In architectures where multiple-point faults are not applicable or prevented by hardware design, LFM calculation is considered fully covered."
+      },
+      {
+        "name": "Probabilistic Metric for random Hardware Failures (PMHF)",
+        "expression": "PMHF = lambda_SPF + lambda_RF + lambda_MPF_latent * lambda_MPF_detected * T_lifetime",
+        "variables": [
+          {"symbol": "lambda_SPF", "meaning": "Failure rate of single-point faults", "units": "h^-1"},
+          {"symbol": "lambda_RF", "meaning": "Failure rate of residual faults", "units": "h^-1"},
+          {"symbol": "lambda_MPF_latent", "meaning": "Failure rate of latent multiple-point faults", "units": "h^-1"},
+          {"symbol": "lambda_MPF_detected", "meaning": "Failure rate of detected multiple-point faults", "units": "h^-1"},
+          {"symbol": "T_lifetime", "meaning": "Operational lifetime of the vehicle/system", "units": "hours (h)"}
+        ],
+        "worked_example": "Given lambda_SPF = 5 FIT = 5e-9 h^-1, lambda_RF = 15 FIT = 15e-9 h^-1, lambda_MPF_latent = 80 FIT = 80e-9 h^-1, lambda_MPF_detected = 700 FIT = 700e-9 h^-1, and T_lifetime = 15,000 hours. Step 1: Single-point + residual contribution = 5e-9 + 15e-9 = 2.0e-8 h^-1 (20 FIT). Step 2: Dual-point latent contribution = (80e-9) * (700e-9) * 15000 = 8.4e-10 h^-1 (0.84 FIT). Step 3: PMHF = 2.0e-8 + 8.4e-10 = 2.084e-8 h^-1 = 20.84 FIT. Target evaluation: ASIL B (< 100 FIT): PASS; ASIL C (< 100 FIT): PASS; ASIL D (< 10 FIT): FAIL.",
+        "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+        "clause_locator": "Clause 8.4.7, Annex F",
+        "known_uncertainty": "Simplified formula shown; full ISO 26262-5 Annex F includes second-order terms for diagnostic test intervals."
+      }
+    ],
+    "edge_cases": [
+      "Division by zero in SPFM or LFM if total failure rate lambda_total or denominator evaluates to 0 FIT.",
+      "Boundary condition where SPFM or LFM equals exact target threshold (e.g., SPFM = 90.0% for ASIL B) complies with greater-than-or-equal-to (>=) semantics.",
+      "PMHF evaluation at exact upper threshold (e.g. 100 FIT for ASIL B/C or 10 FIT for ASIL D) complies with less-than-or-equal-to (<=) semantics."
+    ]
+  },
+  {
+    "family": "JEDEC FIT-rate math",
+    "formulas": [
+      {
+        "name": "Arrhenius Temperature Acceleration Factor (AF)",
+        "expression": "AF = exp((E_a / k_B) * (1 / T_use - 1 / T_stress))",
+        "variables": [
+          {"symbol": "E_a", "meaning": "Thermal activation energy of failure mechanism", "units": "electron-volts (eV)"},
+          {"symbol": "k_B", "meaning": "Boltzmann constant (8.617333262e-5)", "units": "eV/K"},
+          {"symbol": "T_use", "meaning": "Use operating temperature in Kelvin (T_Celsius + 273.15)", "units": "Kelvin (K)"},
+          {"symbol": "T_stress", "meaning": "Accelerated stress test temperature in Kelvin (T_Celsius + 273.15)", "units": "Kelvin (K)"}
+        ],
+        "worked_example": "Given use temperature T_use = 55 °C = 328.15 K, stress test temperature T_stress = 125 °C = 398.15 K, and activation energy E_a = 0.7 eV. Step 1: Calculate (1 / T_use - 1 / T_stress) = (1 / 328.15 - 1 / 398.15) = 0.003047387 - 0.002511616 = 0.000535771 K^-1. Step 2: Calculate E_a / k_B = 0.7 / 8.617333262e-5 = 8123.163 K. Step 3: Compute exponent = 8123.163 * 0.000535771 = 4.352157. Step 4: Compute AF = exp(4.352157) = 77.64538.",
+        "authority": "JEDEC Standard JESD85 / JESD47 / JEP122",
+        "clause_locator": "JESD85 Section 4; JEP122H Section 5.1",
+        "known_uncertainty": "Activation energy E_a = 0.7 eV is standard default for general silicon defect mechanisms, but specific mechanisms (e.g. electromigration E_a ≈ 0.45 eV) require mechanism-specific E_a."
+      },
+      {
+        "name": "Chi-Square Accelerated Failure Rate in FIT",
+        "expression": "lambda_FIT = (chi2(2 * r + 2, 1 - alpha) / (2 * N * t * AF)) * 1e9",
+        "variables": [
+          {"symbol": "r", "meaning": "Number of observed failures during stress test", "units": "count"},
+          {"symbol": "alpha", "meaning": "Statistical confidence level (e.g., 0.60 for 60% confidence)", "units": "dimensionless"},
+          {"symbol": "chi2(df, P)", "meaning": "Upper quantile of chi-square distribution for degrees of freedom df = 2*r + 2 at probability P", "units": "dimensionless"},
+          {"symbol": "N", "meaning": "Sample size of units under test", "units": "count"},
+          {"symbol": "t", "meaning": "Stress test duration per unit", "units": "hours (h)"},
+          {"symbol": "AF", "meaning": "Arrhenius acceleration factor", "units": "dimensionless"}
+        ],
+        "worked_example": "Given r = 0 failures, confidence alpha = 0.60 (60%), N = 100 units, t = 1000 hours, and AF = 77.64538. Step 1: Degrees of freedom df = 2 * 0 + 2 = 2. Step 2: Chi-square value chi2(2, 0.60) = -2 * ln(1 - 0.60) = -2 * ln(0.40) = 1.832581. Step 3: Calculate total equivalent device hours = N * t * AF = 100 * 1000 * 77.64538 = 7,764,538 hours. Step 4: Calculate lambda_FIT = (1.832581 / (2 * 7,764,538)) * 1e9 = 118.0097 FIT.",
+        "authority": "JEDEC Standard JESD85",
+        "clause_locator": "JESD85 Section 3.2",
+        "known_uncertainty": "Chi-square FIT calculation assumes a constant failure rate (exponential life distribution) during the steady-state operating period."
+      }
+    ],
+    "edge_cases": [
+      "Zero equivalent operating hours (N * t * AF = 0) causes division by zero.",
+      "T_use >= T_stress produces AF <= 1, representing thermal deceleration or unaccelerated testing.",
+      "Zero failures (r = 0) requires df = 2 in chi-square distribution lookup; setting df = 0 is mathematically undefined."
+    ]
+  },
+  {
+    "family": "EAR advanced-computing parameters",
+    "formulas": [
+      {
+        "name": "Total Processing Performance (TPP)",
+        "expression": "TPP = 2 * MacTOPS * b",
+        "variables": [
+          {"symbol": "MacTOPS", "meaning": "Theoretical peak throughput of Multiply-Accumulate operations per second in TeraOps (10^12 MACs/s)", "units": "TeraMACs/s"},
+          {"symbol": "b", "meaning": "Bit length of the operation (e.g., 8 for INT8, 16 for FP16, 32 for FP32, 64 for FP64)", "units": "bits"}
+        ],
+        "worked_example": "Given an AI accelerator chip with peak INT8 performance of 250 MacTOPS (500 TOPS). Step 1: Identify b = 8 bits for INT8. Step 2: Calculate TPP = 2 * 250 * 8 = 4000. (Equivalently, TPP = 500 TOPS * 8 = 4000).",
+        "authority": "U.S. Export Administration Regulations (EAR), 15 CFR § 774, Supp. No. 1, ECCN 3A090 Technical Notes",
+        "clause_locator": "ECCN 3A090 Technical Note 1",
+        "known_uncertainty": "If an integrated circuit supports multiple data types, regulations mandate using the maximum TPP derived across all supported data types."
+      },
+      {
+        "name": "Performance Density (PD)",
+        "expression": "PD = TPP / A_die",
+        "variables": [
+          {"symbol": "TPP", "meaning": "Total Processing Performance as defined in ECCN 3A090 Technical Note 1", "units": "dimensionless"},
+          {"symbol": "A_die", "meaning": "Total die area of the integrated circuit including all logic and memory dies in a single package", "units": "square millimeters (mm^2)"}
+        ],
+        "worked_example": "Given TPP = 4000 and total die area A_die = 500 mm^2. Step 1: Compute Performance Density PD = 4000 / 500 = 8.0. Step 2: Evaluate ECCN 3A090.a threshold criteria: (TPP >= 4800) OR (TPP >= 1600 AND PD >= 5.92). Since TPP = 4000 (>= 1600) and PD = 8.0 (>= 5.92), the chip meets ECCN 3A090.a export control criteria.",
+        "authority": "U.S. Export Administration Regulations (EAR), 15 CFR § 774, Supp. No. 1, ECCN 3A090 Technical Notes",
+        "clause_locator": "ECCN 3A090 Technical Note 2 & Item 3A090.a",
+        "known_uncertainty": "For multi-chip module / chiplet assemblies, total die area includes the aggregate surface area of all processing and memory dies within the package."
+      }
+    ],
+    "edge_cases": [
+      "Die area A_die = 0 mm^2 causes division by zero.",
+      "Threshold boundary semantics: TPP = 4800 or (TPP = 1600 and PD = 5.92) triggers export control under ECCN 3A090.a ('greater than or equal to' semantics).",
+      "Non-integer or non-standard bit lengths (e.g. micro-scaling FP formats like MXFP6) require specific regulatory guidance for bit length variable 'b'."
+    ]
+  },
+  {
+    "family": "CHIPS Act incentives math",
+    "formulas": [
+      {
+        "name": "Advanced Manufacturing Investment Credit Amount",
+        "expression": "Credit_Amount = Basis_Qualified_Property * 0.25",
+        "variables": [
+          {"symbol": "Basis_Qualified_Property", "meaning": "Tax basis of qualified property placed in service during the tax year as part of an advanced manufacturing facility", "units": "USD ($)"},
+          {"symbol": "Credit_Rate", "meaning": "Statutory credit percentage equal to 25% (0.25)", "units": "dimensionless"}
+        ],
+        "worked_example": "Given a semiconductor manufacturing company investing $500,000,000 in qualified equipment and property placed in service for a new semiconductor manufacturing facility. Step 1: Confirm eligibility under 26 U.S.C. § 48D(b) (primary purpose = semiconductor manufacturing). Step 2: Apply 25% statutory rate: Credit_Amount = $500,000,000 * 0.25 = $125,000,000.",
+        "authority": "Internal Revenue Code (IRC) 26 U.S.C. § 48D; CHIPS Act of 2022 (P.L. 117-167, Section 107)",
+        "clause_locator": "26 U.S.C. § 48D(a)",
+        "known_uncertainty": "Proposed legislative adjustments may alter future credit rates, but the enacted statutory value under IRC § 48D is 25%."
+      },
+      {
+        "name": "Primary Purpose and Expansion Recapture Thresholds",
+        "expression": "Output_Ratio = Cost_or_Revenue_Primary_Purpose / Total_Cost_or_Revenue > 0.50",
+        "variables": [
+          {"symbol": "Cost_or_Revenue_Primary_Purpose", "meaning": "Cost to produce or revenue from semiconductor manufacturing or manufacturing equipment", "units": "USD ($)"},
+          {"symbol": "Total_Cost_or_Revenue", "meaning": "Total production cost or total revenue of the facility", "units": "USD ($)"},
+          {"symbol": "Expansion_Threshold_Advanced", "meaning": "Statutory maximum allowable expansion of advanced semiconductor capacity in a foreign country of concern", "units": "5 percent (0.05)"},
+          {"symbol": "Expansion_Threshold_Legacy", "meaning": "Statutory maximum allowable expansion of legacy semiconductor capacity in a foreign country of concern", "units": "10 percent (0.10)"}
+        ],
+        "worked_example": "A facility generates $80,000,000 in revenue from manufacturing semiconductor wafer processing equipment out of $100,000,000 total facility revenue. Step 1: Output_Ratio = $80,000,000 / $100,000,000 = 0.80 (80%). Step 2: Evaluate Primary Purpose test: 80% > 50% threshold (Treas. Reg. § 1.48D-2), facility qualifies as an advanced manufacturing facility. Step 3: If taxpayer expands advanced facility capacity in China by 8% during 10-year clawback period (> 5% threshold under 26 U.S.C. § 50(a)(3)), 100% of the $125,000,000 credit is subject to tax recapture.",
+        "authority": "Internal Revenue Code 26 U.S.C. § 48D(b)(1), 26 U.S.C. § 50(a)(3); Treasury Regulations 26 CFR § 1.48D-2",
+        "clause_locator": "26 U.S.C. § 48D(b)(1) & 26 U.S.C. § 50(a)(3)(C)",
+        "known_uncertainty": "Specific technical definitions of legacy vs advanced manufacturing processes reference Department of Commerce regulations."
+      }
+    ],
+    "edge_cases": [
+      "Basis of qualified property <= 0 USD yields $0 credit amount.",
+      "Exact 50% primary purpose ratio (Output_Ratio = 0.50) fails the 'more than 50 percent' requirement under Treas. Reg. § 1.48D-2.",
+      "Construction beginning after December 31, 2026 renders property completely ineligible under 26 U.S.C. § 48D(e)."
+    ]
+  }
+]
+
+# Verify JSON dump
+json_str = json.dumps(data)
+print("JSON length:", len(json_str))
+print("Valid JSON!")
+
+
+```
+
+```text
+JSON length: 14106
+Valid JSON!
+
+
+```
+
+[
+{
+"family": "ISO 26262-5 hardware architectural metrics",
+"formulas": [
+{
+"name": "Single-Point Fault Metric (SPFM)",
+"expression": "SPFM = 1 - (sum(lambda_SPF) + sum(lambda_RF)) / sum(lambda_total) = (sum(lambda_MPF_detected) + sum(lambda_MPF_perceived) + sum(lambda_MPF_latent) + sum(lambda_S)) / sum(lambda_total)",
+"variables": [
+{
+"symbol": "lambda_total",
+"meaning": "Total rate of random hardware failures",
+"units": "FIT (failures / 10^9 hours) or h^-1"
+},
+{
+"symbol": "lambda_SPF",
+"meaning": "Failure rate of single-point faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_RF",
+"meaning": "Failure rate of residual faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_MPF",
+"meaning": "Failure rate of multiple-point faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_S",
+"meaning": "Failure rate of safe faults",
+"units": "FIT or h^-1"
+}
+],
+"worked_example": "Given total hardware failure rate sum(lambda_total) = 1000 FIT, composed of lambda_SPF = 5 FIT, lambda_RF = 15 FIT, lambda_MPF_detected = 700 FIT, lambda_MPF_latent = 80 FIT, and lambda_S = 200 FIT. Step 1: Calculate total single-point and residual failure rate = lambda_SPF + lambda_RF = 5 + 15 = 20 FIT. Step 2: Calculate SPFM = 1 - (20 / 1000) = 1 - 0.02 = 0.98 or 98.0%. Target evaluation: ASIL B (>= 90%): PASS; ASIL C (>= 97%): PASS; ASIL D (>= 99%): FAIL.",
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.5, Table 4",
+"known_uncertainty": "Formula is standardized; minor variations exist if safe faults are excluded from total failure rate definition in specialized sub-systems."
+},
+{
+"name": "Latent Fault Metric (LFM)",
+"expression": "LFM = 1 - sum(lambda_MPF_latent) / (sum(lambda_total) - sum(lambda_SPF) - sum(lambda_RF)) = (sum(lambda_MPF_detected) + sum(lambda_MPF_perceived) + sum(lambda_S)) / (sum(lambda_MPF) + sum(lambda_S))",
+"variables": [
+{
+"symbol": "lambda_MPF_latent",
+"meaning": "Failure rate of latent multiple-point faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_MPF_detected",
+"meaning": "Failure rate of detected multiple-point faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_S",
+"meaning": "Failure rate of safe faults",
+"units": "FIT or h^-1"
+},
+{
+"symbol": "lambda_total",
+"meaning": "Total rate of random hardware failures",
+"units": "FIT or h^-1"
+}
+],
+"worked_example": "Using the same system parameters: sum(lambda_total) = 1000 FIT, lambda_SPF = 5 FIT, lambda_RF = 15 FIT, lambda_MPF_latent = 80 FIT. Step 1: Calculate denominator = sum(lambda_total) - lambda_SPF - lambda_RF = 1000 - 5 - 15 = 980 FIT. Step 2: Calculate LFM = 1 - (80 / 980) = 1 - 0.0816326 = 0.918367 or 91.84%. Target evaluation: ASIL B (>= 60%): PASS; ASIL C (>= 80%): PASS; ASIL D (>= 90%): PASS.",
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.6, Table 5",
+"known_uncertainty": "In architectures where multiple-point faults are not applicable or prevented by hardware design, LFM calculation is considered fully covered."
+},
+{
+"name": "Probabilistic Metric for random Hardware Failures (PMHF)",
+"expression": "PMHF = lambda_SPF + lambda_RF + lambda_MPF_latent * lambda_MPF_detected * T_lifetime",
+"variables": [
+{
+"symbol": "lambda_SPF",
+"meaning": "Failure rate of single-point faults",
+"units": "h^-1"
+},
+{
+"symbol": "lambda_RF",
+"meaning": "Failure rate of residual faults",
+"units": "h^-1"
+},
+{
+"symbol": "lambda_MPF_latent",
+"meaning": "Failure rate of latent multiple-point faults",
+"units": "h^-1"
+},
+{
+"symbol": "lambda_MPF_detected",
+"meaning": "Failure rate of detected multiple-point faults",
+"units": "h^-1"
+},
+{
+"symbol": "T_lifetime",
+"meaning": "Operational lifetime of the vehicle/system",
+"units": "hours (h)"
+}
+],
+"worked_example": "Given lambda_SPF = 5 FIT = 5e-9 h^-1, lambda_RF = 15 FIT = 15e-9 h^-1, lambda_MPF_latent = 80 FIT = 80e-9 h^-1, lambda_MPF_detected = 700 FIT = 700e-9 h^-1, and T_lifetime = 15,000 hours. Step 1: Single-point + residual contribution = 5e-9 + 15e-9 = 2.0e-8 h^-1 (20 FIT). Step 2: Dual-point latent contribution = (80e-9) * (700e-9) * 15000 = 8.4e-10 h^-1 (0.84 FIT). Step 3: PMHF = 2.0e-8 + 8.4e-10 = 2.084e-8 h^-1 = 20.84 FIT. Target evaluation: ASIL B (< 100 FIT): PASS; ASIL C (< 100 FIT): PASS; ASIL D (< 10 FIT): FAIL.",
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.7, Annex F",
+"known_uncertainty": "Simplified formula shown; full ISO 26262-5 Annex F includes second-order terms for diagnostic test intervals."
+}
+],
+"edge_cases": [
+"Division by zero in SPFM or LFM if total failure rate lambda_total or denominator evaluates to 0 FIT.",
+"Boundary condition where SPFM or LFM equals exact target threshold (e.g., SPFM = 90.0% for ASIL B) complies with greater-than-or-equal-to (>=) semantics.",
+"PMHF evaluation at exact upper threshold (e.g. 100 FIT for ASIL B/C or 10 FIT for ASIL D) complies with less-than-or-equal-to (<=) semantics."
+]
+},
+{
+"family": "JEDEC FIT-rate math",
+"formulas": [
+{
+"name": "Arrhenius Temperature Acceleration Factor (AF)",
+"expression": "AF = exp((E_a / k_B) * (1 / T_use - 1 / T_stress))",
+"variables": [
+{
+"symbol": "E_a",
+"meaning": "Thermal activation energy of failure mechanism",
+"units": "electron-volts (eV)"
+},
+{
+"symbol": "k_B",
+"meaning": "Boltzmann constant (8.617333262e-5)",
+"units": "eV/K"
+},
+{
+"symbol": "T_use",
+"meaning": "Use operating temperature in Kelvin (T_Celsius + 273.15)",
+"units": "Kelvin (K)"
+},
+{
+"symbol": "T_stress",
+"meaning": "Accelerated stress test temperature in Kelvin (T_Celsius + 273.15)",
+"units": "Kelvin (K)"
+}
+],
+"worked_example": "Given use temperature T_use = 55 °C = 328.15 K, stress test temperature T_stress = 125 °C = 398.15 K, and activation energy E_a = 0.7 eV. Step 1: Calculate (1 / T_use - 1 / T_stress) = (1 / 328.15 - 1 / 398.15) = 0.003047387 - 0.002511616 = 0.000535771 K^-1. Step 2: Calculate E_a / k_B = 0.7 / 8.617333262e-5 = 8123.163 K. Step 3: Compute exponent = 8123.163 * 0.000535771 = 4.352157. Step 4: Compute AF = exp(4.352157) = 77.64538.",
+"authority": "JEDEC Standard JESD85 / JESD47 / JEP122",
+"clause_locator": "JESD85 Section 4; JEP122H Section 5.1",
+"known_uncertainty": "Activation energy E_a = 0.7 eV is standard default for general silicon defect mechanisms, but specific mechanisms (e.g. electromigration E_a ≈ 0.45 eV) require mechanism-specific E_a."
+},
+{
+"name": "Chi-Square Accelerated Failure Rate in FIT",
+"expression": "lambda_FIT = (chi2(2 * r + 2, 1 - alpha) / (2 * N * t * AF)) * 1e9",
+"variables": [
+{
+"symbol": "r",
+"meaning": "Number of observed failures during stress test",
+"units": "count"
+},
+{
+"symbol": "alpha",
+"meaning": "Statistical confidence level (e.g., 0.60 for 60% confidence)",
+"units": "dimensionless"
+},
+{
+"symbol": "chi2(df, P)",
+"meaning": "Upper quantile of chi-square distribution for degrees of freedom df = 2*r + 2 at probability P",
+"units": "dimensionless"
+},
+{
+"symbol": "N",
+"meaning": "Sample size of units under test",
+"units": "count"
+},
+{
+"symbol": "t",
+"meaning": "Stress test duration per unit",
+"units": "hours (h)"
+},
+{
+"symbol": "AF",
+"meaning": "Arrhenius acceleration factor",
+"units": "dimensionless"
+}
+],
+"worked_example": "Given r = 0 failures, confidence alpha = 0.60 (60%), N = 100 units, t = 1000 hours, and AF = 77.64538. Step 1: Degrees of freedom df = 2 * 0 + 2 = 2. Step 2: Chi-square value chi2(2, 0.60) = -2 * ln(1 - 0.60) = -2 * ln(0.40) = 1.832581. Step 3: Calculate total equivalent device hours = N * t * AF = 100 * 1000 * 77.64538 = 7,764,538 hours. Step 4: Calculate lambda_FIT = (1.832581 / (2 * 7,764,538)) * 1e9 = 118.0097 FIT.",
+"authority": "JEDEC Standard JESD85",
+"clause_locator": "JESD85 Section 3.2",
+"known_uncertainty": "Chi-square FIT calculation assumes a constant failure rate (exponential life distribution) during the steady-state operating period."
+}
+],
+"edge_cases": [
+"Zero equivalent operating hours (N * t * AF = 0) causes division by zero.",
+"T_use >= T_stress produces AF <= 1, representing thermal deceleration or unaccelerated testing.",
+"Zero failures (r = 0) requires df = 2 in chi-square distribution lookup; setting df = 0 is mathematically undefined."
+]
+},
+{
+"family": "EAR advanced-computing parameters",
+"formulas": [
+{
+"name": "Total Processing Performance (TPP)",
+"expression": "TPP = 2 * MacTOPS * b",
+"variables": [
+{
+"symbol": "MacTOPS",
+"meaning": "Theoretical peak throughput of Multiply-Accumulate operations per second in TeraOps (10^12 MACs/s)",
+"units": "TeraMACs/s"
+},
+{
+"symbol": "b",
+"meaning": "Bit length of the operation (e.g., 8 for INT8, 16 for FP16, 32 for FP32, 64 for FP64)",
+"units": "bits"
+}
+],
+"worked_example": "Given an AI accelerator chip with peak INT8 performance of 250 MacTOPS (500 TOPS). Step 1: Identify b = 8 bits for INT8. Step 2: Calculate TPP = 2 * 250 * 8 = 4000. (Equivalently, TPP = 500 TOPS * 8 = 4000).",
+"authority": "U.S. Export Administration Regulations (EAR), 15 CFR § 774, Supp. No. 1, ECCN 3A090 Technical Notes",
+"clause_locator": "ECCN 3A090 Technical Note 1",
+"known_uncertainty": "If an integrated circuit supports multiple data types, regulations mandate using the maximum TPP derived across all supported data types."
+},
+{
+"name": "Performance Density (PD)",
+"expression": "PD = TPP / A_die",
+"variables": [
+{
+"symbol": "TPP",
+"meaning": "Total Processing Performance as defined in ECCN 3A090 Technical Note 1",
+"units": "dimensionless"
+},
+{
+"symbol": "A_die",
+"meaning": "Total die area of the integrated circuit including all logic and memory dies in a single package",
+"units": "square millimeters (mm^2)"
+}
+],
+"worked_example": "Given TPP = 4000 and total die area A_die = 500 mm^2. Step 1: Compute Performance Density PD = 4000 / 500 = 8.0. Step 2: Evaluate ECCN 3A090.a threshold criteria: (TPP >= 4800) OR (TPP >= 1600 AND PD >= 5.92). Since TPP = 4000 (>= 1600) and PD = 8.0 (>= 5.92), the chip meets ECCN 3A090.a export control criteria.",
+"authority": "U.S. Export Administration Regulations (EAR), 15 CFR § 774, Supp. No. 1, ECCN 3A090 Technical Notes",
+"clause_locator": "ECCN 3A090 Technical Note 2 & Item 3A090.a",
+"known_uncertainty": "For multi-chip module / chiplet assemblies, total die area includes the aggregate surface area of all processing and memory dies within the package."
+}
+],
+"edge_cases": [
+"Die area A_die = 0 mm^2 causes division by zero.",
+"Threshold boundary semantics: TPP = 4800 or (TPP = 1600 and PD = 5.92) triggers export control under ECCN 3A090.a ('greater than or equal to' semantics).",
+"Non-integer or non-standard bit lengths (e.g. micro-scaling FP formats like MXFP6) require specific regulatory guidance for bit length variable 'b'."
+]
+},
+{
+"family": "CHIPS Act incentives math",
+"formulas": [
+{
+"name": "Advanced Manufacturing Investment Credit Amount",
+"expression": "Credit_Amount = Basis_Qualified_Property * 0.25",
+"variables": [
+{
+"symbol": "Basis_Qualified_Property",
+"meaning": "Tax basis of qualified property placed in service during the tax year as part of an advanced manufacturing facility",
+"units": "USD ($)"
+},
+{
+"symbol": "Credit_Rate",
+"meaning": "Statutory credit percentage equal to 25% (0.25)",
+"units": "dimensionless"
+}
+],
+"worked_example": "Given a semiconductor manufacturing company investing $500,000,000 in qualified equipment and property placed in service for a new semiconductor manufacturing facility. Step 1: Confirm eligibility under 26 U.S.C. § 48D(b) (primary purpose = semiconductor manufacturing). Step 2: Apply 25% statutory rate: Credit_Amount = $500,000,000 * 0.25 = $125,000,000.",
+"authority": "Internal Revenue Code (IRC) 26 U.S.C. § 48D; CHIPS Act of 2022 (P.L. 117-167, Section 107)",
+"clause_locator": "26 U.S.C. § 48D(a)",
+"known_uncertainty": "Proposed legislative adjustments may alter future credit rates, but the enacted statutory value under IRC § 48D is 25%."
+},
+{
+"name": "Primary Purpose and Expansion Recapture Thresholds",
+"expression": "Output_Ratio = Cost_or_Revenue_Primary_Purpose / Total_Cost_or_Revenue > 0.50",
+"variables": [
+{
+"symbol": "Cost_or_Revenue_Primary_Purpose",
+"meaning": "Cost to produce or revenue from semiconductor manufacturing or manufacturing equipment",
+"units": "USD ($)"
+},
+{
+"symbol": "Total_Cost_or_Revenue",
+"meaning": "Total production cost or total revenue of the facility",
+"units": "USD ($)"
+},
+{
+"symbol": "Expansion_Threshold_Advanced",
+"meaning": "Statutory maximum allowable expansion of advanced semiconductor capacity in a foreign country of concern",
+"units": "5 percent (0.05)"
+},
+{
+"symbol": "Expansion_Threshold_Legacy",
+"meaning": "Statutory maximum allowable expansion of legacy semiconductor capacity in a foreign country of concern",
+"units": "10 percent (0.10)"
+}
+],
+"worked_example": "A facility generates $80,000,000 in revenue from manufacturing semiconductor wafer processing equipment out of $100,000,000 total facility revenue. Step 1: Output_Ratio = $80,000,000 / $100,000,000 = 0.80 (80%). Step 2: Evaluate Primary Purpose test: 80% > 50% threshold (Treas. Reg. § 1.48D-2), facility qualifies as an advanced manufacturing facility. Step 3: If taxpayer expands advanced facility capacity in China by 8% during 10-year clawback period (> 5% threshold under 26 U.S.C. § 50(a)(3)), 100% of the $125,000,000 credit is subject to tax recapture.",
+"authority": "Internal Revenue Code 26 U.S.C. § 48D(b)(1), 26 U.S.C. § 50(a)(3); Treasury Regulations 26 CFR § 1.48D-2",
+"clause_locator": "26 U.S.C. § 48D(b)(1) & 26 U.S.C. § 50(a)(3)(C)",
+"known_uncertainty": "Specific technical definitions of legacy vs advanced manufacturing processes reference Department of Commerce regulations."
+}
+],
+"edge_cases": [
+"Basis of qualified property <= 0 USD yields $0 credit amount.",
+"Exact 50% primary purpose ratio (Output_Ratio = 0.50) fails the 'more than 50 percent' requirement under Treas. Reg. § 1.48D-2.",
+"Construction beginning after December 31, 2026 renders property completely ineligible under 26 U.S.C. § 48D(e)."
+]
+}
+]

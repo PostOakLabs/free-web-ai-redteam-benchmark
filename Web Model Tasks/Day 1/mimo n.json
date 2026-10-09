@@ -1,0 +1,19 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But I can discuss what I know about this specific paper with honest attribution.
+
+The Warnock et al. paper is the physical-design companion to the POWER4 system microarchitecture paper in the same IBM J. R&D issue. Here's what I recall, with honest flags:
+
+**What I believe is likely in this paper:**
+
+1. **Clock distribution methodology:** The paper discusses the hierarchical clock grid used on POWER4, designed for low skew across a large die (the POWER4 die was quite large, ~170M transistors on 180nm SOI). I believe the paper discusses the tradeoff between clock grid power consumption and skew targets. However, I'm not fully certain whether specific alternatives (e.g., H-tree vs. grid) are explicitly discussed or whether the grid choice is presented as a given.
+
+2. **Custom vs. synthesized circuit design:** POWER4 was known for extensive custom circuit design on critical paths (execution units, caches) while using synthesized logic elsewhere. I believe this paper discusses the methodology for deciding which blocks get custom treatment, but I'm less certain about whether specific alternatives or rejected approaches are named.
+
+3. **Timing closure methodology:** The paper likely discusses how timing closure was achieved across the large design, including the use of statistical timing methods or OCV approaches. IBM was an early adopter of statistical timing analysis. But I'm not confident about the specific details or alternatives discussed.
+
+4. **Power grid design:** The paper likely covers the power distribution network, given the chip's power consumption. But I can't confidently recall specific design decisions or tradeoffs discussed.
+
+5. **180nm SOI technology specifics:** The paper likely discusses SOI-specific circuit design considerations (body effect, history effect), but I'm not certain how much detail is in this paper vs. other IBM SOI publications.
+
+**Honesty assessment:** I have moderate confidence that items 1-3 are discussed in this paper, but low confidence about the specific framing, alternatives considered, and exact reasoning. I may be conflating some details with other POWER4 publications or general IBM physical design methodology. I cannot confidently distinguish "in this paper" from "general POWER4 knowledge" for most details.
+
+Given this uncertainty, I think the most honest approach is to share what I know conversationally rather than produce structured output that might misattribute general knowledge to this specific paper. Would you like me to go deeper on any of these topics?

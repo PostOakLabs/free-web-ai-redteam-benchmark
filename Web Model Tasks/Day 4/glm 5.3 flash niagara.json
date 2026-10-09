@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Adoption of Fine-Grained Multithreading",
+    "where_in_paper": "Section 3: Architectural Overview / Subsection on Thread-Level Parallelism",
+    "decision": "Implemented fine-grained multithreading (FGMT) with 4 hardware threads per core to maximize core utilization and hide memory latency.",
+    "alternatives_or_rejected": "Rejected coarser-grained multithreading (e.g., switch-on-event) and simultaneous multithreading (SMT) due to higher design complexity, area overhead, and power consumption, which conflicted with the throughput-per-watt goal.",
+    "rationale": "FGMT allows a thread to be switched every cycle, effectively hiding both short and long memory latencies without complex scheduling logic, and is more power-efficient than SMT for server workloads.",
+    "outcome": "Achieved high core utilization despite memory stalls, enabling the processor to sustain high throughput for server applications.",
+    "quote_as_recalled": "Fine-grained multithreading switches to a different thread every cycle, effectively hiding memory latency.",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact phrasing of the rationale regarding power efficiency might be paraphrased.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Choice of Core Complexity and Count",
+    "where_in_paper": "Section 2: Design Philosophy / Section 3: Architectural Overview",
+    "decision": "Opted for many simple, in-order, single-issue cores (8 cores) rather than fewer, complex out-of-order superscalar cores.",
+    "alternatives_or_rejected": "Rejected the alternative of fewer, more complex cores due to their lower aggregate throughput, higher power consumption, and diminished returns for server-class workloads characterized by high thread-level parallelism (TLP).",
+    "rationale": "For throughput-oriented workloads like web serving and databases, aggregate performance is better served by many simple cores, each handling multiple threads, than by a few complex cores. This approach also offers better power and area efficiency.",
+    "outcome": "The many-core design provided high aggregate throughput for multi-threaded server applications with good power efficiency.",
+    "quote_as_recalled": "The design philosophy was to maximize overall throughput by using many simple cores, not a few complex ones.",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The term 'diminished returns' might be my interpretation; the paper might have used more specific wording about the target workloads.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Shared L2 Cache Architecture",
+    "where_in_paper": "Section 3: Architectural Overview / Subsection on Cache Hierarchy",
+    "decision": "Implemented a unified, shared L2 cache for all 8 cores, instead of private per-core L2 caches.",
+    "alternatives_or_rejected": "Rejected private per-core L2 caches due to the increased area cost, potential for cache duplication, and the challenge of maintaining coherence for a shared-memory workload.",
+    "rationale": "A shared L2 cache is more area- and power-efficient for a chip with many cores. It avoids data duplication and automatically provides a larger effective cache capacity for workloads with shared data, which is common in server applications.",
+    "outcome": "The shared L2 cache simplified the design, reduced overall cache area, and effectively handled the shared data patterns of server workloads.",
+    "quote_as_recalled": "A shared L2 cache avoids duplication and provides a larger effective cache for shared data.",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact trade-off analysis regarding coherence might be more nuanced in the paper.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Focus on Memory Bandwidth over Latency",
+    "where_in_paper": "Section 2: Design Philosophy / Section 4: Memory System",
+    "decision": "Prioritized high aggregate memory bandwidth over minimizing individual memory access latency for the on-chip L2 cache and memory interconnect.",
+    "alternatives_or_rejected": "Rejected designs that optimized heavily for low latency (e.g., complex, high-associativity caches with sophisticated prefetching) as they consumed more power and area without proportionally improving throughput for TLP workloads.",
+    "rationale": "With many threads, the memory system is typically saturated in terms of bandwidth. Providing high bandwidth to feed all the threads is more critical than optimizing the latency of a single thread's access.",
+    "outcome": "The memory system successfully sustained high bandwidth to support the aggregate demand of 32 threads, preventing it from becoming a major bottleneck.",
+    "quote_as_recalled": "For many threads, the goal is to maximize bandwidth, not minimize latency for a single thread.",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "This is a core design principle, but the exact phrasing and placement might differ. It is a central thesis of the paper.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Aggressive Voltage/Frequency Scaling for Power Efficiency",
+    "where_in_paper": "Section 5: Physical Design / Section 6: Power Efficiency",
+    "decision": "Designed the processor to operate at a relatively low clock frequency and voltage to achieve high performance-per-watt.",
+    "alternatives_or_rejected": "Rejected pushing for the highest possible frequency (like contemporary high-performance processors) as it would have exponentially increased power consumption, making the many-core design impractical and less efficient.",
+    "rationale": "By operating at a lower voltage and frequency, the processor could achieve a much better performance-per-watt ratio. The throughput lost from lower frequency was more than compensated for by the ability to pack more cores and threads within the same power budget.",
+    "outcome": "The chip delivered exceptional performance-per-watt for its time, a key metric for server environments.",
+    "quote_as_recalled": "The design targets high throughput per watt, not maximum frequency.",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The specific quote is a reconstruction. The paper certainly discusses power as a key design constraint, but this exact sentence might not exist.",
+    "confidence": 0.85
+  }
+]
+```

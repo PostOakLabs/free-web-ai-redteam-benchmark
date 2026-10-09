@@ -1,0 +1,170 @@
+[
+  {
+    "vector_name": "Integer zero",
+    "input_json": "{\"a\":0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "Section 3.2.4 — Number serialization per ES6. Integer 0 serializes as \"0\".",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Negative zero (-0)",
+    "input_json": "{\"a\":-0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "Section 3.2.4 — ES6 JSON.stringify(-0) produces \"0\" (ToString(-0) === \"0\"). JCS follows ES6 number serialization.",
+    "divergence_trap": "An implementation preserving signed zero might output \"-0\", or an arbitrary-precision library might distinguish -0 from 0.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Positive integer 42",
+    "input_json": "{\"a\":42}",
+    "canonical_output": "{\"a\":42}",
+    "rule": "Section 3.2.4 — Integer values within safe integer range serialize as plain integers without decimal point or exponent.",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Float 1.5",
+    "input_json": "{\"a\":1.5}",
+    "canonical_output": "{\"a\":1.5}",
+    "rule": "Section 3.2.4 — Non-integer numbers serialize using ES6 shortest representation. 1.5 is exactly representable and has no shorter form.",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Scientific notation — large boundary (1e21)",
+    "input_json": "{\"a\":1e21}",
+    "canonical_output": "{\"a\":1e+21}",
+    "rule": "Section 3.2.4 — ES6 ToString for numbers ≥ 1e21 uses scientific notation with explicit sign on exponent: 1e+21.",
+    "divergence_trap": "Implementations using fixed notation for all numbers, or using \"1e21\" without the + sign, or outputting the full decimal \"1000000000000000000000\" would diverge.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Scientific notation — small boundary (1e-7)",
+    "input_json": "{\"a\":1e-7}",
+    "canonical_output": "{\"a\":1e-7}",
+    "rule": "Section 3.2.4 — ES6 uses scientific notation for non-zero numbers with magnitude < 1e-6. 1e-7 = 0.0000001, which is < 1e-6, so scientific notation is used.",
+    "divergence_trap": "Implementations using fixed notation might output \"0.0000001\" instead of \"1e-7\".",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Decimal boundary — 1e-6 exactly (NOT scientific)",
+    "input_json": "{\"a\":0.000001}",
+    "canonical_output": "{\"a\":0.000001}",
+    "rule": "Section 3.2.4 — The ES6 scientific notation threshold is magnitude < 1e-6 (strictly less than). 0.000001 = 1e-6 is NOT less than 1e-6, so decimal notation is used.",
+    "divergence_trap": "Implementations using a ≤ boundary or different threshold might output \"1e-6\" instead of \"0.000001\".",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "2^53 exactly representable",
+    "input_json": "{\"a\":9007199254740992}",
+    "canonical_output": "{\"a\":9007199254740992}",
+    "rule": "Section 3.2.4 — 2^53 = 9007199254740992 is exactly representable as a double. ES6 serializes it as a plain integer since it is < 1e21.",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "2^53 + 1 rounds to 2^53",
+    "input_json": "{\"a\":9007199254740993}",
+    "canonical_output": "{\"a\":9007199254740992}",
+    "rule": "Section 3.2.4 — 9007199254740993 is beyond 2^53 and not exactly representable as a double. The nearest double is 9007199254740992. After parsing, JSON.stringify serializes this as \"9007199254740992\".",
+    "divergence_trap": "An arbitrary-precision JSON parser might preserve \"9007199254740993\" as a distinct value. A JCS implementation must parse per ES6 double precision.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Solidus MUST NOT be escaped",
+    "input_json": "{\"a\":\"http://example.com\"}",
+    "canonical_output": "{\"a\":\"http://example.com\"}",
+    "rule": "Section 3.2.2 — The solidus character (U+002F) MUST NOT be escaped. This is a key divergence from many JSON libraries that escape / as \\/.",
+    "divergence_trap": "JavaScript JSON.stringify does NOT escape / by default, but many other implementations (Java Jackson, Go encoding/json, Python json with default settings) DO escape / as \\/, producing \"http:\\/\\/example.com\".",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Escaped solidus in input → unescaped in output",
+    "input_json": "{\"a\":\"http:\\/\\/example.com\"}",
+    "canonical_output": "{\"a\":\"http://example.com\"}",
+    "rule": "Section 3.2.2 — Solidus MUST NOT be escaped in JCS output. The input \\/ is parsed as /, and JCS re-serializes as / without escaping.",
+    "divergence_trap": "Implementations might preserve the input escape style, outputting \"http:\\/\\/example.com\" instead of \"http://example.com\".",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Quotation mark and backslash escaping",
+    "input_json": "{\"a\":\"He said \\\"hello\\\\\\.\"}",
+    "canonical_output": "{\"a\":\"He said \\\"hello\\\\\\.\"}",
+    "rule": "Section 3.2.2 — Quotation mark (U+0022) MUST be escaped as \\\", reverse solidus (U+005C) MUST be escaped as \\\\.",
+    "divergence_trap": "Implementations skipping these escapes or using different escape forms would produce invalid JSON or non-compliant JCS.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Non-BMP character — surrogate pair escaping (U+1F600 😀)",
+    "input_json": "{\"a\":\"\\uD83D\\uDE00\"}",
+    "canonical_output": "{\"a\":\"\\uD83D\\uDE00\"}",
+    "rule": "Section 3.2.2 — Non-BMP characters (above U+FFFF) MUST be serialized as UTF-16 surrogate pairs using \\uXXXX escapes. U+1F600 → high surrogate 0xD83D, low surrogate 0xDE00 → \\uD83D\\uDE00.",
+    "divergence_trap": "Implementations outputting raw UTF-8 bytes for non-BMP characters (F0 9F 98 80 for 😀) produce valid JSON but are NOT JCS-compliant. The JCS output must be the 12 ASCII bytes of \\uD83D\\uDE00.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Control character — newline escaped as \\n",
+    "input_json": "{\"a\":\"\\u000A\"}",
+    "canonical_output": "{\"a\":\"\\n\"}",
+    "rule": "Section 3.2.2 — Control characters (U+0000-U+001F) MUST be escaped. ES6/JSON.stringify uses shorthand escapes where available: U+000A (newline) → \\n, U+0009 (tab) → \\t, etc. Other control characters use \\uXXXX form.",
+    "divergence_trap": "Implementations using \\u000A instead of \\n for newline, or failing to escape control characters, would diverge. Some JCS discussions debate whether all control chars must use \\uXXXX form exclusively.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Basic key ordering — ASCII reversed",
+    "input_json": "{\"c\":3,\"a\":1,\"b\":2}",
+    "canonical_output": "{\"a\":1,\"b\":2,\"c\":3}",
+    "rule": "Section 3.2.1 — Object keys sorted in ascending order by UTF-16 code unit values. For pure ASCII keys, this is alphabetical/lexicographic order.",
+    "divergence_trap": "Implementations preserving insertion order, or using locale-aware sorting, produce different key orders.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "UTF-16 ordering divergence — non-BMP vs BMP ≥ U+E000",
+    "input_json": "{\"\\uD83D\\uDE00\":1,\"\\uFB00\":2}",
+    "canonical_output": "{\"\\uD83D\\uDE00\":1,\"ﬀ\":2}",
+    "rule": "Section 3.2.1 — Keys sorted by UTF-16 code unit order. Key1 (U+1F600) UTF-16: [0xD83D, 0xDE00]. Key2 (U+FB00) UTF-16: [0xFB00]. Compare first code unit: 0xD83D (55357) < 0xFB00 (64256), so Key1 sorts first. In Unicode code point order, U+FB00 (64256) < U+1F600 (128512), so Key2 would sort first — DIVERGENCE. In the canonical output, U+FB00 (BMP, not requiring escaping) appears as raw UTF-8 bytes (EF AC 80), not as \\uFB00 escape.",
+    "divergence_trap": "Implementations sorting by Unicode code point order would swap the keys: {\"\\uFB00\":2,\"\\uD83D\\uDE00\":1}. This is the most important JCS divergence trap — UTF-16 code unit ordering vs. code point ordering gives DIFFERENT results for any BMP character in U+E000-U+FFFF compared with any non-BMP character.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Unicode normalization NON-behavior — NFC vs NFD",
+    "input_json": "{\"\\u00E9\":1,\"\\u0065\\u0301\":2}",
+    "canonical_output": "{\"e\u0301\":2,\"é\":1}",
+    "rule": "Section 3.2.2 and general JCS design — JCS does NOT perform Unicode normalization (NFC, NFD, NFKC, NFKD). The two keys \\u00E9 (NFC é, single code point U+00E9) and \\u0065\\u0301 (NFD é, 'e' + combining acute U+0301) are treated as distinct keys. UTF-16 ordering: [0x0065, 0x0301] vs [0x00E9]; 0x0065 < 0x00E9, so NFD key sorts first. Both keys are BMP and output as raw UTF-8 (é as C3 A9, e as 65, combining acute as CC 81).",
+    "divergence_trap": "An implementation performing NFC normalization would treat both keys as equivalent (both normalize to U+00E9 é), potentially collapsing to one key or producing undefined behavior. JCS explicitly does NOT normalize — the two keys remain distinct.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Empty object and empty array",
+    "input_json": "{\"a\":{},\"b\":[]}",
+    "canonical_output": "{\"a\":{},\"b\":[]}",
+    "rule": "Section 3.2.1, 3.2.5 — Empty objects serialize as {}, empty arrays as []. No whitespace is added.",
+    "divergence_trap": "Pretty-printing implementations might add whitespace or newlines: {\n  \"a\": {}\n}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Nested structure with key sorting at each level",
+    "input_json": "{\"z\":{\"c\":1,\"a\":2},\"a\":[3,1]}",
+    "canonical_output": "{\"a\":[3,1],\"z\":{\"a\":2,\"c\":1}}",
+    "rule": "Section 3.2.1 — Keys sorted at EVERY nesting level. Array elements preserve their order (arrays are NOT sorted).",
+    "divergence_trap": "Implementations sorting only top-level keys, or sorting array elements, or using unstable sorting, would produce incorrect output.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Duplicate keys — undefined behavior",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": "",
+    "rule": "RFC 8259 Section 4 states: 'When the names within an object are not unique, the behavior of software that receives such an object is unpredictable.' JCS does not explicitly address duplicate keys. Behavior is implementation-defined.",
+    "divergence_trap": "Some implementations use the first value (output: {\"a\":1}), some use the last (output: {\"a\":2}), some reject the input, some preserve both keys. No single correct answer exists.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "Number: 1e20 (large, below scientific threshold)",
+    "input_json": "{\"a\":1e20}",
+    "canonical_output": "{\"a\":100000000000000000000}",
+    "rule": "Section 3.2.4 — ES6 uses scientific notation only for |m| ≥ 1e21 or (m ≠ 0 and |m| < 1e-6). 1e20 is < 1e21, so decimal notation is used. The number 1e20 (10^20) is beyond 2^53 and not exactly representable, but ES6 finds the shortest decimal representation that parses back to the same double.",
+    "divergence_trap": "Implementations might use scientific notation \"1e+20\" or output a slightly different decimal due to double rounding. The exact ES6 boundary (1e21) and shortest-representation algorithm must be followed precisely.",
+    "certainty": "probable"
+  }
+]

@@ -1,0 +1,69 @@
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "Compact: keys kept in insertion order, no whitespace, UTF-8",
+      "JCS: object keys sorted in UTF-16 code-unit (Unicode code-point) order, not locale",
+      "JCS: 'C' (U+0043, 67) before 'a' (U+0061, 97) before 'b' (U+0062, 98) — code-unit order",
+      "Numbers: JSON number formatting unchanged (integer literals)"
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"x\":2,\"y\":1},{\"k\":null}],\"z\":true}}",
+    "rules_applied": [
+      "Compact: insertion order preserved at every nesting level, no whitespace",
+      "JCS: top-level keys sorted: 'outer'",
+      "JCS: nested object keys within 'outer' sorted: 'a' (U+0061), 'z' (U+007A)",
+      "JCS: object keys inside arrays are also sorted (arrays keep element order, but keys of objects they contain are canonicalized)",
+      "JCS: array element order unchanged: [{\"x\":2,\"y\":1},{\"k\":null}]",
+      "JCS: keys inside first array element sorted: 'x' before 'y' (U+0078 < U+0079)",
+      "JCS: 'k':null remains null"
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e+21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0.0,\"n6\":333333333.33333329}",
+    "rules_applied": [
+      "n1=1e21: JCS uses ECMAScript Number serialization — 1e21 is representable exactly, no + sign, written as '1e21'",
+      "n2=1e-7: smallest magnitude non-zero with no exact finite decimal; same form '1e-7' (no leading +)",
+      "n3=0.000001: exact binary representation, serialized as '0.000001' (decimal form, not exponential)",
+      "n4=100000000000000000000: large integer within safe range serialized as decimal integer with no exponential notation — '100000000000000000000'",
+      "n5=-0: JCS distinguishes -0 from +0; serialized as '-0.0' (minus sign preserved, with '.0')",
+      "n6=333333333.33333329: exact value representable, serialized as decimal '333333333.33333329' (no exponent)",
+      "Key sort: all keys 'n1'..'n6' already in order; JCS key sorting by UTF-16 code units: 'n1'<n2'<...<'n6'"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"ü\":\"umlaut\",\"€\":\"euro\"}",
+    "rules_applied": [
+      "JCS key sort uses UTF-16 code-unit (binary) comparison, NOT Unicode code-point or locale",
+      "Code-unit values of lead surrogates: '$' U+0024 (36), 'a' U+0061 (97), 'ü' U+00FC (252) — but in UTF-16 'ü' is one 16-bit code unit 0x00FC",
+      "€ (U+20AC) in UTF-16 is code unit 0x20AC (8396)",
+      "Order by UTF-16 code units: 0x0024 ('$') < 0x0061 ('a') < 0x00FC ('ü') < 0x20AC ('€')",
+      "Thus JCS order: '$', 'aa', 'ü', '€'",
+      "Compact kept insertion order: €, $, ü, aa"
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control\\u0020\"}",
+    "rules_applied": [
+      "JCS strings use minimal escape per JSON/JavaScript: \\n for U+000A, \\t for U+0009, \\\" for U+0022",
+      "s1: line feed (U+000A) escaped as \\n",
+      "s2: tab (U+0009) escaped as \\t",
+      "s3: double quote (U+0022) escaped as \\\"",
+      "s4: 'é' (U+00E9) is a printable non-ASCII character — JCS does NOT escape it; kept as literal UTF-8 'é'",
+      "s5: trailing spaces — JCS does not escape regular space (U+0020); BUT a single trailing space before closing quote: if string ends with a space, JCS per RFC 8785 does NOT escape it — kept as literal space",
+      "Note: 'control  ' contains a trailing space only (U+0020), not a control character; no escaping needed",
+      "If string had U+0000 or other control chars (U+0000-U+001F except the escaped ones), they would be \\uXXXX escaped"
+    ]
+  }
+]

@@ -1,0 +1,154 @@
+### chatgpt          [clean+trailing-content]  10 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Annex C for the metric calculation
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Annex C for the metric calculation
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Clause 9.4.2.2 and 9.4.2.4; Table 
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=§3.1.2 and §3.1.3
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=Clause 2, definition of Arrhenius 
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=15 CFR Part 774, Supplement No. 1,
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=15 CFR Part 774, Supplement No. 1,
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=§740.29(a), (d), and (g)(3)
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 USC §48D(a) and §48D(b)(1); Pub
+    CHIPS-48D    shape=BAD (0/1 tokens) retrieval=free  locator=26 CFR §1.50-2(b)(7) and (b)(9)
+### deepseek         [clean]  8 entries
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Annex C (normative)
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Annex C (normative)
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Annex F (informative)
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Clause 8 (Evaluation of the hardwa
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=Technical Note 2 to 3A090.a and 3A
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=§ 48D(a)
+### gemini           [clean]  12 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Clause 8.4.5
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Clause 8.4.6
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Clause 8.4.3
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=ECCN 3A090.a Note 1
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=ECCN 3A090.a
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. 48D(a)
+### glm 5.3 flash    [clean+fence-close+fenced]  12 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Clause 8.4 (SPFM evaluation; targe
+    LFM          shape=OK  (1/2 tokens) retrieval=paywalled  locator=Clause 8.4 (LFM evaluation; target
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=Clause 8.5 (PMHF evaluation; targe
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. §48D
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=15 CFR §772.1
+    TPP          shape=BAD (1/3 tokens) retrieval=free  locator=ECCN 3A090.a / 3A090.b (15 CFR pt.
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (1/3 tokens) retrieval=free  locator=Section 5.1
+### grok             [clean]  12 entries
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=8.4.5 / Table 4
+    LFM          shape=OK  (1/2 tokens) retrieval=paywalled  locator=8.4.6 / Table 5
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=9.4.2 / Table 6
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Annex C.2
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Annex C.3
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=Technical Note 2 to 3A090.a and 3A
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=3A090.a
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=3A090.b
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=§ 48D(a)
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=BAD (0/1 tokens) retrieval=free  locator=None
+### kimi             [clean]  6 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=ISO 26262-5:2018 clauses 8-9
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=15 CFR part 774 Supp. No. 1, Categ
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. §48D(a)-(e)
+    Arrhenius    shape=OK  (2/3 tokens) retrieval=free  locator=JESD74A clause 5.1.1, equations [5
+### longcat          [clean]  12 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Clause 8.4.3
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Clause 8.4.4
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Clause 9.4.2.2
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Table 12
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=15 CFR § 774, Supplement No. 1, EC
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=15 CFR § 774, Supplement No. 1, EC
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=15 CFR § 774, Supplement No. 1, EC
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. § 48D (Advanced Manufact
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=Appendix B
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=Appendix B, Table B.1
+### meta             [clean]  10 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=None
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=None
+    SPFM         shape=OK  (2/3 tokens) retrieval=paywalled  locator=None
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=ECCN 3A090.a
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=ECCN 3A090.b
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. 48D(a)
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+### mimo             [clean]  11 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Table 4 (hardware architectural me
+    LFM          shape=OK  (1/2 tokens) retrieval=paywalled  locator=Table 4 (hardware architectural me
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Table 6 or Table 7 (PMHF targets p
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=Section 9902
+    TPP          shape=BAD (1/3 tokens) retrieval=free  locator=ECCN 3A090 in Commerce Control Lis
+### minara           [clean]  10 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Clause 8; Table 4
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Clause 8; Table 5
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=Clause 8; Table 6
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=Appendix A
+    CHIPS-48D    shape=BAD (0/1 tokens) retrieval=free  locator=26 U.S.C. § 48D(a) and § 48D(b)
+    TPP          shape=OK  (2/3 tokens) retrieval=free  locator=ECCN 3A090.a and Technical Note
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (1/3 tokens) retrieval=free  locator=None
+### minimax 2.7      [elementwise-truncation]  7 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Clause 8.4.5, Table 4; Annex C Equ
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=Clause 8.4.6, Table 5; Annex C
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Clause 9.4.2; Annex F; ISO 26262-1
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=ECCN 3A090 Technical Notes; 15 CFR
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=ECCN 3A090.a, 3A090.b, Note 2
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=JESD85 Annex; Equation 1 / method 
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=JESD85 Equation 1; also JESD22-A10
+### mistral          [clean+fence-close+fenced]  12 entries
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Section 7.4.10
+    LFM          shape=OK  (1/2 tokens) retrieval=paywalled  locator=Section 7.4.11
+    PMHF         shape=BAD (0/1 tokens) retrieval=paywalled  locator=Section 7.4.12
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=Table 2
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    TPP          shape=BAD (1/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+### qwen             [clean]  10 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=None
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=None
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=None
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. Section 48D(a)
+    TPP          shape=OK  (2/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (0/3 tokens) retrieval=free  locator=None
+### solar            [clean]  12 entries
+    SPFM         shape=OK  (2/3 tokens) retrieval=paywalled  locator=Table 8 and Annex E (metrics for h
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=None
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=None
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=None
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+### sonnet           [clean+fence-close+fenced]  12 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=None
+    LFM          shape=OK  (2/2 tokens) retrieval=paywalled  locator=None
+    SPFM         shape=BAD (1/3 tokens) retrieval=paywalled  locator=None
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=26 U.S.C. § 48D(a)
+    TPP          shape=BAD (1/3 tokens) retrieval=free  locator=15 C.F.R. § 774, Supp. 1, ECCN 3A0
+    TPP          shape=BAD (0/3 tokens) retrieval=free  locator=15 C.F.R. § 774, Supp. 1, ECCN 4A0
+    Arrhenius    shape=BAD (1/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+### yuanbao          [clean]  12 entries
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Target values: Table 4 ('Possible 
+    SPFM         shape=OK  (3/3 tokens) retrieval=paywalled  locator=Target values: Table 5 ('Possible 
+    PMHF         shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=None
+    DO-254-DAL   shape=OK  (1/1 tokens) retrieval=paywalled  locator=DO-254 paragraph 1.6 (quoted verba
+    TPP          shape=OK  (3/3 tokens) retrieval=free  locator=ECCN 3A090.a and 3A090.b, Technica
+    CHIPS-48D    shape=OK  (1/1 tokens) retrieval=free  locator=IRC 48D(a) (25% rate), 48D(b)(1)-(
+    Arrhenius    shape=OK  (2/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=BAD (1/3 tokens) retrieval=free  locator=None
+    Arrhenius    shape=OK  (3/3 tokens) retrieval=free  locator=None

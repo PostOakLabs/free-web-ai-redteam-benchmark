@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Macro-channel routing congestion on a 28nm SoC block rescued by asymmetric macro shoving after cell-spreading was rejected",
+    "design_context": "28nm, ~1M placeable instances, ~80 SRAM hard macros (4 macro rows, north/south/east/west edges + 2 interior rows), 5 clock domains (2 primary + 3 generated), commercial P&R flow.",
+    "prior_state": "Post-CTS timing and global-route report: WNS -120ps setup, TNS -3.4ns; overall block utilization 71%; macro-channel region (between two interior macro rows, ~140um wide, ~600um long) at local utilization 89%; global-route overflow on M4/M5 layers in that channel at 38%; DRC clean.",
+    "observation": "First detailed-route attempt failed: 1,247 DRC shorts in the macro-channel region, 94% of total block DRC, all M5 track spills and M4 pin-access conflicts. Overflow signature: tight, localized, oriented along the channel length. Severity: HIGH — 6 working days remaining in tapeout window.",
+    "hypothesis": "Congestion is not density-driven (overall util 71% is healthy); it is pin-access-driven from the macros on both sides of the channel, where each macro's port pins land on the same M4 track rows and create a fan-in bottleneck. Spreading standard cells would not relieve pin escape demand; only the macro-side geometry will.",
+    "candidates_considered": [
+      {"action": "Global cell-spreading ECO + lower density target (71% → 62%)", "rejected_because": "Estimated 4-5 days re-route + timing re-convergence; high risk of hold degradation on near-critical paths that already pass; does source (macro pin escape), so likely cap of ~10% relief on overflow, insufficient to close DRC."},
+      {"action": "Switch detailed-route layer assignment to M3/M4 preferred-direction swap", "rejected_because": "Preferred-direction swap would force re-placement of macros for routing-track alignment; macro placement is frozen by upstream floorplan sign-off and the analog IP team has its embedded in those rows."},
+      {"action": "Symmetric widening of the channel by 12um on both sides", "rejected_because": "Touches both macro rows symmetrically; macros on the east row are boundary-locked against the chip edge fence (no slack to absorb 12um shove); east-row shove would force a top-level die-size growth request the packaging team has already frozen."},
+      {"action": "Asymmetric channel widening: 12um shove of the west-row macros only, plus pin-spreading constraints on the macros bordering the channel on the west side", "rejected_because": null}
+    ],
+    "chosen_intervention": "Applied asymmetric channel widening (12um westward on the west-row macros), added per-macro pin-spreading constraints (spread M4 escape pins across available tracks instead of default pitch) on the 9 macros bordering the channel on the west side, ran detailed route. East-row macros untouched. Re-ran CTS only on the west row to recover minor skew impact (sub-15ps).",
+    "post_state": "Detailed route clean: 0 DRC, 0 shorts; macro-channel M4/M5 overflow dropped from 38% to ~6%; block overall utilization rose from 71% to 72% (small area cost from shifted macros); WNS -135ps (slight degradation from longer wires on west edge, expected and within slack budget); TNS -3.8ns (slight increase, still closable); final ECO timing pass closed WNS to +40ps with standard buffer insertion.",
+    "expert_assessment": "The right call when is a 'cold side' (a macro row with room to move) adjacent to a 'hot side' (boundary-locked). Asymmetric widening is underused because most P&R flows bias toward symmetric perturbations and engineers default to symmetric thinking. Does NOT transfer when both macro rows are boundary-locked, when analog macros with strong LDE dependency sit on the movable side, or when pin-spreading is already maxed by the macro library. A senior reviewer should also confirm the west-row CTS re-run did not silently regress skew on the untouched paths.",
+    "confidence": 0.7,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claim that a 12um asymmetric shove produces only ~15ps of skew impact and ~15ps of WNS degradation is the load-bearing number — at 28nm, macro-shove-induced wire length growth on near-critical paths can easily cost 30ps, and the post-state's clean closure with standard buffer insertion may be optimistic."
+  },
+  {
+    "title": "Tight-cluster slack signature on a 7nm block: SDC output-load miscalibration diagnosed before any physical change",
+    "design_context": "7nm, ~750K instances, ~35 macros, 4 clock domains, commercial P&R + commercial timing signoff.",
+    "prior_state": "Pre-CTS timing report: 287 failing setup paths on a single output port of clock domain C2; slack distribution tightly clustered between -195ps and -215ps (sigma ~7ps); TNS -58ns; WNS -215ps; block utilization 67%; 412 source flops feeding the endpoint through 2-3 logic levels of apparently uniform depth.",
+    "observation": "Failure shape: many paths, single shared endpoint, narrow slack spread, narrow logic-depth spread. Severity: HIGH.",
+    "hypothesis": "Tight clustering on a shared endpoint with uniform logic depth is the classic signature of an over-constrained output port (-pessimistic output_delay) or an under-constrained input arrival at the next stage — a constraint-side problem, not a logic or placement problem. Physical problems usually produce wider slack spread because wire RC varies path-to-path.",
+    "candidates_considered": [
+      {"action": "Run timing-driven buffer/eco-placement on the failing source flops and logic", "rejected_because": "Each buffer hop buys ~25-40ps at 7nm; closing 215ps requires 3+ insertions per path across 287 paths = high cell count, several days of ECO, and risks new hold/DRC/congestion churn; addresses symptom, not cause."},
+      {"action": "Re-synthesize the fanin cone with different area/delay target", "rejected_because": "Logic is architecturally frozen; re-synthesis not in scope this iteration."},
+      {"action": "Reduce clock pessimism on C2 by 25ps via CTS-only adjustment", "rejected_because": "Skew already at spec floor; only buys ~25ps of the 215ps gap, and CTS changes have global impact."},
+      {"action": "Audit the SDC for the failing output port: output_delay, output loading model, and any inherited hierarchical margin from the previous block-level signoff", "rejected_because": "Requires re-validation of the entire block timing; but this matches the diagnostic signature directly and addresses the actual cause."}
+    ],
+    "chosen_intervention": "Audited SDC at the failing port. Found the output loading model had been specified with an output capacitance 60fF higher than the actual post-route extracted load on the driver, propagated from an early pre-layout estimate and never updated. Corrected the load spec to the post-route extracted value, reran timing.",
+    "post_state": "WNS improved from -215ps to +35ps; TNS from -58ns to -0.6ns; 287/287 paths cleared without placement, CTS, or netlist changes; DRC unchanged; hold unchanged.",
+    "expert_assessment": "Correct diagnosis and the lesson is right: read the shape of the report before reading the headline. Tight clusters on shared endpoints with uniform depth = suspect SDC/loading first. Does NOT transfer when the failing paths have wide slack spread (sigma > ~25ps), which usually indicates real physical delay variation; nor on cross-clock paths where SDC fixes have wider blast radius and need signoff re-validation. A reviewer should also confirm the corrected load model is the one actually used by the signoff tool, not just by the implementation tool — these often diverge at advanced nodes.",
+    "confidence": 0.62,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific mechanism — a 60fF over-specified load producing exactly 215ps of pessimism — implies roughly 3.5ps/fF of delay sensitivity at the output driver; a reviewer should verify that sensitivity figure is realistic at 7nm for the specific driver cell type."
+  },
+  {
+ "Block-boundary timing budget: multicycle-path reclassification absorbed a handshake-protocol miscategorization",
+    "design_context": "28nm, two interacting blocks (Block A sender, Block B receiver), each ~500K instances, single physical clock domain with a CDC-safe handshake crossing the boundary, commercial P&R + commercial timing.",
+    "prior_state": "Inter-block interface timing: 19 paths failing setup by 40-180ps, TNS -1.6ns. SDC constrained all interface paths as single-cycle (one launch, one capture in the next cycle). Budget split assumed by upstream: Block A output_delay = -1.0ns (driver burden), Block B input_delay = -0.6ns (receiver burden).",
+    "observation": "Protocol review: the interface is a request/acknowledge handshake where the acknowledge path is allowed one full clock of latency, making the captured data valid in cycle N+1 from a cycle launch — i.e., a 2-cycle relationship, not a 1-cycle relationship. Severity: MODERATE — would trigger wasted ECO work if not caught.",
+    "hypothesis": "The constraint category is wrong: single-cycle should be MCP=2 per the protocol spec. Reclassifying will absorb the entire violation without any netlist, placement, or buffer changes.",
+    "candidates_considered": [
+      {"action": "Add buffers on the 19 failing inter-block paths to close 40-180ps of setup slack", "rejected_because": "Buffers must be placed in BOTH blocks because the path spans both; requires coordination across two P&R owners; risks hold issues on the return acknowledge path; ~1.5-2 weeks of churn for what is fundamentally a constraint error."},
+      {"action": "Renegotiate the budget split to 50/50 between blocks at single-cycle constraint", "rejected_because": "Would force both teams to redo internal path optimization; ~3 week slip; high probability of regressing already-closed paths elsewhere in each block."},
+      {"action": "Declare the interface paths as false-path", "rejected_because": "Interface IS timing-critical for the handshake to function correctly within its protocol window; false-path would create a real silicon bug. Wrong category."},
+      {"action": "Reclassify as multicycle-path with N=2, re-split budget 50/50 (output_delay = 0.4ns sender, input_delay = 0.4ns receiver), document the protocol justification with spec cross-reference", "rejected_because": null}
+    ],
+    "chosen_intervention": "Updated SDC: set_multicycle_path -setup 2 on the interface paths, with new output_delay/input_delay of 0.4ns each side; documented the protocol-justified N=2 in the SDC header comment with a reference to the architecture spec section number.",
+    "post_state": "All 19 paths cleared without any netlist, placement, or buffer changes. WNS on interface improved from -180ps to +210ps. Both blocks' internal timing closed unchanged. Total schedule impact: 2 days for SDC update + signoff re-validation. Hold unchanged.",
+    "expert_assessment": "Correct decision and the documentation discipline (spec cross-reference in the SDC comment) is the part most engineers skip — that comment is what prevents the next engineer from 'fixing' it back to single-cycle six months later. Does NOT transfer if the protocol genuinely is single-cycle, if downstream STA tools interpret MCP differently at hierarchical boundaries, or if the receiving block has internal setup requirements the new MCP budget silently violates. A reviewer should also confirm the acknowledge path itself is now correctly constrained (a common follow-on error).",
+    "confidence": 0.68,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The post-state WNS of +210ps after MCP=2 reclassification implies ~430ps of absorbed pessimism; a reviewer should verify this matches the actual cycle-time budget arithmetic (the difference between the original 1-cycle requirement and the new 2-cycle requirement) rather than the MCP reclassification over-relaxing the path into a falsely easy closure."
+  }
+]

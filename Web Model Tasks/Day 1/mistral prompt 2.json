@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Post-CTS congestion in SRAM channels on 28nm block",
+    "design_context": "28nm node, 1.0M placeable instances, 82 SRAM macros, 4 clock domains, commercial P&R",
+    "prior_state": {"WNS_ns": -0.15, "TNS_ps": -800, "global_route_overflow_pct": 18.0, "utilization_pct": 78.0, "DRC_count": 0},
+    "observation": "First detailed-route attempt fails with 18% overflow concentrated in channels between SRAM macros M42-M45 and M58-M61; layers M6-M8 showing >15% overflow in these channels while other regions remain <3%", 
+    "severity": "HIGH",
+    "hypothesis": "Post-CTS optimization increased logic density around SRAM channels without adjusting macro placement, creating routing bottlenecks in the macro-to-macro channels",
+    "candidates_considered": [
+      {"action": "Re-run global placement with congestion-aware cost weight increased from 0.4 to 0.9", "rejected_because": "Adds 1.5 days to schedule with no guarantee of fixing channel-specific hotspots given fixed macro positions"},
+      {"action": "Swap SRAM macros M42 and M65 to open channel between M42-M45 cluster", "rejected_because": "Requires re-running timing for both macro domains (estimated 1.0 day CPU) and risks breaking existing timing closure in both domains"},
+      {"action": "Manually add routing guides around congested channels", "rejected_because": "Requires manual creation of 50+ guides, error-prone and not scalable; estimated 0.8 days of engineer time"}
+    ],
+    "chosen_intervention": "Local halo expansion of 5% around congested SRAM clusters M42-M45 and M58-M61, plus pin access optimization on 25 cells in hotspot, followed by incremental detailed routing",
+    "post_state": {"WNS_ns": -0.18, "TNS_ps": -950, "global_route_overflow_pct": 2.1, "utilization_pct": 78.3, "DRC_count": 0},
+    "expert_assessment": "Correct call for schedule constraints. Lesson: post-CTS optimizations can create local congestion that global placement won't fix. Does not transfer to designs with <5% global overflow where global re-placement is viable.",
+    "confidence": 0.90,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact timing degradation from halo expansion is tool-dependent and may vary by 10-30ps"
+  },
+  {
+    "title": "Spatial clustering of 12k failing paths reveals physical congestion, not constraint issue",
+    "design_context": "28nm node, 900K placeable instances, 75 macros, 3 clock domains, commercial P&R",
+    "prior_state": {"WNS_ns": -0.35, "TNS_ps": -2500, "DRC_count": 0},
+    "observation": "12000 timing paths failing by 20-50ps each, slack histogram shows tight clustering (std dev 12ps), 85% of failing paths originate or terminate in top-right quadrant of the block, no common clock domain", 
+    "severity": "CRITICAL",
+    "hypothesis": "Physical congestion in top-right quadrant causing excessive wirelength and capacitance on nets in that region, systematically degrading timing for all paths routing through it",
+    "candidates_considered": [
+      {"action": "Relax setup constraint by 10% across the block", "rejected_because": "Would mask real timing issues in other quadrants, risking silicon failure in non-congested regions"},
+      {"action": "Upsize all drivers on failing paths", "rejected_because": "Increases area by 0.8% and power by 3.0%, plus creates new congestion in an already-tight top-right quadrant"},
+      {"action": "Re-synthesize logic in top-right quadrant only", "rejected_because": "Requires 2 days of runtime and could introduce new timing violations while not addressing the physical routing cause"}
+    ],
+    "chosen_intervention": "Re-run placement with congestion-aware cost function focused on top-right quadrant (weight 1.2), followed by incremental timing optimization limited to that region",
+    "post_state": {"WNS_ns": -0.05, "TNS_ps": -400, "DRC_count": 0},
+    "expert_assessment": "Excellent diagnosis from spatial clustering. The geographic concentration was the telltale sign of a physical/placement problem. Lesson: always plot failing path locations on the floorplan before assuming logic or constraint issues. Would not have worked if the slack distribution was bimodal.",
+    "confidence": 0.88,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact improvement from congestion-aware placement is flow-dependent and tool-specific"
+  },
+  {
+    "title": "Async boundary budget derived from measured clock skew and uncertainty",
+    "design_context": "28nm node, Block A: 800K instances, Block B: 600K instances, async boundary, commercial P&R",
+    "prior_state": {"WNS_ns": -0.20, "TNS_ps": -1500, "boundary_path_count": 180},
+    "observation": "180 paths crossing A-to-B boundary failing by 100-250ps, all setup violations with no hold violations, failures correlate with launch clock domain CLK_A", 
+    "severity": "HIGH",
+    "hypothesis": "Missing timing budget at async boundary; current SDC assumes ideal clock alignment and zero uncertainty between CLK_A (Block A) and CLK_B (Block B)",
+    "candidates_considered": [
+      {"action": "Set fixed budget of 200ps for all A-to-B boundary paths", "rejected_because": "Overly conservative for 60% of paths, would cause unnecessary optimization effort and area increase estimated at 1.5%"},
+      {"action": "Mark all A-to-B boundary paths as false paths", "rejected_because": "Would break functional timing for real synchronous handshake paths and cause silicon failure on boundary registers"},
+      {"action": "Use clock period difference (5.0ns) as budget", "rejected_because": "Ignores clock uncertainty and jitter, which account for 150ps of the observed failures; would still leave 100ps of violations unaddressed"}
+    ],
+    "chosen_intervention": "Derived budget = measured_clock_skew(100ps) + max_uncertainty(50ps) + 15% margin(22.5ps) = 172.5ps; applied as set_clock_uncertainty -setup 175ps on A-to-B boundary; set_clock_uncertainty -hold 80ps for hold checks",
+    "post_state": {"WNS_ns": 0.02, "TNS_ps": 200, "boundary_path_count": 180},
+    "expert_assessment": "Textbook derivation. Measuring actual skew with the clock tree analysis tool was the right first step. Lesson: always derive boundary budgets from real clock network metrics, not from period differences. Method fails if clock networks are not yet stable or if margin percentage is miscalculated.",
+    "confidence": 0.85,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 15% margin is arbitrary and should be validated against historical data"
+  }
+]

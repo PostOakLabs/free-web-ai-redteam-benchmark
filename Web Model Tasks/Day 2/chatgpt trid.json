@@ -1,0 +1,209 @@
+[
+{
+"case_name": "Mixed-direction 10% bucket — passes",
+"fees": [
+{
+"name": "Settlement agent",
+"bucket": "ten_pct_aggregate",
+"le_amount": 400,
+"cd_amount": 500
+},
+{
+"name": "Credit report",
+"bucket": "ten_pct_aggregate",
+"le_amount": 100,
+"cd_amount": 80
+},
+{
+"name": "Recording fee",
+"bucket": "ten_pct_aggregate",
+"le_amount": 50,
+"cd_amount": 50
+},
+{
+"name": "Affiliated appraisal",
+"bucket": "zero_tolerance",
+"le_amount": 500,
+"cd_amount": 500
+},
+{
+"name": "Consumer-selected off-list attorney",
+"bucket": "no_limit",
+"le_amount": 300,
+"cd_amount": 450
+}
+],
+"computation": "10% bucket LE sum = 400 + 100 + 50 = $550. 10% threshold = $550 × 0.10 = $55. Permitted aggregate CD amount = $550 + $55 = $605. 10% bucket CD sum = 500 + 80 + 50 = $630. Therefore the aggregate exceeds the permitted amount by $25 and the bucket violates the tolerance. The individual increase on the settlement-agent fee is $100, which is more than 10% of that individual $400 fee, but that is not the test: the rule compares aggregate CD charges with aggregate LE charges. Zero-tolerance appraisal: $500 CD ≤ $500 LE, so no violation. No-limit attorney: no tolerance violation merely from the $150 increase, assuming the off-list consumer-selected-service conditions and best-information requirement are satisfied.",
+"violations": {
+"buckets": [
+"ten_pct_aggregate"
+],
+"cure_amount": 25
+},
+"clause_basis": "12 CFR 1026.19(e)(3)(ii)(A): the aggregate amount of covered third-party-service and recording-fee charges may not exceed the aggregate LE amount by more than 10%. Official commentary expressly says the test remains aggregate even when an individual charge increases by more than 10%. Zero-tolerance charges are governed by §1026.19(e)(3)(i), while consumer-selected providers not on the creditor's list fall under §1026.19(e)(3)(iii)(D). ([Consumer Financial Protection Bureau][1]) ",
+"weakest_point": "The no-limit classification assumes the attorney was a required service for which the consumer selected a provider not on the creditor's list and the original estimate satisfied the best-information requirement."
+},
+{
+"case_name": "Mixed-direction 10% bucket — fails despite one large decrease",
+"fees": [
+{
+"name": "Title search",
+"bucket": "ten_pct_aggregate",
+"le_amount": 700,
+"cd_amount": 900
+},
+{
+"name": "Survey",
+"bucket": "ten_pct_aggregate",
+"le_amount": 200,
+"cd_amount": 100
+},
+{
+"name": "Recording fee",
+"bucket": "ten_pct_aggregate",
+"le_amount": 100,
+"cd_amount": 130
+},
+{
+"name": "Lender underwriting fee",
+"bucket": "zero_tolerance",
+"le_amount": 800,
+"cd_amount": 825
+},
+{
+"name": "Consumer-selected pest inspection",
+"bucket": "no_limit",
+"le_amount": 150,
+"cd_amount": 250
+}
+],
+"computation": "10% bucket LE sum = 700 + 200 + 100 = $1,000. 10% threshold = $1,000 × 0.10 = $100. Permitted aggregate CD amount = $1,100. 10% bucket CD sum = 900 + 100 + 130 = $1,130. Aggregate excess = $1,130 − $1,100 = $30, so the 10% bucket violates. The individual changes are +$200, −$100, and +$30; the sum of increases alone would be $230, but that is NOT the TRID test. The required comparison is $1,130 aggregate CD versus $1,000 aggregate LE. Zero-tolerance underwriting fee: $825 − $800 = $25 violation. No-limit pest inspection: no tolerance violation if it satisfies §1026.19(e)(3)(iii).",
+"violations": {
+"buckets": [
+"ten_pct_aggregate",
+"zero_tolerance"
+],
+"cure_amount": 55
+},
+"clause_basis": "Section 1026.19(e)(3)(ii)(A) requires aggregate-to-aggregate comparison, not summing only the increases. Section 1026.19(e)(3)(i) applies to charges outside the permitted exceptions and prohibits an actual charge above the LE amount absent an applicable revised-estimate provision. ([Consumer Financial Protection Bureau][1]) ",
+"weakest_point": "The underwriting fee is treated as zero-tolerance on the assumption that it is a creditor/affiliate charge not qualifying for another tolerance exception."
+},
+{
+"case_name": "Zero-tolerance violation with passing 10% bucket",
+"fees": [
+{
+"name": "Affiliated appraisal",
+"bucket": "zero_tolerance",
+"le_amount": 400,
+"cd_amount": 425
+},
+{
+"name": "Credit report",
+"bucket": "zero_tolerance",
+"le_amount": 75,
+"cd_amount": 75
+},
+{
+"name": "Settlement agent",
+"bucket": "ten_pct_aggregate",
+"le_amount": 600,
+"cd_amount": 640
+},
+{
+"name": "Recording fee",
+"bucket": "ten_pct_aggregate",
+"le_amount": 100,
+"cd_amount": 95
+},
+{
+"name": "Consumer-selected off-list surveyor",
+"bucket": "no_limit",
+"le_amount": 200,
+"cd_amount": 300
+}
+],
+"computation": "Zero-tolerance appraisal: $425 − $400 = $25 excess, so it violates. Credit report: $75 − $75 = $0, so it passes. 10% bucket LE sum = $600 + $100 = $700. 10% threshold = $700 × 0.10 = $70. Permitted aggregate CD amount = $770. 10% bucket CD sum = $640 + $95 = $735. Since $735 ≤ $770, the 10% bucket passes. No-limit surveyor charge is not subject to a dollar-for-dollar tolerance comparison if the §1026.19(e)(3)(iii)(D) conditions are satisfied.",
+"violations": {
+"buckets": [
+"zero_tolerance"
+],
+"cure_amount": 25
+},
+"clause_basis": "Section 1026.19(e)(3)(i) provides the general good-faith rule for estimated closing costs; §1026.19(e)(3)(ii) permits an aggregate 10% increase for qualifying unaffiliated third-party services and recording fees. ([Consumer Financial Protection Bureau][1])",
+"weakest_point": "The appraisal is assumed to be an affiliated appraisal charge, making it zero-tolerance rather than a qualifying unaffiliated shoppable third-party service."
+},
+{
+"case_name": "10% bucket exactly at tolerance limit",
+"fees": [
+{
+"name": "Title service",
+"bucket": "ten_pct_aggregate",
+"le_amount": 800,
+"cd_amount": 880
+},
+{
+"name": "Recording fee",
+"bucket": "ten_pct_aggregate",
+"le_amount": 200,
+"cd_amount": 220
+},
+{
+"name": "Credit report",
+"bucket": "zero_tolerance",
+"le_amount": 60,
+"cd_amount": 60
+},
+{
+"name": "Consumer-selected off-list home inspection",
+"bucket": "no_limit",
+"le_amount": 350,
+"cd_amount": 500
+}
+],
+"computation": "10% bucket LE sum = $800 + $200 = $1,000. 10% threshold = $1,000 × 0.10 = $100. Permitted aggregate CD amount = $1,100. 10% bucket CD sum = $880 + $220 = $1,100. Therefore aggregate increase = $100, exactly 10%, so there is no violation. Zero-tolerance credit report: $60 CD = $60 LE, so it passes. No-limit inspection is not compared under the zero/10% dollar tolerances if the §1026.19(e)(3)(iii) conditions are met.",
+"violations": {
+"buckets": [],
+"cure_amount": 0
+},
+"clause_basis": "Section 1026.19(e)(3)(ii)(A) permits aggregate charges to be no more than 10% above the aggregate amount disclosed; an increase of exactly 10% therefore remains within the tolerance. ([Consumer Financial Protection Bureau][1])",
+"weakest_point": "The no-limit inspection classification assumes the consumer selected a provider not on the creditor's written list and the estimate otherwise met the best-information requirement."
+},
+{
+"case_name": "Omitted 10% fee but aggregate remains within tolerance",
+"fees": [
+{
+"name": "Settlement agent",
+"bucket": "ten_pct_aggregate",
+"le_amount": 700,
+"cd_amount": 760
+},
+{
+"name": "Recording fee",
+"bucket": "ten_pct_aggregate",
+"le_amount": 300,
+"cd_amount": 300
+},
+{
+"name": "Notary fee omitted from LE",
+"bucket": "ten_pct_aggregate",
+"le_amount": 0,
+"cd_amount": 20
+},
+{
+"name": "Affiliated title fee",
+"bucket": "zero_tolerance",
+"le_amount": 500,
+"cd_amount": 500
+}
+],
+"computation": "10% bucket LE sum = $700 + $300 + $0 = $1,000. 10% threshold = $1,000 × 0.10 = $100. Permitted aggregate CD amount = $1,100. 10% bucket CD sum = $760 + $300 + $20 = $1,080. Aggregate increase = $1,080 − $1,000 = $80, which is below the $100 permitted increase. Therefore the bucket passes even though the $20 notary fee was omitted from the LE and the settlement-agent fee increased by $60. Zero-tolerance affiliated title fee is unchanged and passes.",
+"violations": {
+"buckets": [],
+"cure_amount": 0
+},
+"clause_basis": "Official interpretation of §1026.19(e)(3)(ii)-2 expressly permits an omitted charge in the 10% category to be imposed at consummation so long as the aggregate CD charges do not exceed the aggregate LE charges by more than 10%. ([Consumer Financial Protection Bureau][1])",
+"weakest_point": "The omitted notary fee is assumed to qualify as a recording/third-party charge within §1026.19(e)(3)(ii), and the underlying service is assumed actually performed."
+}
+]
+
+[1]: https://www.consumerfinance.gov/rules-policy/regulations/1026/19/?utm_source=chatgpt.com "§ 1026.19 Certain mortgage and variable-rate transactions. | Consumer Financial Protection Bureau"

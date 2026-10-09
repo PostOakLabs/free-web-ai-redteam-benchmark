@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Design for throughput on commercial server workloads instead of single-thread performance",
+    "where_in_paper": "Introduction / design philosophy or 'Why throughput computing' (opening section)",
+    "decision": "Optimize the whole processor for total throughput on commercial server workloads (database, web, Java/application-server class) rather than for the latency of one thread: many simple cores, many threads, low power per unit of work.",
+    "alternatives_or_rejected": "Conventional single-thread-optimized, deeply speculative, wide-issue out-of-order superscalar designs — the paper argues these spend area and power chasing instruction-level parallelism that commercial workloads do not offer.",
+    "rationale": "As I recall the thrust of the argument: the target workloads have abundant thread-level parallelism but little instruction-level parallelism, and they stall on memory and long-latency events, so a conventional ILP machine leaves most of its machinery idle while burning power.",
+    "outcome": "The paper reports a chip that delivers high throughput on commercial benchmarks (SPECjbb/SPECweb-class and TPC-C-like results) at a small fraction of the power of comparable conventional processors, while explicitly conceding poor single-thread performance.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper names any specific competing processor/microarchitecture it argues against, or only contrasts against the general class of ILP-optimized designs; my 'alternatives' phrasing may be broader than what the text actually says.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Four threads per core, eight cores, 32 threads; each thread gets its own register file",
+    "where_in_paper": "Multithreading / core architecture section (also the overview table near the front)",
+    "decision": "Replicate a simple core eight times and give each core four hardware threads (32 threads/chip), with per-thread register state, all threads of a core sharing the core's execution units, L1 I-cache and L1 D-cache.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "My recollection of the stated reasoning: fine-grained multithreading hides both long memory latencies and pipeline/branch stalls by switching to another ready thread each cycle, so throughput is maintained without any of the speculation hardware a single-threaded core would need; four threads per core was the balance point between latency-hiding and the area/power cost of more thread state.",
+    "outcome": "The paper reports that with four threads per core the core pipeline stays usefully busy under commercial workloads; I cannot recall a specific utilization or IPC figure stated in the paper.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly states a considered-and-rejected alternative (e.g. 'we evaluated eight threads per core and found diminishing returns') — I believe there is some discussion of the thread-count trade-off, but I cannot confirm the paper makes an explicit rejected-alternative argument, so I left that field as not-stated-in-paper.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Simple single-issue, in-order, short-pipeline core with functional units shared across threads",
+    "where_in_paper": "SPARC core / pipeline description (with the six-stage pipeline figure)",
+    "decision": "Make each core single-issue and in-order with a short six-stage pipeline (fetch, thread-select, decode, execute, memory, writeback), with the integer/FP/memory functional units shared by the core's four threads, and a single floating-point unit per core because FP is rare in the target workloads.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Recollection of the thrust: area and power saved by omitting out-of-order issue, renaming and heavy speculation buys more cores and threads, which is where the throughput actually comes from; sharing the FP unit across threads costs little because commercial server code is mostly integer.",
+    "outcome": "The paper reports a core small enough to fit eight on the die within the power budget; it also notes the resulting weakness on floating-point / single-threaded SPECfp-class code.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Two sub-claims I am unsure the paper makes: (a) that there is no branch-prediction hardware at all and the short pipeline plus thread switching covers the branch delay — I believe Niagara omitted branch prediction, but I am not certain this paper says so in those words; (b) whether the shared FP unit is described as one per core or as one shared across larger groups of cores (I am ~75% sure it is one per core).",
+    "confidence": 0.45
+  },
+  {
+    "title": "Shared, banked L2 reached through a crossbar, with small write-through L1 caches",
+    "where_in_paper": "Memory subsystem / cache and interconnect section",
+    "decision": "Give each core a small L1 instruction and data cache (write-through, no write-allocate, as I recall) and back all cores with a single shared, multi-banked L2 reached over a crossbar interconnect, so all memory traffic funnels through one on-chip coherence point.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Recollection of the thrust: keeping L1 small and write-through simplifies coherence and reduces the cost of the eight cache copies, while banking L2 and connecting it with a crossbar supplies the aggregate bandwidth that 32 threads demand; memory-level parallelism comes from threads rather than from prefetching or a large aggressive L1.",
+    "outcome": "The paper reports a shared L2 with high on-chip bandwidth (I cannot recall the GB/s figure as stated) and that the memory system, not the cores, sets the throughput ceiling on the commercial benchmarks.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The cache specifics: L1 sizes (I recall 16-Kbyte instruction / 8-Kbyte data per core), the number of L2 banks (I recall four), total L2 size (3 Mbyte), and especially the write-through/no-write-allocate claim — these are T1 facts I know generally and I am not certain which of them this 9-page paper actually states.",
+    "confidence": 0.4
+  },
+  {
+    "title": "Moderate clock frequency and aggressive clock gating to hold the chip to a hard power budget",
+    "where_in_paper": "Power / implementation section (later in the paper, before or alongside the performance results)",
+    "decision": "Target a moderate clock frequency (Niagara shipped at about 1.2 GHz, in a 90-nm process) and hold the chip to a tight power envelope using extensive clock gating and power-aware design, accepting low single-thread speed in exchange for throughput per watt.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Recollection of the thrust: for these workloads the binding constraint is power, not die area or transistor count, so frequency and per-core complexity were deliberately capped and the saved power budget was spent on more cores and threads.",
+    "outcome": "The paper reports a chip dissipating on the order of tens of watts (I recall a figure around 60-70 W but cannot trust my memory of the number as printed here) and uses it to claim a large throughput-per-watt advantage over conventional processors.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The wattage figure and the claimed power ratio versus competing chips — both are numbers I associate with T1 generally and I am not confident they appear as stated in this 2005 IEEE Micro paper, which was written close to (or before) silicon characterization.",
+    "confidence": 0.35
+  }
+]

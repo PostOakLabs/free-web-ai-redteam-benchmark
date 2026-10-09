@@ -1,0 +1,164 @@
+[
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "mid-range ASIL-C meeting SPFM",
+    "inputs": {
+      "lambda_SPF": {"value": 0.4, "units": "FIT"},
+      "lambda_RF": {"value": 0.2, "units": "FIT"},
+      "lambda_total_SR": {"value": 20.0, "units": "FIT"}
+    },
+    "computation": "sum_SPF_RF = 0.4 + 0.2 = 0.6 FIT; ratio = 0.6 / 20.0 = 0.03; SPFM = 1 - 0.03 = 0.97 = 97%",
+    "expected_output": {
+      "SPFM": {"value": 0.97, "units": "dimensionless (97%)"},
+      "meets_ASIL": ["B (recommended >=90%)", "C (>=97%)"],
+      "fails_ASIL": ["D (>=99%)"]
+    },
+    "discriminates": "Realistic mid-range case that lands exactly on the ASIL-C SPFM threshold of 97%.",
+    "known_uncertainty": "Whether ASIL-B SPFM target is strictly mandatory or recommended in the cited edition."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "ASIL-D boundary exactly 99%",
+    "inputs": {
+      "lambda_SPF": {"value": 0.05, "units": "FIT"},
+      "lambda_RF": {"value": 0.05, "units": "FIT"},
+      "lambda_total_SR": {"value": 10.0, "units": "FIT"}
+    },
+    "computation": "sum_SPF_RF = 0.05 + 0.05 = 0.10 FIT; ratio = 0.10 / 10.0 = 0.01; SPFM = 1 - 0.01 = 0.99 = 99%",
+    "expected_output": {
+      "SPFM": {"value": 0.99, "units": "dimensionless (99%)"},
+      "meets_ASIL": ["B", "C", "D (>=99%)"],
+      "fails_ASIL": []
+    },
+    "discriminates": "THRESHOLD-BOUNDARY case landing exactly on the ASIL-D SPFM limit of 99%.",
+    "known_uncertainty": "None on arithmetic; target value 99% confirmed across secondary sources."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "degenerate all-safe (SPFM 100%)",
+    "inputs": {
+      "lambda_SPF": {"value": 0.0, "units": "FIT"},
+      "lambda_RF": {"value": 0.0, "units": "FIT"},
+      "lambda_total_SR": {"value": 15.0, "units": "FIT"}
+    },
+    "computation": "sum_SPF_RF = 0.0 + 0.0 = 0.0; ratio = 0.0 / 15.0 = 0.0; SPFM = 1 - 0.0 = 1.0 = 100%",
+    "expected_output": {
+      "SPFM": {"value": 1.0, "units": "dimensionless (100%)"},
+      "meets_ASIL": ["B", "C", "D"],
+      "fails_ASIL": []
+    },
+    "discriminates": "Degenerate input where every fault is safe or fully covered; tests division and 100% handling.",
+    "known_uncertainty": "None."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "classic 0-fail HTOL 60% CL",
+    "inputs": {
+      "failures_f": {"value": 0, "units": "count"},
+      "sample_size_ss": {"value": 231, "units": "devices"},
+      "test_hours_t": {"value": 1000, "units": "h"},
+      "confidence_level": {"value": 0.60, "units": "fraction"},
+      "chi2_alpha_df2": {"value": 1.83258146, "units": "dimensionless (chi2 60% upper, 2 dof)"},
+      "Ea": {"value": 0.7, "units": "eV"},
+      "k_boltzmann": {"value": 8.617333262145e-5, "units": "eV/K"},
+      "T_test_C": {"value": 125, "units": "C"},
+      "T_use_C": {"value": 55, "units": "C"}
+    },
+    "computation": "T_test_K = 125 + 273.15 = 398.15; T_use_K = 55 + 273.15 = 328.15; delta = 1/328.15 - 1/398.15 = 0.0030477 - 0.0025116 = 0.0005361; Ea/k = 0.7 / 8.617333262145e-5 = 8123.15; AF = exp(8123.15 * 0.0005361) = exp(4.3548) = 77.85; device_hours_accel = 231 * 1000 * 77.85 = 17.983e6; lambda = 1.83258146 / (2 * 17.983e6) = 1.83258146 / 35.966e6 = 5.095e-8 per h; FIT = 5.095e-8 * 1e9 = 50.95 FIT",
+    "expected_output": {
+      "AF": {"value": 77.85, "units": "dimensionless"},
+      "FIT_60pct_CL": {"value": 50.95, "units": "FIT at 55 C"}
+    },
+    "discriminates": "Realistic industry-standard 0-fail 231-device 1000 h HTOL case at 60% CL with Ea=0.7 eV.",
+    "known_uncertainty": "Exact chi-square quantile to more digits; AF sensitive to Boltzmann constant rounding."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "one-failure case higher CL",
+    "inputs": {
+      "failures_f": {"value": 1, "units": "count"},
+      "sample_size_ss": {"value": 231, "units": "devices"},
+      "test_hours_t": {"value": 1000, "units": "h"},
+      "confidence_level": {"value": 0.60, "units": "fraction"},
+      "chi2_alpha_df4": {"value": 4.044565, "units": "dimensionless (chi2 approx 60% upper, 4 dof)"},
+      "AF": {"value": 77.85, "units": "dimensionless (precomputed from prior vector)"}
+    },
+    "computation": "device_hours_accel = 231 * 1000 * 77.85 = 17.983e6; lambda = 4.044565 / (2 * 17.983e6) = 4.044565 / 35.966e6 = 1.1245e-7 per h; FIT = 1.1245e-7 * 1e9 = 112.45 FIT",
+    "expected_output": {
+      "FIT_60pct_CL": {"value": 112.45, "units": "FIT at use temperature"}
+    },
+    "discriminates": "Non-zero failure count (f=1) changes degrees of freedom to 4 and raises the upper-bound FIT.",
+    "known_uncertainty": "Exact chi-square 60% quantile for 4 dof; value approximated."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "AF boundary T_use equals T_test",
+    "inputs": {
+      "failures_f": {"value": 0, "units": "count"},
+      "sample_size_ss": {"value": 100, "units": "devices"},
+      "test_hours_t": {"value": 1000, "units": "h"},
+      "chi2_alpha_df2": {"value": 1.83258146, "units": "dimensionless"},
+      "Ea": {"value": 0.7, "units": "eV"},
+      "T_test_C": {"value": 55, "units": "C"},
+      "T_use_C": {"value": 55, "units": "C"}
+    },
+    "computation": "T_test_K = T_use_K = 328.15; delta = 0; AF = exp(0) = 1.0; device_hours = 100 * 1000 * 1.0 = 100000; lambda = 1.83258146 / (2 * 100000) = 9.1629e-6 per h; FIT = 9.1629e-6 * 1e9 = 9162.9 FIT",
+    "expected_output": {
+      "AF": {"value": 1.0, "units": "dimensionless"},
+      "FIT_60pct_CL": {"value": 9162.9, "units": "FIT"}
+    },
+    "discriminates": "Degenerate acceleration (identical temperatures) forces AF=1 and tests pure chi-square scaling.",
+    "known_uncertainty": "None on AF=1 path."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "exactly 4800 TPP threshold a.1",
+    "inputs": {
+      "MacTOPS": {"value": 150, "units": "10^12 MAC/s"},
+      "bit_length": {"value": 16, "units": "bits"}
+    },
+    "computation": "TPP = 2 * 150 * 16 = 300 * 16 = 4800",
+    "expected_output": {
+      "TPP": {"value": 4800, "units": "regulatory TPP units"},
+      "3A090_a1_controlled": true,
+      "note": "Exactly meets '4800 or more'"
+    },
+    "discriminates": "THRESHOLD-BOUNDARY case landing exactly on the 3A090.a.1 TPP=4800 limit.",
+    "known_uncertainty": "None; formula and threshold taken from EAR Technical Note."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "below both primary thresholds",
+    "inputs": {
+      "MacTOPS": {"value": 50, "units": "10^12 MAC/s"},
+      "bit_length": {"value": 8, "units": "bits"}
+    },
+    "computation": "TPP = 2 * 50 * 8 = 100 * 8 = 800",
+    "expected_output": {
+      "TPP": {"value": 800, "units": "regulatory TPP units"},
+      "3A090_a1_controlled": false,
+      "3A090_a2_candidate": false,
+      "note": "800 < 1600 so a.2 density test not reached"
+    },
+    "discriminates": "Clearly sub-threshold case well below 1600 and 4800.",
+    "known_uncertainty": "None."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "multi-unit aggregation above threshold",
+    "inputs": {
+      "unit1_MacTOPS": {"value": 100, "units": "10^12 MAC/s"},
+      "unit1_bit_length": {"value": 16, "units": "bits"},
+      "unit2_MacTOPS": {"value": 80, "units": "10^12 MAC/s"},
+      "unit2_bit_length": {"value": 16, "units": "bits"}
+    },
+    "computation": "TPP1 = 2 * 100 * 16 = 3200; TPP2 = 2 * 80 * 16 = 2560; TPP_total = 3200 + 2560 = 5760",
+    "expected_output": {
+      "TPP": {"value": 5760, "units": "regulatory TPP units"},
+      "3A090_a1_controlled": true,
+      "note": "Aggregation across processing units required by regulation"
+    },
+    "discriminates": "Multi-unit aggregation path that crosses 4800 only after summing.",
+    "known_uncertainty": "None on aggregation rule."
+  }
+]

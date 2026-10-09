@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Combining out-of-order execution with high clock frequency (departure from the 21164)",
+    "where_in_paper": "Introduction / design-approach discussion (performance framed as clock frequency × IPC, contrasted against the in-order 21164)",
+    "decision": "Build the 21264 as an out-of-order, speculative machine with a large instruction window and 4-way issue (up to 4 integer + 2 FP instructions per cycle) while preserving the Alpha emphasis on very high clock frequency (a 500+ MHz target on the 0.35 μm process, as I recall), explicitly departing from the 21164's in-order, frequency-led design.",
+    "alternatives_or_rejected": "The implicit alternative was continuing the 21164's in-order, statically scheduled approach, which obtained performance almost entirely from clock rate. I do not recall the paper enumerating a formal list of rejected designs; the frequency-versus-IPC contrast with earlier Alphas is how the trade-off is presented.",
+    "rationale": "The paper argues that an in-order machine could not deliver the instructions-per-cycle improvement needed for the performance targets, and that the perceived conflict between out-of-order complexity and high frequency could be resolved by microarchitectural structuring (distributed/replicated queues, clustered execution) rather than by sacrificing one goal for the other.",
+    "outcome": "The paper presents this as the central reason the 21264 delivers large gains over the 21164 — roughly doubling integer performance at comparable frequencies — and treats it as evidence that out-of-order execution and high frequency can coexist.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Hybrid branch predictor: local + global components with a chooser (over 35K bits of state)",
+    "where_in_paper": "Instruction fetch / branch-prediction subsection",
+    "decision": "Use a combined predictor: a local-history component (roughly 1024 entries of 10-bit local histories feeding a 1024 × 3-bit local predictor), a global-history component (12-bit history into a 4096 × 2-bit predictor), and a 4096 × 2-bit chooser selecting between them — together more than 35,000 bits of prediction state. I also recall, with less certainty, that fetch is redirected only on taken branches so not-taken predictions cost no fetch bandwidth.",
+    "alternatives_or_rejected": "Simpler single-component predictors (e.g., bimodal or global-history-only) are the implicit baseline; I do not recall the paper explicitly listing rejected alternatives, it mainly justifies the hybrid on accuracy grounds. Exact table sizes are recalled with moderate confidence.",
+    "rationale": "Local history captures branch-specific behavior, global history captures correlated branches, and the chooser picks the currently more reliable component; the deep out-of-order pipeline makes mispredictions expensive, justifying the large hybrid structure.",
+    "outcome": "The paper credits this predictor with high accuracy on its benchmark workloads; I do not recall the exact misprediction figures quoted.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Two integer clusters with duplicated register files and duplicated issue queues",
+    "where_in_paper": "Instruction issue / integer execution unit section",
+    "decision": "Organize the four integer pipelines as two clusters (each with one ALU-type unit and one address-generation unit). The 20-entry integer issue queue and the 80-entry integer register file are each duplicated so every cluster holds a full copy; as best I recall, both queue copies hold all ready integer instructions, each cluster arbitrates oldest-ready-first within its own copy, and an instruction issued by one cluster is invalidated in the other's copy. Results are broadcast to both clusters, with an extra forwarding cycle for dependences that cross clusters (the exact penalty wording is recalled with moderate confidence).",
+    "alternatives_or_rejected": "The implicit alternative is a single centralized queue and one large, heavily multi-ported register file shared by all four pipelines. I believe the paper motivates the duplication via port count, wiring, and cycle-time concerns, but I am not certain it explicitly presents the monolithic design as a considered-and-rejected option.",
+    "rationale": "A centrally shared register file and scheduler serving four integer pipelines would need many read/write ports and long wires, hurting cycle time; duplicating the file and queue lets each cluster operate locally and keeps arbitration logic small and fast, protecting the clock frequency.",
+    "outcome": "The design sustains up to four integer instructions issued per cycle at the target clock; the paper notes the cross-cluster forwarding delay as a cost of this organization.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Register renaming into enlarged physical register files (80 integer / 72 FP)",
+    "where_in_paper": "Register rename / instruction-window section",
+    "decision": "Rename into pools of 80 integer and 72 floating-point physical registers (versus 31 architectural of each), holding speculative results in the register files themselves; combined with the 20-entry fetch queue, 20-entry integer queue, 15-entry FP queue, and 32-entry memory queue, roughly 80 instructions can be in flight. I recall misprediction recovery relying on copying/checkpointing of the rename map, with only moderate confidence in the exact mechanism described.",
+    "alternatives_or_rejected": "A reorder-buffer-based renaming scheme is the natural alternative, but I do not recall the paper explicitly discussing or rejecting it; the 80/72 numbers and the physical-register-file approach are what I am actually confident about.",
+    "rationale": "A large pool of rename registers is needed to keep the big out-of-order window busy; buffering results in the register files avoids a separate reorder-buffer data path (this framing is partly my inference).",
+    "outcome": "The paper reports that the large window supplies enough in-flight state for the out-of-order engine to expose ILP, a key contributor to the performance gains over the 21164.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Large on-chip L1 caches with the second-level cache moved off-chip",
+    "where_in_paper": "Memory system / cache organization section",
+    "decision": "Provide 64 KB, two-way set-associative L1 instruction and data caches on-chip (the D-cache write-back and byte-writable, using the 'cloaking' ECC mechanism for partial-line writes, recalled with moderate confidence), and place the multi-megabyte second-level cache off-chip (direct-mapped, sized roughly 1–16 MB, recalled with moderate confidence), in contrast to the 21164's ~96 KB on-chip secondary cache.",
+    "alternatives_or_rejected": "The 21164-style on-chip secondary cache is the contrast case. I recall the trade-off being die area spent on the large L1s and the out-of-order core versus on an on-chip L2, with the external cache allowing much larger capacity — but I am not certain how explicitly the paper frames the on-chip L2 as a considered-and-rejected option.",
+    "rationale": "The out-of-order core needs substantially more first-level capacity and bandwidth than the 21164's small direct-mapped L1s provided; the L1s were enlarged accordingly, with the large off-chip L2 preserving cache capacity at modest die cost.",
+    "outcome": "The paper reports the resulting hierarchy sustains the bandwidth and miss behavior the core needs, at the cost of a multi-cycle off-chip L2 access, with notably strong performance on memory-intensive floating-point workloads.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  }
+]

@@ -1,0 +1,172 @@
+[
+{
+"calculation": "ISO 26262 single-point fault metric (SPFM)",
+"formula_or_test": "SPFM = 1 - [Σ(λ_SPF + λ_RF) / Σλ_SR,HW], equivalently the fraction of the total safety-related hardware failure rate remaining after excluding single-point and residual faults. The compliance test is SPFM ≥ 90% for ASIL B, ≥ 97% for ASIL C, and ≥ 99% for ASIL D.",
+"inputs": [
+"λ_SPF: single-point-fault failure rates",
+"λ_RF: residual-fault failure rates",
+"λ_SR,HW: total failure rates of safety-related hardware elements",
+"ASIL"
+],
+"authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level ([Kekaoxing][1])",
+"clause_locator": "Annex C for the metric calculation; Clause 8.4.5 and Table 4 for quantitative target values",
+"publicly_retrievable": "Authoritative ISO publication is paywalled; public copies and national-adoption text are retrievable",
+"volatility": "Low; changes only when ISO 26262 is revised",
+"confidence": 0.94
+},
+{
+"calculation": "ISO 26262 latent-fault metric (LFM)",
+"formula_or_test": "LFM = 1 - [Σλ_MPF,latent / Σ(λ_SR,HW - λ_SPF - λ_RF)]. The compliance test is LFM ≥ 60% for ASIL B, ≥ 80% for ASIL C, and ≥ 90% for ASIL D.",
+"inputs": [
+"λ_MPF,latent: latent multiple-point-fault failure rates",
+"λ_SR,HW: total safety-related hardware failure rates",
+"λ_SPF: single-point-fault failure rates",
+"λ_RF: residual-fault failure rates",
+"ASIL"
+],
+"authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level ([Kekaoxing][1])",
+"clause_locator": "Annex C for the metric calculation; Clause 8.4.6 and Table 5 for quantitative target values",
+"publicly_retrievable": "Authoritative ISO publication is paywalled; public copies and national-adoption text are retrievable",
+"volatility": "Low; changes only when ISO 26262 is revised",
+"confidence": 0.93
+},
+{
+"calculation": "ISO 26262 probabilistic metric for random hardware failures (PMHF) target",
+"formula_or_test": "Evaluate the quantitative hardware-failure analysis for the safety goal and require PMHF < 10^-7 h^-1 for ASIL B, < 10^-7 h^-1 for ASIL C, or < 10^-8 h^-1 for ASIL D. PMHF itself is obtained from the applicable random-hardware-failure analysis rather than a single universal closed-form equation.",
+"inputs": [
+"ASIL",
+"single-point-fault failure rates",
+"residual-fault failure rates",
+"multiple-point-fault failure rates",
+"diagnostic coverage",
+"exposure duration for multiple-point faults"
+],
+"authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level ([Kekaoxing][1])",
+"clause_locator": "Clause 9.4.2.2 and 9.4.2.4; Table 6",
+"publicly_retrievable": "Authoritative ISO publication is paywalled; public copies are retrievable",
+"volatility": "Low; changes only when ISO 26262 is revised",
+"confidence": 0.96
+},
+{
+"calculation": "JEDEC constant-failure-rate FIT point estimate with Arrhenius acceleration",
+"formula_or_test": "For the single-activation-energy case: AF = exp[(E_A/k)(1/T_USE - 1/T_STRESS)]; FIT_POINT = f × 10^9 / (t × ss × AF). Here f is observed failures, t is stress-test hours per device, ss is sample size, E_A is activation energy in eV, k = 8.6×10^-5 eV/K in JESD85A's worked procedure, and temperatures are absolute kelvin.",
+"inputs": [
+"f: number of failures",
+"t: test duration",
+"ss: sample size",
+"T_STRESS",
+"T_USE",
+"E_A",
+"k"
+],
+"authority": "JEDEC JESD85A:2021, Methods for Calculating Failure Rates in Units of FITs ([Scribd][2])",
+"clause_locator": "§3.1.2 and §3.1.3",
+"publicly_retrievable": "JEDEC standard is publicly retrievable; third-party copies are also available",
+"volatility": "Low to medium; revised periodically as JEDEC reliability methodology evolves",
+"confidence": 0.97
+},
+{
+"calculation": "JEDEC Arrhenius thermal acceleration factor",
+"formula_or_test": "A_T = exp[(-E_AA/k)(1/T_TEST - 1/T_SYSTEM)] = λ_TEST/λ_SYSTEM. JESD91A specifies k = 8.62×10^-5 eV/K and temperatures in kelvin.",
+"inputs": [
+"E_AA: apparent activation energy in eV",
+"k = 8.62×10^-5 eV/K",
+"T_TEST in K",
+"T_SYSTEM in K",
+"failure rates at the two temperatures"
+],
+"authority": "JEDEC JESD91A, Method for Developing Acceleration Models for Electronic Component Failure Mechanisms ([Scribd][3])",
+"clause_locator": "Clause 2, definition of Arrhenius equation; §5.2 for deriving/using acceleration factors",
+"publicly_retrievable": "Authoritative JEDEC text is publicly retrievable",
+"volatility": "Low; changes only when JEDEC revises the acceleration-model standard",
+"confidence": 0.96
+},
+{
+"calculation": "EAR ECCN 3A090 total processing performance (TPP)",
+"formula_or_test": "For each processing unit, TPP_i = 2 × MacTOPS_i × bit_length_i; aggregate TPP = ΣTPP_i across all processing units on the IC. MacTOPS is the theoretical peak tera-operations/s for multiply-accumulate computation. For classification, compare the resulting TPP and performance density against the 3A090.a/b thresholds.",
+"inputs": [
+"MacTOPS for each processing unit",
+"largest input bit length for the MAC operation",
+"number of processing units",
+"applicable die area in mm²",
+"TPP",
+"performance density"
+],
+"authority": "Export Administration Regulations, 15 CFR Part 774, Supplement No. 1, ECCN 3A090, Technical Note 2 to 3A090.a and 3A090.b ([GovInfo][4])",
+"clause_locator": "15 CFR Part 774, Supplement No. 1, ECCN 3A090, Technical Note 2",
+"publicly_retrievable": "Free; U.S. export-control regulations and Federal Register text are public",
+"volatility": "High; BIS has amended advanced-computing thresholds repeatedly",
+"confidence": 0.99
+},
+{
+"calculation": "EAR ECCN 3A090 performance-density classification test",
+"formula_or_test": "Performance density = TPP / applicable die area. Under current 3A090.a, an IC falls into the specified a-classification when TPP ≥ 4800, or when TPP ≥ 1600 and performance density ≥ 5.92. Under 3A090.b, the specified alternatives include 2400 ≤ TPP < 4800 with 1.6 ≤ density < 5.92, or TPP ≥ 1600 with 3.2 ≤ density < 5.92.",
+"inputs": [
+"TPP",
+"applicable die area in mm²",
+"performance density",
+"applicable 3A090 branch"
+],
+"authority": "Export Administration Regulations, 15 CFR Part 774, Supplement No. 1, ECCN 3A090 ([BIS][5])",
+"clause_locator": "15 CFR Part 774, Supplement No. 1, ECCN 3A090.a and 3A090.b; Technical Note 2",
+"publicly_retrievable": "Free; U.S. export-control regulations are public",
+"volatility": "High; BIS periodically changes thresholds and classification structure",
+"confidence": 0.98
+},
+{
+"calculation": "EAR License Exception LPP cumulative advanced-compute TPP limit",
+"formula_or_test": "For a single ultimate consignee in a calendar year, cumulative TPP = Σ individual TPP of eligible commodities. License Exception LPP is available only if cumulative TPP ≤ 26,900,000; a shipment with aggregate TPP ≥ 3,200,000 triggers the specified BIS notification requirement.",
+"inputs": [
+"TPP of each eligible IC",
+"ultimate consignee",
+"calendar-year cumulative TPP",
+"shipment aggregate TPP"
+],
+"authority": "Export Administration Regulations, 15 CFR §740.29, License Exception Low Processing Performance (LPP) ([Legal Information Institute][6])",
+"clause_locator": "§740.29(a), (d), and (g)(3)",
+"publicly_retrievable": "Free; eCFR text is public",
+"volatility": "High; export-control license-exception limits can be amended by BIS",
+"confidence": 0.99
+},
+{
+"calculation": "CHIPS advanced manufacturing investment tax credit",
+"formula_or_test": "Current credit = 35% × qualified investment for the taxable year with respect to an advanced manufacturing facility of an eligible taxpayer. Qualified investment is the basis of qualified property placed in service during the taxable year that is part of the advanced manufacturing facility. The 35% rate applies to property placed in service after December 31, 2025; the original CHIPS Act rate was 25%.",
+"inputs": [
+"qualified investment / qualifying property basis",
+"taxable year",
+"placed-in-service date",
+"eligible taxpayer",
+"advanced manufacturing facility"
+],
+"authority": "Internal Revenue Code §48D, Advanced Manufacturing Investment Credit, as amended by Pub. L. 119-21, §70308 ",
+"clause_locator": "26 USC §48D(a) and §48D(b)(1); Pub. L. 119-21, §70308(b) effective-date provision",
+"publicly_retrievable": "Free; U.S. Code and enacted public laws are public",
+"volatility": "Medium to high; statutory tax-credit rates can change through legislation",
+"confidence": 0.99
+},
+{
+"calculation": "CHIPS advanced-manufacturing-credit foreign expansion clawback test",
+"formula_or_test": "For an existing semiconductor facility, a material expansion occurs when semiconductor manufacturing capacity increases by more than 5% during the applicable period due to added cleanroom, production line, physical space, or a series of such additions. Any construction of a new semiconductor manufacturing facility also qualifies as a material expansion. A significant renovation is separately defined as an aggregate capacity increase of 10% or more from specified physical additions.",
+"inputs": [
+"baseline semiconductor manufacturing capacity",
+"post-expansion capacity",
+"percentage capacity increase",
+"nature of physical expansion",
+"applicable period",
+"whether the facility is new or existing"
+],
+"authority": "Treasury Regulations, 26 CFR §1.50-2, Recapture of the advanced manufacturing investment credit in the case of certain expansions ([Legal Information Institute][7])",
+"clause_locator": "26 CFR §1.50-2(b)(7) and (b)(9)",
+"publicly_retrievable": "Free; eCFR text is public",
+"volatility": "Medium; regulatory definitions can be amended by Treasury/IRS rulemaking",
+"confidence": 0.99
+}
+]
+
+[1]: https://img.kekaoxing.com/wp-content/uploads/standard/ISO26262-2018/ISO-26262-5-2018.pdf?utm_source=chatgpt.com "INTERNATIONAL"
+[2]: https://www.scribd.com/document/967922230/JESD-85A-Calculation-Failure?utm_source=chatgpt.com "Failure Rate Calculation Methods in FITs | PDF"
+[3]: https://www.scribd.com/document/929706135/jesd91a?utm_source=chatgpt.com "Acceleration Models for Component Failures | PDF | Reliability Engineering | Temperature"
+[4]: https://www.govinfo.gov/content/pkg/FR-2025-01-16/pdf/2025-00711.pdf?utm_source=chatgpt.com "Federal Register / Vol. 90, No. 10 / Thursday, January 16, 2025 / Rules and Regulations 5315"
+[5]: https://www.bis.gov/media/1381?utm_source=chatgpt.com "a.2. a ‘total processing performance’ of 1600 or more and a ‘performance density’ of 5.92 or more."
+[6]: https://www.law.cornell.edu/cfr/text/15/740.29?utm_source=chatgpt.com "15 CFR § 740.29 - License Exception Low Processing Performance (LPP). | Electronic Code of Federal Regulations (e-CFR) | US Law | LII / Legal Information Institute"
+[7]: https://www.law.cornell.edu/cfr/text/26/1.50-2?utm_source=chatgpt.com "26 CFR § 1.50-2 - Recapture of the advanced manufacturing investment credit in the case of certain expansions. | Electronic Code of Federal Regulations (e-CFR) | US Law | LII / Legal Information Institute"

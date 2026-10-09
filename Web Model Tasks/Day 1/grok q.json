@@ -1,0 +1,149 @@
+{
+  "opening": [
+    "Can you walk me to a project where, after placement or CTS, the numbers looked acceptable on paper but the first detailed-route or timing run showed something that forced a non-obvious recovery—something that still sticks with you because the stakes were real?",
+    "Tell me about a time the 'obvious' fix (widen the channel, re-floorplan, add a corner) was off the table and the team still had to close. What was the observation that made it clear the usual path was blocked?",
+    "Is there a block or tapeout where a congestion, IR, or hold problem surprised the team late, and the recovery taught you something you still use?"
+  ],
+  "decompression": [
+    {
+      "question": "What was the state of the design just before anyone noticed the problem—utilization, overflow, WNS/TNS, or DRC count, whatever the key metric was?",
+      "extracts": "prior state",
+      "follow_up_if_vague": "If you had to put a single number or range on the board for a new engineer, what would you write?",
+      "leading_risk": "Asking 'was utilization already high?' plants a cause. Neutral form keeps the metric open-ended."
+    },
+    {
+      "question": "What exactly did the first bad report or map show, and how was it different from the previous clean or expected result?",
+      "extracts": "observation (with metrics)",
+      "follow_up_if_vague": "Where on the die or in which clock group or layer did the failures concentrate?",
+      "leading_risk": "Suggesting 'was it the west edge channels?' leads the location. Let the engineer name the signature."
+    },
+    {
+      "question": "At that moment, what did the team think was the most likely cause?",
+      "extracts": "hypothesis",
+      "follow_up_if_vague": "What made that hypothesis the leading one rather than the alternatives?",
+      "leading_risk": "Offering 'density or pin-access?' contaminates. Ask for their ranking, not yours."
+    },
+    {
+      "question": "What other explanations were on the table, even briefly?",
+      "extracts": "candidates considered",
+      "follow_up_if_vague": "If a junior had suggested X, what data would have ruled it out?",
+      "leading_risk": "Listing candidates for them creates false memory. Use only after they volunteer at least one."
+    },
+    {
+      "question": "For each of those other explanations, what made the team set it aside?",
+      "extracts": "why each rejected one was rejected",
+      "follow_up_if_vague": "Was it a quick check, a prior experience, or schedule that killed it?",
+      "leading_risk": "Saying 'because it would have taken too long' puts words in their mouth. Ask for the actual reason."
+    },
+    {
+      "question": "What did the team actually change—density screens, layer directives, pin-swap, CTS tweak, hold buffers, power-grid edit—and in what order?",
+      "extracts": "chosen intervention",
+      "follow_up_if_vague": "Which single action moved the metric the most, and which were supporting?",
+      "leading_risk": "Assuming the first-named action was the decisive one. Probe for sequence and relative impact."
+    },
+    {
+      "question": "After the change, what did the next route or timing run report, and how many iterations did it take to reach the number you signed off?",
+      "extracts": "measured outcome",
+      "follow_up_if_vague": "Was the final number zero, or an accepted residual with a waiver?",
+      "leading_risk": "Asking 'did it go to zero?' pressures a clean ending. Allow residuals and waivers."
+    },
+    {
+      "question": "Looking back, what would you do differently on day one of that block, or what rule did you write for the next project?",
+      "extracts": "lessons",
+      "follow_up_if_vague": "Is that lesson still in your checklist, or has it been superseded?",
+      "leading_risk": "Framing 'so the lesson was to always do X' freezes a moral. Keep it open."
+    }
+  ],
+  "rejected_paths": [
+    {
+      "question": "Before the team settled on the fix that worked, what other concrete actions were proposed in the war-room or email thread, even if they lasted only ten minutes?",
+      "extracts": "candidates considered + why rejected",
+      "follow_up_if_vague": "Who floated the idea that was killed fastest, and what sentence killed it?",
+      "leading_risk": "Supplying options ('re-floorplan, NDR relax, via-pillar') creates a menu. Leave the list empty."
+    },
+    {
+      "question": "Was there a fix that would have worked technically but was rejected for schedule, freeze, or political reasons? What was the cost estimate that made it non-viable?",
+      "extracts": "why rejected (non-technical)",
+      "follow_up_if_vague": "If the freeze had not existed, would that path have been taken?",
+      "leading_risk": "Implying 'management blocked the right fix' invites grievance narrative. Stay factual."
+    },
+    {
+      "question": "Memory-jog (critical decision method): Picture the screen or the printout when the first bad number appeared. Who spoke first, and what alternative did they name that ultimately was not used?",
+      "extracts": "candidates considered",
+      "follow_up_if_vague": "If that person's idea had been tried, what do you predict the metric would have done?",
+      "leading_risk": "Over-prompting the mental image can invent dialogue. Stop at the first recalled alternative."
+    },
+    {
+      "question": "Did any rejected idea get a partial trial—an overnight run or a local experiment—whose result confirmed it was wrong?",
+      "extracts": "why rejected (empirical)",
+      "follow_up_if_vague": "What number from that trial was decisive?",
+      "leading_risk": "Assuming every rejection had data. Some were pure judgment; allow that."
+    }
+  ],
+  "numbers": [
+    {
+      "question": "For the key metric—overflow, DRC count, WNS, IR drop—what was the before and after, even if only to an order of magnitude?",
+      "extracts": "observation + measured outcome",
+      "follow_up_if_vague": "Is 'hundreds of thousands of DRCs' or 'a few thousand' closer? I will record it as a range.",
+      "leading_risk": "Demanding three significant figures forces fabrication. Explicitly accept ranges and 'order of'."
+    },
+    {
+      "question": "How long did the recovery take in calendar time and in tool iterations, and was that typical or unusually long/short for that node and block size?",
+      "extracts": "measured outcome (time)",
+      "follow_up_if_vague": "Days versus weeks is enough; hours only if you remember them cleanly.",
+      "leading_risk": "Comparing to 'industry average' invites post-hoc rationalization. Stay inside their project."
+    },
+    {
+      "question": "Were any secondary metrics (utilization, hold TNS, power, via count) moved by the same intervention, and in which direction?",
+      "extracts": "measured outcome (side effects)",
+      "follow_up_if_vague": "Even a qualitative 'utilization crept up a point' is useful.",
+      "leading_risk": "Asking only about the primary metric hides trade-offs. Prompt for side effects without naming them."
+    }
+  ],
+  "verification": [
+    {
+      "question": "If the density screen (or the NDR change, or the pin-swap) had been the only action, would the final number still have been reached, or did it require the combination?",
+      "extracts": "internal consistency of chosen intervention",
+      "follow_up_if_vague": "Which action, if removed in hindsight, would have left the problem unsolved?",
+      "leading_risk": "Challenging too hard makes the engineer defend rather than recall. Keep the tone collaborative."
+    },
+    {
+      "question": "The before/after delta you described—does it line up with the magnitude you usually see for that class of fix on that node, or was this one an outlier?",
+      "extracts": "plausibility of metrics",
+      "follow_up_if_vague": "If it was an outlier, what made this block different?",
+      "leading_risk": "Saying 'that drop seems large' is accusatory. Frame as calibration against their own experience."
+    },
+    {
+      "question": "After the fix, did any later signoff corner or SI/IR run reopen the same region, or did the recovery stay clean through tapeout?",
+      "extracts": "outcome durability",
+      "follow_up_if_vague": "If it reopened, what was the second-order fix?",
+      "leading_risk": "Implying the story is incomplete if nothing reopened. Accept clean closures."
+    }
+  ],
+  "closing": [
+    "Is there another block or tapeout where the recovery path was different enough that it would make a useful contrast to this one?",
+    "If we had ten more minutes, is there a near-miss or a waived residual from the same project that is still instructive?"
+  ],
+  "anti_patterns": [
+    {
+      "mistake": "Offering a menu of causes or fixes before the engineer has named any",
+      "symptom": "Record lists the interviewer's hypotheses as if they were the team's candidates considered"
+    },
+    {
+      "mistake": "Accepting a success-only narrative without asking for the rejected alternatives",
+      "symptom": "Record jumps from observation to chosen intervention with an empty or single-item candidates list"
+    },
+    {
+      "mistake": "Pressing for exact numbers when the engineer offers ranges or 'order of'",
+      "symptom": "Record contains spuriously precise metrics that later fail cross-checks"
+    },
+    {
+      "mistake": "Summarizing the lesson for the engineer ('so the takeaway is always widen channels early')",
+      "symptom": "Lesson field is generic best-practice language instead of the concrete, project-specific rule the engineer actually formed"
+    },
+    {
+      "mistake": "Treating schedule or freeze constraints as secondary instead of first-class rejection reasons",
+      "symptom": "Record under-weights non-technical rejection causes and over-states pure technical optimality of the chosen path"
+    }
+  ]
+}

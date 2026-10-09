@@ -1,0 +1,98 @@
+```json
+[
+  {
+    "case_name": "Single-advance, single-payment transaction",
+    "appendix_basis": "Appendix J, Part I (general actuarial method equation for a single advance, single payment) - exact example number not recalled",
+    "inputs": {
+      "amount_financed": "1,000.00",
+      "finance_charge": "100.00",
+      "total_of_payments": "1,100.00",
+      "term": "12 months (1 unit-period = 1 month, payment due exactly 1 year after consummation)"
+    },
+    "unit_period_analysis": "Single payment falling exactly on a whole-month unit-period boundary (12 unit-periods from consummation); no fractional period involved, so this is the simplest case of Appendix J's actuarial equation with a single term.",
+    "computation": [
+      "Actuarial equation: AF = Payment x (1+i)^-n, with AF=1,000, Payment=1,100, n=12 (unit-periods)",
+      "1,000 = 1,100 x (1+i)^-12",
+      "(1+i)^12 = 1,100/1,000 = 1.1",
+      "1+i = 1.1^(1/12)",
+      "ln(1.1) = 0.095310; 0.095310/12 = 0.0079425; e^0.0079425 = 1.0079741",
+      "i = 0.79741% per unit-period (month)",
+      "APR = i x (unit-periods per year) = 0.79741% x 12 = 9.5689%"
+    ],
+    "result_apr": "9.57% (rounded to the nearest 1/8 of 1 percent per Appendix J's stated tolerance would give 9.50% or 9.625%; rounded to the nearest 0.01% per the regulation's general APR disclosure rounding, 9.57%)",
+    "doc_vs_general": "probably",
+    "weakest_point": "I am not fully certain whether Appendix J's own worked single-payment example uses these exact dollar figures, and I'm uncertain which rounding convention (nearest 1/8%, per Section 1026.22, vs. nearest 0.01%) Appendix J's own illustrative examples display in their answer line."
+  },
+  {
+    "case_name": "Regular monthly installment loan (level payments, no irregular periods)",
+    "appendix_basis": "Appendix J, Part I general equation for equal unit-periods and equal payment amounts - constructed to match the standard amortization identity, not a recalled specific example",
+    "inputs": {
+      "amount_financed": "5,000.00",
+      "number_of_payments": "36",
+      "payment_amount": "161.37 per month",
+      "unit_period": "1 month"
+    },
+    "unit_period_analysis": "All 36 payments fall on successive whole-month unit-period boundaries starting one unit-period after consummation; no fractional first period, so the annuity form of the actuarial equation applies directly (all common unit-periods equal in length, all payments equal in amount).",
+    "computation": [
+      "Actuarial equation: AF = Payment x [1 - (1+i)^-n] / i, with AF=5,000.00, Payment=161.37, n=36",
+      "Assume i = 0.833333% per month (constructed so APR comes out to a round 10.00%)",
+      "(1+i)^-36 = (1.0083333)^-36",
+      "ln(1.0083333) = 0.0082988; x36 = 0.298717; e^-0.298717 = 0.74183",
+      "1 - 0.74183 = 0.25817",
+      "Payment = 5,000 x 0.0083333 / 0.25817 = 41.667 / 0.25817 = 161.37",
+      "Check confirms Payment = 161.37 is consistent with AF=5,000, i=0.833333%",
+      "APR = 12 x i = 12 x 0.833333% = 10.00%"
+    ],
+    "result_apr": "10.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "This case is built backward to be internally consistent (I chose i=10%/12 and solved for the payment) rather than recalled from a published Appendix J example, and I have no confidence these specific dollar figures appear in the actual appendix."
+  },
+  {
+    "case_name": "Irregular first period (odd days), single payment",
+    "appendix_basis": "Appendix J, Part I - fractional unit-period rule for an odd first period, applied to the special single-payment sub-case",
+    "inputs": {
+      "amount_financed": "1,000.00",
+      "total_payment": "1,100.00",
+      "unit_period": "1 month (deemed 30 days per Appendix J's convention for a monthly unit-period)",
+      "actual_days_to_payment": "45 days from consummation"
+    },
+    "unit_period_analysis": "Appendix J treats a monthly unit-period as having a deemed length (I recall this as 30 days, i.e., 1/12 of a 360-day year) for computing fractional periods when the interval to a payment isn't a whole number of unit-periods. Here 45 actual days / 30 deemed days-per-unit-period = 1.5 unit-periods, so the payment is discounted over 1 whole unit-period plus a 0.5 fractional unit-period, using the exponent (1+i)^-1.5 in the actuarial equation (Appendix J's fractional-period exponent method, as opposed to a simple-interest adjustment for the fractional part).",
+    "computation": [
+      "Actuarial equation: AF = Payment x (1+i)^-(k+f), with AF=1,000, Payment=1,100, (k+f)=1.5",
+      "1,000 = 1,100 x (1+i)^-1.5",
+      "(1+i)^1.5 = 1.1",
+      "1+i = 1.1^(1/1.5) = 1.1^0.66667",
+      "ln(1.1) = 0.095310; x0.66667 = 0.063540; e^0.063540 = 1.065610",
+      "i = 6.5610% per unit-period (month)",
+      "Check: (1.065610)^1.5 -> ln(1.065610)=0.063536, x1.5=0.095304, e^0.095304=1.09999 ~ 1.1, consistent",
+      "APR = 12 x i = 12 x 6.5610% = 78.73%"
+    ],
+    "result_apr": "78.73%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "I am genuinely unsure whether Appendix J's fractional-period convention for a monthly unit-period uses a 30-day deemed month (giving f=45/30=1.5) versus counting actual days against a 365/12-day deemed month, or whether it applies a simple-interest (rather than compound exponent) adjustment to the fractional part only. This choice changes the exponent and therefore the APR meaningfully, so the direction/magnitude here should be treated as illustrative only, not a reliable restatement of the appendix's actual rule."
+  },
+  {
+    "case_name": "Irregular (unequal) payment schedule, three monthly payments",
+    "appendix_basis": "Appendix J, Part I general equation for unequal payment amounts on regular unit-period boundaries - constructed, not a recalled published example",
+    "inputs": {
+      "amount_financed": "3,072.35",
+      "payments": "Payment 1 = 1,000.00 at month 1; Payment 2 = 1,000.00 at month 2; Payment 3 = 1,200.00 at month 3",
+      "unit_period": "1 month"
+    },
+    "unit_period_analysis": "All three payments fall on regular, whole-month unit-period boundaries (months 1, 2, and 3 after consummation), so no fractional-period adjustment is needed here; the irregularity is only in the payment amounts, not the unit-period spacing, so each term uses a simple integer exponent.",
+    "computation": [
+      "Actuarial equation: AF = Payment1 x (1+i)^-1 + Payment2 x (1+i)^-2 + Payment3 x (1+i)^-3",
+      "Assume i = 2.00% per month (constructed so APR comes out to a round 24.00%)",
+      "(1.02)^-1 = 0.980392; x1,000 = 980.39",
+      "(1.02)^-2 = 0.961169; x1,000 = 961.17",
+      "(1.02)^-3 = 0.942322; x1,200 = 1,130.79",
+      "Sum = 980.39 + 961.17 + 1,130.79 = 3,072.35",
+      "This confirms AF=3,072.35 is consistent with i=2.00% and the given payment stream",
+      "APR = 12 x i = 12 x 2.00% = 24.00%"
+    ],
+    "result_apr": "24.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Built backward for internal consistency (i chosen first, amount financed solved from it) rather than recalled from the appendix; I have no confidence these specific dollar amounts or this exact three-payment pattern match any actual published Appendix J example, though the equation form itself (sum of discounted unequal payments at whole unit-period exponents) is the standard actuarial method structure."
+  }
+]
+```

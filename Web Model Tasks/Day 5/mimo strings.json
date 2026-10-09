@@ -1,0 +1,69 @@
+```json
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "JCS key sort: UTF-16 code-unit order, not locale. C=0x0043 (67) < a=0x0061 (97) < b=0x0062 (98).",
+      "Numbers: all three are single-digit non-negative integers, no decimal point or exponent needed.",
+      "No whitespace inserted."
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"x\":2,\"y\":1},{\"k\":null}],\"z\":true}}",
+    "rules_applied": [
+      "Top-level: one key, so key sort is trivial.",
+      "Inner object {z,a}: a=0x61 < z=0x7A, so a-first.",
+      "Array element 0 {y,x}: x=0x78 < y=0x79, so x-first.",
+      "Array element 1 {k}: single key, trivial.",
+      "Boolean true and null serialized as-is (JCS mandates the literal tokens).",
+      "Outer array order preserved (arrays are never sorted)."
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.3333333}",
+    "rules_applied": [
+      "Single-key object — no key sort needed. Compact and JCS differ only in number serialization.",
+      "n1 = 1e21: JS number literal parsed to 1×10^21. Decimal rep needs >6 digits (22 digits) so scientific notation required. Serializable as-is. → 1e21",
+      "n2 = 1e-7: Decimal rep needs >6 leading zeros after decimal point. Scientific notation required. → 1e-7",
+      "n3 = 0.000001: Decimal rep needs exactly 6 leading zeros. ≤6, so decimal notation permitted. Exact double. → 0.000001",
+      "n4 = 100000000000000000000 (= 10^20): fits in 53-bit significand exactly (5^20 < 2^54). Non-negative integer representable exactly as double → no decimal point, no exponent. → 100000000000000000000",
+      "n5 = -0: JCS Rule 1 exception — negative zero MUST be serialized as -0 (not 0). → -0",
+      "n6 = 333333333.33333329: parsed to double 333333333.3333333 (midpoint between neighboring doubles is ≈333333333.333333285; input rounds up). JS toString shortest round-trip decimal = 333333333.3333333 (17 significant digits needed; '333333333.333333' does NOT round-trip). → 333333333.3333333"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"€\":\"euro\",\"ü\":\"umlaut\"}",
+    "rules_applied": [
+      "JCS key sort uses UTF-16 code-unit comparison, which for BMP characters equals the Unicode code-point comparison.",
+      "UTF-16 code units: $=0x0024, a=0x0061, ü=0x00FC, €=0x20AC.",
+      "Sorted order: $ (0x0024) < aa (0x0061,0x0061) < ü (0x00FC) < € (0x20AC).",
+      "€ is U+20AC (BMP, not surrogate pair); in UTF-8 = 0xE2 0x82 0xAC (3 bytes). ü is U+00FC; in UTF-8 = 0xC3 0xBC (2 bytes).",
+      "String values are plain ASCII — no escaping needed."
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "rules_applied": [
+      "Single-key object — no key sort needed. Compact = JCS.",
+      "s1 line\\nbreak: JCS mandates \\n for U+000A (newline). No other escapes needed.",
+      "s2 tab\\there: JCS mandates \\t for U+0009 (tab). No other escapes needed.",
+      "s3 quote\\\"inside: JCS mandates \\\" for U+0022 (quotation mark). Backslash is not present, so no \\\\ needed.",
+      "s4 unicode é: U+00E9 is NOT an ASCII control character (0x00–0x1F) and NOT the quote or backslash. JCS allows it unescaped in UTF-8 (0xC3 0xA9).",
+      "s5 control  : The two characters after 'control ' are literal spaces (U+0020), which is not a control character (U+0020 > 0x1F). JCS does not mandate escaping spaces. HOWEVER: if the intent was actual control characters (U+0000–0x1F), they WOULD require \\uXXXX form. I treat them as literal spaces per the JSON text. [UNCERTAIN: see weakest_point]"
+    ]
+  },
+  {
+    "weakest_point": "Case 5, s5 'control  ': I cannot tell from the JSON text whether the two characters are literal spaces (U+0020, no escaping needed) or control characters (U+0000–0x1F, requiring \\uXXXX form). If they are U+0000, the JCS value would be 'control\\u0000\\u0000' (28 chars vs 10), changing the entire case output. This ambiguity is the single largest source of potential byte-level error in all five cases. Additionally, the n6 (333333333.3333333) serializiation depends on V8/SpiderMonkey's exact toString rounding implementation, which I have verified mentally but not by programmatic execution."
+  }
+]
+```

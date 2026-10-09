@@ -1,0 +1,122 @@
+[
+  {
+    "calculation": "Single Point Fault Metric (SPFM)",
+    "formula_or_test": "SPFM = 1 - (Lambda_SP / (Lambda_SP + Lambda_L + Lambda_S)) where Lambda_SP = single-point fault rate, Lambda_L = latent fault rate, Lambda_S = safe fault rate. Target: ASIL B >= 90%, ASIL C >= 97%, ASIL D >= 99%.",
+    "inputs": ["single-point fault rate", "latent fault rate", "safe fault rate"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Production, operation, service and decommissioning",
+    "clause_locator": "Table 8 and Annex E (metrics for hardware architectural metrics)",
+    "publicly_retrievable": false,
+    "volatility": "rare (standards revision cycle, years)",
+    "confidence": 0.7
+  },
+  {
+    "calculation": "Latent Fault Metric (LFM)",
+    "formula_or_test": "LFM = 1 - (Lambda_L / (Lambda_SP + Lambda_L + Lambda_S)). Target: ASIL B >= 80%, ASIL C >= 90%, ASIL D >= 99%.",
+    "inputs": ["single-point fault rate", "latent fault rate", "safe fault rate"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "rare",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "Probabilistic Hardware Failure Metric (PMHF)",
+    "formula_or_test": "PMHF is the average probability of failure per hour accumulated over the whole product lifetime for random hardware failures; total PMHF must not exceed the ASIL-specific threshold (e.g., ASIL D <= 10E-8/h, ASIL C <= 10E-7/h, ASIL B <= 10E-6/h). Integrated as sum of dangerous detected/undetected probabilities over lifetime T.",
+    "inputs": ["per-hour failure probabilities by failure mode", "lifetime T (typically 10–15 years)"],
+    "authority": "ISO 26262-5:2018 Part 5",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "rare",
+    "confidence": 0.6
+  },
+  {
+    "calculation": "FIT rate (Failures in Time) from failure-count data",
+    "formula_or_test": "FIT = (Failures_observed / (total_device_hours)) * 1E9. Where λ is failure rate per hour, FIT = λ * 1E9.",
+    "inputs": ["number of observed failures", "total device-hours of operation"],
+    "authority": "JEDEC JESD85 (failures-in-time conventions) and companion reliability handbooks",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low (metric convention stable; underlying failure data changes per device/batch)",
+    "confidence": 0.7
+  },
+  {
+    "calculation": "Arrhenius temperature acceleration factor",
+    "formula_or_test": "AF = exp( (Ea/k) * (1/T_use - 1/T_stress) ) where Ea = activation energy, k = Boltzmann constant, T in Kelvin. Used to relate high-stress test failure rates to use conditions.",
+    "inputs": ["activation energy Ea", "use temperature T_use", "stress temperature T_stress", "Boltzmann constant k"],
+    "authority": "JEDEC JESD85 and related reliability documents (Arrhenius model)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "CHIPS Act of 2022 refundable investment tax credit (ITC) percentage basis",
+    "formula_or_test": "The CHIPS Act created a 25% refundable tax credit for 'applicable advanced manufacturing investment' under IRC as amended. Structures depend on the taxpayer's election; the base statutory percentage is 25% of qualified capital expenditures.",
+    "inputs": ["qualified capital expenditures", "applicable advanced manufacturing investment status", "tax election election"],
+    "authority": "Creating Helpful Incentives to Produce Semiconductors (CHIPS) for America Act of 2022, Public Law 117-167",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "medium (amended by subsequent legislation, e.g., CHIPS and Science Act; annual appropriations and rule changes)",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "EAR ECCN 3A090 total processing performance (TPP) aggregation",
+    "formula_or_test": "TPP is computed per EAR §734.17/734.18 aggregation rules for microprocessors and related items: (number of processors * is a combination of frequency and total core count ... the precise test combines giga-operations per second (GOPS) and aggregate gate count where applicable). Items exceeding specific numeric thresholds are controlled. The exact test text is in the EAR 3A090 entry and the ECCN aggregation appendix.",
+    "inputs": ["processor frequency", "core count / gate count", "applicable technology node factors", "use classification"],
+    "authority": "US Export Administration Regulations (EAR), 15 CFR Parts 730–774, ECCN 3A090 and §734.17/§734.18",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "high (rule changes, interim final rules, political cycles)",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "EAR 4A090 FPGA/adaptive processor aggregate threshold test",
+    "formula_or_test": "4A090 entries include numeric thresholds for FPGAs, adaptive processors, and related items — gate count / architecture limits and specific performance tests; determination relies on the exact 4A090 paragraph text and the §734.17/§734.18 aggregation rules.",
+    "inputs": ["fabric/gate equivalent count", "application-specific performance metrics", "technology/process parameters"],
+    "authority": "US Export Administration Regulations (EAR), 15 CFR Parts 730–774, ECCN 4A090 and §734.17/§734.18",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "high",
+    "confidence": 0.55
+  },
+  {
+    "calculation": "DO-254 Design Assurance Level (DAL) objective count mapping",
+    "formula_or_test": "The DO-254 objective-cell structure maps Design Assurance Level (A–E) to objective categories (e.g., planning, requirements, design, implementation, configuration management, verification, validation, workmanship, and so on) — the mapping selects the applicable objectives and any direction/notes by DAL, and the total number of objectives satisfied is a compliance test for that DAL.",
+    "inputs": ["Design Assurance Level (DAL A–E)", "application of each objective, direction, or note"],
+    "authority": "RTCA/DO-254 Quality Assurance and Software Considerations in Airborne Electronic Hardware (FAA-adopted as AC 20-152)",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "rare (revised periodically by RTCA, FAA AC updates)",
+    "confidence": 0.7
+  },
+  {
+    "calculation": "Mean Time to Failure (MTTF) from constant failure rate assumption (exponential model)",
+    "formula_or_test": "MTTF = 1 / λ where λ is the constant failure rate (failures/hour). This applies when a component is modeled with a constant-rate failure distribution (useful life region).",
+    "inputs": ["failure rate λ (failures per hour)"],
+    "authority": "Reliability engineering handbooks and JEDEC reliability practices (general reliability math)",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "Exponential reliability function (R(t)) for component survival",
+    "formula_or_test": "R(t) = exp(-λ*t), where λ is the constant failure rate and t is operating time. Used for mission-time reliability.",
+    "inputs": ["failure rate λ", "mission time t"],
+    "authority": "General reliability engineering math as used in JEDEC and semiconductor reliability documents",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "FIT-to-MTBF conversion",
+    "formula_or_test": "MTBF (hours) = 1E9 / FIT, where FIT is failures per 1E9 device-hours. Equivalent to MTBF = 1/λ with λ = FIT/1E9.",
+    "inputs": ["FIT value"],
+    "authority": "JEDEC reliability conventions (FIT metric)",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low",
+    "confidence": 0.85
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "pitfall_name": "JS↔WASM boundary copies on every field element or proof chunk",
+    "what_happens": "Proving time appears 2-5× slower than native; heap profiles show massive ArrayBuffer allocation/churn even though the WASM module itself is stable.",
+    "why": "Passing a JS TypedArray into a WASM function that takes a pointer still incurs a copy unless the buffer is explicitly transferred or the WASM linear memory is used in-place; crypto kernels that cross the boundary per limb or per constraint amplify the cost.",
+    "how_discovered": "Performance counters or browser memory timeline show allocation rate proportional to proof size rather than constant; typically wastes 1-3 days chasing 'slow field arithmetic'.",
+    "mitigation": "Allocate once in WASM memory, keep all intermediate field elements and witness data inside linear memory, and only marshal the final proof bytes out; use Memory views or wasm-bindgen zero-copy patterns.",
+    "affects": "performance",
+    "confidence": 0.92
+  },
+  {
+    "pitfall_name": "SharedArrayBuffer requires cross-origin isolation and is still blocked in many embedding contexts",
+    "what_happens": "WASM threads or Atomics simply throw or fall back to single-threaded; multi-threaded proving silently becomes single-core.",
+    "why": "Browsers gate SharedArrayBuffer behind COOP/COEP headers (crossOriginIsolated === true). Iframes, many CDN setups, and older enterprise proxies strip or omit the headers; Safari had longer restrictions.",
+    "how_discovered": "navigator.crossOriginIsolated is false while the code assumes threads; or Atomics.wait throws; often discovered only after deploying to production domain, wasting days.",
+    "mitigation": "Serve with Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp (or credentialless); detect crossOriginIsolated at startup and fall back gracefully; avoid relying on SAB inside third-party iframes.",
+    "affects": "deployment",
+    "confidence": 0.93
+  },
+  {
+    "pitfall_name": "WASM 32-bit linear memory ceiling and growth failure under large circuits",
+    "what_happens": "Memory.grow returns -1 or the module traps once the heap approaches 2-4 GiB; proving of large circuits aborts mid-run.",
+    "why": "Standard WASM is 32-bit addressed (max ~4 GiB, practical browser limits often lower due to contiguous reservation). Proving systems that allocate large FFTs, quotient polynomials, or full witness tables hit the wall; browsers may also refuse growth under memory pressure.",
+    "how_discovered": "Sudden trap or OOM after working on smaller instances; memory timeline shows growth attempts failing; wastes hours to a day diagnosing 'random' crashes.",
+    "mitigation": "Stream or chunk large polynomials, reuse buffers aggressively, prefer memory64 where available (still limited support), or offload the largest allocations to WebGPU buffers.",
+    "affects": "correctness",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "WASM SIMD not vectorizing the actual field arithmetic",
+    "what_happens": "Binary contains SIMD opcodes and 'SIMD enabled' flags are set, yet cycle counts or throughput match scalar code.",
+    "why": "LLVM/Binaryen SIMD lowering is sensitive to lane widths, alignment, and the exact integer widths used in Montgomery or goldilocks arithmetic; many hand-written or macro-generated field implementations stay scalar because the autovectorizer cannot see through the carry chains or modular reductions.",
+    "how_discovered": "objdump / wasm-objdump shows few or no v128 operations inside the hot mul/reduce loops; or micro-benchmarks of the field mul show no speedup vs scalar build; typically wastes 1-2 days of 'why is SIMD not helping'.",
+    "mitigation": "Inspect the generated WASM for v128 in the critical kernels; rewrite hot paths with explicit SIMD intrinsics or platform-specific primitives that the compiler respects; verify with a disassembly diff.",
+    "affects": "performance",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "WebGPU buffer mapAsync / readback stalls counted as GPU compute time",
+    "what_happens": "Reported GPU proving time includes long stalls; throughput looks far below theoretical shader occupancy.",
+    "why": "mapAsync is asynchronous from the JS side but the GPU timeline still serializes the readback; if the measurement bracket includes the await on the mapped range, host-side copy and synchronization are attributed to the kernel.",
+    "how_discovered": "Timestamp queries or GPU duration timestamps show much smaller numbers than the wall-clock bracket around mapAsync; or CPU profiles show the main thread blocked in the await; often wastes a day of 'GPU is slow' investigation.",
+    "mitigation": "Use timestamp queries around the compute pass only; keep readback outside the timed region; prefer double-buffering so the next dispatch proceeds while the previous result is mapped.",
+    "affects": "measurement-validity",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "GPU timestamp-query support is optional and quantization is coarse",
+    "what_happens": "Timing code throws or returns zeros; or reported kernel times have 1-10 µs steps that swamp short dispatches.",
+    "why": "timestamp-query is a WebGPU feature level that many mobile and some desktop adapters still lack; even when present, the resolution is adapter-dependent and often coarser than CPU timers, so short MSM or NTT kernels are dominated by quantization noise.",
+    "how_discovered": "adapter.features missing 'timestamp-query' or values that are identical across runs of different sizes; wastes hours before falling back to coarser measurement.",
+    "mitigation": "Feature-detect and fall back to CPU wall time around queue.submit + onSubmittedWorkDone; batch enough work that quantization becomes negligible; never treat a single short dispatch time as authoritative.",
+    "affects": "measurement-validity",
+    "confidence": 0.88
+  },
+  {
+    "pitfall_name": "Browser timer clamping and cross-origin isolation effects on performance.now",
+    "what_happens": "Benchmark numbers become quantized to 1 ms or 100 µs; short iterations appear identical; speed-ups disappear.",
+    "why": "Without cross-origin isolation, many browsers clamp performance.now to 1 ms or coarser for fingerprinting resistance; even with isolation the resolution is not guaranteed to be nanosecond. Measurement of sub-millisecond field operations or small proofs is therefore distorted.",
+    "how_discovered": "All iteration times are multiples of 1 ms or show zero variance; comparing isolated vs non-isolated origins reveals the clamp; typically wastes half a day of 'why are my micro-benchmarks flat'.",
+    "mitigation": "Ensure COOP/COEP so crossOriginIsolated is true; measure longer batches (many proofs or large circuits) so clamping error is amortized; prefer GPU timestamp queries when available.",
+    "affects": "measurement-validity",
+    "confidence": 0.91
+  },
+  {
+    "pitfall_name": "JIT warmup and tiering mid-benchmark",
+    "what_happens": "First few proofs are dramatically slower; later proofs suddenly speed up, so average or 'peak' numbers depend on how many iterations were discarded.",
+    "why": "JS and the WASM baseline compiler start slow; optimizing tiers (TurboFan, etc.) recompile hot functions after a threshold of invocations. If the benchmark loop itself triggers tier-up, the measured interval mixes cold and hot code.",
+    "how_discovered": "Time-per-proof curve shows a clear step function after N iterations; disabling the optimizing compiler (or using --no-opt flags in controlled environments) removes the step; wastes a day of unstable numbers.",
+    "mitigation": "Run a fixed, sufficiently long warmup that is discarded; measure only after steady-state; or pin to a known tier if the engine exposes flags (not available to normal web content).",
+    "affects": "measurement-validity",
+    "confidence": 0.9
+  },
+  {
+    "pitfall_name": "GC pauses and minor collections attributed to the proving kernel",
+    "what_happens": "Occasional multi-millisecond spikes in an otherwise smooth proving timeline; throughput variance is high.",
+    "why": "Even when most data lives in WASM memory, any JS-side TypedArray views, temporary proof objects, or logging allocate on the JS heap; major GC or growing nursery pauses are charged to the surrounding wall-clock measurement.",
+    "how_discovered": "Browser performance timeline shows yellow/gray GC bars exactly at the spikes; allocating less on the JS side removes them; often mis-diagnosed as 'WASM GC' or scheduler noise for hours.",
+    "mitigation": "Keep allocation off the hot path; reuse JS objects; force a GC before timed runs if the engine allows (chrome://tracing or equivalent); measure with allocation instrumentation.",
+    "affects": "measurement-validity",
+    "confidence": 0.87
+  },
+  {
+    "pitfall_name": "Mobile browser memory kills and background tab throttling",
+    "what_happens": "Tab is discarded or process is killed mid-proof; or proving slows by 5-10× when the phone screen turns off or the tab is backgrounded.",
+    "why": "Mobile OSes aggressively reclaim memory from background tabs; browsers also throttle timers and JS execution. Large WASM heaps + WebGPU resources exceed the per-tab budget on mid-range devices.",
+    "how_discovered": "Proofs that finish on desktop die on phone; visibilitychange or freeze events correlate with kills; wastes days of 'works on my laptop' debugging.",
+    "mitigation": "Detect deviceMemory / hardwareConcurrency and shrink circuit or switch to a lighter proving mode; listen for visibilitychange and checkpoint; keep working set under typical mobile limits (~300-600 MB).",
+    "affects": "deployment",
+    "confidence": 0.89
+  },
+  {
+    "pitfall_name": "Safari WebGPU and WASM thread divergences",
+    "what_happens": "Code that runs on Chrome/Firefox fails or is dramatically slower on Safari; timestamp queries or certain buffer usages are missing; threads may be limited.",
+    "why": "Safari's WebGPU implementation lagged in feature completeness (timestamp-query, certain storage-texture usages) and its WASM threading / SAB story has historically been more restrictive; scheduler and memory allocator behavior also differ under pressure.",
+    "how_discovered": "Feature detection fails only on Safari; or proofs that pass elsewhere OOM or time out; typically discovered late in cross-browser testing, wasting 1-2 days.",
+    "mitigation": "Feature-detect every WebGPU capability used; maintain a Safari-specific reduced path; test on real Safari early; do not assume Chrome behavior is universal.",
+    "affects": "deployment",
+    "confidence": 0.8
+  },
+  {
+    "pitfall_name": "Iframe and embedded-context restrictions on workers, SAB, and WebGPU",
+    "what_happens": "Proving that works in a top-level page fails when embedded; workers cannot be created or SharedArrayBuffer is unavailable; WebGPU adapter request returns null.",
+    "why": "Cross-origin iframes inherit stricter isolation; COOP/COEP must be set on both the embedder and the embeddee; some browsers further restrict WebGPU and high-resolution timers inside iframes for fingerprinting and security reasons.",
+    "how_discovered": "Same origin works top-level but fails when loaded as an iframe in a host application; wastes a day of 'it works locally' confusion.",
+    "mitigation": "Require top-level or carefully coordinated COOP/COEP on the whole frame chain; detect the embedding context and surface a clear error; prefer popup or dedicated origin for heavy proving.",
+    "affects": "deployment",
+    "confidence": 0.86
+  }
+]

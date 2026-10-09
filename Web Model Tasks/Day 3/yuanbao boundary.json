@@ -1,0 +1,11 @@
+[
+  {"rule": 1, "phrase_inclusivity": "strict", "verdicts": {"below": "FAIL", "at": "FAIL", "above": "FIRE"}, "reasoning": "\"more than 2 percent\" is strict inequality (>2%), so only values strictly greater than 2% trigger."},
+  {"rule": 2, "phrase_inclusivity": "strict", "verdicts": {"below": "FAIL", "at": "FAIL", "above": "FIRE"}, "reasoning": "\"more than 36 months\" is strict (>36), so only durations strictly exceeding 36 months trigger."},
+  {"rule": 3, "phrase_inclusivity": "inclusive", "verdicts": {"below": "FAIL", "at": "FIRE", "above": "FIRE"}, "reasoning": "\"1.5 or more percentage points\" is inclusive (>=1.5), so spreads at or above 1.5 trigger."},
+  {"rule": 4, "phrase_inclusivity": "strict", "verdicts": {"below": "PASS", "at": "FAIL", "above": "FAIL"}, "reasoning": "\"does not exceed ... by 2.25 or more\" negates an inclusive condition, making the effective pass boundary strict (<2.25)."},
+  {"rule": 5, "phrase_inclusivity": "strict", "verdicts": {"below": "PASS", "at": "FAIL", "above": "FAIL"}, "reasoning": "\"less than\" is strict (<), so both revenue and income must be strictly below thresholds to pass; only the pair with both below passes."},
+  {"rule": 6, "phrase_inclusivity": "inclusive", "verdicts": {"below": "FAIL", "at": "PASS", "above": "PASS"}, "reasoning": "\"equal to or greater than 16%\" is inclusive (>=16%), so ETRs at or above 16% pass."},
+  {"rule": 7, "phrase_inclusivity": "inclusive", "verdicts": {"below": "FAIL", "at": "PASS", "above": "PASS"}, "reasoning": "\"at least equal to 50%\" is inclusive (>=50%), so ratios at or above 50% pass."},
+  {"rule": 8, "phrase_inclusivity": "inclusive", "verdicts": {"below": "FAIL", "at": "PASS", "above": "PASS"}, "reasoning": "\"equal to or greater than\" the minimum is inclusive (>=), so values at or above threshold pass."},
+  {"weakest_point": "Rule 5 (GloBE de-minimis): I am least certain I have the exact verbatim phrasing of the OECD GloBE rules regarding the de-minimis exclusion, as the consolidated commentary may use slightly different formulations like 'is less than' versus 'does not exceed'."}
+]

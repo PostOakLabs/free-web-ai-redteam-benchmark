@@ -1,0 +1,140 @@
+{
+"receipt_kinds": [
+{
+"kind": "composite",
+"when_produced": "The non-succinct zkVM receipt produced directly from execution/segment proofs; it retains the composite/segment-level proof structure rather than reducing the proof to one recursive receipt."
+},
+{
+"kind": "succinct",
+"when_produced": "A recursively compressed receipt in which the underlying composite execution proof has been reduced to a succinct proof. This is the intermediate proof form used by the recursion system."
+},
+{
+"kind": "groth16",
+"when_produced": "A succinct receipt wrapped by the RISC Zero Groth16 recursion circuit, producing a BN254 Groth16 proof ('seal') that can be verified with a Groth16 verifying key."
+}
+],
+"groth16_receipt_fields": [
+{
+"field": "claim",
+"type_shape": "ReceiptClaim (version-dependent internal shape; conceptually pre-state, post-state, exit code, input digest, output/journal digest)",
+"meaning": "The statement certified by the receipt. The journal bytes are not themselves the Groth16 claim field; the claim commits to the execution result including the journal/output digest and the execution state transition.",
+"verifier_must_check": "Recompute the claim digest from the canonical ReceiptClaim representation and use that digest as the expected Groth16 public input. Also validate the semantic relationship between the claim and the requested image ID and journal.",
+"failure_if_skipped": "An attacker could pair a valid Groth16 proof for one execution claim with a different claim object supplied to the verifier, causing the verifier to accept a valid proof as certification of a different program/result."
+},
+{
+"field": "seal",
+"type_shape": "byte string containing the Groth16 proof over BN254; exact serialized length/encoding is circuit/library-version dependent",
+"meaning": "The actual Groth16 proof produced by the RISC Zero Groth16 wrapping circuit.",
+"verifier_must_check": "Parse the proof using the exact RISC Zero Groth16 encoding rules, verify it with the correct circuit-specific verifying key, and supply the exact expected public inputs, including the claim digest and the circuit/control-root commitment required by that version.",
+"failure_if_skipped": "If the seal is not cryptographically verified, an attacker can submit arbitrary or unrelated claim data without possessing a proof of execution."
+}
+],
+"claim_structure": {
+"components": [
+{
+"component": "pre-state",
+"meaning": "The initial VM/system state commitment. In RISC Zero versions where ReceiptClaim exposes SystemState, this is a structured state commitment rather than simply a field literally named image_id. The program image identity is bound through the initial machine state/commitment used by the VM."
+},
+{
+"component": "post-state",
+"meaning": "The final VM/system state commitment resulting from execution."
+},
+{
+"component": "exit_code",
+"meaning": "The VM execution outcome/status. A verifier requiring successful execution must enforce the appropriate success exit code rather than merely checking that a proof exists."
+},
+{
+"component": "input",
+"meaning": "Digest/commitment to the committed execution input."
+},
+{
+"component": "output",
+"meaning": "Digest/commitment to the execution output, which is the commitment used to bind the journal contents in the receipt API."
+}
+],
+"image_id": "The image ID is not safely described across all v1.x-3.x releases as a direct ReceiptClaim field named image_id. The important invariant is that the claim's initial state commitment is bound to the executable image identity, and verification against a caller-supplied image ID must enforce that binding.",
+"journal_digest": "The receipt carries journal bytes separately from the cryptographic claim. The claim contains the corresponding output/journal commitment; verification of a supplied journal therefore requires recomputing the canonical journal/output digest and checking equality with the claim.",
+"claim_digest": "The Groth16 statement is not formed by hashing an arbitrary JSON serialization. RISC Zero defines a canonical ReceiptClaim digest routine in its zkVM receipt implementation. Mechanically, the verifier must compute exactly the protocol-defined digest over the canonical encoded claim fields and use that resulting 32-byte Digest as the corresponding Groth16 public input. Exact serialization/hash framing is implementation-version specific and should be taken from the matching risc0-zkvm source rather than reimplemented from a generic serialization scheme."
+},
+"binding_chain": [
+{
+"step": 1,
+"binding": "journal bytes -> output/journal digest",
+"detail": "The journal bytes are committed by the receipt's output/journal digest. A verifier that exposes journal bytes to an application must recompute the protocol-defined digest from those bytes and compare it with the digest committed by the claim."
+},
+{
+"step": 2,
+"binding": "claim fields -> claim digest",
+"detail": "The ReceiptClaim's canonical fields are encoded according to the RISC Zero receipt implementation and passed through its claim-digest routine. This produces the digest representing the exact claim."
+},
+{
+"step": 3,
+"binding": "claim digest -> Groth16 public input",
+"detail": "The Groth16 circuit proves a statement whose public inputs include the claim digest. Therefore the Groth16 proof is bound to that exact claim rather than merely to an unstructured receipt byte string."
+},
+{
+"step": 4,
+"binding": "control-root/circuit commitment -> Groth16 public input and circuit",
+"detail": "The RISC Zero Groth16 wrapper is tied to the recursion circuit configuration and its control commitment/root. The verifier must use the expected control-root value for the intended RISC Zero version/configuration and the matching Groth16 verifying key."
+},
+{
+"step": 5,
+"binding": "seal -> verifying key",
+"detail": "The Groth16 seal is verified against the circuit-specific BN254 verifying key. Successful verification therefore establishes that the supplied public inputs satisfy the RISC Zero Groth16 wrapping circuit."
+},
+{
+"step": 6,
+"binding": "public inputs -> requested verification statement",
+"detail": "The complete application-level check is consequently: the requested image/program identity is the one bound by the claim's initial state, the supplied journal hashes to the claim's output/journal commitment, the claim digest is recomputed exactly, the Groth16 proof verifies against the exact expected public inputs/control commitment, and the exit code satisfies the policy being requested."
+}
+],
+"version_coupling": {
+"verifying_key": "Circuit/version dependent. A Groth16 verifying key is tied to a particular Groth16 circuit. Using a key for a different RISC Zero circuit/version is not a harmless substitution: a legitimate seal from the intended circuit will generally fail verification, while accepting a key for an unintended circuit can destroy the verifier's intended statement if the surrounding checks are not correspondingly updated.",
+"control_root": "Version/circuit dependent. The control root represents the approved recursion-control configuration for the relevant proof system/version. It must match the expected root for the circuit and receipt ecosystem being verified.",
+"control_ids": "The underlying recursion control IDs and their Merkle/root commitment are also version/configuration sensitive. They should not be treated as stable constants across risc0-zkvm releases.",
+"claim_encoding": "The exact canonical encoding and claim-digest construction are implementation details that can change with receipt/circuit revisions. A verifier should use the matching risc0-zkvm implementation rather than assuming that the v1.x encoding is identical to v2.x or v3.x.",
+"failure_mode": "Using the wrong version's parameters normally causes valid proofs to fail because the seal, verifying key, public-input interpretation, or control commitment no longer matches. A more dangerous implementation mistake is to mix parameters from different versions while omitting an explicit version/circuit binding; this can create cross-version confusion about what exactly was proven."
+},
+"common_verifier_bugs": [
+{
+"bug": "Checks the Groth16 seal but does not recompute the claim digest from the supplied claim.",
+"check_that_catches_it": "Recompute ReceiptClaim::digest() (or the exact equivalent for the selected risc0-zkvm version) and compare the resulting digest with the Groth16 public input used for verification.",
+"concrete_failure": "A proof for claim A could be presented alongside attacker-controlled claim B, and the verifier could accidentally report that B was proven."
+},
+{
+"bug": "Accepts journal bytes without checking that they hash to the claim's output/journal digest.",
+"check_that_catches_it": "Recompute the protocol-defined journal/output digest over the exact journal bytes and compare it to the digest committed in the claim.",
+"concrete_failure": "A valid proof for journal J1 could be accompanied by forged journal bytes J2, causing an application to consume data that was never proven."
+},
+{
+"bug": "Fails to bind the receipt to the requested image ID/program identity.",
+"check_that_catches_it": "Validate the claim's initial state/image binding against the exact expected image ID using the risc0-zkvm verification logic for the relevant release.",
+"concrete_failure": "A receipt proving a different executable could be accepted as proof of the caller's intended program."
+},
+{
+"bug": "Uses the wrong Groth16 verifying key or accepts a caller-selected key without separately binding it to the intended RISC Zero circuit/version.",
+"check_that_catches_it": "Select the verifying key from trusted, version-specific parameters and verify the seal with that exact key.",
+"concrete_failure": "The verifier could accept a proof generated for a different circuit/protocol configuration and mistake it for a proof of the intended RISC Zero statement."
+},
+{
+"bug": "Does not enforce the expected control root/control-ID commitment.",
+"check_that_catches_it": "Compare the control commitment/public input against the trusted expected value for the exact circuit/version before accepting the Groth16 proof.",
+"concrete_failure": "A mathematically valid Groth16 proof from a different recursion-control configuration could be accepted as though it certified the intended RISC Zero recursion system."
+},
+{
+"bug": "Treats 'proof verifies' as equivalent to 'successful program execution' without checking the exit code.",
+"check_that_catches_it": "Enforce the expected successful ExitCode, or explicitly propagate failure semantics to the caller.",
+"concrete_failure": "A receipt proving a program that deterministically halted with a failure/panic exit could be mistakenly treated as proof of successful execution."
+}
+],
+"certainty_notes": {
+"receipt_kinds": "High confidence on the composite/succinct/groth16 progression and their roles. Exact construction paths/default APIs can differ across risc0-zkvm releases.",
+"groth16_receipt_fields": "High confidence that the Groth16 receipt conceptually consists of a ReceiptClaim plus Groth16 seal/proof. Exact Rust field names and wrapper types should be checked against the target release because RISC Zero changed receipt APIs and serialization across versions.",
+"claim_structure": "Moderate-to-high confidence on the conceptual fields: pre-state, post-state, exit code, input digest, and output/journal digest. I am deliberately not asserting that every v1.x-3.x release exposed an image_id field literally by that name, because the image identity is represented through the initial system-state commitment in relevant receipt designs.",
+"claim_digest": "High confidence that verification must use the RISC Zero-defined canonical claim-digest procedure and must not substitute arbitrary serialization. Lower confidence in a byte-for-byte reconstruction of every version's internal encoding from memory alone; this is precisely the part that should be taken from the matching risc0-zkvm source before implementing an independent verifier.",
+"binding_chain": "High confidence in the cryptographic dependency chain: journal/output commitment -> claim -> claim digest -> Groth16 public input -> Groth16 seal verification, with program/image identity and recursion-control configuration also bound into the statement.",
+"version_coupling": "High confidence that Groth16 verifying keys, recursion control commitments/IDs, and circuit parameters are version/configuration coupled. Exact parameter names and packaging vary by release.",
+"common_verifier_bugs": "These are concrete, standard failure modes for a RISC Zero-style receipt verifier; the exact method names used to prevent them are version dependent.",
+"source_scope": "The attached document specifies that the requested target is the RISC Zero receipt format, especially the Groth16-wrapped form, and explicitly requires version sensitivity and per-section honesty notes. "
+}
+}

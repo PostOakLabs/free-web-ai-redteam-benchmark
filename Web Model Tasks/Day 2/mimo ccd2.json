@@ -1,0 +1,136 @@
+```json
+[
+  {
+    "case_name": "Case 1 — Basic single drawdown, equal monthly payments",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "credit_unit": "EUR",
+      "drawdown": {"amount": 10000, "time_years": 0},
+      "payment_schedule": "24 equal monthly payments",
+      "payment_amount": 459.47,
+      "payment_unit": "EUR",
+      "payment_times": "k/12 years for k = 1, 2, ..., 24"
+    },
+    "equation_setup": "Σ(k=1 to 24) 459.47 / (1 + x)^(k/12) = 10,000\n\nEquivalently: 459.47 × [1 − (1+x)^(−2)] / [(1+x)^(1/12) − 1] = 10,000",
+    "computation": "Step 1: Set x = 0.10 (trial)\nStep 2: Monthly rate r = (1.10)^(1/12) − 1 = 0.0079741\nStep 3: (1.0079741)^24 = (1.10)^2 = 1.21\nStep 4: Sum = [1 − 1/1.21] / 0.0079741 = 0.173554 / 0.0079741 = 21.7647\nStep 5: 459.47 × 21.7647 = 9,999.97 ≈ 10,000 ✓\nStep 6: x = 0.10 satisfies the equation → APRC = 10.0%",
+    "result_aprc": "10.0% (rounded to one decimal place)",
+    "assumptions_applied": [
+      "Single drawdown of full credit amount at t = 0 (first day of agreement)",
+      "Equal intervals between successive payments (1 month = 1/12 year)",
+      "Time measured in years from drawdown date",
+      "No charges other than those embedded in the payment amount"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The specific payment amount (€459.47) was reverse-engineered to produce a clean 10.0% APRC; the annex's Example 1 likely uses different input values. The rounding convention (one decimal place) is my best recall but may differ."
+  },
+  {
+    "case_name": "Case 2 — Single drawdown with upfront fee (charges at t=0)",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "credit_unit": "EUR",
+      "drawdown": {"amount": 10000, "time_years": 0},
+      "upfront_fee": {"amount": 500, "time_years": 0, "description": "Arrangement fee paid at drawdown"},
+      "payment_schedule": "12 equal monthly payments",
+      "payment_amount": 879.16,
+      "payment_unit": "EUR",
+      "payment_times": "k/12 years for k = 1, 2, ..., 12",
+      "nominal_rate": "10% per annum (monthly compounding) on €10,000"
+    },
+    "equation_setup": "10,000 = 500/(1+x)^0 + Σ(k=1 to 12) 879.16 / (1+x)^(k/12)\n\nSimplifies to: 9,500 = 879.16 × Σ(k=1 to 12) 1/(1+x)^(k/12)",
+    "computation": "Step 1: Net amount to recover from monthly payments = 10,000 − 500 = 9,500\nStep 2: Payment verification at10% nominal monthly:\n  P = 10,000 × (0.10/12) / [1 − (1 + 0.10/12)^(−12)]\n  = 10,000 × 0.008333 / [1 − (1.008333)^(−12)]\n  (1.008333)^12 = 1.10471\n  1 − 1/1.10471 = 0.09474\n  P = 83.33 / 0.09474 = 879.16 ✓\nStep 3: Iterate for APRC:\n  At x = 0.217:\n    r = (1.217)^(1/12) − 1 = 0.016502\n    (1.016502)^12 = 1.217\n    Sum = [1 − 1/1.217] / 0.016502 = 0.17831 / 0.016502 = 10.805\n879.16 × 10.805 = 9,499.3 ≈ 9,500 ✓\nStep 4: APRC ≈ 21.7%\nStep 5: Compare to APRC without fee: 10.47% (nominal monthly → effective annual)\n  The €500 fee increases APRC from 10.5% to 21.7% — a 11.2 percentage point increase.",
+    "result_aprc": "21.7% (rounded to one decimal place)",
+    "assumptions_applied": [
+      "Single drawdown of full credit amount at t = 0",
+      "Upfront fee treated as a repayment at t = 0 (not discounted, reduces net advance)",
+      "Equal monthly intervals (1/12 year)",
+      "Payment amount based on10% nominal monthly rate on full €10,000",
+      "Time measured in years from drawdown date"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The annex may treat upfront fees differently (e.g., added to credit amount vs. separate repayment at t=0); both treatments yield the same APRC mathematically, but the equation setup differs. The specific fee amount and payment are my construction."
+  },
+  {
+    "case_name": "Case 3 — Irregular payment intervals",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "credit_unit": "EUR",
+      "drawdown": {"amount": 10000, "time_years": 0},
+      "payments": [
+        {"amount": 3000, "time_years": 0.25, "time_description": "3 months after drawdown"},
+        {"amount": 4000, "time_years": 0.6667, "time_description": "8 months after drawdown"},
+        {"amount": 4500, "time_years": 1.1667, "time_description": "14 months after drawdown"}
+      ],
+      "total_payments": 11500,
+      "total_cost_of_credit": 1500
+    },
+    "equation_setup": "10,000 = 3,000/(1+x)^0.25 + 4,000/(1+x)^0.6667 + 4,500/(1+x)^1.1667",
+    "computation": "Step 1: Trial x = 0.10:\n  (1.10)^0.25 = 1.02411, (1.10)^0.6667 = 1.06497, (1.10)^1.1667 = 1.11742\n  PV = 3,000/1.02411 + 4,000/1.06497 + 4,500/1.11742\n  = 2,929.4 + 3,756.0 + 4,027.1 = 10,712.5 > 10,000\n\nStep 2: Trial x = 0.20:\n  (1.20)^0.25 = 1.04664, (1.20)^0.6667 = 1.12924, (1.20)^1.1667 = 1.24067\n  PV = 3,000/1.04664 + 4,000/1.12924 + 4,500/1.24067\n  = 2,866.3 + 3,542.2 + 3,627.1 = 10,035.6 > 10,000\n\nStep 3: Trial x = 0.207:\n  ln(1.207) = 0.18809\n  (1.207)^0.25 = e^0.04702 = 1.04814\n  (1.207)^0.6667 = e^0.12540 = 1.13359\n  (1.207)^1.1667 = e^0.21945 = 1.24529\n  PV = 3,000/1.04814 + 4,000/1.13359 + 4,500/1.24529\n  = 2,862.2 + 3,528.6 + 3,613.6 = 10,004.4 ≈ 10,000\n\nStep 4: APRC ≈ 20.7%\n  (Refinement: at x = 0.2075, PV = 10,001.0; APRC ≈ 20.8% rounded)",
+    "result_aprc": "20.8% (rounded to one decimal place)",
+    "assumptions_applied": [
+      "Single drawdown of full credit amount at t = 0",
+      "Irregular intervals between payments (not equal)",
+      "Time measured in years using actual days / 365 (3 months = 0.25, 8 months = 0.6667, 14 months = 1.1667)",
+      "No additional charges beyond the payment amounts"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The day-count convention (actual/365 vs30/360) affects the time fractions and hence the APRC; I used actual/365 but the annex may prescribe30/360. The specific payment amounts and intervals are my construction."
+  },
+  {
+    "case_name": "Case 4 — Short-term credit, 6 monthly payments",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 5000,
+      "credit_unit": "EUR",
+      "drawdown": {"amount": 5000, "time_years": 0},
+      "payment_schedule": "6 equal monthly payments",
+      "payment_amount": 861.27,
+      "payment_unit": "EUR",
+      "payment_times": "k/12 years for k = 1, 2, ..., 6",
+      "total_payments": 5167.62,
+      "total_cost_of_credit": 167.62
+    },
+    "equation_setup": "Σ(k=1 to 6) 861.27 / (1 + x)^(k/12) = 5,000\n\nEquivalently: 861.27 × [1 − (1+x)^(−0.5)] / [(1+x)^(1/12) − 1] = 5,000",
+    "computation": "Step 1: Set x = 0.12 (trial)\nStep 2: Monthly rate r = (1.12)^(1/12) − 1 = 0.009489\nStep 3: (1.009489)^6 = (1.12)^0.5 = 1.05830\nStep 4: Sum = [1 − 1/1.05830] / 0.009489 = 0.055087 / 0.009489 = 5.8054\nStep 5: 861.27 × 5.8054 = 5,000.0 ✓\nStep 6: x = 0.12 satisfies the equation → APRC = 12.0%",
+    "result_aprc": "12.0% (rounded to one decimal place)",
+    "assumptions_applied": [
+      "Single drawdown of full credit amount at t = 0",
+      "Equal monthly intervals (1/12 year)",
+      "Time measured in years from drawdown date",
+      "Short-term credit (6 months total term)",
+      "No additional charges beyond the payment amount"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The payment amount (€861.27) was reverse-engineered to produce a clean 12.0% APRC. The annex may not include a 6-month example. The short term means the effective annual rate differs more from the nominal rate."
+  },
+  {
+    "case_name": "Case 5 — Charges paid at conclusion (final fee at t = 1 year)",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "credit_unit": "EUR",
+      "drawdown": {"amount": 10000, "time_years": 0},
+      "payment_schedule": "12 equal monthly payments of €879.16",
+      "payment_amount": 879.16,
+      "payment_unit": "EUR",
+      "payment_times": "k/12 years for k = 1, 2, …, 12",
+      "final_fee": {"amount": 100, "time_years": 1, "description": "Administration fee paid with last installment at t = 1 year"},
+      "nominal_rate": "10% per annum (monthly compounding) on €10,000"
+    },
+    "equation_setup": "10,000 = 879.16 × Σ(k=1 to 12) 1/(1+x)^(k/12) + 100/(1+x)^1",
+    "computation": "Step 1: At x = 0.10:\n 879.16 × 11.4008 + 100/1.10 = 10,022.6 + 90.91 = 10,113.5 > 10,000\n\nStep 2: At x = 0.12:\n r = 0.009489, Sum = 11.291\n 879.16 × 11.291 + 100/1.12 = 9,926.5 + 89.29 = 10,015.8 > 10,000\n\nStep 3: At x = 0.123:\n r = (1.123)^(1/12) − 1 = 0.009713\n (1.009713)^12 = 1.123\n Sum = [1 − 1/1.123] / 0.009713 = 0.10953 / 0.009713 = 11.277\n 879.16 × 11.277 + 100/1.123 = 9,913.8 + 89.05 = 10,002.9 ≈ 10,000\n\nStep 4: APRC ≈ 12.3%\nStep 5: Without fee, APRC = 10.47%\n Final fee increases APRC by 1.8 percentage points.\n The fee at t = 1 is DISCOUNTED (100/1.123 = 89.05), unlike the t = 0 fee in Case 2 which was not discounted.",
+    "result_aprc": "12.3% (rounded to one decimal place)",
+    "assumptions_applied": [
+      "Single drawdown of full credit amount at t = 0",
+      "Equal monthly intervals (1/12 year)",
+      "Final fee paid at t = 1 year (with last installment, DISCOUNTED by (1+x)^1)",
+      "Payment computed at 10% nominal monthly rate on €10,000",
+      "The fee at conclusion is a separate cash flow from the regular payments"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The annex likely includes a 'charges at conclusion' example but with different values. The fee amount (€100) and its timing (t = 1 year) are my construction. The APRC increase is modest because the fee is small relative to the credit amount and is discounted — a larger or later fee would increase APRC more."
+  }
+]
+```

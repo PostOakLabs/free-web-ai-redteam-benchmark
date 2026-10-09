@@ -1,0 +1,108 @@
+I can execute **PROMPT A** (no tools needed). I cannot execute **PROMPT B** (no live web access — every cell would be `UNVERIFIED`). **PROMPT C** the document says should be a separate fresh chat, so I'll address it if you ask in a new conversation.
+
+Here is the PROMPT A output:
+
+```json
+[
+  {
+    "title": "Macro-Channel Overflow Resolved by Selective Macro Rotation and Pin-Row Rebalancing",
+    "design_context": "28nm, 1.05M placeable instances, 82 hard macros (single-port and dual-port SRAMs, ranging 32KB to 512KB), 3 clock domains (250 MHz core_clk, 500 MHz datapath_clk, 100 MHz config_clk), commercial P&R, commercial STA",
+    "prior_state": "Post-CTS optimization: WNS +0.012 ns (met), TNS 0, utilization 71%, global-route overflow 0.3% (appeared clean). First detailed-route attempt produced 3,842 DRC violations.",
+    "observation": "At first detailed-route attempt, DRC violations clustered in four macro channels — specifically the horizontal channels between rows of vertically oriented SRAMs in the northeast and southwest quadrants. These four channels contained 3,104 of 3,842 violations (80.7%). M2 track utilization in those channels reached 94% (vs 65% block average). The violations were predominantly M2 shorts and minimum-spacing violations. Severity: HIGH.",
+    "hypothesis": "The macro orientation placed long pin rows along the channel edges, concentrating all signal access onto M2/M3 in the narrow horizontal channels. Post-CTS optimization had looked clean because the global router's capacity model underestimates local pin-access congestion when macros are oriented with their long edge parallel to the channel. The detailed router exposed the true demand.",
+    "candidates_considered": [
+      {
+        "action": "Widen the four macro channels by 15 um each, re-running placement and CTS from scratch",
+        "rejected_because": "The floorplan was locked by the top-level integration team. Moving macros would shift port locations on the block boundary, requiring top-level re-integration. Estimated schedule impact: 8–10 days. The tape-out date was 5 weeks away."
+      },
+      {
+        "action": "Add M2 routing blockages in the congested channels and force all traffic to M3–M5",
+        "rejected_because": "M2 blockages would push ~2,400 nets to upper metals. M3 sheet resistance at 28nm is 1.8x M2; forcing critical-path nets to detour through M3–M5 would degrade setup timing by an estimated 40–70 ps. The post-CTS WNS margin was only 12 ps — no timing budget to spend."
+      },
+      {
+        "action": "Reduce standard-cell density by 5% in the congested quadrants using cell inflation, then re-route",
+        "rejected_because": "Cell inflation in two quadrants would require re-optimization of the entire block's timing (estimated 2 days runtime plus 1 day of engineer review). The timing team judged the risk of creating new violations in adjacent regions as unacceptable given the schedule."
+      },
+      {
+        "action": "Rotate 14 of the 82 macros 90 degrees to reorient their pin rows from channel-parallel to channel-perpendicular, redistributing pin access from M2 to M3/M4, combined with adding soft M2 keep-out zones (not hard blockages) along the four congested channels",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Rotated 14 macros (the 14 with the highest pin-count facing the congested channels) by 90 degrees. This reoriented their long pin rows from horizontal to vertical, shifting ~60% of their signal access from M2 to M3/M4 preferred directions. Added soft M2 keep-out zones (2 um wide) along the four channel edges to discourage the router from packing M2 nets there. Re-ran detailed routing without re-running CTS (clock tree was unaffected because clock pins were on the macros' short edges, which did not change position). Total turnaround: 1.5 days.",
+    "post_state": "DRC count dropped to 287 (from 3,842). M2 track utilization in the four channels fell to 71%. WNS degraded to -0.018 ns (from +0.012 ns — the pin-access detour added ~30 ps of delay on 6 paths near the rotated macros, but all within the -0.05 ns budget). TNS -0.04 ns. Utilization unchanged at 71%.",
+    "expert_assessment": "Macro rotation is a low-cost congestion lever that is often overlooked because it requires re-validation of pin connectivity and can shift timing margins. The right call here — the schedule could not absorb a floorplan change or full re-CTS. The general lesson: when congestion is channel-localized and macro-pin-driven, check macro orientation before blaming cell density or utilization. This would NOT transfer if the macros were custom hard IP with orientation-locked pin assignments, or if the block had abutment constraints fixing macro orientation.",
+    "confidence": 0.74,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claim that 14 macro rotations alone reduced DRCs from 3,842 to 287 is aggressive; in practice, some residual cleanup via ECO routing or minor cell re-placement would likely be needed, and the final DRC count might be closer to 400–600 without those steps."
+  },
+  {
+    "title": "Clustered Single-Launch Signature Reveals Missing Clock-Group Exclusion Before Any Physical Optimization",
+    "design_context": "16nm, 1.4M placeable instances, 45 macros (SRAMs and register files), 4 clock domains (600 MHz core_clk, 1.2 GHz serdes_clk, 200 MHz jtag_clk, 32 kHz always-on_clk), commercial P&R, commercial STA",
+    "prior_state": "Post-route optimization pass 1: WNS -0.287 ns (setup, core_clk group), TNS -6.3 ns, 31 failing endpoints, hold WNS +0.02 ns (met), utilization 74%",
+    "observation": "The timing report showed 31 failing setup paths. All 31 paths launched from exactly 2 flip-flops in the always-on domain (aon_clk, 32 kHz). The violation magnitudes were tightly clustered: -0.24 ns to -0.31 ns. The paths were physically short (2–4 logic levels, routed in M3–M5 with no detours or congestion). The launch FFs were part of a wake-up synchronizer feeding core_clk domain registers. Severity: HIGH.",
+    "hypothesis": "The engineer recognized the signature: single launch source + narrow violation band + physically clean routes = constraint error, not a physical problem. The STA was evaluating the aon_clk-to-core_clk crossing as a synchronous path (same clock group or missing exclusion), computing a 600 MHz setup check on paths that are functionally asynchronous. The 32 kHz clock has a 31.25 us period — no real setup violation exists.",
+    "candidates_considered": [
+      {
+        "action": "Run incremental placement and routing on the 31 failing paths with aggressive cell sizing and Vt swap",
+        "rejected_because": "The paths were already physically short and well-routed. Physical optimization on 2–4 logic levels would gain at most 30–50 ps per path, insufficient to close 287 ps. Runtime: 4–6 hours with near-zero probability of success."
+      },
+      {
+        "action": "Add buffer trees on the 2 launch nets to improve drive strength and reduce delay",
+        "rejected_because": "The launch nets were already buffered (2 stages). Adding buffers would increase insertion delay on the non-violating paths sharing those nets. Estimated gain: 20–40 ps, still insufficient for 287 ps."
+      },
+      {
+        "action": "Upsize all cells on the 31 critical paths to maximum drive strength",
+        "rejected_because": "Cells were already at X4 or X8. Upsizing to X16 would gain ~25 ps per stage (50–100 ps total across 2–4 levels), still insufficient. Area increase of ~12% in the local region was judged unacceptable for the marginal gain."
+      },
+      {
+        "action": "Add set_clock_groups -asynchronous between aon_clk and core_clk in the SDC, or add set_false_path -from [get_clocks aon_clk] -to [get_clocks core_clk]",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Reviewed the SDC and found that aon_clk was defined as a generated clock of core_clk (a legacy error from an earlier design revision when the always-on domain was synchronous). Corrected the SDC: removed the generated-clock definition for aon_clk, declared it as a primary clock, and added `set_clock_groups -asynchronous -group {aon_clk} -group {core_clk serdes_clk jtag_clk}`. The 31 paths were re-timed in STA with zero violations. No physical changes were needed.",
+    "post_state": "WNS improved to -0.008 ns (on a different, legitimate path in the core_clk group). TNS -0.01 ns. 0 failing endpoints. Utilization 74%. No physical re-optimization was performed.",
+    "expert_assessment": "The violation report shape — single launch source, clustered violations, physically clean routes — is a textbook signature of a constraint error. A less experienced engineer would have spent days on physical optimization chasing 287 ps that could never be closed by placement or routing. The general lesson: always read the report structure before touching the design. This pattern transfers broadly, but requires the engineer to have seen enough reports to develop the pattern recognition instinct.",
+    "confidence": 0.83,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claim that aon_clk was mistakenly defined as a generated clock of core_clk is a plausible but somewhat convenient error; in a real 16nm tape-out, this would likely have been caught during SDC review at an earlier stage — the scenario assumes a review gap that may not be realistic for a mature team."
+  },
+  {
+    "title": "Slack-Asymmetric Budget Re-Derivation Avoids Floorplan Change at Block Boundary",
+    "design_context": "28nm, 700K instances (block A, memory controller) + 500K instances (block B, ECC encoder), 22 macros total (14 in block A, 8 in block B), 2 clock domains (400 MHz core_clk, 200 MHz ecc_clk), commercial synthesis, commercial P&R",
+    "prior_state": "Top-level inter-block timing: WNS -0.19 ns on paths from block A output ports to block B input ports. Block A internal WNS +0.03 ns (met, tight). Block B internal WNS +0.11 ns (met, comfortable). Original budget: equal split of 1.0 ns inter-block delay — 0.5 ns output delay on block A, 0.5 ns input delay on block B.",
+    "observation": "The inter-block paths failed by -0.19 ns. The original budget assumed 0.5 ns of output delay on block A, but actual post-route inter-block wire delay was 0.89 ns (vs the 0.5 ns budget assumption), because the blocks were placed 2.1 mm apart — far exceeding the 0.6 mm wire-load-model assumption used during budgeting. Block A could not absorb any more output-delay tightening (only 3 ps of internal slack). Severity: MODERATE.",
+    "hypothesis": "The equal-split budget was derived from an idealized WLM that underestimated actual route length by 3.5x. The correct approach is to derive the budget from actual floorplan distance and each block's internal slack capacity, not from a mechanical 50/50 split.",
+    "candidates_considered": [
+      {
+        "action": "Move block A and block B 800 um closer in the top-level floorplan to match the WLM assumption",
+        "rejected_because": "The top-level floorplan was committed. Moving blocks would shift port locations on the chip boundary, requiring re-validation of the package substrate design (already in fabrication). Schedule impact: 4 weeks minimum. Cost of substrate re-spin: ~$180K."
+      },
+      {
+        "action": "Insert a pipeline register between block A and block B at the top level",
+        "rejected_because": "The inter-block data path carried a single-cycle-latency memory-write acknowledgment signal. Adding a pipeline stage would break the memory controller protocol and require micro-architecture changes to the ECC encoder's write-handshake logic. The RTL team estimated 3 weeks for the change plus re-verification."
+      },
+      {
+        "action": "Allocate 0.7 ns of the inter-block delay as block A output delay and 0.3 ns as block B input delay, then re-optimize block A to meet the tighter budget",
+        "rejected_because": "Block A had only 3 ps of internal slack. Tightening its output-delay budget by 0.2 ns (from 0.5 ns to 0.3 ns effective) was physically impossible without a floorplan change or major re-architecture. The block A team confirmed this was infeasible."
+      },
+      {
+        "action": "Allocate 0.35 ns of inter-block delay as block A output delay and 0.65 ns as block B input delay, then re-optimize block B (which has 110 ps of slack) to absorb the tighter input-delay budget",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Re-derived the budget using actual floorplan distance: 0.89 ns wire delay + 0.11 ns margin = 1.0 ns total. Allocated 0.35 ns as block A output delay (block A must deliver data within 0.35 ns of its clock edge — feasible given its 3 ps slack plus the fact that output delay is measured from the clock, not from internal logic) and 0.65 ns as block B input delay (block B must capture data within 0.65 ns of its clock edge). Block B absorbed the tighter input constraint by swapping 8 cells from HVT to LVT near its input ports (gained ~80 ps of setup margin at a power cost of ~0.5 mW). Block A's output-delay constraint was actually relaxed from 0.5 ns to 0.35 ns (the original budget had been too tight on block A and too loose on block B).",
+    "post_state": "Top-level inter-block WNS +0.04 ns (met). Block A WNS +0.03 ns (unchanged — output delay was relaxed). Block B WNS +0.02 ns (tightened from +0.11 ns due to LVT swaps, but still met). Power increase: ~0.5 mW in block B. No floorplan change, no schedule slip.",
+    "expert_assessment": "The equal-split budget is a common starting point but almost never correct when blocks have asymmetric internal slack or when the floorplan distance deviates from the WLM assumption. The right approach is to derive budgets from actual route-length estimates and each block's slack capacity. The general lesson: SDC budgets are a negotiation informed by data, not a mechanical formula. This transfers to any multi-block SoC, but the specific numbers depend on floorplan geometry and block-internal timing margins.",
+    "confidence": 0.71,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The original budget allocating 0.5 ns output delay to block A when block A had only 3 ps of internal slack suggests the budget was never validated against block-level STA — a mature team would have caught this mismatch before top-level integration, making the scenario somewhat contrived."
+  }
+]
+```
+
+**PROMPT C** should be run in a separate fresh chat per the document's instructions. Let me know if you'd like me to address it here or in a new conversation.
+
+**PROMPT B** cannot be executed — I have no live web access, so every cell would honestly come back as `claim: "UNVERIFIED"`, which is the correct but unhelpful output per the prompt's own honesty rules.

@@ -1,0 +1,92 @@
+[
+  {
+    "pattern_name": "Block-boundary input delay from available period",
+    "situation": "Defining set_input_delay at a block boundary when the chip-level clock period and the receiver block's internal path are known",
+    "derivation": "Available input budget = clock period − capture block's internal delay − clock skew. Example: 1GHz target (period = 1000ps), capture block has a 650ps internal setup path, clock skew = 30ps → input_delay budget = 1000 − 650 − 30 = 320ps. Set set_input_delay [0, 320] ns on the boundary nets.",
+    "wrong_way": "Using a round number like 0.5ns copied from a previous project without calculating the actual available budget, or setting input_delay = 0 (maximum budget) and hoping the implementation is fast enough — both silently break signoff when the real silicon has different block delays.",
+    "defense": "Pull the capture block's critical path from its timing report; use the worst-case corner; apply the clock skew estimate from the chip-level CTS. Present the arithmetic in the constraint review doc so the number is traceable to a source, not an assumption.",
+    "signoff_risk": "Too tight: block passes internally but fails at chip assembly because the interface budget is smaller than the silicon delivers. Too loose: the interface is under-constrained, the sending block has no pressure to meet timing, and the chip-level integration reveals the problem late.",
+    "confidence": 0.92
+  },
+  {
+    "pattern_name": "Block-boundary output delay from launch-side path",
+    "situation": "Defining set_output_delay at a block boundary from the launch block's perspective",
+    "derivation": "Output delay = launch block's maximum clock-to-q delay + any combinational logic delay on the sending side. Example: launch block's FF clock-to-q = 200ps, combinational logic = 150ps → output_delay = 350ps. Set set_output_delay [−350, 0] (or [0, 350] depending on tool sign). The receiving block's set_input_delay and the sending block's set_output_delay must sum to less than the clock period minus interconnect.",
+    "wrong_way": "Setting output_delay = 0 because 'the output should be ready at the clock edge' — this ignores the launch-side logic delay and effectively over-constrains the sending block by pretending its own internal delay does not consume any of the period.",
+    "defense": "Extract the launch block's worst-case clock-to-q from its timing library; add the max combinational delay on the boundary path. Present the number as a sum of two independently-sourced values.",
+    "signoff_risk": "Too tight: launch block is forced to meet a constraint that includes its own internal delay, double-counting its path. Too loose: boundary paths have no pressure and may not meet chip-level timing when assembled.",
+    "confidence": 0.90
+  },
+  {
+    "pattern_name": "False path from handshaking protocol",
+    "situation": "Declaring a timing path false because a handshaking protocol makes the launch-to-capture relationship non-deterministic within one cycle",
+    "derivation": "Analyze the FSM or protocol: if a valid/ready handshake requires 3 cycles to complete (data cycle, ready-acknowledge cycle, backoff cycle), and the path in question traverses from the data register to the ready flag register, it is a 3-cycle path, not a 1-cycle path — it cannot be analyzed as a normal setup path. Derivation: document the state machine, count cycles, write set_false_path with explicit from/to and a comment citing the protocol document.",
+    "wrong_way": "Declaring a path false because 'it doesn't matter for timing' without analyzing the protocol — the path may become real under a different reset or test mode, and the false path silently masks a real timing failure when the design evolves.",
+    "defense": "Provide the state diagram or protocol timing diagram that shows the cycle relationship; cite the RTL comment or design spec that documents the handshake. In review, the defense is only credible if the engineer can point to a written design document, not just 'I know the protocol.'",
+    "signoff_risk": "False positive: path is genuinely false and stays false → no risk. False negative: path becomes real as RTL evolves → silent timing failure at signoff, caught only by silicon bring-up or by a desperate ECO. The failure is silent because the timing tool reported clean.",
+    "confidence": 0.88
+  },
+  {
+    "pattern_name": "Multicycle path from memory read latency",
+    "situation": "A RAM or register file read where the output data is not valid until N cycles after the address is presented",
+    "derivation": "Memory read latency = memory parameter (e.g., 1-cycle read: data valid 1 cycle after address; 2-cycle read: valid 2 cycles after). Set multicycle = N − 1 for setup. Example: 2-cycle read RAM → set_multicycle_path -setup 1 -from [address_register] -to [data_register]. Hold multicycle = 0 (hold is checked at the launching edge, unchanged). The wrong multicycle value either over-constrains (tool reports spurious failures) or under-constrains (masking a real performance bug).",
+    "wrong_way": "Setting multicycle 2 on a 1-cycle read RAM because 'the timing report looked better' — this masks the real issue (insufficient pipeline depth) and creates a chip that may not meet performance targets even if it passes STA.",
+    "defense": "Cite the memory IP datasheet or liberty file which states the read latency explicitly. The multicycle value must match the IP characterization, not the timing convenience.",
+    "signoff_risk": "Multicycle too short: spurious setup violations that consume engineering time investigating non-problems. Multicycle too long: the tool allows the path to take more cycles than the RAM actually provides, and the chip fails functionally — this is a silent failure that passes STA.",
+    "confidence": 0.91
+  },
+  {
+    "pattern_name": "CDC budget from clock period ratio",
+    "situation": "Constraining a signal that crosses from one clock domain to another where no handshaking primitive is used — a 'direct' CDC",
+    "derivation": "If source clock = 500MHz (period = 2000ps) and destination clock = 250MHz (period = 4000ps), and the crossing is protected by a 2-FF synchronizer, the budget for combinational logic on the source side is effectively unconstrained for setup (the synchronizer absorbs the period difference) but hold must be checked at the sending edge: data must not change within 1 destination cycle of the sampling edge. Derive hold budget = destination clock period − synchronizer setup time − clock skew ≈ 4000 − 200 − 30 = 3770ps. Use set_max_delay across the CDC boundary to bound the source-side logic.",
+    "wrong_way": "Not constraining the CDC at all — the tool treats it as a normal cross-clock path and may report a setup violation that doesn't exist (because the synchronizer absorbs the period mismatch), or it may report nothing when the source-side logic is too slow and the data changes before the second FF captures it.",
+    "defense": "Document the clock ratio, the synchronizer type (2-FF, FIFO, handshake), and the resulting budget. The defense is the absence of metastability failures in timing simulation — but that only works if the constraint actually enforces the correct budget.",
+    "signoff_risk": "Too loose: source-side logic is unbounded and may change data mid-synchronizer window, causing metastability or data loss. Too tight: spurious setup violations at the CDC boundary that don't reflect the actual synchronizer behavior.",
+    "confidence": 0.85
+  },
+  {
+    "pattern_name": "Inter-block period budget split before block implementation",
+    "situation": "Allocating clock period to two blocks when neither has been implemented — used for top-level planning and constraint distribution",
+    "derivation": "Chip period = 1000ps. Interface logic = 100ps (muxes, retiming registers). Remaining budget = 900ps. Split proportionally: Block A gets 500ps, Block B gets 400ps (based on relative complexity estimates or historical data from similar blocks). Use set_input_delay / set_output_delay to enforce the split from the top level. Revisit when blocks are further along.",
+    "wrong_way": "Splitting the budget 50/50 because it is simple, without considering that one block may be fundamentally more complex (e.g., a wide datapath vs. a control block) — one block ends up over-budget, the other under-utilized, and the frequency target is silently missed.",
+    "defense": "Base the split on estimated logic depth (gate count / fanout), historical data from similar blocks, or a rough synthesis run on the RTL. Present the arithmetic in the constraint planning document: 'Block A budget = X ps derived from estimated Y logic levels at Z MHz.'",
+    "signoff_risk": "Too optimistic for a block: that block fails timing at signoff and forces a frequency derate or a painful late-stage redesign. Too pessimistic: both blocks are over-constrained and the whole chip is slower than necessary — nobody's fault because the constraint was never challenged.",
+    "confidence": 0.83
+  },
+  {
+    "pattern_name": "Virtual clock for IO timing",
+    "situation": "Constraining chip inputs and outputs relative to a board-level clock that is not the chip's internal clock",
+    "derivation": "Board clock = 200MHz (period = 5000ps). Chip input arrives up to 500ps after the board clock edge due to board skew and package delay. Set virtual clock = 200MHz, set_input_delay = [0, 500]ps on inputs (relative to virtual clock), set_output_delay = [0, 500]ps on outputs. Add set_max_delay / set_min_delay on chip IO to bound the chip-internal portion of the path.",
+    "wrong_way": "Using the chip's internal clock as the reference for IO constraints — this ties the IO timing to the internal clock uncertainty and board-level delay interchangeably, making it impossible to separate chip-internal timing from board-level timing in the signoff report.",
+    "defense": "Cite the board timing spec for the clock frequency and board skew estimate. Use a virtual clock even if its frequency happens to match the internal clock — it keeps the IO constraint domain clean and prevents the board and chip timing from being conflated in the timing report.",
+    "signoff_risk": "Too tight on input delay: chip rejects valid data that arrives within the board skew window. Too loose: chip accepts data with insufficient setup margin, causing failures on fast boards or at high temperature.",
+    "confidence": 0.89
+  },
+  {
+    "pattern_name": "Generated clock constraint from source clock",
+    "situation": "Deriving constraints for a divided, multiplied, or gated version of the primary clock",
+    "derivation": "If primary clock = 1GHz and a divided-by-2 clock drives a block, derive the generated clock: create_generated_clock -divide 2 -source [primary_clock_port] [divided_clock_port]. The STA tool uses the source clock period to compute the divided clock period. Set_input_delay and set_output_delay on paths involving the divided clock must be relative to the divided clock domain, not the primary clock.",
+    "wrong_way": "Declaring the generated clock without specifying the source (create_clock on the divided port alone) — the tool treats it as an independent clock with no relationship to the source, and the timing arcs between the two domains are not correctly analyzed. A common silent failure: the divided clock paths appear to have infinite margin because the tool computes them against a fictional period.",
+    "defense": "Show the clock tree diagram in the constraint review: source port → divider → divided clock → destination registers. The source specification is the audit trail.",
+    "signoff_risk": "Missing source: divided clock paths are either over-constrained (wrong period) or under-constrained (no period relationship enforced), and the failure only surfaces when the chip is assembled and the divided domain misses timing in a way that doesn't show up in block-level signoff.",
+    "confidence": 0.87
+  },
+  {
+    "pattern_name": "Over-constraining early, relaxing at implementation freeze",
+    "situation": "Setting tighter constraints than the guaranteed frequency during early implementation to catch problems before they become entrenched",
+    "derivation": "Target frequency = 1GHz (period = 1000ps). Set constraints at 1.2GHz (period = 833ps) for early implementation. This gives ~17% headroom. The relaxation plan: when the block reaches timing at 1.2GHz, re-analyze and relax back to 1GHz with a rationale document. The over-constraining forces tighter placement and more aggressive optimization early; the relaxation is a planned event, not an emergency.",
+    "wrong_way": "Setting constraints at the target frequency from day one — when the block fails timing, the engineer has no systematic way to know whether it is 10ps short or 200ps short, and the implementation may converge on a local optimum that is 100ps short of where it could be.",
+    "defense": "Document the over-constraining strategy and the planned relaxation point in the constraint plan. At review, show the delta: 'Constraints set at 833ps; target 1000ps; relaxation documented at [MILESTONE].'",
+    "signoff_risk": "Over-constrained through to signoff: the block passes at the tighter constraint but may be over-designed (excess area, power) compared to what the target frequency actually requires. Under-constrained from the start: problems surface late and may force a frequency derate.",
+    "confidence": 0.80
+  },
+  {
+    "pattern_name": "Asynchronous interface — no-timing-exception constraint",
+    "situation": "An interface with no clock relationship at all (e.g., asynchronous reset, a free-running sensor, a debug interface) where timing cannot be analyzed with normal SDC",
+    "derivation": "For an async reset that affects sequential elements: set_false_path -from [async_reset_port] -to [all_registers]. For a CDC that is not meant to be timed (e.g., a debug scan read): set_false_path with explicit from/to and a comment that this path is async and should be verified by functional simulation, not STA. Do NOT set_max_delay on async paths — a max delay constraint implies a timing relationship that does not exist, and the tool will try to optimize it, potentially introducing hazards.",
+    "wrong_way": "Setting set_max_delay on an async path because 'I want to bound it' — the max delay constraint tells the optimizer to try to meet that delay, which on an async path means speeding up the signal, which can cause hold violations or race conditions that the constraint was supposed to prevent.",
+    "defense": "Cite the design spec that describes the interface as asynchronous. For CDC async paths, the verification method is functional simulation with async cycles modeled, not STA — state this explicitly in the constraint doc so the verification plan is complete.",
+    "signoff_risk": "Adding timing constraints to async paths: the tool optimizes a path that should not be optimized, potentially creating functional bugs. Not constraining at all: metastability risk is unverified and may cause intermittent failures in the lab. The correct risk is managed by functional verification, not STA.",
+    "confidence": 0.86
+  }
+]

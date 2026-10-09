@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clustered Integer Execution for Clock Frequency",
+    "where_in_paper": "Section on integer execution / clustered microarchitecture",
+    "decision": "Split the integer execution engine into two identical clusters, each with its own copy of the integer register file, rather than one wide unified cluster",
+    "alternatives_or_rejected": "A single unified integer cluster with all functional units and one large multi-ported register file",
+    "rationale": "A single large cluster with many read/write ports creates a long critical path through the register file and bypass network. Splitting into two clusters with fewer ports per register file and shorter local bypass networks enables significantly higher clock frequency. The cost is a 1-cycle forwarding penalty for results that cross from one cluster to the other. The paper argues that most dependency chains stay within one cluster, so the IPC loss is small relative to the frequency gain.",
+    "outcome": "The 21264 achieved 500 MHz+ in 0.35um CMOS (later higher in 0.25um), competitive clock rates for its era, while the inter-cluster penalty was reported to cause modest IPC loss",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The specific 1-cycle inter-cluster forwarding penalty — I believe this is correct but am not fully certain the paper states the exact penalty rather than describing it more generally",
+    "confidence": 0.85
+  },
+  {
+    "title": "Out-of-Order Execution Window Size",
+    "where_in_paper": "Section on out-of-order issue / instruction queue",
+    "decision": "Implement out-of-order execution with a large instruction window to expose instruction-level parallelism, replacing the in-order pipeline of the predecessor 21164",
+    "alternatives_or_rejected": "Continuing with the 21164's simpler in-order superscalar design, which had a narrower critical path and potentially higher clock frequency",
+    "rationale": "The in-order approach of the 21164 limited the ILP that could be extracted, especially from code with cache misses and unpredictable branches. The paper argues that out-of-order execution, while adding complexity and potentially constraining clock frequency, delivers sufficient IPC improvement on real workloads to justify the trade-off. A sufficiently large instruction window is needed to keep functional units busy during cache misses.",
+    "outcome": "The 21264 achieved significantly higher IPC than the 21164 while maintaining competitive clock frequency through careful physical design",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not certain the paper explicitly frames the 21164 in-order design as the 'rejected alternative' — it may describe the 21264's out-of-order approach more positively without explicitly contrasting against a continued in-order strategy. The specific window size trade-off (size vs clock speed) may be discussed at a different level of detail than I present.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Wire-Delay-Driven Physical Partitioning",
+    "where_in_paper": "Section on floorplanning / physical design philosophy",
+    "decision": "Allow wire delays to drive the physical partitioning of major functional blocks rather than treating logic delay as the sole critical-path concern",
+    "alternatives_or_rejected": "A floorplan optimized purely for logical critical paths, treating interconnect as secondary",
+    "rationale": "At the 21264's 0.35um technology node, wire delays were becoming a significant fraction of the clock period. The paper discusses how this motivated placing frequently communicating structures physically close together and accepting that less-frequent communication paths would bear larger wire delays. The clustered integer execution and cache placement were influenced by wire-delay considerations.",
+    "outcome": "The resulting floorplan enabled the 21264 to meet its clock frequency targets despite the increasing relative importance of interconnect delay",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain whether the paper presents wire-delay-driven floorplanning as an explicit engineering decision with a named alternative, or whether it weaves wire-delay considerations throughout the discussion of other decisions (clustering, cache placement) without a dedicated section. The page guess is also quite uncertain.",
+    "confidence": 0.65
+  },
+  {
+    "title": "Cache Size and Single-Cycle Access",
+    "where_in_paper": "Section on cache hierarchy / memory subsystem",
+    "decision": "Implement 64KB instruction cache and 64KB data cache sized to enable fast (single-cycle or low-cycle) access, rather than larger caches that would require more pipeline stages",
+    "alternatives_or_rejected": "Larger caches (e.g., 128KB or 256KB) that would increase hit rate but require additional pipeline stages for access",
+    "rationale": "The paper discusses the trade-off between cache size and access latency. A cache that can be accessed in fewer pipeline stages reduces the penalty on cache hits, which dominate the access pattern. The 64KB size was chosen as a sweet spot that provides reasonable hit rates for typical workloads while fitting within the latency budget for the target clock frequency.",
+    "outcome": "The 64KB caches provided adequate hit rates with low access latency, contributing to the overall IPC of the processor",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am least confident about the specific rejected alternative (128KB or 256KB) — the paper may discuss cache sizing trade-offs without naming specific larger sizes that were considered. The page guess is also uncertain as the cache discussion might be earlier or later in the article.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Large Physical Register File with Register Renaming for OOO Execution",
+    "where_in_paper": "Section on register file / out-of-order resources",
+    "decision": "Use a large physical register file with register renaming to support out-of-order execution, enabling many in-flight instructions to each have their own physical destination register",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Out-of-order execution requires that the architectural register set be decoupled from the physical registers through renaming, eliminating false dependencies (WAR, WAW). A large physical register file allows a large instruction window to be fully utilized without stalls from register exhaustion.",
+    "outcome": "The large physical register file supported the out-of-order engine's ability to find and exploit ILP across long-latency operations like cache misses",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "I am not confident that the Kessler paper discusses the physical register file sizing as an explicit engineering trade-off with considered alternatives. Register renaming is a necessary component of out-of-order execution, but the paper may describe it mechanistically rather than as a design decision. This entry may be general 21264 knowledge rather than content specific to this paper.",
+    "confidence": 0.45
+  }
+]
+```

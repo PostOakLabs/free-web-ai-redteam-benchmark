@@ -1,0 +1,139 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Open LVS detailed report and isolate short isolator vs open locator sections, sort by net with highest mismatch count",
+        "why_first": "cheapest, tells instantly if single global power short dominates vs many local opens",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare top-level LVS vs each child block LVS standalone to see if mismatch reproduces in block or only at parent stitching",
+        "why_first": "rules out the most, localizes root to block interior vs hierarchical boundary",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Highlight suspect net in layout viewer and verify text label attachment, pin text layer, and port property vs schematic pin list",
+        "why_first": "cheapest fix, rules out labeling error before chasing metal",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Move or delete suspected text label by order of microns and re-extract; if short disappears, restore label on correct text layer with single attachment point and re-run",
+        "rules_in": "text label short causing two distinct nets to be merged by label",
+        "rules_out": "true metal-to-metal short"
+      },
+      {
+        "experiment": "Run connectivity trace from schematic port down through hierarchy; if trace stops at a hierarchical port, run that block alone and diff its extracted port list against parent instantiation pins",
+        "rules_in": "hierarchical pin mismatch or missing property at boundary causing open",
+        "rules_out": "intra-block metal open or via stack break"
+      },
+      {
+        "experiment": "Rerun extraction with fill, dummy metal, and seal ring layers excluded vs included; if open/short disappears when excluded, re-include layers one by one",
+        "rules_in": "fill tie, seal ring, or dummy bridging causing short or masking open",
+        "rules_out": "core signal routing error"
+      },
+      {
+        "experiment": "Toggle soft-connect and virtual-connect handling for well taps and substrate ties and re-run LVS; if signal net that was shorted to power becomes clean, inspect tap cell placement",
+        "rules_in": "tap cell or well tie virtual connect merging power with signal",
+        "rules_out": "direct signal-to-power metal short"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Text label on wrong layer or label polygon overlapping two separate metal shapes causing virtual short",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "Floating shape or incomplete via stack at top-level integration leaving intentional open, often after manual edit",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Hierarchical port mismatch, missing pin, or off-grid port property so parent does not stitch child net",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Real metal short from sliver overlap or DRC-clean but LVS-dirty manual routing",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Soft-connect handling of tap cells or guard rings merging signal net to power/ground",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "Assuming a reported short is a real metal short and spending hours fixing routing, when it is a text label short merging two nets in extraction",
+    "node_era_note": "At 28nm opens were mostly missing via stacks; at 7nm-and-below color violations from multi-patterning and cut-metal / local interconnect opens and shorts dominate, and via enclosure rules make soft-connect shorts more frequent"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Check LVS property error table for systematic scaling: are all W/L off by order of 2x or integer finger count vs random values",
+        "why_first": "cheapest, distinguishes folding/merging setting error from random draw error",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "List extra devices by type and location: are they all same flavor clustered near fill boundary or scattered",
+        "why_first": "rules out the most, tells if filter issue vs genuine extra layout",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify PDK version, LVS deck version, and schematic netlister options match between layout and schematic runs",
+        "why_first": "rules out version mismatch which causes wholesale size mismatches before inspecting individual devices",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun with series/parallel device merging disabled vs enabled and with merging threshold swept; if wrong size or extra count disappears when merging is off or threshold changes, compare netlister merging setting to LVS deck",
+        "rules_in": "inconsistent series/parallel merging or finger folding between schematic netlister and layout extractor",
+        "rules_out": "true drawn size error or real extra device"
+      },
+      {
+        "experiment": "Overlay marker layers for Vt flavor, thick-oxide, and low-Vt/high-Vt implants on mismatched devices and compare to schematic device flavor; re-extract after correcting marker",
+        "rules_in": "missing or extra flavor marker causing wrong device type counted as size mismatch or extra device",
+        "rules_out": "schematic parameter or CDF callback error"
+      },
+      {
+        "experiment": "Run LVS with dummy fill, decoupling cap, antenna diode, and ESD device filtering excluded vs included; if extra devices vanish when filtered, check filter options in deck",
+        "rules_in": "dummy fill, decap, or antenna diode counted as real device",
+        "rules_out": "unintended physical transistor drawn in layout"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Folding mismatch: schematic uses single large W device while layout uses multiple fingers, netlister folds differently than extractor",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Missing or mis-drawn Vt flavor or thick-oxide marker causing LVS to recognize wrong device type or wrong effective size",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Series/parallel merging thresholds inconsistent between schematic netlister and LVS deck causing summed W/L to differ",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Dummy fill transistors, ESD clamps, or antenna diodes not excluded by LVS filter options",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "CDF callback or model parameter not propagating W, L, fingers, or m-factor from schematic to netlist, or scale factor applied twice",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "Chasing layout W/L as drawn wrong and editing layout, when schematic netlist has wrong effective W due to folding or callback and layout is actually correct",
+    "node_era_note": "At 28nm size is continuous W/L; at 7nm-and-below size is quantized to fins and fingers, and gate-cut and source-drain epi merge rules create systematic extra device and fin-count mismatches not seen at 28nm"
+  }
+]

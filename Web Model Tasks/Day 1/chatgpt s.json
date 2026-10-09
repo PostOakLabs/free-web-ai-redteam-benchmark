@@ -1,0 +1,349 @@
+[
+{
+"family": "ISO 26262-5 hardware architectural metrics",
+"formulas": [
+{
+"name": "Single-Point Fault Metric (SPFM)",
+"expression": "SPFM = 1 - [Σ(λ_SPF + λ_RF)] / Σλ = [Σ(λ_MPF + λ_S)] / Σλ",
+"variables": [
+{
+"symbol": "λ",
+"meaning": "failure rate of a safety-related hardware element",
+"units": "failures/hour; commonly FIT, where 1 FIT = 10^-9 failures/hour"
+},
+{
+"symbol": "λ_SPF",
+"meaning": "failure rate of single-point faults",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_RF",
+"meaning": "failure rate of residual faults",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_MPF",
+"meaning": "failure rate of multiple-point faults",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_S",
+"meaning": "failure rate of safe faults",
+"units": "failures/hour or FIT"
+}
+],
+"worked_example": "Assume Σλ = 100 FIT, Σλ_SPF = 2 FIT, and Σλ_RF = 1 FIT. Step 1: Σ(λ_SPF + λ_RF) = 2 + 1 = 3 FIT. Step 2: SPFM = 1 - 3/100 = 0.97. Step 3: SPFM = 97%. This meets the ASIL C target of ≥97%.",
+"authority": "ISO 26262-5:2018, hardware architectural metrics; the supplied prompt explicitly requires the exact λ-expression and ASIL targets.  The published text gives SPFM targets of ≥90%, ≥97%, and ≥99% for ASIL B, C, and D respectively. ([studylib.net][1])",
+"clause_locator": "8.4.5; Table 4",
+"known_uncertainty": "The formula and targets are well supported, but the publicly accessible copy used for verification is not the licensed ISO publication itself; the exact subclause numbering is therefore stated with less confidence than the mathematical expression."
+},
+{
+"name": "Latent-Fault Metric (LFM)",
+"expression": "LFM = 1 - Σλ_MPF,latent / Σ(λ - λ_SPF - λ_RF)",
+"variables": [
+{
+"symbol": "λ",
+"meaning": "failure rate of a safety-related hardware element",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_SPF",
+"meaning": "failure rate of single-point faults",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_RF",
+"meaning": "failure rate of residual faults",
+"units": "failures/hour or FIT"
+},
+{
+"symbol": "λ_MPF,latent",
+"meaning": "failure rate of latent multiple-point faults",
+"units": "failures/hour or FIT"
+}
+],
+"worked_example": "Assume Σλ = 100 FIT, Σλ_SPF = 2 FIT, Σλ_RF = 1 FIT, and Σλ_MPF,latent = 3 FIT. Step 1: denominator = 100 - 2 - 1 = 97 FIT. Step 2: LFM = 1 - 3/97 = 0.9690721649. Step 3: LFM ≈ 96.91%. This meets the ASIL D target of ≥90%.",
+"authority": "ISO 26262-5:2018, Annex C equation for LFM; the supplied prompt requires the exact λ-expression.  The published text reproduces LFM as 1 - Σλ_MPF,L / Σ(λ - λ_SPF - λ_RF). ([studylib.net][1])",
+"clause_locator": "8.4.6; Annex C, C.3.2/C.8",
+"known_uncertainty": "The expression is supported by the accessible ISO 26262-5 text, but the exact table/subclause mapping can vary in secondary reproductions; the equation itself is the high-confidence portion."
+},
+{
+"name": "Probabilistic Metric for random Hardware Failures (PMHF)",
+"expression": "For the simplified PMHF estimation shown in ISO 26262-5 Annex F: PMHF_est = λ_SPF + λ_RF + λ_DPF,det × λ_DPF,latent × T_lifetime. This is an approximation for estimating PMHF; the Part 5 requirement is a quantitative analysis of single-point, residual, and multiple-point faults rather than a single universal λ-only equation.",
+"variables": [
+{
+"symbol": "λ_SPF",
+"meaning": "single-point fault rate",
+"units": "failures/hour"
+},
+{
+"symbol": "λ_RF",
+"meaning": "residual fault rate",
+"units": "failures/hour"
+},
+{
+"symbol": "λ_DPF,det",
+"meaning": "detected component of a dual-point-fault rate in the simplified approximation",
+"units": "failures/hour"
+},
+{
+"symbol": "λ_DPF,latent",
+"meaning": "latent component of a dual-point-fault rate in the simplified approximation",
+"units": "failures/hour"
+},
+{
+"symbol": "T_lifetime",
+"meaning": "operational lifetime used for the multiple-point-fault exposure term",
+"units": "hours"
+},
+{
+"symbol": "PMHF",
+"meaning": "average probability per hour of violation of the considered safety goal due to random hardware failures",
+"units": "1/hour"
+}
+],
+"worked_example": "Assume λ_SPF = 2 FIT = 2×10^-9/hour, λ_RF = 1 FIT = 1×10^-9/hour, λ_DPF,det = 2 FIT = 2×10^-9/hour, λ_DPF,latent = 4 FIT = 4×10^-9/hour, and T_lifetime = 10,000 hours. Step 1: λ_DPF,det × λ_DPF,latent × T_lifetime = (2×10^-9)(4×10^-9)(10,000) = 8×10^-14/hour. Step 2: λ_SPF + λ_RF = 3×10^-9/hour. Step 3: PMHF_est = 3×10^-9 + 8×10^-14 = 3.00008×10^-9/hour. This is below the ASIL B/C reference target of 10^-7/hour and the ASIL D reference target of 10^-8/hour.",
+"authority": "ISO 26262-5:2018 clause 9.4.2 requires PMHF to be expressed as average probability per hour and requires quantitative analysis covering single-point, residual, and multiple-point faults. Annex F gives the cited simplified PMHF approximation. ([studylib.net][1])",
+"clause_locator": "9.4.2.1-9.4.2.4; Annex F.2",
+"known_uncertainty": "The exact general PMHF calculation is architecture- and failure-chain-dependent; the displayed formula is explicitly an approximation from Annex F, not a claim that every ISO 26262 PMHF calculation reduces to this expression. The target values are <10^-7/hour for ASIL B and C and <10^-8/hour for ASIL D. ([ISO 26262 Academy][2])"
+}
+],
+"edge_cases": [
+"SPFM is undefined if Σλ = 0; a calculator must reject division by zero rather than return 100%.",
+"LFM is undefined if Σ(λ - λ_SPF - λ_RF) = 0; this occurs when there is no multiple-point-fault population in the denominator.",
+"For target comparisons, preserve the standard's inequality semantics: SPFM and LFM targets are at least the stated percentage, while PMHF targets are below the stated per-hour value."
+]
+},
+{
+"family": "JEDEC FIT-rate math",
+"formulas": [
+{
+"name": "Point estimate of FIT rate from accelerated test",
+"expression": "λ_POINT = f × 10^9 / (t × ss × AF)",
+"variables": [
+{
+"symbol": "f",
+"meaning": "number of observed failures",
+"units": "count"
+},
+{
+"symbol": "t",
+"meaning": "test duration per sample",
+"units": "hours"
+},
+{
+"symbol": "ss",
+"meaning": "sample size",
+"units": "devices"
+},
+{
+"symbol": "AF",
+"meaning": "acceleration factor converting stress exposure to use-condition exposure",
+"units": "dimensionless"
+},
+{
+"symbol": "λ_POINT",
+"meaning": "point estimate of failure rate",
+"units": "FIT"
+}
+],
+"worked_example": "Use the JESD85 example: f = 15 failures, t = 2000 h, ss = 500 devices, AF = 78.6. Step 1: total stress exposure = 2000 × 500 = 1,000,000 device-hours. Step 2: accelerated equivalent exposure = 1,000,000 × 78.6 = 78,600,000 device-hours. Step 3: λ_POINT = 15 × 10^9 / 78,600,000 = 190.8397 FIT. Step 4: λ_POINT ≈ 191 FIT.",
+"authority": "JEDEC JESD85A, Methods for Calculating Failure Rates in Units of FITs; the standard's worked Case I uses these exact inputs and obtains approximately 191 FIT. ([Scribd][3])",
+"clause_locator": "JESD85A §3.1.3",
+"known_uncertainty": "The accessible copy is a reproduced standard rather than a directly licensed JEDEC publication; the numerical example and formula agree across reproduced copies."
+},
+{
+"name": "Chi-square upper confidence bound",
+"expression": "λ_CL = χ²_(CL, 2f+2) × 10^9 / (2 × t × ss × AF), where χ²_(CL, 2f+2) is the chi-square quantile used by JESD85 for the stated confidence level and 2f+2 degrees of freedom",
+"variables": [
+{
+"symbol": "λ_CL",
+"meaning": "upper confidence bound on the failure rate",
+"units": "FIT"
+},
+{
+"symbol": "χ²_(CL,2f+2)",
+"meaning": "chi-square quantile at the selected confidence level with 2f+2 degrees of freedom",
+"units": "dimensionless"
+},
+{
+"symbol": "CL",
+"meaning": "confidence level",
+"units": "fraction or percent"
+},
+{
+"symbol": "f",
+"meaning": "number of observed failures",
+"units": "count"
+},
+{
+"symbol": "t",
+"meaning": "test duration per sample",
+"units": "hours"
+},
+{
+"symbol": "ss",
+"meaning": "sample size",
+"units": "devices"
+},
+{
+"symbol": "AF",
+"meaning": "acceleration factor",
+"units": "dimensionless"
+}
+],
+"worked_example": "Use f = 15, t = 2000 h, ss = 500, AF = 78.6. For the 60% confidence example, JESD85 gives χ² = 33.4 for 15 failures. Step 1: numerator = 33.4 × 10^9. Step 2: denominator = 2 × 2000 × 500 × 78.6 = 157,200,000. Step 3: λ_60% = 33.4×10^9 / 157,200,000 = 212.4682 FIT ≈ 212 FIT. For 90% confidence, JESD85 gives χ² = 42.6; λ_90% = 42.6×10^9 / 157,200,000 = 270.9924 FIT ≈ 271 FIT.",
+"authority": "JEDEC JESD85A §3.1.4 gives the chi-square upper-confidence calculation and the 60% and 90% worked results. ([Scribd][3])",
+"clause_locator": "JESD85A §3.1.4",
+"known_uncertainty": "The confidence-bound notation is reproduced from accessible copies whose PDF text extraction is imperfect; the numerical chi-square values and resulting FIT values are explicit in the reproduced standard."
+},
+{
+"name": "Arrhenius acceleration factor",
+"expression": "AF = exp[(E_A/k) × (1/T_USE - 1/T_STRESS)], with temperatures expressed in kelvin",
+"variables": [
+{
+"symbol": "AF",
+"meaning": "acceleration factor from stress temperature to use temperature",
+"units": "dimensionless"
+},
+{
+"symbol": "E_A",
+"meaning": "activation energy for the relevant failure mechanism",
+"units": "eV"
+},
+{
+"symbol": "k",
+"meaning": "Boltzmann constant expressed consistently with E_A",
+"units": "eV/K; JESD85 worked example uses approximately 8.6×10^-5 eV/K"
+},
+{
+"symbol": "T_USE",
+"meaning": "use-condition absolute temperature",
+"units": "K"
+},
+{
+"symbol": "T_STRESS",
+"meaning": "stress-condition absolute temperature",
+"units": "K"
+}
+],
+"worked_example": "Use T_USE = 55°C = 328 K, T_STRESS = 125°C = 398 K, and E_A = 0.7 eV. Using k = 8.6×10^-5 eV/K: exponent = (0.7/8.6×10^-5) × (1/328 - 1/398) ≈ 4.3647. Therefore AF = exp(4.3647) ≈ 78.6. The JESD85 worked example reports AF = 78.6.",
+"authority": "JESD85A §3.1.2 uses the Arrhenius equation with 0.7 eV, 125°C stress, 55°C use, and obtains AF = 78.6. The standard also uses 0.5 eV, 0.7 eV, and 1.0 eV in its multiple-mechanism example. It cautions that activation energy must correspond to the failure mechanism and points to JEP122 when defaults are unknown. It also warns that self-heating should be accounted for using junction temperature rather than ambient temperature where applicable. ([Scribd][3])",
+"clause_locator": "JESD85A §3.1.2, Equation (1)",
+"known_uncertainty": "The 0.5, 0.7, and 1.0 eV values are example values in JESD85 rather than universal physical constants or universally applicable 'typical' values. Applying any one of them without identifying the failure mechanism can materially distort the FIT estimate."
+}
+],
+"edge_cases": [
+"If f = 0, the point estimate is zero but the confidence-bound calculation must still use the appropriate chi-square quantile with 2 degrees of freedom; zero observed failures does not imply zero true failure rate.",
+"If AF ≤ 0 or temperatures are not absolute temperatures in kelvin, the Arrhenius calculation is invalid.",
+"A calculator must not silently apply a default activation energy to an unknown mechanism when mechanism-specific data or JEP122 guidance are available; self-heating can also invalidate use of ambient temperature."
+]
+},
+{
+"family": "EAR advanced-computing parameters",
+"formulas": [
+{
+"name": "Total Processing Performance (TPP)",
+"expression": "TPP = 2 × MacTOPS × bit length of the operation, aggregated over all processing units: TPP = TPP1 + TPP2 + ... + TPPn",
+"variables": [
+{
+"symbol": "TPP",
+"meaning": "Total Processing Performance",
+"units": "tera operations/second multiplied by operation bit length; the EAR uses the resulting numeric TPP parameter for its thresholds"
+},
+{
+"symbol": "MacTOPS",
+"meaning": "theoretical peak number of Tera (10^12) operations per second for multiply-accumulate computation D = A × B + C",
+"units": "tera MAC operations/second"
+},
+{
+"symbol": "bit length",
+"meaning": "largest bit length of the inputs to the multiply operation for the MAC",
+"units": "bits"
+},
+{
+"symbol": "n",
+"meaning": "number of processing units on the integrated circuit",
+"units": "count"
+}
+],
+"worked_example": "For one processing unit with 300 MacTOPS at a 16-bit operation: Step 1: 2 × MacTOPS = 2 × 300 = 600 tera operations/second. Step 2: TPP = 600 × 16 = 9600. Therefore TPP = 9600. For two processing units with TPP values 9600 and 2400, aggregate TPP = 9600 + 2400 = 12,000.",
+"authority": "ECCN 3A090 Technical Note 2 defines TPP as 2 × MacTOPS × bit length, aggregated across processing units. It gives the same dimensional examples: 600 tera integer operations at 8 bits yields TPP 4800, while 300 tera FLOPS at 16 bits also yields TPP 4800. ([Eccn][4])",
+"clause_locator": "EAR Supplement No. 1 to Part 774, ECCN 3A090, Technical Note 2 to 3A090.a and 3A090.b",
+"known_uncertainty": "The formula and threshold numbers are high confidence. The wording of the unit is easy to misstate because the EAR defines TPP through MacTOPS and bit length rather than assigning it a conventional standalone SI unit."
+},
+{
+"name": "Performance density",
+"expression": "Performance density = TPP / applicable die area",
+"variables": [
+{
+"symbol": "TPP",
+"meaning": "Total Processing Performance",
+"units": "EAR-defined TPP units"
+},
+{
+"symbol": "applicable die area",
+"meaning": "die area used by the ECCN definition; measured in square millimeters and including all die area of logic dies manufactured with a process node using a non-planar transistor architecture",
+"units": "mm²"
+},
+{
+"symbol": "performance density",
+"meaning": "TPP divided by applicable die area",
+"units": "TPP/mm²"
+}
+],
+"worked_example": "Using the preceding TPP = 9600 and an applicable die area of 100 mm²: Step 1: performance density = 9600 / 100. Step 2: performance density = 96 TPP/mm². Compare this with the 5.92 TPP/mm² threshold: 96 ≥ 5.92.",
+"authority": "ECCN 3A090 Technical Note 4 defines performance density as TPP divided by applicable die area and specifies that applicable die area is measured in mm². ([Eccn][4]) Current 3A090.a thresholds include TPP ≥4800, or TPP ≥1600 together with performance density ≥5.92; 3A090.b uses TPP 2400–<4800 with density 1.6–<5.92, or TPP ≥1600 with density 3.2–<5.92. ([Federal Register Public Inspection][5])",
+"clause_locator": "EAR Supplement No. 1 to Part 774, ECCN 3A090, Technical Note 4; 3A090.a and 3A090.b",
+"known_uncertainty": "The numerical thresholds are verified against current BIS/Federal Register material, but export-control applicability also depends on the surrounding notes, destination, product status, and effective-date provisions; the calculator should therefore calculate parameters, not independently determine licensing requirements."
+}
+],
+"edge_cases": [
+"If applicable die area is zero or unavailable, performance density is undefined and must not be treated as infinite.",
+"Threshold equality matters: 4800, 1600, 5.92, 2400, and 3.2 use the inclusive or exclusive boundaries specified in the particular 3A090 paragraph; for example, 3A090.a includes TPP ≥4800 and TPP ≥1600 with density ≥5.92, while 3A090.b uses ranges with explicit 'less than' boundaries. ([Federal Register Public Inspection][5])",
+"For multiple processing units, TPP must be aggregated before the threshold comparison; for mixed bit lengths, the EAR directs evaluation of the highest resulting TPP value. ([Eccn][4])"
+]
+},
+{
+"family": "CHIPS Act incentives math",
+"formulas": [
+{
+"name": "Advanced Manufacturing Investment Credit under IRC §48D",
+"expression": "Credit = 35% × qualified investment for the taxable year with respect to an advanced manufacturing facility of an eligible taxpayer",
+"variables": [
+{
+"symbol": "Credit",
+"meaning": "advanced manufacturing investment credit",
+"units": "US dollars"
+},
+{
+"symbol": "qualified investment",
+"meaning": "basis of qualified property placed in service by the taxpayer during the taxable year that is part of an advanced manufacturing facility",
+"units": "US dollars"
+},
+{
+"symbol": "35%",
+"meaning": "current statutory credit percentage for qualified property under the amended §48D(a)",
+"units": "dimensionless percentage"
+}
+],
+"worked_example": "Assume qualified investment = $100,000,000. Step 1: convert 35% to decimal = 0.35. Step 2: Credit = 0.35 × $100,000,000. Step 3: Credit = $35,000,000.",
+"authority": "Current 26 U.S.C. §48D(a), as in effect August 30, 2026, provides a credit equal to 35% of qualified investment. Section 48D(b)(1) defines qualified investment as the basis of qualified property placed in service during the taxable year that is part of an advanced manufacturing facility.  The IRS confirms that the rate was increased to 35% for qualified property placed in service after December 31, 2025. ([Internal Revenue Service][6])",
+"clause_locator": "26 U.S.C. §48D(a); §48D(b)(1); §48D(c); §48D(e)",
+"known_uncertainty": "There is no separate dollar minimum investment threshold stated in §48D(a)-(c) that can be reduced to a pure numerical eligibility calculation. Eligibility instead depends on statutory definitions and categorical conditions, including not being a foreign entity of concern and not having made an applicable transaction during the taxable year. The credit also terminates for property whose construction begins after December 31, 2026. "
+}
+],
+"edge_cases": [
+"If qualified investment is zero, the computed credit is zero; a calculator should not infer eligibility merely from a zero result.",
+"The current 35% rate applies under amended §48D(a); the former 25% rate must not be substituted for current-law calculations. ([Internal Revenue Service][6])",
+"Construction beginning after December 31, 2026 is outside the credit under §48D(e); this is a statutory date boundary rather than a dollar threshold. "
+]
+}
+]
+
+[1]: https://studylib.net/doc/27971212/26262-5?utm_source=chatgpt.com "ISO 26262-5: Hardware Development for Road Vehicle Safety"
+[2]: https://iso26262.academy/features/concepts/hardware-metrics?utm_source=chatgpt.com "Hardware Metrics (SPFM, LFM, PMHF) | ISO 26262 Academy"
+[3]: https://www.scribd.com/document/967922230/JESD-85A-Calculation-Failure?utm_source=chatgpt.com "Failure Rate Calculation Methods in FITs | PDF"
+[4]: https://eccn.dev/eccn/3A090?utm_source=chatgpt.com "ECCN 3A090: Integrated circuits as follows (see List of Items Controlled)."
+[5]: https://public-inspection.federalregister.gov/2025-00636.pdf?utm_source=chatgpt.com "a.2. A 'total processing performance' of 1600 or more and a 'performance density' of 5.92 or more."
+[6]: https://www.irs.gov/credits-deductions/advanced-manufacturing-investment-credit?utm_source=chatgpt.com "Advanced Manufacturing Investment Credit | Internal Revenue Service"

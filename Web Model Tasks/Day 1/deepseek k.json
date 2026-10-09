@@ -1,0 +1,92 @@
+[
+  {
+    "delta_name": "Dominant timing contributor: wire delay vs cell delay",
+    "at_28nm": "Cell delay dominated; wire delay was significant but usually less than 30-40% of total path delay. Timing closure focused on cell sizing and logic restructuring.",
+    "at_7nm_5nm": "Wire resistance scales up dramatically (via narrow wires and thinner interlayer dielectrics), causing wire delay to dominate (>60% of path delay in many blocks). Timing closure is driven by routing optimization, shielding, and track assignment.",
+    "why_it_changed": "Metal pitch scaling without corresponding dielectric constant reduction increases RC; also, cell size shrinks but wire dimensions shrink more aggressively, increasing resistivity per micron.",
+    "what_breaks": "A 28nm engineer applies cell-sizing algorithms first and ignores wire optimization; result: timing remains stubbornly negative despite huge area/power spent on sizing, because the critical paths are wiring-limited.",
+    "workflow_impact": "Physical synthesis now places high weight on wirelength during placement; routers are run earlier and more iteratively; routing‑aware placement is standard.",
+    "confidence": 0.95
+  },
+  {
+    "delta_name": "Congestion character: pin access vs channel routing",
+    "at_28nm": "Congestion was dominated by global routing tracks between macros and large channels; macro spacing and channel width were primary concerns.",
+    "at_7nm_5nm": "Congestion is now dominated by pin-access issues – the number of available routing tracks at the standard‑cell pin layer (M1/M2) is insufficient for the high pin density and small cell height; many violations are 'stacked via' or 'pin blockage' rather than channel overflow.",
+    "why_it_changed": "Cell height shrinks from ~1.0 µm to ~0.5 µm (or less), but the number of pins per cell does not scale down proportionally; also, multiple fins and contact rules consume more space.",
+    "what_breaks": "A 28nm engineer checks global route overflow and is satisfied with low numbers, but detailed routing fails with millions of pin‑access DRCs (e.g., M1 shorts due to too many gate contacts). They waste time tweaking global place and route when the real issue is cell‑library pin placement.",
+    "workflow_impact": "Pin‑access analysis is now a standard pre‑placement metric; routing‑aware placement with pin‑access awareness is mandatory; some flows use `place_opt -pin_access_aware`.",
+    "confidence": 0.93
+  },
+  {
+    "delta_name": "Via density / via-pin DRC as first-order issue",
+    "at_28nm": "Via density was usually met naturally; vias were plentiful and not a major DRC source.",
+    "at_7nm_5nm": "Via density rules (minimum via count per area) and via enclosure rules are much tighter, and vias consume significant routing area. Violations of via density are common and require manual via arrays or place‑and‑route rule changes.",
+    "why_it_changed": "With thinner metal layers and tighter spacing, vias are more prone to electromigration and CMP dishing; foundries impose stricter minimum via coverage and maximum via density to ensure planarization.",
+    "what_breaks": "Engineer sees only shorts/spacing DRCs and ignores the via density report; after fixing shorts, via density remains unsolved, requiring a full re‑route with different via generation rules, often adding days.",
+    "workflow_impact": "Dedicated via‑density fixing steps are added after route, often using `insert_via_array` or density‑aware routing options.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Power grid vs routing resource tension",
+    "at_28nm": "Power grid stripes consumed ~10-15% of routing resources; trade‑offs were manageable, and power grid was designed early and fixed.",
+    "at_7nm_5nm": "Power grid stripes and their many vias consume 25-30% of routing resources in lower metal layers; dynamic IR drop is severe, requiring more stripes, which crowds signal routes.",
+    "why_it_changed": "IR drop margins tighten (allowed drop <3% vs <5% at 28nm) because lower voltage supplies (0.7V vs 1.0V) leave less absolute voltage margin; also, electromigration limits force wider wires.",
+    "what_breaks": "A 28nm engineer uses the same power grid density as before, but the block fails IR drop at signoff; when adding more stripes, congestion blows up, and routing becomes impossible because they didn't reserve extra tracks.",
+    "workflow_impact": "Power‑aware placement and routing are tightly integrated; early IR‑drop estimation is used to guide grid density, and routing‑layer assignment for power is done early.",
+    "confidence": 0.92
+  },
+  {
+    "delta_name": "Multi‑patterning / coloring constraints entering placement",
+    "at_28nm": "No multi‑patterning; single exposure lithography, so no coloring constraints.",
+    "at_7nm_5nm": "Multiple patterning (e.g., LELE for 7nm, LELELE for 5nm) requires that adjacent metal tracks on the same layer cannot have same color, forcing the router to respect coloring and sometimes requiring dummy fills. This limits track usage and affects congestion.",
+    "why_it_changed": "Lithographic resolution limits at 7nm and below require splitting dense pitches into multiple masks; the router must assign colors and ensure no conflicts.",
+    "what_breaks": "Engineer doesn't enable coloring‑aware routing and gets millions of DRC violations after coloring assignment, requiring a complete re‑route with coloring constraints, which can take weeks.",
+    "workflow_impact": "Coloring constraints are built into the routing engine; some blocks require `route_opt -coloring_aware` and early coloring feasibility checks.",
+    "confidence": 0.88
+  },
+  {
+    "delta_name": "Library / Vt‑mixing strategy",
+    "at_28nm": "Standard mixing of high‑Vt (HVT) and low‑Vt (LVT) cells was common; engineers would swap cells for speed/power trade‑offs; multiple Vt options were available.",
+    "at_7nm_5nm": "More Vt flavors (e.g., RVT, LVT, uLVT, SLVT) and threshold‑voltage variability is larger; leakage is a major concern. Engineers now must manage per‑path Vt assignment with tight leakage budgets; threshold‑voltage spread (due to process variation) can vary by 30–40 mV, making speed predictability difficult.",
+    "why_it_changed": "FinFETs exhibit larger Vt variations due to work‑function differences and fin‑height variations; process corners are more numerous and less predictable.",
+    "what_breaks": "A 28nm engineer uses a simple two‑Vt strategy and ignores the leakage explosion; at 7nm, leakage can exceed power budget by 2x. They also assume fixed Vt values, but actual silicon shows 30% spread, causing timing failures.",
+    "workflow_impact": "Multi‑Vt optimization is now a major step with explicit leakage constraints; statistical timing analysis (SSTA) is more common to handle Vt variation.",
+    "confidence": 0.87
+  },
+  {
+    "delta_name": "Clock distribution style: tree vs mesh",
+    "at_28nm": "Most designs used balanced tree clock networks with local skew control; mesh clocks were rare due to power overhead.",
+    "at_7nm_5nm": "Global clock mesh is common to reduce skew and jitter at high frequencies (2GHz+); the mesh provides low‑skew distribution but consumes huge power (10-20% of total).",
+    "why_it_changed": "At high frequencies, tree skew becomes dominated by on‑chip variation and wire RC; mesh effectively averages skew, but power becomes a bigger concern.",
+    "what_breaks": "An engineer uses a tree clock on a 5nm design and finds skew >80ps despite many buffers; they try to re‑balance the tree with more buffers, but power rises and still skew is high. They should have used a mesh, but that would require changing floorplan and power grid.",
+    "workflow_impact": "Clock mesh planning is now part of floorplan; power estimates for clocks are included in early budget.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Signoff corner explosion",
+    "at_28nm": "Typically 5-10 signoff corners (e.g., worst-case setup: slow process, low voltage, high temp; best-case hold: fast process, high voltage, low temp).",
+    "at_7nm_5nm": "Up to 30+ corners due to multiple Vt corners, wire‑RC corners, and advanced OCV (AOCV/POCV) corners; each corner needs separate STA and often separate optimization.",
+    "why_it_changed": "More process parameters and their combinations; also, multiple metal RC corners (e.g., worst-case RC vs best-case RC) to account for CMP variation.",
+    "what_breaks": "Engineer runs only the traditional two or three corners and misses a setup violation in a corner they didn't consider (e.g., slow process + slow RC + low Vt); later, at silicon, the chip fails in a specific batch.",
+    "workflow_impact": "Corner‑reduction techniques are employed; `ccopt` with multi‑corner optimization; more automation for corner‑specific ECO.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "IR drop / EM from afterthought to first-class constraint",
+    "at_28nm": "IR drop was checked late in the flow; if violations, you could add decap or widen stripes moderately; not a primary driver.",
+    "at_7nm_5nm": "IR drop and electromigration (EM) are critical from the start; many blocks are power‑limited, and EM limits force wide wires and many vias; dynamic IR drop can cause timing failures.",
+    "why_it_changed": "Lower supply voltage (0.7V vs 1.0V) makes IR drop percentage more critical; higher current densities in narrow wires exacerbate EM.",
+    "what_breaks": "Engineer waits until signoff to run IR analysis; finds huge drops >10% requiring a full power grid redesign, which pushes schedule by weeks and may force a floorplan change.",
+    "workflow_impact": "IR analysis is run after placement and refined after routing; power‑aware placement and early decap insertion are standard.",
+    "confidence": 0.92
+  },
+  {
+    "delta_name": "Hold closure difficulty",
+    "at_28nm": "Hold was manageable; you could insert delay buffers in the data path without causing huge area or setup violations.",
+    "at_7nm_5nm": "Hold is much harder because clock skew variation is larger (due to local variation) and the minimum delay of cells is smaller, leaving less margin. Many hold paths need insertion of multiple buffers, which then hurt setup and add routing congestion.",
+    "why_it_changed": "On‑chip variation (OCV) has increased; local random variation in device dimensions causes significant skew and delay variation, making hold more pessimistic.",
+    "what_breaks": "Engineer fixes hold by inserting a single buffer per path, as they did at 28nm; but at 7nm, that buffer creates a setup violation on nearby paths because the added delay shifts the capture window; they end up in a fix‑loop.",
+    "workflow_impact": "Hold closure is now considered during CTS; hold buffer insertion is part of optimization with setup‑awareness; more use of advanced OCV (POCV).",
+    "confidence": 0.9
+  }
+]

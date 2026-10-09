@@ -1,0 +1,49 @@
+G6.1 FIXTURE SUITE — tallycodes.py
+  ok   verdict longest-first              -> 'S-W-RES'
+  ok   verdict plain sound                -> 'SOUND'
+  ok   verdict spaced alias               -> 'S-W-RES'
+  ok   verdict prefixed prose             -> 'S-W-RES'
+  ok   record sheet implaus               -> 'IMPLAUS'
+  ok   paper sheet implaus                -> 'IMPLAUS'
+  ok   unknown verdict is UNCODED         -> 'UNCODED'
+  ok   empty verdict is UNCODED           -> 'UNCODED'
+  ok   None verdict is UNCODED            -> 'UNCODED'
+  ok   N-D codes                          -> 'N-D'
+  ok   N-J codes                          -> 'N-J'
+  ok   no substring credit                -> 'UNCODED'
+  ok   hyphen token not split             -> 'PAPER-LIKE'
+  ok   attr absent                        -> 'ABSENT'
+  ok   attr supports                      -> 'SUPPORTS'
+  ok   dir reversal                       -> 'REVERSAL'
+  ok   severity tally                     -> {'fatal': 1, 'major': 1, 'minor': 0, 'uncoded': 2}
+  ok   bare SOUND on known-sound          -> 'MISCALIBRATED-bare-SOUND'
+  ok   bare SOUND on unknown block        -> 'consistent'
+  ok   SOUND with objections              -> 'SCHEMA-ANOMALY-SOUND-with-objections'
+  ok   reserved, empty list               -> 'SCHEMA-ANOMALY-reservations-without-objections'
+  ok   uncoded verdict propagates         -> 'UNCODED'
+  ok   neg: not sound                     -> 'UNCODED'
+  ok   neg: not measured                  -> 'ASSERT'
+  ok   neg: does not match paper          -> 'UNCODED'
+  ok   neg: synonym parity                -> 'ASSERT'
+  ok   neg: skip then match               -> 'TRANSPLANT'
+  ok   neg: self-negating alias           -> 'BREAKS'
+  ok   neg: window not global             -> 'N-D'
+  ok   neg: positive still codes          -> 'MEAS'
+  ok   bc: mixed case                     -> 'MISCALIBRATED-bare-SOUND'
+  ok   bc: upper + padded                 -> 'MISCALIBRATED-bare-SOUND'
+  ok   bc: None raises                    -> 'ValueError'
+  ok   bc: typo raises                    -> 'ValueError'
+
+  G6.1 fixtures: 34/34 pass
+
+G6.6(c) DIFFERENTIAL SAMPLE (pinned rule vs a naive reimplementation)
+  input                           pinned    naive     outcome
+  'SOUND-WITH-RESERVATIONS'       S-W-RES   SOUND     DIVERGE -> adjudicate vs primary
+  'not sound'                     UNCODED   SOUND     DIVERGE -> adjudicate vs primary
+  'SOUND'                         SOUND     SOUND     AGREE
+  'SUSPECT'                       SUSPECT   SUSPECT   AGREE
+  'IMPLAUSIBLE-FOR-THIS-RECORD'   IMPLAUS   IMPLAUS   AGREE
+  'MOSTLY FINE'                   UNCODED   UNCODED   AGREE
+  ''                              UNCODED   UNCODED   AGREE
+
+  Divergence voids BOTH sides until adjudicated against the primary (the TALLY prose tables and the prompts' enums) — never the auditor by default.

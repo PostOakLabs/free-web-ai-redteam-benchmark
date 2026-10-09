@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Throughput-oriented design philosophy",
+    "where_in_paper": "Introduction / design goals (approx pp. 21–23)",
+    "decision": "Prioritized throughput (number of threads or requests completed per unit time) over single-thread performance for commercial server workloads.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Server workloads consist of many independent threads with long memory latency; hiding latency with many threads rather than one large thread is more beneficial for overall throughput.",
+    "outcome": "The 32-thread Niagara processor reportedly achieved the target throughput.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The throughput-centric philosophy is core to Niagara and likely in the paper, but I am not certain of the exact wording or whether single-thread approaches are explicitly dismissed.",
+    "confidence": 0.7
+  },
+  {
+    "title": "8 cores × 4 threads configuration",
+    "where_in_paper": "Processor configuration / core and thread count decision (approx pp. 23–25)",
+    "decision": "Implemented 8 cores, each with 4 hardware threads, for a total of 32 threads.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Increasing threads per core reduces context switch overhead but increases core complexity; increasing cores increases area and power but improves thread parallelism. The 4-thread/8-core combination is remembered as a balance point between area, power, and thread parallelism.",
+    "outcome": "Achieved target throughput with the 32-thread configuration on the actual chip.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I do not precisely recall if the paper explicitly compared alternatives (e.g., 2-thread/16-core, 8-thread/4-core). The 'balance point' description may be my inference.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Simple in-order core design",
+    "where_in_paper": "Core microarchitecture / execution pipeline (approx pp. 25–27)",
+    "decision": "Each core was designed with a simple in-order pipeline rather than complex out-of-order execution.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "With sufficient thread-level parallelism, other threads fill empty slots caused by memory or pipeline stalls, so complex out-of-order structures to extract ILP within a single thread may be unnecessary. Complex structures increase area, power, and verification burden with limited throughput gain.",
+    "outcome": "Reported achieving sufficient thread throughput while suppressing area and power with simple in-order cores.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Niagara being in-order is well-known, but I am unsure how much detail this specific paper devotes to explicit comparison with out-of-order alternatives or the specific rationale provided.",
+    "confidence": 0.45
+  },
+  {
+    "title": "Fine-grained thread interleaving (zero-overhead multithreading)",
+    "where_in_paper": "Thread scheduling / pipeline interleaving (approx pp. 27–28)",
+    "decision": "Adopted round-robin style thread interleaving that switches between threads at a very fine granularity (e.g., every cycle or few cycles) in the pipeline.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Fine-grained interleaving allows multiple threads to uniformly wait out long memory latencies, keeping the pipeline alive even when one thread stalls. A structure with near-zero thread switch overhead minimizes context switching cost.",
+    "outcome": "Reported maintaining high pipeline utilization in server workloads with long memory latency.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am unsure if the term 'zero-overhead multithreading' appears in the paper or if I recall the exact interleaving granularity (e.g., switch frequency) correctly. This is a general Niagara characteristic but the paper's specific description is uncertain.",
+    "confidence": 0.5
+  },
+  {
+    "title": "Shared L2 cache structure",
+    "where_in_paper": "Memory system / cache hierarchy (approx pp. 28–29)",
+    "decision": "Integrated a relatively large L2 cache shared by all cores on-chip, utilizing it for data sharing between cores and memory access latency mitigation.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "With 32 threads accessing memory concurrently, dedicated per-core caches alone would incur large capacity requirements and multiple-copy issues for shared data. A shared L2 provides a single large capacity pool and can simplify shared data consistency.",
+    "outcome": "Reported that core memory requests were handled efficiently with the shared L2 cache.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Niagara having a shared L2 is factual, but I do not recall if this paper details specific designs like L2 size, bank structure, or comparison with dedicated caches. The rationale is inference based on general knowledge.",
+    "confidence": 0.4
+  }
+]
+```

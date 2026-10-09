@@ -1,0 +1,83 @@
+[
+  {
+    "case_name": "Reserve Coverage Test — Full Backing Article 36(1)",
+    "inputs": {"ply_units": "ART tokens outstanding", "supply_value": 1000000.0, "reserve_asset_value_EUR": 1020000.0, "reserve_composition": "low-risk liquid assets (HQLA-equivalent)"},
+    "computation": {
+      "supply_value": 1000000.0,
+      1020000.0,
+      "coverage_ratio_formula": "reserve_value / supply_value",
+      "1.02,
+      "coveragect": 102.0,
+      "full_backing_threshold_pct": 100.0,
+      "excess_EUR": 20000.0,
+      "tail_convention": "LOW-tail for coverage: the WORST-CASE for the issuer is reserve_value BEING LOW relative to supply. The test compares coverage_ratio to the 100% threshold; coverage_ratio >= 1.0 PASSES (right tail — high coverage — is favourable)."
+    },
+    "result": {"coverage_ratio": 1.02, "coverage_pct": 102.0, "excess_EUR": 20000.0, "regulatory_verdict": "ADEQUATE — Article 36(1) full-backing requirement met (reserve 102% of supply).", "test_anchor": "MiCA Article 36(1) — reserve of assets equal to at least the outstanding token supply at all times."},
+    "article_basis": "Regulation (EU) 2023/1114, Article 36(1) — issuers of asset-referenced tokens (ART) must maintain a reserve of assets whose value is at least equal to the outstanding token supply.",
+    "tail_convention": "Adverse tail for coverage = LOW tail of (reserve/supply). High coverage is favourable. Test examines whether coverage_ratio >= 100% under the issuer-stressed scenario (lower reserve_value, higher supply_value).",
+    "weakest_point": "The supply and reserve values are point-in-time. MiCA Article 36 imposes AT-ALL-TIMES coverage; a single snapshot satisfying 102% does not establish the at-all-times condition. No liquidity, no segregation, no custody-quality check is performed here."
+  },
+  {
+    "case_name": "Own-Funds Requirement — Article 35 (ART issuer capital)",
+    "inputs": {"reserve_value_EUR": 1020000.0, "own_funds_lower_of_pct_basis_ART_EUR": null, "own_funds_fixed_minimum_EUR": null, "pct_of_reserve_used": "UNKNOWN-CURRENT-VALUE — parameterised; MiCA Article 35 specifies own funds equal to the HIGHER of (i) a percentage of the reserve assets and (ii) a fixed EUR minimum; current statutory percentages are NOT cited here because not verified to source.", "fixed_minimum_EUR_constant_used": 350000.0, "pct_of_reserve_constant_used": 0.02, "named_pct_constant": "PCT_OF_RESERVE_ART"},
+    "computation": {
+      "reserve_value": 1020000.0,
+      "pct_of_reserve_amount": "reserve * PCT_OF_RESERVE_ART = 1020000 * 0.02 = 20400.0 (illustrative)",
+      "fixed_minimum_amount": 350000.0,
+      "own_funds_required_formula": "MAX(pct_of_reserve_amount, fixed_minimum)",
+      "own_funds_required": 350000.0,
+      "own_funds_held_EUR": 380000.0,
+      "excess_EUR": 30000.0,
+      "tail_convention": "Adverse tail for own-funds adequacy = LOW tail of own_funds_held. Own_funds_held >= MAX(pct_of_reserve, fixed_min) PASSES; high own-funds held is favourable."
+    },
+    "result": {"own_funds_required_EUR": 350000.0, "own_funds_held_EUR": 380000.0, "excess_EUR": 30000.0, "regulatory_verdict": "ADEQUATE — own funds held (380k) >= required MAX(20.4k, 350k) = 350k.", "test_anchor": "MiCA Article 35 — own-funds requirement for ART issuers (higher of percentage-of-reserve and fixed minimum)."},
+    "article_basis": "Regulation (EU) 2023/1114, Article 35 — own-funds requirement for issuers of asset-referenced tokens.",
+    "tail_convention": "Adverse tail = LOW tail of own. Test examines whether own_funds_held is at least MAX(pct_of_reserve_amount, fixed_minimum).",
+    "weakest_point": "PCT_OF_RESERVE_ART and the fixed-minimum amount are parameterised as named constants because the current statutory percentages were not independently verified against the consolidated MiCA text in this environment. The chosen illustrative values (2%, 350k EUR) are placeholders. A real computation requires citation of the actual Article 35 figures as published in the Official Journal."
+  },
+  {
+    "case_name": "Stressed Coverage Test — Haircuts on Reserve",
+    "inputs": {"supply_value_EUR": 1000000.0, "reserve_value_EUR": 1020000.0, "haircut_pct": 0.05, "haircut_convention": "applied to reserve assets; LOW tail of reserve is the issuer-adverse scenario"},
+    "computation": {
+      "supply_value": 1000000.0,
+      "reserve_value_pre_stress": 1020000.0,
+      "haircut_pct": 0.05,
+      "stressed_reserve_value_formula": "reserve_value_pre_stress * (1 - haircut_pct)",
+      "stressed_reserve_value": 969000.0,
+      "coverage_ratio_stressed": 969000.0 / 1000000.0,
+      "coverage_ratio_stressed_value": 0.969,
+      "coverage_pct_stressed": 96.9,
+      "full_backing_threshold_pct": 100.0,
+      "shortfall_EUR": 31000.0,
+      "tail_converse tail for coverage = LOW tail of (stressed_reserve / supply). The stress INCREASES the issuer's adverse tail by marking down reserve_value. Coverage_pct 96.9% is the issuer-adverse outcome, not the favourable one."
+    },
+    "result": {"stressed_coverage_ratio": 0.969, "stressed_coverage_pct": 96.9, "shortfall_EUR": 31000.0, "regulatory_verdict": "INADEQUATE under Article 36( stressed reserve 96.9% of supply breaches the 100% full-backing requirement; shortfall 31k EUR.", "test_anchor": "MiCA Article 36(1) — full-backing tested under issuer-adverse (LOW-tail) reserve haircut."},
+    "article_basis": "Regulation (EU) 2023/1114, Article 36(1) full-backing requirement re-tested under a reserve-asset haircut.",
+    "tail_convention": "Adverse tail for coverage = LOW tail of reserve_value/supply_value. The haircut shifts reserve_value into the LOW tail (issuer-adverse). The test examines whether the LOW-tail outcome still satisfies the 100% threshold.",
+    "weakest_point": "The 5% haircut is an illustrative stress; MiCA does not specify a single stress magnitude for ART reserves. Asset-class-specific haircuts (per delegated acts and Article 36 custodial-quality rules) would be required for a real capital assessment. The stress test as stated is a one-factor parallel haircut — concentration risk, duration mismatch, and FX risk are not modelled."
+  },
+  {
+    "case_name": "Redemption at Par — Article 39 Obligation Math",
+    "inputs": {"redemption_request_value_EUR": 50000.0, "tokens_redeemed_units": 50000.0, "redemption_price_per_token_EUR": 1.0, "liquidity_bucket_EUR": "HQLA-equivalent available within the redemption window"},
+    "computation": {
+      "tokens_redeemed": 50000.0,
+      "par_price_per_token": 1.0,
+      "redemption_obligation_EUR_formula": "tokens_redeemed * par_price",
+      "redemption_obligation_EUR": 50000.0,
+      "reserve_value_EUR_pre_redemption": 1020000.0,
+      "reserve_value_EUR_post_redemption_formula": "reserve_pre - redemption_obligation",
+      "reserve_value_post": 970000.0,
+      "supply_post_redemption": 950000.0,
+      "coverage_ratio_post": 970000.0 / 950000.0,
+      "coverage_ratio_post_value": 1.0210526316,
+      "coverage_pct_post": 102.1053,
+      "liquidity_bucket_value_EUR": 120000.0,
+      "liquidity_bucket_minus_obligation": 70000.0,
+      "tail_convention": "Adverse tail for redemption = LOW tail of (liquidity_bucket / redemption_obligation). Adequate liquidity is liquidity_bucket >= redemption_obligation; HIGH liquidity is favourable."
+    },
+    "result": {"redemption_obligation_EUR": 50000.0, "liquidity_bucket_minusUR": 70000.0, "post_redemption_coverage_pct": 102.1053, "regulatory_verdict": "ADEQUATE — Article 39 redemption-at-par obligation can be met; liquidity bucket (120k) exceeds obligation (50k); post-redemption reserve coverage 102.1% still meets Article 36(1).", "test_anchor": "MiCA Article 39 (redemption at par) and Article 36(1) (full-backing retained post-redemption)."},
+    "article_basis": "Regulation (EU) 2023/1114, Article 39 (redemption at par on holder request) and Article 36(1) (continuous full-backing).",
+    "tailAdverse tail for redemption-capacity = LOW tail of liquidity_bucket / redemption_obligation. The test examines whether liquidity_bucket is in the LOW tail (issuer-adverse) still >= obligation; and whether post-redemption reserve_value remains >= post-redemption supply.",
+    "weakest_point": "A single redemption request of 50k units does Article 39's stress assumptions. MiCA permits temporary suspension only in strictly defined circumstances (Article 39(3)); the case ignores concentration of redemption timing. Coverage post-redemption improves mechanically because reserve and supply contract by the same amount, but a HIGH-CONCENTRATION redemption could deplete the liquidity bucket below the obligation."
+  }
+]

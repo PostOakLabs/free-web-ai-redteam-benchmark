@@ -1,0 +1,55 @@
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "€100 arrangement fee paid at t=0 is treated as a charge at t=0, reducing the net amount made available to the consumer: net drawdown = €10,000 - €100 = €9,900 at t=0",
+      "24 equal monthly repayments of €450 commence one month after drawdown: times t = k/12 years for k = 1..24",
+      "Periods expressed in years; one month = 1/12 year (Annex I remark (c), 30.41666 days/month, so 1 month = 1/12 exactly)",
+      "Result rounded to one decimal place per Annex I remark (d) (round half up)"
+    ],
+    "equation": "9900(1+X)^0 = 450(1+X)^(-1/12) + 450(1+X)^(-2/12) + ... + 450(1+X)^(-24/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+4224.210611; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+2625.385694; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+1268.868256; convergence: f(0.088364)=+6.59e-08 (root bracketed to tolerance, X=0.088364)",
+    "aprc_pct": 8.8
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "Annex I Part II assumption (d): for overdrafts the total amount is deemed to be drawn in full for the whole duration of the contract",
+      "Duration not determinable => assumed 3 months (directive's fallback of 3 months / one quarter = 0.25 years) per Annex I Part II assumption (c)",
+      "12% nominal per annum charged monthly => monthly rate = 12%/12 = 1%; interest on €3,000 for 3 months = €3,000*((1.01)^3 - 1) = €90.90",
+      "€25 monthly account fee for 3 months = €75.00; total repaid at 3 months = €3,000 + €90.90 + €75.00 = €3,165.90",
+      "All charges (interest + fees) paid as a single repayment at t = 3/12 years; one month = 1/12 year; result to one decimal place"
+    ],
+    "equation": "3000(1+X)^0 = 3165.90(1+X)^(-3/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+337.803516; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+139.283706; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+5.873803; convergence: f(0.240239)=+4.68e-09 (root bracketed to tolerance, X=0.240239)",
+    "aprc_pct": 24.0
+  },
+  {
+    "case": 3,
+    "assumptions_invoked": [
+      "Annex I Part II assumption (a): where the consumer has freedom of drawdown (open-end credit), the total credit is deemed to be drawn immediately and in full => €1,500 at t=0",
+      "Repayment in 12 equal monthly instalments (source-logic: assumption of equal amortisation over the assumed 12-month horizon, one month = 1/12 year)",
+      "18% nominal per annum, monthly compounding => monthly rate i = 0.18/12 = 1.5%; payment p = 1500 / sum_{k=1..12}(1.015)^(-k) = €137.52",
+      "No other fees; result to one decimal place"
+    ],
+    "equation": "1500(1+X)^0 = 137.52(1+X)^(-1/12) + 137.52(1+X)^(-2/12) + ... + 137.52(1+X)^(-12/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+343.652598; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+166.126824; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+34.625746; convergence: f(0.195618)=-8.56e-09 (root bracketed to tolerance, X=0.195618)",
+    "aprc_pct": 19.6
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "Unascertainable drawdown => Annex I Part II assumption (a): total credit deemed drawn immediately and in full at t=0, so €5,000 drawn at t=0",
+      "€200 broker fee financed into the balance at t=0 => added to the amount drawn/borrowed, giving drawdown = €5,000 + €200 = €5,200 at t=0 (this is why it differs from a t=0 cash fee: see below)",
+      "Single repayment at 12 months; 8% nominal per annum => repayment = €5,200 * 1.08 = €5,616 at t = 1 year",
+      "One month = 1/12 year; result to one decimal place"
+    ],
+    "equation": "5200(1+X)^0 = 5616(1+X)^(-1)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+2392.000000; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+1456.000000; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+707.200000; convergence: f(0.080000)=-6.17e-08 (root bracketed to tolerance, X=0.080000 exactly)",
+    "aprc_pct": 8.0,
+    "financed_fee_note": "A t=0 cash fee reduces the net amount made available to the consumer (net drawdown = principal - fee), leaving the repayment stream unchanged - it raises the APRC because the consumer receives less up front. A fee financed into the balance instead increases the drawn amount (drawdown rises from €5,000 to €5,200) while the repayment is calculated on that larger balance; here the repayment is 8% of €5,200, so the APRC remains exactly 8% - the fee is silently amortised into the loan rather than paid out of pocket."
+  },
+  {
+    "weakest_point": "Case 2 is the most assumption-heavy and therefore most likely to diverge from the directive's exact method: the treatment of the €25 monthly fee and monthly interest (single lump repayment at 3 months vs. deducted/charged each month), the 3-month duration fallback, and whether the fee reduces the net drawdown or is a separate charge all affect the PV equation. Case 1's treatment of the arrangement fee as a t=0 charge (reducing net drawdown to €9,900 rather than a separate outflow) is the next-most-likely divergence point. The monthly-to-year conversion uses exactly 1/12 throughout, consistent with the Annex convention."
+  }
+]

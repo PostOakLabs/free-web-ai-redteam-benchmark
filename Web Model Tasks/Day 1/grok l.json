@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Tournament branch predictor combining local and global history",
+    "where_in_paper": "Branch prediction / fetch section",
+    "decision": "Implement a tournament (hybrid) predictor that runs local-history and global-history predictors in parallel and dynamically selects between them with a choice predictor for each branch.",
+    "alternatives_or_rejected": "Using only a local-history predictor or only a global-history predictor.",
+    "rationale": "Different branches are better predicted by local versus global history; the choice predictor learns which is more accurate for each static branch, improving overall prediction accuracy beyond either predictor alone.",
+    "outcome": "High prediction accuracy supporting aggressive speculative execution and the four-wide fetch pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Clustered integer execution units with cross-cluster bypass penalty",
+    "where_in_paper": "Integer execution / Ebox organization",
+    "decision": "Split the four integer units into two clusters, each with its own register-file copy; allow one-cycle penalty for results produced in one cluster and consumed in the other.",
+    "alternatives_or_rejected": "A single fully-connected integer unit cluster with a multi-ported register file and full bypass network (would lengthen the critical execute-bypass path and cycle time).",
+    "rationale": "Physical distance and the large number of register ports required for quad-issue made a monolithic organization incompatible with the target cycle time; simulations showed the cross-cluster penalty cost only about 1 % performance.",
+    "outcome": "Maintained aggressive cycle time while still supporting four integer operations per cycle with acceptable IPC impact.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.88
+  },
+  {
+    "title": "Out-of-order execution with large in-flight window",
+    "where_in_paper": "Overall pipeline / out-of-order execution description",
+    "decision": "Adopt a full out-of-order, register-renaming, speculative-execution core capable of holding many instructions in flight (on the order of 80) rather than remaining in-order like prior Alpha implementations.",
+    "alternatives_or_rejected": "Continuing with a primarily in-order or limited out-of-order design as in the 21164.",
+    "rationale": "Dynamic scheduling extracts more instruction-level parallelism and hides memory latency, necessary to keep the high-frequency pipeline fed and to reach the targeted SPECint/SPECfp numbers.",
+    "outcome": "Sustained high IPC together with 500–600 MHz operation, delivering industry-leading benchmark scores.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Large on-chip L1 instruction and data caches (64 KB each)",
+    "where_in_paper": "Memory system / cache hierarchy",
+    "decision": "Increase L1 I- and D-caches to 64 KB each (versus the much smaller L1s of the 21164) and eliminate the need for an on-chip L2.",
+    "alternatives_or_rejected": "Retaining smaller L1 caches plus an on-chip L2, or staying with the prior hierarchy sizes.",
+    "rationale": "Larger L1s improve hit rates and reduce average memory latency for the out-of-order core; the external L2 interface was designed for very high bandwidth instead.",
+    "outcome": "High L1 hit rates supporting the speculative core, together with an external L2 capable of multiple GB/s.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "High-bandwidth external L2 and system interface prioritized over on-chip L2",
+    "where_in_paper": "Memory system / system interface",
+    "decision": "Provide a flexible, high-bandwidth interface to an off-chip L2 (and memory) that can sustain several GB/s rather than integrating a large on-chip L2.",
+    "alternatives_or_rejected": "Spending die area on a large on-chip L2 at the expense of the external bandwidth or core resources.",
+    "rationale": "Many important applications lack sufficient cache locality; raw bandwidth to external memory hierarchies is required for robust performance across the workload mix.",
+    "outcome": "Sustained bandwidths reported in excess of 1 GB/s (user-visible) on streaming benchmarks and multi-GB/s peak to the L2.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  }
+]

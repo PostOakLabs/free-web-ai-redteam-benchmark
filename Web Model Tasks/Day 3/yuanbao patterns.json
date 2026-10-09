@@ -1,0 +1,90 @@
+[
+  {
+    "pattern_name": "Hierarchical block input-delay budget from unimplemented launch block",
+    "situation": "Two blocks A and B in same clock domain; B has input port driven by A; A not yet implemented; need set_input_delay on B's input so B's implementation leaves enough margin for A to be built later.",
+    "derivation": "Assume clock period T = 10ns (confidence 0.2 — example only). Budget split: launch logic (A internal) = 0.50  T = 5ns (confidence 0.4 on 50% split), interconnect/wire delay = 0.10  T = 1ns (confidence 0.4 on 10% interconnect), capture internal (B input-to-flop) = 0.40  T = 4ns (confidence 0.4 on 40% capture). set_input_delay -clock clk [get_ports IN] value = launch + interconnect = 0.60  T = 6ns. Remaining time for B's internal logic = T - input_delay - T_setup = 4ns - T_setup. If A later requires more than 5ns, B's budget is already consumed and integration fails.",
+    "wrong_way": "Setting input_delay = T (period) leaves 0ns for B internal logic — always fails STA. Setting input_delay = 0 leaves full period for B but A can never meet its launch delay in integration. Silently breaks: over-constrained B wastes area/power; under-constrained B passes STA but system fails at integration.",
+    "defense": "Engineer presents the budget spreadsheet showing the 50/10/40 split justified by pipeline stage count and wire-load estimates from similar blocks; claims this is conservative for A's complexity.",
+    "signoff_risk": "Too tight: B over-optimized, wasted power/area, possible failure to close timing. Too loose: A cannot meet launch delay at integration, system timing failure on silicon.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "node_era_note": "7nm-and-below: OCV/POCV requires extra 10-15% margin in budget split (confidence 0.6), reducing the capture-side allocation"
+  },
+  {
+    "pattern_name": "False path vs multicycle on slow control/configuration registers",
+    "situation": "Configuration or reset signal that changes only at boot or infrequently; crosses flops in same clock domain but data is not required to be valid next cycle.",
+    "derivation": "If signal only needs to propagate in N cycles (e.g., N=2 for a two-cycle config write), set_multicycle_path N -from [src_regs] -to [dest_regs]. For same-clock slow control, set_multicycle_path 2. Hold check defaults to same edge; add set_multicycle_path 1 -hold to keep hold check at launch edge. Arithmetic: setup check moves to cycle N, so required time = N*T - T_setup. If truly async and never timed (e.g., test reset), set_false_path -from [src] -to [dest].",
+    "wrong_way": "Setting set_false_path on a signal that actually changes at operational speed — silently breaks: chip works at low speed or in simulation but fails intermittently at target frequency because data arrives late relative to capture edge.",
+    "defense": "Engineer shows waveform or protocol spec proving signal only toggles once per N cycles; points to RTL state machine guaranteeing N-cycle separation.",
+    "signoff_risk": "Too tight (no exception): wasted effort fixing unneeded paths, area/power penalty. Too loose (false path when multicycle needed): data corruption if signal changes faster than assumed; intermittent system failure.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Early-implementation over-constraint margin",
+    "situation": "Block synthesis or pre-CTS, before final clock tree and routing; want margin so later stages don't invalidate timing closure.",
+    "derivation": "Target clock period = T. Set constraint to 0.80  T (i.e., 20% margin) (confidence 0.5 on 20% being typical; some teams use 10-15%). Alternatively, set_clock_uncertainty additional 0.05  T (confidence 0.5 on 5% extra). Arithmetic: if T=5ns, constrain to 4ns. Relax to T after CTS or route. Over-constraint removed in final signoff constraint set.",
+    "wrong_way": "Over-constraining by 50% (0.5*T) — tool cannot close timing, wasted iterations, team blames flow. Or forgetting to relax before tapeout — chip ships over-margined, wasted power/area, no benefit.",
+    "defense": "Engineer cites historical data from prior tapeouts showing post-CTS insertion delay consumed 15-20% of period (confidence 0.5); margin chosen to absorb this.",
+    "signoff_risk": "Too tight: area/power penalty, possible failure to close timing, schedule slip. Too loose (no margin): post-P&R timing fails, late ECO required, tapeout delay.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "7nm-and-below: over-constrain by less (e.g., 10%) because tool has harder time closing on aggressive targets due to wire delay dominance (confidence 0.55)"
+  },
+  {
+    "pattern_name": "Virtual clock for external-device input timing",
+    "situation": "Chip receives data from external device with known t_co, board trace delay; need to constrain input port relative to external clock.",
+    "derivation": "Create virtual clock: create_clock -name vclk -period T. set_input_delay -clock vclk -max t_co_ext + t_board_delay [get_ports IN]. Assume T=10ns (confidence 0.2), t_co_ext=2ns (confidence 0.3), t_board=1ns (confidence 0.3). Input delay = 3ns. Required internal arrival = T - input_delay - T_setup = 10 - 3 - 0.1 = 6.9ns for internal logic.",
+    "wrong_way": "Using real internal clock with offset instead of virtual clock — creates false clock relationship, breaks timing analysis. Ignoring board delay — silently breaks: STA passes but system fails at board level because trace delay was not accounted.",
+    "defense": "Engineer presents external device datasheet t_co max, board stack-up trace delay estimate, and system-level timing budget showing the arithmetic.",
+    "signoff_risk": "Too tight: STA fails unnecessarily, over-design of input buffer. Too loose: system integration failure, external device setup not met at board level.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.85,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Generated clock from divider for low-power domain",
+    "situation": "Internal divided clock from PLL or RTL divider for a slower domain; need to constrain paths through divided clock and crossings back to fast domain.",
+    "derivation": "create_generated_clock -name clk_div2 -source [master_pin] -divide_by 2 [divider_output]. Period of clk_div2 = 2*T. For paths from fast to slow domain: launch period = T, capture period = 2T. Default setup check at first slow-clock edge (T) may be too tight; often set_multicycle_path 2 -to [slow_domain_regs] to allow full 2T. Arithmetic: if T=5ns, fast-to-slow default setup check at 5ns; with multicycle 2, check at 10ns.",
+    "wrong_way": "Using create_clock instead of create_generated_clock — breaks clock relationship, timing engine treats as async, no cross-domain paths analyzed. Silently breaks: paths between domains either falsely pass (no check) or are over-constrained.",
+    "defense": "Engineer shows clock tree schematic, divider ratio, and cross-domain path report proving correct clock relationship and multicycle exception.",
+    "signoff_risk": "Wrong command or missing multicycle: complete loss of valid timing checks or false violations; silicon failure if critical path escapes.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.8,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Asynchronous CDC handshake max-delay constraint for MTBF",
+    "situation": "Two async clock domains with handshake; clocks unrelated; need to bound metastability probability with max-delay on synchronizer flops.",
+    "derivation": "set_clock_groups -asynchronous -group {clkA} -group {clkB}. For synchronizer flops, set_max_delay 0.5 * T_fast (confidence 0.4 on 0.5 factor; typical range 0.3-0.7). If T_fast=2ns, max_delay=1ns. This bounds the time for signal to propagate through first sync flop, reducing metastability window. Arithmetic: MTBF ∝ exp(delay/metastability_time_constant); tighter max_delay improves MTBF.",
+    "wrong_way": "No constraint at all — no MTBF check, potential for rare metastability failures in field. Silently breaks: chip passes STA but fails intermittently in system due to unresolved CDC.",
+    "defense": "Engineer presents MTBF calculation spreadsheet showing max_delay value achieves target MTBF (e.g., >1 year mean time between failures) given process metastability parameters.",
+    "signoff_risk": "Too tight: routing congestion, wasted resources on short paths. Too loose: metastability not bounded, system fails intermittently; field returns.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.6,
+    "node_era_note": "7nm-and-below: smaller nodes have smaller metastability window, so max_delay needs to be tighter (e.g., 0.3*T_fast, confidence 0.6); POCV also affects MTBF calculation"
+  },
+  {
+    "pattern_name": "Clock uncertainty budgeting for PLL jitter and variation",
+    "situation": "Setting clock_uncertainty for setup/hold to account for PLL jitter, AOCV/POCV, and clock-tree variation at various implementation stages.",
+    "derivation": "Uncertainty = PLL_jitter + variation_margin. Assume PLL_jitter = 0.05  T (confidence 0.5 on 5%), AOCV_margin = 0.02  T (confidence 0.5 on 2%). Total = 0.07  T. For T=5ns, uncertainty = 0.35ns. Applied via set_clock_uncertainty 0.35 [get_clocks clk]. Pre-CTS: add estimated clock skew (e.g., 0.10T, confidence 0.4). Post-CTS: remove skew, keep jitter + variation.",
+    "wrong_way": "Setting uncertainty = 0 — no margin for jitter; silicon fails at speed. Setting too high (e.g., 0.3*T) — cannot close timing, wasted area/power. Silently breaks: wrong uncertainty hides real timing problems or creates false failures.",
+    "defense": "Engineer presents PLL datasheet jitter spec, process variation model (AOCV/POCV derate tables), and clock-tree insertion-delay estimate to justify the split.",
+    "signoff_risk": "Too tight: fails STA, over-design. Too loose: silicon timing failure, chip doesn't meet frequency rating.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "7nm-and-below: POCV adds significant uncertainty, typically 2-3x 28nm (confidence 0.6), requiring higher budget or statistical timing"
+  },
+  {
+    "pattern_name": "Output delay budget to external device",
+    "situation": "Chip outputs data to external device with known t_su and board trace delay; need set_output_delay to constrain internal logic.",
+    "derivation": "Create virtual clock vclk with period T. set_output_delay -clock vclk -max T - t_su_ext - t_board_delay [get_ports OUT]. Assume T=10ns (confidence 0.2), t_su_ext=1ns (confidence 0.3), t_board=0.5ns (confidence 0.3). Output_delay = 10 - 1 - 0.5 = 8.5ns. Internal logic must produce data 8.5ns after clock edge. Slack = T - output_delay - T_internal_delay - T_skew.",
+    "wrong_way": "Setting output_delay = 0 — internal logic gets full period but external device misses data because t_su not accounted. Silently breaks: STA passes, board-level system fails.",
+    "defense": "Engineer presents external device t_su spec, board trace delay calculation, and system timing budget showing the subtraction arithmetic.",
+    "signoff_risk": "Too tight: internal logic over-optimized, power/area wasted. Too loose: external device setup violation at system level, board failure.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.85,
+    "node_era_note": "no-era-difference-recalled"
+  }
+]

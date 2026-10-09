@@ -1,0 +1,724 @@
+```json
+[
+  {
+    "symptom": "Congestion-driven routing DRCs with clean placement density",
+    "first_checks": [
+      {
+        "check": "Overlay the post-route violation map on the global-route overflow/congestion heatmap, split by direction (horizontal vs vertical) and by layer",
+        "why_first": "cheapest check and it immediately splits 'real overflow the router reported' from 'violations with no overflow anywhere near them'",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether the violating region is dominated by non-cell objects: PG straps, clock trunks, macro pin channels, pre-routes, or leftover obstructions",
+        "why_first": "rules out the most common 'density looks clean but routing resources were eaten' case before any re-run is spent",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "List the NDR (non-default rule) nets passing through the hotspot",
+        "why_first": "a single wide/double-spacing NDR net can fabricate a whole hotspot of neighbor violations",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run global route with the hotspot's obstruction class temporarily removed or thinned (e.g., one strap lane or one IP's channel) while everything else stays fixed",
+        "rules_in": "if overflow and DRCs in that region collapse, the specific obstruction class is the cause",
+        "rules_out": "if overflow persists at the same coordinates with unchanged cell density, cell/pin-driven congestion is excluded and the structural resource conflict is confirmed"
+      },
+      {
+        "experiment": "Trial route with the NDRs stripped from only the nets crossing the hotspot",
+        "rules_in": "violations disappear with NDRs off means the hotspot is self-induced by the rule, not by congestion",
+        "rules_out": "violations persist without NDRs means rule-driven shorts are excluded"
+      },
+      {
+        "experiment": "Macro/hierarchical-block pin-escape analysis on the hotspot boundary",
+        "rules_in": "all violations ringing one macro or block pin array confirms pin-escape/channel planning as the cause",
+        "rules_out": "violations distributed mid-row away from any pin array excludes pin-access and points back at wire resources"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Macro pin channels / pin escapes not planned wide enough",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "PG straps or clock trunks consuming specific layers through the region",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "NDR overuse on many nets through one corridor",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Local hierarchy-boundary placement imbalance invisible in the global utilization number",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Forgotten padding/inflation or keepout settings from an earlier congestion fix",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.4
+      }
+    ],
+    "classic_trap": "globally lowering utilization targets and re-placing the whole block when the real problem is one macro pin channel or one strap lane; engineers blame the router first and burn a full rerun before measuring where the wire resources actually went",
+    "node_era_note": "at 7nm-and-below, pin access, self-aligned via restrictions, and coloring/multi-patterning rules can masquerade as congestion shorts where 28nm violations were plain spacing",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Setup (max-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Bucket the failing paths by clock domain and path group, and by launch/capture clock-gating cell",
+        "why_first": "cheapest report, and it immediately splits 'one clock tree is late' from 'everything degraded uniformly'",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare actual clock insertion delay per sink against what the pre-CTS scenario assumed",
+        "why_first": "rules out the most common cause — latency that the pre-CTS budget never modeled — in one report",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check clock-net transition/slew at endpoints against the CTS spec targets",
+        "why_first": "a degraded slew on one trunk explains a whole subtree of failures in a single glance",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Diff the analysis setup against the last clean run: uncertainty, derate/OCV mode, corner assignment",
+        "why_first": "if the analysis changed, the physical timing may not have — this rules out a whole class of phantom regressions cheaply",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-time with the real propagated clock but the pre-CTS latency assumptions (or subtract the measured mean insertion delay from the failing slack)",
+        "rules_in": "if slack recovers by roughly the added latency, the failure is unbudgeted insertion delay, not path degradation",
+        "rules_out": "if slack does not recover, pure latency is excluded and real data/clock-path delay degradation is confirmed"
+      },
+      {
+        "experiment": "Trace each failing capture clock back to the root and compare tree depth against its launch counterpart",
+        "rules_in": "failing paths sharing one deep CTS subtree or one late CG cell while launch trees are shallow confirms a gating/branch latency imbalance",
+        "rules_out": "launch and capture trees of similar depth exclude tree-imbalance and point at data-path or model changes"
+      },
+      {
+        "experiment": "Toggle the derate/OCV mode off in an analysis-only run",
+        "rules_in": "violations vanishing means the post-CTS derating/OCV change is the cause, not physical delay",
+        "rules_out": "violations persisting excludes analysis-mode change as the explanation"
+      },
+      {
+        "experiment": "Measure routed/estimated detour ratio on the failing nets against the congestion map",
+        "rules_in": "failing nets detouring in congested regions confirms congestion-induced delay",
+        "rules_out": "straight, uncongested failing nets exclude congestion and leave cell delay or clock structure"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Clock insertion latency never budgeted pre-CTS",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Latency imbalance across clock-gating cells or branches",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Analysis setting drift (uncertainty, derate, corner) between scenarios",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Congestion detours inflating data-path delay",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "CTS run on a stale sink list or with wrong excluded pins",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.35
+      }
+    ],
+    "classic_trap": "blaming the CTS tool for 'creating' bad timing when CTS merely exposed an optimistic pre-CTS budget; teams then waste iterations re-balancing skew when the fix is re-budgeting latency, not more balancing",
+    "node_era_note": "at 7nm-and-below, insertion delay runs to hundreds of picoseconds across many buffer stages, so latency budgeting is survival; at 28nm ideal-clock flows often survived to route",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Hold (min-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Split violations into same-clock-domain short paths vs cross-clock paths, and functional vs scan-shift paths",
+        "why_first": "cheapest split and it rules out the largest mis-scoped work — cross-clock and shift-mode paths need entirely different handling",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "For each failing pair, read launch-vs-capture clock arrival and find their common point in the clock tree",
+        "why_first": "directly separates 'skew of the built tree' from 'path is just too short' in one look",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify the hold corner: fast library, min derate, correct mode",
+        "why_first": "a wrong corner shows up as systematic negative hold everywhere, which is instantly distinguishable from localized pairs",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run hold analysis with ideal (zero-skew) clock network",
+        "rules_in": "violations disappearing under ideal clocks confirms the built tree's skew as the driver",
+        "rules_out": "violations persisting under ideal clocks excludes skew and confirms genuinely short data paths needing hold buffers or model fixes"
+      },
+      {
+        "experiment": "Overlay violation locations on the CTS insertion-delay gradient map",
+        "rules_in": "violations clustered where a steep latency gradient runs (e.g., past a macro cluster edge) confirms skew-gradient as cause",
+        "rules_out": "violations uniformly scattered across die independent of the gradient excludes tree-structure causes"
+      },
+      {
+        "experiment": "Set hold-mode clock uncertainty to zero in an analysis-only pass",
+        "rules_in": "a clean result with zero uncertainty means the pessimism was uncertainty margin and real hold is routine to fix",
+        "rules_out": "still-negative slack with zero uncertainty excludes pessimism as the story"
+      },
+      {
+        "experiment": "Restrict the scenario to scan-shift clocks only and re-report",
+        "rules_in": "the whole violation set appearing only under shift confirms scan-chain hold scope, not functional logic",
+        "rules_out": "functional-only violations exclude the scan-path explanation"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Very short data paths between adjacent flops awaiting routine hold fixing",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Excessive local skew between close flop pairs",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Scan/shift-mode hold paths never included in the checked scenario",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Cross-clock paths wrongly assumed synchronous and chased for skew",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Wrong min-corner or missing min derate",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "panicking over expected pre-hold-fix negatives and burning days re-balancing CTS, when the standard flow inserts hold buffers post-route anyway — or worse, fixing hold in functional mode only and shipping a chip that fails scan-shift",
+    "node_era_note": "at 7nm-and-below per-stage delay is small, so hold margin dominates and hold fixing consumes far more buffer area; at 28nm hold was a lighter afterthought",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "IR-drop-induced timing failure",
+    "first_checks": [
+      {
+        "check": "Run static IR analysis and overlay droop on the failing-instance map",
+        "why_first": "one run answers the whole 'is it power at all' question and rules out a pure timing-model problem if maps don't correlate",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Audit PG strap and rail density plus via-array counts in the failing region against spec",
+        "why_first": "missing straps or starved via arrays are visible by inspection and are the most frequent physical cause",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Correlate failing region with high-activity hierarchies (clock-heavy, wide data-path banks toggling together)",
+        "why_first": "activity correlation separates dynamic droop from static network resistance before deeper dynamic simulation is spent",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Static IR vs dynamic (vector- or activity-aware) IR comparison on the same region",
+        "rules_in": "static clean but dynamic showing local droop during activity windows confirms dynamic di/dt droop",
+        "rules_out": "static IR already showing the same hotspots excludes a purely dynamic story and confirms network resistance"
+      },
+      {
+        "experiment": "Re-run timing with per-instance IR-derived voltage derating applied only to the drooping instances",
+        "rules_in": "if per-instance derating reproduces exactly the observed failing set and magnitudes, IR is confirmed as the timing mechanism",
+        "rules_out": "if per-instance derating explains none or a different set, IR-induced timing is excluded for those paths"
+      },
+      {
+        "experiment": "Trial fix: add straps/via arrays (or supply bumps) only in the hotspot and re-run IR",
+        "rules_in": "droop collapsing locally confirms the localized network was the bottleneck",
+        "rules_out": "droop persisting after local reinforcement pushes the cause outward to supply pads, package, or uniform grid insufficiency"
+      },
+      {
+        "experiment": "Stagger the enable timing of the large clock-gated banks in the activity model and re-run dynamic IR",
+        "rules_in": "peak droop dropping when wake-ups are staggered confirms simultaneous switching as the driver",
+        "rules_out": "droop insensitive to staggering excludes simultaneity and points back at DC resistance"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Insufficient strap density or gaps around macros in the PG network",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Dynamic di/dt underestimated; too little decoupling near the load",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Starved via arrays at strap/rail junctions",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Supply pad/bump allocation leaving one die corner weakly fed",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Power-gating switch fabric undersized",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.4
+      }
+    ],
+    "classic_trap": "treating the failure as generic slow silicon and hammering global optimization or a blanket derate, instead of locating the droop and fixing the grid locally — the timing fix then never converges because the true mechanism is voltage, not delay",
+    "node_era_note": "at 7nm-and-below, lower Vdd and higher interconnect resistance make IR sensitivity far worse, so voltage-aware per-instance timing is mandatory; at 28nm static IR signoff usually caught it",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Clock skew / CTS divergence (sinks missing insertion-delay targets)",
+    "first_checks": [
+      {
+        "check": "Histogram insertion delay per sink, grouped by clock and by hierarchy level",
+        "why_first": "cheapest report and it immediately splits 'a few outlier sinks' from 'an entire subtree shifted late'",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether outlier sinks sit in don't-touch regions, inside macros, or near excluded/pre-routed clock resources",
+        "why_first": "rules out the most common structural cause — CTS never allowed to fix those sinks — in one query",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Diff the sink list in the CTS spec against the current netlist",
+        "why_first": "a stale or mis-excluded sink list produces exactly this symptom and takes minutes to confirm",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Overlay outlier locations on the congestion map",
+        "why_first": "if late sinks coincide with routed detours, clock-net congestion is implicated before any rerun",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Manually route or buffer one outlier sink's clock net with unrestricted resources",
+        "rules_in": "insertion delay dropping to target confirms routing congestion/blockage on that net as the cause",
+        "rules_out": "delay staying high even with a clean dedicated route excludes routing and confirms structural depth or placement distance"
+      },
+      {
+        "experiment": "Find the common ancestor of all late sinks and measure pre-existing delay through it",
+        "rules_in": "one CG cell or mux whose output feeds only the late group with a long input net confirms branch-level imbalance at a single structure",
+        "rules_out": "no shared structure among outliers excludes a single-tree defect and points at per-sink placement"
+      },
+      {
+        "experiment": "Compare physical distance from clock root to outliers vs to the median sink",
+        "rules_in": "outliers sitting at the far edge of a macro cluster or die corner confirms inherent placement-driven latency",
+        "rules_out": "outliers interleaved physically with on-target sinks excludes placement distance as the driver"
+      },
+      {
+        "experiment": "Re-run CTS with congestion-aware clock routing enabled (or the region decongested) and compare the tail",
+        "rules_in": "tail collapsing confirms congestion-driven divergence",
+        "rules_out": "tail persisting excludes congestion and leaves buffering/topology causes"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Sink clusters placed late at die/macro edges, far from the tree root",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Clock nets blocked by obstructions, NDRs, or pre-routes forcing detours",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Stale or wrong CTS sink/exclude list",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Deep gating/mux chains on one branch adding levels of delay",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Sink count ballooned after a late netlist change without re-running CTS",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.35
+      }
+    ],
+    "classic_trap": "padding delay onto all the on-time sinks to match the late outliers — inflating total latency, power, and area — when relocating the outlier cluster or clearing one blocked route fixes the tail at its root",
+    "node_era_note": "at 7nm-and-below, CTS runs corner-aware with OCV-derated clock paths and larger latency budgets, so the 'skew target' itself is multi-corner; at 28nm a single balanced tree was typically sufficient",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "LVS mismatch: missing / shorted / open nets",
+    "first_checks": [
+      {
+        "check": "Read the mismatch summary counts first — net count, device count, and the open/short/missing breakdown — before opening any single mismatch",
+        "why_first": "cheapest step, and the classic arithmetic (one real short typically surfaces as a short plus a paired open) can collapse dozens of reported mismatches into one physical defect",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Run a dedicated power/ground short check",
+        "why_first": "most shorts are signal-to-rail at a via, and rail involvement is both most common and cheapest to confirm",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Cross-probe one representative mismatch between layout and schematic viewers",
+        "why_first": "one manually verified case establishes whether the reports are real geometry problems or label/mapping artifacts",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Diff the netlist and GDS versions against the last clean LVS run",
+        "why_first": "if mismatches track a recent ECO or block integration, the search space shrinks to that delta immediately",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run LVS per sub-block and compare against full-chip results",
+        "rules_in": "sub-blocks clean but full chip failing confirms top-level integration wiring or PG stitching as the cause",
+        "rules_out": "the owning sub-block itself failing excludes top-level wiring and localizes the defect inside the block"
+      },
+      {
+        "experiment": "Audit text/label completeness on the flagged nets (labels vs geometry check)",
+        "rules_in": "geometry continuous but labels missing confirms a label-driven phantom open",
+        "rules_out": "labels present and correct on all flagged nets excludes label artifacts — the open or short is physical"
+      },
+      {
+        "experiment": "Cut the suspect via/wire locally in a trial GDS edit and re-run LVS",
+        "rules_in": "mismatch counts changing in the predicted direction confirms that via/wire was the defect",
+        "rules_out": "mismatch counts unchanged excludes the suspect and the defect is elsewhere in the flagged set"
+      },
+      {
+        "experiment": "Re-extract with via-recognition/layer-mapping options reset to the foundry default",
+        "rules_in": "opens vanishing under default recognition confirms a techfile or recognition misconfiguration, not a layout defect",
+        "rules_out": "opens persisting under defaults excludes recognition artifacts"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "PG rail/strap shorts or missing PG vias",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Dropped via cuts or incomplete via arrays on signal nets",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Block-boundary integration wiring errors (cross-block nets)",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Missing labels/text producing phantom opens",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "grinding through every reported mismatch individually; veterans first apply the short/open pairing heuristic — fix one real short and its paired 'open' report typically disappears with it, collapsing the work by an order of magnitude",
+    "node_era_note": "at 7nm-and-below, LVS additionally checks mask-ops/coloring and richer via structures, so some 'shorts' are coloring violations that 28nm never saw",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Diff the device summary tables — counts and W/L (or fin-count) histograms by device type — between extraction and source netlist",
+        "why_first": "cheapest step and it instantly separates 'every device of a type is scaled' (systematic/version issue) from 'a handful of outliers' (local edits)",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Classify the 'extra' devices by master cell name",
+        "why_first": "if extras are all fill/decap/dummy or ESD/antenna devices, the cause is known in one sort",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Cross-reference mismatched devices against the recent ECO/change log",
+        "why_first": "mismatch tracking a known edit rules out library-level causes immediately",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check the LVS device-merge (parallel/series combining) settings in both runs",
+        "why_first": "mismatched merge configuration fabricates size mismatches from identical layout — cheapest config check before suspecting geometry",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run LVS with parallel-device merging toggled (on vs off) between the two views",
+        "rules_in": "mismatches collapsing under the changed merge setting confirms a configuration artifact, not a layout error",
+        "rules_out": "mismatches invariant to merge setting excludes this class and confirms real size/device differences"
+      },
+      {
+        "experiment": "Regenerate the source netlist from the same library/PDK version as the layout and re-run",
+        "rules_in": "mismatches vanishing confirms library-version skew as the cause",
+        "rules_out": "mismatches persisting against the matched-version netlist excludes version skew and indicts the layout edits themselves"
+      },
+      {
+        "experiment": "Update the netlist to include (or exclude) the physically inserted fill/dummy/ESD devices and re-run",
+        "rules_in": "extras reconciling after netlist update confirms 'physical additions never back-annotated' as the cause",
+        "rules_out": "unexplained devices remaining after reconciliation are true layout defects to chase individually"
+      },
+      {
+        "experiment": "Vary device-recognition bounds in extraction",
+        "rules_in": "phantom devices appearing or disappearing with recognition bounds confirms device-recognition (not geometry) as the mechanism",
+        "rules_out": "device set stable across recognition settings excludes recognition artifacts"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Source netlist stale relative to the layout (ECO applied to one side only)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Fill/decap/dummy/ESD devices inserted in layout without netlist update",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Library version skew between layout cells and source netlist",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Device-merge or recognition option differences between runs",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "assuming layout is wrong and redrawing devices for days, when the source netlist was stale or the merge options differed — veterans check the two 'free' explanations before touching geometry",
+    "node_era_note": "at 7nm-and-below, devices are discrete fin-count/fixed-rule structures checked against discrete size steps, so 'wrong size' means wrong cell variant or fin count rather than a continuous W/L typo as at 28nm",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Antenna (process-antenna-effect) violations at signoff",
+    "first_checks": [
+      {
+        "check": "Group the antenna report by metal layer and by rule type (per-layer ratio vs cumulative ratio)",
+        "why_first": "cheapest split — violations concentrated on one long-trunk layer point at jumpers, while cumulative failures point at total metal run",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "For each violating net, check whether a jumper (route-up) or antenna diode already exists nearby",
+        "why_first": "rules out 'fix exists but was lost or misplaced' before any new fix is designed",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check the antenna rule deck version and gate-area accounting mode against the foundry signoff requirement",
+        "why_first": "a stale deck or a pessimistic default gate-area assumption can manufacture the entire violation set",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Correlate violating nets with high-fanout and long-span nets (clock, reset, scan)",
+        "why_first": "confirms the physical intuition — long unbroken trunks to big gate loads — in one overlay",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Apply jumpers (route up a layer near the gate) to a sample of violating nets and re-run the antenna check",
+        "rules_in": "sampled nets clearing without diodes confirms jumper-fix sufficiency and that trunk length was the mechanism",
+        "rules_out": "ratio still failing after jumping excludes trunk-length-only explanation and demands diodes or gate protection"
+      },
+      {
+        "experiment": "Re-run with the current foundry antenna ratio tables and extraction-based gate area enabled",
+        "rules_in": "violation count collapsing confirms the earlier set was a stale-deck or pessimistic-gate-area artifact",
+        "rules_out": "violations persisting under current rules and real gate area excludes rule-deck artifacts — fixes are genuinely required"
+      },
+      {
+        "experiment": "Run both per-layer and cumulative ratio modes separately",
+        "rules_in": "failing only in cumulative mode confirms total accumulated metal as the driver, so fixes must shorten total run, not one layer",
+        "rules_out": "failing only per-layer confines the problem to specific layer segments and excludes cumulative effects"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Long un-jumpered trunks on upper metals",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Antenna repair disabled or lost during a routing/ECO stage and never rechecked",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Missing antenna diodes near high-fanout gate loads",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Stale ratio tables or pessimistic gate-area defaults",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "sprinkling antenna diodes on every violating net — diodes cost area and add leakage, while jumpers are nearly free; or fixing antenna mid-flow and then losing the fixes in a later ECO without re-running the check at signoff",
+    "node_era_note": "at 7nm-and-below the rule decks are stricter with cumulative ratios and extraction-based gate-area accounting across more layers; at 28nm a handful of diodes typically sufficed",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Detailed-routing DRC hotspots after clean global routing",
+    "first_checks": [
+      {
+        "check": "Cluster the detail-route violations by rule type (via spacing vs wire spacing vs width) and by layer",
+        "why_first": "cheapest split — via-rule clusters point at pin access, wire-rule clusters at mid-route congestion or obstructions",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether violations sit at cell pins (access conflicts) or mid-wire",
+        "why_first": "at advanced nodes pin access is the dominant cause and this single observation redirects the entire investigation",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "List NDR nets and pre-routes/PG straps crossing the hotspot",
+        "why_first": "rules out self-induced rule conflicts and fixed obstructions before blaming the router",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-route the hotspot region with pin-access effort/optimization maximized",
+        "rules_in": "violations clearing confirms pin-access as the mechanism (cell rows or library pins need adjustment)",
+        "rules_out": "violations persisting at maximal pin-access effort excludes access and confirms a genuine space conflict"
+      },
+      {
+        "experiment": "Allow the router freedom to detour involved nets to upper layers within the hotspot",
+        "rules_in": "violations relocating away from the spot confirms a local vertical/track resource conflict the router can route around",
+        "rules_out": "violations pinned to the same coordinates regardless of detour freedom confirm a fixed obstruction (strap, pre-route, via stack) that must be physically changed"
+      },
+      {
+        "experiment": "Strip NDRs from the involved nets in a trial route of the region",
+        "rules_in": "DRCs vanishing confirms NDR-induced conflicts with neighbors",
+        "rules_out": "DRCs persisting without NDRs excludes rule-driven conflicts"
+      },
+      {
+        "experiment": "Re-run the same region with a different route order/seed",
+        "rules_in": "hotspot relocating with seed confirms order-dependent congestion rather than hard geometry",
+        "rules_out": "hotspot invariant to seed confirms a geometry-bound conflict independent of routing order"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Pin-access conflicts in dense cell rows",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Pre-routes/PG straps pinching tracks through the region",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "NDR nets adjacent to default-rule nets",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Local congestion finer-grained than the global-route grid caught",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "assuming 'clean global route' means congestion is ruled out and blaming the detailed router — when the actual hotspot is pin access, which no amount of re-running the router fixes without touching cell placement or the library pins",
+    "node_era_note": "at 7nm-and-below, pin access with color-aware pins and restricted via choices dominates detail-route DRCs; at 28nm hotspots were mostly plain congestion",
+    "not_in_paper": false
+  },
+  {
+    "symptom": "Unroutable placement (global placement diverges or overflows)",
+    "first_checks": [
+      {
+        "check": "Do the density arithmetic: total cell area + macro area + halos + blockages against die area at the current target utilization",
+        "why_first": "cheapest check of all — most 'divergence' is simply a design that does not fit at the requested density",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Map macro/hard-block locations, halos, and the contiguous routable channels remaining between them",
+        "why_first": "one badly placed macro row can sever the die and cause region overflow no global tuning recovers",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Find extreme-fanout nets (scan chains, resets, ties) and their placement contribution",
+        "why_first": "mega-nets dominate wirelength and can prevent convergence; identifying them is a single sorted report",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inventory fixed cells, don't-touch regions, and placement blockages as a fraction of usable area",
+        "why_first": "rules out 'the die is nominally big enough but effectively full' in one query",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Raise the density target ceiling (or set a per-region target) and rerun placement",
+        "rules_in": "convergence at higher density confirms the target — not the netlist or macros — was the blocker",
+        "rules_out": "divergence persisting even at high density excludes pure utilization and confirms structural causes"
+      },
+      {
+        "experiment": "Re-run with macros pre-placed by hand or per a channel plan, versus free macro placement",
+        "rules_in": "convergence with pre-placed macros confirms automatic macro arrangement as the diverging factor",
+        "rules_out": "divergence persisting with manual macro placement excludes macro placement and shifts suspicion to netlist/obstacles"
+      },
+      {
+        "experiment": "Virtual-weight or detach the mega-nets (e.g., break scan order) and rerun",
+        "rules_in": "convergence returning confirms mega-net wirelength domination as the cause",
+        "rules_out": "no improvement excludes net weighting and leaves density/obstacle causes"
+      },
+      {
+        "experiment": "Examine the overflow map at divergence: concentrated region vs uniform overflow",
+        "rules_in": "overflow concentrated around one obstacle or macro halo confirms a local structural conflict",
+        "rules_out": "uniform overflow across the die confirms global utilization, not local geometry"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Utilization target physically unachievable (die too small or blockages too large)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Macro arrangement leaving insufficient channels/halos",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Huge-fanout nets (scan, reset) dominating placement cost",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Excessive fixed obstacles/don't-touch regions fragmenting usable area",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Netlist defects (unconnected pins, overlapping instances)",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.35
+      }
+    ],
+    "classic_trap": "treating divergence as a tool bug and cycling placer options/effort knobs, when the density arithmetic on a napkin already showed the design cannot fit as constrained — teams lose days on knobs that no setting can overcome",
+    "node_era_note": "at 7nm-and-below, achievable utilization is lower because PG and routing resources eat more tracks, so a density that 'worked at 28nm' silently fails at 7nm even with the same die area",
+    "not_in_paper": false
+  }
+]
+```

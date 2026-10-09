@@ -1,0 +1,100 @@
+[
+{
+"delta_name": "Wire delay became a first-order timing limiter",
+"at_28nm": "Cell delay and wire delay were both important, but conventional timing optimization could often recover substantial frequency through cell sizing, buffering, Vt selection, and logic restructuring before interconnect became the dominant physical constraint. Upper-layer routing was comparatively effective at controlling long-net resistance.",
+"at_7nm_5nm": "Interconnect resistance and capacitance occupy a much larger fraction of the timing problem, so physical location, routing layer, via count, and extracted parasitics directly constrain achievable frequency. Critical-net optimization increasingly becomes a placement-and-routing problem rather than purely a cell-selection problem. Advanced-node implementation flows explicitly incorporate layer-aware optimization and physical effects into synthesis and implementation. ([Synopsys][1])",
+"why_it_changed": "Transistor scaling continued to improve device density and drive capability while metal dimensions and pitches became extremely small; resistance therefore became increasingly important. IRDS identifies maintaining interconnect RC performance as a continuing scaling challenge. ([IRDS][2])",
+"what_breaks": "A 28nm-trained engineer may see a −100 ps path and expect upsizing or Vt swaps to solve most of it. On a 7nm/5nm block, the same path may be dominated by a long resistive route, excessive via resistance, or a poor physical topology; aggressive cell upsizing then produces little improvement while increasing congestion.",
+"workflow_impact": "Timing optimization moves earlier into physically aware synthesis, placement, routing-layer assignment, parasitic estimation, and incremental physical optimization instead of waiting primarily for post-route cell ECOs.",
+"confidence": 0.98
+},
+{
+"delta_name": "Congestion shifted from coarse channel capacity toward pin access",
+"at_28nm": "A large part of congestion analysis could be understood as routing demand versus available horizontal/vertical channel capacity around macros and standard-cell regions. Widening a channel or lowering utilization often provided a relatively direct recovery mechanism.",
+"at_7nm_5nm": "Congestion increasingly appears as local pin-access, via-access, and detailed-routing failures even when coarse global-route congestion looks acceptable. Cell architecture, pin placement, track alignment, local density, and routing-layer restrictions can dominate whether a region is actually routable. Advanced-node implementation flows explicitly include pin-access-aware optimization. ([Synopsys][3])",
+"why_it_changed": "Metal pitch and standard-cell dimensions became highly constrained, reducing the number of legal ways for a router to escape dense cell pins. The practical routing capacity of a region is therefore lower than a simple geometric track-count calculation suggests.",
+"what_breaks": "A 28nm-trained engineer may respond to a 7nm hotspot by looking only at global-route overflow and lowering average utilization. The observable symptom is a block with apparently reasonable global congestion but thousands of detailed-route pin-access, via, or spacing violations concentrated around particular cells or macros.",
+"workflow_impact": "Placement must become congestion- and pin-access-aware earlier; cell architecture, legalization, detailed routing, layer assignment, and hotspot-specific density control become tightly coupled.",
+"confidence": 0.98
+},
+{
+"delta_name": "Via and pin-access DRC became a central closure problem",
+"at_28nm": "Routing DRC closure was heavily concerned with conventional width, spacing, enclosure, shorts, and manufacturability rules. Via failures mattered, but they were less frequently the dominant symptom of an otherwise apparently routable digital block.",
+"at_7nm_5nm": "Via placement, via resistance, via redundancy, pin access, end-of-line restrictions, and local pattern constraints can dominate detailed-route closure. Advanced-node flows explicitly use via pillars, via stapling, pin-access-aware optimization, and node-specific routing rules to preserve routability and reliability. ([Synopsys News Releases][4])",
+"why_it_changed": "Smaller pitches reduce geometric freedom and make a single cell-to-wire connection consume a larger fraction of the locally available routing resources. At the same time, increased current density makes via resistance and electromigration more consequential.",
+"what_breaks": "A 28nm-trained engineer may treat a large DRC count as something a final router cleanup pass can absorb. At 7nm/5nm, a systematic pin-access or via-access problem can indicate that placement itself is wrong; repeated route-and-repair iterations then produce little improvement.",
+"workflow_impact": "Detailed-route feasibility moves earlier into placement and synthesis, with pin-access analysis, via-aware optimization, local density control, and advanced-node routing rules influencing decisions before final routing.",
+"confidence": 0.98
+},
+{
+"delta_name": "Lithography constraints became a physical-design optimization variable",
+"at_28nm": "Lithography and patterning were important manufacturing considerations, but much of the digital physical-design workflow could treat ordinary placement and routing rules as the dominant abstraction.",
+"at_7nm_5nm": "Patterning constraints, coloring, decomposition, and increasingly EUV-specific rules become directly relevant to placement and routing decisions. Depending on the particular process, some layers still require multi-patterning while EUV can move selected layers toward single-pattern exposure. ASML describes multi-patterning as splitting complex patterns into separate exposures, while its EUV systems support 7nm/5nm-class production. ([ASML][5])",
+"why_it_changed": "193nm immersion lithography reached a point where complex pattern splitting was needed for increasingly small pitches; EUV subsequently moved some layers to shorter-wavelength single-exposure patterning, but not all process layers or restrictions disappeared.",
+"what_breaks": "A 28nm-trained engineer may assume that a geometrically legal placement is largely independent of lithographic decomposition. On an advanced node, a placement or routing change can create pattern conflicts, decomposition problems, or additional manufacturing restrictions even when conventional width/spacing checks look healthy.",
+"workflow_impact": "Foundry-qualified patterning and lithography rules become integrated into placement, routing, physical verification, and sometimes synthesis optimization rather than being treated as a late manufacturing-only concern.",
+"confidence": 0.96
+},
+{
+"delta_name": "Variation became a larger component of timing closure",
+"at_28nm": "Process, voltage, and temperature variation were already part of signoff, but timing closure could often be reasoned about with relatively coarse corner abstractions and larger voltage/timing margins.",
+"at_7nm_5nm": "Lower operating voltages, tighter geometries, increased sensitivity to local variation, waveform distortion, and more complex parasitic behavior make variation-aware timing a much more central optimization constraint. 7nm implementation/signoff flows explicitly added advanced variation modeling such as POCV and addressed waveform distortion and non-Gaussian variation effects. ([Synopsys News Releases][6])",
+"why_it_changed": "As voltage margins shrink and physical dimensions become tighter, small process and electrical variations represent a larger fraction of the available timing margin.",
+"what_breaks": "A 28nm-trained engineer may optimize the nominal or a small set of traditional corners and expect the signoff result to track closely. The symptom at 7nm/5nm is a design that looks comfortably positive in nominal analysis but develops materially worse slack under variation-aware signoff.",
+"workflow_impact": "Variation-aware libraries, timing analysis, multi-corner optimization, statistical or parametric derating, and signoff correlation become part of the implementation loop rather than a final independent check.",
+"confidence": 0.98
+},
+{
+"delta_name": "IR drop moved from late reliability analysis toward timing-aware closure",
+"at_28nm": "Power-grid integrity was important, particularly for high-performance designs, but many flows treated detailed IR/EM analysis as a later-stage verification activity after much of placement and routing had stabilized.",
+"at_7nm_5nm": "Voltage drop increasingly feeds directly into timing and optimization because supply voltages are lower and the available voltage margin is smaller. Modern advanced-node flows therefore use voltage-drop-aware timing and optimization rather than treating IR as an independent final report. ([Synopsys][7])",
+"why_it_changed": "Supply voltage scaling reduces absolute voltage margin while power density and current density remain high. A given absolute voltage drop therefore represents a larger percentage of the operating voltage.",
+"what_breaks": "A 28nm-trained engineer may close timing first and then run IR analysis. On a 7nm/5nm block, the resulting IR repair can alter cell placement, buffering, routing, or power-grid resources and immediately invalidate timing closure.",
+"workflow_impact": "Power-grid planning, dynamic/static IR analysis, electromigration analysis, voltage-aware timing, and physical optimization increasingly run iteratively rather than sequentially.",
+"confidence": 0.99
+},
+{
+"delta_name": "Power-grid resources increasingly compete directly with signal-routing resources",
+"at_28nm": "Power straps could often be planned with comparatively generous metal geometry and then evaluated mainly for voltage-drop and electromigration sufficiency while signal routing consumed the remaining resources.",
+"at_7nm_5nm": "The power grid, signal routing, clocks, and high-current vias compete more aggressively for limited upper-metal and via resources. Increasing power-grid density can improve IR while simultaneously reducing signal-routing capacity and increasing congestion; reducing the grid can improve routability while worsening IR/EM.",
+"why_it_changed": "Metal pitches became tighter while current density, power density, and reliability requirements increased. Advanced-node flows explicitly optimize routing, via structures, utilization, IR drop, and electromigration together rather than independently. ([Synopsys News Releases][4])",
+"what_breaks": "A 28nm-trained engineer may add wider or denser power straps late to cure IR. The observable symptom on a 7nm/5nm design can be a sudden routing-capacity collapse, new timing detours, or detailed-route failures in the same regions that were electrically repaired.",
+"workflow_impact": "Power-grid architecture becomes a floorplan and routing-resource decision, and IR/EM feasibility must be considered before the physical database becomes too mature to restructure cheaply.",
+"confidence": 0.97
+},
+{
+"delta_name": "Clock distribution became more tightly coupled to variation, power, and physical topology",
+"at_28nm": "Clock-tree synthesis was already a major physical-design stage, but conventional balanced-tree construction with useful skew, buffering, and shielding could often be analyzed primarily through latency and skew targets.",
+"at_7nm_5nm": "Clock design has to account more aggressively for variation, insertion delay, power, local routing resources, waveform effects, and the physical interaction between clock and signal routing. Clock-tree decisions can therefore affect congestion, IR, EM, and timing simultaneously.",
+"why_it_changed": "Smaller geometries and lower voltages increase sensitivity to local variation and interconnect effects, while higher transistor density increases the number of clock sinks and the physical complexity of their distribution.",
+"what_breaks": "A 28nm-trained engineer may focus on minimizing nominal skew and accept a large clock-buffer population. On an advanced node, the same strategy can create power, congestion, or variation-sensitive timing problems even if nominal skew improves.",
+"workflow_impact": "Clock planning begins earlier, clock routing and power are considered together, and variation-aware CTS/signoff correlation becomes more important than simply producing a low nominal skew number.",
+"confidence": 0.94
+},
+{
+"delta_name": "Hold closure became more physically expensive",
+"at_28nm": "Hold repair commonly relied on inserting delay cells or buffers on short data paths after CTS. There was still congestion and power cost, but additional physical room generally made localized repair comparatively straightforward.",
+"at_7nm_5nm": "Hold fixes can consume scarce placement and routing resources, add capacitance and power, interact with pin access, and create new setup or congestion problems. Because interconnect and clock variation are more significant, minimum-delay closure can be strongly physical rather than simply a matter of adding a delay element.",
+"why_it_changed": "The available routing and placement space around advanced-node cells is tighter, while clock and data interconnect effects are more significant. A delay buffer is therefore not a free logical operation; it is another physical object competing for resources.",
+"what_breaks": "A 28nm-trained engineer may leave thousands of small hold violations for a late blanket buffer-insertion pass. At 7nm/5nm, the observable result can be placement overflow, new setup failures, power growth, or detailed-routing collapse around the repaired paths.",
+"workflow_impact": "Hold analysis and repair become more incremental and physically aware, with earlier attention to clock topology, minimum data-path structure, placement whitespace, and multi-corner interactions.",
+"confidence": 0.95
+},
+{
+"delta_name": "Usable utilization fell relative to the naive density promise",
+"at_28nm": "A relatively high global placement utilization could often be feasible if macro channels, routing layers, and standard-cell architecture provided enough geometric routing capacity. The headline cell-density number was therefore a more useful approximation to actual achievable utilization.",
+"at_7nm_5nm": "The nominal transistor-density improvement does not translate linearly into usable standard-cell placement density. Pin access, local routing tracks, via restrictions, power-grid resources, variation, and manufacturing constraints can require substantially more whitespace in critical regions. Advanced-node implementation technology consequently performs explicit congestion, pin-access, layer, and physical-effect optimization. ([Synopsys][3])",
+"why_it_changed": "Device density improved faster than the practical routing resources available to connect those devices. Shrinking cells does not proportionally increase the number of legal connections that can escape each cell.",
+"what_breaks": "A 28nm-trained engineer may attempt to preserve the same utilization target after migrating a block to 7nm/5nm because the technology advertises substantially higher density. The symptom is a design that looks excellent in placement metrics but repeatedly fails detailed routing, pin access, timing, or IR closure.",
+"workflow_impact": "Utilization becomes a regional and routability-driven target rather than a single chip-wide percentage; floorplanning, macro placement, local density screens, pin-aware placement, and early routing estimation become more important.",
+"confidence": 0.98
+}
+]
+
+[1]: https://www.synopsys.com/content/dam/synopsys/company/publications/insight/snps-insight-issue2-2016.pdf?utm_source=chatgpt.com "Increasingly, design teams have to break down big macros into small macros, which leads to fragmentation in the floorplans. Richards believes that all these challenges impact the entire design flow. “While you can shrink standard cells at each new generation, realistically when you put all these cells together, you can’t route them at the new density,” he said. “There are so many other things in flight that we need to address through place and route, modeling, improvements to routability, placement technology — there are implications for the entire flow.”"
+[2]: https://irds.ieee.org/images/files/pdf/2022/2022IRDS_BC.pdf?utm_source=chatgpt.com "2022 IRDS Beyond CMOS"
+[3]: https://www.synopsys.com/blogs/chip-design/evolution-of-synthesis-navigating-complex-rules-in-finfet-era.html?utm_source=chatgpt.com "The Evolution of Synthesis: Navigating Complex Process & Layout Rules in the FinFET Era | Synopsys Blog"
+[4]: https://news.synopsys.com/2019-03-20-Synopsys-Fusion-Design-Platform-Extends-Leadership-at-7nm-Surpasses-100-Tapeout-Milestone-in-First-Year?utm_source=chatgpt.com "Synopsys Fusion Design Platform Extends Leadership at 7nm, Surpasses 100-Tapeout Milestone in First Year"
+[5]: https://www.asml.com/en/products/euv-lithography-systems?utm_source=chatgpt.com "EUV lithography systems – Products | ASML"
+[6]: https://news.synopsys.com/2018-04-30-TSMC-Certifies-Synopsys-Design-Platform-for-High-performance-7-nm-FinFET-Plus-Technology?utm_source=chatgpt.com "TSMC Certifies Synopsys Design Platform for High-performance 7-nm FinFET Plus Technology"
+[7]: https://www.synopsys.com/blogs/chip-design/ir-eco-is-it-possible-to-fix-voltage-drop-violations-without-destroying-your-chip-timing.html?utm_source=chatgpt.com "IR-ECO: Is it Possible to Fix Voltage-Drop Violations Without Destroying Your Chip Timing? | Synopsys Blog"

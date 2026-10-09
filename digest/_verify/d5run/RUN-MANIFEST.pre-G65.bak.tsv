@@ -1,0 +1,598 @@
+date	prompt-id	model	output-filename	quarantine
+2026-08-31	D2	chatgpt	chatgpt d2.json	
+2026-08-31	PROMPT-F	chatgpt	chatgpt f.json	
+2026-08-31	PROMPT-G	chatgpt	chatgpt g.json	
+2026-08-31	PROMPT-H	chatgpt	chatgpt h.json	
+2026-08-31	PROMPT-I	chatgpt	chatgpt i.json	
+2026-08-31	PROMPT-J	chatgpt	chatgpt j.json	
+2026-08-31	PROMPT-K	chatgpt	chatgpt k.json	
+2026-08-31	PROMPT-L	chatgpt	chatgpt l.json	
+2026-08-31	PROMPT-M	chatgpt	chatgpt m.json	
+2026-08-31	PROMPT-N	chatgpt	chatgpt n.json	
+2026-08-31	PROMPT-O	chatgpt	chatgpt o.json	
+2026-08-31	PROMPT-P	chatgpt	chatgpt p.json	
+2026-08-31	PROMPT-A-EPISODES	chatgpt	chatgpt prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	chatgpt	chatgpt prompt 2.json	
+2026-08-31	PROMPT-Q	chatgpt	chatgpt q.json	
+2026-08-31	PROMPT-S	chatgpt	chatgpt s.json	
+2026-08-31	PROMPT-T	chatgpt	chatgpt t.json	
+2026-08-31	PROMPT-C-SOURCES	deep-research-report	deep-research-report prompt 3.md	
+2026-08-31	D2	deepseek	deepseek d2.json	
+2026-08-31	PROMPT-F	deepseek	deepseek f.json	
+2026-08-31	PROMPT-G	deepseek	deepseek g.json	
+2026-08-31	PROMPT-H	deepseek	deepseek h.json	
+2026-08-31	PROMPT-I	deepseek	deepseek i.json	
+2026-08-31	PROMPT-J	deepseek	deepseek j.json	
+2026-08-31	PROMPT-K	deepseek	deepseek k.json	
+2026-08-31	PROMPT-L	deepseek	deepseek l.json	
+2026-08-31	PROMPT-M	deepseek	deepseek m.json	
+2026-08-31	PROMPT-N	deepseek	deepseek n.json	
+2026-08-31	PROMPT-O	deepseek	deepseek o.json	
+2026-08-31	PROMPT-P	deepseek	deepseek p.json	
+2026-08-31	PROMPT-A-EPISODES	deepseek	deepseek prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	deepseek	deepseek prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	deepseek	deepseek prompt 3.json	
+2026-08-31	PROMPT-Q	deepseek	deepseek q.json	
+2026-08-31	PROMPT-S	deepseek	deepseek s.json	
+2026-08-31	PROMPT-T	deepseek	deepseek t.json	
+2026-08-31	D2	gemini	gemini d2.json	
+2026-08-31	PROMPT-F	gemini	gemini f.json	
+2026-08-31	PROMPT-G	gemini	gemini g.json	
+2026-08-31	PROMPT-H	gemini	gemini h.json	
+2026-08-31	PROMPT-I	gemini	gemini i.json	
+2026-08-31	PROMPT-J	gemini	gemini j.json	
+2026-08-31	PROMPT-K	gemini	gemini k.json	
+2026-08-31	PROMPT-L	gemini	gemini l.json	
+2026-08-31	PROMPT-M	gemini	gemini m.json	
+2026-08-31	PROMPT-N	gemini	gemini n.json	
+2026-08-31	PROMPT-O	gemini	gemini o.json	
+2026-08-31	PROMPT-P	gemini	gemini p.json	
+2026-08-31	PROMPT-A-EPISODES	gemini	gemini prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	gemini	gemini prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	gemini	gemini prompt 3.json	
+2026-08-31	PROMPT-Q	gemini	gemini q.json	
+2026-08-31	PROMPT-S	gemini	gemini s.json	
+2026-08-31	PROMPT-T	gemini	gemini t.json	
+2026-08-31	PROMPT-L	glm 5.3 Flash	glm 5.3 Flash l.json	
+2026-08-31	PROMPT-M	glm 5.3 flash	glm 5.3 flash m.json	
+2026-08-31	PROMPT-N	glm 5.3 flash	glm 5.3 flash n.json	
+2026-08-31	PROMPT-O	glm 5.3 flash	glm 5.3 flash o.json	
+2026-08-31	PROMPT-P	glm 5.3 flash	glm 5.3 flash p.json	
+2026-08-31	PROMPT-Q	glm 5.3 flash	glm 5.3 flash q.json	
+2026-08-31	PROMPT-S	glm 5.3 flash	glm 5.3 flash s.json	
+2026-08-31	PROMPT-T	glm 5.3 flash	glm 5.3 flash t.json	
+2026-08-31	PROMPT-A-EPISODES	glm 5.3	glm 5.3 prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	glm 5.3	glm 5.3 prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	glm 5.3	glm 5.3 prompt 3.json	
+2026-08-31	D2	grok	grok d2.json	
+2026-08-31	PROMPT-F	grok	grok f.json	
+2026-08-31	PROMPT-G	grok	grok g.json	
+2026-08-31	PROMPT-H	grok	grok h.json	
+2026-08-31	PROMPT-I	grok	grok i.json	
+2026-08-31	PROMPT-J	grok	grok j.json	
+2026-08-31	PROMPT-K	grok	grok k.json	
+2026-08-31	PROMPT-L	grok	grok l.json	
+2026-08-31	PROMPT-M	grok	grok m.json	
+2026-08-31	PROMPT-N	grok	grok n.json	
+2026-08-31	PROMPT-O	grok	grok o.json	
+2026-08-31	PROMPT-P	grok	grok p.json	
+2026-08-31	PROMPT-Q	grok	grok q.json	
+2026-08-31	PROMPT-S	grok	grok s.json	
+2026-08-31	PROMPT-T	grok	grok t.json	
+2026-08-31	PROMPT-H	kimi	kimi h.json	
+2026-08-31	PROMPT-I	kimi	kimi i.json	
+2026-08-31	PROMPT-J	kimi	kimi j.json	
+2026-08-31	PROMPT-K	kimi	kimi k.json	
+2026-08-31	PROMPT-L	kimi	kimi l.json	
+2026-08-31	PROMPT-M	kimi	kimi m.json	
+2026-08-31	PROMPT-N	kimi	kimi n.json	
+2026-08-31	PROMPT-O	kimi	kimi o.json	
+2026-08-31	PROMPT-P	kimi	kimi p.json	
+2026-08-31	PROMPT-A-EPISODES	kimi	kimi prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	kimi	kimi prompt 2.json	
+2026-08-31	PROMPT-Q	kimi	kimi q.json	
+2026-08-31	PROMPT-S	kimi	kimi s.json	
+2026-08-31	PROMPT-T	kimi	kimi t.json	
+2026-08-31	D2	meta	meta d2.json	
+2026-08-31	PROMPT-F	meta	meta f.json	
+2026-08-31	PROMPT-G	meta	meta g.json	
+2026-08-31	PROMPT-H	meta	meta h.json	
+2026-08-31	PROMPT-I	meta	meta i.json	
+2026-08-31	PROMPT-J	meta	meta j.json	
+2026-08-31	PROMPT-K	meta	meta k.json	
+2026-08-31	PROMPT-L	meta	meta l.json	
+2026-08-31	PROMPT-M	meta	meta m.json	
+2026-08-31	PROMPT-N	meta	meta n.json	
+2026-08-31	PROMPT-O	meta	meta o.json	
+2026-08-31	PROMPT-P	meta	meta p.json	
+2026-08-31	PROMPT-A-EPISODES	meta	meta prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	meta	meta prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	meta	meta prompt 3.json	
+2026-08-31	PROMPT-Q	meta	meta q.json	
+2026-08-31	PROMPT-S	meta	meta s.json	
+2026-08-31	PROMPT-T	meta	meta t.json	
+2026-08-31	D2	mimo	mimo d2.json	
+2026-08-31	PROMPT-F	mimo	mimo f.json	
+2026-08-31	PROMPT-G	mimo	mimo g.json	
+2026-08-31	PROMPT-H	mimo	mimo h.json	
+2026-08-31	PROMPT-I	mimo	mimo i.json	
+2026-08-31	PROMPT-J	mimo	mimo j.json	
+2026-08-31	PROMPT-K	mimo	mimo k.json	
+2026-08-31	PROMPT-L	mimo	mimo l.json	
+2026-08-31	PROMPT-M	mimo	mimo m.json	
+2026-08-31	PROMPT-N	mimo	mimo n.json	
+2026-08-31	PROMPT-O	mimo	mimo o.json	
+2026-08-31	PROMPT-P	mimo	mimo p.json	
+2026-08-31	PROMPT-A-EPISODES	mimo	mimo prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	mimo	mimo prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	mimo	mimo prompt 3.json	
+2026-08-31	PROMPT-Q	mimo	mimo q.json	
+2026-08-31	PROMPT-S	mimo	mimo s.json	
+2026-08-31	PROMPT-T	mimo	mimo t.json	
+2026-08-31	D2	minimax 2.7	minimax 2.7 d2.json	
+2026-08-31	PROMPT-F	minimax 2.7	minimax 2.7 f.json	
+2026-08-31	PROMPT-G	minimax 2.7	minimax 2.7 g.json	
+2026-08-31	PROMPT-H	minimax 2.7	minimax 2.7 h.json	
+2026-08-31	PROMPT-I	minimax 2.7	minimax 2.7 i.json	
+2026-08-31	PROMPT-J	minimax 2.7	minimax 2.7 j.json	
+2026-08-31	PROMPT-K	minimax 2.7	minimax 2.7 k.json	
+2026-08-31	PROMPT-L	minimax 2.7	minimax 2.7 l.json	
+2026-08-31	PROMPT-M	minimax 2.7	minimax 2.7 m.json	
+2026-08-31	PROMPT-O	minimax 2.7	minimax 2.7 o.json	
+2026-08-31	PROMPT-P	minimax 2.7	minimax 2.7 p.json	
+2026-08-31	PROMPT-A-EPISODES	minimax 2.7	minimax 2.7 prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	minimax 2.7	minimax 2.7 prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	minimax 2.7	minimax 2.7 prompt 3.json	
+2026-08-31	PROMPT-Q	minimax 2.7	minimax 2.7 q.json	
+2026-08-31	PROMPT-S	minimax 2.7	minimax 2.7 s.json	
+2026-08-31	PROMPT-T	minimax 2.7	minimax 2.7 t.json	
+2026-08-31	D2	minimax m3	minimax m3 d2.json	
+2026-08-31	PROMPT-F	minimax m3	minimax m3 f.json	
+2026-08-31	PROMPT-G	minimax m3	minimax m3 g.json	
+2026-08-31	PROMPT-H	minimax m3	minimax m3 h.json	
+2026-08-31	PROMPT-I	minimax m3	minimax m3 i.json	
+2026-08-31	PROMPT-J	minimax m3	minimax m3 j.json	
+2026-08-31	PROMPT-K	minimax m3	minimax m3 k.json	
+2026-08-31	PROMPT-L	minimax m3	minimax m3 l.json	
+2026-08-31	PROMPT-M	minimax m3	minimax m3 m.json	
+2026-08-31	PROMPT-N	minimax m3	minimax m3 n.json	
+2026-08-31	PROMPT-O	minimax m3	minimax m3 o.json	
+2026-08-31	PROMPT-P	minimax m3	minimax m3 p.json	
+2026-08-31	PROMPT-A-EPISODES	minimax m3	minimax m3 prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	minimax m3	minimax m3 prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	minimax m3	minimax m3 prompt 3.json	
+2026-08-31	PROMPT-Q	minimax m3	minimax m3 q.json	
+2026-08-31	PROMPT-S	minimax m3	minimax m3 s.json	
+2026-08-31	PROMPT-T	minimax m3	minimax m3 t.json	
+2026-08-31	PROMPT-N	minimax	minimax n.json	
+2026-08-31	PROMPT-F	mistral	mistral f.json	
+2026-08-31	PROMPT-G	mistral	mistral g.json	
+2026-08-31	PROMPT-H	mistral	mistral h.json	
+2026-08-31	PROMPT-I	mistral	mistral i.json	
+2026-08-31	PROMPT-J	mistral	mistral j.json	
+2026-08-31	PROMPT-K	mistral	mistral k.json	
+2026-08-31	PROMPT-A-EPISODES	mistral	mistral prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	mistral	mistral prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	mistral	mistral prompt 3.json	
+2026-08-31	PROMPT-Q	mistral	mistral q.json	
+2026-08-31	PROMPT-S	mistral	mistral s.json	
+2026-08-31	PROMPT-T	mistral	mistral t.json	
+2026-08-31	PROMPT-C-SOURCES	nemotron	nemotron prompt 3.json	
+2026-08-31	UNMAPPED	opus 5 asic	opus 5 asic august.json	
+2026-08-31	PROMPT-C-SOURCES	opus 5	opus 5 prompt 3.json	
+2026-08-31	PROMPT-A-EPISODES	opus	opus prompt 2.json	
+2026-08-31	UNMAPPED	qwen	qwen Deconstructing Chip Design Decisions_ A Catalog of Technical Retrospectives and a Framework for Extracting Implementation Episodes.md	
+2026-08-31	PROMPT-F	qwen	qwen f.json	
+2026-08-31	PROMPT-G	qwen	qwen g.json	
+2026-08-31	PROMPT-H	qwen	qwen h.json	
+2026-08-31	PROMPT-I	qwen	qwen i.json	
+2026-08-31	PROMPT-J	qwen	qwen j.json	
+2026-08-31	PROMPT-K	qwen	qwen k.json	
+2026-08-31	PROMPT-L	qwen	qwen l.json	
+2026-08-31	PROMPT-M	qwen	qwen m.json	
+2026-08-31	PROMPT-N	qwen	qwen n.json	
+2026-08-31	PROMPT-O	qwen	qwen o.json	
+2026-08-31	PROMPT-P	qwen	qwen p.json	
+2026-08-31	PROMPT-A-EPISODES	qwen	qwen prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	qwen	qwen prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	qwen	qwen prompt 3.json	
+2026-08-31	PROMPT-Q	qwen	qwen q.json	
+2026-08-31	PROMPT-T	qwen	qwen t.json	
+2026-08-31	UNMAPPED	solar pro free asic	solar pro free asic august.json	
+2026-08-31	PROMPT-A-EPISODES	solar pro	solar pro prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	solar pro	solar pro prompt 3.json	
+2026-08-31	PROMPT-I	sonnet	sonnet i.json	
+2026-08-31	PROMPT-J	sonnet	sonnet j.json	
+2026-08-31	PROMPT-K	sonnet	sonnet k.json	
+2026-08-31	PROMPT-L	sonnet	sonnet l.json	
+2026-08-31	PROMPT-M	sonnet	sonnet m.json	
+2026-08-31	PROMPT-N	sonnet	sonnet n.json	
+2026-08-31	PROMPT-O	sonnet	sonnet o.json	
+2026-08-31	PROMPT-P	sonnet	sonnet p.json	
+2026-08-31	PROMPT-A-EPISODES	sonnet	sonnet prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	sonnet	sonnet prompt 2.json	
+2026-08-31	PROMPT-Q	sonnet	sonnet q.json	
+2026-08-31	PROMPT-S	sonnet	sonnet s.json	
+2026-08-31	PROMPT-T	sonnet	sonnet t.json	
+2026-08-31	D2	yuanbao	yuanbao d2.json	
+2026-08-31	PROMPT-F	yuanbao	yuanbao f.json	
+2026-08-31	PROMPT-G	yuanbao	yuanbao g.json	
+2026-08-31	PROMPT-H	yuanbao	yuanbao h.json	
+2026-08-31	PROMPT-I	yuanbao	yuanbao i.json	
+2026-08-31	PROMPT-J	yuanbao	yuanbao j.json	
+2026-08-31	PROMPT-K	yuanbao	yuanbao k.json	
+2026-08-31	PROMPT-L	yuanbao	yuanbao l.json	
+2026-08-31	PROMPT-M	yuanbao	yuanbao m.json	
+2026-08-31	PROMPT-N	yuanbao	yuanbao n.json	
+2026-08-31	PROMPT-O	yuanbao	yuanbao o.json	
+2026-08-31	PROMPT-P	yuanbao	yuanbao p.json	
+2026-08-31	PROMPT-A-EPISODES	yuanbao	yuanbao prompt 1.json	
+2026-08-31	PROMPT-A-EPISODES	yuanbao	yuanbao prompt 2.json	
+2026-08-31	PROMPT-C-SOURCES	yuanbao	yuanbao prompt 3.json	
+2026-08-31	PROMPT-Q	yuanbao	yuanbao q.json	
+2026-08-31	PROMPT-S	yuanbao	yuanbao s.json	
+2026-08-31	PROMPT-T	yuanbao	yuanbao t.json	
+2026-09-01	C1-APPJ-EXAMPLES	chatgpt	chatgpt appj.json	
+2026-09-01	C1-CCD2-APRC	chatgpt	chatgpt ccd2.json	
+2026-09-01	C1-FRTB-ES	chatgpt	chatgpt frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	chatgpt	chatgpt globe.json	
+2026-09-01	C1-IRB-EXAMPLES	chatgpt	chatgpt irb.json	
+2026-09-01	C2-JCS-EDGES	chatgpt	chatgpt jcs.json	
+2026-09-01	C1-MICA-RESERVE	chatgpt	chatgpt mica.json	
+2026-09-01	C1-OFAC-GRAPHS	chatgpt	chatgpt ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	chatgpt	chatgpt receipt.json	
+2026-09-01	C1-TRID-CASES	chatgpt	chatgpt trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	deepseek	deepseek appj.json	
+2026-09-01	C1-CCD2-APRC	deepseek	deepseek ccd2.json	
+2026-09-01	C1-FRTB-ES	deepseek	deepseek frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	deepseek	deepseek globe.json	
+2026-09-01	C1-IRB-EXAMPLES	deepseek	deepseek irb.json	
+2026-09-01	C2-JCS-EDGES	deepseek	deepseek jcs.json	
+2026-09-01	C1-MICA-RESERVE	deepseek	deepseek mica.json	
+2026-09-01	C1-OFAC-GRAPHS	deepseek	deepseek ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	deepseek	deepseek receipt.json	
+2026-09-01	C1-TRID-CASES	deepseek	deepseek trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	gemini	gemini appj.json	
+2026-09-01	C1-CCD2-APRC	gemini	gemini ccd2.json	
+2026-09-01	C1-FRTB-ES	gemini	gemini frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	gemini	gemini globe.json	
+2026-09-01	C1-IRB-EXAMPLES	gemini	gemini irb.json	
+2026-09-01	C2-JCS-EDGES	gemini	gemini jcs.json	
+2026-09-01	C1-MICA-RESERVE	gemini	gemini mica.json	
+2026-09-01	C1-OFAC-GRAPHS	gemini	gemini ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	gemini	gemini receipt.json	
+2026-09-01	C1-TRID-CASES	gemini	gemini trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	glm 5.3 flash	glm 5.3 flash appj.json	
+2026-09-01	C1-GLOBE-EXAMPLES	glm 5.3 flash	glm 5.3 flash globe.json	
+2026-09-01	C2-JCS-EDGES	glm 5.3 flash	glm 5.3 flash jcs.json	
+2026-09-01	C1-OFAC-GRAPHS	glm 5.3 flash	glm 5.3 flash ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	glm 5.3 flash	glm 5.3 flash receipt.json	
+2026-09-01	C1-APPJ-EXAMPLES	grok	grok appj.json	
+2026-09-01	C1-CCD2-APRC	grok	grok ccd2.json	
+2026-09-01	C1-FRTB-ES	grok	grok frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	grok	grok globe.json	
+2026-09-01	C1-IRB-EXAMPLES	grok	grok irb.json	
+2026-09-01	C2-JCS-EDGES	grok	grok jcs.json	
+2026-09-01	C1-MICA-RESERVE	grok	grok mica.json	
+2026-09-01	C1-OFAC-GRAPHS	grok	grok ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	grok	grok receipt.json	
+2026-09-01	C1-TRID-CASES	grok	grok trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	kimi	kimi appj.json	
+2026-09-01	C1-FRTB-ES	kimi	kimi frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	kimi	kimi globe.json	
+2026-09-01	C1-IRB-EXAMPLES	kimi	kimi irb.json	
+2026-09-01	C2-JCS-EDGES	kimi	kimi jcs.json	
+2026-09-01	C1-MICA-RESERVE	kimi	kimi mica.json	
+2026-09-01	C1-OFAC-GRAPHS	kimi	kimi ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	kimi	kimi receipt.json	
+2026-09-01	C1-TRID-CASES	kimi	kimi trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	meta	meta appj.json	
+2026-09-01	C1-CCD2-APRC	meta	meta ccd2.json	
+2026-09-01	C1-FRTB-ES	meta	meta frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	meta	meta globe.json	
+2026-09-01	C1-IRB-EXAMPLES	meta	meta irb.json	
+2026-09-01	C2-JCS-EDGES	meta	meta jcs.json	
+2026-09-01	C1-MICA-RESERVE	meta	meta mica.json	
+2026-09-01	C1-OFAC-GRAPHS	meta	meta ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	meta	meta receipt.json	
+2026-09-01	C1-TRID-CASES	meta	meta trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	mimo	mimo appj.json	
+2026-09-01	C1-CCD2-APRC	mimo	mimo ccd2.json	
+2026-09-01	C1-FRTB-ES	mimo	mimo frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	mimo	mimo globe.json	
+2026-09-01	C2-JCS-EDGES	mimo	mimo jcs.json	
+2026-09-01	C1-MICA-RESERVE	mimo	mimo mica.json	
+2026-09-01	C1-OFAC-GRAPHS	mimo	mimo ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	mimo	mimo receipt.json	
+2026-09-01	C1-TRID-CASES	mimo	mimo trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	minimax 2.7	minimax 2.7 appj.json	
+2026-09-01	C1-CCD2-APRC	minimax 2.7	minimax 2.7 ccd2.json	
+2026-09-01	C1-FRTB-ES	minimax 2.7	minimax 2.7 frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	minimax 2.7	minimax 2.7 globe.json	
+2026-09-01	C1-IRB-EXAMPLES	minimax 2.7	minimax 2.7 irb.json	
+2026-09-01	C2-JCS-EDGES	minimax 2.7	minimax 2.7 jcs.json	
+2026-09-01	C1-MICA-RESERVE	minimax 2.7	minimax 2.7 mica.json	
+2026-09-01	C1-OFAC-GRAPHS	minimax 2.7	minimax 2.7 ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	minimax 2.7	minimax 2.7 receipt.json	
+2026-09-01	C1-TRID-CASES	minimax 2.7	minimax 2.7 trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	minimax m3	minimax m3 appj.json	
+2026-09-01	C1-CCD2-APRC	minimax m3	minimax m3 ccd2.json	
+2026-09-01	C1-FRTB-ES	minimax m3	minimax m3 frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	minimax m3	minimax m3 globe.json	
+2026-09-01	C1-IRB-EXAMPLES	minimax m3	minimax m3 irb.json	
+2026-09-01	C2-JCS-EDGES	minimax m3	minimax m3 jcs.json	
+2026-09-01	C1-MICA-RESERVE	minimax m3	minimax m3 mica.json	
+2026-09-01	C1-OFAC-GRAPHS	minimax m3	minimax m3 ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	minimax m3	minimax m3 receipt.json	
+2026-09-01	C1-TRID-CASES	minimax m3	minimax m3 trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	mistral	mistral appj.json	
+2026-09-01	C1-CCD2-APRC	mistral	mistral ccd2.json	
+2026-09-01	C1-FRTB-ES	mistral	mistral frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	mistral	mistral globe.json	
+2026-09-01	C1-IRB-EXAMPLES	mistral	mistral irb.json	
+2026-09-01	C2-JCS-EDGES	mistral	mistral jcs.json	
+2026-09-01	C1-MICA-RESERVE	mistral	mistral mica.json	
+2026-09-01	C1-OFAC-GRAPHS	mistral	mistral ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	mistral	mistral receipt.json	
+2026-09-01	C1-TRID-CASES	mistral	mistral trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	qwen	qwen appj.json	
+2026-09-01	C1-CCD2-APRC	qwen	qwen ccd2.json	
+2026-09-01	C1-FRTB-ES	qwen	qwen frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	qwen	qwen globe.json	
+2026-09-01	C1-IRB-EXAMPLES	qwen	qwen irb.json	
+2026-09-01	C2-JCS-EDGES	qwen	qwen jcs.json	
+2026-09-01	C1-MICA-RESERVE	qwen	qwen mica.json	
+2026-09-01	C1-OFAC-GRAPHS	qwen	qwen ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	qwen	qwen receipt.json	
+2026-09-01	C1-TRID-CASES	qwen	qwen trid.json	
+2026-09-01	C1-CCD2-APRC	solar	solar ccd2.json	
+2026-09-01	C1-FRTB-ES	solar	solar frtb.json	
+2026-09-01	C1-IRB-EXAMPLES	solar	solar irb.json	
+2026-09-01	C2-JCS-EDGES	solar	solar jcs.json	
+2026-09-01	C1-MICA-RESERVE	solar	solar mica.json	
+2026-09-01	C1-OFAC-GRAPHS	solar	solar ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	solar	solar receipt.json	
+2026-09-01	C1-TRID-CASES	solar	solar trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	sonnet	sonnet appj.json	
+2026-09-01	C1-CCD2-APRC	sonnet	sonnet ccd2.json	
+2026-09-01	C1-FRTB-ES	sonnet	sonnet frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	sonnet	sonnet globe.json	
+2026-09-01	C1-IRB-EXAMPLES	sonnet	sonnet irb.json	
+2026-09-01	C2-JCS-EDGES	sonnet	sonnet jcs.json	
+2026-09-01	C1-MICA-RESERVE	sonnet	sonnet mica.json	
+2026-09-01	C1-OFAC-GRAPHS	sonnet	sonnet ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	sonnet	sonnet receipt.json	
+2026-09-01	C1-TRID-CASES	sonnet	sonnet trid.json	
+2026-09-01	C1-APPJ-EXAMPLES	yuanbao	yuanbao appj.json	
+2026-09-01	C1-CCD2-APRC	yuanbao	yuanbao ccd2.json	
+2026-09-01	C1-FRTB-ES	yuanbao	yuanbao frtb.json	
+2026-09-01	C1-GLOBE-EXAMPLES	yuanbao	yuanbao globe.json	
+2026-09-01	C1-IRB-EXAMPLES	yuanbao	yuanbao irb.json	
+2026-09-01	C2-JCS-EDGES	yuanbao	yuanbao jcs.json	
+2026-09-01	C1-MICA-RESERVE	yuanbao	yuanbao mica.json	
+2026-09-01	C1-OFAC-GRAPHS	yuanbao	yuanbao ofac.json	
+2026-09-01	C2-RECEIPT-ANATOMY	yuanbao	yuanbao receipt.json	
+2026-09-01	C1-TRID-CASES	yuanbao	yuanbao trid.json	
+2026-09-03	C1-CCD2-APRC	chatgpt	chatgpt aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	chatgpt	chatgpt boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	chatgpt	chatgpt library.json	
+2026-09-03	G-SDC-PATTERNS	chatgpt	chatgpt patterns.json	
+2026-09-03	D2-POWER4-RECALL	chatgpt	chatgpt power4.json	
+2026-09-03	C1-CCD2-APRC	deepseek	deepseek aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	deepseek	deepseek boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	deepseek	deepseek library.json	
+2026-09-03	G-SDC-PATTERNS	deepseek	deepseek patterns.json	
+2026-09-03	D2-POWER4-RECALL	deepseek	deepseek power4.json	
+2026-09-03	C1-CCD2-APRC	gemini	gemini aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	gemini	gemini boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	gemini	gemini library.json	
+2026-09-03	G-SDC-PATTERNS	gemini	gemini patterns.json	
+2026-09-03	D2-POWER4-RECALL	gemini	gemini power4.json	
+2026-09-03	C1-CCD2-APRC	glm 5.3 flash	glm 5.3 flash aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	glm 5.3 flash	glm 5.3 flash boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	glm 5.3 flash	glm 5.3 flash library.json	
+2026-09-03	G-SDC-PATTERNS	glm 5.3 flash	glm 5.3 flash patterns.json	
+2026-09-03	D2-POWER4-RECALL	glm 5.3 flash	glm 5.3 flash power4.json	
+2026-09-03	C1-CCD2-APRC	grok	grok aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	grok	grok boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	grok	grok library.json	
+2026-09-03	G-SDC-PATTERNS	grok	grok patterns.json	
+2026-09-03	D2-POWER4-RECALL	grok	grok power4.json	
+2026-09-03	C1-CCD2-APRC	kimi	kimi aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	kimi	kimi boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	kimi	kimi library.json	
+2026-09-03	G-SDC-PATTERNS	kimi	kimi patterns.json	
+2026-09-03	D2-POWER4-RECALL	kimi	kimi power4.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	longcat	longcat library.json	TRUNCATED
+2026-09-03	D2-POWER4-RECALL	longcat	longcat power4.json	
+2026-09-03	C1-CCD2-APRC	meta	meta aprc.json	EXCLUDE
+2026-09-03	C1-BOUNDARY-VERDICTS	meta	meta boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	meta	meta library.json	
+2026-09-03	G-SDC-PATTERNS	meta	meta patterns.json	
+2026-09-03	D2-POWER4-RECALL	meta	meta power4.json	
+2026-09-03	C1-CCD2-APRC	mimo	mimo aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	mimo	mimo boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	mimo	mimo library.json	
+2026-09-03	G-SDC-PATTERNS	mimo	mimo patterns.json	
+2026-09-03	D2-POWER4-RECALL	mimo	mimo power4.json	
+2026-09-03	C1-CCD2-APRC	minimax 2.7	minimax 2.7 aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	minimax 2.7	minimax 2.7 boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	minimax 2.7	minimax 2.7 library.json	
+2026-09-03	G-SDC-PATTERNS	minimax 2.7	minimax 2.7 patterns.json	
+2026-09-03	D2-POWER4-RECALL	minimax 2.7	minimax 2.7 power4.json	
+2026-09-03	C1-CCD2-APRC	minimax m3	minimax m3 aprc.json	TRUNCATED
+2026-09-03	C1-BOUNDARY-VERDICTS	minimax m3	minimax m3 boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	minimax m3	minimax m3 library.json	TRUNCATED
+2026-09-03	G-SDC-PATTERNS	minimax m3	minimax m3 patterns.json	EXCLUDE
+2026-09-03	D2-POWER4-RECALL	minimax m3	minimax m3 power4.json	
+2026-09-03	C1-CCD2-APRC	mistral	mistral aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	mistral	mistral boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	mistral	mistral library.json	
+2026-09-03	G-SDC-PATTERNS	mistral	mistral patterns.json	
+2026-09-03	C1-CCD2-APRC	qwen	qwen aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	qwen	qwen boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	qwen	qwen library.json	
+2026-09-03	G-SDC-PATTERNS	qwen	qwen patterns.json	
+2026-09-03	D2-POWER4-RECALL	qwen	qwen power4.json	
+2026-09-03	C1-CCD2-APRC	sonnet	sonnet aprc.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	sonnet	sonnet library.json	
+2026-09-03	G-SDC-PATTERNS	sonnet	sonnet patterns.json	
+2026-09-03	D2-POWER4-RECALL	sonnet	sonnet power4.json	
+2026-09-03	C1-CCD2-APRC	yuanbao	yuanbao aprc.json	
+2026-09-03	C1-BOUNDARY-VERDICTS	yuanbao	yuanbao boundary.json	
+2026-09-03	F-DIAGNOSIS-LIBRARY	yuanbao	yuanbao library.json	
+2026-09-03	G-SDC-PATTERNS	yuanbao	yuanbao patterns.json	
+2026-09-03	D2-POWER4-RECALL	yuanbao	yuanbao power4.json	
+2026-09-04	D2-ALPHA21264-RECALL	chatgpt	chatgpt alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	chatgpt	chatgpt lvs.json
+2026-09-04	D2-NIAGARA-RECALL	chatgpt	chatgpt niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	chatgpt	chatgpt p4.json
+2026-09-04	D2-ALPHA21264-RECALL	deepseek	deepseek alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	deepseek	deepseek lvs.json
+2026-09-04	D2-NIAGARA-RECALL	deepseek	deepseek niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	deepseek	deepseek p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	deepseek	deepseek pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	gemini	gemini alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	gemini	gemini lvs.json
+2026-09-04	D2-NIAGARA-RECALL	gemini	gemini niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	gemini	gemini p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	gemini	gemini pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	glm 5.3 flash	glm 5.3 flash alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	glm 5.3 flash	glm 5.3 flash lvs.json
+2026-09-04	D2-NIAGARA-RECALL	glm 5.3 flash	glm 5.3 flash niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	glm 5.3 flash	glm 5.3 flash p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	glm 5.3 flash	glm 5.3 flash pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	grok	grok alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	grok	grok lvs.json
+2026-09-04	D2-NIAGARA-RECALL	grok	grok niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	grok	grok p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	grok	grok pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	kimi	kimi alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	kimi	kimi lvs.json
+2026-09-04	D2-NIAGARA-RECALL	kimi	kimi niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	kimi	kimi p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	kimi	kimi pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	longcat	longcat alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	longcat	longcat lvs.json
+2026-09-04	D2-PENTIUM4-RECALL	longcat	longcat p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	longcat	longcat pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	meta	meta alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	meta	meta lvs.json
+2026-09-04	D2-NIAGARA-RECALL	meta	meta niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	meta	meta p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	meta	meta pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	mimo	mimo alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	mimo	mimo lvs.json
+2026-09-04	D2-NIAGARA-RECALL	mimo	mimo niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	mimo	mimo p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	mimo	mimo pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	minimax 2.7	minimax 2.7 alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	minimax 2.7	minimax 2.7 lvs.json
+2026-09-04	D2-NIAGARA-RECALL	minimax 2.7	minimax 2.7 niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	minimax 2.7	minimax 2.7 p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	minimax 2.7	minimax 2.7 pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	minimax m3	minimax m3 alpha.json
+2026-09-04	D2-PENTIUM4-RECALL	minimax m3	minimax m3 p4.json
+2026-09-04	D2-ALPHA21264-RECALL	mistral	mistral alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	mistral	mistral lvs.json
+2026-09-04	D2-NIAGARA-RECALL	mistral	mistral niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	mistral	mistral p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	mistral	mistral pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	qwen	qwen alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	qwen	qwen lvs.json
+2026-09-04	D2-NIAGARA-RECALL	qwen	qwen niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	qwen	qwen p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	qwen	qwen pphysical.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	solar	solar lvs.json
+2026-09-04	D2-NIAGARA-RECALL	solar	solar niagara.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	solar	solar pphysical.json
+2026-09-04	D2-ALPHA21264-RECALL	sonnet	sonnet alpha.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	sonnet	sonnet lvs.json
+2026-09-04	D2-NIAGARA-RECALL	sonnet	sonnet niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	sonnet	sonnet p4.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	sonnet	sonnet pphysical.json
+2026-09-04	F-LVS-MISMATCH-CLASSES	yuanbao	yuanbao lvs.json
+2026-09-04	D2-NIAGARA-RECALL	yuanbao	yuanbao niagara.json
+2026-09-04	D2-PENTIUM4-RECALL	yuanbao	yuanbao p4.json
+2026-09-04	D2-ALPHA21264-RECALL	yuanbao	yuanbao power.json
+2026-09-04	D2-POWER4-PHYSICAL-RECALL	yuanbao	yuanbao pphysical.json
+2026-09-08	PROMPT-E-CALCULATIONS	chatgpt	chatgpt e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	chatgpt	chatgpt red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	chatgpt	chatgpt red3.json
+2026-09-08	C1-REGZ-FACTOR	chatgpt	chatgpt regz.json
+2026-09-08	C2-JCS-STRINGS	chatgpt	chatgpt strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	deepseek	deepseek e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	deepseek	deepseek red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	deepseek	deepseek red3.json
+2026-09-08	C1-REGZ-FACTOR	deepseek	deepseek regz.json
+2026-09-08	C2-JCS-STRINGS	deepseek	deepseek strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	gemini	gemini e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	gemini	gemini red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	gemini	gemini red3.json
+2026-09-08	C1-REGZ-FACTOR	gemini	gemini regz.json
+2026-09-08	C2-JCS-STRINGS	gemini	gemini strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	glm 5.3 flash	glm 5.3 flash e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	glm 5.3 flash	glm 5.3 flash red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	glm 5.3 flash	glm 5.3 flash red3.json
+2026-09-08	C1-REGZ-FACTOR	glm 5.3 flash	glm 5.3 flash regz.json
+2026-09-08	C2-JCS-STRINGS	glm 5.3 flash	glm 5.3 flash strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	grok	grok e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	grok	grok red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	grok	grok red3.json
+2026-09-08	C1-REGZ-FACTOR	grok	grok regz.json
+2026-09-08	C2-JCS-STRINGS	grok	grok strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	kimi	kimi e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	kimi	kimi red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	kimi	kimi red3.json
+2026-09-08	C1-REGZ-FACTOR	kimi	kimi regz.json
+2026-09-08	C2-JCS-STRINGS	kimi	kimi strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	longcat	longcat e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	longcat	longcat red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	longcat	longcat red3.json
+2026-09-08	C1-REGZ-FACTOR	longcat	longcat regz.json
+2026-09-08	C2-JCS-STRINGS	longcat	longcat strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	meta	meta e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	meta	meta red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	meta	meta red3.json
+2026-09-08	C1-REGZ-FACTOR	meta	meta regz.json
+2026-09-08	C2-JCS-STRINGS	meta	meta strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	mimo	mimo e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	mimo	mimo red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	mimo	mimo red3.json
+2026-09-08	C1-REGZ-FACTOR	mimo	mimo regz.json
+2026-09-08	C2-JCS-STRINGS	mimo	mimo strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	minara	minara e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	minara	minara red1.json
+2026-09-08	C1-REGZ-FACTOR	minara	minara regz.json
+2026-09-08	J-EPISODE-REDTEAM-V3	minaria	minaria red3.json
+2026-09-08	C2-JCS-STRINGS	minaria	minaria strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	minimax 2.7	minimax 2.7 e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	minimax 2.7	minimax 2.7 red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	minimax 2.7	minimax 2.7 red3.json
+2026-09-08	C1-REGZ-FACTOR	minimax 2.7	minimax 2.7 regz.json
+2026-09-08	C2-JCS-STRINGS	minimax 2.7	minimax 2.7 strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	mistral	mistral e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	mistral	mistral red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	mistral	mistral red3.json
+2026-09-08	C1-REGZ-FACTOR	mistral	mistral regz.json
+2026-09-08	C2-JCS-STRINGS	mistral	mistral strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	qwen	qwen e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	qwen	qwen red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	qwen	qwen red3.json
+2026-09-08	C1-REGZ-FACTOR	qwen	qwen regz.json
+2026-09-08	C2-JCS-STRINGS	qwen	qwen strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	solar	solar e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	solar	solar red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	solar	solar red3.json
+2026-09-08	C1-REGZ-FACTOR	solar	solar regz.json
+2026-09-08	C2-JCS-STRINGS	solar	solar strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	sonnet	sonnet e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	sonnet	sonnet red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	sonnet	sonnet red3.json
+2026-09-08	C1-REGZ-FACTOR	sonnet	sonnet regz.json
+2026-09-08	C2-JCS-STRINGS	sonnet	sonnet strings.json
+2026-09-08	PROMPT-E-CALCULATIONS	yuanbao	yuanbao e.json
+2026-09-08	J-ISSUE-REDTEAM-V1	yuanbao	yuanbao red1.json
+2026-09-08	J-EPISODE-REDTEAM-V3	yuanbao	yuanbao red3.json
+2026-09-08	C1-REGZ-FACTOR	yuanbao	yuanbao regz.json
+2026-09-08	C2-JCS-STRINGS	yuanbao	yuanbao strings.json

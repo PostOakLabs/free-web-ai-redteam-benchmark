@@ -1,0 +1,3727 @@
+{
+ "chatgpt|alpha": {
+  "entries": [
+   {
+    "confidence": 0.94,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Choose a large out-of-order window despite its implementation cost"
+   },
+   {
+    "confidence": 0.99,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Cluster the integer register file and execution pipes into two replica"
+   },
+   {
+    "confidence": 0.97,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 1.0,
+    "page_found": 2,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Use line-and-way prediction to get associative-cache benefits without "
+   },
+   {
+    "confidence": 0.93,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 1.0,
+    "page_found": 7,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Accept one-cycle inter-cluster communication to make four-way integer "
+   },
+   {
+    "confidence": 0.98,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 12,
+    "page_guess": 35,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Use speculative load-hit/miss execution with a targeted minirestart ra"
+   }
+  ],
+  "family": "alpha",
+  "file": "chatgpt alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "chatgpt"
+ },
+ "chatgpt|niagara": {
+  "entries": [
+   {
+    "confidence": 0.98,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 1,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Optimize throughput rather than single-thread speed"
+   },
+   {
+    "confidence": 0.96,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Simple cores versus complex ILP processors"
+   },
+   {
+    "confidence": 0.93,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Share each pipeline among four threads"
+   },
+   {
+    "confidence": 0.98,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Keep L1 caches small and rely on TLP to hide misses"
+   },
+   {
+    "confidence": 0.91,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Scale the memory system for thread-rich throughput"
+   }
+  ],
+  "family": "niagara",
+  "file": "chatgpt niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "chatgpt"
+ },
+ "chatgpt|p4": {
+  "entries": [
+   {
+    "confidence": 0.97,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 1.0,
+    "page_found": 5,
+    "page_guess": 5,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Replace the conventional L1 instruction cache with an Execution Trace "
+   },
+   {
+    "confidence": 0.98,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 3,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Deepen the pipeline aggressively to pursue much higher clock frequency"
+   },
+   {
+    "confidence": 0.97,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Run the critical ALU execution loop at twice the main processor clock"
+   },
+   {
+    "confidence": 0.95,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Optimize common cases rather than making every execution unit equally "
+   },
+   {
+    "confidence": 0.94,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.882,
+    "page_found": 7,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Allow execution bandwidth to exceed front-end and retirement bandwidth"
+   }
+  ],
+  "family": "p4",
+  "file": "chatgpt p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "chatgpt"
+ },
+ "deepseek|alpha": {
+  "entries": [
+   {
+    "confidence": 0.75,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered Integer Execution Core with Replicated Register Files"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-Order and Speculative Execution Pipeline"
+   },
+   {
+    "confidence": 0.7,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "High-Bandwidth Memory System with Parallel Cache Access"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Aggressive 600 MHz Cycle Time in 0.35 µm CMOS"
+   },
+   {
+    "confidence": 0.65,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Integration of Advanced Branch Prediction (Tournament Predictor)"
+   }
+  ],
+  "family": "alpha",
+  "file": "deepseek alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "deepseek"
+ },
+ "deepseek|niagara": {
+  "entries": [
+   {
+    "confidence": 0.95,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.778,
+    "page_found": 1,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Throughput-oriented design over single-thread performance"
+   },
+   {
+    "confidence": 0.95,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.667,
+    "page_found": 3,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Use of fine-grained multithreading per core"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Rejection of out-of-order execution in favor of multithreading"
+   },
+   {
+    "confidence": 0.9,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Shared L2 cache organization with crossbar interconnect"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Power efficiency as a primary design constraint"
+   }
+  ],
+  "family": "niagara",
+  "file": "deepseek niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "deepseek"
+ },
+ "deepseek|p4": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.769,
+    "page_found": 5,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Trace Cache over Conventional Instruction Cache"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-P4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Deep Pipelining / Hyper Pipelined Technology"
+   },
+   {
+    "confidence": 0.9,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 1,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Double-Pumped (2x Core Frequency) ALU"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 1,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Low-Latency Level 1 Data Cache (2-cycle access)"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Rapid Execution Engine with ALUs at 2x Core Frequency"
+   }
+  ],
+  "family": "p4",
+  "file": "deepseek p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "deepseek"
+ },
+ "deepseek|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 9,
+    "page_guess": 35,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Predominant use of complementary static CMOS circuits"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hierarchical design methodology for concurrent engineering"
+   },
+   {
+    "confidence": 0.95,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": [
+     "4 ",
+     "1.5 ghz",
+     "15",
+     "200 "
+    ],
+    "overlap": 0.615,
+    "page_found": 5,
+    "page_guess": 40,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T3-contradicts-CANDIDATE",
+    "title": "Clock distribution network design"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 9,
+    "page_guess": 35,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Limits on effective beta ratio (p-to-n strength)"
+   },
+   {
+    "confidence": 0.7,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.846,
+    "page_found": 13,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Power distribution design to limit voltage drop"
+   }
+  ],
+  "family": "pphysical",
+  "file": "deepseek pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "deepseek"
+ },
+ "gemini|alpha": {
+  "entries": [
+   {
+    "confidence": 0.95,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered Integer Execution Pipeline vs. Centralized Register File"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Dual-Bank Instruction Cache Duplication for Multi-Read Bandwidth"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-Order Instruction Scheduling Window Sizing vs Clock Frequency"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 31,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Speculative Execution with Hardware Memory Orientation / Store Sets"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-Order Memory Access Engine with On-Chip L1 Data Cache"
+   }
+  ],
+  "family": "alpha",
+  "file": "gemini alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "gemini"
+ },
+ "gemini|niagara": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Simple In-Order Single-Issue Core Design Over Complex Out-of-Order Exe"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four Threads per Core for Memory Latency Hiding"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared Floating-Point Unit across All Cores"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "On-Chip Crossbar Switch for L1-to-L2 Interconnect"
+   },
+   {
+    "confidence": 0.75,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Integrated On-Chip Memory Controllers"
+   }
+  ],
+  "family": "niagara",
+  "file": "gemini niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "gemini"
+ },
+ "gemini|p4": {
+  "entries": [
+   {
+    "confidence": 0.95,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 3,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Execution Trace Cache vs. Conventional Instruction L1 Cache"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 6,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-Pumped Fast ALU Execution Engine"
+   },
+   {
+    "confidence": 0.9,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 2,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Deep Pipeline Strategy for High Frequency (Hyper Pipelining)"
+   },
+   {
+    "confidence": 0.85,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 4,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Advanced Branch Prediction Engine Architecture"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 7,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Point-to-Point 400 MHz Quad-Pumped System Bus"
+   }
+  ],
+  "family": "p4",
+  "file": "gemini p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "gemini"
+ },
+ "gemini|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 33,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Grid-based Clock Distribution Network Design"
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Dynamic Circuit Family Selection (Dynamic vs. Static Logic)"
+   },
+   {
+    "confidence": 0.75,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Timing Closure and Static Timing Analysis Methodology"
+   },
+   {
+    "confidence": 0.7,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "On-Die Power Distribution and Decoupling Capacitance"
+   }
+  ],
+  "family": "pphysical",
+  "file": "gemini pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "gemini"
+ },
+ "glm 5.3 flash|alpha": {
+  "entries": [
+   {
+    "confidence": 0.8,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution: replicated register file and split issue "
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 31,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Duplicated data cache instead of multi-porting"
+   },
+   {
+    "confidence": 0.75,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Frequency-first philosophy combined with out-of-order execution"
+   },
+   {
+    "confidence": 0.55,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "No on-chip second-level cache; external L2 with window-based latency t"
+   },
+   {
+    "confidence": 0.65,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Aggressive memory-dependence speculation for loads"
+   }
+  ],
+  "family": "alpha",
+  "file": "glm 5.3 flash alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "glm 5.3 flash"
+ },
+ "glm 5.3 flash|niagara": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.636,
+    "page_found": 8,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Adoption of Fine-Grained Multithreading"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Choice of Core Complexity and Count"
+   },
+   {
+    "confidence": 0.9,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Shared L2 Cache Architecture"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Focus on Memory Bandwidth over Latency"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 0.625,
+    "page_found": 9,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "Aggressive Voltage/Frequency Scaling for Power Efficiency"
+   }
+  ],
+  "family": "niagara",
+  "file": "glm 5.3 flash niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "glm 5.3 flash"
+ },
+ "glm 5.3 flash|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.8,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 35,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Hierarchical Clock Distribution Network"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Power Grid Design with Decoupling Capacitors"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Timing Closure via Static Timing Analysis (STA)"
+   },
+   {
+    "confidence": 0.75,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Dominance of Static CMOS over Dynamic Logic"
+   },
+   {
+    "confidence": 0.8,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 45,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Floorplanning with Pre-Placed Macro Blocks"
+   }
+  ],
+  "family": "pphysical",
+  "file": "glm 5.3 flash pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "glm 5.3 flash"
+ },
+ "grok|alpha": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 29,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Clustered integer execution units with duplicated register files"
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim-hyphen-variant",
+    "title": "Line and way prediction for set-associative instruction cache"
+   },
+   {
+    "confidence": 0.82,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Tournament branch predictor combining local and global history"
+   },
+   {
+    "confidence": 0.78,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Out-of-order execution with map stage and larger in-flight window"
+   },
+   {
+    "confidence": 0.75,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Larger two-way associative on-chip data cache"
+   }
+  ],
+  "family": "alpha",
+  "file": "grok alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "grok"
+ },
+ "grok|niagara": {
+  "entries": [
+   {
+    "confidence": 0.92,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 1,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Throughput (TLP) over single-thread ILP optimization"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Eight simple cores each with four fine-grained threads"
+   },
+   {
+    "confidence": 0.88,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Shared banked L2 plus on-chip crossbar and memory controllers"
+   },
+   {
+    "confidence": 0.85,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 24,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Simple single-issue six-stage pipeline per SPARC pipe"
+   },
+   {
+    "confidence": 0.87,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Small private L1 caches accepted because of multithreading"
+   }
+  ],
+  "family": "niagara",
+  "file": "grok niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "grok"
+ },
+ "grok|p4": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 3,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Deep pipeline for high clock rate"
+   },
+   {
+    "confidence": 0.88,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 2,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Execution Trace Cache instead of conventional L1I"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 1,
+    "page_guess": 1,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Double-pumped (2x) ALUs for low-latency integer execution"
+   },
+   {
+    "confidence": 0.65,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 9,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T1-verbatim-hyphen-variant",
+    "title": "Small low-latency L1 data cache backed by large L2"
+   },
+   {
+    "confidence": 0.75,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 6,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Deeper buffering for out-of-order window"
+   }
+  ],
+  "family": "p4",
+  "file": "grok p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "grok"
+ },
+ "grok|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.95,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 33,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Primarily static circuit design strategy"
+   },
+   {
+    "confidence": 0.92,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 5,
+    "page_guess": 31,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Single chip-wide global clock domain without skew feedback"
+   },
+   {
+    "confidence": 0.93,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 33,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Global signal slew-rate limit of one-third cycle time"
+   },
+   {
+    "confidence": 0.9,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 15,
+    "page_guess": 41,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Fourteen-wiring-track power-grid image for common-mode noise control"
+   },
+   {
+    "confidence": 0.88,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Hierarchical four-level design methodology with contracts for concurre"
+   }
+  ],
+  "family": "pphysical",
+  "file": "grok pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "grok"
+ },
+ "kimi|alpha": {
+  "entries": [
+   {
+    "confidence": 0.94,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": 1.0,
+    "page_found": 5,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T2-paraphrase-consistent",
+    "title": "80-instruction out-of-order window at 500–600MHz"
+   },
+   {
+    "confidence": 0.97,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Two-cluster integer execution with local register-file copies"
+   },
+   {
+    "confidence": 0.98,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim-hyphen-variant",
+    "title": "Predicted line-and-way access for a large two-way instruction cache"
+   },
+   {
+    "confidence": 0.98,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 12,
+    "page_guess": 34,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Speculative load consumers with a two-cycle minirestart"
+   },
+   {
+    "confidence": 0.96,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 11,
+    "page_guess": 34,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Adaptive load-wait training for store-to-load hazards"
+   }
+  ],
+  "family": "alpha",
+  "file": "kimi alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "kimi"
+ },
+ "kimi|niagara": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Optimize server throughput rather than single-thread performance"
+   },
+   {
+    "confidence": 0.88,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Use many simple in-order cores instead of a few complex out-of-order c"
+   },
+   {
+    "confidence": 0.86,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four-way fine-grained multithreading per core"
+   },
+   {
+    "confidence": 0.72,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2, crossbar, and integrated memory controllers over private ca"
+   },
+   {
+    "confidence": 0.58,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Spend area and power on integer throughput, not per-core floating-poin"
+   }
+  ],
+  "family": "niagara",
+  "file": "kimi niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "kimi"
+ },
+ "kimi|p4": {
+  "entries": [
+   {
+    "confidence": 0.96,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 5,
+    "page_guess": 5,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Decoded-uop Execution Trace Cache as the L1 instruction cache"
+   },
+   {
+    "confidence": 0.95,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 3,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "About 2x P6 pipeline depth in pursuit of frequency"
+   },
+   {
+    "confidence": 0.97,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Double-pumped, staggered integer ALU only for frequent operations"
+   },
+   {
+    "confidence": 0.97,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 9,
+    "page_guess": 9,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Small 8KB, two-clock L1 data cache with hit speculation and replay"
+   },
+   {
+    "confidence": 0.98,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 10,
+    "page_guess": 10,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Simplified second FP/SSE port instead of two full units"
+   }
+  ],
+  "family": "p4",
+  "file": "kimi p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "kimi"
+ },
+ "kimi|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.62,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hybrid custom/synthesized implementation strategy for a multisite giga"
+   },
+   {
+    "confidence": 0.58,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 33,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "X-Y grid-tree / tunable clock distribution instead of skew-by-latency "
+   },
+   {
+    "confidence": 0.48,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 37,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Design-in SOI floating-body/history-effect tolerance rather than treat"
+   },
+   {
+    "confidence": 0.6,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-absent",
+    "title": "Power integrity handled as a physical-design closure item with grids, "
+   },
+   {
+    "confidence": 0.72,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 48,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Timing closure by design: early static-timing budgets, latch borrowing"
+   }
+  ],
+  "family": "pphysical",
+  "file": "kimi pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "kimi"
+ },
+ "longcat|alpha": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Instruction cache replication"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-order window size vs. clock frequency"
+   },
+   {
+    "confidence": 0.75,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire-delay-driven floorplanning"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Data cache double-pumped structure"
+   }
+  ],
+  "family": "alpha",
+  "file": "longcat alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "longcat"
+ },
+ "longcat|p4": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Trace Cache vs Conventional L1 Instruction Cache"
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Double-Pumped ALUs (Rapid Execution Engine)"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Hyper-Pipelined Technology (Deep Pipeline)"
+   },
+   {
+    "confidence": 0.75,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Advanced Dynamic Execution Engine (Large Out-of-Order Window)"
+   },
+   {
+    "confidence": 0.8,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T4-not-found",
+    "title": "Quad-Pumped Bus (QDR) Front-Side Bus"
+   }
+  ],
+  "family": "p4",
+  "file": "longcat p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "longcat"
+ },
+ "longcat|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.55,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clock distribution topology selection"
+   },
+   {
+    "confidence": 0.5,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 35,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Power delivery and on-die decoupling strategy"
+   },
+   {
+    "confidence": 0.5,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 40,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Timing closure methodology with OCV derating"
+   },
+   {
+    "confidence": 0.5,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Macro placement and floorplan for the dual cores and caches"
+   },
+   {
+    "confidence": 0.45,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 45,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "I/O and signal integrity for high-speed off-chip interfaces"
+   }
+  ],
+  "family": "pphysical",
+  "file": "longcat pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "longcat"
+ },
+ "meta|alpha": {
+  "entries": [
+   {
+    "confidence": 0.88,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 7,
+    "page_guess": 29,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Clustered integer execution with duplicated 80-entry register files"
+   },
+   {
+    "confidence": 0.86,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 2,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Line and way prediction to keep I-cache off critical fetch loop"
+   },
+   {
+    "confidence": 0.84,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 31,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim-hyphen-variant",
+    "title": "Double-pumped 64KB data cache to provide two ports"
+   },
+   {
+    "confidence": 0.82,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 12,
+    "page_guess": 35,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Speculative issue of load consumers with minirestart and load hit/miss"
+   },
+   {
+    "confidence": 0.78,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Tournament branch predictor plus store-wait/load-wait dynamic memory d"
+   }
+  ],
+  "family": "alpha",
+  "file": "meta alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "meta"
+ },
+ "meta|niagara": {
+  "entries": [
+   {
+    "confidence": 0.82,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Throughput-oriented 8 simple in-order cores instead of few aggressive "
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four-way fine-grained multithreading per core to hide stalls"
+   },
+   {
+    "confidence": 0.78,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Single shared pipelined floating-point unit for all 8 cores"
+   },
+   {
+    "confidence": 0.65,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Small write-through private L1s with large shared banked L2 instead of"
+   },
+   {
+    "confidence": 0.7,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "On-chip crossbar, four integrated DRAM controllers and JBus interface"
+   }
+  ],
+  "family": "niagara",
+  "file": "meta niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "meta"
+ },
+ "meta|p4": {
+  "entries": [
+   {
+    "confidence": 0.94,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 5,
+    "page_guess": 4,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Execution Trace Cache as primary L1I storing decoded uops"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 3,
+    "page_guess": 3,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Deep pipeline for frequency target about 2x P6"
+   },
+   {
+    "confidence": 0.88,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 8,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Double-pumped Rapid Execution ALUs with staggered 16-bit add"
+   },
+   {
+    "confidence": 0.84,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 9,
+    "page_guess": 9,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim-hyphen-variant",
+    "title": "Small 8KB low-latency L1 data cache with replay and deep buffering"
+   },
+   {
+    "confidence": 0.86,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": 10,
+    "page_guess": 10,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T1-verbatim",
+    "title": "Optimized FP/SSE cluster with one full port plus move/store port vs tw"
+   }
+  ],
+  "family": "p4",
+  "file": "meta p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "meta"
+ },
+ "meta|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 33,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hybrid H-tree driving sector buffers that drive global clock grid with"
+   },
+   {
+    "confidence": 0.65,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 36,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Predominantly static CMOS implementation with restricted selective dyn"
+   },
+   {
+    "confidence": 0.75,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "SOI history effect bounded by early/late timing corners with body-volt"
+   },
+   {
+    "confidence": 0.62,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 37,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Pulsed L1/L2 LSSD latches with local clock choppers for time borrowing"
+   }
+  ],
+  "family": "pphysical",
+  "file": "meta pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "meta"
+ },
+ "mimo|alpha": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered Integer Execution for Clock Frequency"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-Order Execution Window Size"
+   },
+   {
+    "confidence": 0.65,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire-Delay-Driven Physical Partitioning"
+   },
+   {
+    "confidence": 0.6,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Cache Size and Single-Cycle Access"
+   },
+   {
+    "confidence": 0.45,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Large Physical Register File with Register Renaming for OOO Execution"
+   }
+  ],
+  "family": "alpha",
+  "file": "mimo alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "mimo"
+ },
+ "mimo|niagara": {
+  "entries": [
+   {
+    "confidence": 0.8,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Eight simple cores over fewer complex cores"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four hardware threads per core via fine-grained multithreading"
+   },
+   {
+    "confidence": 0.65,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Simple single-issue in-order pipeline"
+   },
+   {
+    "confidence": 0.55,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2 cache with crossbar interconnect"
+   },
+   {
+    "confidence": 0.6,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Power efficiency as primary optimization target"
+   }
+  ],
+  "family": "niagara",
+  "file": "mimo niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "mimo"
+ },
+ "mimo|p4": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 5,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace Cache vs Conventional L1 Instruction Cache"
+   },
+   {
+    "confidence": 0.8,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 4,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Deep Pipeline for Clock Frequency Scaling"
+   },
+   {
+    "confidence": 0.75,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 7,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Rapid Execution Engine with Double-Pumped ALUs"
+   },
+   {
+    "confidence": 0.6,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 8,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "256KB Unified L2 Cache"
+   },
+   {
+    "confidence": 0.7,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 6,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Improved Branch Prediction for Deep Pipeline Compensation"
+   }
+  ],
+  "family": "p4",
+  "file": "mimo p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "mimo"
+ },
+ "mimo|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Copper interconnect process selection for POWER4"
+   },
+   {
+    "confidence": 0.65,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 34,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hierarchical clock distribution using a global clock grid"
+   },
+   {
+    "confidence": 0.45,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Power distribution and decoupling strategy for a large-die processor"
+   },
+   {
+    "confidence": 0.6,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Timing methodology and physical design closure approach"
+   },
+   {
+    "confidence": 0.55,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Integration of multiple cores and L2 cache on a single die"
+   }
+  ],
+  "family": "pphysical",
+  "file": "mimo pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "mimo"
+ },
+ "minimax 2.7|alpha": {
+  "entries": [
+   {
+    "confidence": 0.65,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Two-clustered integer execution architecture"
+   },
+   {
+    "confidence": 0.55,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Large reorder buffer (80 entries) for deep out-of-order execution"
+   },
+   {
+    "confidence": 0.5,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Instruction cache replication (Icache and Jcache split)"
+   },
+   {
+    "confidence": 0.5,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four-way superscalar issue with explicit cluster assignment"
+   },
+   {
+    "confidence": 0.6,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Exceeding sequential execution CPI via high-issue-width out-of-order e"
+   }
+  ],
+  "family": "alpha",
+  "file": "minimax 2.7 alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "minimax 2.7"
+ },
+ "minimax 2.7|niagara": {
+  "entries": [
+   {
+    "confidence": 0.75,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Simple in-order cores over complex out-of-order cores for throughput w"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "8-core, 4-threads-per-core organization (32 total threads) as the core"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Throughput-over-single-thread-performance as the primary design philos"
+   },
+   {
+    "confidence": 0.6,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2 cache across all cores rather than private L2 per core"
+   }
+  ],
+  "family": "niagara",
+  "file": "minimax 2.7 niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "minimax 2.7"
+ },
+ "minimax 2.7|p4": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 4,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace cache over conventional L1 instruction cache"
+   },
+   {
+    "confidence": 0.6,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 6,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-pumped ALUs in the Rapid Execution Engine"
+   },
+   {
+    "confidence": 0.65,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Very deep pipeline as clock-frequency-first microarchitecture philosop"
+   },
+   {
+    "confidence": 0.55,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 5,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Branch target buffer with 4K-entry BTB"
+   },
+   {
+    "confidence": 0.5,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 7,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Issue and retirement bandwidth matching for out-of-order execution"
+   }
+  ],
+  "family": "p4",
+  "file": "minimax 2.7 p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "minimax 2.7"
+ },
+ "minimax 2.7|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.65,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 35,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Latch-based clock distribution architecture for POWER4"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "ASIC-style design methodology adoption for physical design"
+   },
+   {
+    "confidence": 0.55,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Conservative wire load models for synthesis timing correlation"
+   },
+   {
+    "confidence": 0.45,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Structured power grid for power distribution at large die scale"
+   }
+  ],
+  "family": "pphysical",
+  "file": "minimax 2.7 pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "minimax 2.7"
+ },
+ "minimax m3|alpha": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Instruction window / reorder buffer size selection under wire-delay co"
+   },
+   {
+    "confidence": 0.75,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution units with inter-cluster communication"
+   },
+   {
+    "confidence": 0.65,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 33,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire-delay-driven floorplanning with timing-driven placement"
+   },
+   {
+    "confidence": 0.4,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Frequency / IPC trade-off positioning"
+   }
+  ],
+  "family": "alpha",
+  "file": "minimax m3 alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "minimax m3"
+ },
+ "minimax m3|p4": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace cache replaces conventional L1 instruction cache"
+   },
+   {
+    "confidence": 0.75,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-pumped ALUs for rapid execution engine"
+   },
+   {
+    "confidence": 0.55,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Deep pipeline (20 stages) chosen over shorter pipeline"
+   },
+   {
+    "confidence": 0.5,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Bypass between trace cache miss and decode (μops delivered by decode t"
+   }
+  ],
+  "family": "p4",
+  "file": "minimax m3 p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "minimax m3"
+ },
+ "mistral|alpha": {
+  "entries": [
+   {
+    "confidence": 0.6,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-Order Window Size vs Clock Cycle Trade-off"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Clustered Integer Execution Units"
+   },
+   {
+    "confidence": 0.6,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Instruction Cache Replication for Bandwidth"
+   },
+   {
+    "confidence": 0.7,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Wire-Delay-Driven Floorplanning Methodology"
+   }
+  ],
+  "family": "alpha",
+  "file": "mistral alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "mistral"
+ },
+ "mistral|niagara": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Throughput-first design philosophy"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "32-way multithreading via 8 cores with 4-way SMT"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2 cache among all cores"
+   },
+   {
+    "confidence": 0.7,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Small per-core L1 caches"
+   },
+   {
+    "confidence": 0.85,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Power-aware design for server workloads"
+   }
+  ],
+  "family": "niagara",
+  "file": "mistral niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "mistral"
+ },
+ "mistral|p4": {
+  "entries": [
+   {
+    "confidence": 0.75,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace Cache vs Conventional L1 Instruction Cache"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-Pumped ALU Implementation"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "20-Stage Pipeline Depth Selection"
+   },
+   {
+    "confidence": 0.7,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Rapid Execution Engine Design"
+   },
+   {
+    "confidence": 0.6,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Memory Hierarchy Optimization for High Frequency"
+   }
+  ],
+  "family": "p4",
+  "file": "mistral p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "mistral"
+ },
+ "mistral|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.85,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hierarchical H-tree global clock distribution topology"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 34,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Copper interconnect for upper metal layers in power grid"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 40,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Corner-based static timing analysis with OCV derating"
+   },
+   {
+    "confidence": 0.7,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Symmetrical floorplan for L2 cache and processor cores"
+   },
+   {
+    "confidence": 0.7,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 45,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shielding and spacing rules for critical signal nets"
+   }
+  ],
+  "family": "pphysical",
+  "file": "mistral pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "mistral"
+ },
+ "qwen|alpha": {
+  "entries": [
+   {
+    "confidence": 0.55,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-order window sized for clock frequency"
+   },
+   {
+    "confidence": 0.7,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution"
+   },
+   {
+    "confidence": 0.45,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 31,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Instruction-cache replication for fetch timing"
+   },
+   {
+    "confidence": 0.68,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 34,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire-delay-driven floorplanning"
+   }
+  ],
+  "family": "alpha",
+  "file": "qwen alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "qwen"
+ },
+ "qwen|niagara": {
+  "entries": [
+   {
+    "confidence": 0.95,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Core Complexity vs. Core Count Trade-off"
+   },
+   {
+    "confidence": 0.9,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Number of Threads per Core and Multithreading Style"
+   },
+   {
+    "confidence": 0.95,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Floating Point Unit Sharing"
+   },
+   {
+    "confidence": 0.85,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "L2 Cache Interconnect and Bandwidth"
+   },
+   {
+    "confidence": 0.9,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Target Workload and Power Optimization Philosophy"
+   }
+  ],
+  "family": "niagara",
+  "file": "qwen niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "qwen"
+ },
+ "qwen|p4": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 8,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Execution Trace Cache vs Conventional L1 Instruction Cache"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 12,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Rapid Execution Engine with Double-Pumped ALUs"
+   },
+   {
+    "confidence": 0.85,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 6,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "20-Stage Hyper Pipelined Technology"
+   },
+   {
+    "confidence": 0.8,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 14,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "On-Die Advanced Transfer Cache"
+   },
+   {
+    "confidence": 0.75,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 16,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Quad-Pumped System Bus"
+   }
+  ],
+  "family": "p4",
+  "file": "qwen p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "qwen"
+ },
+ "qwen|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.9,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hybrid Custom and Synthesized Logic Methodology"
+   },
+   {
+    "confidence": 0.85,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 32,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hierarchical Partitioning for Timing Closure"
+   },
+   {
+    "confidence": 0.8,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Global and Local Clock Distribution Grid"
+   },
+   {
+    "confidence": 0.85,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 41,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Dense Power Grid for di/dt Noise Mitigation"
+   },
+   {
+    "confidence": 0.75,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 35,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire Delay Modeling and Repeater Insertion"
+   }
+  ],
+  "family": "pphysical",
+  "file": "qwen pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "qwen"
+ },
+ "solar|niagara": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Throughput-oriented design philosophy"
+   },
+   {
+    "confidence": 0.6,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "8 cores × 4 threads configuration"
+   },
+   {
+    "confidence": 0.45,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Simple in-order core design"
+   },
+   {
+    "confidence": 0.5,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Fine-grained thread interleaving (zero-overhead multithreading)"
+   },
+   {
+    "confidence": 0.4,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2 cache structure"
+   }
+  ],
+  "family": "niagara",
+  "file": "solar niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "solar"
+ },
+ "solar|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.75,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Single-die dual-core integration"
+   },
+   {
+    "confidence": 0.65,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 38,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clock distribution network architecture"
+   },
+   {
+    "confidence": 0.55,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 43,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Power delivery and electrical design strategy"
+   },
+   {
+    "confidence": 0.4,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 47,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "SRAM array / cache macro design approach"
+   }
+  ],
+  "family": "pphysical",
+  "file": "solar pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "solar"
+ },
+ "sonnet|alpha": {
+  "entries": [
+   {
+    "confidence": 0.45,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution units"
+   },
+   {
+    "confidence": 0.35,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Out-of-order issue window size vs. clock frequency trade-off"
+   },
+   {
+    "confidence": 0.25,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Instruction cache replication for register-mapping/rename purposes"
+   },
+   {
+    "confidence": 0.4,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Wire-delay-aware floorplanning as a first-order design constraint"
+   }
+  ],
+  "family": "alpha",
+  "file": "sonnet alpha.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "sonnet"
+ },
+ "sonnet|niagara": {
+  "entries": [
+   {
+    "confidence": 0.5,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Throughput over single-thread performance"
+   },
+   {
+    "confidence": 0.45,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 22,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Simple, short pipeline cores rather than complex cores"
+   },
+   {
+    "confidence": 0.4,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Fine-grained multithreading per core to hide memory latency"
+   },
+   {
+    "confidence": 0.35,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 25,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared L2 cache and single floating-point unit design"
+   },
+   {
+    "confidence": 0.25,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Power efficiency as a first-order design constraint"
+   }
+  ],
+  "family": "niagara",
+  "file": "sonnet niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "sonnet"
+ },
+ "sonnet|p4": {
+  "entries": [
+   {
+    "confidence": 0.4,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace cache instead of conventional L1 instruction cache"
+   },
+   {
+    "confidence": 0.35,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Deep pipeline for high clock frequency"
+   },
+   {
+    "confidence": 0.4,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-pumped (double-speed) ALUs for integer execution"
+   },
+   {
+    "confidence": 0.3,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-P4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Prioritizing frequency headroom over IPC (instructions per clock) in o"
+   }
+  ],
+  "family": "p4",
+  "file": "sonnet p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "sonnet"
+ },
+ "sonnet|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.35,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 33,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Global clock distribution approach"
+   },
+   {
+    "confidence": 0.3,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Use of custom circuit design in critical macros"
+   },
+   {
+    "confidence": 0.25,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 35,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Latch/pipeline circuit style for timing closure"
+   },
+   {
+    "confidence": 0.3,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 40,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Hierarchical floorplanning and timing closure methodology"
+   },
+   {
+    "confidence": 0.2,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 45,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Power/density management via circuit and physical design choices"
+   }
+  ],
+  "family": "pphysical",
+  "file": "sonnet pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "sonnet"
+ },
+ "yuanbao|alpha": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 28,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Clustered integer execution with duplicated integer register files"
+   },
+   {
+    "confidence": 0.75,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Performance leadership via high clock speed + out-of-order, not braini"
+   },
+   {
+    "confidence": 0.6,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 30,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "20-entry integer issue queue bounded by pick-2 arbitration circuit"
+   },
+   {
+    "confidence": 0.55,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "64 KB primary I- and D-caches with line/way prediction to hide set-ass"
+   }
+  ],
+  "family": "alpha",
+  "file": "yuanbao power.json",
+  "ground_truth": "Alpha21264-pagemarked.txt",
+  "model": "yuanbao"
+ },
+ "yuanbao|niagara": {
+  "entries": [
+   {
+    "confidence": 0.6,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 21,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Design for throughput on commercial server workloads instead of single"
+   },
+   {
+    "confidence": 0.6,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 23,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Four threads per core, eight cores, 32 threads; each thread gets its o"
+   },
+   {
+    "confidence": 0.45,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 24,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Simple single-issue, in-order, short-pipeline core with functional uni"
+   },
+   {
+    "confidence": 0.4,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 26,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Shared, banked L2 reached through a crossbar, with small write-through"
+   },
+   {
+    "confidence": 0.35,
+    "i": 4,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 27,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Moderate clock frequency and aggressive clock gating to hold the chip "
+   }
+  ],
+  "family": "niagara",
+  "file": "yuanbao niagara.json",
+  "ground_truth": "Niagara-pagemarked.txt",
+  "model": "yuanbao"
+ },
+ "yuanbao|p4": {
+  "entries": [
+   {
+    "confidence": 0.7,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 3,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Trace cache replaces conventional L1 instruction cache"
+   },
+   {
+    "confidence": 0.65,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 2,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Very deep (20-stage) pipeline to maximize clock frequency"
+   },
+   {
+    "confidence": 0.6,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 4,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Double-pumped (2× clocked) ALUs — Rapid Execution Engine"
+   },
+   {
+    "confidence": 0.55,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 5,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "400 MHz system bus via quad-pumping"
+   }
+  ],
+  "family": "p4",
+  "file": "yuanbao p4.json",
+  "ground_truth": "Pentium4-pagemarked.txt",
+  "model": "yuanbao"
+ },
+ "yuanbao|pphysical": {
+  "entries": [
+   {
+    "confidence": 0.3,
+    "i": 0,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 42,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "One global clock domain for the cores and on-chip L2, with skew treate"
+   },
+   {
+    "confidence": 0.22,
+    "i": 1,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 34,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Full-chip static-timing sign-off with unit-level timing budgets / inte"
+   },
+   {
+    "confidence": 0.22,
+    "i": 2,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 46,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "Power distribution, IR drop and power density treated as first-class p"
+   },
+   {
+    "confidence": 0.3,
+    "i": 3,
+    "not_in_paper": false,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": 29,
+    "paper_vs_general": "probably-in-the-paper",
+    "tier": "T0-declined",
+    "title": "0.18 μm bulk CMOS with copper interconnect as the technology base for "
+   },
+   {
+    "confidence": 0.25,
+    "i": 4,
+    "not_in_paper": true,
+    "numeric_flags": null,
+    "overlap": null,
+    "page_found": null,
+    "page_guess": null,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "tier": "T0-declined",
+    "title": "Two out-of-order cores plus shared on-chip L2, off-chip L3 and fabric "
+   }
+  ],
+  "family": "pphysical",
+  "file": "yuanbao pphysical.json",
+  "ground_truth": "POWER4-cpd-pagemarked.txt",
+  "model": "yuanbao"
+ }
+}

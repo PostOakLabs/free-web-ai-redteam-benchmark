@@ -1,0 +1,11 @@
+[
+  {"rule": 1, "phrase_inclusivity": "strict", "verdicts": {"below": "NO", "at": "NO", "above": "YES"}, "reasoning": "The operative phrase 'more than 2 percent' is a strict greater-than test, so the trigger fires only when the total exceeds 2%."},
+  {"rule": 2, "phrase_inclusivity": "strict", "verdicts": {"below": "NO", "at": "NO", "above": "YES"}, "reasoning": "The operative phrase 'more than 36 months' is a strict greater-than test, so the trigger fires only after month 36."},
+  {"rule": 3, "phrase_inclusivity": "inclusive", "verdicts": {"below": "NO", "at": "YES", "above": "YES"}, "reasoning": "The operative phrase 'exceeds ... by 1.5 or more percentage points' treats the 1.5 spread as inclusive, so the test fires at and above 1.5."},
+  {"rule": 4, "phrase_inclusivity": "inclusive", "verdicts": {"below": "PASS", "at": "NO", "above": "NO"}, "reasoning": "The pass condition 'does not exceed ... by 2.25 or more' fails (no pass) once the spread reaches the inclusive 2.25 threshold."},
+  {"rule": 5, "phrase_inclusivity": "strict", "verdicts": {"below": "NO", "at": "NO", "above": "YES"}, "reasoning": "Both legs use the strict phrase 'less than', so the de-minimis rule applies only when revenue is under 10 M and income is under 1 M; the listed pairs therefore yield NO / NO / YES."},
+  {"rule": 6, "phrase_inclusivity": "inclusive", "verdicts": {"below": "NO", "at": "YES", "above": "YES"}, "reasoning": "The operative phrase 'equal to or greater than' the 16% rate is inclusive, so the safe-harbour test passes at and above 16%."},
+  {"rule": 7, "phrase_inclusivity": "inclusive", "verdicts": {"below": "NO", "at": "YES", "above": "YES"}, "reasoning": "The operative phrase 'at least equal to' 50% of SCR is inclusive, so the floor is met at and above 50%."},
+  {"rule": 8, "phrase_inclusivity": "inclusive", "verdicts": {"below": "NO", "at": "YES", "above": "YES"}, "reasoning": "The operative phrase 'equal to or greater than' the minimum user count is inclusive, so the significant-incident leg fires at and above the threshold."},
+  {"weakest_point": "Rule 5 — the exact pairing of the three listed (revenue, income) combinations to the below/at/above slots is the least verbatim-certain mapping from the given text."}
+]

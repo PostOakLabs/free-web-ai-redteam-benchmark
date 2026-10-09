@@ -1,0 +1,45 @@
+TRACK C - e, HW-safety calculations vs the estate consensus formulas
+  reference: digest/hw-calc-formulas.md (Prompt-S merge) + hw-calc-vectors.md
+  models: 16   gradable: 16
+
+  model            entries classif shapeOK shapeBAD needsRetr locNull  parse
+  yuanbao               12      10       9        1         5       5  clean
+  glm 5.3 flash         12      10       8        2         4       3  clean+fence-close+fenced
+  sonnet                12      12       8        4         6       9  clean+fence-close+fenced
+  grok                  12      12       7        5         5       3  clean
+  longcat               12      12       7        5         6       2  clean
+  chatgpt               10      10       6        4         3       0  clean+trailing-content
+  gemini                12       9       6        3         3       3  clean
+  meta                  10       8       6        2         4       5  clean
+  minara                10       8       6        2         4       2  clean
+  qwen                  10       8       6        2         5       7  clean
+  solar                 12       7       6        1         4       6  clean
+  deepseek               8       8       4        4         4       2  clean
+  kimi                   6       4       4        0         1       0  clean
+  mimo                  11       6       4        2         3       1  clean
+  minimax 2.7            7       7       4        3         3       0  elementwise-truncation
+  mistral               12       7       3        4         5       3  clean+fence-close+fenced
+
+  calculation families seen (shape OK / total):
+    Arrhenius     20 /  30   retrieval=free
+    TPP           11 /  27   retrieval=free
+    SPFM          16 /  25   retrieval=paywalled
+    CHIPS-48D     13 /  16   retrieval=free
+    LFM           15 /  15   retrieval=paywalled
+    PMHF           8 /  14   retrieval=paywalled
+    DO-254-DAL    11 /  11   retrieval=paywalled
+
+  NEEDS-RETRIEVAL entries (paywalled standard text): 65
+  free-primary-text entries (JEDEC / FR / USC): 73
+
+  RETRIEVAL HONESTY: ISO 26262, DO-254 and IEC 61508 clause text is paywalled.
+  Those entries are graded on FORMULA SHAPE against the estate's own 13-model
+  consensus merge only. Their clause locators are NOT verified here and the
+  entries keep NEEDS-RETRIEVAL. A shape-OK verdict is not a correctness verdict
+  against the standard.
+
+  SHAPE CHECK IS TOKEN-BASED, NOT SEMANTIC: it confirms the stated formula
+  contains the governing terms, not that the arithmetic or the thresholds are
+  right. An inverted metric that keeps the right tokens would pass silently -
+  the mistral SPFM inversion recorded in hw-calc-formulas.md is exactly that
+  shape, and this checker would not catch it.

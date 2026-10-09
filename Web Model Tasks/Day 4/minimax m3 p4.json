@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Trace cache replaces conventional L1 instruction cache",
+    "where_in_paper": "Trace End section",
+    "decision": "Decided to store decoded micro-ops in a trace cache rather than decoded micro-ops in a conventional L1 instruction cache fed by x86 decode",
+    "alternatives_or_rejected": "Conventional L1 instruction cache that holds raw x86 and decodes on fetch (decoded-uop L1 also implied as the conventional alternative)",
+    "rationale": "Decoupling fetch bandwidth from x86 decoding bandwidth; avoiding the complexity and decode cost on the hot fetch path; storing already-decoded traces ready for delivery to the allocation/rename stage",
+    "outcome": "The paper states the trace cache supplies the renamed micro-ops stream directly to the out-of-order core, with trace-pack and segment build-up mechanisms described as building traces from decoded paths",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Direction of the decision (trace cache chosen over conventional L1 I$) is almost certainly correct; exact wording and any explicit 'rejected alternative' framing is uncertain since I am reconstructing from memory of this paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Double-pumped ALUs for rapid execution engine",
+    "where_in_paper": "Rapid Execution Engine section",
+    "decision": "Chose to clock the integer ALUs at twice the core clock (double-pumped) so each ALU can complete up to two integer ops per core clock, rather than running ALUs at the core clock rate",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Stated reasoning in the paper: simple integer ALU operations (add, compare, logic, shift) have latency short enough that halving their pipeline stage enables 2x integer execution throughput at modest cost; supported by low-latency ALU design rather than port replication",
+    "outcome": "Paper reports this allows low-latency integer operations and high issue bandwidth on simple ALU ops, enabling the rapid execution engine characteristic",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am uncertain whether the paper explicitly justifies double-pumping via ALU latency analysis in the way I've stated, vs. merely describing it; direction of decision (double-pumped, not single-pumped) is high confidence",
+    "confidence": 0.75
+  },
+  {
+    "title": "Deep pipeline (20 stages) chosen over shorter pipeline",
+    "where_in_paper": "Pipeline / Introduction / Front End discussion",
+    "decision": "Adopted a deep pipeline (~20 stages) to enable high clock frequency",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Paper's stated philosophy: deeper pipeline allows higher frequency scaling by breaking work into shorter stages; traded pipeline depth against branch misprediction / recovery cost",
+    "outcome": "Paper presents the long pipeline as a fundamental design point underlying the frequency-targeted design of NetBurst",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am uncertain of the paper's specific stage-count phrasing and whether alternatives were ever discussed; this is closest to general P4 knowledge dressed as paper content",
+    "confidence": 0.55
+  },
+  {
+    "title": "Bypass between trace cache miss and decode (μops delivered by decode trace cache miss)",
+    "where_in_paper": "Trace Cache section, microarchitecture diagram and surrounding text",
+    "decision": "Decided that on a trace cache miss, decoded micro-ops are delivered directly from the decode pipeline to the allocation/rename stage, rather than always going through the trace cache",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Avoids serializing execution on trace cache build-up; maintains forward progress on branch/path that is not yet traced",
+    "outcome": "Paper describes a μop delivery path from decode in parallel with the trace cache delivery, with mux/selection between the two at allocation",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper describes this as a 'design decision weighed' vs. just a structural fact is uncertain; the structural fact of decode-path-bypass is likely correct",
+    "confidence": 0.5
+  }
+]

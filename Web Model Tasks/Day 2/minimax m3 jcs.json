@@ -1,0 +1,98 @@
+[
+  {
+    "vector_name": "integer_vs_float_one",
+    "input_json": "{\"a\":1,\"b\":1.0}",
+    "canonical_output": "{\"a\":1,\"b\":1}",
+    "rule": "RFC 8785 §3.2.2.3 — numbers equivalent to an integer serialize without fraction/exponent",
+    "divergence_trap": "A naive implementation that does not run ES6 Number.prototype.toString-equivalent may emit {\"a\":1,\"b\":1.0} because it preserves the lexical form from the source string.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "minus_zero_rejected",
+    "input_json": "{\"a\":-0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "RFC 8785 §3.2.2.3 (combined with §3.2.2.4) — no representation of negative zero is allowed; must serialize as 0",
+    "divergence_trap": "Most JSON parsers preserve the signedness of zero and a naive stringifier (or a parser that uses IEEE-754 .isNegative()) will emit -0, which JCS explicitly forbids.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "beyond_2_to_53_upper_boundary",
+    "input_json": "{\"a\":9007199254740992,\"b\":9007199254740993,\"c\":9007199254740994,\"d\":9007199254740995}",
+    "canonical_output": "{\"a\":9007199254740992,\"b\":9007199254740993,\"c\":9007199254740994,\"d\":9007199254740995}",
+    "rule": "RFC 8785 §3.2.2.4 — numbers in the inclusive range [-(2^53)+1, (2^53)-1] serialize without loss; above that, the canonical JSON serialization rules of ES6 (Number.prototype.toString) apply, which uses exponent form.",
+    "divergence_trap": "Implementers often cap at 2^53 and either error, round, or stringify via toFixed; values at and beyond 2^53 in JCS are emitted in shortest round-trippable form (here all four round-trip exactly because they are all representable integers in IEEE-754 doubles — the boundary is 2^53+1=9007199254740993, which is also exactly representable). The trap: 9007199254740995 is NOT exactly representable in IEEE next double after 9007199254740993 is 9007199254740996), so ES6 toString emits '9007199254740996' for 9007199254740995; a naive implementation that prints the literal 9007199254740995 will diverge from reference.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "exponent_boundary_1e21",
+    "input_json": "{\"a\":1e21,\"b\":1e22,\"c\":1e-7}",
+    "canonical_output": "{\"a\":1000000000000000000000,\"b\":1e22,\"c\":1e-7}",
+    "rule": "RFC 8785 §3.2.2.4 — ES6 Number.prototype.toString: below 1e21 use plain integer form; 1e21 and above use exponent form; small numbers use shortest round-trip form.",
+    "divergence_trap": "The cutoff in ES6 is exactly 1e21 — 1e21 prints as '1000000000000000000000' (no exponent), while 1e22 prints as '1e22'. A naive stringifier that uses toFixed or sprintf(\"%g\") may emit '1e+21' (with explicit plus) or pick a different cutoff (e.g. printf %g uses 1e7/1e-7 boundaries), diverging badly.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal_shortest_round_trip",
+    "input_json": "{\"a\":1.1,\"b\":1.0000000000000001,\"c\":0.1}",
+    "canonical_output": "{\"a\":1.1,\"b\":1.0000000000000002,\"c\":0.1}",
+    "rule": "RFC 8785 §3.2.2.4 — numbers must be serialized as their shortest round-trippable IEEE-754 representation via ES6 Number.prototype.toString.",
+    "divergence_trap": "Many implementations use toFixed(17) or printf %.17g, producing '1.0000000000000002' for 1.1 and '0.10000000000000001' for 0.1; ES6 toString yields the shortest form. Also, 1.0000000000000001 is NOT a distinct double, it equals 1.0000000000000002 in IEEE-754 — so naive lexical preservation will output '1.0000000000000001' which is wrong.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_escaping_default",
+    "input_json": "{\"a\":\"line1\\nline2\",\"b\":\"tab\\there\",\"b2\":\"back\\bspace\",\"f\":\"form\\ffeed\",\"r\":\"carri\\age\",\"q\":\"quote\\\"and\\/slash\"}",
+    "canonical_output": "{\"a\":\"line1\\nline2\",\"b\":\"tab\\there\",\"b2\":\"back\\bspace\",\"f\":\"form\\ffeed\",\"r\":\"carri\\age\",\"q\":\"quote\\\"and\\/slash\"}",
+    "rule": "RFC 8785 §3.2.2.2 — only \\b, \\t, \\n, \\f, \\r, \\\", \\\\, \\/ (optionally) and \\uXXXX for control characters are escaped; other printable Unicode is passed through literally.",
+    "divergence_trap": "The solidus '/' is escapable per the JSON spec but JCS leaves it unescaped by default; naive Python json.dumps uses ensure_ascii=True and escapes \\u00xx for non-ASCII (and may or may not escape /), while json.dumps(..., ensure_ascii=False) diverges from a normalizer that escapes ASCII control chars as \\u00XX (RFC requires \\b \\t \\n \\f \\r forms, not \\u0008 \\u0009 etc.).",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "surrogate_pair_passthrough",
+    "input_json": "{\"a\":\"𝄞\",\"b\":\"𝄞\"}",
+    "canonical_output": "{\"a\":\"𝄞\",\"b\":\"𝄞\"}",
+    "rule": "RFC 8785 §3.2.2.2 — strings are sequences of UTF-16 code units; no Unicode normalization is performed; surrogate pairs are passed through as-is.",
+    "divergence_trap": "Implementations that normalize to NFC/NFD or that escape non-BMP characters to \\uD834\\uDD1E will differ; Python with ensure_ascii=True will emit \\uD834\\uDD1E, which is identical but lexically longer — for this test the byte sequence must be the raw UTF-8 of the paired surrogate. A naive .normalize('NFC') call would yield the same here (no decomposition) but for accented Latin text would diverge by changing byte length.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "key_ordering_utf16_not_codepoint",
+    "input_json": "{\"𐀀\":1,\"\":2\":3,\"Z\":4,\"a\":5,\"z\":6}",
+    "canonical_output": "{\"A\":3,\"Z\":4,\"a\":5,\"z\":6,\"𐀀\":1,\"\":2}",
+    "rule": "RFC 8785 §3.2.3 — object members are sorted by UTF-16 code unit values of their keys (lexicographic ascending), NOT by Unicode code point.",
+    "divergence_trap": "UTF-16 code-unit ordering of U+E000 is 0xE000 (= 57344), and U+10000 (𐀀) is encoded as the surrogate pair 0xD800 0xDC00, whose FIRST code unit 0xD800 (= 55296) is LESS than 0xE000. So '𐀀' (0xD800,0xDC00) sorts BEFORE '' (0xE000) under JCS, but by Unicode code point U+10000 (65536) sorts AFTER U+E000 (57344). Naive sorted-keys implementations that compare decoded code points (Python str.__lt__ over full strings, or ICU collators, or Arrays.sort on JS strings) order by UTF-16 code unit already — but implementations that decode first (e.g. Python's bytes vs str with .encode().decode() with surrogate-passing, or anything using ICU's UCharIterator with code-point semantics) will invert the order of these two keys.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_object_and_array",
+    "input_json": "{}",
+    "canonical_output": "{}",
+    "rule": "RFC 8785 §3.2.3 / §3.2.4 — empty containers serialize to '{}' and '[]' respectively; arrays preserve index order.",
+    "divergence_trap": "Some canonicalizers emit whitespace; some canonicalizers sort object keys in empty objects (no-op); arrays must never be reordered. Pair with [] test below.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "deep_nesting_and_array_order_preserved",
+    "input_json": "{\"a\":[3,1,2,{\"z\":1,\"a\":2}],\"b\":[[[[1]]]]}",
+    "canonical_output": "{\"a\":[3,1,2,{\"a\":2,\"z\":1}],\"b\":[[[[1]]]]}",
+    "rule": "RFC 8785 §3.2.4 — array elements are kept in original order; object keys recursively sorted by UTF-16 code unit order (§3.2.3).",
+    "divergence_trap": "Naive implementations that recursively sort both arrays and objects (a common bug) emit [1,2,3,...] for the inner array. Some implementations also mis-sort keys inside deeply nested objects (e.g. only sort top-level).",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_keys_illegal",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": "{\"a\":2}",
+    "rule": "RFC 8785 §3.2.3 / §3 — duplicate member names are not allowed; a conforming implementation MUST reject. This vector lists the legal deterministic outcome IF one chooses last-wins for graceful handling, but the SPEC requires rejection.",
+    "divergence_trap": "Most naive canonicalizers silently pick one (often last-wins, but Python's json treats this as undefined-parse-time-error — actually a duplicate key in a JSON object is implementation-defined per RFC 8259). A reference JCS library must raise; if it doesn't, it is non-conformant. This vector is a NEGATIVE test: a reference implementation should produce an error, and a gate test should detect the absence of that error.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "solidus_not_escaped_and_unicode_passthrough",
+    "input_json": "{\"k\":\"A/B/C\",\"k2\":\"héllo\",\"k3\":\"\\u0001\"}",
+    "canonical_output": "{\"k\":\"A/B/C\",\"k2\":\"héllo\",\"k3\":\"\\u0001\"}",
+    "rule": "RFC 8785 §3.2.2.2 — slash not escaped (JCS); printable Unicode (including non-ASCII) passed through literally; U+0001 is a C0 control and must escape as \\u0001 (not as the literal control byte).",
+    "divergence_trap": "Implementations differ on: (1) escaping '/' — JSON.stringify in older browsers escaped it; (2) whether to escape non-ASCII to \\uXXXX — Python json.dumps default (ensure_ascii=True) escapes 'é' to '\\u00e9'; (3) whether U+0001 serializes as the literal byte 0x01 (invalid UTF-8 in JSON) or as '\\u0001' — JCS mandates '\\u0001'.",
+    "certainty": "rfc-exact"
+  }
+]

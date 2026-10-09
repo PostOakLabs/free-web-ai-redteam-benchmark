@@ -1,0 +1,87 @@
+```json
+[
+  {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "NO FIRE (1.99% ≤ 2.00%, not more than)",
+      "at": "NO FIRE (2.00% = 2.00%, equal is not more than)",
+      "above": "FIRE (2.01% > 2.00%, exceeds the threshold)"
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' is a strict inequality requiring values strictly greater than 2.00%."
+  },
+  {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "NO FIRE (35 months ≤ 36 months, not more than)",
+      "at": "NO FIRE (36 months = 36 months, not more than)",
+      "above": "FIRE (37 months > 36 months, exceeds)"
+    },
+    "reasoning": "The phrase 'more than 36 months' excludes 36 itself; only values strictly greater trigger."
+  },
+  {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "NO (1.49 pp < 1.50 pp, below the threshold)",
+      "at": "PASS (1.50 pp = 1.50 pp, exactly at the inclusive threshold)",
+      "above": "PASS (1.51 pp > 1.50 pp, exceeds)"
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' is inclusive of 1.5 exactly."
+  },
+  {
+    "rule": 4,
+    "phrase_inclusivity": "strict (for the pass condition)",
+    "verdicts": {
+      "below": "PASS (2.24 pp < 2.25 pp, does not exceed by 2.25 or more)",
+      "at": "FAIL (2.25 pp = 2.25 pp, does exceed by 2.25 or more — not a passing spread)",
+      "above": "FAIL (2.26 pp > 2.25 pp, exceeds the pass ceiling)"
+    },
+    "reasoning": "The pass condition requires the spread to be less than 2.25 pp; 2.25 pp itself fails because it 'exceeds by 2.25 or more.'"
+  },
+  {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "NO DE-MINIMIS (10.0M ≥ 10M, revenue not less than; 0.9M < 1M, income satisfied but both required)",
+      "at": "NO DE-MINIMIS (9.9M < 10M, revenue satisfied; 1.0M ≥ 1M, income not less than — both required)",
+      "above": "DE-MINIMIS (9.9M < 10M AND 0.9M < 1M, both strict conditions met)"
+    },
+    "reasoning": "Both 'less than' thresholds use strict inequalities; both must be satisfied simultaneously for the safe harbour to apply."
+  },
+  {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL (15.99% < 16.00%, not equal to or greater than)",
+      "at": "PASS (16.00% = 16.00%, equal to the transition rate)",
+      "above": "PASS (16.01% > 16.00%, greater than the transition rate)"
+    },
+    "reasoning": "The phrase 'equal to or greater than' includes the boundary value of exactly 16%."
+  },
+  {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL (49.99% < 50.00%, not at least equal to the 50% floor)",
+      "at": "PASS (50.00% = 50.00%, at least equal to the required floor)",
+      "above": "PASS (50.01% > 50.00%, exceeds the minimum requirement)"
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive of the 50% boundary."
+  },
+  {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "NO SIGNIFICANT INCIDENT (threshold−1 < threshold, below the minimum)",
+      "at": "SIGNIFICANT INCIDENT (threshold = threshold, exactly at the inclusive minimum)",
+      "above": "SIGNIFICANT INCIDENT (threshold+1 > threshold, exceeds the minimum)"
+    },
+    "reasoning": "The 'equal to or greater than' framing includes the threshold itself as a triggering value."
+  },
+  {
+    "weakest_point": "Rule 5 (GloBE de-minimis): the rule text says 'EUR 10 million' and 'EUR 1 million' but actual GloBE regulations reference jurisdictional currency revenue thresholds that may not universally use EUR; the framing in my task may be a simplified proxy. Rule 6 (CbCR simplified ETR): the specific transition rate year (2026) and exact percentage (16%) may vary by jurisdiction or fiscal year; OECD Model Rules specify different thresholds for different periods. Rule 7 (Solvency II Tier 1): while 'at least equal to' is a reasonable paraphrase of the ≥50% requirement in Article 82 of the Solvency II Delegated Regulation, the precise regulatory citation should be verified."
+  }
+]
+```

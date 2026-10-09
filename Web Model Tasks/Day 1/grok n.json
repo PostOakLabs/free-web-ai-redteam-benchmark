@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Primarily static circuit design style",
+    "where_in_paper": "Circuit styles / design constraints section",
+    "decision": "Adopt a predominantly complementary static-circuit design strategy, with dynamic circuits used only sparingly in SRAMs, register files, and a few critical core regions.",
+    "alternatives_or_rejected": "Widespread use of dynamic logic for speed (common in high-frequency designs of the era).",
+    "rationale": "Power dissipation was a major concern; SOI floating-body uncertainties affected noise immunity and decoupling needs; the chip’s size and logical complexity, plus schedule risk and design-team skill mix, favored a simple, robust style that minimized CAD and verification risk and eased future technology migration.",
+    "outcome": "Overall logic was >99 % static outside arrays; the approach supported meeting frequency, power, and schedule goals with manageable noise and testability (LSSD-compatible latches).",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Global slew-rate limit of one-third cycle time",
+    "where_in_paper": "Circuit design constraints",
+    "decision": "Enforce a global slew-rate limit equal to one-third of the cycle time for every signal (local and global) across the entire chip.",
+    "alternatives_or_rejected": "Allowing faster slews on critical nets or leaving slew unconstrained beyond local checks.",
+    "rationale": "To ensure a robust design that minimizes coupled-noise impact on timing and reduces sensitivity of path delay to wiring-process variability and device-model uncertainty.",
+    "outcome": "Approximately 100 000 buffers/inverters were inserted to satisfy the limit; the rule was treated as part of the cycle-time budget and contributed to predictable timing closure.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Single chip-wide global clock domain without skew feedback",
+    "where_in_paper": "Clock distribution section",
+    "decision": "Use a single chip-wide global clock domain driven by an SOI-optimized PLL and a tuned tree-plus-grid network, with no skew-feedback or adjustable delay settings.",
+    "alternatives_or_rejected": "Multiple clock domains or active skew-adjustment circuitry to compensate for residual skew.",
+    "rationale": "Simplifies timing methodology and enables rapid bring-up; prior server-microprocessor experience showed that a carefully tuned passive distribution could meet targets without feedback complexity on this size of chip.",
+    "outcome": "Measured skew of ~20 ps and jitter of ~35 ps; “correct-by-design” clock that required no post-silicon adjustment and supported the >1.3 GHz target.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.92
+  },
+  {
+    "title": "Selective, late-binding use of low-Vt devices",
+    "where_in_paper": "Device / circuit styles discussion",
+    "decision": "Use reduced-Vt devices only in the most timing-critical paths, keeping total low-Vt usage under ~10 % of logic transistors; technology allowed last-minute Vt swaps with minimal layout change.",
+    "alternatives_or_rejected": "Broad or early application of low-Vt transistors across large logic regions.",
+    "rationale": "Low-Vt devices gave ~10 % performance gain but increased off-state leakage; selective use captured the speed benefit while avoiding a large standby-current penalty.",
+    "outcome": "Performance targets met without a prohibitive leakage increase; Vt decisions could be postponed until late in the design cycle.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "On-chip decoupling capacitance budgeting for transient IR",
+    "where_in_paper": "Power / decoupling section",
+    "decision": "Embed ~250 nF of decoupling capacitance in critical areas, sized from transient chip/package analysis to keep supply fluctuations under 10 % for a ~25 W maximum power step (chip power ~115 W).",
+    "alternatives_or_rejected": "Relying primarily on package-level decoupling or a smaller on-chip budget.",
+    "rationale": "Transient analyses showed that the resonant package/chip response to abrupt power changes required this on-chip capacitance to hold voltage within limits; average IR was separately constrained to <30 mV.",
+    "outcome": "Supply integrity targets were met; white-space fill combined decoupling cells with gate-array backfill for late metal-only logic fixes.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.88
+  }
+]

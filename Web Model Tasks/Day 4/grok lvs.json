@@ -1,0 +1,134 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Extract the exact net name(s) and pin/device terminals flagged in the LVS error report and cross-reference against both schematic and layout connectivity viewers",
+        "why_first": "Immediately localizes the discrepancy to a handful of nets and rules out global extraction or deck failures",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Confirm the layout is DRC-clean on the metal/via layers involved and that no floating metal or unconnected via shapes exist on those nets",
+        "why_first": "Cheapest physical inspection that rules out the most common layout-editing oversights",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Re-run LVS with hierarchical comparison disabled (flat mode) on the failing block only",
+        "why_first": "Discriminates hierarchical black-box or interface mapping errors from true connectivity problems",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Temporarily short the suspect open net at the layout terminals (or cut the shorted path) with a zero-resistance ideal metal and re-extract; observe whether the LVS error count drops by exactly one",
+        "rules_in": "True geometric open or short in the drawn geometry",
+        "rules_out": "Extraction-rule or net-labeling artifact"
+      },
+      {
+        "experiment": "Force a pure-text netlist comparison (ignore geometry) after renaming the schematic net to match the extracted name; check if the mismatch vanishes",
+        "rules_in": "Name-mapping or hierarchical-port mismatch",
+        "rules_out": "Actual missing connectivity or unintended short"
+      },
+      {
+        "experiment": "Re-extract with via-enclosure and metal-overlap rules deliberately loosened by 10–20 %; see whether previously open nets now connect",
+        "rules_in": "Extraction-rule tightness (false open)",
+        "rules_out": "Genuine missing via or metal break"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing or under-sized via/contact that fails extraction connectivity rules",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "Unintended metal short caused by abutment or over-drawn polygon that extraction merges",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Hierarchical port or pin-name mismatch between schematic symbol and layout abstract",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Floating metal or unconnected device terminal left after ECO edits",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Power/ground net short through an ESD or decap structure whose connectivity is only visible after full-chip extraction",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.65
+      }
+    ],
+    "classic_trap": "Assuming every reported short is a real layout error and spending days searching polygons when the root cause is an extraction deck that merges adjacent nets under aggressive overlap rules",
+    "node_era_note": "At 7 nm and below, via-resistance and multi-cut via extraction tolerances become far tighter, so many ‘opens’ that passed at 28 nm now fail unless the deck is re-tuned"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Identify the exact device instance and parameter (W/L, m-factor, fingers) flagged in the LVS report and compare the schematic value against the extracted geometric measurement",
+        "why_first": "Localizes the mismatch to a single device type and immediately shows whether the error is size, multiplicity, or recognition",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify that the layout device recognition rules (layer combinations that define MOS, RES, CAP, etc.) match the PDK documentation for the technology",
+        "why_first": "Rules out the most frequent cause of phantom or missing devices before any geometry editing",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Confirm that the schematic netlist was generated with the correct process option and that no parasitic extraction was accidentally mixed into the LVS comparison",
+        "why_first": "Eliminates tool-flow or option-setting errors that produce systematic size or device-count deltas",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Force device recognition with a deliberately relaxed width/length tolerance (e.g., ±5 %) and re-run LVS; observe whether the size-mismatch errors disappear while device count stays constant",
+        "rules_in": "Geometric measurement or grid-rounding discrepancy",
+        "rules_out": "Wrong device type or extra parasitic device"
+      },
+      {
+        "experiment": "Selectively disable recognition of one device class (e.g., poly resistors or MOM capacitors) and re-extract; check whether the extra-device count drops by the expected number",
+        "rules_in": "False-positive recognition of a parasitic or intentional structure",
+        "rules_out": "True extra schematic device or missing layout instance"
+      },
+      {
+        "experiment": "Compare the extracted device count and total gate width against a pure schematic device audit (ignore geometry); if counts match but sizes differ, the problem is measurement, not recognition",
+        "rules_in": "Sizing or multiplicity (m-factor/finger) mismatch",
+        "rules_out": "Extra or missing devices"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Incorrect multiplicity or finger count drawn in layout versus the schematic m-factor",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "Device recognition rule that incorrectly identifies a parasitic structure (e.g., poly over diffusion) as an intentional MOSFET or resistor",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Width/length measurement difference caused by drawn-versus-effective size or OPC bias not accounted for in the LVS deck",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Extra devices introduced by an un-black-boxed IP block or by a fill structure that the recognition deck treats as active devices",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Schematic generated with the wrong process corner or device model variant so that L and W defaults differ from layout",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.65
+      }
+    ],
+    "classic_trap": "Editing the layout device geometry to ‘fix’ a size mismatch when the real problem is an LVS deck that reports drawn size instead of the electrical (post-bias) size expected by the schematic",
+    "node_era_note": "At 7 nm and below, multi-patterning and cut-mask effects make effective W/L extraction far more sensitive to deck settings than at 28 nm, where drawn dimensions were usually sufficient"
+  }
+]

@@ -1,0 +1,163 @@
+{
+  "receipt_kinds": [
+    {
+      "kind": "Composite / Segment Receipt",
+      "type_shape": "Vec<SegmentReceipt> + claim, STARK FRI proofs",
+      "when_produced": "Default output of risc0 prover when guest execution spans multiple segments due to cycle limit / continuations. Each segment is a STARK. Composite aggregates segments via host-side recursion metadata but is not yet a single succinct proof.",
+      "verifier_note": "Verified by STARK recursion verification, not directly Groth16. Must be compressed before on-chain use."
+    },
+    {
+      "kind": "Succinct Receipt (STARK Succinct)",
+      "type_shape": "Single STARK proof (FRI) + ReceiptClaim",
+      "when_produced": "Produced by compressing a Composite receipt using the recursion circuit (lift -> join -> resolve). Result of `receipt.compress()` / `default_prover.prove()` with succinct mode or `ProverOpts::succinct()`. Single proof for whole execution.",
+      "verifier_note": "Still STARK, not BN254 Groth16. Needs Groth16 wrapping for Ethereum."
+    },
+    {
+      "kind": "Groth16 Receipt (groth16-wrapped)",
+      "type_shape": "Groth16 proof over BN254 + claimDigest + journal",
+      "when_produced": "Produced from Succinct receipt via Groth16 prover (`groth16` feature, `risc0-groth16` crate). Seal = Groth16 proof (a,b,c). Used for on-chain verification. Encoded as 4-byte selector + abi-encoded Seal (256 bytes raw: pi_a 64, pi_b 128, pi_c 64).",
+      "verifier_note": "What Ethereum contracts verify. Public inputs are control_root (2x128-bit), claimDigest (2x128-bit), BN254_CONTROL_ID (1x)."
+    },
+    {
+      "kind": "Fake Receipt",
+      "type_shape": "Empty seal, claim only",
+      "when_produced": "When RISC0_DEV_MODE=1 or `FakeProver`. No cryptographic security.",
+      "verifier_note": "Must be rejected in production verifiers."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal (Groth16 proof)",
+      "type_shape": "bytes, decoded as Seal { a: uint256 (G1), b: uint256 (G2), c: uint256 (G1) } total 256 bytes raw; wire format = 4-byte selector + abi.encode(Seal)",
+      "meaning": "BN254 Groth16 proof that the recursion circuit verified the inner STARK succinct receipt and that claimDigest is correctly bound to control_root",
+      "verifier_must_check": "Split claimDigest into 2x128-bit chunks with byte-reverse per chunk, combine with control_root chunks and BN254_CONTROL_ID as 5 public inputs, then call Groth16 pairing verifier with the version-pinned verifying key (VK). Check pairing equation e(a,b)*e(...) ==...",
+      "failure_if_skipped": "Trivial forgery: any random 256 bytes accepted as proof; attacker can claim arbitrary imageId/journal without proving execution."
+    },
+    {
+      "field": "selector (first 4 bytes of encoded seal)",
+      "type_shape": "bytes4",
+      "meaning": "Truncated hash of verifier parameters: sha256(tag='risc0.Groth16ReceiptVerifierParameters', control_root, reverse(BN254_CONTROL_ID), vk_digest). Routes receipt to correct verifier version.",
+      "verifier_must_check": "Compute expected selector from local verifier's control_root, BN254_CONTROL_ID, VK digest and require bytes4(seal[:4]) == expected. Revert with SelectorMismatch otherwise.",
+      "failure_if_skipped": "Version confusion forgery: attacker reuses Groth16 proof generated under old/vulnerable recursion circuits or different VK (e.g., dev control_root) that shares same on-chain verifier interface but has different trusted setup; verifier would accept proof that does not correspond to its pinned circuits."
+    },
+    {
+      "field": "claimDigest / ReceiptClaim",
+      "type_shape": "bytes32 digest of ReceiptClaim struct; ReceiptClaim = { preStateDigest: bytes32, postStateDigest: bytes32, exitCode: {system: u8 (Halted=0,Paused=1,SystemSplit=2), user: u8}, input: bytes32, output: bytes32 } - field names may vary: preStateDigest sometimes holds imageId in Solidity ok() constructor",
+      "meaning": "Commitment to all public claims about execution. In Solidity helper ok(imageId, journalDigest), preStateDigest = imageId, postStateDigest = SYSTEM_STATE_ZERO_DIGEST (0x...), input = 0, output = digest(Output{journalDigest, assumptionsDigest=0}).",
+      "verifier_must_check": "Recompute claimDigest via tagged struct hashing (SHA256-based, not Keccak) from expected imageId, journalDigest, zero pre/post for ok() case, Halted(0) exit, input=0, output=Output digest. Compare recomputed digest to public inputs derived from seal verification. For generic receipts, ensure pre/post are expected values.",
+      "failure_if_skipped": "Claim substitution: attacker keeps valid Groth16 seal for claim A but presents different claim B (different imageId or exit code) that verifier does not bind to seal, bypassing program identity."
+    },
+    {
+      "field": "journal / journalDigest",
+      "type_shape": "journal: bytes (Vec<u8>), journalDigest: bytes32 = SHA256(journal bytes)",
+      "meaning": "Public output committed by guest via env::commit / env::journal. JournalDigest lives inside Output struct, inside claim.",
+      "verifier_must_check": "Compute journalDigest = sha256(journal bytes) using SHA256 (risc0 Digest is SHA256, byte order is raw, not reversed). Require journalDigest == Output.journalDigest extracted from claim. For ok() helper, also require Output digest = tagged hash of (journalDigest, assumptionsDigest).",
+      "failure_if_skipped": "Journal substitution forgery: valid proof for program that committed journal 'balance=0' reused to claim journal 'balance=1000000' because verifier never hashes journal bytes; same claimDigest not checked or different journal allowed."
+    },
+    {
+      "field": "Output.assumptionsDigest",
+      "type_shape": "bytes32, digest of list of assumed ReceiptClaims",
+      "meaning": "If guest called env::verify / zkvm::Verify to compose proofs, those assumed claims are accumulated into assumptionsDigest. Zero means unconditional receipt with no assumptions.",
+      "verifier_must_check": "For unconditional receipts expected by most dApps, require assumptionsDigest == bytes32(0). If composition allowed, require caller provides list of assumed claims and that digest matches.",
+      "failure_if_skipped": "Assumption forgery: attacker creates receipt that is valid only if another receipt (e.g., 'I am admin') is valid, but never provides that assumption proof; verifier treating assumptionsDigest as irrelevant accepts conditional proof as unconditional."
+    },
+    {
+      "field": "preStateDigest / imageId and postStateDigest / input",
+      "type_shape": "bytes32 each",
+      "meaning": "preStateDigest = digest of SystemState before execution (pc + merkle_root). For standard start, SYSTEM_STATE_ZERO_DIGEST or imageId depending on version. postStateDigest = digest after execution. input = reserved, must be zero digest currently. These bind initial memory image and final state.",
+      "verifier_must_check": "For ok() unconditional case, require preStateDigest == imageId (or imageId supplied maps to expected pre), postStateDigest == SYSTEM_STATE_ZERO_DIGEST, input == 0, exitCode.system == Halted, exitCode.user == 0. Reject Paused or SystemSplit unless resumption logic intended.",
+      "failure_if_skipped": "Program substitution / incomplete execution forgery: attacker proves execution of different ELF (different imageId) or proves execution that paused early or halted with user error code 1, but verifier still treats as success for expected program; or uses non-zero input to smuggle hidden pre-image."
+    },
+    {
+      "field": "control_root and BN254_CONTROL_ID (verifier parameters, not in receipt but in public inputs)",
+      "type_shape": "bytes32 each, split into 2x bytes16 for control_root in circuit",
+      "meaning": "control_root = Merkle root / hash committing to set of allowed recursion circuits (lift, join, resolve, etc.) for this zkVM version. BN254_CONTROL_ID = field element identifier for BN254 recursion circuit.",
+      "verifier_must_check": "Pin these constants per zkVM version (e.g., v1.x, v2.x, v3.0.5 values differ). Include them as public inputs to Groth16 verification and in selector calculation. Ensure they match expected release.",
+      "failure_if_skipped": "Control root substitution: attacker generates Groth16 proof with custom control_root that includes malicious recursion circuit that always accepts; if verifier does not pin control_root, proof verifies against attacker's VK and is accepted as valid execution of any program."
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "preStateDigest": "Digest of SystemState before execution: SystemState = {pc: u32, merkle_root: bytes32}. For ReceiptClaim::ok(), this field holds imageId in some Solidity versions (e.g., RiscZeroGroth16Verifier ok() does ReceiptClaim(imageId, SYSTEM_STATE_ZERO_DIGEST,...)), in Rust native struct it is preStateDigest = zero and imageId is separate field historically - field name changed across versions. Must check version.",
+      "postStateDigest": "Digest of SystemState after execution. For halted execution, SYSTEM_STATE_ZERO_DIGEST (all zeros hash of zero state) per ok() helper.",
+      "exitCode": "Struct {system: SystemExitCode enum (Halted=0, Paused=1, SystemSplit=2), user: u8}. For successful execution, Halted, user=0. Non-zero user indicates guest called env::exit with code.",
+      "input": "bytes32, currently must be zero digest. Reserved for future committed input (currently unused).",
+      "output": "bytes32 = digest(Output). Output = {journalDigest: bytes32, assumptionsDigest: bytes32}. journalDigest = SHA256(journal bytes). assumptionsDigest = digest of list of assumed claims, or zero.",
+      "imageId": "In newer Rust API, imageId not inside ReceiptClaim but supplied separately to verify(imageId). In older Solidity libs and Go verifier, imageId is encoded as first field of ReceiptClaim (preStateDigest). CalculateClaimDigest(imageId, journalDigest) helper hides this."
+    },
+    "claim_digest_computation": "ReceiptClaim is Merkle-ized / tagged struct using SHA256 (not Keccak, not EIP-712 keccak but similar idea with sha256 tags). Steps per risc0-zkvm 1.x-3.x: (1) digest Output: tag = sha256('risc0.Output'), outputDigest = sha256(tag || sha256(journalDigest) || sha256(assumptionsDigest) || little-endian length encoding). Actually implementation uses StructHash::tagged_struct with tagged list. (2) digest ReceiptClaim: tag = sha256('risc0.ReceiptClaim'), digest = sha256(tag || digest(preState) || digest(postState) || digest(exitCode) || digest(input) || digest(output) || u16(5)<<8 ). In Solidity ReceiptClaimLib.ok(), this is done via StructHash. (3) final claimDigest is what becomes Groth16 public input (split). Exact byte order uses reverseByteOrderUint256 for BN254 field conversion.",
+    "journal_binding": "journal bytes themselves not inside claim, only journalDigest. Verifier must recompute sha256(journal) and ensure equals Output.journalDigest."
+  },
+  "binding_chain": [
+    "1. Guest writes journal bytes via env::commit / env::commit_slice.",
+    "2. Host computes journalDigest = SHA256(journal bytes) (risc0 Digest uses SHA256, raw bytes, no extra length prefix in digest input besides tag).",
+    "3. Host collects assumptions list from env::verify calls: each assumed ReceiptClaim digest collected, tagged list hashed into assumptionsDigest = tagged_list_hash('risc0.Output.assumptions', claimDigests) or zero if empty.",
+    "4. Host builds Output struct {journalDigest, assumptionsDigest} and computes outputDigest = tagged_struct_hash('risc0.Output', journalDigest, assumptionsDigest).",
+    "5. Host builds ReceiptClaim {preStateDigest=imageId or zero depending on version, postStateDigest=SYSTEM_STATE_ZERO_DIGEST, exitCode=Halted(0), input=zero, output=outputDigest}.",
+    "6. Host computes claimDigest = tagged_struct_hash('risc0.ReceiptClaim', pre, post, exitCode, input, output). This is the digest exposed as receipt.claimDigest.",
+    "7. For Groth16 wrapping: claimDigest bytes are reversed byte order (reverseByteOrderUint256) then split into two 128-bit halves: claim0 = low 128 bits reversed, claim1 = high 128 bits reversed. Same split for control_root.",
+    "8. Public inputs for Groth16 circuit = [control_root_0, control_root_1, claim0, claim1, BN254_CONTROL_ID] each as BN254 Fr element (uint256 < field modulus).",
+    "9. Succinct STARK proof is verified inside Groth16 circuit: circuit checks FRI verification against control_root and that inner claimDigest equals public input claim. BN254_CONTROL_ID binds which recursion circuit variant.",
+    "10. Groth16 prover produces proof Seal {a,b,c} for those public inputs using Groth16 proving key. Encoded seal = selector (first 4 bytes of sha256('risc0.Groth16ReceiptVerifierParameters' || control_root || reverse(BN254_CONTROL_ID) || vk_digest)) + abi.encode(a,b,c).",
+    "11. On-chain verifier: checks selector matches its pinned parameters, splits digests same way, calls Groth16 pairing check with pinned VK (IC points). If passes, claimDigest is considered proven.",
+    "12. Application verifier then checks journalDigest binding (sha256(journal) == expected) and imageId binding (preStateDigest == expected imageId or imageId param equals expected)."
+  ],
+  "version_coupling": {
+    "circuit_version_dependent_parts": [
+      "CONTROL_ROOT - hash of recursion circuit set, changes every zkVM release (e.g., 1.0, 1.1, 2.0, 3.0.5 have different control roots)",
+      "BN254_CONTROL_ID - identifier for BN254 Groth16 recursion verifier circuit, changes with recursion circuit update",
+      "Groth16 verifying key (VK) - alpha, beta, gamma, delta, IC[0..5] points - tied to control_root and BN254_CONTROL_ID, changes with each release",
+      "SELECTOR - derived from control_root + BN254_CONTROL_ID + vk_digest, so version-dependent",
+      "SYSTEM_STATE_ZERO_DIGEST - constant zero state hash, stable but may be redefined",
+      "ReceiptClaim field layout - preStateDigest vs imageId field name changed between risc0-ethereum-contracts versions (some versions have imageId field, some have preStateDigest holding imageId)"
+    ],
+    "what_breaks_if_wrong_version": [
+      "SelectorMismatch revert if verifier checks selector - receipt rejected even if proof is valid for other version; dApp appears broken",
+      "If selector check skipped and VK mismatched, Groth16 pairing check fails - proof rejected with VerificationFailed, but attacker could supply proof from old version with known vulnerability if verifier still pins old VK",
+      "If verifier uses wrong control_root as public input, honest proofs from new prover will have public inputs that don't match verifier's expected control_root, causing verification failure even though claimDigest correct",
+      "If verifier pins old control_root that included buggy recursion circuit, attacker could generate fake succinct receipt that old circuit accepted (e.g., accepting invalid FRI), then wrap to Groth16 and it would verify against old VK - upgrade required",
+      "Byte order change: older versions used different reverseByteOrder convention; using wrong splitDigest leads to claim0/claim1 mismatch, valid proof fails",
+      "Field name change: if verifier expects ReceiptClaim.preStateDigest to be imageId but new version expects separate imageId param, claimDigest reconstruction yields different hash, causing journal binding bypass or false rejection"
+    ]
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Journal hash not checked - using journal bytes directly without comparing sha256(journal) to Output.journalDigest in claim",
+      "check_that_catches": "Recompute journalDigest = sha256(journal bytes) and require equality with claim's Output.journalDigest; also require Output digest matches claim's output field",
+      "forgery_if_missed": "Journal substitution: attacker takes valid receipt for program that committed '0' and presents journal '1000000' with same seal; verifier accepts inflated balance because proof still valid but journal not bound."
+    },
+    {
+      "bug": "ImageId / preStateDigest not checked against expected program",
+      "check_that_catches": "Require receipt claim's preStateDigest (or separate imageId param) equals expected ImageID for the application logic; for ok() case, require preStateDigest == expected imageId",
+      "forgery_if_missed": "Program substitution: attacker proves execution of attacker-controlled ELF that commits same journal (e.g., program that just commits attacker-supplied data) and passes it as proof of honest program; verifier accepts because it never checks which program was executed."
+    },
+    {
+      "bug": "ExitCode not validated - accepting Paused or Halted with non-zero user code as success",
+      "check_that_catches": "Require exitCode.system == Halted (0) and exitCode.user == 0 for successful unconditional execution; explicitly reject SystemSplit and Paused unless resumption flow is intended",
+      "forgery_if_missed": "Failure acceptance: attacker submits receipt where guest called env::fail or exited with user code 1 indicating business logic failure (e.g., insufficient funds check failed), but verifier treats as success because it only checks Groth16 proof, not exit code."
+    },
+    {
+      "bug": "AssumptionsDigest not required to be zero for unconditional receipts",
+      "check_that_catches": "For unconditional verification, require Output.assumptionsDigest == bytes32(0). If composition allowed, require explicit list of assumed claims and verify each recursively",
+      "forgery_if_missed": "Assumption smuggling: attacker creates receipt that says 'this is valid if assumption X is valid' where X is 'admin approved', but never proves X; verifier ignoring assumptionsDigest accepts conditional proof as unconditional, granting admin rights."
+    },
+    {
+      "bug": "Selector / ControlRoot / BN254_CONTROL_ID not pinned or not checked",
+      "check_that_catches": "Pin expected CONTROL_ROOT and BN254_CONTROL_ID per zkVM version; compute expected selector = first 4 bytes of sha256(tag || control_root || reverse(bn254_control_id) || vk_digest) and require seal[:4] == expected; also use pinned control_root as Groth16 public input",
+      "forgery_if_missed": "Version downgrade / custom circuit forgery: attacker builds custom recursion circuit that accepts any claim, generates its own control_root and VK, produces Groth16 proof for arbitrary claim, and submits to verifier that does not check selector/control_root; proof verifies against attacker's VK if verifier uses attacker-supplied VK, or against old vulnerable VK if verifier still accepts old version."
+    },
+    {
+      "bug": "Byte order / splitDigest mishandled - using keccak256 instead of sha256 or forgetting reverseByteOrderUint256",
+      "check_that_catches": "Use SHA256 for all digests (not Keccak256), and splitDigest = reverseByteOrderUint256(digest) split into low/high 128-bit halves as uint128. Recompute public inputs exactly as in RiscZeroGroth16Verifier.splitDigest",
+      "forgery_if_missed": "Public input malleability: if verifier uses wrong hash or wrong byte order, honest proofs fail, and attacker can craft two different claimDigests that map to same public inputs under buggy split, causing collision and acceptance of wrong claim; or more commonly, verifier never accepts any honest proof leading to DoS and fallback to unchecked path."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High certainty from official risc0 docs and docs.rs risc0_zkvm::Receipt docs: Composite, Succinct, Groth16, Fake are documented. When each is produced (prover default -> composite, compress() -> succinct, groth16 -> wrapped) confirmed from risc0 examples and cartesi-risc0-cli docs. Medium certainty on exact enum names (InnerReceipt vs ReceiptKind) may have changed between v1.x and v3.x.",
+    "groth16_receipt_fields": "High certainty for seal structure (256 bytes = a 64 + b 128 + c 64) from onchain_verifier test data snippet and Groth16Verifier contract. High certainty for selector as first 4 bytes of encoded seal from RiscZeroGroth16Verifier.sol source lines 274-300 and encode_seal docs. High certainty for public inputs = control_root (2), claim (2), bn254_control_id (1) from RiscZeroGroth16Verifier _verifyIntegrity lines 354-376. Medium certainty for exact field names in Rust Receipt vs Solidity Receipt struct - Rust Receipt has inner + journal, Solidity Receipt has seal + claimDigest. Field names may have changed across versions.",
+    "claim_structure": "High certainty for ReceiptClaim fields preStateDigest, postStateDigest, exitCode, input, output from docs.rs risc0_ethereum_contracts ReceiptClaim struct and Go verifier struct (PreStateDigest, PostStateDigest, ExitCode, Input, Output). High certainty for Output containing journalDigest and assumptionsDigest from Go Output struct and Solidity OutputLib. Medium certainty for imageId location: in Go GetOKReceiptClaim, imageId is passed separately; in Solidity ok() helper, first field of ReceiptClaim is imageId (preStateDigest = imageId). This discrepancy is version-dependent - noted as such. High certainty for exitCode structure (SystemExitCode enum Halted/Paused/SystemSplit + user u8) from Go ExitCode struct. Claim digest computation as tagged struct SHA256 is high certainty from StructHash library usage and risc0 source references to tagged_struct, but exact tag strings 'risc0.ReceiptClaim' and 'risc0.Output' are inferred from verifier_key_digest tag 'risc0_groth16.VerifyingKey' and need confirmation - medium certainty on exact tag spelling.",
+    "binding_chain": "High certainty for steps 1-6 from Solidity RiscZeroGroth16Verifier verify() calling ReceiptClaimLib.ok(imageId, journalDigest).digest() and from Go docs journal hash -> Output -> ReceiptClaim -> claim digest -> sys_verify_integrity. High certainty for splitDigest reverseByteOrder and 5 public inputs from Solidity splitDigest function and verifyIntegrity public inputs array. Medium certainty for intermediate recursion steps (lift, join, resolve) names - general recursion knowledge, not verified against specific risc0 monorepo bootstrap output. High certainty for selector derivation from verifier parameters including vk_digest from Solidity verifier_key_digest() function lines 222-265.",
+    "version_coupling": "High certainty that control_root, BN254_CONTROL_ID, VK, selector are version-dependent from RiscZeroGroth16Verifier contract comments lines 168-204 stating control root controls what set of recursion programs will be accepted and new releases require updating values via cargo xtask bootstrap. High certainty that mismatch causes SelectorMismatch or VerificationFailed from Solidity code lines 346-350. Medium certainty on exact number of IC points (6) from vk_digest code showing IC0..IC5. Low certainty on exact SYSTEM_STATE_ZERO_DIGEST value - known to be zero hash but not verified.",
+    "common_verifier_bugs": "High certainty for journal substitution, imageId substitution, exitCode, assumptionsDigest bugs - these are documented in risc0 verifier best practices and seen in audits of on-chain verifiers (e.g., exochain verifier requiring journal.bytes BLAKE3 hash to journal_digest binding). High certainty for selector/control_root pinning bug from SelectorMismatch error purpose. Medium certainty for byte order bug - reverseByteOrderUint256 function exists in Util.sol, many reimplementations mistakenly use keccak or no reverse. General zk-receipt reasoning for assumption smuggling - medium certainty but plausible per risc0 composition docs."
+  }
+}[2]

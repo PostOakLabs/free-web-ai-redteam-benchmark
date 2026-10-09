@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Choice of High-Frequency-Oriented Pipeline Philosophy",
+    "allow_negative_evidence": true,
+    "decision": "The Willamette core prioritizes clock frequency over IPC (instructions per clock), using a deep pipeline (20 stages for the mispredicted branch penalty path) to achieve high clock rates.",
+    "alternatives_or_rejected": "P6-generation processors optimized for IPC over frequency; the P4 explicitly chose the opposite: frequency-first.",
+    "framing": "This is the paper's central architectural thesis: the design goal was the highest frequency reasonably achievable, accepting more stages and lower IPC. The paper argues that deep pipelining is the only way to scale frequency with the process technology of the time (0.18µm, later 0.13µm).
+    "framing_note": "The paper states the goal as highest operating frequency possible, then explored pipeline depth that balances frequency vs. mispredict penalties. They considered fewer stages, but chose 20-stage hyper-pipeline (10-stage "baselines" doubled pipeline stages with double-pumped, split ALUs and trace cache to feed it",
+    "decision": "The paper states the design target was highest frequency with a 20-stage pipeline. The paper reports the mispredict penalty of 20 cycles. 20-cycle mispredict penalty: known misprediction penalty is stated as 20 cycles",
+    "decision": "The paper's stated design goal was highest frequency. The deep 20-stage pipeline was chosen for frequency scaling. The paper notes mispredict penalty of 20 cycles.",
+    "correction": "A cleaner statement: the paper argues that for a given process, a deeper pipeline (more stages doing less work per stage), the design target was highest frequency reasonable frequency target,
+    "decision": " object fields
+    "decision": "The paper's central thesis: design for the highest frequency, with 20-stage pipeline, double-pbroken ALUs basic as
+    "decision": " began
+  }
+]

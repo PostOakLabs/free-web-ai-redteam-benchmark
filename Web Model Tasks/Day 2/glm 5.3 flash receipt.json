@@ -1,0 +1,123 @@
+{
+  "receipt_kinds": [
+    {
+      "kind": "Composite",
+      "when_produced": "Default Rust SDK output (no compression requested) in the 1.x era. Contains the per-segment STARK receipts for the whole session plus auxiliary receipts resolving execution assumptions (segment exit-code assumption and the po2/circuit-size assumption). Not recommended for third-party or on-chain verification because the recipient must re-verify the whole segment chain and assumption resolution. Field layout changed materially between 0.x (SegmentReceipt{index, po2, seal, hashfn}, no per-segment claim) and 1.x (segments carry claims/exit-code receipts); do not assume one shape across versions.",
+      "caveat": "Exact CompositeReceipt field names (seal, assumption_receipts, exit_code_receipt, journal_digest/claim_digest) are 1.x-era and may have shifted in 2.x/3.x; I am least sure of this variant's exact struct."
+    },
+    {
+      "kind": "Succinct",
+      "when_produced": "After running the risc0 recursion pipeline (lift/join/resolve over segments): a single STARK receipt whose circuit verifies the whole computation's final ReceiptClaim. Seal is a large Poseidon-based STARK proof; claim is a full ReceiptClaim; carries control ids (input/output control digests in 1.x, naming version-dependent) that the verifier must match against the control root of its trusted circuit set."
+    },
+    {
+      "kind": "Groth16",
+      "when_produced": "Compression of the Succinct receipt: the succinct STARK's verification is re-proven inside a Groth16 circuit over BN254 (circom-based stark-to-snark). Produced via risc0's groth16 prover when the user requests the compressed form; intended for cheap on-chain verification (Ethereum verifier contracts hardcode the Groth16 verifying key, control root, and bn254 control id). Introduced in the 1.0 line; does not exist in 0.x."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Raw Rust form: 256 bytes of Groth16 proof (pi_a G1 64B, pi_b G2 128B, pi_c G1 64B on BN254). ABI/Ethereum form: 592 bytes = 256B proof plus ~336B of receipt material (the serialized ReceiptClaim, 208B / 52 words, and the 4 public-input limbs: claim digest split into two 128-bit limbs + control root + bn254 control id, 128B). Exact ordering/offsets of the non-proof bytes vary by risc0-ethereum release; treat offsets as release-specific.",
+      "meaning": "The cryptographic proof; everything else in the receipt is metadata the seal must commit to.",
+      "verifier_must_check": "Validate proof points are canonical (coordinates < field modulus, on-curve, correct subgroup, not point-at-infinity) before the pairing check; recompute the claim digest from the claim bytes carried in the seal (sha256 over the serialized claim) rather than trusting any digest field; check the recomputed digest equals the public-input limbs; check control root and bn254 control id equal the constants bound to the deployed verifying key; then run the pairing check.",
+      "failure_if_skipped": "If canonicality/on-curve checks are skipped, degenerate or malleated proofs (e.g., point-at-infinity or non-canonical coordinate encodings) can be crafted so a 'valid' seal exists without knowledge of a real proving key. If the claim digest is taken from a seal field instead of recomputed, an attacker swaps in a claim for a different program/exit code with the same journal digest and it passes."
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim: 52 words / 208 bytes in 1.x serialization (pre and post SystemState of 17 words each, 1-word exit code, 8-word input digest, 9-word optional output digest). In the Rust struct it embeds the journal for Groth16Receipt<Journal>; in the OuterReceipt the journal bytes sit outside.",
+      "meaning": "The statement being proven: which program, what input, what final memory state, how it exited, and the journal commitment.",
+      "verifier_must_check": "Recompute sha256 over the serialized claim and compare to the public-input digest limbs; extract pre.digest (image ID) and output (journal digest) and compare against the caller/app's expected values; check exit_code is the one the application accepts (normally Halted(0)).",
+      "failure_if_skipped": "Skipping the image-ID comparison lets a receipt for a different guest program vouch for your journal; skipping the exit-code check lets a paused/split or errored execution (Halted(nonzero), Paused, SystemSplit) be presented as a completed successful run."
+    },
+    {
+      "field": "verifiers_config / control_root",
+      "type_shape": "Digest (32B sha256-style in the Rust VerifiersConfig) encoding the root of the Merkle tree of control IDs for all sanctioned recursion circuits; on BN254 it is carried as a single field element (encoding from digest to field element is version-dependent and flagged as uncertain).",
+      "meaning": "Pins the exact set of circuits (segment/lift/join/resolve) that may appear inside the proof chain.",
+      "verifier_must_check": "Verify the seal's control root equals the one the verifier's own parameters/verifying key were generated for (in Solidity it is a compile-time constant; in Rust the DefaultVerifier embeds it).",
+      "failure_if_skipped": "An attacker proves execution with their own modified circuit set whose control tree they computed themselves, producing a seal that internally verifies while asserting an arbitrary claim — total forgery with a real-looking receipt."
+    },
+    {
+      "field": "verifiers_config / bn254_control_id",
+      "type_shape": "Digest identifying the bn254 stark-to-snark wrapper circuit; carried as a single BN254 field element among the public inputs.",
+      "meaning": "Identifies which wrapper circuit the Groth16 verifying key corresponds to; ties the SNARK to a specific risc0 release's circuits.",
+      "verifier_must_check": "Must equal the constant associated with the hardcoded Groth16 verifying key; a mismatch means the seal was produced for a different circuit than the key being used.",
+      "failure_if_skipped": "If a deployer wires a verifying key from release A with control ids from release B (or accepts a caller-supplied control id), proofs from an unvetted circuit version verify; conversely honest receipts from the intended version are rejected or, worse, a matching attacker circuit/key pair is accepted."
+    },
+    {
+      "field": "journal (OuterReceipt level)",
+      "type_shape": "Raw bytes, carried alongside the inner receipt, not inside the seal.",
+      "meaning": "The guest's committed output; the seal never contains the journal itself, only its digest in claim.output.",
+      "verifier_must_check": "Compute sha256(journal_bytes) and require it equals claim.output; do this on every verify, not only at creation.",
+      "failure_if_skipped": "Journal substitution: any valid receipt can be repackaged with arbitrary journal bytes, so an attacker shows your image ID with a fabricated result."
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "pre": "SystemState { pc: u32, merkle_root: Digest, digest: Digest } — machine state before the proven span; digest field is the image ID (sha256-style digest of the guest ELF), merkle_root is the root of the memory Merkle tree.",
+      "post": "SystemState, same shape, at the end of the span; for a final receipt the merkle_root is the final memory commitment.",
+      "exit_code": "ExitCode enum: SystemSplit | Halted(u8) | Paused; Halted(0) is the normal successful halt; Paused/SystemSplit relate to session continuation and are what 'verify' must distinguish from a finished run.",
+      "input": "Digest — commitment to the guest input (added in 1.x; not present in 0.x claims).",
+      "output": "Option<Digest> — Some(sha256(journal)) for a completed run; serialized as 8 digest words plus a 1-word present/none marker (exact marker encoding version-dependent)."
+    },
+    "digest_computation": "The claim is serialized word-aligned via the Digestible/bytemuck path (52 words / 208 bytes in 1.x, including the Option marker) and hashed with sha256; Receipt::claim_digest() / ReceiptClaim::digest() return this value. The Groth16 public inputs carry this digest split into two ~128-bit limbs to fit the BN254 scalar field. Any change in claim fields or serialization across versions changes this digest, so digests are not comparable across risc0 versions.",
+    "uncertainty": "Word-level offsets and the Option<Digest> marker value are reconstructed from the 1.x layout and the 592-byte ABI seal arithmetic (256+208+128=592); confirm against the specific release before relying on byte offsets."
+  },
+  "binding_chain": [
+    "1. journal bytes -> sha256 -> journal digest; the VM records it as claim.output for a completed session.",
+    "2. ReceiptClaim assembled: pre.digest = image ID (program), pre/post.merkle_root = memory roots, exit_code, input digest, output = journal digest.",
+    "3. claim serialized (52 words) -> sha256 -> claim digest; this single 256-bit value is the canonical statement identifier.",
+    "4. Segment STARKs prove spans; the recursion pipeline (lift/join/resolve) produces a Succinct receipt whose proof internally checks that every consumed proof's control ID is a leaf of the control tree with root = control_root. This is where the control root enters: it is the whitelist of circuits, enforced in-circuit.",
+    "5. The Groth16 (bn254 control id) circuit verifies the succinct STARK and exposes public inputs: [claim digest limbs, control root, bn254 control id]. The bn254 control id ties the SNARK itself to the sanctioned wrapper circuit.",
+    "6. Seal = Groth16 proof (+ claim + public inputs in the ABI form). Verifier: recompute claim digest from claim bytes, match limbs, match control constants against verifying-key-bound values, pair-check, then bind to application data: claim.pre.digest == expected image ID, sha256(journal) == claim.output, exit_code acceptable.",
+    "Key invariant: the journal is bound only through claim.output inside the claim digest; nothing else in the seal touches the journal bytes."
+  ],
+  "version_coupling": {
+    "circuit_version_dependent": [
+      "Control root and all control IDs: derived from the recursion circuit set, they change with each risc0 release (0.x and 1.x are incompatible; 1.x point releases also changed them).",
+      "Groth16 verifying key, SEAL_SIZE, and the CONTROL_ROOT/BN254_CONTROL_ID constants hardcoded in the Ethereum verifier contract — all correspond to one release.",
+      "ReceiptClaim serialization layout (field set, Option marker) — changes shift the claim digest for identical semantics.",
+      "Segment/composite receipt shapes (0.x SegmentReceipt without claims vs 1.x claim-bearing segments).",
+      "2.x/3.x-era additions such as verifier-parameter/anchor mechanisms were introduced after my most confident knowledge; treat their specifics as unverified."
+    ],
+    "what_breaks_with_wrong_version": [
+      "Benign failure: honest receipts from release A fail verification under release B's control root / verifying key — availability breaks, not safety.",
+      "Safety break: if a verifier is loosened to 'accept multiple control roots' or takes control constants from the receipt itself, an attacker proves with an attacker-built circuit set and forges arbitrary claims.",
+      "Digest confusion: claim digests computed under different serializations are incomparable; caching or comparing digests across versions misattributes results.",
+      "ABI confusion: parsing a seal with another release's offsets silently reads garbage as the claim, so recomputed digests and image-ID checks fail in confusing ways rather than cleanly."
+    ]
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Trusting a journal digest carried in the seal/API instead of hashing the journal bytes and comparing to claim.output on every verify.",
+      "catching_check": "require(sha256(journal_bytes) == claim.output) inside the verify path, computed from the actual bytes presented."
+    },
+    {
+      "bug": "Not validating exit code — accepting Paused, SystemSplit, or Halted(nonzero) as a completed successful commitment.",
+      "catching_check": "require(claim.exit_code == Halted(0)) for final receipts; only continuations-oriented code may accept Paused/SystemSplit, and then it must resolve the continuation explicitly."
+    },
+    {
+      "bug": "Accepting receipts with unresolved assumptions (composite receipts whose assumption receipts do not resolve, or continuation receipts presented as final).",
+      "catching_check": "Reject any receipt whose claim still references unresolved assumptions; verify assumption resolution when consuming Composite receipts."
+    },
+    {
+      "bug": "Recomputing the claim digest as sha256(imageId || journalDigest) or otherwise from a partial claim, instead of sha256 over the full serialized ReceiptClaim.",
+      "catching_check": "Recompute the digest over the complete claim bytes as serialized by the matching risc0 version and compare against the public-input limbs."
+    },
+    {
+      "bug": "Skipping BN254 canonicality checks on proof points (coordinates in range, on-curve, subgroup, non-infinity) before the pairing check.",
+      "catching_check": "Explicit on-curve and field-range validation of pi_a/pi_b/pi_c, or use a verifier implementation known to enforce it, so malleated/degenerate proofs cannot verify."
+    },
+    {
+      "bug": "Hardcoding or wiring control root / verifying key from a different risc0 release than the one that produced receipts (or 'supporting' several roots to make errors go away).",
+      "catching_check": "Pin one release: assert the seal's control root and bn254 control id equal the constants bound to the deployed verifying key, and regenerate both together when upgrading the guest toolchain."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High confidence that Composite/Succinct/Groth16 are the 1.x inner receipt variants and when each is produced; exact CompositeReceipt field names are medium confidence and likely shifted in 2.x.",
+    "groth16_receipt_fields": "Field names seal/claim/verifiers_config(control_root, bn254_control_id) are from the 1.x risc0-zkvm design with medium-high confidence; the 592-byte ABI seal total is well-attested, but the internal byte ordering (proof/claim/limbs) is reconstructed from size arithmetic (256+208+128) and is medium-low confidence — verify offsets against the risc0-ethereum release you target.",
+    "claim_structure": "High confidence on the field set (pre/post SystemState with pc, merkle_root, digest=image ID; exit_code variants; input; output Option) and sha256-based Digestible digest; medium confidence on the 52-word size and the Option<Digest> marker encoding.",
+    "binding_chain": "High confidence on the chain's shape (journal->output digest, claim digest as public input, control root as circuit whitelist enforced in-circuit, VK pinning the wrapper); medium confidence on the exact limb split of the claim digest and the digest-to-BN254-field-element encoding.",
+    "version_coupling": "High confidence that control root/control IDs/VK/claim serialization are release-coupled and that mismatched versions fail benignly while loosened checks enable forgery; low confidence on specific 2.x/3.x verifier-parameter mechanisms.",
+    "common_verifier_bugs": "Journal-check omission, exit-code omission, control-root pinning, and non-canonical point issues are known classes in risc0-adjacent verification; the unresolved-assumptions and partial-claim-digest bugs are plausible constructions labeled as such rather than documented incidents."
+  }
+}

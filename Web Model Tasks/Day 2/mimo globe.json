@@ -1,0 +1,40 @@
+```json
+[
+  {
+    "example_id": null,
+    "article": "Articles 5.1–5.4 and Chapter 10 (Top-up Tax computation)",
+    "fact_pattern": "MNE Group with one Constituent Entity (Entity A) located in Jurisdiction X. GloBE Income of Jurisdiction X: EUR 1,000 million. Adjusted Covered Taxes allocated to Jurisdiction X: EUR 125 million. No eligible payroll costs or tangible assets (SBIE = 0). Fiscal year 2023.",
+    "computation": "Step 1: Compute ETR = Adjusted Covered Taxes ÷ GloBE Income = 125 ÷ 1,000 = 12.5%. Step 2: Determine Top-up Tax Percentage = 15.0% − 12.5% = 2.5%. Step 3: SBIE = 0 (no substance-based carve-out). Step 4: Excess Profit = GloBE Income − SBIE = 1,000 − 0 = 1,000. Step 5: Top-up Tax = Top-up Tax Percentage × Excess Profit = 2.5% × 1,000 = EUR 25 million.",
+    "result": "Top-up Tax for Jurisdiction X = EUR 25 million.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The specific input values (1,000 / 125) and the example label are not confirmed from the published Illustrative Examples document; the mechanical steps are correct per the Model Rules but the document may use different magnitudes or additional entities."
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.2 (Substance-Based Income Exclusion with transitional rates)",
+    "fact_pattern": "Constituent Entity B in Jurisdiction Y. GloBE Income: EUR 1,000 million. Adjusted Covered Taxes: EUR 125 million (ETR = 12.5%). Eligible Payroll Costs: EUR 200 million. Carrying Value of Eligible Tangible Assets: EUR 300 million. Fiscal year beginning in 2023 (transition year 1). Transitional SBIE rates applied: Payroll carve-out rate = 10.0%, Tangible asset carve-out rate = 8.0%.",
+    "computation": "Step 1: Payroll carve-out = 10.0% × 200 = EUR 20.0 million. Step 2: Tangible asset carve-out = 8.0% × 300 = EUR 24.0 million. Step 3: SBIE = 20.0 + 24.0 = EUR 44.0 million. Step 4: Excess Profit = GloBE Income − SBIE = 1,000 − 44.0 = EUR 956.0 million. Step 5: Top-up Tax Percentage = 15.0% − 12.5% = 2.5%. Step 6: Top-up Tax = 2.5% × 956.0 = EUR 23.9 million.",
+    "result": "Top-up Tax for Jurisdiction Y = EUR 23.9 million (reduced from EUR 25.0 million without SBIE).",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The transitional SBIE rates for 2023 (10.0% payroll, 8.0% tangible assets) are based on my understanding of Article 9.2, but the exact annual decrement schedule (whether 0.2 pp, 0.3 pp, or 0.5 pp per year) and the final steady-state year may differ from the published table; this affects any year other than the first transition year."
+  },
+  {
+    "example_id": null,
+    "article": "Article 10.1 (De minimis exclusion)",
+    "fact_pattern": "MNE Group with Constituent Entities in Jurisdiction Z. Total Revenue of all Constituent Entities in Jurisdiction Z: EUR 8 million. Total GloBE Income of Constituent Entities in Jurisdiction Z: EUR 0.5 million. Fiscal year 2023.",
+    "computation": "Step 1: Check Revenue condition — EUR 8 million < EUR 10 million threshold → Satisfied. Step 2: Check GloBE Income condition — EUR 0.5 million < EUR 1 million threshold → Satisfied. Step 3: Both conditions met → Jurisdiction Z qualifies for the de minimis exclusion. Step 4: No top-up tax is computed or charged for Jurisdiction Z.",
+    "result": "Jurisdiction Z is excluded from the top-up tax computation under the de minimis exclusion; Top-up Tax = EUR 0.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The de minimis thresholds (EUR 10 million revenue AND EUR 1 million GloBE Income) are based on my understanding of Article 10.1 but may not match the exact wording or values in the published examples; the document may frame the conditions using different metrics (e.g., accounting profit rather than GloBE Income) or apply averaging over a multi-year period."
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.1 (Deferred tax transition rules)",
+    "fact_pattern": "Constituent Entity C in Jurisdiction W enters the GloBE regime at the transition date. Entity C has a deferred tax asset (DTA) of EUR 15 million recognized in its financial statements, measured at the enacted statutory tax rate of 20%. The underlying temporary difference relates to a GloBE item (e.g., an accrued expense deductible for GloBE purposes in future periods). Under Article 9.1, the DTA must be recast at the GloBE minimum rate of 15%.",
+    "computation": "Step 1: Original DTA = EUR 15 million (at 20% enacted rate). Step 2: Underlying temporary difference = DTA ÷ enacted rate = 15 ÷ 0.20 = EUR 75 million. Step 3: Recast DTA at GloBE minimum rate = 75 × 15% = EUR 11.25 million. Step 4: Adjustment = Original DTA − Recast DTA = 15 − 11.25 = EUR 3.75 million. Step 5: The EUR 3.75 million reduction is treated as an adjustment to Adjusted Covered Taxes in the transition year.",
+    "result": "DTA is reduced from EUR 15 million to EUR 11.25 million; the EUR 3.75 million difference adjusts Covered Taxes downward in the transition year.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The exact treatment of the DTA recast under Article 9.1 is the area of greatest uncertainty: the Model Rules contain specific elections (e.g., the election to use deferred tax accounting rather than recast), ordering rules, and provisions for carried-forward losses that may alter or eliminate this adjustment; the direction of the adjustment (reducing vs. increasing Covered Taxes) and whether it is recognized immediately or spread may also differ from what is shown."
+  }
+]
+```

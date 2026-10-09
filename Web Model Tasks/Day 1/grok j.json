@@ -1,0 +1,49 @@
+{
+  "verdict": "PLAUSIBLE-WITH-CORRECTIONS",
+  "objections": [
+    {
+      "claim_attacked": "First detailed route produced ~214,000 DRC violations concentrated in those channels",
+      "objection": "At 28 nm with only 3.8 % GR overflow confined to six narrow channels, a jump to 214 k DRCs is extreme. Typical first-detail-route DRC counts for a 1 M-instance block with modest overflow are in the low tens of thousands; 214 k implies either massive shorts/spacing failures from near-zero free tracks or an unstated technology/rule-deck factor (e.g., via-enclosure or end-of-line rules exploding). The causal link from 3.8 % GR overflow to that DRC magnitude is overstated.",
+      "severity": "major",
+      "corrected_version": "First detailed route produced several tens of thousands of DRCs (order of 20 k–60 k) concentrated in the channels, still dominated by spacing/shorts and via violations.",
+      "confidence": 0.85
+    },
+    {
+      "claim_attacked": "non-default routing rules relaxed for two mid-layer metals within the channel regions only",
+      "objection": "Relaxing NDRs (typically wider spacing or wider widths) inside already-congested channels increases track consumption, which worsens rather than relieves overflow. The useful lever in a pin-access/macro-channel bottleneck is usually the opposite: tighter rules, double-cut vias, or preferential use of higher layers that still have free tracks. Region-limited NDR relaxation is more often applied for SI or EM reasons, not pure congestion relief.",
+      "severity": "major",
+      "corrected_version": "Preferential routing or layer-promotion directives pushing nets onto less-congested upper layers inside the channels, or selective tightening of via rules to improve pin escape, rather than relaxation of spacing/width NDRs.",
+      "confidence": 0.8
+    },
+    {
+      "claim_attacked": "global-route overflow dropped to 0.6 %, detailed-route violations dropped to 340 \ldots with unchanged utilization (71.5 %)",
+      "objection": "Hotspot density screens at 65 % inside and around the channels necessarily displace cells outward. In a block already at 71.5 % overall utilization it is implausible that the displaced cells produce zero measurable increase in global utilization or new secondary congestion. Some utilization rise or redistribution is expected.",
+      "severity": "minor",
+      "corrected_version": "Overall utilization rose modestly (e.g., to ~72–73 %) or local density outside the channels increased enough to require a second, lighter density pass; the story should acknowledge that redistribution.",
+      "confidence": 0.75
+    },
+    {
+      "claim_attacked": "pin-swap on two macro instances to move high-fanout pins away from the most congested channel",
+      "objection": "Pin-swaps on hard macros are only legal if the macro view exposes swappable equivalent pins and the logical netlist permits it without functional change. For a DSP block the high-fanout pins are often clocks, resets or wide data buses whose pin positions are fixed by the macro’s internal floorplan; arbitrary swaps are frequently impossible without a new macro abstract. The draft presents it as a free, always-available lever.",
+      "severity": "minor",
+      "corrected_version": "Pin-swap (or pin-reordering) was possible only because the two macros exposed logically equivalent pin groups; for non-swappable pins the team would have needed soft-macro re-synthesis or feedthrough buffering instead.",
+      "confidence": 0.7
+    },
+    {
+      "claim_attacked": "small WNS degradation (−12 ps) accepted and recovered later during incremental optimization",
+      "objection": "Density screens plus any NDR or layer-directive changes alter both routing capacitance and cell displacement. A net −12 ps WNS movement is plausible, but recovering it with only incremental optimization while keeping the same utilization and without touching the frozen macros implies the critical paths were only mildly perturbed. If any of the high-fanout nets that were pin-swapped or re-routed through the channels were timing-critical, larger local regressions are more typical.",
+      "severity": "minor",
+      "corrected_version": "WNS degraded by a few tens of ps on paths that touched the channels; recovery required a combination of incremental sizing, limited buffering, and possibly useful-skew adjustment rather than pure incremental optimization alone.",
+      "confidence": 0.65
+    }
+  ],
+  "missing_from_story": [
+    "Whether the six channels also contained power-stripe or via-array blockages that further reduced available signal tracks (common root cause when power grid is derived from a frozen macro placement).",
+    "The actual layer-utilization numbers inside the channels before and after the fix—without them it is impossible to judge whether mid-layer relaxation or upper-layer promotion was the real lever.",
+    "Hold-timing impact of the density screens and any extra buffers inserted during the two repair iterations; density reduction often lengthens local paths and creates new hold violations.",
+    "How pin-access on the macros themselves was confirmed after the pin-swap (macro pin DRC or DFM checks).",
+    "Runtime and iteration count of the two repair passes—340 DRCs closing to zero in two iterations is optimistic unless the remaining violations were trivial and localized."
+  ],
+  "most_defensible_part": "The decision to keep the macro placement frozen because top-level feedthroughs and power-grid stripes were already derived from it, and the consequent use of localized density screens as the primary congestion-relief lever.",
+  "overall_note": "The core narrative—frozen macros, channel-limited congestion, density screens plus selective pin and routing adjustments, and recovery without a floorplan respins—is realistic for a 28 nm DSP. The DRC magnitude and the claim that relaxing NDRs inside the channels helped are the weakest links and should be revised downward and inverted, respectively. Adding power-grid interaction, layer-utilization data, and hold impact would make the case study credible for a curated dataset."
+}

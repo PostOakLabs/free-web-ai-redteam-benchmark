@@ -1,0 +1,109 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is a valuable technical topic I can discuss substantively. Here are the four review gates and what I know about how senior engineers actually approach them:
+
+---
+
+## Gate 1: Floorplan Review (Before Placement Starts)
+
+**Purpose:** Catch floorplan decisions that placement and routing cannot recover from — bad macro placement, insufficient routing resources, or power grid weaknesses. Fixing a floorplan after placement starts costs days to weeks; fixing it before costs hours.
+
+**Key checks a reviewer would ask:**
+
+1. **Macro placement and channel width:** "Show me the macro channel utilization heatmap. Are any channels below 2 tracks of routing resource per metal layer?" If macro channels are too narrow, global routing will overflow catastrophically and no amount of cell placement optimization will fix it.
+
+2. **Pin accessibility:** "For each hard macro, show me the pin access analysis — are all pins reachable from the routing grid without DRC violations?" Blocked pins force detours that create congestion and timing problems.
+
+3. **Power grid adequacy:** "Show me the IR drop simulation on the initial power grid. Is static IR drop within spec across the entire die, including corners?" A weak power grid in one region can't be fixed post-placement without major rework.
+
+4. **Floorplan utilization and halos:** "What's the effective utilization after halos and placement blockages? Show me the placement halos around each macro." Insufficient halos cause cells to pack against macro edges, creating local congestion and timing issues.
+
+5. **Clock planning:** "Where do the clock roots enter the block? Is there a clean path from the clock source to all major clock regions?" Poor clock root placement creates an unfixable skew problem downstream.
+
+6. **IO planning and pad ring:** "Do the IO placements match the package constraints? Show me the IO-to-pad connectivity and any cross-domain IO issues."
+
+**Kill questions:** "What's the minimum channel width between macros X and Y?" — if it's below the threshold for the routing layers available, the review stops. "Has anyone verified the power grid with the actual switching activity, not just static analysis?"
+
+**Waiver culture:** Teams routinely waive marginal IR drop in non-critical regions, planning to fix it with decap cells later. The cost: decap eats area, and if the estimate was wrong, you're doing a late-stage floorplan ECO.
+
+---
+
+## Gate 2: Pre-CTS Review (Placement Done, Clocks Next)
+
+**Purpose:** Catch placement quality issues before CTS commits to a clock tree. After CTS, changing placement means rebuilding the clock tree — expensive. Before CTS, placement changes are relatively cheap.
+
+**Key checks:**
+
+1. **Timing histogram by clock group:** "Show me the setup slack histogram per clock group. A healthy pre-CTS has the wall near zero with a tight distribution, not a tail stretching to −300ps or worse." A long negative tail means systematic placement problems, not random variation.
+
+2. **Congestion overflow:** "Show me the global and local routing overflow maps. Is overflow under 1% globally and under 5% locally?" Overflow above these thresholds means the router will struggle and DRC closure will be painful.
+
+3. **Logic depth on critical paths:** "For the worst 10 setup paths, what's the logic depth? If it's above [threshold for the node], is this a constraint problem or a real logic-depth problem?" High logic depth on critical paths means placement can't help — it's an architecture or synthesis issue.
+
+4. **Cell density uniformity:** "Show me the cell density map. Are there regions above 80% density?" Hot spots above 80% create local congestion and make CTS difficult.
+
+5. **TNS trend:** "What's the total negative slack, and how does it compare to the pre-placement estimate? If TNS degraded significantly, where did it degrade?" A large TNS jump from placement means the placer made poor decisions for some paths.
+
+6. **Physical-only cells and ECO buffers:** "Are there sufficient ECO buffer slots reserved? Show me the spare cell and ECO buffer insertion sites." Without ECO reserves, post-CTS fixes become very constrained.
+
+7. **Macro abutment and alignment:** "Verify macro alignment with the floorplan intent — any macros shifted during placement optimization?"
+
+**Kill questions:** "Show me the congestion map overlaid with the critical path routes — are the most congested regions exactly where the critical paths run?" If yes, CTS will make it worse and you need to fix placement first. "Is the worst setup slack worse than −500ps? If so, what's the root cause?"
+
+**Waiver culture:** Teams waive moderate congestion in non-critical regions, hoping the router handles it. The cost: routing DRC closure takes extra days, and sometimes the router fails entirely in those regions, requiring placement ECOs after CTS.
+
+---
+
+## Gate 3: Pre-Tapeout Timing Signoff Review
+
+**Purpose:** Final timing verification before committing to fabrication. This is the last chance to catch timing issues. After tapeout, fixing a timing bug costs a mask respin (millions of dollars and months of delay).
+
+**Key checks:**
+
+1. **Setup slack by corner and mode:** "Show me the setup slack histogram at the worst-case corner. WNS must be ≥ 0 (or within signed-off waiver). Show me the per-mode breakdown — are any modes marginal?" Each operating mode (functional, test, scan, low-power) must close independently.
+
+2. **Hold slack: ** "Show me the hold slack histogram. Are all hold violations fixed? Show me the hold fix cell count — is it reasonable or suspiciously high?" Excessive hold fixing suggests clock skew problems or overly aggressive hold constraints.
+
+3. **Clock skew and jitter:** "Show me the post-CTS clock skew report per clock domain. Is skew within the budget? Show me the jitter numbers used in uncertainty — do they match the PLL spec?" Wrong jitter values silently invalidate the entire timing analysis.
+
+4. **OCV/AOCV derates:** "Verify the derate tables match the foundry signoff spec. Show me the AOCV table version and the depth-distance derate curves." Using wrong derate tables is a silent killer — timing looks clean but silicon fails.
+
+5. **Max transition and max capacitance:** "Show me the max_transition and max_capacitance violations. Are they all fixed? Show me the fix methodology — buffer insertion or cell upsizing?" Unfixed transition violations cause slow transitions that create functional failures under certain conditions.
+
+6. **Noise and crosstalk:** "Show me the noise analysis results. Are all aggressor-victim pairs within spec? Show me the worst-case coupling capacitance ratios." At advanced nodes (7nm and below), crosstalk can flip logic states.
+
+7. **Constraint review:** "Walk me through the SDC constraints — are all false paths and multicycle paths justified? Show me the constraint signoff document." Wrong constraints are the most common source of silicon timing failures.
+
+8. **ECO status:** "Show me the ECO log — how many ECO iterations were needed? Are there any pending ECOs?" Unresolved ECOs at signoff are a red flag.
+
+**Kill questions:** "Is there any clock domain with WNS worse than −100ps that isn't explicitly waived with a documented reason?" "Show me the timing signoff at the SS/FF/TT corners — does the trend make sense, or does one corner look suspiciously different?"
+
+**Waiver culture:** Teams routinely waive small negative slack (tens of picoseconds) on non-critical paths with documented margin analysis. The cost: if the margin analysis was optimistic, silicon fails on those paths under voltage or temperature variation.
+
+---
+
+## Gate 4: Physical Verification Signoff Review (DRC/LVS/antenna/ERC)
+
+**Purpose:** Verify that the physical layout matches the design rules (DRC), the schematic (LVS), and reliability requirements (antenna, ERC). This is the final physical integrity check before fabrication.
+
+**Key checks:**
+
+1. **DRC clean:** "Show me the DRC report — zero violations, or all violations explicitly waived with foundry-approved waivers. Show me the waiver document with the foundry signoff engineer's approval." Any unwived DRC violation can cause a fabrication defect.
+
+2. **LVS clean:** "Show me the LVS report — is the layout vs. schematic comparison clean? Show me the netlist comparison. Are there any open/short mismatches?" An LVS mismatch means the fabricated chip won't match the intended design.
+
+3. **Antenna compliance:** "Show me the antenna report. Are all antenna ratios within spec? Show me the antenna protection diode insertion." Antenna violations cause gate oxide damage during fabrication.
+
+4. **ERC (Electrical Rule Check):** "Show me the ERC report — floating gates, unconnected pins, missing well taps, etc." ERC violations can cause latchup or unreliable operation.
+
+5. **Metal density and fill:** "Show me the metal fill report. Is density within the foundry's required range for all metal layers?" Incorrect metal density causes CMP (chemical-mechanical polishing) problems during fabrication.
+
+6. **ESD protection:** "Verify ESD protection on all IO pads. Show me the ESD verification report." Missing ESD protection causes field failures from electrostatic discharge.
+
+7. **Connectivity and power grid integrity:** "Show me the connectivity check — are all power and ground connections verified? Is the power grid resistance within spec?"
+
+**Kill questions:** "Is there a single DRC violation that isn't waived?" If yes, the review stops. "Does the LVS report show any mismatch, even a single net?" If yes, tapeout is blocked.
+
+**Waiver culture:** Foundry-approved DRC waivers are common for known benign violations (e.g., density violations in non-critical regions, or waivers for specific layout patterns the foundry has validated). The cost: each waiver requires foundry signoff, and unwaived violations cause yield loss or functional failure.
+
+---
+
+These reflect common industry practice in ASIC physical-design signoff reviews. The specific thresholds (slack values, density percentages, congestion percentages) vary by team, node, and foundry. My knowledge reflects practices up to mid-2025; specific tool behaviors and foundry requirements may have evolved since then.

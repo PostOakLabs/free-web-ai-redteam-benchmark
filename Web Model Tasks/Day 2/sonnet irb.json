@@ -1,0 +1,100 @@
+```json
+[
+  {
+    "case_name": "PD=0.50%, LGD=45%, M=2.5",
+    "inputs": {"pd": 0.005, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "step1_exp_-50PD": 0.7788007831,
+      "step2_worst_case_default_rate_wcdr_ratio": 0.2211992169,
+      "R_correlation": 0.213456094,
+      "sqrt_1_over_1minusR": 1.12752,
+      "sqrt_R_over_1minusR": 0.52094,
+      "phi_inv_PD": -2.5758,
+      "phi_inv_0.999": 3.0902,
+      "inner_phi_argument": "sqrt(1/(1-R))*Φ⁻¹(PD) + sqrt(R/(1-R))*Φ⁻¹(0.999) = 1.12752*(-2.5758) + 0.52094*3.0902 = -2.90427 + 1.60980 = -1.29447",
+      "phi_of_inner_argument": 0.09776,
+      "K_before_maturity_adj": "LGD*Φ(inner) - PD*LGD = 0.45*0.09776 - 0.005*0.45 = 0.041742",
+      "ln_PD": -5.29832,
+      "b_maturity_coefficient": 0.167087,
+      "maturity_multiplier": "since M=2.5, (M-2.5)*b=0, so multiplier = (1-1.5b)^-1 = (1-0.250631)^-1 = 1.334446",
+      "K_after_maturity_adj": 0.055703
+    },
+    "result": {"k_pct": 5.5703, "risk_weight_pct": 69.63},
+    "formula_basis": "R(PD) = 0.12*(1-e^(-50PD))/(1-e^-50) + 0.24*(1-(1-e^(-50PD))/(1-e^-50)); b(PD) = (0.11852 - 0.05478*ln(PD))^2; K = [LGD*N( sqrt(1/(1-R))*G(PD) + sqrt(R/(1-R))*G(0.999) ) - PD*LGD] * (1-1.5b)^-1 * (1+(M-2.5)b); RWA% = K*12.5*100 (per unit EAD, no 1.06 scaling factor applied)",
+    "known_benchmark": "Published Basel calibration illustrations commonly cite ~70% risk weight for PD=0.50%, LGD=45%, M=2.5. My computed 69.63% is close (~0.4 pp low), consistent within manual-interpolation rounding error of Φ.",
+    "weakest_point": "Φ(-1.29447) obtained by linear interpolation between tabulated Φ(-1.29) and Φ(-1.30) rather than exact normal CDF evaluation; sqrt(R) and sqrt(1-R) also hand-computed to 5-6 significant figures. Error likely under ±0.1 percentage point in the final risk weight."
+  },
+  {
+    "case_name": "PD=1.00%, LGD=45%, M=2.5",
+    "inputs": {"pd": 0.01, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "step1_exp_-50PD": 0.606530660,
+      "step2_worst_case_default_rate_wcdr_ratio": 0.393469340,
+      "R_correlation": 0.192783679,
+      "sqrt_1_over_1minusR": 1.113064,
+      "sqrt_R_over_1minusR": 0.488673,
+      "phi_inv_PD": -2.3263,
+      "phi_inv_0.999": 3.0902,
+      "inner_phi_argument": "1.113064*(-2.3263) + 0.488673*3.0902 = -2.589379 + 1.510097 = -1.079282",
+      "phi_of_inner_argument": 0.140231,
+      "K_before_maturity_adj": "0.45*0.140231 - 0.01*0.45 = 0.063104 - 0.0045 = 0.058604",
+      "ln_PD": -4.605170,
+      "b_maturity_coefficient": 0.137492,
+      "maturity_multiplier": "(1-1.5*0.137492)^-1 = (0.793762)^-1 = 1.259824",
+      "K_after_maturity_adj": 0.073834
+    },
+    "result": {"k_pct": 7.3834, "risk_weight_pct": 92.29},
+    "formula_basis": "R(PD) = 0.12*(1-e^(-50PD))/(1-e^-50) + 0.24*(1-(1-e^(-50PD))/(1-e^-50)); b(PD) = (0.11852 - 0.05478*ln(PD))^2; K = [LGD*N( sqrt(1/(1-R))*G(PD) + sqrt(R/(1-R))*G(0.999) ) - PD*LGD] * (1-1.5b)^-1 * (1+(M-2.5)b); RWA% = K*12.5*100",
+    "known_benchmark": "Basel calibration documents frequently cite ≈92% risk weight for the PD=1%, LGD=45%, M=2.5 benchmark case. My computed 92.29% matches this closely.",
+    "weakest_point": "Φ(-1.079282) interpolated linearly between Φ(-1.07)=0.14231 and Φ(-1.08)=0.14007; true value may differ by a few hundredths of a percentage point, which propagates (×12.5) into the risk weight."
+  },
+  {
+    "case_name": "PD=3.00%, LGD=45%, M=2.5",
+    "inputs": {"pd": 0.03, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "step1_exp_-50PD": 0.223130160,
+      "step2_worst_case_default_rate_wcdr_ratio": 0.776869840,
+      "R_correlation": 0.146775619,
+      "sqrt_1_over_1minusR": 1.082612,
+      "sqrt_R_over_1minusR": 0.414807,
+      "phi_inv_PD": -1.8808,
+      "phi_inv_0.999": 3.0902,
+      "inner_phi_argument": "1.082612*(-1.8808) + 0.414807*3.0902 = -2.036177 + 1.281837 = -0.754340",
+      "phi_of_inner_argument": 0.225328,
+      "K_before_maturity_adj": "0.45*0.225328 - 0.03*0.45 = 0.101398 - 0.0135 = 0.087898",
+      "ln_PD": -3.506558,
+      "b_maturity_coefficient": 0.096478,
+      "maturity_multiplier": "(1-1.5*0.096478)^-1 = (0.855283)^-1 = 1.169210",
+      "K_after_maturity_adj": 0.102772
+    },
+    "result": {"k_pct": 10.2772, "risk_weight_pct": 128.47},
+    "formula_basis": "R(PD) = 0.12*(1-e^(-50PD))/(1-e^-50) + 0.24*(1-(1-e^(-50PD))/(1-e^-50)); b(PD) = (0.11852 - 0.05478*ln(PD))^2; K = [LGD*N( sqrt(1/(1-R))*G(PD) + sqrt(R/(1-R))*G(0.999) ) - PD*LGD] * (1-1.5b)^-1 * (1+(M-2.5)b); RWA% = K*12.5*100",
+    "known_benchmark": "No single widely-quoted benchmark value is reliably known to me for PD=3% at these parameters (unlike the standard PD=0.5%/1% textbook points); I cannot verify against a published figure with confidence, so this result is unverified against an external benchmark.",
+    "weakest_point": "Φ⁻¹(0.03)=-1.8808 and Φ(-0.754340)=0.225328 both come from manual table interpolation rather than a closed-form/algorithmic normal inverse and CDF, so this case carries the largest cumulative rounding risk of the four (potentially ±0.5-1 pp on the risk weight)."
+  },
+  {
+    "case_name": "PD=10.00%, LGD=45%, M=2.5",
+    "inputs": {"pd": 0.10, "lgd": 0.45, "m": 2.5, "ead": 1.0},
+    "computation": {
+      "step1_exp_-50PD": 0.006737947,
+      "step2_worst_case_default_rate_wcdr_ratio": 0.993262053,
+      "R_correlation": 0.120808553,
+      "sqrt_1_over_1minusR": 1.066496,
+      "sqrt_R_over_1minusR": 0.370229,
+      "phi_inv_PD": -1.2816,
+      "phi_inv_0.999": 3.0902,
+      "inner_phi_argument": "1.066496*(-1.2816) + 0.370229*3.0902 = -1.366821 + 1.144086 = -0.222735",
+      "phi_of_inner_argument": 0.411876,
+      "K_before_maturity_adj": "0.45*0.411876 - 0.10*0.45 = 0.185344 - 0.045 = 0.140344",
+      "ln_PD": -2.302585,
+      "b_maturity_coefficient": 0.059851,
+      "maturity_multiplier": "(1-1.5*0.059851)^-1 = (0.910223)^-1 = 1.098631",
+      "K_after_maturity_adj": 0.154187
+    },
+    "result": {"k_pct": 15.4187, "risk_weight_pct": 192.73},
+    "formula_basis": "R(PD) = 0.12*(1-e^(-50PD))/(1-e^-50) + 0.24*(1-(1-e^(-50PD))/(1-e^-50)); b(PD) = (0.11852 - 0.05478*ln(PD))^2; K = [LGD*N( sqrt(1/(1-R))*G(PD) + sqrt(R/(1-R))*G(0.999) ) - PD*LGD] * (1-1.5b)^-1 * (1+(M-2.5)b); RWA% = K*12.5*100",
+    "known_benchmark": "I do not have a confidently-recalled published benchmark figure for PD=10% at LGD=45%, M=2.5; this region is near where the correlation function's decay makes risk weight growth flatten and eventually reverse at higher PDs, so I cannot state a verified match, only my own computation of ≈192.7%.",
+    "weakest_point": "Φ⁻¹(0.10)=-1.2816 is a well-known constant so that input is solid, but Φ(-0.222735) was again obtained by linear table interpolation rather than exact computation; also this is the parameter region furthest from the well-anchored 0.5%/1% checkpoints, so confidence in cross-checking against any known figure is lower than the first two cases."
+  }
+]
+```

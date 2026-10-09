@@ -1,0 +1,74 @@
+[
+{
+"delta_name": "Shift from Global Channel Congestion to Pin-Access & Local Track-Grid Congestion",
+"at_28nm": "Routing congestion was primarily driven by macro channels and global wire density across inter-block corridors.",
+"at_7nm_5nm": "Congestion is localized to standard cell pin access points on Metal 1/Metal 2. Global route overflow can report 0% while detailed route produces tens of thousands of pin access DRCs.",
+"why_it_changed": "Shrinking standard cell pin geometry relative to wire pitch, FinFET grid-snapping constraints, and unidirectional routing rules reduce valid via-drop locations on M1/M2 pins.",
+"what_breaks": "A 28nm engineer sees a clean 0.2% global routing overflow report and proceeds to detailed route, only to hit >30,000 detailed route DRCs on lower metal layers.",
+"workflow_impact": "Pin-density screening, cell-padding rules, and track-aware placement legalization become mandatory setup steps prior to CTS.",
+"confidence": 0.98
+},
+{
+"delta_name": "Explosion of Lower-Layer Interconnect Resistance and Layer-Aware Optimization",
+"at_28nm": "Gate delay was the primary contributor to path delay; lower-layer metal wire delay scaled predictably with length.",
+"at_7nm_5nm": "Interconnect RC dominates total path delay (>70%). Unit length resistance of M1-M3 exploded due to copper grain-boundary scattering and thin barrier/liner layers.",
+"why_it_changed": "Non-linear scaling of metal wire resistance as cross-sectional dimensions dropped below electron mean free path in copper (~39nm).",
+"what_breaks": "A 28nm engineer allows long timing-critical nets to route on default mid-level metals, resulting in un-closable 300ps+ setup violations caused purely by wire resistance.",
+"workflow_impact": "Mandatory layer-based timing constraints, aggressive promotion of critical paths to upper thick metals (M6+), and layer-aware P&R optimization engines.",
+"confidence": 0.97
+},
+{
+"delta_name": "Cross-Corner Hold Closure Divergence and Delay-Buffer Bottlenecks",
+"at_28nm": "Hold fixing was straightforward; adding delay buffers post-CTS fixed fast-corner hold without degrading slow-corner setup timing.",
+"at_7nm_5nm": "Operating voltages (0.6V–0.75V) near threshold induce massive Vth variability. Buffer delay in the slow corner increases far more than wire delay, meaning hold buffers inserted for the fast corner break slow-corner setup timing.",
+"why_it_changed": "Extreme non-linear delay sensitivity to supply voltage (VDD) near threshold, combined with multi-Vt cell performance divergence across PVT corners.",
+"what_breaks": "A 28nm engineer runs standalone post-route hold fixing, causing hundreds of new setup violations to appear in the slow-temperature corner and creating endless optimization loops.",
+"workflow_impact": "Concurrent multi-corner setup/hold co-optimization using specialized low-power, setup-neutral delay cells throughout CTS and post-route phases.",
+"confidence": 0.96
+},
+{
+"delta_name": "Dynamic IR-Drop Shift from Signoff Check to In-Flow Placement Constraint",
+"at_28nm": "IR drop was primarily a static power grid verification step performed near signoff; simple decap allocation solved localized issues.",
+"at_7nm_5nm": "Dynamic vectorless and vector-based IR drop causes sharp local voltage droop (>10% VDD) on simultaneous switching events, severely degrading setup timing and causing transient functional failures.",
+"why_it_changed": "Reduced nominal supply voltage lowers noise margins, while FinFET switching speeds and dense clock-gated logic clusters create massive local current density surges (A/mm²).",
+"what_breaks": "A 28nm engineer tightly clusters register banks to minimize clock latency, causing severe dynamic IR drop during simultaneous switching that degrades silicon operating frequency below STA predictions.",
+"workflow_impact": "Dynamic IR-aware placement, localized clock-edge staggering during CTS, and continuous power-grid integrity checks integrated into early P&R loops.",
+"confidence": 0.95
+},
+{
+"delta_name": "Reduction of Sustainable Core Placement Utilization Limits",
+"at_28nm": "High-density blocks routinely achieved 80%–85% placeable instance utilization without routing or timing closure issues.",
+"at_7nm_5nm": "Maximum routable block utilization drops to 65%–72% for complex FinFET designs.",
+"why_it_changed": "High pin density per unit area, strict cell boundary/spacing rules (tap cell spacing, ABUS rules, poly-pitch alignment), track starvation, and extensive buffer area overhead for CTS/hold/SI fixing.",
+"what_breaks": "A 28nm engineer floorplans a block at 80% utilization; the design runs out of routable space during CTS and hold fixing, leading to un-resolvable congestion DRCs and placement failure.",
+"workflow_impact": "Early floorplanning enforces lower baseline utilization limits and reserves explicit placement headroom for CTS, power grid, and timing optimization buffers.",
+"confidence": 0.98
+},
+{
+"delta_name": "Transition from Unstructured CTS Trees to H-Tree and Mesh Clock Architectures",
+"at_28nm": "Standard auto-routed buffer trees built by the P&R CTS engine were sufficient to achieve acceptable clock skew and latency.",
+"at_7nm_5nm": "Unstructured clock trees incur unacceptable OCV variations and power penalties. High-performance clock domains require structured H-Trees or clock meshes with custom shielding and NDRs.",
+"why_it_changed": "Increased On-Chip Variation (OCV) at low voltages, high clock-network dynamic power consumption (up to 40% of block dynamic power), and interconnect RC delay sensitivity on clock trunks.",
+"what_breaks": "A 28nm engineer relies on default P&R CTS synthesis without structured trunk planning; clock skew and corner-to-corner skew variation consume over 25% of the target clock period.",
+"workflow_impact": "Explicit clock tree architecture planning, manual pre-routing of clock trunks on upper metal layers, and clock power optimization steps before signal routing.",
+"confidence": 0.94
+},
+{
+"delta_name": "Multi-Corner Multi-Mode (MCMM) Signoff Matrix Explosion",
+"at_28nm": "Timing signoff was typically accomplished across 6 to 12 corners (Worst/Best/Typical PVT combined with Max/Min parasitics).",
+"at_7nm_5nm": "Signoff matrix expands to 30–60+ corners due to temperature inversion, multi-VDD rail targets, aging, and multi-mode complexity.",
+"why_it_changed": "Temperature inversion effects (where low temperature becomes the slow corner at low VDD), non-linear Vt behavior, and sub-10nm process variability.",
+"what_breaks": "A 28nm engineer optimizes and validates timing across a classic 8-corner matrix; signoff analysis at low temperature or non-standard VDD steps reveals hundreds of unexpected setup/hold violations.",
+"workflow_impact": "P&R flows rely on concurrent MCMM engines operating across dozens of active scenarios, backed by large-scale distributed cloud computing infrastructure for STA.",
+"confidence": 0.96
+},
+{
+"delta_name": "Shift from Free-Form Placement to Track-Aligned and Color-Aware Placement",
+"at_28nm": "Cell placement and routing were 2D, free-form, single-exposure tasks without track-alignment or color-matching restrictions.",
+"at_7nm_5nm": "Cell placement must strictly align with FinFET poly grids and unidirectional routing tracks; sub-EUV/multi-patterning rules require Self-Aligned Double/Quad Patterning (SADP/SAQP) color compliance.",
+"why_it_changed": "Sub-resolution manufacturing limits required multi-patterning lithography (193nm immersion) and tight EUV design constraints, imposing rigid 1D/gridded layout rules.",
+"what_breaks": "A 28nm engineer manually places custom cells or defines unaligned placement blockages, triggering systemic grid-alignment and color-conflict DRCs that P&R tools cannot fix automatically.",
+"workflow_impact": "Placement engines enforce real-time track-alignment and color-checking legalization, with LEF definitions containing strict grid properties.",
+"confidence": 0.95
+}
+]

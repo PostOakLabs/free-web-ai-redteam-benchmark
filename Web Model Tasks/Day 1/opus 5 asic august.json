@@ -1,0 +1,226 @@
+```json
+[
+  {
+    "title": "Late detonation of routing congestion in a macro-dense DSP block; floorplan rework rejected, hotspot-local density and NDR relief used instead",
+    "design_context": {
+      "node": "28nm",
+      "placeable_instances": 1200000,
+      "macros": 92,
+      "clock_domains": 3,
+      "tools": "commercial P&R (place-route-CTS-optimize flow), commercial synthesis, sign-off extraction and STA from a separate commercial vendor"
+    },
+    "prior_state": {
+      "stage": "post-CTS, first detailed-route attempt",
+      "placement_utilization_pct": 71.5,
+      "global_route_overflow_pct": 3.8,
+      "gr_overflow_hotspots": "6 macro channels on the west edge, each 2-4 gcell columns wide, local overflow 25-40%",
+      "detailed_route_drc_violations": 214000,
+      "wns_ns": -0.180,
+      "tns_ns": -46.0,
+      "schedule": "9 working days to a hard top-level integration handoff"
+    },
+    "observation": "Detailed routing did not converge: DRC count plateaued near 214k after three route-opt iterations instead of decaying, and 90% of remaining violations were shorts and unroutable pins concentrated in six narrow macro channels that carried both a wide datapath bus and the CTS trunk. Global route overflow was only 3.8% averaged over the block, which is why the problem was invisible on the block-level congestion summary until routing was attempted.",
+    "severity": "HIGH",
+    "hypothesis": "The block is not globally congested; it is locally over-subscribed. Placement legalized high-fanout datapath logic into the macro channels because the channels were the only large open regions after macro placement, and CTS then pushed clock trunks with non-default rules through the same channels. The result is a demand/supply mismatch confined to roughly 2% of the block area, so any global remedy (lower utilization, upsize the die) would pay full cost for a local defect.",
+    "candidates_considered": [
+      {
+        "action": "Rework the floorplan: widen the six west-edge macro channels and re-place macros to open routing corridors.",
+        "rejected_because": "Macro placement was frozen because top-level feedthrough and power-grid stripe locations were derived from it and already integrated at the top level; changing it would force a top-level re-integration and a fresh power/IR sign-off, estimated 2.5-3 weeks against 9 days of schedule."
+      },
+      {
+        "action": "Reduce overall placement utilization from 71.5% to ~64% by growing the block outline.",
+        "rejected_because": "Block outline was fixed by the top-level partition; growth would take area from the neighbouring block and, in any case, treats a local defect with a global remedy - the channel supply does not increase when the whole block gets sparser."
+      },
+      {
+        "action": "Re-run placement with a global congestion-driven effort setting bumped to high and let the tool spread everything.",
+        "rejected_because": "Discards a placement that CTS was already built on; the clock tree would have to be rebuilt and all post-CTS timing work redone, costing 3-4 full flow days with no guarantee the tool would treat the channels differently, since its own cost function had already chosen them."
+      },
+      {
+        "action": "Push the block to route with DRC waivers and fix violations manually in the last days.",
+        "rejected_because": "214k violations is far beyond manual-repair scale, and shipping unrouted shorts creates downstream churn - every ECO after that point would be against a database that cannot be signed off."
+      }
+    ],
+    "chosen_intervention": "Three local actions applied together, without disturbing macro placement or the clock tree topology: (1) placement blockages of graduated density (partial blockages at 40% then 60% density) applied over the six offending channels and their 15um halos, forcing the incremental placer to evacuate non-critical combinational logic while keeping the channels available for routing; (2) audit of non-default routing rules - a double-width/double-space rule had been applied blanket-wide to the whole datapath bus rather than just its long top-level segments, so the NDR was scoped down to segments longer than 200um, returning track supply in the channels; (3) resynthesis-in-place of two high-fanout one-hot mux structures into balanced fanout-limited trees so the pin density in the channels dropped. Then incremental place-opt (placement only, clock tree preserved) followed by a fresh detailed route.",
+    "post_state": {
+      "placement_utilization_pct": 71.5,
+      "global_route_overflow_pct": 0.6,
+      "gr_overflow_hotspots": "worst remaining channel at 8% local overflow",
+      "detailed_route_drc_violations": 340,
+      "drc_after_two_repair_iterations": 0,
+      "wns_ns": -0.205,
+      "tns_ns": -58.0,
+      "elapsed": "4 working days including two full route runs",
+      "note": "Timing degraded slightly (25 ps WNS, 12 ns TNS) because logic was displaced out of the channels and some datapath nets got longer; this was recovered later by ordinary post-route timing ECO, and was accepted at the time as the price of routability."
+    },
+    "expert_assessment": "This was the right call given a frozen floorplan: the diagnostic move that mattered was refusing to trust the block-average overflow number and looking at the spatial distribution, because a 3.8% average hid 25-40% local. The general lesson is that congestion metrics must be read as maps, not scalars, and that a blanket non-default rule is one of the most common self-inflicted supply reductions in a macro-dense block. It would not transfer to a block that is genuinely globally congested (utilization in the high 80s with diffuse overflow), where density screens only move the problem around and the honest answer is floorplan or utilization change.",
+    "confidence": 0.62,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claimed DRC drop from 214k to 340 in a single route after these three actions is the least defensible number - a real recovery of that magnitude usually takes more than one route iteration and often needs some macro halo or pin-access change as well, so the reviewer should check whether the effect size is overstated."
+  },
+  {
+    "title": "4,200 failing endpoints that were one SDC defect: reading the violation histogram before touching the design",
+    "design_context": {
+      "node": "7nm",
+      "placeable_instances": 850000,
+      "macros": 34,
+      "clock_domains": "2 functional (a 1.6 GHz core clock and a divide-by-2 1.6/2 GHz peripheral clock generated inside the block) plus a scan clock",
+      "tools": "commercial synthesis, commercial P&R, commercial sign-off STA"
+    },
+    "prior_state": {
+      "stage": "post-placement, pre-CTS, first full-block timing report",
+      "wns_ns": -1.42,
+      "tns_ns": -820,
+      "failing_endpoints": 4200,
+      "total_endpoints": 310000,
+      "prior_run_wns_ns": -0.085,
+      "note": "The immediately preceding run, one SDC revision earlier, closed at WNS -85 ps with 41 failing endpoints."
+    },
+    "observation": "The failing-endpoint count jumped from 41 to 4,200 and WNS from -85 ps to -1.42 ns after an SDC update, on a netlist whose logic had not changed. The slack histogram was the tell: the failures were not a smooth tail, they were a spike - roughly 3,900 of the 4,200 endpoints sat within 60 ps of each other around -1.35 ns, all captured by the generated divide-by-2 clock, all launched by the core clock, and their reported required times implied a launch-to-capture window of about half a cycle rather than a full cycle.",
+    "severity": "CRITICAL",
+    "hypothesis": "This is a constraint defect, not a physical or logical one. A distributed physical problem produces a broad slack distribution across many clock groups with a long tail; a logic problem produces a small number of deep paths with distinct topologies. A dense spike of endpoints sharing one capture clock, one launching clock, and one identical slack value can only come from a common timing-model term - here, the edge definition of the generated clock, which had been redefined in the SDC update and now placed the capture edge half a period early on every core-to-peripheral crossing.",
+    "candidates_considered": [
+      {
+        "action": "Start incremental timing optimization on the 4,200 endpoints immediately, since the schedule was tight and the tool could be running overnight.",
+        "rejected_because": "Optimizing against a wrong constraint burns real area and power buying margin that does not exist, and the resulting upsized, buffer-heavy netlist has to be reverted once the constraint is fixed - a full day of tool time plus an untangling cost on top of it."
+      },
+      {
+        "action": "Assume a placement regression and re-run placement with tighter timing effort.",
+        "rejected_because": "The netlist and floorplan were byte-identical to the previous run; spending a 6-hour placement cycle to test a hypothesis already falsified by the inputs is unaffordable in a daily-turn schedule."
+      },
+      {
+        "action": "Declare the core-to-peripheral crossings asynchronous and set_false_path them, which would have made all 3,900 failures disappear immediately.",
+        "rejected_because": "The two clocks are synchronous and phase-related by construction; a false path there hides real single-cycle transfers and would defer a genuine functional hold/setup failure to silicon, which is the most expensive place to find it."
+      },
+      {
+        "action": "Relax the clock uncertainty on the peripheral domain to absorb the shortfall.",
+        "rejected_because": "1.35 ns is roughly a full half-period of margin - far outside any defensible uncertainty budget - so this would be disguising a constraint error as pessimism removal and would silently corrupt every later margin decision on that domain."
+      }
+    ],
+    "chosen_intervention": "Before any tool run: pulled the clock report and compared the generated-clock definition between the two SDC revisions. The divide-by-2 peripheral clock had been rewritten from an edge-based definition (edges specified so the derived clock's active edge aligns with the source's rising edge) to a divide-by form that inverted the phase relationship, so the STA engine chose the half-cycle-earlier capture edge on every core-to-peripheral path. Restored the edge-based generated-clock definition, confirmed against the divider RTL that the flop's Q toggles on the source rising edge, and added a clock-report diff check to the SDC regression so an edge-relationship change cannot land silently again.",
+    "post_state": {
+      "wns_ns": -0.095,
+      "tns_ns": -3.4,
+      "failing_endpoints": 47,
+      "netlist_delta": "none - no cells were sized, added, or removed",
+      "elapsed": "about 90 minutes from report to fixed SDC, one STA re-run",
+      "note": "The residual 47 endpoints were the same population as the previous run's 41, plus 6 that the recheck exposed; they were closed later by ordinary optimization."
+    },
+    "expert_assessment": "This is the correct sequence: the shape of the violation set is evidence, and it is cheap evidence compared with a tool run. The general lesson is that a large step change in failure count with no netlist change is a constraint hypothesis until proven otherwise, and the discriminator is whether the failures cluster on a shared clock/slack value or spread across the design. It would not transfer to a case where the failure count grows gradually run over run - that pattern is usually genuine physical degradation, and hunting for an SDC culprit there wastes the day.",
+    "confidence": 0.68,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact mechanism by which the rewritten generated-clock definition shifts the capture edge by half a period is the detail most likely to be stated imprecisely; a reviewer should check whether the described SDC change really produces a half-cycle capture shift in a commercial STA engine, or whether the realistic version of this bug is a missing waveform inversion on a negative-edge-derived divider."
+  },
+  {
+    "title": "Deriving an asymmetric interface budget at a block boundary, and why the multicycle - not the false path - was the defensible relaxation",
+    "design_context": {
+      "node": "16nm",
+      "placeable_instances": "block A 640k, block B 900k (budget derived at the A-to-B boundary)",
+      "macros": "A: 18, B: 61",
+      "clock_domains": "single 800 MHz clock (1.25 ns period) shared by both blocks, plus a slow configuration write path from an APB-style bus in the same domain",
+      "tools": "commercial synthesis for block budgeting, commercial P&R, commercial sign-off STA"
+    },
+    "prior_state": {
+      "stage": "block-level constraint derivation, before either block's first place-and-route",
+      "period_ns": 1.25,
+      "top_level_interconnect_estimate_ns": 0.22,
+      "clock_uncertainty_ns": 0.06,
+      "budget_available_for_A_output_plus_B_input_ns": 0.97,
+      "initial_placeholder_budget": "50/50 - set_output_delay 0.485 ns on A, set_input_delay 0.485 ns at B",
+      "note": "The A-side driver was a registered output through at most 2 levels of buffering; the B-side receiver fed a 7-level address decode and comparator before its first capture flop."
+    },
+    "observation": "Under the placeholder 50/50 split, a trial synthesis showed A closing its interface paths with 310 ps of positive slack while B failed its interface inputs by 190 ps on 120 endpoints, and B's optimizer responded by upsizing the decode cone and inserting a parallel comparator, costing an estimated 4% of B's cell area for margin that A was simply throwing away.",
+    "severity": "MODERATE",
+    "hypothesis": "The budget is a resource allocation, not a symmetry principle: the correct split is proportional to the logic depth each side must actually cover. An even split under-serves the deep receiver and over-serves the shallow driver, and the optimizer converts that mis-allocation directly into area and power on the receiving side while the driving side banks slack it cannot spend.",
+    "candidates_considered": [
+      {
+        "action": "Keep the 50/50 split and let block B absorb the shortfall through optimization and, if needed, a pipeline stage in the decode.",
+        "rejected_because": "The pipeline stage changes the block's cycle-level interface behaviour, which requires an RTL change, a verification re-run, and agreement from the architecture owner - weeks of downstream churn to solve a constraint-arithmetic problem."
+      },
+      {
+        "action": "Give block A only 250 ps of output delay budget and hand B 720 ps, matching depth proportionally with margin to spare.",
+        "rejected_because": "It leaves A with essentially no room for the top-level buffering that had not yet been placed; when top-level routing came in worse than the 220 ps estimate, A would have had no absorbing capacity and the shortfall would land on the block that had already been signed off."
+      },
+      {
+        "action": "Declare the configuration-write subset of the interface a false path, since software writes those registers once at boot and never during traffic.",
+        "rejected_because": "The configuration writes are synchronous transfers in the same clock domain; a false path removes both setup AND hold checking, and the hold check on that short, lightly-loaded path is the one that actually protects it. A boot-time-only path can still be sampled wrong on the cycle after the write if hold is unconstrained, and that failure would be silicon-visible and intermittent."
+      },
+      {
+        "action": "Widen the assumed top-level interconnect estimate from 220 ps to 400 ps to be safe, shrinking both sides' budgets.",
+        "rejected_because": "Unearned pessimism at the boundary propagates into both blocks' optimization and buys area on both sides; it also destroys the ability to tell later whether a real top-level route regression has occurred, because the estimate no longer tracks anything measured."
+      }
+    ],
+    "chosen_intervention": "Split the 970 ps asymmetrically by measured logic depth rather than by convention: set_output_delay on A's interface reflecting a 350 ps allowance for the B side plus interconnect (i.e. A is constrained to deliver within about 350 ps of its launch edge), and set_input_delay at B reflecting a 620 ps arrival, leaving B 630 ps for its 7-level decode. Separately, the configuration-write group was constrained with set_multicycle_path -setup 2 plus the matching set_multicycle_path -hold 1, justified from the RTL: the bus write strobe and the register capture are two cycles apart by protocol, and the paired hold multicycle keeps the hold check on the correct adjacent-edge relationship. Both decisions were written into a boundary-constraint note with the depth measurements and the RTL protocol citation attached, so the derivation - not just the number - survived into sign-off.",
+    "post_state": {
+      "A_interface_slack_ns": 0.045,
+      "B_interface_slack_ns": 0.030,
+      "B_interface_failing_endpoints": 0,
+      "B_area_delta_vs_50_50_split": "-3.6% cells on the interface decode cone (the parallel comparator and the upsizing were no longer inserted)",
+      "config_path_setup_slack_ns": 0.71,
+      "config_path_hold_slack_ns": 0.042,
+      "note": "Both sides carry thin but positive interface slack by design - the asymmetric split spends the budget, it does not create any, so neither block has the 310 ps cushion A previously had."
+    },
+    "expert_assessment": "Budgeting by logic depth rather than by halves is the right default, and the multicycle-versus-false-path call is the part worth generalizing: a false path is only correct when the transfer genuinely has no timing relationship, and a same-domain, protocol-spaced write always has one - the paired -setup 2 / -hold 1 form preserves the hold check that actually protects it. This does not transfer cleanly to interfaces where the far-side depth is not yet known (early in a project, an even split is the honest placeholder), nor to boundaries where one side is hard IP whose input requirement is fixed by its datasheet and is not yours to allocate.",
+    "confidence": 0.6,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The set_multicycle_path -setup 2 / -hold 1 pairing is stated as the general correct form, but the right hold multiplier depends on the exact launch/capture edge relationship and on whether the design is same-edge or opposite-edge triggered - a reviewer should verify the hold value against the actual protocol timing rather than accepting the conventional pairing."
+  }
+]
+```
+
+```json
+[
+  {
+    "cell": "1. SharedArrayBuffer + cross-origin isolation (COOP/COEP) requirements, Chrome/Edge/Firefox/Safari current stable - anything changed in 2026?",
+    "claim": "Cross-origin isolation is still gated on serving Cross-Origin-Opener-Policy: same-origin together with Cross-Origin-Embedder-Policy: require-corp (or credentialless, Chromium-only) on the top-level document, and SharedArrayBuffer remains gated behind the resulting crossOriginIsolated state in Chrome (desktop 92+/Android 88+), Edge (92+) and Firefox (79+). I found no authoritative evidence of a 2026 change to this requirement. Safari's current-stable behaviour was NOT verified from an authoritative page and is not claimed here.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+    "retrieved": "2026-08-31",
+    "confidence": "medium - the COOP/COEP + crossOriginIsolated requirement is consistent across MDN and web.dev and is long-standing, but I reached these pages through a search summary rather than reading each browser vendor's current release notes, and the '+ nothing changed in 2026' half is an absence-of-evidence claim, not a verified one",
+    "notes": "Supporting page: https://web.dev/articles/coop-coep (retrieved 2026-08-31). Safari/WebKit is the explicit gap - fill it from a WebKit release note or the MDN browser-compat table read directly. The Document-Isolation-Policy proposal (W3C TAG review https://tag-github-bot.w3.org/review/995) is the live standards-track work that could change this cell; status not verified."
+  },
+  {
+    "cell": "2a. WebGPU compute-shader availability, Chrome/Edge/Firefox/Safari current stable",
+    "claim": "WebGPU ships by default in all four engines as of 2026: Chrome/Edge 113+, Firefox 141+ on Windows and 145+ on macOS (Apple Silicon, macOS Tahoe 26), and Safari on macOS Tahoe 26 / iOS 26 / iPadOS 26 / visionOS 26.",
+    "url": "https://github.com/gpuweb/gpuweb/wiki/Implementation-Status",
+    "retrieved": "2026-08-31",
+    "confidence": "medium - version numbers came from search-result summaries of secondary blog posts, not from a page I fetched and read; the gpuweb Implementation-Status wiki is the authoritative source and should be read directly to confirm each version",
+    "notes": "Compute-shader support specifically (as distinct from render) was not separately verified; WebGPU core includes compute pipelines, so availability follows core availability, but confirm on the vendor status page."
+  },
+  {
+    "cell": "2b. Is the WebGPU 'timestamp-query' feature exposed to web content by default in Chrome/Edge/Firefox/Safari?",
+    "claim": "UNVERIFIED",
+    "url": "https://web3dsurvey.com/webgpu/features/timestamp-query",
+    "retrieved": "2026-08-31",
+    "confidence": "none - I did not fetch and read a page stating the default-exposure status per browser",
+    "notes": "This is the cell that matters most for proving-workload measurement and it is the one I could not fill. Two candidate sources surfaced but were not read: web3dsurvey.com/webgpu/features/timestamp-query (real-world availability telemetry) and https://github.com/gpuweb/gpuweb/wiki/Implementation-Status. Historically timestamp-query was gated behind a flag/enterprise policy in Chrome for Spectre-timing reasons; whether that still holds in 2026 stable is exactly what needs checking. Treat as 'measure, don't research' unless an authoritative page says otherwise."
+  },
+  {
+    "cell": "3. WASM feature status per browser: threads, SIMD128, relaxed-SIMD, JSPI, memory64",
+    "claim": "WebAssembly 3.0 became a W3C standard in September 2025 and consolidates memory64 and relaxed-SIMD; secondary sources place Wasm 3.0 support in Chrome 119+, Firefox 120+ and Safari 18.2+, report relaxed-SIMD as unflagged in Firefox since 2025 but still flagged in Safari, and report JSPI at phase 4 and shipping in Chrome while remaining behind a flag in Firefox. Threads remain gated on SharedArrayBuffer and therefore on cross-origin isolation (cell 1). SIMD128 is long-shipped in all four engines.",
+    "url": "https://platform.uno/blog/the-state-of-webassembly-2025-2026/",
+    "retrieved": "2026-08-31",
+    "confidence": "low - every specific version number and flag status here comes from vendor-independent blog summaries reached via search, not from webassembly.org/features, MDN compat data, or vendor release notes. The internal inconsistency in these sources (Wasm 3.0 described as both a Sept-2025 standard and as supported since Chrome 119, a much older release) is itself a signal that the version attributions are unreliable",
+    "notes": "Do not use these numbers without re-verifying against https://webassembly.org/features/ and the MDN compat tables. Safari's relaxed-SIMD flag status and Firefox's JSPI flag status are the two entries most likely to be stale."
+  },
+  {
+    "cell": "4. Inside a cross-origin iframe: can an embedded page obtain cross-origin isolation and WebGPU? (the wallet-embedding cell)",
+    "claim": "Partial. On the isolation half: an embedded cross-origin document can participate in a cross-origin isolated top-level context, and Chromium provides two mechanisms for it - COEP: credentialless (Chromium-only, shipped Chrome 96) and the iframe 'credentialless' attribute (enabled by default from Chrome 110), which loads the frame in an empty, cookie-less context with no access to its origin's normal cookies/storage. Non-Chromium support for COEP: credentialless was not verified. On the WebGPU half: UNVERIFIED - none of the sources reached addressed whether an embedded cross-origin frame can obtain a GPUAdapter, or whether a permissions-policy allow attribute governs it.",
+    "url": "https://developer.chrome.com/blog/iframe-credentialless",
+    "retrieved": "2026-08-31",
+    "confidence": "medium for the isolation half (Chrome-for-Developers is authoritative for Chromium behaviour, though I read a search summary of it rather than the page itself); none for the WebGPU half",
+    "notes": "Supporting pages, not read directly: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/IFrame_credentialless and https://wicg.github.io/anonymous-iframe/. Note the practical trap for wallet embedding: credentialless buys you isolation at the cost of the frame's cookies and storage, which is usually exactly what a wallet needs. The genuinely load-bearing sub-question - WebGPU inside a cross-origin frame - is unanswered and belongs on the 'measure, don't research' list."
+  },
+  {
+    "cell": "5. Published 2026 measurements of in-browser proving with a reproducible harness",
+    "claim": "Two named candidates surfaced, neither of which I verified by reading. (a) FibRace - described as a large-scale benchmark of client-side proving on mobile devices, a joint effort of KKRT Labs (Cairo M prover) and Hyli, dated September 2025, arXiv 2510.14693; a result attributed to it is that in-browser proving of p256 ECDSA signatures was largely impractical across several proving schemes, with only Noir reaching limited usability. (b) A WebGPU compute-shader integration with StarkWare's Stwo/S-two prover, reported as 5x on constraint-polynomial evaluation and 2x on the overall proving pipeline - source is a community news post, not a paper or repo, and neither the hardware nor the harness was identified. ZKProphet (arXiv 2509.22684) measures ZK proving on GPUs but is not in-browser.",
+    "url": "https://arxiv.org/pdf/2510.14693",
+    "retrieved": "2026-08-31",
+    "confidence": "low - I have titles, an arXiv identifier and attributed figures from a search summary; I did not open the paper, did not confirm the harness is reproducible or public, did not find a repository URL, and the dates are 2025 rather than the 2026 the cell asks for. The Stwo/WebGPU figures rest on a single secondary source (https://www.webgpu.com/news/zk-proofs-webgpu-boost/) and should be treated as unconfirmed",
+    "notes": "FibRace is the strongest lead: fetch arXiv 2510.14693 directly, extract the harness repo, the device list and the proof systems covered. Caveat for the matrix: FibRace as described targets mobile devices, which is adjacent to but not identical with in-browser. No genuinely 2026-dated in-browser proving measurement was found."
+  }
+]
+```
+
+Notes outside the JSON, since honesty about the run matters more than format purity: Prompt A ran clean. Prompt B ran on search-result summaries only — I did not fetch and read the underlying pages, so most B cells carry low or medium confidence and cells 2b and half of 4 are genuine UNVERIFIED. Per the harvest doc's own rubric that likely puts B at T2/T3 rather than T1. Worth a second pass with actual WebFetch on gpuweb Implementation-Status, webassembly.org/features, and arXiv 2510.14693 if you want T1 cells.

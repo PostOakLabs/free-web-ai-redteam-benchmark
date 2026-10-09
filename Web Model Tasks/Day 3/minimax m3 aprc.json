@@ -1,0 +1,49 @@
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "CCD Art. 19(2)(a): X is the annual rate equating present value of drawdowns to present value of repayments and charges",
+      "CCD Annex I (method A, monthly compounding): t measured in years, actuarial method, unit period = 1 month = 1/12 year",
+      "CCD Art. 17(2): the €100 arrangement fee paid at t=0 is a charge included on the repayments side",
+      "Actuarial method: discrete compound interest, (1+X)^(t_i) where t_i in years; X solved on the function f(X) = sum D_j*(1+X)^(-t_j) - sum R_i*(1+X)^(-t_i)"
+    ],
+    "equation": "f(X) = 100*(1+X)^(-0) - [100*(1+X)^0 + 450*sum_{k=1..24} (1+X)^(-k/12)] = 0, where the €100 fee is netted against the t=0 drawdown on the LHS so equation reads: 10000 - 100 = 9900 = sum_{k=1..24} 450*(1+X)^(-k/12). Equivalently: 9900*(1+X)^(24/12..1/12 annuity factor) = 450 * (1 - (1+X)^(-24))/((1+X)^(1/12)-1).",
+    "iterations": "Bracketed between X_low=0.005 (monthly=0.5% → APR ≈6.17%) and X_high=0.0125 (monthly=1.25% → APR≈16.08%).\n  Iter 1 (bisection mid 0.008750): a_month = 0.008750, a_annuity factor (1-(1+a)^-24)/a = 21.8296; PV_repayments = 450*21.8296/((1+a)^0) — direct: PV = 450 * sum_{k=1..24}(1.008750)^-k = 450*21.1395 = 9512.8 → 9900 > 9512.8, f>0, raise X.\n  Iter 2 (X=0.010000): PV of 24 pmts at i=1%/mo: a-angle-24 = (1-1.01^-24)/0.01 = 21.195 PV = 450*21.195 = 9537.7 → still <9900, raise X.\n  Iter 3 (X=0.011250): a-angle-24 at 1.125%/mo = (1-1.01125^-24)/0.01125 = 20.598; PV = 450*20.598 = 9269.0 → wait, this is LOWER than 9537.7, but X is higher — recalculation: a-angle-24 DECREASES as rate rises, so PV should fall as X rises; 9269 < 9900, f>0, still raise X.\n  Convergence: monotonic PV falls as X rises. At X=0.02 (≈2%/mo): a-angle-24 = 16.936, PV=7621<9900. At X=0.005: a-angle-24=21.8296, PV=9823. At X=0.003:≈9946. Interpolating: PV=9900 at a-angle=22.0, which corresponds to monthly rate ≈0.0049, annualised nominal ≈5.9%, effective (1.0049^12-1) ≈ 6.06%.\n  Solve precisely: f(0.004917)→ a-angle-24 = (1-1.004917^-24)/0.004917 = 22.0000 → PV=450*22=9900.00 exactly. APR_effective = (1.004917)^12 - 1 = 0.06071 = 6.07%. Per Annex I 'rate per annum' is the nominal-equivalent stated X itself only when compound unit = 1 year; with monthly compounding the conventional display is (1+X)^12-1. The CCD typically reports effective (actuarial) annual rate, so APRC ≈ 6.1%.",
+    "aprc_pct": 6.1
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "CCD Annex I Part II §1 (overdraft assumptions): assumed drawdown is the FULL credit limit (€3,000)",
+      "CCD Annex I Part II §2: assumed duration = 3 months when not determinable (rate/charges are determinable but duration may be); here we apply the default 3-month window",
+      "CCD Annex I Part II §3: repayment in 3 equal monthly instalments of (3000+interest)/3 plus the €25 fee each month",
+      "CCD Annex I Part II §4: borrowing rate 12% nominal p.a. applied monthly (= 1% per month)"
+    ],
+    "equation": "Drawdowns side (LHS) = 3000*(1+X)^0 + 0*(later). Repayments side: month 1 = €25 fee + principal+interest portion; using X as monthly rate (consistent with the directive's 'acts on the actual unit period') we have the internal X_month. We first solve X_month: 3000 = sum_{k=1..3} [ (1000 + 3000*(k-1)*0.01)*X-discount factor (1+X_month)^-k + 25*(1+X_month)^-k ]. Each instalment = (3000 + accumulated interest to that month − prior repayments) / remaining months. Schedule: principal 3000, fee 25/mo. Month-1 interest on full 3000 = 30, outstanding after pmts? Instalment structure: simplest reading = 3 equal instalments of (3000 + total interest over 3 months) / 3 + 25. Total nominal interest over 3 months on declining-by-1000-per-month = 30+20+10 = 60. Instalment = (3000+60)/3 = 1020; total monthly outflow = 1020+25 = 1045. Equation: 3000 = 1045*(1+X_month)^-1 + 1045*(1+X_month)^-2 + 1045*(1+X_month)^-3.",
+    "iterations": "X_month guess. X_low=0.005: PV=1045*(0.9950+0.9900+0.9851)=1045*2.9701=3104.6 > 3000, f>0, raise X.\n  Iter 1 X=0.010: PV=1045*(0.99010+0.98030+0.97059)=1045*2.94099=3073.3, f>0.\n  Iter 2 X=0.020: PV=1045*(0.98039+0.96117+0.94232)=1045*2.88388=3013.8.\n  Iter 3 X=0.025: PV=1045*(0.97561+0.95181+0.92860)=1045*2.85602=2984.5, f<0.\n  Converging between 0.020 and 0.025. Iter 4 X=0.0225: PV=1045*(0.97800+0.95649+0.93552)=1045*2.87001=2999.2, f≈-0.8. Iter 5 X=0.0224: PV≈1045*2.87122=3000.4 → f≈+0.4. So monthly X ≈ 0.02245.\n  Annual: per Annex I the result is reported as the annual rate corresponding to the monthly period — effective annual = (1.02245)^12 - 1 = 0.3052 = 30.5%. CCD typically shows the effective annual rate.",
+    "aprc_pct": 30.5
+    "case": 3,
+    "assumptions_invoked": [
+      "CCD Annex I Part II §5 (open-end credit assumptions): the assumption set for credit agreements that are not in the form of an overdraft or running-account debit card: when repayment schedule is not determinable, assume drawdown = full credit limit (€1500) at t=0 and repayment in 12 equal monthly instalments over 1 year",
+      "CCD Annex I Part I (general): 'actuarial method' applied; X is the rate per period that solves PV equation; period = 1 month",
+      "CCD Art. 19(1): when there are no charges other than interest, APRC reflects only the interest cost"
+    ],
+    "equation": "1500 = R * sum_{k=1..12} (1+X_month)^-k, with R = outstanding annuity payment. Monthly interest rate on declining balance at 18% nominal p.a. monthly = 1.5% per month. Schedule: level payment R = 1500 / a-angle-12 at 1.5%/mo = 1500 / (1-1.015^-12)/0.015 = 1500 / 11.0794 = 135.39. Equation: 1500 = 135.39 * (1-(1+X)^-12)/X. Solves X = monthly rate = 1.5% exactly (because charges=0 → APRC equals nominal).",
+    "iterations": "Trivial: with zero charges the PV equation collapses to 1500*(1+X)^12 = R*((1+X)^12-1)/X → solving yields X = monthly contract rate = 0.015, since contract payments ARE the annuity at that rate.\n  Iter 1 X=0.015: a-angle-12 = 11.0794; R = 1500/11.0794 = 135.39; PV = 135.39*11.0794 = 1500.00. f=0 exactly.\n  Convergence: closed-form; no further iterations needed.",
+    "aprc_pct": 18.0
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "CCD Annex I Part II §6 (unascertainable drawdowns): where the credit limit can be drawn down in different amounts, assume the ENTIRE credit limit is drawn atthis is the directive's safety-favours-consumer default)",
+      "CCD Art. 17(2): charges financed by the creditor are treated as drawdowns, not as a t=0 cash fee",
+      "CCD Annex I general rule: a single repayment at month 12 is the unascertainable-schedule default when timing of repayments is unascertainable; here we apply it as a clean test case"
+    ],
+    "equation": "LHS drawdowns at t=0: principal €5000 + financed broker fee €200 = €5200 treated as a single t=0 drawdown (the fee inflates the amount the consumer is obliged to repay, so it sits on the drawdowns side of the equation, NOT on the repayments side as a t=0 fee). Repayments side: month-12 payment = 5200*(1+0.08) = 5616 (simple interest since nominal 8% with single payment). For the actuarial form: 5200 = 5616*(1+X)^-12.",
+    "iterations": "Solve (1+X)^12 = 5616/5200 = 1.08 → 1+X = 1.08^(1/12) = 1.006434 → X = 0.006434 (monthly rate).\n  Direct check at X=0.006434: (1.006434)^12 = 1.0800 → 5200*1.0800 = 5616.00. PV: 5616*(1.006434)^-12 = 5616/1.08 = 5200. f=0.\n  Iteration count for the solver: 1 (closed-form). For mechanical solvers shown: iter 1 X=0.005 → PV of 5616 at 0.005/12 = (1.005)^12*... Actually re-run: 5616*(1.005)^-12 = 5616/1.0617 = 5289.7 > 5200, f<0, LOWER X. Iter 2 X=0.007: 5616*(1.007)^-12 = 5616/1.0872 = 5166.0 < 5200, f>0. Iter 3 X=0.0064: 5616*(1.0064)^-12 = 5204.6, f>0. Convergence between 0.0064 and 0.007; true value 0.006434.\n  Annual: effective APR = (1.006434)^12 - 1 = 8.00% (because the 8% nominal is itself a single-period-of-12-months rate; no compounding gain). Reported APRC = 8.0%.\n  Note on financed fee: had the €200 been a t=0 CASH fee (not financed), the equation would be 5000 = 5616*(1+X)^-12 - 200 — but that violates PV balance unless we re-interpret: a cash fee at t=0 INCREASES the effective cost because the consumer pays €200 immediately PLUS repays the full €5200. The PV equation would be 5000 = 200 + 5200*(1+X)^-12 → X higher than 8%. The 'financed' treatment LOWERS the headline APRC vs. cash-paid fee because the fee gets amortised.",
+    "aprc_pct": 8.0
+  },
+  {
+    "weakest_point": "Case 2: the directive's Annex I overdraft assumptions (Part II §2 default 3-month duration, §3 instalment structure) are applied to a clean test case, but in real-world APRC computations the most common source of divergence between implementations is (a) whether the monthly €25 fee is placed on the REPAYMENTS side at its respective t_i (correct per Art. 17(2) and Annex I) or netted into the instalment by the calculator's internal amortisation, and (b) the periodicity convention — the directive requires solving for X as a rate per 'unit period' (here 1 month) and then stating it as an annual rate, but the conversion (multiply by 12 vs. (1+X)^12-1) differs across national transpositions. For this specific 3-month overdraft, the conversion only modestly affects the number (effective 30.5% vs nominal 26.9%), but a single national transposition could publish either. This is the highest-divergence risk in the set."
+  }
+]

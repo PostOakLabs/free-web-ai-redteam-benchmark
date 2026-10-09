@@ -1,0 +1,157 @@
+```json
+{
+  "receipt_kinds": [
+    {
+      "kind": "Composite",
+      "description": "Produced for non-succinct proofs, contains the full execution trace and proof.",
+      "when_produced": "Default for non-optimized proofs or debugging."
+    },
+    {
+      "kind": "Succinct",
+      "description": "Produced for STARK-based proofs, compressed but not yet wrapped in Groth16.",
+      "when_produced": "Intermediate step before Groth16 wrapping."
+    },
+    {
+      "kind": "Groth16",
+      "description": "Produced for Groth16-wrapped STARK proofs, optimized for on-chain verification.",
+      "when_produced": "Final form for on-chain verification or production use."
+    }
+  ],
+
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "[u8; 96]",
+      "meaning": "A fixed-size byte array representing the Groth16 proof and public inputs.",
+      "verifier_must_check": "Verify the Groth16 proof using the verifying key and public inputs.",
+      "failure_if_skipped": "Acceptance of a forged proof that does not correspond to the claimed execution."
+    },
+    {
+      "field": "receipt_version",
+      "type_shape": "u32",
+      "meaning": "Version of the receipt format to ensure compatibility.",
+      "verifier_must_check": "Ensure the receipt version matches the expected version for the circuit.",
+      "failure_if_skipped": "Acceptance of a receipt generated with an incompatible circuit version."
+    },
+    {
+      "field": "control_id",
+      "type_shape": "[u8; 32]",
+      "meaning": "A unique identifier for the control root, tying the receipt to a specific circuit.",
+      "verifier_must_check": "Verify that the control_id matches the expected control root for the circuit.",
+      "failure_if_skipped": "Acceptance of a receipt generated for a different circuit or control root."
+    },
+    {
+      "field": "journal_digest",
+      "type_shape": "[u8; 32]",
+      "meaning": "Digest of the journal (public output) produced during execution.",
+      "verifier_must_check": "Ensure the journal digest matches the expected output for the execution.",
+      "failure_if_skipped": "Acceptance of a receipt with tampered or incorrect public output."
+    }
+  ],
+
+  "claim_structure": {
+    "components": [
+      {
+        "field": "image_id",
+        "type_shape": "[u8; 32]",
+        "meaning": "Digest of the guest program (circuit) being executed."
+      },
+      {
+        "field": "journal_digest",
+        "type_shape": "[u8; 32]",
+        "meaning": "Digest of the journal (public output)."
+      },
+      {
+        "field": "exit_code",
+        "type_shape": "u32",
+        "meaning": "Exit code of the guest program (0 for success, non-zero for failure)."
+      },
+      {
+        "field": "input_digest",
+        "type_shape": "[u8; 32]",
+        "meaning": "Digest of the private input to the guest program."
+      },
+      {
+        "field": "output_digest",
+        "type_shape": "[u8; 32]",
+        "meaning": "Digest of the private output from the guest program."
+      }
+    ],
+    "claim_digest_computation": "The claim digest is computed as the hash of the concatenation of image_id, journal_digest, exit_code, input_digest, and output_digest."
+  },
+
+  "binding_chain": {
+    "steps": [
+      {
+        "step": 1,
+        "description": "Journal bytes are hashed to produce the journal_digest."
+      },
+      {
+        "step": 2,
+        "description": "The claim (image_id, journal_digest, exit_code, input_digest, output_digest) is hashed to produce the claim_digest."
+      },
+      {
+        "step": 3,
+        "description": "The claim_digest and control root are used as public inputs to the Groth16 proof."
+      },
+      {
+        "step": 4,
+        "description": "The Groth16 proof is generated using the verifying key, binding the claim_digest and control root to the seal."
+      }
+    ],
+    "control_root_role": "The control root is a commitment to the circuit's control flow and is used to verify the integrity of the execution.",
+    "verifying_key_role": "The verifying key is used to verify the Groth16 proof and is specific to the circuit version."
+  },
+
+  "version_coupling": {
+    "circuit_version_dependent_parts": [
+      "verifying_key",
+      "control_root",
+      "control_id"
+    ],
+    "failure_if_wrong_version": "Using the wrong version's verifying key or control root will cause the Groth16 proof verification to fail, leading to rejection of valid receipts or acceptance of invalid ones."
+  },
+
+  "common_verifier_bugs": [
+    {
+      "bug": "Skipping Groth16 proof verification.",
+      "check": "Always verify the Groth16 proof using the verifying key and public inputs.",
+      "failure_if_skipped": "Acceptance of a forged Groth16 proof."
+    },
+    {
+      "bug": "Not checking the receipt_version.",
+      "check": "Ensure the receipt_version matches the expected version for the circuit.",
+      "failure_if_skipped": "Acceptance of a receipt generated with an incompatible circuit version."
+    },
+    {
+      "bug": "Ignoring the control_id.",
+      "check": "Verify that the control_id matches the expected control root for the circuit.",
+      "failure_if_skipped": "Acceptance of a receipt generated for a different circuit."
+    },
+    {
+      "bug": "Not validating the journal_digest.",
+      "check": "Ensure the journal_digest matches the expected output for the execution.",
+      "failure_if_skipped": "Acceptance of a receipt with tampered public output."
+    },
+    {
+      "bug": "Using an incorrect verifying key.",
+      "check": "Use the verifying key specific to the circuit version.",
+      "failure_if_skipped": "Rejection of valid receipts or acceptance of invalid ones."
+    },
+    {
+      "bug": "Not checking the exit_code.",
+      "check": "Verify that the exit_code is 0 (success) or handle non-zero values appropriately.",
+      "failure_if_skipped": "Acceptance of a receipt from a failed execution."
+    }
+  ],
+
+  "certainty_notes": {
+    "receipt_kinds": "Based on RISC Zero documentation and general zk-receipt reasoning.",
+    "groth16_receipt_fields": "Based on RISC Zero's Groth16-wrapped receipt format and general Groth16 knowledge.",
+    "claim_structure": "Based on RISC Zero's ReceiptClaim structure and general zk-SNARK knowledge.",
+    "binding_chain": "Based on RISC Zero's proof system design and general zk-proof binding mechanisms.",
+    "version_coupling": "Based on RISC Zero's circuit versioning and general zk-SNARK versioning practices.",
+    "common_verifier_bugs": "Based on known pitfalls in zk-SNARK verification and RISC Zero's design."
+  }
+}
+```

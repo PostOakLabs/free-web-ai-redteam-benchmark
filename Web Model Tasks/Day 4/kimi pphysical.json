@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Hybrid custom/synthesized implementation strategy for a multisite gigahertz design",
+    "where_in_paper": "Design methodology / circuit implementation strategy",
+    "decision": "Implement the chip with a hybrid flow: hand-built custom dataflow/macros where density and cycle time were critical, and more automated synthesis/regularized control-logic methods for the large control content, inside a pseudo-hierarchical multisite release flow.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A 174-million-transistor, greater-than-1.3-GHz chip could not be treated as either a small fully custom design or as a flat end-of-flow assembly job; the flow had to preserve local performance while making global timing, clock, power, and interface closure manageable across sites.",
+    "outcome": "The paper reports that the methodology, clock distribution, circuits, power, integration, and timing approach enabled the team to meet project goals and complete the design on schedule.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact partition between synthesized control logic, custom dataflow, and any named synthesis/BooleDozer flow may be more specific than the paper’s wording.",
+    "confidence": 0.62
+  },
+  {
+    "title": "X-Y grid-tree / tunable clock distribution instead of skew-by-latency alone",
+    "where_in_paper": "Clock distribution",
+    "decision": "Use a controlled global clock distribution architecture described in the POWER4 context as an X-Y grid-tree/tunable tree-plus-grid style network, rather than relying only on minimizing nominal clock insertion delay.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "On a very large, high-frequency die, process, voltage, temperature, and spatial variation made a nominally fast tree fragile; the chosen network prioritized bounded skew, robustness, and tunability across the die.",
+    "outcome": "The reported result was a clock network that supported the greater-than-1.3-GHz design point and integrated with the timing-closure flow rather than becoming a late schedule risk.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The label “X-Y grid-tree” is strongly tied to Restle/POWER4 clock work and patents, but I am not certain this paper uses that exact phrase rather than describing the same network generically.",
+    "confidence": 0.58
+  },
+  {
+    "title": "Design-in SOI floating-body/history-effect tolerance rather than treating SOI as bulk CMOS",
+    "where_in_paper": "Circuits / SOI circuit design considerations",
+    "decision": "Adopt the 0.18-µm partially depleted SOI technology for performance while explicitly designing circuit and timing practice around floating-body and history-effect behavior.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "SOI gave the speed needed for a greater-than-1.3-GHz POWER design, but floating-body voltage and switching history made delays less bulk-like, so device-level phenomena had to be reflected in circuit rules, macro design, and timing margins.",
+    "outcome": "The paper presents the resulting circuit style as part of the enabling set for high-frequency operation; I do not recall it reporting a separate post-silicon SOI timing failure or respin caused by this issue.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 37,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The decision direction is safe only at the level of ‘use SOI but account for its effects’; the specific circuit mechanisms and margining rules are not recallable verbatim.",
+    "confidence": 0.48
+  },
+  {
+    "title": "Power integrity handled as a physical-design closure item with grids, C4s, decoupling, and analysis",
+    "where_in_paper": "Power / physical design and integration",
+    "decision": "Make power delivery and simultaneous-switching integrity part of the physical-design architecture: low-resistance supply grids using upper metals, dense package connections/C4 current return paths, intentional decoupling, and IR-drop/EM/di/dt style checking rather than leaving power as a late packaging afterthought.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The chip’s transistor count, frequency, and I/O/bus activity created high current transients; supply noise could directly erode timing margins and circuit robustness, so power architecture had to be co-designed with floorplanning, clocking, and timing.",
+    "outcome": "The reported design met its power/integrity and closure goals closely enough that power, integration, and timing are listed among the items that enabled schedule completion; I cannot recall a quantitative margin from the paper.",
+    "quote_as_recall": "cannot-reproduce-verbatim",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Specific claims about C4 count, decoupling amount, number of power metals, or exact IR/EM limits would be fabrication risk, so the entry intentionally avoids them.",
+    "confidence": 0.60
+  },
+  {
+    "title": "Timing closure by design: early static-timing budgets, latch borrowing, and variation-aware closure",
+    "where_in_paper": "Timing methodology / integration and timing closure",
+    "decision": "Run timing closure as a throughout-the-design discipline—early cycle-time budgets, static timing of real implemented paths, management of latch transparency/time borrowing, and explicit treatment of on-chip variation—instead of depending on final manual ECOs.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "At this frequency and die size, paths crossing macros, blocks, clock domains, and sites could fail late if timing was only audited after integration; closure had to be designed into block interfaces and physical implementation from the start.",
+    "outcome": "The design closed at the stated greater-than-1.3-GHz class frequency and completed on schedule; the paper’s abstract singles out timing among the areas emphasized as enabling that result.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 48,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The phrase “timing closure by design” is associated with this design era and appears near the paper in search context, but I am not certain it is the section title or exact wording inside this paper.",
+    "confidence": 0.72
+  }
+]

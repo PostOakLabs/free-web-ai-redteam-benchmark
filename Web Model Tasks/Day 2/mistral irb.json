@@ -1,0 +1,115 @@
+```json
+[
+  {
+    "case_name": "PD_0.5%",
+    "inputs": {
+      "pd": 0.005,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.21345609396856857,
+      "Φ⁻¹(PD)": -2.575829303548901,
+      "Φ⁻¹(0.999)": 3.090232306167813,
+      "inner_Φ_argument": -1.294549946133697,
+      "Φ(·)": 0.09773776443735033,
+      "K_before_maturity_adjustment": 0.041731993996807645,
+      "b(PD)": 0.16708622985488109,
+      "K_after_maturity_adjustment": 0.041731993996807645,
+      "risk_weight": 0.5216499249600955
+    },
+    "result": {
+      "k_pct": 4.173199399680764,
+      "risk_weight_pct": 0.5216499249600955
+    },
+    "formula_basis": "K = LGD * (Φ((Φ⁻¹(PD) + √R * Φ⁻¹(0.999)) / √(1 - R)) - PD) * (1 + (M - 2.5) * b(PD))",
+    "known_benchmark": null,
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "PD_1.0%",
+    "inputs": {
+      "pd": 0.01,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.192783679165516,
+      "Φ⁻¹(PD)": -2.3263478740408408,
+      "Φ⁻¹(0.999)": 3.090232306167813,
+      "inner_Φ_argument": -1.0790950517201592,
+      "Φ(·)": 0.14027267845651592,
+      "K_before_maturity_adjustment": 0.05862270530543216,
+      "b(PD)": 0.13748613089693737,
+      "K_after_maturity_adjustment": 0.05862270530543216,
+      "risk_weight": 0.732783816317902
+    },
+    "result": {
+      "k_pct": 5.862270530543216,
+      "risk_weight_pct": 0.732783816317902
+    },
+    "formula_basis": "K = LGD * (Φ((Φ⁻¹(PD) + √R * Φ⁻¹(0.999)) / √(1 - R)) - PD) * (1 + (M - 2.5) * b(PD))",
+    "known_benchmark": {
+      "value": 92,
+      "matches": false
+    },
+    "weakest_point": "Disagreement with known benchmark"
+  },
+  {
+    "case_name": "PD_3.0%",
+    "inputs": {
+      "pd": 0.03,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.14677561921781157,
+      "Φ⁻¹(PD)": -1.880793608151251,
+      "Φ⁻¹(0.999)": 3.090232306167813,
+      "inner_Φ_argument": -0.7544485702827219,
+      "Φ(·)": 0.2252899580603288,
+      "K_before_maturity_adjustment": 0.08788048112714797,
+      "b(PD)": 0.09647810097676261,
+      "K_after_maturity_adjustment": 0.08788048112714797,
+      "risk_weight": 1.0985060140893497
+    },
+    "result": {
+      "k_pct": 8.788048112714797,
+      "risk_weight_pct": 1.0985060140893497
+    },
+    "formula_basis": "K = LGD * (Φ((Φ⁻¹(PD) + √R * Φ⁻¹(0.999)) / √(1 - R)) - PD) * (1 + (M - 2.5) * b(PD))",
+    "known_benchmark": null,
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "PD_10.0%",
+    "inputs": {
+      "pd": 0.1,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.12080855363989025,
+      "Φ⁻¹(PD)": -1.2815515655446004,
+      "Φ⁻¹(0.999)": 3.090232306167813,
+      "inner_Φ_argument": -0.22125829429620225,
+      "Φ(·)": 0.4124456607660609,
+      "K_before_maturity_adjustment": 0.14060054734472738,
+      "b(PD)": 0.05985636818667657,
+      "K_after_maturity_adjustment": 0.14060054734472738,
+      "risk_weight": 1.7575068418090922
+    },
+    "result": {
+      "k_pct": 14.060054734472738,
+      "risk_weight_pct": 1.7575068418090922
+    },
+    "formula_basis": "K = LGD * (Φ((Φ⁻¹(PD) + √R * Φ⁻¹(0.999)) / √(1 - R)) - PD) * (1 + (M - 2.5) * b(PD))",
+    "known_benchmark": null,
+    "weakest_point": "None"
+  }
+]
+```

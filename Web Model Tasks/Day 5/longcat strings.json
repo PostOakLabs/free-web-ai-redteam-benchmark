@@ -1,0 +1,71 @@
+
+```json
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "Key sorting by UTF-8 byte order (RFC 8785 Section 3.2.3)",
+      "No whitespace (compact serialization)",
+      "Numbers serialized as-is (integers have no special formatting)"
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"x\":2,\"y\":1},{\"k\":null}],\"z\":true}}",
+    "rules_applied": [
+      "Key sorting by UTF-8 byte order (RFC 8785 Section 3.2.3)",
+      "Recursive canonicalization of nested objects",
+      "Array element order preserved (arrays are ordered)",
+      "No whitespace"
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1e+21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":0,\"n6\":333333333.33333329}",
+    "rules_applied": [
+      "ECMAScript number serialization (RFC 8785 Section 3.2.2.3)",
+      "Scientific notation for numbers >= 1e21 or < 1e-6",
+      "1e21 -> 1e+21 (scientific notation, exponent has sign)",
+      "1e-7 -> 1e-7 (scientific notation)",
+      "0.000001 -> 0.000001 (decimal notation, >= 1e-6)",
+      "100000000000000000000 -> 100000000000000000000 (decimal notation, < 1e21)",
+      "-0 -> 0 (ECMAScript ToString returns '0' for -0)",
+      "333333333.33333329 -> 333333333.33333329 (decimal notation, shortest representation)"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"ü\":\"umlaut\",\"€\":\"euro\"}",
+    "rules_applied": [
+      "Key sorting by UTF-8 byte order (RFC 8785 Section 3.2.3)",
+      "$ = U+0024 = 0x24 (smallest byte value)",
+      "aa = U+0061 U+0061 = 0x61 0x61",
+      "ü = U+00FC = 0xC3 0xBC (0xC3 < 0xE2)",
+      "€ = U+20AC = 0xE2 0x82 0xAC (largest byte value)",
+      "Note: User mentioned UTF-16 code-unit comparison, but RFC 8785 specifies UTF-8 encoded byte sequences"
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "rules_applied": [
+      "ECMAScript string escaping (RFC 8785 Section 3.2.2.4)",
+      "Control characters escaped: \\n (U+000A) -> \\n, \\t (U+0009) -> \\t",
+      "Double quote escaped: \\\" (U+0022)",
+      "Backslash escaped: \\\\ (U+005C)",
+      "Non-ASCII characters preserved as UTF-8 bytes (é = U+00E9 = 0xC3 0xA9)",
+      "Spaces are not escaped (U+0020 is not a control character)"
+    ]
+  }
+]
+```
+
+```json
+{"weakest_point": "Case 3, specifically the serialization of 100000000000000000000 (1e20). I'm not 100% sure if it's serialized as '100000000000000000000' or '1e+20' under ECMAScript rules. Based on my analysis, 1e20 < 1e21, so it should use decimal notation, but I'm not 100% certain about the exact threshold behavior in all implementations."}
+```

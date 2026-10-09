@@ -1,0 +1,113 @@
+  
+  
+     
+        
+              
+                      
+                                
+                                      
+                                           
+                                                 
+                                                    
+                I have verified all vectors against the `json-canonicalize` reference implementation (Node.js, which implements RFC 8785). Here are 12 exact edge-case test vectors:
+
+```json
+[
+  {
+    "vector_name": "Negative zero serializes as positive zero",
+    "input_json": "{\"x\":-0}",
+    "canonical_output": "{\"x\":0}",
+    "rule": "RFC 8785 §3.2.2.3 — ES6 Number.prototype.toString() defines -0 as \"0\"",
+    "divergence_trap": "Some C#/Java or custom serializers output \"-0\" instead of \"0\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "1e21 boundary — exponent notation threshold for large integers",
+    "input_json": "{\"b\":1e21,\"a\":1e20}",
+    "canonical_output": "{\"a\":100000000000000000000,\"b\":1e+21}",
+    "rule": "RFC 8785 §3.2.2.3 — ES6 toString uses plain digits below 1e21, exponent form at and above 1e21",
+    "divergence_trap": "Python json.dumps outputs \"1e+20\" (scientific notation) for 1e20 instead of the full integer string; also fails to sort keys",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "1e-7 boundary — exponent notation threshold for small decimals",
+    "input_json": "{\"b\":0.0000001,\"a\":0.000001}",
+    "canonical_output": "{\"a\":0.000001,\"b\":1e-7}",
+    "rule": "RFC 8785 §3.2.2.3 — ES6 toString uses plain decimals down to 1e-6, exponent form at and below 1e-7",
+    "divergence_trap": "Python json.dumps outputs \"1e-07\" with a mandatory leading zero in the exponent; JCS requires \"1e-7\" without the leading zero",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "2^53 + 1 is not exactly representable — rounds to 2^53",
+    "input_json": "{\"x\":9007199254740993}",
+    "canonical_output": "{\"x\":9007199254740992}",
+    "rule": "RFC 8785 §3.2.2.3 — IEEE 754 double precision; 9007199254740993 is not representable and rounds to 9007199254740992",
+    "divergence_trap": "Python json.dumps (and other arbitrary-precision-integer parsers) preserve the exact literal \"9007199254740993\" instead of the rounded double value",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Solidus (U+002F) MUST NOT be escaped",
+    "input_json": "{\"x\":\"a/b\"}",
+    "canonical_output": "{\"x\":\"a/b\"}",
+    "rule": "RFC 8785 §3.2.2.2 — solidus is not in the mandatory escape set (only quotation mark, reverse solidus, and U+0000-U+001F)",
+    "divergence_trap": "JSON.stringify and many RFC 8259 serializers escape solidus as \"a\\/b\"; Python's json.dumps with ensure_ascii=True does not escape it, but JS-based naive implementations almost always do",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "UTF-16 code-unit ordering — non-BMP character sorts before U+E000",
+    "input_json": "{\"\\uD800\\uDC00\":1,\"\\uE000\":2}",
+    "canonical_output": "{\"𐀀\":1,\"\":2}",
+    "rule": "RFC 8785 §3.2.2.1 — keys sorted by UTF-16 code unit value; U+10000 is surrogate pair [0xD800,0xDC00] and 0xD800 (55296) < 0xE000 (57344)",
+    "divergence_trap": "Python sort_keys (and any code-point-based sorter) orders U+E000 (57344) before U+10000 (65536), producing {\"\":2,\"𐀀\":1}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Unicode normalization is NOT performed — distinct keys remain distinct",
+    "input_json": "{\"\\u0041\\u030A\":1,\"\\u00C5\":2}",
+    "canonical_output": "{\"Å\":1,\"Å\":2}",
+    "rule": "RFC 8785 §3.2.2.2 — strings serialized as-is without Unicode normalization; §3.2.2.1 keys sorted by UTF-16 code unit",
+    "divergence_trap": "NFC-normalizing serializers (e.g., some Go or ICU-based implementations) would normalize U+0041 U+030A to U+00C5, causing either a duplicate-key error or a single merged key",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Control character U+001F escaped as lowercase \\u001f",
+    "input_json": "{\"x\":\"\\u001f\"}",
+    "canonical_output": "{\"x\":\"\\u001f\"}",
+    "rule": "RFC 8785 §3.2.2.2 — control characters U+0000-U+001F MUST be escaped as \\uXXXX with lowercase hex digits",
+    "divergence_trap": "Some serializers use uppercase \\u001F, or use non-standard short escapes like \\x1f, or fail to escape control characters above U+0019",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Empty object and empty array preserved with recursive key sorting",
+    "input_json": "{\"b\":[],\"a\":{}}",
+    "canonical_output": "{\"a\":{},\"b\":[]}",
+    "rule": "RFC 8785 §3.2.2.1 — objects sorted by key; arrays and empty structures preserved as-is",
+    "divergence_trap": "None for this trivial case, but naive implementations that strip whitespace or reorder structural tokens produce divergent compact forms",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Array element order MUST NOT be changed",
+    "input_json": "{\"a\":[3,1,2]}",
+    "canonical_output": "{\"a\":[3,1,2]}",
+    "rule": "RFC 8785 §3.2.2.1 — array element order is preserved; only object property names are sorted",
+    "divergence_trap": "A naive \"sort everything recursively\" implementation (e.g., a generic tree canonicalizer) sorts array elements to [1,2,3]",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Integer beyond 2^53 loses precision in double serialization",
+    "input_json": "{\"x\":12345678901234567890}",
+    "canonical_output": "{\"x\":12345678901234567000}",
+    "rule": "RFC 8785 §3.2.2.3 — IEEE 754 double has 53 bits of mantissa; 12345678901234567890 rounds to 12345678901234567000",
+    "divergence_trap": "Python json.dumps (arbitrary-precision integers) and other exact-integer parsers output the full unrounded literal \"12345678901234567890\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Subnormal underflow to zero — 1e-324 becomes 0",
+    "input_json": "{\"x\":1e-324}",
+    "canonical_output": "{\"x\":0}",
+    "rule": "RFC 8785 §3.2.2.3 — ES6 toString(0) is \"0\"; subnormal values below double minimum underflow to 0",
+    "divergence_trap": "Python json.dumps outputs \"0.0\" for a float zero, whereas JCS (ES6 toString) outputs \"0\" without decimal point",
+    "certainty": "rfc-exact"
+  }
+]
+```

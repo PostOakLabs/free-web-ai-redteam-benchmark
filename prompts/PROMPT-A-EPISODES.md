@@ -1,0 +1,15 @@
+You are helping build a research dataset about how senior ASIC physical-design engineers actually reason during design closure. I need DRAFT case studies ("episodes") that a real 14-year physical-design veteran will later review, correct, or reject. Produce the most realistic, technically self-consistent drafts you can — and be completely honest about where each one comes from.
+
+**Output format: a SINGLE bare JSON array and NOTHING else.** No wrapper object, no markdown fences, no prose before or after, no second block.
+
+**Produce exactly 3 episodes**, one per scenario:
+
+1. A **routing-congestion crisis on a 28nm block**: ~1M placeable instances, ~80 hard macros (SRAMs), discovered at first detailed-route attempt after post-CTS optimization looked clean. The global-route overflow is concentrated in macro channels, not spread uniformly. The *obvious* fix was rejected for schedule or risk reasons; a less obvious one succeeded.
+2. A **timing-closure failure where the violation report's SHAPE drove the diagnosis**: the engineer distinguished "constraint problem" vs "logic-depth problem" vs "physical/placement problem" from how many paths failed, by how much, and what they shared — before touching anything.
+3. A **timing-budget / SDC-derivation decision at a block boundary**: how a budget between two blocks (or a false-path/multicycle decision) was derived, what alternative budget was rejected, and what would have gone wrong with the rejected one.
+
+**Each episode is a JSON object with exactly these fields:** `title` · `design_context` (node, instance count, macro count, clock domains, generic tool family) · `prior_state` (realistic self-consistent metrics: WNS/TNS, overflow %, utilization %, DRC count as applicable) · `observation` (with numbers) + `severity` (LOW|MODERATE|HIGH|CRITICAL) · `hypothesis` (causal claim) · `candidates_considered` (array of ≥3 `{action, rejected_because}` — rejections matter most and must cite a concrete cost) · `chosen_intervention` (repeatable specificity) · `post_state` (numerically consistent with prior_state and typical effect sizes — a pin-swap does not buy 500 ps; a congestion fix often COSTS a little timing) · `expert_assessment` (2–3 sentences: right call? general lesson? when would it NOT transfer?) · `confidence` (0.0–1.0) · `failure_class` (FAIL_CONGESTION | FAIL_TIMING | SDC_BUDGET) · `source_basis` (exactly one of `"recalled-public-case: <named source>"`, `"composite-of-common-practice"`, `"constructed-example"`) · `weakest_point` (the single detail most likely wrong).
+
+**Hard rules:** No invented chip, company, or person names. No sources you cannot name. Check your numbers before answering — inconsistent prior→post transitions are discarded mechanically. Boring-and-consistent beats dramatic-and-wrong. If you cannot produce a sound episode for a scenario, output `{"skipped": "<scenario>", "reason": "<honest reason>"}` — an honest skip scores higher than a fabricated episode.
+
+[prompt-version: A-v5 2026-08-31]

@@ -1,0 +1,29 @@
+[
+  {
+    "task": 1,
+    "steps": "Tier A: 130461 / 124331 = 1.049304 (130461 ÷ 124331: 124331 × 1.049 = 130423.219; remainder 37.781; 37.781 / 124331 ≈ 0.000304 → 1.049304). Tier B: 3914 / 3730 = 1.049330 (3730 × 1.049 = 3912.770; remainder 1.230; 1.230 / 3730 ≈ 0.000330 → 1.049330). Tier C: 26092 / 24866 = 1.049304 (24866 × 1.049 = 26084.434; remainder 7.566; 7.566 / 24866 ≈ 0.000304 → 1.049304). Tier D: 1305 / 1243 = 1.049879 (1243 × 1.049 = 1303.907; remainder 1.093; 1.093 / 1243 ≈ 0.000879 → 1.049879). Stated 4.9% factor = 1.049000. Factors are not identical (range 1.049304–1.049879); A and C match at 1.049304; B and D differ slightly due to integer rounding of the resulting dollar amounts. None equals exactly 1.049000.",
+    "answer": "factors=[1.049304,1.049330,1.049304,1.049879]; not mutually consistent to 6 dp; deviate from pure 1.049000 by +0.000304 to +0.000879",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 2,
+    "steps": "Inferred rounding rule from 2023→2024: multiply prior-year value by the CPI factor, then round to nearest integer dollar (standard banker's/ half-up observed: A 124331×1.049→130423.219→130461 after actual applied factor+round; similarly others land on integers). Apply uniform 3.4% = ×1.034 to each 2024 value. Tier A: 130461 × 1.034 = 130461 × 1 + 130461 × 0.03 + 130461 × 0.004 = 130461 + 3913.83 + 521.844 = 134896.674 → round to 134897. Tier B: 3914 × 1.034 = 3914 + 117.42 + 15.656 = 4047.076 → 4047. Tier C: 26092 × 1.034 = 26092 + 782.76 + 104.368 = 26979.128 → 26979. Tier D: 1305 × 1.034 = 1305 + 39.15 + 5.22 = 1349.37 → 1349.",
+    "answer": "2025 projected: A=134897, B=4047, C=26979, D=1349 (nearest-dollar rounding after ×1.034)",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 3,
+    "steps": "Official 2025 tier A = 134841. Projection was 134897. Difference = 134897 − 134841 = 56. Exact factor that yields 134841 from 130461: 134841 / 130461 ≈ 1.033572 (130461 × 1.033 = 134766.213; remainder 74.787; 74.787 / 130461 ≈ 0.000573 → 1.033573). Stated 3.4% = 1.034000. Discrepancy = 1.034000 − 1.033573 = 0.000427 → 4.27 basis points.",
+    "answer": "projection 134897 vs official 134841 (diff +56); exact factor 1.033573; discrepancy −4.27 bp from stated 3.4%",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 4,
+    "steps": "N/A",
+    "answer": "see final object",
+    "evidence_level": "computed"
+  },
+  {
+    "weakest_point": "The CPI-U percentage published for the annual adjustment is itself a rounded figure (to one decimal place); the agency multiplies by the unrounded index ratio (new CPI / prior CPI) before applying nearest-dollar rounding, so a published “3.4 percent” can correspond to an effective factor of ~1.03357 rather than exactly 1.03400."
+  }
+]

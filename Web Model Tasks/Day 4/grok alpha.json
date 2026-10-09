@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Clustered integer execution units with duplicated register files",
+    "where_in_paper": "Execution engine / integer pipeline description",
+    "decision": "Split the integer register file into two clusters, each with a duplicated 80-entry register file and two pipelines, supporting four-way integer execution",
+    "alternatives_or_rejected": "An idealized unclustered implementation with a single larger register file",
+    "rationale": "Clustering makes the design simpler and faster, although it costs an extra cycle of latency to broadcast results from one integer cluster to the other; performance cost of clustering and issue-queue arbitration simplifications is small (a few percent or less)",
+    "outcome": "Four integer pipes (upper/lower in each of two clusters); most dependent computations stay on the same cluster; cross-cluster result broadcast costs one extra cycle",
+    "quote_as_recalled": "This clustering makes the design simpler and faster, although it costs an extra cycle of latency to broadcast results from an integer cluster to the other cluster.",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page number and precise wording of the 'few percent' claim",
+    "confidence": 0.85
+  },
+  {
+    "title": "Line and way prediction for set-associative instruction cache",
+    "where_in_paper": "Instruction pipeline—Fetch / line and way prediction",
+    "decision": "Use a 64-Kbyte two-way set-associative instruction cache together with line and way prediction so that the next fetch block (including which way) is predicted and accessed with direct-mapped speed",
+    "alternatives_or_rejected": "A pure direct-mapped instruction cache (as in the prior 21164 8-Kbyte design) or a conventional set-associative access that would lengthen the critical fetch path",
+    "rationale": "Combines the advantages of set-associative behavior and fetch-bubble elimination with the fast access time of a direct-mapped cache; address paths needing extra logic (decode, branch prediction, tag compare) stay outside the critical fetch loop",
+    "outcome": "Line/way predictors correct ~95-100% of the time for most applications; most mispredictions cost only a single cycle; improved L1 hit rates versus the 21164 while preserving high-frequency fetch",
+    "quote_as_recalled": "a line and way prediction technique that combines the advantages of set-associative behavior and fetch bubble elimination, together with the fast access time of a direct-mapped cache",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact hit-rate percentage recalled from the paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Tournament branch predictor combining local and global history",
+    "where_in_paper": "Branch prediction section",
+    "decision": "Implement a tournament branch predictor that dynamically chooses, for each branch, between a local-history predictor and a global-history predictor",
+    "alternatives_or_rejected": "Larger tables of either local-history-only or global-history-only predictors",
+    "rationale": "The combination yields better prediction accuracy than larger tables of either individual method; the processor adapts to choose the best method for each branch",
+    "outcome": "90-100% success rate on most simulated applications/benchmarks; local predictor uses 10-bit histories for up to 1024 branches feeding 1024 counters; global uses 4096-entry tables indexed by 12-bit path history",
+    "quote_as_recalled": "The result is a tournament branch predictor with better prediction accuracy than larger tables of either individual method",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact table sizes and success-rate numbers",
+    "confidence": 0.82
+  },
+  {
+    "title": "Out-of-order execution with map stage and larger in-flight window",
+    "where_in_paper": "Architecture highlights / pipeline overview",
+    "decision": "Add a map (rename) stage and support out-of-order speculative execution allowing up to 80 in-flight instructions (versus 20 on the prior 21164)",
+    "alternatives_or_rejected": "Continuing with the in-order pipeline style of the 21164",
+    "rationale": "Instructions execute as soon as possible and in parallel with other nondependent work; critical-path computations start and complete quickly; more functional units plus dynamic techniques extract greater parallelism even though both generations fetch at most four instructions per cycle",
+    "outcome": "Processor is 50% to 200% faster than the 21164 for many applications; seven-stage pipeline similar to 21164 but with the added map stage fundamental to out-of-order techniques",
+    "quote_as_recalled": "One notable addition is the map stage that renames registers to expose instruction parallelism—this addition is fundamental to the 21264’s out-of-order techniques.",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact in-flight instruction count attribution to this paper versus related papers",
+    "confidence": 0.78
+  },
+  {
+    "title": "Larger two-way associative on-chip data cache",
+    "where_in_paper": "Internal memory system",
+    "decision": "Implement a 64-Kbyte two-way set-associative data cache (versus the prior generation’s smaller direct-mapped cache)",
+    "alternatives_or_rejected": "The 8-Kbyte direct-mapped data cache used in the 21164",
+    "rationale": "Much lower miss rates than the earlier design, contributing to a high-bandwidth, low-latency memory system that can service many parallel references",
+    "outcome": "Cache can support any combination of two loads or stores per cycle (double-pumped); tracks up to 32 in-flight loads, 32 stores and 8 cache misses; sustains >1.3 GBytes/s on Stream",
+    "quote_as_recalled": "This cache has much lower miss rates than the 8-Kbyte, direct-mapped cache in the earlier 21164.",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames the size/associativity choice as a weighed alternative versus other capacity points",
+    "confidence": 0.75
+  }
+]

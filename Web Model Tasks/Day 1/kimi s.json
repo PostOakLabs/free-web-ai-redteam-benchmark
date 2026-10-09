@@ -1,0 +1,162 @@
+[
+  {
+    "family": "ISO 26262-5 hardware architectural metrics",
+    "formulas": [
+      {
+        "name": "Single-Point Fault Metric (SPFM)",
+        "expression": "SPFM = 1 - (Σ λ_SPF + Σ λ_RF) / (Σ λ_SPF + Σ λ_RF + Σ λ_MPF,D + Σ λ_MPF,L + Σ λ_S)",
+        "variables": [
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults", "units": "FIT (10^-9 failures per hour)"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults", "units": "FIT"},
+          {"symbol": "λ_MPF,D", "meaning": "failure rate of detected multiple-point faults", "units": "FIT"},
+          {"symbol": "λ_MPF,L", "meaning": "failure rate of latent multiple-point faults", "units": "FIT"},
+          {"symbol": "λ_S", "meaning": "failure rate of safe faults", "units": "FIT"}
+        ],
+        "worked_example": "Element 1: λ_SPF=5, λ_RF=3, λ_MPF,D=10, λ_MPF,L=2, λ_S=80 FIT. Element 2: λ_SPF=2, λ_RF=1, λ_MPF,D=5, λ_MPF,L=1, λ_S=41 FIT. Numerator: Σ(λ_SPF+λ_RF)=7+4=11 FIT. Denominator: 7+4+15+3+121=150 FIT. SPFM = 1 - 11/150 = 1 - 0.073333 = 0.926667 = 92.67%. ASIL B target (≥90%) is met; ASIL C target (≥97%) is not met.",
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Annex C (normative), Clause 8 Table 4 for targets",
+        "known_uncertainty": "Exact table number for target values in Clause 8 is inferred from standard structure but not directly verified; the formula expression is the normative Annex C version."
+      },
+      {
+        "name": "Latent-Fault Metric (LFM)",
+        "expression": "LFM = 1 - Σ λ_MPF,L / (Σ λ_MPF,L + Σ λ_MPF,D + Σ λ_S)",
+        "variables": [
+          {"symbol": "λ_MPF,L", "meaning": "failure rate of latent multiple-point faults", "units": "FIT"},
+          {"symbol": "λ_MPF,D", "meaning": "failure rate of detected multiple-point faults", "units": "FIT"},
+          {"symbol": "λ_S", "meaning": "failure rate of safe faults", "units": "FIT"}
+        ],
+        "worked_example": "Same elements as SPFM example: Σ λ_MPF,L=3 FIT, Σ λ_MPF,D=15 FIT, Σ λ_S=121 FIT. Denominator: 3+15+121=139 FIT. LFM = 1 - 3/139 = 1 - 0.021583 = 0.978417 = 97.84%. ASIL C target (≥80%) and ASIL D target (≥90%) are both met.",
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Annex C (normative), Clause 8 Table 5 for targets",
+        "known_uncertainty": "Exact table number for target values in Clause 8 is inferred; the denominator expression is equivalent to (Σ λ_total - Σ λ_SPF - Σ λ_RF)."
+      },
+      {
+        "name": "Probabilistic Metric for Hardware Failure (PMHF)",
+        "expression": "PMHF = Σ λ_SPF + Σ λ_RF + (Σ λ_DPF,latent × Σ λ_DPF,det × T_lifetime) / 10^9, with all λ in FIT and T_lifetime in hours",
+        "variables": [
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults", "units": "FIT"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults", "units": "FIT"},
+          {"symbol": "λ_DPF,latent", "meaning": "failure rate of latent dual-point faults", "units": "FIT"},
+          {"symbol": "λ_DPF,det", "meaning": "failure rate of detected dual-point faults", "units": "FIT"},
+          {"symbol": "T_lifetime", "meaning": "operational lifetime of the item", "units": "hours"}
+        ],
+        "worked_example": "Σ λ_SPF=7 FIT, Σ λ_RF=4 FIT, Σ λ_DPF,latent=3 FIT, Σ λ_DPF,det=15 FIT, T_lifetime=100000 h. First two terms: 7+4=11 FIT. Dual-point term: (3×15×100000)/10^9 = 4,500,000/10^9 = 0.0045 FIT. PMHF = 11 + 0.0045 = 11.0045 FIT. This meets ASIL B and C targets (≤100 FIT) but not ASIL D (≤10 FIT).",
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": "Clause 9 / Annex F.2 (simplified), Clause 8 Table 6 for targets",
+        "known_uncertainty": "This is the simplified Annex F.2 formula; the full normative PMHF calculation in Clause 9 involves probabilistic integration over the operational lifetime and diagnostic test intervals, which is more complex than this algebraic approximation."
+      }
+    ],
+    "edge_cases": [
+      "Σ λ_total = 0 (no safety-related hardware elements): SPFM and LFM denominators become zero; calculator must abort and report undefined.",
+      "T_lifetime = 0: PMHF dual-point term collapses to zero, leaving only SPF+RF contributions; calculator should warn that lifetime must be positive.",
+      "SPFM exactly at threshold boundary (e.g., 90.000% for ASIL B): standard uses ≥, so equality passes; PMHF uses <, so equality at exactly 10 FIT for ASIL D fails."
+    ]
+  },
+  {
+    "family": "JEDEC FIT-rate math",
+    "formulas": [
+      {
+        "name": "Chi-squared upper-confidence-bound FIT rate",
+        "expression": "λ_CL [FIT] = (χ²_%CL, 2f+2 × 10^9) / (2 × t × ss × AF)",
+        "variables": [
+          {"symbol": "χ²_%CL, 2f+2", "meaning": "chi-squared statistic at confidence level %CL with (2f+2) degrees of freedom", "units": "dimensionless"},
+          {"symbol": "f", "meaning": "number of observed failures during test", "units": "count"},
+          {"symbol": "t", "meaning": "test duration per device", "units": "hours"},
+          {"symbol": "ss", "meaning": "sample size (number of devices tested)", "units": "count"},
+          {"symbol": "AF", "meaning": "acceleration factor from stress to use conditions", "units": "dimensionless"}
+        ],
+        "worked_example": "ss=231, t=1000 h, f=0, 60% confidence level. Degrees of freedom: 2×0+2=2. χ²_0.60,2 = 1.8326. AF=77.6 (from Arrhenius example). Denominator: 2×1000×231×77.6 = 35,851,200. λ_CL = (1.8326×10^9) / 35,851,200 = 51.1 FIT.",
+        "authority": "JEDEC JESD85",
+        "clause_locator": null,
+        "known_uncertainty": "Exact JESD85 section number is not verified; the χ² value depends on the statistical table or function implementation used."
+      },
+      {
+        "name": "Arrhenius acceleration factor",
+        "expression": "AF = exp[(E_a / k) × (1/T_use - 1/T_stress)]",
+        "variables": [
+          {"symbol": "E_a", "meaning": "apparent activation energy of the failure mechanism", "units": "electron-volts (eV)"},
+          {"symbol": "k", "meaning": "Boltzmann constant", "units": "eV/K (typically 8.617×10^-5)"},
+          {"symbol": "T_use", "meaning": "absolute use temperature", "units": "Kelvin"},
+          {"symbol": "T_stress", "meaning": "absolute stress test temperature", "units": "Kelvin"}
+        ],
+        "worked_example": "E_a=0.7 eV, k=8.617×10^-5 eV/K, T_use=55°C=328.15 K, T_stress=125°C=398.15 K. Exponent: (0.7/8.617×10^-5)×(1/328.15-1/398.15) = 8123.5×0.0005358 = 4.352. AF = exp(4.352) = 77.6.",
+        "authority": "JEDEC JESD85",
+        "clause_locator": null,
+        "known_uncertainty": "Exact JESD85 section number is not verified; typical E_a=0.7 eV is a broad industry default but actual values range from ~0.3 eV (electromigration) to ~1.0 eV (oxide breakdown), and using the wrong E_a can over- or under-accelerate by orders of magnitude."
+      }
+    ],
+    "edge_cases": [
+      "ss=0 or t=0 or AF=0: denominator becomes zero; calculator must reject input.",
+      "T_stress ≤ T_use: AF ≤ 1, which is physically valid only if the stress temperature does not accelerate the mechanism; calculator should warn that AF < 1 implies no acceleration or invalid input.",
+      "f=0 with 0% confidence level: χ²_0,2 = 0, yielding λ_CL = 0, which is an uninformative lower bound; calculator should require a positive confidence level."
+    ]
+  },
+  {
+    "family": "EAR advanced-computing parameters",
+    "formulas": [
+      {
+        "name": "Total Processing Performance (TPP)",
+        "expression": "TPP = Σ_i (2 × MacTOPS_i × bit_length_i)",
+        "variables": [
+          {"symbol": "MacTOPS_i", "meaning": "theoretical peak Tera operations per second for multiply-accumulate computation (D=A×B+C) of processing unit i", "units": "Tera operations per second (10^12 ops/s)"},
+          {"symbol": "bit_length_i", "meaning": "largest bit-length of the inputs to the multiply operation for processing unit i", "units": "bits"},
+          {"symbol": "n", "meaning": "number of digital processing units on the integrated circuit", "units": "count"}
+        ],
+        "worked_example": "Processing unit 1: MacTOPS=50, bit_length=16 → TPP1=2×50×16=1600. Processing unit 2: MacTOPS=25, bit_length=8 → TPP2=2×25×8=400. Total TPP = 1600+400 = 2000.",
+        "authority": "EAR Supplement No. 4 to Part 774, Technical Note 1 to ECCN 3A090",
+        "clause_locator": "15 CFR Part 774 Supplement No. 4, Technical Note 1",
+        "known_uncertainty": "Exact CFR citation for the Technical Note is inferred from EAR structure; the formula wording is verbatim from BIS guidance but the formal Federal Register citation may differ."
+      },
+      {
+        "name": "Performance Density (PD)",
+        "expression": "PD = TPP / applicable_die_area",
+        "variables": [
+          {"symbol": "TPP", "meaning": "total processing performance of the integrated circuit", "units": "dimensionless (TPP score)"},
+          {"symbol": "applicable_die_area", "meaning": "area in mm² of all logic dies manufactured with a non-planar transistor architecture on the integrated circuit", "units": "mm²"}
+        ],
+        "worked_example": "TPP=2000, applicable_die_area=400 mm². PD = 2000/400 = 5.0 TPP/mm².",
+        "authority": "EAR Supplement No. 4 to Part 774, Technical Note 4 to ECCN 3A090",
+        "clause_locator": "15 CFR Part 774 Supplement No. 4, Technical Note 4",
+        "known_uncertainty": "Exact CFR citation for the Technical Note is inferred; the definition of applicable_die_area excludes separate memory stacks (e.g., HBM) per BIS guidance."
+      },
+      {
+        "name": "ECCN 3A090 classification thresholds",
+        "expression": "3A090.a if TPP ≥ 4800 OR (TPP ≥ 1600 AND PD ≥ 5.92); 3A090.b if (TPP ≥ 2400 AND TPP < 4800 AND PD ≥ 1.6 AND PD < 5.92) OR (TPP ≥ 1600 AND PD ≥ 3.2 AND PD < 5.92)",
+        "variables": [
+          {"symbol": "TPP", "meaning": "total processing performance", "units": "dimensionless"},
+          {"symbol": "PD", "meaning": "performance density", "units": "TPP/mm²"}
+        ],
+        "worked_example": "TPP=2000, PD=5.0. 3A090.a: 2000<4800 and 5.0<5.92 → false. 3A090.b: first branch 2000<2400 → false; second branch 2000≥1600 AND 5.0≥3.2 AND 5.0<5.92 → true. Result: ECCN 3A090.b.",
+        "authority": "BIS Interim Final Rule (AI Diffusion IFR, January 2025) and subsequent amendments",
+        "clause_locator": null,
+        "known_uncertainty": "Threshold values are current as of April 2025 BIS guidance; an interim final rule was pending finalization and thresholds may have been revised between April 2025 and August 2026."
+      }
+    ],
+    "edge_cases": [
+      "applicable_die_area = 0: division by zero; calculator must reject because die area must be positive.",
+      "MacTOPS = 0 or bit_length = 0 for all units: TPP = 0, which is below all thresholds; calculator should return uncontrolled.",
+      "TPP or PD exactly at threshold boundary: regulation uses ≥ and < with exact numeric boundaries; equality on a lower bound pushes into the higher control tier."
+    ]
+  },
+  {
+    "family": "CHIPS Act incentives math",
+    "formulas": [
+      {
+        "name": "Advanced manufacturing investment credit (48D)",
+        "expression": "Credit = 0.35 × qualified_investment",
+        "variables": [
+          {"symbol": "qualified_investment", "meaning": "basis of qualified property placed in service by the taxpayer that is part of an advanced manufacturing facility", "units": "USD"}
+        ],
+        "worked_example": "Qualified investment = $1,000,000,000. Credit = 0.35 × $1,000,000,000 = $350,000,000.",
+        "authority": "26 U.S.C. § 48D",
+        "clause_locator": "26 U.S.C. § 48D(a)",
+        "known_uncertainty": "Statute was amended by Pub. L. 119-21 in 2025 to substitute 35% for 25%; no further amendments are verified as of August 2026, but tax legislation is subject to frequent change."
+      }
+    ],
+    "edge_cases": [
+      "qualified_investment = 0: credit = 0; this is valid but the calculator should flag that no credit is generated.",
+      "No pure-calculation statutory threshold exists for the primary-purpose test in § 48D(b)(3); the 75% illustrative threshold appears only in proposed regulations, not the statute, so a calculator cannot apply a hard numeric cutoff without regulatory guidance.",
+      "Negative qualified investment: not physically meaningful for basis; calculator must reject negative input."
+    ]
+  }
+]

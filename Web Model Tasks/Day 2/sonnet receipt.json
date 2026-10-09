@@ -1,0 +1,128 @@
+```json
+{
+  "receipt_kinds": [
+    {
+      "kind": "Composite receipt",
+      "produced_when": "Default output of a risc0 zkVM execution session that spans multiple segments (or a single segment); consists of a chain/list of per-segment STARK receipts plus assumption receipts for any resolved `env::verify` calls, unified under a composite structure rather than a single proof object.",
+      "certainty": "General/moderate — the existence of per-segment receipts chained via composite structure is a real risc0 design feature, but exact current struct naming may have shifted across versions."
+    },
+    {
+      "kind": "Succinct receipt",
+      "produced_when": "Produced by recursively compressing/folding the composite (multi-segment) STARK receipt into a single constant(ish)-size STARK proof via the recursion circuit ('lift' and 'join' recursion programs), so verification cost no longer scales with the number of segments.",
+      "certainty": "Moderate — the lift/join recursion terminology reflects risc0's actual recursion-based aggregation design, though I am not fully certain of current exact program names."
+    },
+    {
+      "kind": "Groth16 receipt",
+      "produced_when": "Produced by taking a succinct receipt and wrapping/compressing it one further step through a 'stark-to-snark' circuit that produces a Groth16 proof over the BN254 curve, giving small, constant-size, cheap-to-verify-on-chain (e.g. EVM) proofs — this is the form typically used for on-chain verification.",
+      "certainty": "Moderate-high — the general architecture (STARK -> STARK recursion -> Groth16 wrapping over BN254 for on-chain verification) is a well-known risc0 design choice; exact circuit/tool naming (e.g. 'stark_verify' circuit) recalled with lower confidence."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal (Groth16 proof bytes: typically A, B, C group elements)",
+      "type_shape": "Fixed-size byte array/struct encoding BN254 G1/G2 group elements (the standard Groth16 proof triple), possibly with a leading selector/version prefix byte(s) used by the on-chain verifier to pick a verifying key.",
+      "meaning": "The actual zk-SNARK proof attesting that the wrapped STARK verification circuit accepted, i.e. that a valid succinct receipt existed for the claimed computation.",
+      "verifier_must_check": "Run the Groth16 pairing check e(A,B) = e(alpha,beta)*e(C,gamma)^-1*... against the fixed verifying key for the corresponding circuit version, with the public inputs derived from the claim digest.",
+      "failure_if_skipped": "If the pairing check itself is skipped or short-circuited, any seal bytes (including garbage or a proof for an unrelated statement) would be accepted, letting an attacker submit a forged claim of arbitrary program execution and output."
+    },
+    {
+      "field": "claim / journal digest encoded as public input(s)",
+      "type_shape": "One or more field elements (BN254 scalar field elements) derived from hashing/packing the ReceiptClaim digest (or journal digest + image ID digest) into the Groth16 circuit's public input format.",
+      "meaning": "Binds the SNARK proof to a specific claim (specific program image, specific journal/output, specific exit code) rather than being a proof of 'some computation happened.'",
+      "verifier_must_check": "Recompute the expected public input(s) independently from the claim the verifier is checking against (its own copy of image ID + journal bytes + exit code), and compare bit-for-bit/field-element-for-field-element against what's fed into the pairing check — never trust public inputs supplied alongside the seal without recomputation.",
+      "failure_if_skipped": "If the verifier accepts attacker-supplied public inputs instead of recomputing them from the claim it actually cares about, an attacker can pair a valid seal for claim A with public inputs claiming to be for claim B, causing the verifier to believe an unrelated (possibly malicious) program's output was produced by the expected image."
+    },
+    {
+      "field": "image ID (method ID / program digest)",
+      "type_shape": "A fixed-size digest (commonly a 256-bit / 32-byte hash, sometimes represented as multiple field-sized words) identifying the compiled guest program (its RISC-V ELF/binary content, effectively a commitment to the exact code that ran).",
+      "meaning": "Tells the verifier WHICH program produced the journal — i.e., that the specific known/audited guest binary was executed, not some arbitrary code.",
+      "verifier_must_check": "Compare the image ID embedded in (or derivable from) the claim against the expected/whitelisted image ID for the application in question, exactly, before trusting the journal contents.",
+      "failure_if_skipped": "If the verifier checks that 'some valid receipt exists' but never pins down which image ID it corresponds to, an attacker can get a legitimately-proven receipt for a DIFFERENT (attacker-controlled) guest program and pass off its journal as if it came from the expected, trusted program."
+    },
+    {
+      "field": "journal digest (output commitment)",
+      "type_shape": "A digest (hash) of the journal bytes — the public output data the guest program committed to via `env::commit`.",
+      "meaning": "Commits to the actual output/result the program produced, without requiring the full (potentially large) journal bytes to be part of the SNARK's public inputs directly.",
+      "verifier_must_check": "Recompute the digest of the journal bytes it has received out-of-band and compare against the journal digest embedded in the claim/public inputs, ensuring the journal the verifier is reading was really the one committed to inside the proof.",
+      "failure_if_skipped": "If the verifier trusts journal bytes handed to it separately from the receipt without re-hashing and comparing to the committed digest, an attacker can present a valid proof for one journal digest alongside a swapped, more favorable set of journal bytes."
+    },
+    {
+      "field": "exit code (system + user exit code pair)",
+      "type_shape": "A small enum/struct value, e.g. a pair distinguishing normal halt vs fault vs 'system split' (used internally for segmentation) vs paused, plus a user-supplied sub-code on normal halt.",
+      "meaning": "Encodes how/why the guest program terminated — whether it was a clean successful halt with a given user code, or an abnormal termination.",
+      "verifier_must_check": "Confirm the exit code indicates a legitimate, expected successful halt (and, if the application semantics depend on the specific user exit sub-code, check that value too) rather than accepting receipts for faulted or paused executions as if they were successful.",
+      "failure_if_skipped": "If a verifier accepts any exit code as valid, a guest program that faulted partway through (potentially with attacker-influenced partial/garbage journal state, depending on implementation) or that used a 'paused' continuation state could be misinterpreted as a completed, trustworthy computation."
+    },
+    {
+      "field": "control root / control ID (recursion verifying-key commitment)",
+      "type_shape": "A digest or small set of digests identifying which version of risc0's recursion/aggregation circuits (and ultimately which Groth16 verifying key) were used to produce this receipt.",
+      "meaning": "Pins the receipt to a specific trusted circuit-version lineage, since the STARK-to-STARK recursion and STARK-to-SNARK wrapping circuits are versioned artifacts of the risc0 toolchain, not the guest program itself.",
+      "verifier_must_check": "Verify that the control root/ID embedded in or implied by the receipt matches one of the verifier's allow-listed, trusted control roots for the version(s) of risc0 it supports, and that the Groth16 verifying key used for the pairing check corresponds to that same version.",
+      "failure_if_skipped": "If the verifier does not pin the control root/ID to a known-good set, an attacker could exploit a receipt generated by a deprecated, buggy, or maliciously modified version of the recursion circuits (if such a version's verifying key were somehow substitutable) to get proofs accepted for computations that were never actually correctly proven under the intended circuit."
+    }
+  ],
+  "claim_structure": {
+    "components": [
+      "pre_state_digest / image ID — commitment to the guest program binary/method being executed (and, in continuation contexts, the starting machine state)",
+      "post_state_digest — commitment to the ending machine state after execution (used internally across segment boundaries in composite receipts; often not directly meaningful to an application-level verifier beyond confirming a clean halt)",
+      "exit_code — system exit code (e.g., Halted, Paused, SystemSplit, Fault) paired with a user-defined sub-code on Halted",
+      "input digest — a commitment to any input data the guest was configured with (used in some verification flows; may be a zero/empty digest when unused)",
+      "output digest / journal digest — commitment to the journal bytes (public output) the guest committed via `env::commit`, typically wrapped inside an 'Output' structure that may also include an assumptions digest for composite receipts"
+    ],
+    "claim_digest_computation": "The ReceiptClaim struct's fields are serialized into a fixed structure and hashed (using risc0's chosen hash, historically SHA-256-based tagged hashing for its internal Merkle/struct-hash scheme) to produce a single claim digest; this digest is what ultimately gets bound into the recursion/Groth16 circuit's public inputs, rather than the individual fields being passed through separately.",
+    "certainty": "Moderate — the conceptual shape (pre-state/image commitment, post-state, exit code, input/output digests folded into one struct that gets hashed) matches risc0's actual ReceiptClaim design, but exact current field names (e.g., whether it's literally called 'pre_state_digest' vs something else in the current source) and the precise tagged-hash construction are not recalled with high confidence and may have changed across major versions."
+  },
+  "binding_chain": [
+    "Step 1: The guest program executes and calls `env::commit(&data)`, and the zkVM serializes and hashes this data into the journal digest as part of the execution trace.",
+    "Step 2: At segment-proof time, the STARK circuit constrains that the claimed journal digest (and image ID, exit code, etc.) is consistent with the actual machine execution trace being proven — this is where 'journal bytes' become cryptographically tied to 'claim digest' via the per-segment STARK proof(s).",
+    "Step 3: Composite (multi-segment) receipts are aggregated via the recursion circuit(s) (lift/join), which prove 'these per-segment claims chain together into one overall claim' without re-executing the original computation, producing a succinct receipt whose single claim digest still traces back to the same journal/image/exit-code commitments.",
+    "Step 4: The succinct receipt's STARK proof and its claim digest are fed into the stark-to-snark wrapping circuit, which is itself a fixed circuit whose correctness (and whose verifying key) depends on a specific 'control root'/control ID identifying that exact version of the recursion verifier being wrapped.",
+    "Step 5: The stark-to-snark circuit outputs public inputs for the Groth16 proof that encode (typically as one or more BN254 field elements) the claim digest (or a further hash/packing of it) plus the control root, so the Groth16 seal is only valid for that specific (claim digest, control root) pairing.",
+    "Step 6: An on-chain or off-chain verifier holding the fixed Groth16 verifying key (which is itself tied to the control root's circuit version) recomputes the expected public inputs from its own trusted image ID + journal bytes + exit code + expected control root, and checks the Groth16 pairing equation against the seal — if it passes, the entire chain from journal bytes up through the SNARK is bound together.",
+    "certainty_for_this_section": "Moderate — the high-level 'commit -> STARK -> recursion -> wrap -> SNARK public inputs -> pairing check' pipeline reflects real risc0 architecture, but the precise point(s) at which control root enters the public inputs vs. is hardcoded into the verifying key, and the exact field-packing scheme, are recalled at lower confidence and could differ from the current implementation."
+  ],
+  "version_coupling": {
+    "circuit_version_dependent_parameters": [
+      "The Groth16 verifying key (alpha/beta/gamma/delta group elements and IC coefficients) is tied to one specific compiled stark-to-snark circuit, which changes whenever risc0 updates its recursion/wrapping circuits.",
+      "The control root / set of control IDs (identifying which recursion programs — lift, join, resolve, identity, etc. — are considered valid) changes across risc0 releases as the recursion circuit set is revised or extended.",
+      "The STARK proof system parameters used inside the succinct/composite receipts (field, hash function, FRI parameters) for the base zkVM circuit are also version-pinned, though these matter less to a pure Groth16-receipt verifier since that layer is already compressed away by the wrapping step."
+    ],
+    "what_breaks_with_mismatched_version": "If a verifier uses an outdated or wrong verifying key for a receipt produced by a newer (or differently-configured) risc0 toolchain version, Groth16 pairing verification will simply fail (proof rejected) in the honest-mismatch case — but the more dangerous failure mode is a verifier that accepts an OLD, deprecated verifying key/control root pair whose validity should have been revoked (e.g., because that old circuit had a discovered bug), allowing receipts crafted against the deprecated, faulty circuit to be accepted as if they were current."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Recomputing the claim digest with an out-of-date field ordering/serialization or the wrong hash tag, or forgetting to include one field of the claim entirely (e.g. omitting exit code) when constructing the expected digest.",
+      "check_that_catches_it": "Cross-check the verifier's claim-digest computation against reference test vectors covering all claim fields, including at least one test case where a single field changes and the digest must change too."
+    },
+    {
+      "bug": "Trusting an image ID or journal bytes passed alongside the receipt without recomputing/comparing them against what's actually bound into the proof's public inputs.",
+      "check_that_catches_it": "A test where the accompanying (out-of-band) journal bytes or image ID are deliberately mismatched from the ones baked into a valid seal, confirming the verifier rejects rather than silently trusting the mismatched side channel."
+    },
+    {
+      "bug": "Accepting any exit code (including Fault or Paused) as if it were a successful Halt, because the verifier only checks 'proof verifies' and not 'the underlying claim represents a completed successful execution.'",
+      "check_that_catches_it": "A test receipt with a non-Halted exit code (still a validly-provable claim about a real, if unsuccessful/incomplete, execution) that the verifier must explicitly reject at the application layer."
+    },
+    {
+      "bug": "Hardcoding or accepting a verifying key/control root without pinning it to an explicit allow-list, so a receipt generated under an old/deprecated or unofficial circuit build silently verifies.",
+      "check_that_catches_it": "A test that swaps in a receipt produced (or simulated) under a known-deprecated control root and confirms the verifier rejects it due to the allow-list check, independent of whether the Groth16 pairing itself would pass."
+    },
+    {
+      "bug": "Off-by-one or endianness errors when packing the claim digest into BN254 scalar-field public input elements (since a 256-bit digest doesn't fit directly into one BN254 scalar field element without truncation/splitting), causing the verifier to silently check a truncated or shifted version of the intended digest.",
+      "check_that_catches_it": "Test vectors with claim digests near field-size boundaries or with specific bit patterns in the top bits, confirming the packing/truncation the verifier applies exactly matches the packing used at proof-generation time."
+    },
+    {
+      "bug": "Reusing or caching a verification result keyed only on the seal bytes without also keying on the (claim digest, control root) pair, so a seal that is legitimately reused across contexts (if the system allows receipt reuse) is treated as valid for a DIFFERENT claim than the one it actually attests to.",
+      "check_that_catches_it": "A test that submits the same seal bytes alongside two different claimed (image ID, journal) pairs and confirms the verifier only accepts the one whose recomputed public inputs actually match the seal."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "Moderate confidence on the composite -> succinct -> groth16 progression and its general purpose (cost reduction, on-chain verification); low-moderate confidence on exact current struct/program names.",
+    "groth16_receipt_fields": "The conceptual role of each field (seal, public inputs, image ID, journal digest, exit code, control root) is drawn from general risc0 architecture knowledge; exact byte layouts, field orderings, and current struct/serialization names are NOT verified against source and should be treated as approximate rather than exact.",
+    "claim_structure": "Moderate confidence on the conceptual claim components (image/pre-state, post-state, exit code, input/output digests folded into one hashed struct); low confidence on exact current field names and the precise tagged-hash algorithm details.",
+    "binding_chain": "Moderate confidence on the high-level pipeline shape; low-moderate confidence on exactly where/how control root enters the public inputs versus being baked into the verifying key, and on the precise field-packing of a 256-bit digest into BN254 scalars.",
+    "version_coupling": "Moderate-high confidence on the general principle that verifying key and control root/IDs are version-pinned artifacts that must be matched; low confidence on specifics of how risc0 currently manages/publishes/rotates these across releases.",
+    "common_verifier_bugs": "These are constructed from general zk-SNARK/zkVM verifier-implementation reasoning (a defect-pattern library applicable to STARK/SNARK-wrapped verification systems generally) rather than recalled from specific documented risc0 CVEs or incident reports; I am not confidently aware of specific historical risc0 verifier bugs matching each entry, and these should be read as plausible risk classes to test for, not confirmed historical incidents.",
+    "overall": "This document reflects general/moderate-confidence architectural knowledge of the risc0 zkVM proof system as of its v1.x-era public design, not a verified read of the current source code or documentation; several field names, exact digest/serialization schemes, and version-specific details are flagged as uncertain rather than asserted, per the task's instructions."
+  }
+}
+```

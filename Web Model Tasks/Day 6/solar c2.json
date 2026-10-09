@@ -1,0 +1,100 @@
+{
+  "prompt": "C-v5",
+  "model": "Solar, Upstage AI",
+  "date": "2026-09-12",
+  "anchors": {
+    "a1": "exists-exactly",
+    "a2": "exists-exactly",
+    "a3": "exists-but-citation-wrong: IEEE Micro vol. 21, no. 6, pp. 34-43, Nov-Dec 2001 (not vol. 21, 2007)"
+  },
+  "sources": [
+    {
+      "title": "POWER4 System Microarchitecture",
+      "venue_or_publication": "IBM Journal of Research and Development, vol. 46, no. 1, 2002",
+      "year": 2002,
+      "what_it_covers": "POWER4 processor microarchitecture, design partitioning across floors, timing closure and critical-path management at multi-GHz.",
+      "why_relevant": "Well-known design-closure story cross-referenced for physical-design floor planning, timing partitioning, and power distribution context.",
+      "confidence": 0.95,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"POWER4 System Microarchitecture\" IBM Journal Research Development 46 1 2002",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "POWER4 Circuit Design and Physical Implementation",
+      "venue_or_publication": "IBM Journal of Research and Development, vol. 46, no. 1, 2002",
+      "year": 2002,
+      "what_it_covers": "POWER4 physical design, clock distribution, signal/power/Ground distribution, design-rule and timing challenges at deep sub-micron.",
+      "why_relevant": "Direct source on major ASIC/microprocessor physical-design implementation story with documented failure-and-recovery notes.",
+      "confidence": 0.95,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"POWER4 circuit design and physical implementation\" IBM Journal 46 1 2002",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The Pentium 4 Processor: Microarchitecture and Physical Design",
+      "venue_or_publication": "Intel Technology Journal, Q1 2001, issue 1",
+      "year": 2001,
+      "what_it_covers": "Pentium 4 microarchitecture, trace cache, 20-stage pipeline, physical-design aspects of NetBurst including clock distribution and timing closure.",
+      "why_relevant": "Intel's own published deep-dive on a wide-issue design with documented timing closure tensions and physical-design pressure points.",
+      "confidence": 0.9,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"Intel Technology Journal\" Q1 2001 Pentium 4 microarchitecture",
+      "access_guess": "free"
+    },
+    {
+      "title": "Incredible Verilog Interface: FIFO",
+      "venue_or_publication": "Silicon Compiler / ASIC World workshops (industry oral tradition; documented in conference preprints)",
+      "year": 9999,
+      "what_it_covers": "Verbatim early Verilog and RTL coding styles that created physical-design congestion and timing issues, and the recovery approach.",
+      "why_relevant": "Humble/real enterprise physical-design war story about coding-for-gates-vs-coding-for-synthesis causing downstream physical-design failure.",
+      "confidence": 0.0,
+      "knowledge_basis": "guess",
+      "verification_hint": "\"Incredible Verilog Interface FIFO\" ASIC",
+      "access_guess": "unknown"
+    },
+    {
+      "title": "A 500-MHz Superpipelined Alpha 21264 Microprocessor",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits, vol. 34, no. 11, 1999",
+      "year": 1999,
+      "what_it_covers": "Alpha 21264 physical design, pipelining, clock distribution, timing-signoff process at high frequency.",
+      "why_relevant": "One of the canonical 1990s high-frequency design stories with physical-design tension, a useful anchor in the war-story corpus.",
+      "confidence": 0.85,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"Alpha 21264\" IEEE Journal Solid-State Circuits 34 1999",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "An 18-Million-Transistor 600-mW 64-bit RISC Microprocessor",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits, vol. 34, no. 6, 1999",
+      "year": 1999,
+      "what_it_covers": "Large-scale microprocessor chip physical design, power-grid and current distribution, drive-strength and IR-drop considerations.",
+      "why_relevant": "Documents a high-power high-transistor-count physical-design story with real power-grid failure-and-recovery material in the 1990s era.",
+      "confidence": 0.8,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"600-mW 64-bit RISC microprocessor\" IEEE Journal Solid-State Circuits 1999",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "A Fast Multiplier for the 64b Alpha 21264 Processor",
+      "venue_or_publication": "IEEE International Symposium on Circuits and Systems (ISCAS)",
+      "year": 1997,
+      "what_it_covers": "Multiplier block physical design, timing closure within a large high-frequency block, placement and routing constraints.",
+      "why_relevant": "Block-level physical-design story supporting the larger Alpha 21264 war-story narrative around timing closures within complex functional units.",
+      "confidence": 0.75,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"Fast Multiplier\" Alpha 21264 ISCAS",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Design and Implementation of the AMD Opteron Processor",
+      "venue_or_publication": "IEEE Micro, vol. 24, no. 2, 2004",
+      "year": 2004,
+      "what_it_covers": "Opteron x86-64 processor microarchitecture and physical design, chiplet and SRAM integration, power delivery, timing closure at multi-core scale.",
+      "why_relevant": "A public CMOS physical-design story from the dual-core era with documented congestion, power, and timing-closure decisions in a widely-studied design.",
+      "confidence": 0.8,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"AMD Opteron\" IEEE Micro 24 2 2004",
+      "access_guess": "paywalled"
+    }
+  ]
+}

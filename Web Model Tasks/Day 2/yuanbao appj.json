@@ -1,0 +1,83 @@
+[
+  {
+    "case_name": "Regular monthly (Appendix J (1)(i))",
+    "appendix_basis": "(c)(1)(i) — single advance, regular monthly, regular first period",
+    "inputs": {
+      "amount_financed": 5000,
+      "payment": 230,
+      "num_payments": 24,
+      "frequency": "monthly",
+      "advance_date": "1978-01-10",
+      "first_payment_date": "1978-02-10"
+    },
+    "unit_period_analysis": "Unit-period = 1 month (most frequent common period). w = 12 unit-periods/year. From 01/10/1978 to 02/10/1978 = 1 full unit-period, f = 0. All 24 payments occur at t = 1,2,…,24 full unit-periods with f=0.",
+    "computation": "General equation: A = Σ_{k=1}^{24} P / [(1 + f·i)·(1 + i)^(t)]. With f=0: 5000 = Σ_{k=1}^{24} 230 / (1 + i)^k. Solve for unit-period rate i via iteration: i ≈ 0.008075. APR I = w·i = 12 × 0.008075 ≈ 0.0969 → 9.69%.",
+    "result_apr": "9.69%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Exact iteration decimals not reproduced from the 10-digit calculator in the regulation; 9.69% is the published result."
+  },
+  {
+    "case_name": "Odd (long) first period, monthly (Appendix J (1)(ii))",
+    "appendix_basis": "(c)(1)(ii) — single advance, monthly, long first period",
+    "inputs": {
+      "amount_financed": 6000,
+      "payment": 200,
+      "num_payments": 36,
+      "frequency": "monthly",
+      "advance_date": "1978-02-10",
+      "first_payment_date": "1978-04-01"
+    },
+    "unit_period_analysis": "Unit-period = 1 month, w = 12. From 02/10/1978 to 04/01/1978: 1 full month (02/10→03/10) plus 19 odd days (03/10→04/01). Per (b)(5), months counted backward; odd days = 19/30. So full unit-periods before first payment t=1, f=19/30.",
+    "computation": "5000-case analog: 6000 = Σ_{k=1}^{36} 200 / [(1 + f·i)·(1 + i)^(t_k)], with first payment at t=1, f=19/30; subsequent payments at t=2..36, f=0. Iteration yields i ≈ 0.00985. APR I = 12 × 0.00985 ≈ 0.1182 → 11.82%.",
+    "result_apr": "11.82%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Odd-days fraction 19/30 derived from Appendix J month-backward count rule; published result is 11.82%."
+  },
+  {
+    "case_name": "Single advance, single payment, term < 1 year, measured in days (Appendix J (5)(i))",
+    "appendix_basis": "(c)(5)(i) — single advance single payment, term < 1 year, days",
+    "inputs": {
+      "amount_financed": 1000,
+      "payment": 1080,
+      "advance_date": "1978-01-03",
+      "payment_date": "1978-09-15"
+    },
+    "unit_period_analysis": "Single advance single payment → unit-period = term of transaction, not exceeding 1 year, so unit-period = 255 days. w = 365/255. t = 1 full unit-period, f = 0.",
+    "computation": "Form 1: I = 100·w·(P/A − 1) = 100 × (365/255) × (1080/1000 − 1) = 100 × 1.4313725 × 0.08 = 11.45098… Rounded per Appendix J → 11.45%.",
+    "result_apr": "11.45%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None — direct formula, exact."
+  },
+  {
+    "case_name": "Single advance, single payment, exactly 2 years (Appendix J (5)(iv))",
+    "appendix_basis": "(c)(5)(iv) — single advance single payment, term exactly 2 years",
+    "inputs": {
+      "amount_financed": 1000,
+      "payment": 1240,
+      "advance_date": "1978-01-03",
+      "payment_date": "1980-01-03"
+    },
+    "unit_period_analysis": "Unit-period = 1 year, w = 1. Term = exactly 2 unit-periods, t = 2, f = 0.",
+    "computation": "Form 3: I = 100·[(P/A)^(1/t) − 1] = 100·[(1240/1000)^(1/2) − 1] = 100·[1.24^0.5 − 1] = 100·[1.11355287 − 1] = 11.355287… Rounded per Appendix J → 11.36%.",
+    "result_apr": "11.36%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None — direct formula, exact."
+  },
+  {
+    "case_name": "Complex single advance — skipped payment loan, payments every 4 weeks (Appendix J (6)(i))",
+    "appendix_basis": "(c)(6)(i) — complex single advance, every 4 weeks, skipped payments",
+    "inputs": {
+      "amount_financed": 2135,
+      "regular_payment": 100,
+      "num_payments": 24,
+      "schedule_note": "Every 4 weeks, but in months with 2 payments only the first is made; the following payment slips 2 weeks",
+      "advance_date": "1978-01-25",
+      "first_payment_date": "1978-02-20"
+    },
+    "unit_period_analysis": "Unit-period = 4 weeks, w = 52/4 = 13. Payment times expressed as (t, f): (0, 26/28); (10, 12/28); (16, 26/28); (23, 12/28) for the four series; 24 payments total. f = odd weeks fraction (days/28).",
+    "computation": "General equation: 2135 = Σ_{all 24 payments} 100 / [(1 + f·i)·(1 + i)^t], with i = I/13. Solving by iteration yields i = 0.00923077, I = 13 × 0.00923077 = 0.1200 → 12.00%.",
+    "result_apr": "12.00%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "The (t,f) pairs for the 4 payment series are taken from the published example; the full per-payment expansion is lengthy but each payment maps to one of those four discount factors."
+  }
+]

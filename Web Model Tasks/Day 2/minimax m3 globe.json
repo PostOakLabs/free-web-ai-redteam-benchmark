@@ -1,0 +1,47 @@
+[
+  {
+    "example_id": null,
+    "article": "Article 2.1 (definition of GloBE Income) with Article 3.1 (Covered Taxes)",
+    "fact_pattern": "Single Constituent Entity in Country X. Financial Accounting Net Income (FANI) before tax = 1,000. Current tax expense in Country X = 50. There are no other items. No deferred tax, no payroll, no tangible assets. Jurisdictional ETR is then computed.",
+    "computation": "Step 1: Adjusted Covered Taxes = Current tax expense of 50 (simplified; assume no adjustments to current tax under Articles 3.2-3.4). Step 2: GloBE Income is taken directly as FANI of 1,000 (simplified; assume no Article 2.2-2.10 timing adjustments). Step 3: Jurisdictional ETR = Adjusted Covered Taxes / GloBE Income = 50 / 1,000 = 0.05 = 5%.",
+    "result": "Jurisdictional ETR is 5%, which is below the 15% minimum rate, so a Top-up Tax would arise in Country X (Top-up Tax percentage = 15% - 5% = 10%).",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Direction of the rate gap: the illustrative examples use this ETR-mechanics form repeatedly, but the specific numbers and any deferred-tax interaction are my own, not transcribed from a labelled example number in the March 2022 / May 2025 illustrative-examples document."
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.1 (transition relief from deferred tax)",
+    "fact_pattern": "Constituent Entity in Country X. FANI = 1,000. Recomputed opening deferred tax liability (DTL) = 200. Recomputed opening deferred tax asset (DTA) = 100. Recomputed closing DTL = 250. Recomputed closing DTA = 80. No current tax. The Opening DTL is treated as a liability for Article 9.1.1 purposes only if the is below 15% (here 10%).",
+    "computation": " Total deferred tax adjustment = (Closing DTL - Opening DTL) - (Closing DTA - Opening DTA) = (250 - 200) - (80 - 100) = 50 - (-20) = 70. This is an increase in net deferred tax liability of 70, which would reduce Adjusted Covered Taxes by 70. Step 2: Article 9.1.1 transition adjustment: deferred tax expense attributable to Opening DTL is excluded from the post-2023 ETR computation. Step 3: Excluded amount = Opening DTL of 200 x (15% - 10%) / 10% = 200 x 0.5 = 100 (illustrative re-grossing). Step 4: Adjusted Covered Taxes used for the ETR = the post-2023 number with the Opening DTL component added back; the post-2023 deferred tax movement of 70 is retained.",
+    "result": "Opening DTL of 200 is effectively deferred-tax locked out of the 5-year transition ETR test; only deferred tax relating to post-30-November-2021 movements affects the transitional jurisdictional ETR.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The re-grossing arithmetic (200 x (15%-10%)/10%) is my attempt to back into the standard 'exclude only the part that would push ETR to 15%' mechanic; the exact formula and the specific 200/100/250 are not taken from a recalled labelled example in the document."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.2 (Substance-Based Income Exclusion - payroll)",
+    "fact_pattern": "Constituent Entity in Country X. Eligible Payroll Costs for the year = 500. Country X's payroll carve-out transition rate = 5% (2024 transitional rate band).",
+    "computation": "Step 1: Identify transitional rate for Year 1 (assumed 2024) of payroll carve-out = 5%. Step 2: Payroll SBIE = Eligible Payroll Costs x 5% = 500 x 5% = 25. Step 3: If Tangible Asset SBIE were also computed separately and added, the combined carve-out would be the sum of payroll and tangible-asset carve-outs.",
+    "result": "Payroll carve-out of 25 is excluded from Excess Profits before applying the Top-up Tax percentage of (15% - ETR).",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Transitional glide path direction: I have labelled 5% as the 2024 payroll rate consistent with the Year-1 transitional band, but the exact Year-1 figure (the published band starts at higher percentages and glides down to a permanent rate) is a frequent point of confusion; verify against the current Annex A transitional schedule before relying on the number."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.3 (Substance-Based Income Exclusion - tangible assets)",
+    "fact_pattern": "Constituent Entity in Country X. Carrying Value of Eligible Tangible Assets = 4,000. Tangible-asset carve-out transition rate = 7.5% (illustrative Year-1 transitional band).",
+    "computation": "Step 1: Identify transitional tangible-asset rate for the year = 7.5%. Step 2: Tangible Asset SBIE = Carrying Value x 7.5% = 4,000 x 7.5% = 300. Step 3: Excess Profits = GloBE Income - (Payroll SBIE + Tangible Asset SBIE) - Substance-Based Income Exclusion (net).",
+    "result": "Tangible-asset carve-out of 300 excluded from the Excess Profits base.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Carrying value basis: Article 5.3 uses the average of opening and closing carrying values for tax purposes (not financial accounting carrying value); I used a single 4,000 figure, which the document's worked examples would not do."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.5 (de minimis exclusion) with Article 2.4 (revenue test)",
+    "fact_pattern": "Constituent Entity in Country X. Average GloBE Revenue (over the test period) = 950 (units, e.g. m). Average GloBE Income (over the test period) = 5. Both are below the 1,000 revenue and 50 income de minimis thresholds (illustrative).",
+    "computation": "Step 1: Average GloBE Revenue = 950 < 1,000 -> revenue condition met. Step 2: Average GloBE Income = 5 < 50 -> income condition met. Step 3: Both conditions are satisfied, the de minimis exclusion applies, and the Top-up Tax for the period is deemed zero for that jurisdiction.",
+    "result": "Jurisdictional Top-up Tax = 0 under the de minimis safe harbour for that year (subject to Article 5.5 monitoring and recapture conditions).",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The de minimis threshold currency-unit ('EUR 10 million and EUR 1 million' per the Model Rules, not 1,000 / 50) and the test-period averaging convention are not reflected in the inputs; my chosen numbers are pedagogical, not a transcription of a published example."
+  }
+]

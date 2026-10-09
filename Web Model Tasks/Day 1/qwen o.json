@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Throughput-per-watt rather than single-thread performance",
+    "where_in_paper": "Introduction / design goals",
+    "decision": "Target aggregate throughput and throughput per watt for commercial server workloads instead of maximizing single-thread performance.",
+    "alternatives_or_rejected": "Conventional high-performance single-thread designs, such as wider or out-of-order cores, were treated as poor matches for the power envelope and workload mix.",
+    "rationale": "Server workloads contain many parallel threads and are often limited by memory latency; many simple threads can use execution resources more efficiently within a fixed power budget.",
+    "outcome": "The paper presents Niagara as a 32-thread processor intended to deliver high aggregate throughput at low power.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Eight simple cores instead of fewer complex cores",
+    "where_in_paper": "Architecture overview / core-count discussion",
+    "decision": "Implement eight simple SPARC cores on a single die, with four threads per core, rather than a smaller number of complex cores.",
+    "alternatives_or_rejected": "Fewer, more complex cores with out-of-order execution or wider issue were implicitly rejected because they consume more area and power and are less effective for high-thread-count server workloads.",
+    "rationale": "Simple cores are smaller and lower power; available thread-level parallelism lets the chip spend its area and power budget on more threads rather than on single-thread sophistication.",
+    "outcome": "The resulting chip has 8 cores and 32 hardware threads, trading per-thread speed for aggregate throughput.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.70
+  },
+  {
+    "title": "Four-way fine-grained multithreading per core",
+    "where_in_paper": "Core / multithreading section",
+    "decision": "Each core supports four hardware threads and interleaves them fine-grained through a simple in-order pipeline.",
+    "alternatives_or_rejected": "Single-threaded cores, coarse-grained multithreading, or adding out-of-order logic to hide latency were less attractive; the paper argues that fine-grained SMT hides latency more simply and with lower power.",
+    "rationale": "Frequent thread switching keeps the pipeline busy during cache misses and long-latency operations without the complexity, area, and power cost of out-of-order execution.",
+    "outcome": "The core achieves high utilization across threads while remaining simple and low power.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.68
+  },
+  {
+    "title": "Memory hierarchy sized for many threads",
+    "where_in_paper": "Cache and memory-system section",
+    "decision": "Use small private L1 caches per core and a shared on-chip L2 cache, with an integrated memory subsystem, to serve many simultaneous threads.",
+    "alternatives_or_rejected": "Large private caches per core or relying primarily on off-chip memory would either consume too much area and power or provide insufficient bandwidth and latency for 32 threads.",
+    "rationale": "Many threads generate high aggregate memory traffic; a shared L2 and integrated memory path reduce off-chip traffic and improve effective bandwidth within power limits.",
+    "outcome": "The paper describes a memory system intended to sustain high throughput for multithreaded server workloads.",
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "confidence": 0.50
+  },
+  {
+    "title": "Architecture constrained by a low-power design point",
+    "where_in_paper": "Power / performance discussion",
+    "decision": "Keep the chip within a modest server power envelope by simplifying cores and relying on multithreading rather than raising frequency or adding complex single-thread features.",
+    "alternatives_or_rejected": "High-frequency, high-power complex cores were rejected because power and cooling limits, and throughput-per-watt goals, dominate server economics.",
+    "rationale": "Power is a first-order constraint; simpler cores plus many threads deliver better throughput per watt than pursuing single-thread speed.",
+    "outcome": "The paper presents Niagara as achieving high throughput within a low-power design point.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.60
+  }
+]

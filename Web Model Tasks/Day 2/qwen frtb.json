@@ -1,0 +1,121 @@
+[
+  {
+    "case_name": "Parametric ES at 97.5% (Normal P&L)",
+    "inputs": {
+      "confidence_level": "97.5%",
+      "alpha": 0.025,
+      "distribution": "Normal(0, 1)",
+      "volatility_sigma": 1.0,
+      "units": "Standard Deviations (sigma)"
+    },
+    "computation": {
+      "z_alpha": 1.9600,
+      "VaR_multiplier": 1.9600,
+      "pdf_at_z_alpha_phi": 0.05844,
+      "ES_multiplier_formula": "phi(z_alpha) / alpha",
+      "ES_multiplier_calculation": "0.05844 / 0.025 = 2.3376",
+      "VaR_value": "1.9600 * 1.0 = 1.9600",
+      "ES_value": "2.3376 * 1.0 = 2.3376"
+    },
+    "result": {
+      "var_multiplier": 1.9600,
+      "es_multiplier": 2.3376,
+      "units": "sigma"
+    },
+    "formula_basis": "ES_alpha = sigma * [phi(Phi^-1(1-alpha)) / alpha]. VaR_alpha = sigma * Phi^-1(1-alpha). Anchored to MAR30/MAR33 parametric Expected Shortfall standard under normality.",
+    "weakest_point": "The assumption of normality severely underestimates tail risk (fat tails) compared to empirical market returns, which is a known limitation of pure parametric ES without heavy-tailed distributions."
+  },
+  {
+    "case_name": "Parametric ES at 99% (Normal P&L)",
+    "inputs": {
+      "confidence_level": "99%",
+      "alpha": 0.01,
+      "distribution": "Normal(0, 1)",
+      "volatility_sigma": 1.0,
+      "units": "Standard Deviations (sigma)"
+    },
+    "computation": {
+      "z_alpha": 2.3263,
+      "VaR_multiplier": 2.3263,
+      "pdf_at_z_alpha_phi": 0.02665,
+      "ES_multiplier_formula": "phi(z_alpha) / alpha",
+      "ES_multiplier_calculation": "0.02665 / 0.01 = 2.6650",
+      "VaR_value": "2.3263 * 1.0 = 2.3263",
+      "ES_value": "2.6650 * 1.0 = 2.6650"
+    },
+    "result": {
+      "var_multiplier": 2.3263,
+      "es_multiplier": 2.6650,
+      "units": "sigma"
+    },
+    "formula_basis": "ES_alpha = sigma * [phi(Phi^-1(1-alpha)) / alpha]. VaR_alpha = sigma * Phi^-1(1-alpha). Anchored to MAR30/MAR33 parametric Expected Shortfall standard under normality.",
+    "weakest_point": "At higher confidence levels (99% vs 97.5%), the divergence between parametric normal ES and empirical fat-tailed ES grows significantly, making the normality assumption increasingly dangerous for capital adequacy."
+  },
+  {
+    "case_name": "Liquidity-Horizon-Scaled ES (MAR33)",
+    "inputs": {
+      "base_ES_10day": 2.3376,
+      "base_horizon_days": 10,
+      "liquidity_horizon_LH_days": 40,
+      "risk_factor_category": "Broad Market Indices (Example)",
+      "units": "USD Millions"
+    },
+    "computation": {
+      "scaling_factor_formula": "sqrt(LH / 10)",
+      "scaling_factor_calculation": "sqrt(40 / 10) = sqrt(4) = 2.0",
+      "scaled_ES_calculation": "2.3376 * 2.0 = 4.6752"
+    },
+    "result": {
+      "scaled_es": 4.6752,
+      "units": "USD Millions"
+    },
+    "formula_basis": "ES_LH = ES_10 * sqrt(LH / 10). Anchored to MAR33 liquidity horizon scaling rules for risk factors that cannot be easily liquidated within 10 days.",
+    "weakest_point": "The square-root-of-time rule assumes independent and identically distributed (i.i.d.) returns and constant volatility, which fails to capture volatility clustering and autocorrelation often present in less liquid risk factors over longer horizons."
+  },
+  {
+    "case_name": "Historical Simulation ES at 97.5% (N=20)",
+    "inputs": {
+      "sample_size": 20,
+      "confidence_level": "97.5%",
+      "alpha": 0.025,
+      "pnl_values_sorted_worst_to_best": [
+        -120.0,
+        -105.0,
+        -95.0,
+        -88.0,
+        -80.0,
+        -72.0,
+        -65.0,
+        -58.0,
+        -50.0,
+        -45.0,
+        -40.0,
+        -35.0,
+        -30.0,
+        -25.0,
+        -20.0,
+        -15.0,
+        -10.0,
+        -5.0,
+        -2.0,
+        1.0
+      ],
+      "units": "USD Millions"
+    },
+    "computation": {
+      "tail_probability_alpha": 0.025,
+      "N_times_alpha": "20 * 0.025 = 0.5",
+      "observations_in_tail": "0.5 observations",
+      "fractional_observation_treatment": "Partial Observation Weighting Convention (honestly named as text is silent). The 97.5% tail requires averaging the worst 0.5 observations. The worst observation (index 1, value -120.0) represents 1.0 full observation (5% probability mass). Since 0.5 < 1.0, the tail is entirely contained within this single worst observation. The tail average is computed as (0.5 * -120.0) / 0.5 = -120.0.",
+      "observations_entering_tail": "Index 1 (value -120.0) with a weight of 0.5.",
+      "tail_sum": "0.5 * -120.0 = -60.0",
+      "tail_average_es": "-60.0 / 0.5 = -120.0"
+    },
+    "result": {
+      "es_value": -120.0,
+      "units": "USD Millions"
+    },
+    "formula_basis": "ES_alpha = (1 / (N * alpha)) * sum(PnL_i in tail) (with fractional weighting for non-integer N*alpha). Anchored to MAR33 historical simulation requirements for ES tail averaging.",
+    "weakest_point": "With only 20 observations, the 97.5% tail (0.5 observations) relies entirely on the single worst outcome, making the ES estimate highly unstable and entirely dependent on the chosen fractional-observation convention, as MAR33 does not explicitly dictate interpolation for such small samples."
+  }
+]

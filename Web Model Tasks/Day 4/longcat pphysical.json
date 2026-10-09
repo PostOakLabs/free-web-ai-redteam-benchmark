@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clock distribution topology selection",
+    "where_in_paper": "Clock distribution / global clocking",
+    "decision": "Adopted a balanced global clock distribution network using a single PLL source with matched delay paths to minimize skew across the dual-core die.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To achieve GHz-class frequencies on a large 0.18µm SOI die, controlling clock skew between the two cores and across the chip was critical; a matched-delay tree was chosen to limit worst-case skew and support timing closure.",
+    "outcome": "Reported low enough skew to meet setup/hold margins at the target frequency points; the design taped out successfully at 1 GHz+.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact skew numbers and whether a single PLL or multiple PLLs were used are not recalled verbatim.",
+    "confidence": 0.55
+  },
+  {
+    "title": "Power delivery and on-die decoupling strategy",
+    "where_in_paper": "Power distribution / power density",
+    "decision": "Used a combination of on-chip decoupling capacitors and a carefully planned power grid to manage di/dt noise and IR drop under high switching activity.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "With ~174 M transistors switching at GHz frequencies in 0.18µm CMOS, power density and supply noise were first-order risks; on-die decaps were added to stabilize the supply during simultaneous switching events.",
+    "outcome": "The paper reports that measured supply noise stayed within the margins assumed during timing signoff, enabling the chip to hit its frequency targets.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact decap density and whether MIM or MOS decaps are used are not recalled verbatim.",
+    "confidence": 0.5
+  },
+  {
+    "title": "Timing closure methodology with OCV derating",
+    "where_in_paper": "Timing methodology / signoff",
+    "decision": "Implemented a statistical-leaning on-chip-variation (OCV) derating methodology for setup and hold signoff rather than purely corner-based static timing analysis.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "At 0.18µm and GHz frequencies, within-die variation threatened to consume a large fraction of the clock period; OCV derating was adopted to avoid over-design while still guaranteeing yield across process spread.",
+    "outcome": "The reported post-silicon frequency binning matched the signoff predictions, validating the OCV-based closure flow.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 40,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact derating factors and whether the paper calls it 'OCV' or 'statistical' are not recalled verbatim.",
+    "confidence": 0.5
+  },
+  {
+    "title": "Macro placement and floorplan for the dual cores and caches",
+    "where_in_paper": "Physical design / floorplanning",
+    "decision": "Chose a floorplan that placed the two processor cores symmetrically with shared L2/L3 interfaces and minimized long global wires between them.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationala": "Symmetric placement was used to balance wire delays between the cores and the shared cache fabric, easing timing closure and reducing the risk of one core limiting the other's frequency.",
+    "outcome": "The paper states that this placement allowed the chip to meet its cycle-time goals without requiring excessive repeater insertion or extra metal layers.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the L2 was on-die or partly off-die in the floorplan description is not recalled verbatim.",
+    "confidence": 0.5
+  },
+  {
+    "title": "I/O and signal integrity for high-speed off-chip interfaces",
+    "where_in_paper": "I/O design / signal integrity",
+    "decision": "Used controlled-impedance I/O with on-die termination and careful shielding for the high-speed buses connecting to the off-die L3 and fabric.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To support the multi-chip module (MCM) off-die L3 and chip-to-chip fabric at GHz-class edge rates, signal integrity and simultaneous switching noise had to be managed; on-die termination and shielding were chosen to keep eye diagrams open.",
+    "outcome": "The paper reports that the I/O design met the required bit-error-rate and timing margins, enabling the MCM-based Regatta systems to operate at the intended bus speeds.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 45,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact I/O standard (e.g., SSTL, HSTL) and termination values are not recalled verbatim.",
+    "confidence": 0.45
+  }
+]
+```

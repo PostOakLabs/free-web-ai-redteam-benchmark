@@ -1,0 +1,87 @@
+[
+  {
+    "case_name": "Single direct 51% blocked owner - simple majority",
+    "entities": [
+      {"id": "SDN_A", "blocked": true},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN_A", "to": "Target_Co", "pct": 51.0}
+    ],
+    "computation": "Direct path: SDN_A -> Target_Co at 51.0%. Only one path. Aggregate = 51.0%. Rule applied: aggregate is the sum of all paths' percentage ownership by blocked owners; ownership percentages across paths sum because they represent independent equity stakes. SDN_A is itself blocked, so any entity it owns ≥50% in aggregate is blocked.",
+    "blocked_verdicts": ["Target_Co"],
+    "guidance_basis": "OFAC FAQ 398: ownership of 50% or more in the aggregate, directly or indirectly, by one or more blocked persons, causes the entity to be treated as blocked.",
+    "weakest_point": "No indirect chains here; the simple case is unambiguous. Direction of aggregation: I sum ownership percentages by blocked persons across all paths."
+  },
+  {
+    "case_name": "Two independent blocked owners each below 50%, combined exceed 50% (convergent, sum)",
+    "entities": [
+      {"id": "SDN_A", "blocked": true},
+      {"id": "SDN_B", "blocked": true},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN_A", "to": "Target_Co", "pct": 30.0},
+      {"from": "SDN_B", "to": "Target_Co", "pct": 25.0}
+    ],
+    "computation": "Path 1: SDN_A -> Target_Co at 30.0%. Path 2: SDN_B -> Target_Co at 25.0%. Both blocked persons reach Target_Co through independent paths; aggregate = 30.0% + 25.0% = 55.0%. Per OFAC, ownership by 'one or more blocked persons' is summed across blocked owners when each individually owns less than 50% but the aggregate exceeds 50%. Result: Target_Co is blocked.",
+    "blocked_verdicts": ["Target_Co"],
+    "guidance_basis": "OFAC FAQ 398: '50% or more in the aggregate' means the combined ownership of all summed across each blocked person's path.",
+    "weakest_point": "The rule direction: this is the headline case the 50% Rule addresses. Edge order does not affect the sum."
+  },
+  {
+    "case_name": "Convergent graph - blocked person reaches Targeto through two intermediaries (independent paths, both ≥50% so attribution)",
+    "entities": [
+      {"id": "SDN_A", "blocked": true},
+      {"id": "HoldCo_X", "blocked": false},
+      {"Co_Y", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN_A", "to": "HoldCo_X", "pct": 100.0},
+      {"from": "HoldCo_X", "to": "Target_Co", "pct": 40.0},
+      {"from": "SDN_A", "to": "HoldCo_Y", "pct": 60.0},
+      {"from": "HoldCo_Y", "to": "Target_Co", "pct": 20.0}
+    ],
+    "computation": "Two paths: (1) SDN_A -> HoldCo_X (100%) -> Target_Co (40%). (2) SDN_A -> HoldCo_Y (60%,50% so attribute) -> Target_Co (20%). Indirect treatment per OFAC: a blocked person's ownership is FULLY ATTRIBUTED through a ≥50%-owned entity (the intermediary is itself blocked by the 50% Rule, and the SDN is treated as owning the intermediary's holdings). Path 1: SDN_A is treated as owning 40% of Target_Co via HoldCo_X. Path 2: SDN_A is treated as owning 20% of Target_Co via HoldCo_Y. Aggregate = 40.0% + 20.0% = 60.0%. ≥50% -> Target_Co blocked.",
+    "blocked_verdicts": ["HoldCo_X", "HoldCo_Y", "Target_Co"],
+    "guidance_basis": "OFAC FAQ 401: an entity owned 50% or more by a blocked person is itself blocked; the blocked person's interest is then attributed through that entity. Independent paths from a single blocked owner to a target are summed (convergent graph).",
+    "weakest_point": "Treatment choice: I applied FULL ATTRIBUTION (not multiplication) because OFAC's rule treats the ≥50%-owned intermediary as the blocked person, so the SDN is deemed to own the intermediary's full holdings. If one instead treated indirect ownership as multiplicative (40% × 100% = 40% on path 1; 20% × 60% = 12% on path 2; aggregate 52%), the answer would differ. OFAC's actual practice is full attribution through a ≥50%-owned intermediary, but I flag that some commentary discusses multiplicative fallback only when no ≥50% threshold is crossed at the intermediary level."
+  },
+  {
+    "case_name": "Divergent graph - blocked owner of HoldCo which owns three subsidiaries at varying percentages, one chain crosses a 49% (non-majority) intermediary",
+    "entities": [
+      {"id": "SDN_A", "blocked": true},
+      {"id": "HoldCo_Z", "blocked": false},
+      {"id": "Sub_LLC1", "blocked": false},
+      {"id": "Sub_LLC2", "blocked": false},
+      {"id": "Sub_LLC3", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN_A", "to": "HoldCo_Z", "pct": 100.0},
+      {"from": "HoldCo_Z", "to": "Sub_LLC1", "pct": 80.0},
+      {"from": "HoldCo_Z", "to": "Sub_LLC2", "pct": 60.0},
+      {"from": "HoldCo_Z", "to": "Sub_LLC3", "pct": 49.0}
+    ],
+    "computation": "HoldCo_Z is 100% owned by SDN_A, so HoldCo_Z is blocked by the 50% Rule. Through HoldCo_Z, SDN_A is attributed with the full holdings of HoldCo_Z in each subsidiary. Sub_LLC1: SDN_A attributed 80.0%. Sub_LLC2: SDN_A attributed 60.0%. Sub_LLC3: SDN_A attributed 49.0%. Aggregate per subsidiary = the attributed percentages (only one SDN path each). Sub_LLC1 (80% ≥ 50%) BLOCKED; Sub_LLC2 (60% ≥ 50%) BLOCKED; Sub_LLC3 (49% < 50%) NOT BLOCKED under the 50% Rule solely on SDN_A's indirect path. If a non-blocked 1% owner of Sub_LLC3 is also blocked, aggregate changes; none here.",
+    "blocked_verdicts": ["HoldCo_Z", "Sub_LLC1", "Sub_LLC2"],
+    "guidance_basis": "OFAC FAQ 398/401; full attribution through a ≥50%-owned intermediary; per-target 50% test for the indirect owner's holdings.",
+    "weakest_point": "Sub_LLC3 at 49% is NOT blocked under SDN_A's indirect interest alone, but any additional blocked owner of Sub_LLC3 (even direct) could push it past 50%. I did not include such an owner, so Sub_LLC3 is not blocked. This case assumes a single blocked chain."
+  },
+  {
+    "case_name": "Chain through a 49%-owned intermediary - multiplicative fallback because the intermediary is NOT itself blocked by the 50% Rule",
+    "entities": [
+      {"id": "SDN_A", "blocked": true},
+      {"id": "MinorCo_M", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN_A", "to": "MinorCo_M", "pct": 49.0},
+      {"from": "MinorCo_M", "to": "Target_Co", "pct": 100.0}
+    ],
+    "computation": "MinorCo_M is owned 49% by SDN_A (<50%), so MinorCo_M is NOT itself blocked by the 50% Rule on SDN_A's interest alone. Indirect ownership by SDN_A of Target_Co = 49.0% × 100.0% = 49.0% (multiplicative). Aggregate SDN_A ownership in Target_Co = 49.0% (<50%). Result: Target_Co NOT blocked solely by SDN_A's indirect chain. If any direct blocked owner of Target_Co exists (e.g., 2% additional), aggregate would change; none here. NOTE: this is the case where OFAC's full-attribution rule does NOT apply because the intermediary is below 50%; multiplicative math governs.",
+    "blocked_verdicts": [],
+    "guidance_basis": "OFAC FAQ 401 (and surrounding guidance): the full-attribution / blocked-intermediary shortcut applies only when the intermediary is itself ≥50% blocked. Below 50%, ownership passes through multiplicatively.",
+    "weakest_point": "Direction of the rule at the 49% boundary: I applied multiplicative math (49% × 100% = 49%). This is the most fragile area because OFAC's exact treatment of sub-50% indirect chains in guidance has been discussed as potentially still full-attribution in some scenarios. I am applying the multiplicative as the conservative reading of FAQ 401, but flag this as 'unsure' in spirit."
+  }
+]

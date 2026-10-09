@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Instruction window / reorder buffer size selection under wire-delay constraint",
+    "where_in_paper": "Introduction / front-end scheduling discussion, early pages",
+    "decision": "Chose to keep the out-of-order issue window size moderate (the paper reports a 35-entry issue queue context / window around 35-40 instructions) rather to a much larger window",
+    "alternatives_or_rejected": "Larger monolithic reorder/issue window; the paper argues against scaling window size much further because of wire delay across the die",
+    "rationale": "Wire delay dominates at the target cycle time frequency; a larger centralized window would force the cycle to lengthen or operation to become multi-cycle, so the design accepted a smaller window to hit frequency",
+    "outcome": "Achieves high frequency by keeping the window compact; paper presents this as the wire-delay-driven timing closure argument that shapes the floorplan",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact window number (35 vs 40 vs 41) — I am uncertain whether the paper uses '35' or another figure; the qualitative argument about wire-delay limiting window size is the load-bearing point and I believe it is in the paper",
+    "confidence": 0.7
+  },
+  {
+    "title": "Clustered integer execution units with inter-cluster communication",
+    "where_in_paper": "Integer execution / instruction issue section, mid-article",
+    "decision": "Split integer execution into two clusters (two sets of functional units) that each receive their own subset of instructions, with results forwarded between clusters via dedicated bypass paths",
+    "alternatives_or_rejected": "Single unified integer cluster / monolithic execution datapath; the paper argues-delay / fan-in made a single cluster unattractive at the target cycle",
+    "rationale": "Wire delay and register-file/queue port scaling at high frequency make a single central issue structure and unified RF impractical; clustering localizes wires and lets each half run fast",
+    "outcome": "Paper reports two integer clusters with arbitration at issue and inter-cluster result forwarding; compiler/scheduler mitigates some imbalance",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames this as 'considered and rejected a unified cluster' vs. just describes the clustered design; the clustered design itself is definitely in the paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Replicated instruction cache (dual I-cache ports / mirrored paths) to feed two clustered integer halves",
+    "where_in_paper / front-end section",
+    "decision": "Replicated the instruction cache (or its output paths) so each cluster can be fed from its own copy/port, rather than broadcasting from one cache to two clusters over long",
+    "alternatives_or_rejected": "Single shared I-cache feeding both clusters over long wires; rejected on wire-delay / cycle-time grounds",
+    "rationale": "Wire delay from a single I-cache output to both clusters would not meet cycle time at the target frequency; replication shortens the wires and lets each side locally",
+    "outcome": "Paper reports the replicated I-cache arrangement enabling the clustered integer pipeline to meet frequency targets",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am less certain this specific replication rationale is stated explicitly as a weighed decision; it may be presented more as a structural consequence than a debated choice",
+    "confidence": 0.55
+  },
+  {
+    "title": "Wire-delay-driven floorplanning with timing-driven placement",
+    "where_in_paper": "Physical design / floorplanning discussion, later pages",
+    "decision": "Adopted a timing-driven / wire-delay-aware floorplan (with regional placement of pipeline latches and balanced wire budgets) rather than a purely functional or area-driven layout",
+    "alternatives_or_rejected": "Functional floorplanning without explicit timing budgets; the paper argues this would not close timing at the target cycle",
+    "rationale": "At the 21264's cycle time and process, wire delay rivals or exceeds gate delay; cycle time can only be met by floorplanning that budgets wire lengths and inserts pipeline latches along long paths",
+    "outcome": "Paper presents the wire-delay-balanced floorplan (including the well-known quad/cluster placement) as the means of achieving the aggressive cycle",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether this is framed as an explicit decision- with rejected alternatives vs. described as a methodology; qualitative argument is high confidence, exact phrasing uncertain",
+    "confidence": 0.65
+  },
+  {
+    "title": "Frequency / IPC trade-off positioning",
+    "where_in_paper": "Introduction or conclusion",
+    "decision": "Positioned the design toward maximizing clock frequency (with moderate issue width and modest window) rather than maximizing IPC at lower frequency",
+    "alternatives_or_rejected": "Higher-IPC / lower-frequency design point; the paper argues this was explicitly considered",
+    "rationale": "Paper's stated rationale: in the target performance envelope and with the given process, overall performance favored high frequency over deeper issue, and wire-delay constraints reinforced that choice",
+    "outcome": "Paper reports the resulting frequency / SPEC performance numbers consistent with this trade-off",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am least certain as a weighed decision in this. being general P6/21264 industry commentary; weakest of the five entries",
+    "confidence": 0.4
+  }
+]

@@ -1,0 +1,88 @@
+```json
+[
+  {
+    "case_name": "Reserve coverage test (full-backing check)",
+    "inputs": {
+      "token_supply_units": 10000000,
+      "reference_value_per_token": 1.00,
+      "total_token_liability": 10000000,
+      "reserve_asset_market_value": 9750000,
+      "unit": "USD (or reference currency unit)"
+    },
+    "computation": {
+      "coverage_ratio_formula": "coverage_ratio = reserve_asset_market_value / total_token_liability",
+      "coverage_ratio_calc": "9,750,000 / 10,000,000 = 0.9750",
+      "coverage_pct": "97.50%",
+      "full_backing_requirement": "coverage_ratio >= 1.00 (reserve must be at least equal in value to claims/tokens in circulation at all times)",
+      "shortfall_amount": "10,000,000 - 9,750,000 = 250,000"
+    },
+    "result": {"coverage_ratio": 0.975, "verdict": "INADEQUATE against the full-backing (1:1 reserve-to-claims) test", "shortfall": 250000, "unit": "USD"},
+    "article_basis": "MiCA Article 36 (Obligation to maintain a reserve of assets in favour of holders of asset-referenced tokens / e-money tokens) requires issuers to maintain reserve assets whose value is at all times at least equal to the value of claims of holders; Article 34 sets related management obligations. Article number given at moderate confidence — verify against current consolidated text.",
+    "tail_convention": "For coverage ratio, LOW values are the adverse tail (a ratio below 1.00, i.e. under-collateralization, is the failure mode); this test examines whether the ratio falls below the 1.00 threshold, which is the correct adverse-side check for a higher-is-better metric.",
+    "weakest_point": "Reserve asset 'market value' is treated as a single clean number, but the regulation requires valuation methodology detail (mark-to-market timing, which asset classes, custody segregation) that is not specified here; the article citation (36 vs a renumbered provision) is stated at moderate rather than high confidence."
+  },
+  {
+    "case_name": "Own-funds requirement computation",
+    "inputs": {
+      "average_reserve_of_assets_value": 9750000,
+      "PERCENTAGE_OF_RESERVE_PARAMETER_NAME": "K_reserve_pct (named constant, current numeric value NOT confidently known and not guessed)",
+      "FIXED_MINIMUM_OWN_FUNDS_PARAMETER_NAME": "K_fixed_minimum (named constant, current numeric value NOT confidently known and not guessed)",
+      "unit": "USD"
+    },
+    "computation": {
+      "test_A_percentage_of_reserve": "own_funds_required_A = K_reserve_pct * average_reserve_of_assets_value = K_reserve_pct * 9,750,000",
+      "test_B_fixed_minimum": "own_funds_required_B = K_fixed_minimum",
+      "combined_rule_structure": "own_funds_required = max(test_A_percentage_of_reserve, test_B_fixed_minimum, other_named_tests_if_applicable) -- MiCA's own-funds rules for significant/other ARTs and EMTs use a comparison across multiple prescribed tests (a percentage-of-average-reserve test and a fixed-euro-minimum test among them); the exact set and the applicable percentages/minima are NOT reproduced here as numbers because I do not have current confirmed values",
+      "numeric_result": "UNKNOWN-CURRENT-VALUE: cannot be computed to a number without K_reserve_pct and K_fixed_minimum populated with verified current figures"
+    },
+    "result": {"verdict": "CANNOT BE DETERMINED numerically without verified current parameter values", "own_funds_required": "UNKNOWN-CURRENT-VALUE (function of K_reserve_pct, K_fixed_minimum)"},
+    "article_basis": "MiCA Article 35 (Own funds requirements) is the general anchor for issuer own-funds; Article 45 relates to significant ART/EMT additional requirements. I do not confidently know the current percentage figures or fixed euro minimum amounts prescribed under these articles, so no numeric threshold is asserted -- named parameters are used instead per the instruction that an unknown beats a guess.",
+    "tail_convention": "For own-funds adequacy, LOW own funds relative to the requirement is the adverse tail (insufficient capital buffer is the failure mode); any stress or comparison test should check whether actual own funds fall below the computed requirement, not whether they exceed some upper bound.",
+    "weakest_point": "The entire numeric core of this case is unresolved -- I am declining to state percentage-of-reserve or fixed-minimum figures because I do not have verified current confidence in them, which makes this case structurally correct but numerically incomplete by design."
+  },
+  {
+    "case_name": "Stressed-coverage case with reserve asset haircuts",
+    "inputs": {
+      "token_supply_units": 10000000,
+      "reference_value_per_token": 1.00,
+      "total_token_liability": 10000000,
+      "reserve_composition": {"cash_deposits": 3000000, "government_bonds": 5000000, "other_liquid_assets": 2000000},
+      "reserve_asset_market_value_prehaircut": 10000000,
+      "haircuts_applied": {"cash_deposits_haircut": 0.00, "government_bonds_haircut": 0.05, "other_liquid_assets_haircut": 0.15}
+    },
+    "computation": {
+      "cash_post_haircut": "3,000,000 * (1 - 0.00) = 3,000,000",
+      "bonds_post_haircut": "5,000,000 * (1 - 0.05) = 4,750,000",
+      "other_post_haircut": "2,000,000 * (1 - 0.15) = 1,700,000",
+      "total_reserve_post_haircut": "3,000,000 + 4,750,000 + 1,700,000 = 9,450,000",
+      "stressed_coverage_ratio": "9,450,000 / 10,000,000 = 0.9450",
+      "stressed_coverage_pct": "94.50%",
+      "comparison_to_prehaircut": "pre-haircut coverage was 10,000,000/10,000,000 = 1.0000 (100.00%, fully backed); haircuts move coverage from 100.00% to 94.50%, a decline of 5.50 percentage points"
+    },
+    "result": {"stressed_coverage_ratio": 0.945, "verdict": "INADEQUATE against the full-backing (1:1) test under stress", "shortfall_under_stress": 550000, "unit": "USD"},
+    "article_basis": "MiCA Article 36 (reserve maintenance obligation) as the substantive backing requirement being tested; the specific haircut percentages applied here (0%, 5%, 15%) are illustrative stress parameters chosen for this case, not values prescribed by a specific MiCA regulatory technical standard that I can cite with confidence -- treat them as named/assumed inputs, not regulatory figures.",
+    "tail_convention": "LOW coverage is the adverse tail for this metric; the stress test deliberately examines the downside scenario (haircuts reducing asset value), which is the correct adverse direction -- it does NOT test an upside/favorable scenario (e.g., asset appreciation), which would be the wrong tail for a stress test of collateral adequacy.",
+    "weakest_point": "The haircut percentages (0%/5%/15%) are illustrative assumptions I chose for this worked example, not sourced from a specific MiCA RTS/technical standard on liquidity requirements for reserve assets; presenting them as generic stress inputs rather than regulatory-mandated figures is the intended honest framing, but a reader could mistake them for prescribed values if this caveat were missed."
+  },
+  {
+    "case_name": "Redemptions-at-par obligation",
+    "inputs": {
+      "redemption_request_tokens": 2000000,
+      "reference_value_per_token": 1.00,
+      "issuer_current_reserve_asset_value": 9450000,
+      "issuer_current_token_supply": 10000000
+    },
+    "computation": {
+      "par_redemption_obligation": "redemption_request_tokens * reference_value_per_token = 2,000,000 * 1.00 = 2,000,000",
+      "reserve_value_after_hypothetical_redemption": "9,450,000 - 2,000,000 = 7,450,000",
+      "remaining_token_supply_after_redemption": "10,000,000 - 2,000,000 = 8,000,000",
+      "post_redemption_coverage_ratio": "7,450,000 / 8,000,000 = 0.93125",
+      "post_redemption_coverage_pct": "93.125%"
+    },
+    "result": {"redemption_obligation_amount": 2000000, "post_redemption_coverage_ratio": 0.93125, "verdict": "Redemption obligation is at par (1.00 per token) regardless of current coverage ratio; coverage remains INADEQUATE (below 1.00) both before (0.9450) and after (0.93125) this redemption is honored", "unit": "USD"},
+    "article_basis": "MiCA Article 39 (Right of redemption) establishes the holder's right to redeem at any time and at par value (in funds or, where applicable, in the underlying assets); the at-par nature of the obligation is the key structural point tested here. Article number stated at moderate confidence.",
+    "tail_convention": "LOW coverage is the adverse tail; this case shows that honoring redemptions at par when coverage is already below 1.00 further stresses (here, slightly worsens on a per-token basis) the adequacy metric -- the test correctly checks whether post-redemption coverage stays below the 1.00 threshold, not whether it exceeds some ceiling.",
+    "weakest_point": "The example assumes redemption proceeds are drawn dollar-for-dollar from reserve assets at their stated value with no additional transaction costs, timing gaps, or liquidation losses, which understates real redemption risk when reserve coverage is already below par; it also assumes pro-rata token burn matches reserve drawdown exactly, which may not reflect the actual mechanics of a specific issuer's redemption process."
+  }
+]
+```

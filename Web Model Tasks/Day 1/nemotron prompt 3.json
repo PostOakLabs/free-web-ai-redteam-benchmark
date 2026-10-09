@@ -1,0 +1,140 @@
+{
+  "genre_map": [
+    {
+      "title": "The circuit and physical design of the POWER4 microprocessor",
+      "authors_if_known": "Warnock, J.F. et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2002,
+      "pages_if_known": "Vol. 46, No. 1, pp. 27–52",
+      "what_design_decisions_it_covers": "Physical design methodology, timing closure, circuit design, floorplanning, power distribution, clock distribution for POWER4",
+      "confidence": 1.0
+    },
+    {
+      "title": "POWER4 system microarchitecture",
+      "authors_if_known": "Tendler, J.M. et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2002,
+      "pages_if_known": "Vol. 46, No. 1, pp. 5–26",
+      "what_design_decisions_it_covers": "Microarchitecture overview, pipeline design, cache hierarchy, multiprocessor support",
+      "confidence": 1.0
+    },
+    {
+      "title": "A 1.0 GHz PowerPC microprocessor with copper interconnect",
+      "authors_if_known": "Allen, R.O. et al.",
+      "venue": "ISSCC",
+      "year": 1999,
+      "pages_if_known": "pp. 400–401, 477",
+      "what_design_decisions_it_covers": "Copper interconnect adoption, physical design for high frequency, timing closure at 1 GHz",
+      "confidence": 0.95
+    },
+    {
+      "title": "Circuit implementation of a 64-bit second-generation CMOS PowerPC microprocessor",
+      "authors_if_known": "O'Connell, M. et al.",
+      "venue": "ISSCC",
+      "year": 1995,
+      "pages_if_known": "pp. 184–185",
+      "what_design_decisions_it_covers": "PowerPC 604/620 physical design, circuit techniques",
+      "confidence": 0.9
+    },
+    {
+      "title": "The Alpha 21264 microprocessor",
+      "authors_if_known": "Kessler, R. et al.",
+      "venue": "IEEE Micro",
+      "year": 1999,
+      "pages_if_known": "Vol. 19, No. 2, pp. 24–36",
+      "what_design_decisions_it_covers": "Out-of-order execution implementation, cache design, clock distribution, physical design challenges",
+      "confidence": 0.95
+    },
+    {
+      "title": "A 0.18 µm 1.5 GHz 64-bit PowerPC microprocessor",
+      "authors_if_known": "Grochowski, E. et al.",
+      "venue": "ISSCC",
+      "year": 2001,
+      "pages_if_known": "pp. 218–219, 460",
+      "what_design_decisions_it_covers": "Physical design for 1.5 GHz, copper/low-k, clock distribution",
+      "confidence": 0.9
+    },
+    {
+      "title": "The SPARC64 VIIIfx processor",
+      "authors_if_known": "Satoh, Y. et al.",
+      "venue": "ISSCC",
+      "year": 2010,
+      "pages_if_known": "pp. 100–101",
+      "what_design_decisions_it_covers": "HPC processor physical design, water cooling, timing closure at 2 GHz+",
+      "confidence": 0.85
+    },
+    {
+      "title": "A 32nm 3.1 GHz 8-core x86 processor",
+      "authors_if_known": "Naffziger, S. et al.",
+      "venue": "ISSCC",
+      "year": 2011,
+      "pages_if_known": "pp. 222–223",
+      "what_design_decisions_it_covers": "AMD Bulldozer physical design, clock mesh, power management",
+      "confidence": 0.9
+    },
+    {
+      "title": "Itanium 2 processor microarchitecture",
+      "authors_if_known": "McNairy, C. et al.",
+      "venue": "IEEE Micro",
+      "year": 2003,
+      "pages_if_known": "Vol. 23, No. 2, pp. 10–20",
+      "what_design_decisions_it_covers": "EPIC implementation, physical design, cache hierarchy, clocking",
+      "confidence": 0.9
+    },
+    {
+      "title": "A 65nm 1.6 GHz SPARC64 VII processor",
+      "authors_if_known": "Watanabe, N. et al.",
+      "venue": "ISSCC",
+      "year": 2008,
+      "pages_if_known": "pp. 108–109, 610",
+      "what_design_decisions_it_covers": "Physical design, clock distribution, timing closure for SPARC64 VII",
+      "confidence": 0.85
+    },
+    {
+      "title": "The design and implementation of the RIOS (POWER1) processor",
+      "authors_if_known": "Denman, J. et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 1990,
+      "pages_if_known": "Vol. 34, No. 1, pp. 32–44",
+      "what_design_decisions_it_covers": "First POWER processor physical design, multi-chip module, timing",
+      "confidence": 0.9
+    },
+    {
+      "title": "A 45nm 2.3 GHz 8-core PowerPC processor",
+      "authors_if_known": "Rosenfield, A. et al.",
+      "venue": "ISSCC",
+      "year": 2008,
+      "pages_if_known": "pp. 100–101, 609",
+      "what_design_decisions_it_covers": "POWER6 physical design, clock tree, power management, 45nm challenges",
+      "confidence": 0.9
+    },
+    {
+      "title": "z10 microprocessor design",
+      "authors_if_known": "Biesemeyer, B. et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2009,
+      "pages_if_known": "Vol. 53, No. 1, pp. 1:1–1:11",
+      "what_design_decisions_it_covers": "Mainframe processor physical design, high reliability, clocking, timing closure",
+      "confidence": 0.85
+    },
+    {
+      "title": "A 22nm 3.6 GHz 8-core Xeon processor",
+      "authors_if_known": "Singh, S. et al.",
+      "venue": "ISSCC",
+      "year": 2013,
+      "pages_if_known": "pp. 94–95",
+      "what_design_decisions_it_covers": "Intel Haswell-EP physical design, ring interconnect, voltage/frequency domains",
+      "confidence": 0.9
+    },
+    {
+      "title": "Circuit and physical design of the POWER5 microprocessor",
+      "authors_if_known": "Allen, R.O. et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2005,
+      "pages_if_known": "Vol. 49, No. 4/5, pp. 477–494",
+      "what_design_decisions_it_covers": "POWER5 physical design, dual-core, cache, clock distribution, power",
+      "confidence": 0.85
+    }
+  ],
+  "extracted_episodes": []
+}

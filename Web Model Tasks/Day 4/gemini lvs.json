@@ -1,0 +1,124 @@
+[
+{
+"symptom": "(7) LVS mismatch: missing, shorted, or open nets",
+"first_checks": [
+{
+"check": "Examine the LVS summary report's text/label comparison section and unmatched net count.",
+"why_first": "cheapest (takes seconds) and immediately separates systemic pin/text naming mismatches from physical layout shorts/opens",
+"check_cost": "minutes"
+},
+{
+"check": "Run the LVS layout short-isolation / short-finder utility in interactive layout viewer (e.g., Calibre RVE Short Finder).",
+"why_first": "rules out the vast majority of physical shorts by tracing polygons to the exact intersection node",
+"check_cost": "minutes"
+},
+{
+"check": "Verify global power/ground port connectivity and implicit connection rules (e.g., VDD/VSS text/global declarations vs pin shapes).",
+"why_first": "rules out catastrophic multi-thousand-net cascade failures caused by a single unattached power grid label",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Run short isolation with top-level text labels disabled vs enabled.",
+"rules_in": "If short disappears or changes node when text is disabled, the short is a false short caused by duplicate/misplaced text labels attaching to different nets.",
+"rules_out": "If short persists identically on polygon connectivity alone, the cause is a genuine physical layout metal bridge or via bridge."
+},
+{
+"experiment": "Flatten the local macro/block boundary in extraction vs running hierarchical LVS.",
+"rules_in": "If short/open disappears in flattened run, the issue is a hierarchical port-alignment mismatch or boundary pin extraction bug.",
+"rules_out": "If short/open persists in flat extraction, the physical connectivity inside the cell or routed layer is genuinely broken."
+},
+{
+"experiment": "Trace open net using virtual connect rules (disable VIRTUAL CONNECT COLON / CONNECT statements in LVS rule deck).",
+"rules_in": "If open net count spikes drastically, the layout relies on implicit virtual connections that were missing physical stitching vias.",
+"rules_out": "If open net count remains unchanged, the open is an explicit physical break in a continuous physical wire track."
+}
+],
+"common_root_causes": [
+{
+"cause": "Text/label pin name mismatch or floating pin text placed on the wrong metal layer or off-grid.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Missing fill/via or illegal metal line bridge introduced during automatic filler insertion / ECO routing.",
+"recalled_frequency": "common",
+"recall_confidence": 0.85
+},
+{
+"cause": "Power grid / substrate tie-off missing or mismatched global VDD/VSS net names across IP block boundaries.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+},
+{
+"cause": "LVS deck layer derivation bug on complex multi-patterned or guard-ring layers.",
+"recalled_frequency": "rare",
+"recall_confidence": 0.7
+}
+],
+"classic_trap": "Chasing thousands of individual signal shorts/opens reported by the tool when the actual single root cause is a missing power grid label that caused the tool to merge all power nets together.",
+"node_era_note": "At 7nm and below, coloring/multi-patterning (LELE/EUV) layer derivations and cut-layer via rules introduce false shorts in layout extraction that do not exist in simple single-exposure metal decks."
+},
+{
+"symptom": "(8) LVS mismatch: wrong device sizes or extra devices",
+"first_checks": [
+{
+"check": "Inspect the detailed device mismatch section of the LVS report to check if width (W), length (L), or fin-count (NF) is systematically scaled by a fixed factor.",
+"why_first": "cheapest and immediately identifies grid-unit/scale factor misconfigurations or parallel device combining settings",
+"check_cost": "minutes"
+},
+{
+"check": "Check for dummy device or guard-ring transistor extraction in macro white spaces.",
+"why_first": "rules out extra un-instantiated physical layout devices added for density/reliability (fillers/dummies) that lack schematic representation",
+"check_cost": "minutes"
+},
+{
+"check": "Verify parameter tolerance settings (e.g., LVS REDUCE / LVS TOLS) in the LVS rule deck.",
+"why_first": "rules out false device size errors caused by tiny off-grid snapping or rounding differences in extraction",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Toggle LVS parallel/series device reduction settings (e.g., LVS REDUCE PARALLEL MOS) in the runset.",
+"rules_in": "If extra devices disappear and size mismatch vanishes, the schematic uses multi-finger/parallel instantiations that the layout extraction failed to combine due to asymmetric source/drain connections or resistor insertions.",
+"rules_out": "If extra devices remain, the physical layout contains actual extra poly/diffusion geometry touching active layers."
+},
+{
+"experiment": "Run LVS with dummy cell filter rules enabled vs disabled (e.g., LVS FILTER UNUSED MOS/RES).",
+"rules_in": "If extra devices disappear, the extra devices are intentional floating fill/dummy transistors that need proper schematic dummy tagging or extraction filter rules.",
+"rules_out": "If extra devices persist, the extra devices are functional transistors misplaced or erroneously drawn in active circuits."
+},
+{
+"experiment": "Compare extracted parameter delta against layout geometry (measure poly width/length directly in GDS/OASIS viewer vs schematic property).",
+"rules_in": "If measured layout poly matches schematic but LVS reports a discrepancy, the LVS deck layer derivation (e.g., gate enclosure by active layer or STI stress layer rules) calculated an incorrect effective W/L.",
+"rules_out": "If layout geometry physically differs from schematic, the PCell generation or sizing script injected the wrong parameter value."
+}
+],
+"common_root_causes": [
+{
+"cause": "Multi-finger or parallel device reduction failure due to un-merged source/drain nodes or subtle routing parasitic asymmetry.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Unfiltered dummy/fill transistors or decoupling caps present in layout but absent in schematic netlist.",
+"recalled_frequency": "common",
+"recall_confidence": 0.85
+},
+{
+"cause": "Schematic vs layout parameter property unit mismatch (e.g., microns vs meters, or Fin count vs total width).",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+},
+{
+"cause": "Poly / active layer enclosure overlap rule misinterpretation during LVS device seed layer recognition.",
+"recalled_frequency": "rare",
+"recall_confidence": 0.75
+}
+],
+"classic_trap": "Manually resizing layout transistors to fix a reported size mismatch when the real issue is an extraction setting failing to recognize parallel fingers as a single reduced transistor.",
+"node_era_note": "At 28nm, planar transistor device size mismatch is continuous (W/L ratios); at 7nm and below (FinFET/GAA), transistor sizing is strictly quantized by integer Fin counts (NFIN), turning W/L mismatches into discrete Fin count or gate-pitch alignment mismatches."
+}
+]

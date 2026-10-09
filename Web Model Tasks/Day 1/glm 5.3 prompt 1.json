@@ -1,0 +1,76 @@
+```json
+[
+  {
+    "title": "Post-CTS congestion hotspot in macro channel fixed with routing-direction restriction instead of floorplan rework",
+    "design_context": "28nm, 1.1M placeable instances, 62 macros (mixed SRAM/PHY), 4 clock domains, commercial P&R + commercial synthesis",
+    "prior_state": "Utilization 74%; post-CTS congestion map showing 2.6% total overflow with a single concentrated hotspot (8-12% local overflow) in a 40µm channel between two SRAM macros on M4-M6; WNS -0.062 ns (setup), TNS -3.8 ns; DRC clean pre-route (estimated).",
+    "observation": "Global-route overflow report at post-CTS showed 3,100 overflowing GCells, of which 2,400 clustered in one macro-to-macro channel carrying a wide rebased bus. severity: HIGH",
+    "hypothesis": "The channel was too narrow for the bus crossing it because placement had合法 pushed the bus's repeaters into the channel mouth; the congestion was a local routing-supply problem (direction mismatch between preferred M5 routing and the bus's dominant crossing direction), not a global utilization problem — so global fixes would cost schedule without touching the hotspot.",
+    "candidates_considered": [
+      {"action": "Full floorplan rework: move SRAMs apart by 30µm to widen the channel", "rejected_because": "Re-floorplan at post-CTS means redoing placement and CTS (~1.5-2 weeks) and invalidates already-signed-off macro pin alignment with the top level; schedule slip past tape-in milestone."},
+      {"action": "Drop placement utilization globally from 74% to 65% to give the router breathing room", "rejected_because": "Block area is fixed by the top-level budget; reducing utilization means growing the block, which breaks the chip-level floorplan and reopens top-level routing."},
+      {"action": "Congestion-driven cell padding / NDR on the whole bus", "rejected_because": "Applying keep-out/padding broadly adds area and can worsen timing on already-critical paths; NDRs on a wide bus inside a dense channel typically make overflow worse, not better."}
+    ],
+    "chosen_intervention": "Kept the floorplan; (1) restricted M5 to the bus's dominant crossing direction inside the channel via a partial routing blockage on the orthogonal direction, (2) placed a soft placement blockage on the channel mouth so repeaters get pulled out of it, and (3) ran two congestion-driven placement refinement iterations with the blockage in place. No CTS redo; only incremental timing ECO afterwards.",
+    "post_state": "Overflow 2.6% → 0.4% total, hotspot local overflow 12% → 2%; WNS -0.062 → -0.055 ns (small setup gain from repeater relocation); utilization 74% → 74.5%; elapsed cost 2 days instead of 2 weeks.",
+    "expert_assessment": "Right call: the report shape (one concentrated hotspot on a dominant crossing direction) pointed at a local supply/direction mismatch, and direction restriction is a cheap, reversible first move before structural rework. Lesson: classify congestion as global vs. local and directional vs. capacity before choosing a fix. Would NOT transfer to a case with many distributed hotspots at high utilization — there the floorplan or utilization really is the problem and a blockage just moves the pain.",
+    "confidence": 0.72,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 2-day turnaround and the claim that a soft placement blockage alone pulled repeaters out without hurting neighboring paths is the detail most likely to be optimistic."
+  },
+  {
+    "title": "Thousands of small hold violations sharing one launch clock finger diagnosed as CTS skew signature, fixed at the tree — not per-path",
+    "design_context": "16nm, 800k placeable instances, 28 macros, 3 clock domains (one 800 MHz, two slow synchronous-derived), commercial P&R",
+    "prior_state": "Post-route timing: hold WNS -0.038 ns, hold TNS -118 ns, ~3,900 failing endpoints on the 800 MHz domain; setup WNS +0.011 ns (met); DRC 41 (route-critical areas unrelated to the failing paths).",
+    "observation": "The hold violation report had a distinctive shape: ~3,900 endpoints all failing by 20-38 ps, all launched from the same clock branch (one late-arriving tree finger after a post-CTS ECO), spread across otherwise-unrelated registers. Setup was met on the same domain. severity: HIGH",
+    "hypothesis": "The uniform-small-magnitude, huge-count, common-launch-clock signature is a clock-delivery problem (skew introduced by a rebalanced tree finger), not a logic or path problem — per-path hold buffering would treat 3,900 symptoms and add area/delay everywhere.",
+    "candidates_considered": [
+      {"action": "Fix hold per-path with buffers on 3,900 endpoints", "rejected_because": "3,900 hold buffers add area and setup degradation on paths already at +0.011 ns slack, plus 1-2 days of ECO/route iterations and DRC risk in already route-critical areas."},
+      {"action": "Relax the hold constraint (loosen uncertainty / remove on-chip-variation derating on hold)", "rejected_because": "That masks the signature instead of fixing it; hold analysis credibility is lost and the bug reappears at silicon with real skew."},
+      {"action": "Claim the paths are false paths / multicycle and waive them", "rejected_because": "The endpoints are real launch-capture pairs in the same domain at the same edge; waiving thousands of same-shift transfers is exactly how hold escapes reach silicon."}
+    ],
+    "chosen_intervention": "Traced the skew to one CTS finger whose buffer levels had drifted after an earlier logic ECO inserted load; rebuilt just that tree branch (local CTS re-balance), then fixed the residual ~140 scattered hold violations individually with delay padding. Re-ran signoff STA with OCV.",
+    "post_state": "Hold WNS -0.038 → +0.006 ns, hold TNS -118 → 0 ns, failing endpoints 3,900 → 0; setup WNS +0.011 → +0.004 ns (small cost from tree rebuild); one extra day, ~140 hold buffers instead of 3,900.",
+    "expert_assessment": "Textbook signature reading: many-small-uniform hold violations sharing a launch clock point at clock delivery, and fixing skew upstream is cheaper and safer than per-path patching. The general lesson is to read the report's shape (count, magnitude spread, shared clock pins) before touching any path. Would NOT transfer when violations are few, large, and unclustered — that shape usually IS a path/constraint problem where tree surgery wastes a day.",
+    "confidence": 0.78,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "That a single CTS finger rebuild alone recovers ~3,900 violations with only 7 ps of setup cost is plausible but the exact post numbers are constructed, not recalled."
+  },
+  {
+    "title": "Block-boundary IO budget derived from real interface timing rather than a 50/50 split, avoiding over-constraint of the inner block",
+    "design_context": "7nm, sub-block of 1.6M instances budgeted for a larger SoC, 90 macros, single synchronous 1 GHz domain crossing into a neighboring block over a 2,000-bit bus, commercial STA + commercial synthesis",
+    "prior_state": "Top-level budget: 1.00 ns period for the block-to-block path. Initial handoff used a naive 50/50 split (0.50 ns each side) with set_input_delay/set_output_delay derived from it; inner block timing under that SDC: WNS -0.085 ns, TNS -22 ns, area 9% over budget from aggressive resizing to meet the artificial budget.",
+    "observation": "The inner block could not close against the 50/50 budget while its own logic depth said it needed ~0.58 ns; the neighbor block had only 0.35 ns of real logic and met easily. severity: MODERATE",
+    "hypothesis": "The violations were a constraint artifact, not a physical/logic shortfall: the 50/50 split ignored the actual combinational depth and register-to-register distance each side of the boundary, so the inner block was being over-constrained by roughly 80 ps while the neighbor sat on 150 ps of unused margin.",
+    "candidates_considered": [
+      {"action": "Keep the 50/50 split and push the inner block harder (more pipelining)", "rejected_because": "Adding a pipeline stage changes the bus protocol, ripples into verification and the neighbor's latency assumptions, and costs 3+ weeks of rework — to satisfy a budget that was arbitrary in the first place."},
+      {"action": "Declare the crossing multicycle (2-cycle) to relieve pressure", "rejected_because": "The bus is a same-cycle request path in the protocol; a multicycle would be a false claim on real transfers and would hide genuine silicon risk at frequency."},
+      {"action": "Tighten the budget on the neighbor and take margin there without rebalancing formally", "rejected_because": "Informal margin theft disappears from SDC, so the next owner re-derives 50/50 and the whole negotiation repeats; constraint provenance is lost."}
+    ],
+    "chosen_intervention": "Re-derived the budget from measured reality: characterized the neighbor's actual worst launch path (0.35 ns with uncertainty) from its signed-off SDC, set the inner block's input/output delays from those numbers (inner block got ~0.58 ns effective window plus clock-skew and uncertainty allocation), documented the derivation in the SDC header, and got both block owners plus the top-level integrator to sign the revised boundary constraints in one session.",
+    "post_state": "Inner block WNS -0.085 → +0.012 ns, TNS -22 → 0 ns; area 9% over → ~1% over budget after removing panic resizing; neighbor block still met at +0.09 ns (comfortable, but its owner now tracks that margin explicitly).",
+    "expert_assessment": "Correct call: budgets should be derived from characterized interface timing and owned margin, not symmetry — 50/50 is a starting point for negotiation, not an SDC. The documented derivation in the SDC is what made it durable. Would NOT transfer when the neighbor is not yet characterized: then a conservative split with an explicit renegotiation checkpoint is the honest choice, and rebalancing early just bakes in guesses.",
+    "confidence": 0.68,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "The clean one-session renegotiation and the neighbor's comfortable +0.09 ns margin are idealized; real budget negotiations rarely close without a second iteration."
+  }
+]
+```
+
+```json
+[
+  {"cell": "1: SAB + COOP/COEP — all four browsers, 2026", "claim": "SharedArrayBuffer remains gated behind cross-origin isolation (COOP: same-origin plus COEP: require-corp or credentialless) in Chrome/Edge/Firefox/Safari; no 2026 change to that model surfaced.", "url": "https://web.dev/articles/coop-coep", "retrieved": "2026-08-31", "confidence": "widely believed, weaker source (canonical web.dev guide, but no 2026-specific browser-release confirmation retrieved)", "notes": "Baseline: Chrome since 92, Firefox 96+, Safari 15.2+. COEP credentialless eases adoption (MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy)."},
+  {"cell": "2: WebGPU compute — Chrome/Edge", "claim": "WebGPU is enabled by default in Chrome/Edge stable (compute shaders included).", "url": "https://developer.chrome.com/docs/web-platform/webgpu/developer-features", "retrieved": "2026-08-31", "confidence": "verified from a current authoritative page", "notes": "Long-standing since Chrome 113."},
+  {"cell": "2: WebGPU compute — Firefox", "claim": "Firefox shipped WebGPU on Windows in Firefox 141 (July 2025); platform rollout beyond Windows not verified for 2026.", "url": "https://mozillagfx.wordpress.com/2025/07/15/shipping-webgpu-on-windows-in-firefox-141/", "retrieved": "2026-08-31", "confidence": "verified from a current authoritative page (Mozilla Gfx blog)", "notes": "macOS/Linux status in 2026 UNVERIFIED here."},
+  {"cell": "2: WebGPU compute — Safari", "claim": "UNVERIFIED", "url": "", "retrieved": "2026-08-31", "confidence": "UNVERIFIED", "notes": "Search rate-limited; Safari 26 shipped WebGPU per memory but no live URL retrieved — do not fill from memory per honesty rules."},
+  {"cell": "2: timestamp-query default exposure", "claim": "Chrome shipped WebGPU timestamp-query by default (Intent to Ship executed; chromestatus entry exists); it remains a spec-optional feature — apps must check adapter.features.has('timestamp-query'). Firefox default-enable status not confirmed.", "url": "https://groups.google.com/a/chromium.org/g/blink-dev/c/dtYJ0MQYMlU", "retrieved": "2026-08-31", "confidence": "verified from a current authoritative page for Chrome; Firefox portion UNVERIFIED", "notes": "Chrome Platform Status: https://chromestatus.com/feature/5136606877188096. Optional-feature semantics: https://developer.chrome.com/docs/web-platform/webgpu/developer-features"},
+  {"cell": "3: WASM features per browser", "claim": "UNVERIFIED (per-browser current status of threads/SIMD128/relaxed-SIMD/JSPI/memory64)", "url": "", "retrieved": "2026-08-31", "confidence": "UNVERIFIED", "notes": "Search backend rate-limited on this query. From memory only (not verified, do not rely): JSPI shipped ~Chrome 137, memory64 ~Chrome 133 / Firefox 134, relaxed-SIMD Chrome 114+. Authoritative check: webstatus.dev and MDN compatibility tables."},
+  {"cell": "4: cross-origin iframe isolation / WebGPU", "claim": "Partially UNVERIFIED. Verified general mechanism: COEP require-corp requires embedded cross-origin frames to opt in; Chrome supports iframe allow=\"cross-origin-isolated\" letting an embedded page itself become cross-origin isolated. WebGPU-specific behavior inside cross-origin iframes in 2026: UNVERIFIED.", "url": "https://web.dev/articles/coop-coep", "retrieved": "2026-08-31", "confidence": "widely believed, weaker source", "notes": "This is the wallet-embedding cell; needs a live browser test (matches the 'measure, don't research' guidance in the iteration notes)."},
+  {"cell": "5: published 2026 in-browser proving measurements", "claim": "Closest verifiable items found: ZKSecurity writeup 'Accelerating ZK Proving with WebGPU' (techniques + benchmarks, client-side proving) and ZKProphet arXiv 2509.22684 (GPU ZK proving performance study, Sep 2025 — GPU-native, not browser). No dedicated reproducible in-browser proving harness repo confirmed for 2026.", "url": "https://blog.zksecurity.xyz/posts/webgpu/", "retrieved": "2026-08-31", "confidence": "verified from a current authoritative page for existence of the writeup; hardware/reproducibility details not independently checked", "notes": "arXiv: https://arxiv.org/html/2509.22684v1. Also seen but not vetted: https://www.webgpu.com/news/zk-proofs-webgpu-boost/ (Nov 2025, S-two mention)."}
+]
+```
+
+Prompt B caveat (outside the JSON, for the harvest log, not the dataset): my web-search backend was heavily rate-limited this session; cells marked UNVERIFIED — especially WASM per-browser features, Safari WebGPU, and the iframe-isolation cell — reflect that, not necessarily absence of information. Those three map exactly onto your iteration note's "measure, don't research" list.

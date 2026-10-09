@@ -1,0 +1,83 @@
+[
+  {
+    "delta_name": "Wire delay and wire variation dominate setup closure",
+    "at_28nm": "Timing closure often behaved as if cell sizing and logic restructuring could absorb interconnect effects; pre-route and global-route timing correlated reasonably well with post-route results.",
+    "at_7nm_5nm": "Post-route timing is dominated by net topology, placement proximity, layer choice, via stacks, and local RC variation. Small placement moves can change critical path slack by order tens of picoseconds.",
+    "why_it_changed": "Metal pitch scaled faster than interconnect resistance and via/contact resistance improved. Narrower wires, dense vias, and tighter spacing increase wire RC and make wire delay more variable.",
+    "what_breaks": "A 28nm-trained engineer tries to fix post-route setup violations by upsizing cells and sees little improvement or worse TNS. Long critical nets stay negative until placement, layer assignment, or useful skew is changed.",
+    "workflow_impact": "More timing-driven placement, net-length budgets, useful-skew planning, and post-route ECOs. Extracted-parasitic timing must be consulted earlier and more often.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Congestion shifts from channel capacity to pin and via access",
+    "at_28nm": "Congestion often looked like macro-channel or global routing capacity. Widening channels, moving macros, or adding tracks could recover much of the problem.",
+    "at_7nm_5nm": "Hotspots often arise at cell pins, macro pins, and via stacks. Detailed-route DRCs can be severe even when global-route overflow looks modest.",
+    "why_it_changed": "Smaller metal pitch, stricter via rules, limited pin shapes, and end-of-line or coloring rules reduce effective access to pins and lower layers.",
+    "what_breaks": "The engineer trusts low global-route overflow, then detailed route fails with many pin-access and via violations. Widening channels does not fix the problem because the bottleneck is access, not gross track count.",
+    "workflow_impact": "Pin-access-aware placement, detailed-route feasibility checks earlier, macro pin planning, and via-driven DRC analysis become part of placement signoff rather than post-route debug.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Lithography rules and coloring make routing less free",
+    "at_28nm": "Routing could treat metal layers as relatively regular resources. DRC was mostly spacing, width, area, and simple antenna rules.",
+    "at_7nm_5nm": "Multi-patterning or EUV-driven constraints add coloring, same-color spacing, end-of-line, pattern density, and wire-spreading requirements. A legal route depends on interactions among nearby nets, not just local clearance.",
+    "why_it_changed": "Lithography limits require pattern decomposition or complex pitch rules. Minimum spacing and pattern density constraints couple adjacent wires, so routing resources are not interchangeable.",
+    "what_breaks": "A 28nm engineer packs wires tightly to relieve congestion, then sees coloring conflicts, end-of-line failures, or pattern-density violations. Ripup and reroute oscillates because the obvious alternative tracks are not legally usable.",
+    "workflow_impact": "Pattern-aware or color-aware rule decks, early DRC-driven routing, and more conservative track usage. Congestion metrics must include legal-route capacity, not just nominal track count.",
+    "confidence": 0.80
+  },
+  {
+    "delta_name": "Hold closure becomes harder and more coupled to clock planning",
+    "at_28nm": "Hold often closed with buffer insertion and simple min-delay fixes after setup closure.",
+    "at_7nm_5nm": "Hold is sensitive to clock skew, statistical variation, low voltage, cell transitions, and useful skew. Hold fixes can create congestion, setup loss, or new violations elsewhere.",
+    "why_it_changed": "Statistical local variation, asymmetric rise/fall behavior, tighter clock uncertainty, and dense routing make min-delay paths less predictable and more coupled to clock tree shape.",
+    "what_breaks": "The engineer inserts hold buffers late in the flow. Detailed route becomes more congested, setup timing degrades, and hold violations reappear after incremental routing or clock changes.",
+    "workflow_impact": "Hold analysis must occur during CTS and placement, not only after route. Skew tuning, min-corner validation, and post-route hold ECOs become planned steps.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Clock distribution shifts from simple trees to meshes and local skew control",
+    "at_28nm": "Balanced clock trees with global skew targets were common. Large clock buffers could often be placed relatively freely, and clock DRCs were manageable with standard tree structures.",
+    "at_7nm_5nm": "Clock planning uses meshes, fishbone structures, clustered sinks, multibit clock gating, and controlled useful skew. Clock power, DRC, and hold sensitivity dominate the clock plan.",
+    "why_it_changed": "Higher clock power, dense standard cells, worse wire RC, and hold sensitivity make naive trees inefficient and risky. Local skew becomes a resource and a liability.",
+    "what_breaks": "A 28nm-style tree with aggressive global skew causes clock DRCs, hold failures, or excessive clock power at 7nm/5nm. The clock tree may meet skew on paper but fail min timing or routing.",
+    "workflow_impact": "Clock architecture is defined before placement, placement is clock-aware, and post-CTS signoff includes skew, hold, clock DRC, and power. Incremental clock ECOs are expected.",
+    "confidence": 0.82
+  },
+  {
+    "delta_name": "IR, EM, and dynamic power integrity become first-class constraints",
+    "at_28nm": "Power grids were often sized statically and checked late. Local IR fixes or extra straps could sometimes be added after routing without destroying the design.",
+    "at_7nm_5nm": "Dynamic IR drop, electromigration, and low-voltage noise are planned with the floorplan. Late power-grid changes are expensive because they disturb routing, timing, and DRC.",
+    "why_it_changed": "Higher current density, thinner wires, lower supply margins, and many power states increase resistive drop and reliability risk. Timing margin is too small to absorb large dynamic voltage droop.",
+    "what_breaks": "The engineer delays power-grid reinforcement and sees timing collapse under dynamic IR, EM failures, or late strap insertion destroying routing resources.",
+    "workflow_impact": "Early power-grid planning, dynamic IR analysis with representative vectors, EM signoff, and decap/strap co-optimization become recurring implementation steps.",
+    "confidence": 0.83
+  },
+  {
+    "delta_name": "Signoff corner and variation-model explosion",
+    "at_28nm": "A manageable set of PVT corners with OCV or AOCV derates often sufficed for setup and hold signoff.",
+    "at_7nm_5nm": "Signoff includes many PVT/RC corners, statistical variation models, aging effects, and sometimes combined voltage-temperature-aging scenarios. Corner selection itself is a project risk.",
+    "why_it_changed": "FinFET and interconnect variation, local mismatch, reliability requirements, and reduced timing margins increase uncertainty and the number of conditions that can be worst-case.",
+    "what_breaks": "The engineer signs off only historically familiar corners. Silicon misses frequency, leakage, or reliability targets, or the team later discovers that a omitted corner dominates setup or hold.",
+    "workflow_impact": "Corner matrix planning, statistical variation analysis, corner pruning with justification, and much more STA compute management become explicit signoff tasks.",
+    "confidence": 0.82
+  },
+  {
+    "delta_name": "Utilization targets moved down because routability no longer scales with cell density",
+    "at_28nm": "Higher standard-cell utilization was often achievable if global-route overflow was controlled and macro channels were sized reasonably.",
+    "at_7nm_5nm": "Effective utilization targets are lower or more uneven. Dense regions require extra margins for pin access, clock buffers, power, and DRC legal spacing.",
+    "why_it_changed": "Standard-cell density scaled, but routing tracks, vias, and legal DRC space did not scale proportionally. Congestion becomes access-limited rather than purely track-count-limited.",
+    "what_breaks": "A 28nm engineer pushes high utilization to save area. Detailed route fails with pin/via DRCs and timing cliffs even though global overflow and average utilization looked acceptable.",
+    "workflow_impact": "Early density feasibility studies, local density screens, macro channel planning, and route-capacity-based placement goals become more important than simple utilization targets.",
+    "confidence": 0.84
+  },
+  {
+    "delta_name": "Vt mix and cell selection become multidimensional optimization",
+    "at_28nm": "Vt assignment was often a coarse leakage-versus-speed tradeoff with a few cell classes, applied in relatively large regions or after synthesis.",
+    "at_7nm_5nm": "Multiple Vt options, threshold flavors, and cell height choices interact with leakage, timing, area, DRC, and electromigration. Vt swapping is used continuously through closure.",
+    "why_it_changed": "Leakage and power density targets require granular threshold options, while performance targets require selective use of faster cells. Process and library support more variants than in older nodes.",
+    "what_breaks": "Blanket LVT use fixes setup but fails leakage or power targets; blanket HVT use fixes power but creates setup failure. Late Vt swaps can cause timing regressions or DRC issues if cell geometry or pin access changes.",
+    "workflow_impact": "Iterative Vt optimization across synthesis, placement, CTS, routing, and signoff. Power-aware timing and leakage constraints become first-class closure targets.",
+    "confidence": 0.80
+  }
+]

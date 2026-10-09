@@ -1,0 +1,66 @@
+[
+  {
+    "vector_name": "Number serialization: Negative zero",
+    "input_json": "{\"val\": -0}",
+    "canonical_output": "{\"val\":0}",
+    "rule": "RFC 8785 Section 3.2.2.3 (Numbers) - IEEE 754 negative zero -0 MUST be serialized as 0.",
+    "divergence_trap": "Plain JSON.stringify or naive float formatters may output -0.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Number serialization: Integer vs exponential notation (1e21 boundary)",
+    "input_json": "{\"a\": 1e20, \"b\": 1e21}",
+    "canonical_output": "{\"a\":100000000000000000000,\"b\":1e+21}",
+    "rule": "RFC 8785 Section 3.2.2.3 (Numbers) - ECMAScript Number.prototype.toString() rules: integers >= 1e21 use exponential notation with uppercase 'e' and '+'.",
+    "divergence_trap": "Implementations using standard C printf or lower 'e' without '+' sign (e.g., 1e21 or 1e+21 variations).",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Number serialization: Small floats near 1e-6 boundary",
+    "input_json": "{\"a\": 0.000001, \"b\": 0.0000001}",
+    "canonical_output": "{\"a\":0.000001,\"b\":1e-7}",
+    "rule": "RFC 8785 Section 3.2.2.3 (Numbers) - Numbers in range 1e-6 <= abs(x) < 1 are formatted as decimals; absolute values < 1e-6 use exponential notation.",
+    "divergence_trap": "Formatters using exponential notation for 0.000001 (1e-6) or decimal form for 1e-7.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "String escaping: Solidus and control character escaping",
+    "input_json": "{\"str\": \"/ \\\" \\\\ \\b \\f \\n \\r \\t \\u0001\"}",
+    "canonical_output": "{\"str\":\"/ \\\" \\\\ \\b \\f \\n \\r \\t \\u0001\"}",
+    "rule": "RFC 8785 Section 3.2.2.2 (Strings) - Solidus '/' MUST NOT be escaped; control characters U+0000 through U+001F MUST be escaped using \\u00XX or standard two-character escapes.",
+    "divergence_trap": "Standard JSON formatters often escape solidus as '\\/'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "String escaping: Unicode normalization non-behavior",
+    "input_json": "{\"a\": \"e\\u0301\", \"b\": \"\\u00e9\"}",
+    "canonical_output": "{\"a\":\"e\\u0301\",\"b\":\"\\u00e9\"}",
+    "rule": "RFC 8785 Section 3.2.2.2 (Strings) - Unicode characters MUST NOT be normalized (NFC/NFD transformations are explicitly forbidden).",
+    "divergence_trap": "Implementations that automatically apply NFC/NFD normalization will mutate 'e\\u0301' into '\\u00e9'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Key ordering: UTF-16 code-unit sort order vs Unicode code-point order",
+    "input_json": "{\"\\uD834\\uDD1E\": \"G-clef U+1D11E\", \"\\uE000\": \"Private Use U+E000\"}",
+    "canonical_output": "{\"\\uD834\\uDD1E\":\"G-clef U+1D11E\",\"\\uE000\":\"Private Use U+E000\"}",
+    "rule": "RFC 8785 Section 3.2.3 (Object Keys) - Keys are sorted by UTF-16 code units. High surrogate U+D834 (0xD834) sorts BEFORE BMP character U+E000 (0xE000), even though code point U+1D11E > U+E000.",
+    "divergence_trap": "Languages sorting keys by Unicode code points (e.g. Python string comparison) place U+E000 before U+1D11E, producing wrong key order.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Structural: Empty structures and whitespace elimination",
+    "input_json": "{\n  \"array\": [   ],\n  \"object\": {   }\n}",
+    "canonical_output": "{\"array\":[],\"object\":{}}",
+    "rule": "RFC 8785 Section 3.2.1 (Whitespace) - Insignificant whitespace MUST be eliminated.",
+    "divergence_trap": "Pretty-printing or preserving existing whitespace formatting.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Key ordering: Simple ASCII lexicographical ordering",
+    "input_json": "{\"b\": 1, \"a\": 2, \"10\": 3, \"1\": 4}",
+    "canonical_output": "{\"1\":4,\"10\":3,\"a\":2,\"b\":1}",
+    "rule": "RFC 8785 Section 3.2.3 (Object Keys) - Keys MUST be sorted lexicographically by UTF-16 code unit values.",
+    "divergence_trap": "JS engines that reorder numeric keys first based on integer property traversal order (e.g. key '1' then '10' then 'a' then 'b' in ES6 object iteration vs map).",
+    "certainty": "rfc-exact"
+  }
+]

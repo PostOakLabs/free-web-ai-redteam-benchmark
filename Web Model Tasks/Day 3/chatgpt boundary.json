@@ -1,0 +1,89 @@
+[
+{
+"rule": 1,
+"phrase_inclusivity": "strict",
+"verdicts": {
+"below": "PASS",
+"at": "PASS",
+"above": "FIRE"
+},
+"reasoning": "The operative phrase requires penalties that can exceed 2 percent, so exactly 2.00% does not trigger while 2.01% does. ([Consumer Financial Protection Bureau][1])"
+},
+{
+"rule": 2,
+"phrase_inclusivity": "strict",
+"verdicts": {
+"below": "PASS",
+"at": "PASS",
+"above": "FIRE"
+},
+"reasoning": "The operative phrase is 'more than 36 months,' making 36 months non-triggering and 37 months triggering. ([Consumer Financial Protection Bureau][1])"
+},
+{
+"rule": 3,
+"phrase_inclusivity": "inclusive",
+"verdicts": {
+"below": "PASS",
+"at": "FIRE",
+"above": "FIRE"
+},
+"reasoning": "The operative phrase '1.5 or more percentage points' expressly includes the 1.50% boundary. ([Legal Information Institute][2])"
+},
+{
+"rule": 4,
+"phrase_inclusivity": "strict",
+"verdicts": {
+"below": "PASS",
+"at": "PASS",
+"above": "FAIL"
+},
+"reasoning": "The pass condition says APR 'does not exceed' APOR by 2.25 or more percentage points, so the 2.25% boundary remains permissible and only a spread above it fails. ([Legal Information Institute][2])"
+},
+{
+"rule": 5,
+"phrase_inclusivity": "strict",
+"verdicts": {
+"below": "FAIL",
+"at": "FAIL",
+"above": "PASS"
+},
+"reasoning": "Both conditions are strict 'less than' tests, so (10.0M, 0.9M) fails on revenue, (9.9M, 1.0M) fails on income, and only (9.9M, 0.9M) satisfies both."
+},
+{
+"rule": 6,
+"phrase_inclusivity": "inclusive",
+"verdicts": {
+"below": "FAIL",
+"at": "PASS",
+"above": "PASS"
+},
+"reasoning": "The stated phrase 'equal to or greater than' makes the stated 16.00% boundary inclusive, although the current OECD text identifies 17% rather than 16% as the transition rate for fiscal years beginning in 2026. ([OECD][3])"
+},
+{
+"rule": 7,
+"phrase_inclusivity": "inclusive",
+"verdicts": {
+"below": "FAIL",
+"at": "PASS",
+"above": "PASS"
+},
+"reasoning": "The operative phrase 'at least equal to' includes exactly 50% of SCR, so the floor is satisfied at and above the boundary."
+},
+{
+"rule": 8,
+"phrase_inclusivity": "inclusive",
+"verdicts": {
+"below": "PASS",
+"at": "FIRE",
+"above": "FIRE"
+},
+"reasoning": "An affected-users condition framed as 'equal to or greater than' the minimum fires at the threshold and above it, but not below it."
+},
+{
+"weakest_point": "Rule 6 is the weakest point because the supplied premise says the 2026 transition rate is 16%, whereas current OECD material states that the Transition Rate is 17% for fiscal years beginning in 2026 and 2027; the inclusivity conclusion is clear, but the stated boundary value is not current. ([OECD][3])"
+}
+]
+
+[1]: https://www.consumerfinance.gov/rules-policy/regulations/1026/2026-01-01/32/?utm_source=chatgpt.com "§ 1026.32 Requirements for high-cost mortgages. | Consumer Financial Protection Bureau"
+[2]: https://www.law.cornell.edu/cfr/text/12/1026.43?utm_source=chatgpt.com "12 CFR § 1026.43 - Minimum standards for transactions secured by a dwelling. | Electronic Code of Federal Regulations (e-CFR) | US Law | LII / Legal Information Institute"
+[3]: https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/global-minimum-tax/side-by-side-package.pdf?utm_source=chatgpt.com "Tax Challenges Arising from the Digitalisation of the Economy – Global Anti-Base Erosion Model Rules (Pillar Two), Side-by-Side Package: Inclusive Framework on BEPS"

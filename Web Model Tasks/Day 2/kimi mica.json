@@ -1,0 +1,119 @@
+ [
+  {
+    "case_name": "reserve_coverage_test_ART",
+    "inputs": {
+      "token_supply": "10,000,000 units",
+      "token_par_value": "€1.00",
+      "total_holder_claims": "€10,000,000",
+      "reserve_assets_market_value": "€9,800,000",
+      "reserve_composition": "€6,000,000 government bonds, €3,000,000 commercial paper, €1,000,000 cash equivalents"
+    },
+    "computation": {
+      "step_1_total_claims": "10,000,000 units × €1.00 = €10,000,000",
+      "step_2_coverage_ratio_formula": "reserve_market_value / total_holder_claims",
+      "step_3_coverage_ratio": "9,800,000 / 10,000,000 = 0.980000",
+      "step_4_coverage_percentage": "98.0000%",
+      "step_5_full_backing_test": "98.0000% < 100.0000%",
+      "step_6_shortfall": "€10,000,000 − €9,800,000 = €200,000"
+    },
+    "result": {
+      "coverage_ratio": "98.0000%",
+      "shortfall": "€200,000",
+      "regulatory_verdict": "inadequate",
+      "test_failed": "Article 32(3) full-backing requirement — reserve assets must at all times be at least equal to aggregate claims from token holders"
+    },
+    "article_basis": "Article 32(3) Regulation (EU) 2023/1114 (MiCA): 'Their aggregated value shall be at least equal to the aggregate value of the claims on the issuer from holders of asset-referenced tokens in circulation.'",
+    "tail_convention": "Coverage ratio is a higher-is-better metric; the LOW tail is adverse. This test examines the adverse tail by testing whether coverage falls below the 100% threshold.",
+    "weakest_point": "The reserve valuation assumes orderly mark-to-market pricing; if commercial paper becomes illiquid, the realisable value may fall below the €9.8M mark, deepening the shortfall beyond the €200,000 accounting deficit."
+  },
+  {
+    "case_name": "own_funds_computation_non_significant_ART",
+    "inputs": {
+      "average_reserve_assets_6m": "€10,000,000",
+      "fixed_overheads_preceding_year": "€800,000",
+      "actual_own_funds_CET1": "€400,000",
+      "art_35_1_b_percentage": "2% (non-significant asset-referenced token per Article 35(1)(b))"
+    },
+    "computation": {
+      "step_1_test_a_fixed_floor": "€350,000",
+      "step_2_test_b_pct_of_reserve": "2% × €10,000,000 = €200,000",
+      "step_3_test_c_quarter_overheads": "€800,000 / 4 = €200,000",
+      "step_4_required_own_funds": "max(€350,000; €200,000; €200,000) = €350,000",
+      "step_5_actual_vs_required": "€400,000 − €350,000 = €50,000 surplus",
+      "step_6_binding_test": "Test (a) — fixed floor"
+    },
+    "result": {
+      "required_own_funds": "€350,000",
+      "actual_own_funds": "€400,000",
+      "surplus": "€50,000",
+      "regulatory_verdict": "adequate",
+      "binding_test": "Article 35(1)(a) fixed minimum of EUR 350,000"
+    },
+    "article_basis": "Article 35(1) Regulation (EU) 2023/1114 (MiCA): issuers of asset-referenced tokens shall at all times have own funds equal to at least the highest of (a) EUR 350,000, (b) 2% of the average amount of the reserve of assets, (c) a quarter of the fixed overheads of the preceding year.",
+    "tail_convention": "Own-funds adequacy is a higher-is-better metric; the LOW tail is adverse. This test examines the adverse tail by testing whether actual own funds fall below the required minimum.",
+    "weakest_point": "For this issuer the fixed floor (€350,000) dominates the percentage test (€200,000); the percentage test only becomes binding when average reserve assets exceed €17,500,000. A regulator applying the wrong test sequence or omitting the fixed floor could understate requirements by 42.9%."
+  },
+  {
+    "case_name": "stressed_coverage_test_ART",
+    "inputs": {
+      "token_supply": "10,000,000 units",
+      "token_par_value": "€1.00",
+      "total_holder_claims": "€10,000,000",
+      "reserve_government_bonds_nominal": "€6,000,000",
+      "reserve_commercial_paper_nominal": "€3,000,000",
+      "reserve_cash_equivalents_nominal": "€1,000,000",
+      "haircut_bonds": "5%",
+      "haircut_commercial_paper": "10%",
+      "haircut_cash": "0%"
+    },
+    "computation": {
+      "step_1_bonds_stressed": "€6,000,000 × (1 − 0.05) = €5,700,000",
+      "step_2_cp_stressed": "€3,000,000 × (1 − 0.10) = €2,700,000",
+      "step_3_cash_stressed": "€1,000,000 × (1 − 0.00) = €1,000,000",
+      "step_4_total_stressed_reserve": "€5,700,000 + €2,700,000 + €1,000,000 = €9,400,000",
+      "step_5_stressed_coverage_ratio": "€9,400,000 / €10,000,000 = 0.940000",
+      "step_6_stressed_coverage_percentage": "94.0000%",
+      "step_7_full_backing_test": "94.0000% < 100.0000%",
+      "step_8_stressed_shortfall": "€10,000,000 − €9,400,000 = €600,000"
+    },
+    "result": {
+      "stressed_coverage_ratio": "94.0000%",
+      "stressed_shortfall": "€600,000",
+      "regulatory_verdict": "inadequate",
+      "test_failed": "Article 32(3) full-backing requirement under stress — reserve assets after haircuts are insufficient to cover aggregate claims"
+    },
+    "article_basis": "Article 32(3) and Article 35(5) Regulation (EU) 2023/1114 (MiCA): issuers shall conduct stress testing; based on outcomes, competent authorities may require own funds 20%–40% higher than the Article 35(1)(b) amount.",
+    "tail_convention": "Coverage ratio is a higher-is-better metric; the LOW tail is adverse. This stress test examines the adverse tail by applying haircuts that reduce reserve value toward the lower tail.",
+    "weakest_point": "The haircuts are applied asset-by-asset without correlation; in a systemic liquidity crisis, government bonds and commercial paper may simultaneously gap down, producing a joint tail worse than the sum of individual haircuts."
+  },
+  {
+    "case_name": "redemptions_at_par_EMT",
+    "inputs": {
+      "tokens_in_circulation": "10,000,000 EMT",
+      "par_value_per_token": "€1.00",
+      "total_reserve_assets": "€10,000,000",
+      "redemption_request": "50,000 EMT"
+    },
+    "computation": {
+      "step_1_pre_redemption_claims": "10,000,000 × €1.00 = €10,000,000",
+      "step_2_pre_redemption_coverage": "€10,000,000 / €10,000,000 = 100.0000%",
+      "step_3_redemption_obligation": "50,000 × €1.00 = €50,000",
+      "step_4_post_redemption_reserve": "€10,000,000 − €50,000 = €9,950,000",
+      "step_5_post_redemption_tokens": "10,000,000 − 50,000 = 9,950,000",
+      "step_6_post_redemption_claims": "9,950,000 × €1.00 = €9,950,000",
+      "step_7_post_redemption_coverage": "€9,950,000 / €9,950,000 = 100.0000%",
+      "step_8_reserve_token_parity": "€9,950,000 reserve = €9,950,000 claims"
+    },
+    "result": {
+      "redemption_obligation": "€50,000",
+      "post_redemption_reserve": "€9,950,000",
+      "post_redemption_tokens_outstanding": "9,950,000",
+      "post_redemption_coverage": "100.0000%",
+      "regulatory_verdict": "adequate",
+      "test_satisfied": "Full backing maintained post-redemption; redemption obligation met at par per EMT framework"
+    },
+    "article_basis": "Article 54 Regulation (EU) 2023/1114 (MiCA) reiterates Directive 2009/110/EC obligations for e-money tokens: funds received must be safeguarded and redeemable at par value in the referenced currency.",
+    "tail_convention": "Redemption obligation magnitude is adverse to issuer solvency when high; the HIGH tail (large redemption requests) is adverse. This case examines the adverse tail by testing a material redemption request against the reserve.",
+    "weakest_point": "The case assumes the issuer draws down reserve pro rata; if the issuer instead liquidates the most liquid assets first, the residual reserve becomes concentrated in less liquid instruments, raising liquidity risk for subsequent redemptions."
+  }
+]

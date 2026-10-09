@@ -1,0 +1,47 @@
+[
+  {
+    "example_id": "Example 4.1.5-1",
+    "article": "4.1.5",
+    "fact_pattern": "A Co sole CE in Country A (CIT rate 15%). Year 1: GloBE Income 120 + Expenditure (220) = GloBE Loss (100). Local tax: capital gain 20 excluded so local taxable loss (120). Deferred tax asset generated = 120 × 15% = 18. Expected Adjusted Covered Taxes = (100) × 15% = (15).",
+    "computation": "1. Adjusted Covered Taxes = -18 (DTA generation reduces ACT under Art 4.4.1/4.1.1). 2. Expected ACT Amount = GloBE Loss × Minimum Rate = (100) × 0.15 = (15). 3. ACT (-18) < 0 and ACT < Expected ACT → Additional Current Top-up Tax = Expected ACT - ACT = (-15) - (-18) = 3.",
+    "result": "Additional Current Top-up Tax of 3 arises in Year 1 under Article 4.1.5.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "Exact wording of intermediate tables slightly paraphrased from memory of published text."
+  },
+  {
+    "example_id": "Example 5.5.2-1",
+    "article": "5.5.2",
+    "fact_pattern": "B Co sole CE in Jurisdiction B. Year 1 (short year, created 1 July): GloBE Revenue EUR 1m, GloBE Income EUR 50,000. Year 2: Revenue EUR 1m, Income EUR 100,000. Year 3: Revenue EUR 3m, GloBE Loss EUR (200,000). Fiscal Year = calendar year.",
+    "computation": "1. Short-year adjustment Year 1: multiply by 12/6 = 2 → adjusted Revenue = 2 × 1m = 2m; adjusted Income = 2 × 50,000 = 100,000. 2. Three-year Average Revenue = (2m + 1m + 3m) / 3 = 2m. 3. Three-year Average GloBE Income/(Loss) = (100,000 + 100,000 + (-200,000)) / 3 = 0. 4. Average Revenue 2m < 10m and Average Income 0 < 1m.",
+    "result": "Top-up Tax for B Co deemed zero for Year 3 if Filing CE elects the de minimis exclusion.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "Exact intermediate arithmetic presentation of the three-year average formula."
+  },
+  {
+    "example_id": "Example 5.3.7(a)-1",
+    "article": "5.3.7(a)",
+    "fact_pattern": "B Co 1 Flow-through Entity in Country B with PE; Eligible Payroll Costs EUR 200; Eligible Tangible Assets EUR 400. Ownership: A Co 50%, B Co 2 (same jurisdiction) 45%, non-Group 5%. B Co 1 GloBE Income EUR 1,000.",
+    "computation": "1. Allocate 50% of Eligible Payroll Costs (EUR 100) and Eligible Tangible Assets (EUR 200) to the PE under Art 5.3.6. 2. Allocate remaining 45% of Eligible Payroll Costs (EUR 90) and Eligible Tangible Assets (EUR 180) to B Co 2 under Art 5.3.7(a) because B Co 2 located in same jurisdiction. 3. Residual 5% (Payroll EUR 10; Assets EUR 20) excluded under Art 5.3.7(c).",
+    "result": "Only the amounts allocated to the PE and to B Co 2 enter the Substance-based Income Exclusion computation; residual non-Group share is excluded.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "Precise sequencing of the GloBE Income allocation steps preceding the SBIE allocation."
+  },
+  {
+    "example_id": "Example 9.1.1-1",
+    "article": "9.1.1",
+    "fact_pattern": "A Co first subject to GloBE for FY ending 31 Dec 2023. Country A CIT 20%. Pre-Transition Year 2022: foreign tax credit carry-forward DTA of 10 and investment tax credit carry-forward DTA of 10 (both recorded at domestic rate).",
+    "computation": "1. Recast each DTA at Minimum Rate: (DTA / domestic rate) × Minimum Rate = (10 / 0.20) × 0.15 = 7.5. 2. Both foreign-tax-credit DTA and investment-tax-credit DTA therefore become 7.5 each for GloBE purposes in the Transition Year and subsequent years.",
+    "result": "Each of the two deferred tax assets is recast to 7.5 for GloBE purposes under the Transition Year rules of Article 9.1.1.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "Whether the published example explicitly labels both credits as ‘carry-forwards’ in identical wording."
+  },
+  {
+    "example_id": "Example 4.1.5-2",
+    "article": "4.1.5",
+    "fact_pattern": "Two CEs in Country A (rate 15%): A Co 1 GloBE Loss (100) → DTA (18); A Co 2 GloBE Income 50 → Covered Taxes 7.5. Jurisdictional Net GloBE Loss (50).",
+    "computation": "1. Jurisdictional Adjusted Covered Taxes = (18) + 7.5 = (10.5). 2. Expected ACT Amount = (50) × 0.15 = (7.5). 3. ACT (10.5) < 0 and ACT < Expected → Additional Current Top-up Tax = (7.5) - (10.5) = 3. 4. Under Art 5.4.3 the 3 is allocated to A Co 1 (the entity that generated the excess negative tax expense).",
+    "result": "Additional Current Top-up Tax of 3 arises and is allocated to A Co 1.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "Exact allocation language under Article 5.4.3 in the published text."
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Trace cache over conventional L1 instruction cache",
+    "where_in_paper": "Instruction cache / Trace cache section",
+    "decision": "Pentium 4 replaces the conventional L1 instruction cache with a trace cache that stores decoded micro-ops in program execution order, not in original instruction order",
+    "alternatives_or_rejected": "conventional L1 instruction cache holding raw x86 bytes (as in prior Pentium and competitor designs)",
+    "rationale": "a trace cache eliminates the need to re-decode frequently-executed instruction sequences that are reached via taken branches; because the trace cache stores the already-decoded micro-ops in the order they actually execute, the front-end can deliver a continuous stream of micro-ops to the execution units without stalling on instruction decode whenever a branch misprediction is recovered",
+    "outcome": "the trace cache provides a higher effective bandwidth of micro-op delivery than a conventional instruction cache would achieve; it becomes the primary source of instructions for the out-of-order execution engine",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 4,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "my recall of the specific comparison the paper makes between trace cache and conventional L1 (whether it explicitly discusses a larger conventional L1 as the rejected alternative) may conflate this with later commentary on the P4 rather than what the 2001 paper itself argues",
+    "confidence": 0.7
+  },
+  {
+    "title": "Double-pumped ALUs in the Rapid Execution Engine",
+    "where_in_paper": "Execution engine / Rapid Execution Engine section",
+    "decision": "The integer ALU units operate at twice the core clock frequency, completing two operations per clock cycle by running at double frequency internally",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "to achieve high effective instruction throughput without increasing the core clock frequency beyond what the deep pipeline already delivers; running the ALUs at 2x frequency gives a 2x instruction per clock improvement for ALU-bound code without requiring additional pipeline stages for the ALU operation itself",
+    "outcome": "the Rapid Execution Engine delivers an effective 2x ALU instruction throughput per clock cycle, significantly boosting integer performance on ALU-intensive workloads; this benefit is visible in benchmarks on code with high ALU instruction density",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am not certain the paper explicitly frames the double-pumped ALU as a trade-off against simply increasing core clock frequency — I may be inferring the trade-off rationale from general NetBurst knowledge rather than from the paper's specific text",
+    "confidence": 0.6
+  },
+  {
+    "title": "Very deep pipeline as clock-frequency-first microarchitecture philosophy",
+    "where_in_paper": "Pipeline / clock frequency philosophy section",
+    "decision": "Pentium 4 implements a much deeper pipeline (initially ~20 stages, growing to 31 in later Prescott derivatives) than its predecessors or competitors, prioritizing clock frequency above single-thread CPI",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "the paper argues that higher clock frequency is the most direct path to higher single-thread performance, and that a deep pipeline enables higher clock frequencies by breaking each instruction into many short stages; the cost is a higher CPI (more cycles per instruction) that the paper contends is offset by the frequency gain",
+    "outcome": "Pentium 4 achieved higher clock frequencies than competing designs of the same era (reaching 3.8 GHz in later versions) but with higher CPI; the paper reports benchmark performance improvements from the frequency advantage",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am uncertain of the exact pipeline depth number cited in the 2001 paper vs. later derivatives — the paper may have described the initial Pentium 4 pipeline depth rather than the later 31-stage Prescott pipeline, and I may be conflating the two",
+    "confidence": 0.65
+  },
+  {
+    "title": "Branch target buffer with 4K-entry BTB",
+    "where_in_paper": "Branch prediction / Branch target buffer section",
+    "decision": "Pentium 4 implements a branch target buffer (BTB) to predict taken branches and direct the instruction fetch pipeline accordingly, supporting the trace cache's need for correct branch prediction to build useful traces",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "the trace cache stores micro-ops in execution order, which requires the branch prediction mechanism to correctly predict the direction and target of branches before the trace can be stored or fetched; without a high-accuracy BTB, the trace cache would frequently build incorrect traces or stall during trace construction",
+    "outcome": "the BTB enables the trace cache to function effectively by providing branch direction prediction at fetch time, allowing the front-end to speculatively construct traces before the branch outcome is fully resolved",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am less certain about the specific BTB size and structure details as presented in the 2001 paper — the 4K-entry figure is from general Pentium 4 documentation and may not appear in this specific paper",
+    "confidence": 0.55
+  },
+  {
+    "title": "Issue and retirement bandwidth matching for out-of-order execution",
+    "where_in_paper": "Out-of-order execution / Issue and retirement section",
+    "decision": "The out-of-order execution engine is designed with sufficient issue bandwidth (3 instructions per cycle) and retirement bandwidth (3 micro-ops per cycle) to keep the execution units fed without becoming the bottleneck",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "if issue bandwidth were lower than execution unit capacity, the out-of-order engine would stall before fully utilizing the execution resources; similarly, if retirement bandwidth were lower than issue bandwidth, the out-of-order buffer would fill up and stall dispatch; matching these three numbers (issue, execution, retirement) prevents any one stage from becoming the throughput bottleneck",
+    "outcome": "the paper reports that the matched bandwidth of 3 micro-ops per cycle across issue, execution, and retirement sustains high out-of-order throughput on integer workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain the paper discusses issue/retirement bandwidth matching as a deliberate engineering trade-off with the depth of the out-of-order scheduler — this framing may be from general microarchitecture knowledge rather than the paper's specific emphasis",
+    "confidence": 0.5
+  }
+]

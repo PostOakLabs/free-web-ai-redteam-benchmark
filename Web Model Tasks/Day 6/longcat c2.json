@@ -1,0 +1,101 @@
+
+{
+  "prompt": "C-v5",
+  "model": "LongCat",
+  "date": "2026-09-12",
+  "anchors": {
+    "a1": "exists-exactly",
+    "a2": "exists-exactly",
+    "a3": "exists-but-citation-wrong: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, \"The Microarchitecture of the Pentium 4 Processor,\" Intel Technology Journal, vol. 5, no. 1, Q1 2001."
+  },
+  "sources": [
+    {
+      "title": "War Stories: Physical Design of a 1-GHz Microprocessor",
+      "venue_or_publication": "IEEE Micro",
+      "year": 2002,
+      "what_it_covers": "Physical design challenges and solutions for the Intel Itanium processor, including timing closure, clock distribution, and power grid issues.",
+      "why_relevant": "Provides first-hand war stories on physical design failures and recovery strategies for a high-performance microprocessor.",
+      "confidence": 0.8,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"War Stories: Physical Design of a 1-GHz Microprocessor IEEE Micro\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Design Errors in the Pentium Processor: A Case Study",
+      "venue_or_publication": "IEEE Micro",
+      "year": 1994,
+      "what_it_covers": "Analysis of design errors in the Intel Pentium processor, including the FDIV bug, and lessons learned for future designs.",
+      "why_relevant": "Documents a famous silicon failure and recovery process, highlighting design closure challenges.",
+      "confidence": 0.7,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"Design Errors in the Pentium Processor IEEE Micro\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Clock Distribution in High-Performance Microprocessors",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits",
+      "year": 2001,
+      "what_it_covers": "Case studies on clock distribution challenges in high-performance microprocessors, including skew management and power consumption.",
+      "why_relevant": "Offers insights into CTS failures and recovery techniques from industrial designs.",
+      "confidence": 0.8,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"Clock Distribution in High-Performance Microprocessors IEEE JSSC\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Physical Design of the DEC Alpha 21164 Microprocessor",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits",
+      "year": 1996,
+      "what_it_covers": "Physical design implementation of the DEC Alpha 21164, including floorplanning, placement, and routing challenges.",
+      "why_relevant": "Details physical design war stories and solutions for a complex microprocessor.",
+      "confidence": 0.8,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"Physical Design of the DEC Alpha 21164 Microprocessor IEEE JSSC\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Congestion-Driven Physical Design: A Case Study from Industry",
+      "venue_or_publication": "Proceedings of the 38th Design Automation Conference (DAC)",
+      "year": 2001,
+      "what_it_covers": "Congestion issues and solutions in physical design for a high-density ASIC, based on industrial experience.",
+      "why_relevant": "Provides a war story on routing congestion failures and recovery methods.",
+      "confidence": 0.6,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"Congestion-Driven Physical Design DAC 2001\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Timing Closure in the Intel Itanium Processor",
+      "venue_or_publication": "IEEE Micro",
+      "year": 2002,
+      "what_it_covers": "Timing closure challenges and strategies for the Intel Itanium processor, including process variation effects.",
+      "why_relevant": "Focuses on timing closure war stories and recovery techniques for a complex design.",
+      "confidence": 0.7,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "search for \"Timing Closure in the Intel Itanium Processor IEEE Micro\"",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "有多少芯片是一次流片就成功的？",
+      "venue_or_publication": "CSDN Blog",
+      "year": 2025,
+      "what_it_covers": "Analysis of ASIC tape-out success rates, common failure reasons (e.g., timing, power, congestion), and recovery strategies.",
+      "why_relevant": "Offers multiple real-world failure stories and postmortems from the industry.",
+      "confidence": 0.9,
+      "knowledge_basis": "search-recall",
+      "verification_hint": "search for \"有多少芯片是一次流片就成功的\"",
+      "access_guess": "free"
+    },
+    {
+      "title": "半导体流片失败是种什么体验",
+      "venue_or_publication": "Sohu Article",
+      "year": 2024,
+      "what_it_covers": "Personal experiences with semiconductor tape-out failures, including design errors and silicon bring-up challenges.",
+      "why_relevant": "Provides first-hand accounts of physical design failures and recovery efforts.",
+      "confidence": 0.9,
+      "knowledge_basis": "search-recall",
+      "verification_hint": "search for \"半导体流片失败是种什么体验\"",
+      "access_guess": "free"
+    }
+  ]
+}

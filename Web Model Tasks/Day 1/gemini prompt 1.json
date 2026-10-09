@@ -1,0 +1,125 @@
+[
+{
+"title": "Post-CTS Global Routing Hotspot Resolution via Local Cell-Density Soft Keepouts and Clock Tree Re-routing",
+"design_context": "7nm FinFET, 1.2M placeable instances, 84 SRAM macros, 4 primary clock domains, commercial P&R tool suite",
+"prior_state": {
+"utilization_pct": 74.5,
+"peak_congestion_overflow_pct": 4.8,
+"drc_violations": 14200,
+"wns_ns": -0.12,
+"tns_ns": -14.5
+},
+"observation": "Post-CTS detailed routing showed a severe GRC H/V congestion hotspot at the intersection of three memory channels, causing 14,200 DRCs (mostly short and spacing violations).",
+"severity": "CRITICAL",
+"hypothesis": "Clock tree buffers inserted during CTS in the narrow inter-macro channels inflated local placement density beyond 92%, causing routing track exhaustion for signal nets traversing the channel.",
+"candidates_considered": [
+{
+"action": "Move macro floorplan to widen memory channels by 15um",
+"rejected_because": "Requires full floorplan re-spins, invalidates top-level power grid, and causes a 3-week schedule delay."
+},
+{
+"action": "Apply a global placement density limit reduction from 75% to 65%",
+"rejected_because": "Pushes logic into peripheral blocks, causing WNS degradation of over 300ps on long critical paths and severe area bloat."
+},
+{
+"action": "Rip up clock tree and re-run global placement from scratch",
+"rejected_because": "High risk of unresolvable timing closure churn across all clock domains two weeks before target tapeout."
+}
+],
+"chosen_intervention": "Applied localized Partial Placement Blockage (50% max density limit) across the 3 macro channel regions, eco-routed clock buffers out of the channel into adjacent sparse regions, and applied track assign restrictions for M4/M5 signal nets.",
+"post_state": {
+"utilization_pct": 74.8,
+"peak_congestion_overflow_pct": 0.3,
+"drc_violations": 42,
+"wns_ns": -0.015,
+"tns_ns": -0.18
+},
+"expert_assessment": "Moving clock buffers out of tight macro channels while using localized partial blockages is standard practice to preserve overall schedule when macro floorplans are frozen. This avoids global timing disruption while freeing up M4/M5 tracks for signal routing. However, this strategy relies on adjacent sparse area being available within max-delay constraints of the clock nets.",
+"confidence": 0.95,
+"failure_class": "FAIL_CONGESTION",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes the CTS solver inserted enough buffer stages in the channel that moving them out wouldn't violate max-skew limits on the downstream leaf pins."
+},
+{
+"title": "Identifying Missing False Path Constraints via Massive Uniform WNS Violations Across Unrelated Clock Domains",
+"design_context": "16nm FinFET, 850k placeable instances, 62 macros, 6 clock domains (including asynchronous PCIe and SoC system clocks), commercial P&R",
+"prior_state": {
+"wns_ns": -8.45,
+"tns_ns": -18420.0,
+"failing_endpoint_count": 2150,
+"utilization_pct": 68.0,
+"drc_violations": 0
+},
+"observation": "Setup timing report showed 2,150 failing paths all failing by nearly identical magnitudes (-8.40ns to -8.50ns), originating from a 100MHz control register domain into a 1GHz core clock domain.",
+"severity": "HIGH",
+"hypothesis": "The flat -8.5ns violation magnitude matching the 10ns cycle period minus setup time across thousands of paths indicates an unconstrained asynchronous clock domain crossing (missing set_clock_groups or set_false_path), not a real physical or logic delay bottleneck.",
+"candidates_considered": [
+{
+"action": "Upsize registers and insert pipeline stages along failing paths",
+"rejected_because": "Inserts unnecessary latency and logic overhead without fixing the fundamental 1-cycle setup check across asynchronous domains."
+},
+{
+"action": "Increase clock drive strength and apply extreme path weighting during optimization",
+"rejected_because": "Distorts local placement, exacerbates local power/area, and fails to close timing because the physical path delay exceeds single-cycle targeting."
+},
+{
+"action": "Set a multicycle path constraint of 2 cycles without checking CDC synchronization logic",
+"rejected_because": "Risks masking structural CDC bugs if hardware handshaking or synchronizer flops are absent."
+}
+],
+"chosen_intervention": "Verified presence of dual-flop synchronizers in RTL for the crossing signals, then added an explicit set_clock_groups -asynchronous constraint between the 100MHz control clock and 1GHz core clock domains.",
+"post_state": {
+"wns_ns": -0.025,
+"tns_ns": -0.15,
+"failing_endpoint_count": 8,
+"utilization_pct": 68.0,
+"drc_violations": 0
+},
+"expert_assessment": "A uniform, large WNS failure signature across a massive count of parallel paths is almost always an SDC constraint bug rather than a physical optimization failure. Correctly analyzing the timing report profile prevents wasted optimization iterations and area/power bloat. Care must always be taken to verify hardware synchronizer implementation before declaring false paths.",
+"confidence": 0.98,
+"failure_class": "FAIL_TIMING",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes all 2,150 failing endpoints belonged strictly to the asynchronous crossing and that no true synchronous timing violations were masked underneath the -8.5ns group WNS."
+},
+{
+"title": "Inter-Block Timing Budget Allocation for High-Speed Memory Controller to PHY Interface",
+"design_context": "5nm FinFET, 1.8M placeable instances, 112 SRAM macros, 2 primary clock domains (800MHz bus clock), commercial synthesis and P&R",
+"prior_state": {
+"block_a_input_delay_ns": 0.85,
+"block_b_output_delay_ns": 0.4,
+"clock_period_ns": 1.25,
+"wns_ns": -0.18,
+"tns_ns": -3.2
+},
+"observation": "Top-level timing closure failed at the interface between Block A (Memory Controller) and Block B (PHY Adapter) due to severe routing congestion and wire delays near the partition boundary.",
+"severity": "MODERATE",
+"hypothesis": "The legacy 50/50 static pin delay budgeting (625ps per side) ignored internal logic depth imbalance, over-constraining Block B while leaving unexploited slack inside Block A.",
+"candidates_considered": [
+{
+"action": "Apply a 70/30 budget shift favoring Block B (875ps for Block A, 375ps for Block B)",
+"rejected_because": "Over-constrains Block A internal logic, creating 120ps of setup violations inside Block A where pipeline stages cannot be added."
+},
+{
+"action": "Flatten Block A and Block B into a single sub-system for top-level P&R",
+"rejected_because": "Exceeds runtime memory limits causing tool instability, breaks modular floorplanning, and disrupts concurrent multi-team block layout workflows."
+},
+{
+"action": "Relax input/output delay constraints on both blocks without top-level budgeting validation",
+"rejected_because": "Passes block-level STA but guarantees massive top-level setup violations during chip-level timing signoff."
+}
+],
+"chosen_intervention": "Derived a budget based on actual internal arrival/required times: assigned 750ps (60%) budget to Block A (which had 8 levels of logic) and 500ps (40%) to Block B (which had 3 levels of logic), accompanied by localized pin placement constraints to align boundary ports.",
+"post_state": {
+"block_a_input_delay_ns": 0.75,
+"block_b_output_delay_ns": 0.5,
+"clock_period_ns": 1.25,
+"wns_ns": 0.012,
+"tns_ns": 0.0
+},
+"expert_assessment": "Proportional budgeting based on logic depth and boundary placement is critical for hierarchical closure. Static equal-ratio budgeting frequently leads to unnecessary iterations. However, this approach requires strict freezing of port placement; if top-level routing reassigns ports, boundary path delays will shift unexpectedly.",
+"confidence": 0.92,
+"failure_class": "SDC_BUDGET",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes the top-level router can respect port placement constraints tightly enough that wire delay variations won't consume the 12ps post-intervention slack margin."
+}
+]

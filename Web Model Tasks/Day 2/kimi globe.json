@@ -1,0 +1,109 @@
+```json
+[
+  {
+    "example_id": "Example 5.5.2-1",
+    "article": "Article 5.5.2",
+    "fact_pattern": {
+      "group": "ABC Group, calendar-year Fiscal Year",
+      "jurisdiction": "Jurisdiction B, sole Constituent Entity B Co",
+      "B_Co_created": "1 July Year 1 (short Fiscal Year of 6 months)",
+      "Year_1": "GloBE Revenue EUR 1 million, GloBE Income EUR 50,000",
+      "Year_2": "GloBE Revenue EUR 1 million, GloBE Income EUR 100,000",
+      "Year_3": "GloBE Revenue EUR 3 million, GloBE Loss EUR 200,000"
+    },
+    "computation": {
+      "step_1_short_year_adjustment": "Year 1 revenue and income are multiplied by 2 (= 12/6) to annualise",
+      "step_2_average_revenue": "(2 × 1,000,000 + 1,000,000 + 3,000,000) / 3 = 6,000,000 / 3 = EUR 2,000,000",
+      "step_3_average_income": "(2 × 50,000 + 100,000 + (−200,000)) / 3 = 0 / 3 = EUR 0",
+      "step_4_threshold_test": "Average Revenue EUR 2M < EUR 10M threshold; Average Income EUR 0 < EUR 1M threshold"
+    },
+    "result": "Top-up Tax for B Co deemed zero for Year 3 if the Filing Constituent Entity elects for the de minimis exclusion",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The exact pro-rata adjustment formula for short fiscal years may use slightly different wording in the original OECD PDF"
+  },
+  {
+    "example_id": "Example 4.1.5-1",
+    "article": "Article 4.1.5",
+    "fact_pattern": {
+      "entity": "A Co, sole Constituent Entity in Country A",
+      "local_tax_rate": "15%",
+      "Year_1_GloBE": "Income 120, Expenditure (220), GloBE Loss (100)",
+      "Year_1_local_tax": "Taxable income 100 (capital gain 20 excluded from local tax), Expenditure (220), Local tax loss (120)",
+      "deferred_tax_asset": "120 × 15% = 18"
+    },
+    "computation": {
+      "step_1_expected_adjusted_covered_taxes": "GloBE Loss (100) × Minimum Rate 15% = (15)",
+      "step_2_actual_adjusted_covered_taxes": "(18) [deferred tax asset recognised]",
+      "step_3_comparison": "(18) < 0 and (18) < (15)",
+      "step_4_additional_current_top_up_tax": "(15) − (18) = 3"
+    },
+    "result": "Additional Current Top-up Tax of EUR 3 arises in Year 1 under Article 4.1.5",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The exact table layout and wording of the local-tax vs GloBE comparison may differ slightly from the original"
+  },
+  {
+    "example_id": "Example 5.3.7-1",
+    "article": "Article 5.3.7(a)",
+    "fact_pattern": {
+      "group": "AB Group, A Co is UPE in Country A",
+      "ownership": "A Co owns 50% of B Co 1, 100% of B Co 2; B Co 2 owns 45% of B Co 1; 5% held by non-Group Entities",
+      "B_Co_1": "Flow-through Entity in Country B with PE of A Co in Country B",
+      "Year_1": "B Co 1 GloBE Income EUR 1,000, Eligible Payroll Costs EUR 200, Eligible Tangible Assets EUR 400"
+    },
+    "computation": {
+      "step_1_GloBE_Income_allocation": "1,000 − 50 (non-Group) − 500 (PE) = 450 to B Co 2",
+      "step_2_payroll_allocation": "PE: 200 × 50% = 100; B Co 2: 200 × 45% = 90; Excluded: 200 × 5% = 10",
+      "step_3_tangible_asset_allocation": "PE: 400 × 50% = 200; B Co 2: 400 × 45% = 180; Excluded: 400 × 5% = 20"
+    },
+    "result": "PE receives 50% of Eligible Payroll and Tangible Assets, B Co 2 receives 45%, and 5% is excluded from SBIE computation",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The exact diagram references and paragraph numbering from the original OECD examples document may vary"
+  },
+  {
+    "example_id": null,
+    "article": "Articles 5.1, 5.2, 5.3 and 9.2",
+    "fact_pattern": {
+      "jurisdiction": "Jurisdiction L, FY 2024",
+      "Net_GloBE_Income": "EUR 100.0 million",
+      "Adjusted_Covered_Taxes": "EUR 10.0 million",
+      "Eligible_payroll": "EUR 50.0 million",
+      "Eligible_tangible_assets": "EUR 200.0 million (average carrying value)",
+      "Minimum_rate": "15%"
+    },
+    "computation": {
+      "step_1_ETR": "10.0 / 100.0 = 10.0%",
+      "step_2_top_up_percentage": "15.0% − 10.0% = 5.0%",
+      "step_3_SBIE_payroll": "9.8% × 50.0 = EUR 4.9 million (FY 2024 transitional rate per Art. 9.2)",
+      "step_4_SBIE_tangible": "7.8% × 200.0 = EUR 15.6 million (FY 2024 transitional rate per Art. 9.2)",
+      "step_5_SBIE_total": "4.9 + 15.6 = EUR 20.5 million",
+      "step_6_Excess_Profit": "100.0 − 20.5 = EUR 79.5 million",
+      "step_7_Top_up_Tax": "5.0% × 79.5 = EUR 3.975 million"
+    },
+    "result": "Jurisdictional Top-up Tax of EUR 3.975 million before QDMTT offset and IIR allocation",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The specific EUR fact-pattern values are illustrative composites; the original OECD Illustrative Examples document may not contain this exact numerical example as a single worked example"
+  },
+  {
+    "example_id": null,
+    "article": "Article 9.1.1",
+    "fact_pattern": {
+      "entity": "Constituent Entity in Country X, first Transition Year",
+      "pre_existing_loss": "EUR 10 million incurred before GloBE applied",
+      "domestic_tax_rate": "10%",
+      "Transition_Year_GloBE_Income": "EUR 10 million",
+      "current_tax_payable": "Zero (loss carry-forward offsets taxable profit)"
+    },
+    "computation": {
+      "step_1_DTA_without_recast": "10 million × 10% = EUR 1.0 million; release increases Adjusted Covered Taxes by 1.0 million",
+      "step_2_ETR_without_recast": "1.0 / 10.0 = 10.0%",
+      "step_3_top_up_without_recast": "15.0% − 10.0% = 5.0%; 5.0% × 10.0 = EUR 0.5 million top-up tax",
+      "step_4_DTA_with_recast": "10 million × 15% = EUR 1.5 million (recast to Minimum Rate because loss would have been a GloBE Loss)",
+      "step_5_ETR_with_recast": "1.5 / 10.0 = 15.0%",
+      "step_6_top_up_with_recast": "15.0% − 15.0% = 0%; top-up tax eliminated"
+    },
+    "result": "Recasting the deferred tax asset to the 15% Minimum Rate under Article 9.1.1 eliminates the EUR 0.5 million top-up tax that would otherwise arise",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "The OECD Commentary refers to a basic example for Article 9.1 but I do not have the exact published numbers, example ID, or precise fact pattern from the official Illustrative Examples document"
+  }
+]
+```

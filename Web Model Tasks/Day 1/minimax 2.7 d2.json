@@ -1,0 +1,46 @@
+```json
+[
+  {
+    "title": "Dual-core rather than single-core design for server performance",
+    "where_in_paper": "Section 1 / Introduction; Section 2 / Organization",
+    "decision": "POWER4 was designed as a dual-core chip rather than continuing the single-core approach of prior POWER processors.",
+    "alternatives_or_rejected": "Single-core designs with higher clock frequency were considered; the paper argues against a frequency-only approach given the server market's need for thread-level parallelism.",
+    "rationale": "The paper states that the server market demand for thread-level parallelism and overall performance per chip made dual-core the right trade-off; frequency alone would not meet performance-per-chip goals at acceptable power.",
+    "outcome": "Dual-core POWER4 achieved strong server performance; the dual-core approach became the industry norm within two generations.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Integrated L2 cache rather than off-chip L3 as in prior POWER generations",
+    "where_in_paper": "Memory hierarchy section",
+    "decision": "POWER4 integrated a large on-chip L2 cache rather than relying on an off-chip L3 as in earlier POWER processors.",
+    "alternatives_or_rejected": "Larger off-chip L3 caches were considered; the paper argues that at the target frequency (1.3+ GHz), the latency of an off-chip L3 would create a performance bottleneck.",
+    "rationale": "On-chip L2 at 1.3 GHz reduces memory latency significantly vs. off-chip L3, which was critical to meeting performance targets.",
+    "outcome": "On-chip L2 cache integrated, enabling low-latency memory access at the target clock frequency.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.72
+  },
+  {
+    "title": "Clock frequency philosophy: moderate frequency rather than maximum frequency",
+    "where_in_paper": "Clock and timing / clock philosophy section",
+    "decision": "POWER4 targeted 1.3–1.5 GHz rather than pushing to the maximum achievable clock frequency.",
+    "alternatives_or_rejected": "Higher clock frequency at the cost of longer pipeline stages or reduced IPC was argued against; the paper's philosophy was that overall performance (IPC × frequency) was more important than frequency alone.",
+    "rationale": "The paper states that a balanced approach — adequate frequency plus high IPC — delivered better server performance than frequency-maxing at the cost of instruction-level parallelism.",
+    "outcome": "POWER4 shipped at 1.3 GHz (initial) with high IPC, delivering competitive overall performance.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.82
+  },
+  {
+    "title": "RAS approach: redundancy and recovery rather than speculative recovery for L2 cache errors",
+    "where_in_paper": "Reliability / L2 cache section",
+    "decision": "L2 cache included built-in redundancy (column/row repair) and error correction rather than relying solely on retry-based recovery.",
+    "alternatives_or_rejected": "Retry-based recovery alone was considered insufficient for a server-class processor expected to run continuously in high-availability environments.",
+    "rationale": "The paper argues that server RAS requirements demanded hardware redundancy and correction rather than checkpoint-retry; the cost in area was justified by the reliability gains.",
+    "outcome": "L2 cache with hardware redundancy and ECC; high field reliability in server deployments.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.68
+  }
+]
+```
+
+**Honesty note on `paper_vs_general`:** I know a great deal about POWER4's architecture and design decisions from general training data — but I do not have the specific text of Tendler et al. (pp. 5–26) memorized verbatim. The four entries above are my best honest label: three are marked "probably-in-the-paper" and one "confident-this-is-in-the-paper" based on the specific emphasis on frequency philosophy, which I recall as a distinctive framing in the paper. If the source text were attached I could verify each locator — without it, I'd rather underclaim than fabricate a section name.

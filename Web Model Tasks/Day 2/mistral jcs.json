@@ -1,0 +1,16 @@
+```json
+[
+    {"vector_name": "integer_vs_float", "input_json": "[1, 1.0, 1.00]", "canonical_output": "[1,1,1]", "rule": "Section 3.1: Numbers must be serialized without unnecessary decimal points or trailing zeros.", "divergence_trap": "[1,1.0,1.00]", "certainty": "rfc-exact"},
+    {"vector_name": "negative_zero", "input_json": "[-0, -0.0]", "canonical_output": "[0,0]", "rule": "Section 3.1: -0 is serialized as 0.", "divergence_trap": "[-0,-0.0]", "certainty": "rfc-exact"},
+    {"vector_name": "large_integer", "input_json": "[9007199254740992, 9007199254740993]", "canonical_output": "[9007199254740992,9007199254740993]", "rule": "Section 3.1: Integers beyond 2^53 must be serialized as-is if representable.", "divergence_trap": "[9007199254740992,9007199254740992]", "certainty": "rfc-exact"},
+    {"vector_name": "exponent_boundary", "input_json": "[1e21, 1e-21]", "canonical_output": "[1E+21,1E-21]", "rule": "Section 3.1: Exponents must be serialized with 'E' and explicit sign.", "divergence_trap": "[1e+21,1e-21]", "certainty": "rfc-exact"},
+    {"vector_name": "tiny_decimal", "input_json": "[0.0000001]", "canonical_output": "[1E-7]", "rule": "Section 3.1: Tiny decimals must be serialized in exponent form.", "divergence_trap": "[0.0000001]", "certainty": "rfc-exact"},
+    {"vector_name": "solidus_escaping", "input_json": "{\"key\": \"a/b\"}", "canonical_output": "{\"key\":\"a\\/b\"}", "rule": "Section 3.2: The solidus (/) must be escaped as \\/.", "divergence_trap": "{\"key\":\"a/b\"}", "certainty": "rfc-exact"},
+    {"vector_name": "unicode_no_normalization", "input_json": "{\"key\": \"\\u00E9\"}", "canonical_output": "{\"key\":\"\\u00E9\"}", "rule": "Section 3.2: Unicode normalization is NOT applied; characters are serialized as-is.", "divergence_trap": "{\"key\":\"é\"}", "certainty": "rfc-exact"},
+    {"vector_name": "surrogate_pair", "input_json": "{\"key\": \"\\uD83D\\uDE00\"}", "canonical_output": "{\"key\":\"\\uD83D\\uDE00\"}", "rule": "Section 3.2: Surrogate pairs must be serialized as two 16-bit code units.", "divergence_trap": "{\"key\":\"😀\"}", "certainty": "rfc-exact"},
+    {"vector_name": "utf16_ordering", "input_json": "{\"\\uD83D\\uDE00\": 1, \"\\uE000\": 2}", "canonical_output": "{\"\\uE000\":2,\"\\uD83D\\uDE00\":1}", "rule": "Section 4: Keys are ordered by UTF-16 code units, not code points.", "divergence_trap": "{\"\\uD83D\\uDE00\":1,\"\\uE000\":2}", "certainty": "rfc-exact"},
+    {"vector_name": "empty_object_and_array", "input_json": "[{}, []]", "canonical_output": "[{},[]]", "rule": "Section 2: Empty objects and arrays are serialized as {} and [].", "divergence_trap": "[ {}, [] ]", "certainty": "rfc-exact"},
+    {"vector_name": "nested_structures", "input_json": "{\"a\": {\"b\": []}, \"c\": [{}]}", "canonical_output": "{\"a\":{\"b\":[]},\"c\":[{}]}}", "rule": "Section 2: Nested structures are serialized recursively without spaces.", "divergence_trap": "{\"a\": {\"b\": []}, \"c\": [{}]}}", "certainty": "rfc-exact"},
+    {"vector_name": "duplicate_key_illegality", "input_json": "{\"a\": 1, \"a\": 2}", "canonical_output": "null", "rule": "Section 4: Duplicate keys are illegal in JCS.", "divergence_trap": "{\"a\":1,\"a\":2}", "certainty": "rfc-exact"}
+]
+```

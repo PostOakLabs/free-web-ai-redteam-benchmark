@@ -1,0 +1,90 @@
+[
+  {
+    "pattern_name": "block-boundary I/O delay budget split",
+    "situation": "Deriving set_input_delay / set_output_delay for a hierarchical block whose neighbors are not yet implemented or whose internal timing is still fluid",
+    "derivation": "Start from the common period T of the interface clock. Reserve a fixed chip-level margin M (typically 10-20% of T). Split the remainder (T-M) into three parts: launch-block internal path budget L, interconnect/board/wire budget I, capture-block internal path budget C, with L+I+C = T-M. For an input delay the constraint becomes set_input_delay = L+I (or a chosen fraction); for output delay set_output_delay = C+I. Arithmetic shape: input_delay = (T-M)*f_launch_interconnect where f is usually 0.4-0.6 depending on which side owns more logic. Numbers assumed: M=15% of T (confidence 0.55), L:I:C split ≈ 40:20:40 (confidence 0.5)",
+    "wrong_way": "Copying a flat full-chip I/O delay or using the entire period minus only clock uncertainty; this either starves the neighbor blocks of budget or leaves the current block with an unrealistically easy constraint that hides internal problems until integration",
+    "defense": "Show the arithmetic split against the interface clock period, the reserved margin, and the relative logic depth expected on each side of the boundary; cite any existing similar interfaces already closed at those fractions",
+    "signoff_risk": "Too tight: block fails timing even though the real system path would close, causing unnecessary ECOs or frequency reduction. Too loose: block closes easily but the integrated system fails at the boundary, forcing late redesign of both sides",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "7nm-and-below higher relative variation and OCV usually force a larger reserved margin M than typical 28nm budgets"
+  },
+  {
+    "pattern_name": "false-path versus multicycle-path decision",
+    "situation": "A path exists in the netlist between two flops but is either functionally unreachable or is allowed more than one cycle by protocol",
+    "derivation": "First prove functional unreachability (case analysis, formal, or exhaustive simulation of the enabling conditions). If unreachable under all legal modes → set_false_path. If reachable but the protocol guarantees N cycles of separation (e.g., a handshake that asserts only every Nth cycle) → set_multicycle_path -setup N -hold N-1 (or the appropriate hold adjustment). The multicycle value N is taken directly from the protocol specification or from the minimum observed separation in directed tests, never from a timing report",
+    "wrong_way": "Declaring a false path simply because the path is not critical or because it is long; or setting multicycle without adjusting hold, which creates optimistic hold analysis and real silicon races",
+    "defense": "Present the functional proof (waveform, state-machine excerpt, or formal property) that shows either unreachability or the guaranteed N-cycle separation; never defend solely with 'it timed'",
+    "signoff_risk": "False path that is actually reachable: real timing violation in silicon, often intermittent. Multicycle too aggressive (N too large): same silicon failure. Multicycle too conservative or missing hold adjustment: either unnecessary timing pressure or hold violations that appear only after CTS",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "synchronous clock-domain-crossing constraint",
+    "situation": "Two clocks are known to be synchronous (same source, defined phase relationship) and data crosses between them",
+    "derivation": "Use create_generated_clock or set_clock_groups -asynchronous only if truly async. For synchronous crossings, leave the path timed but budget the available window as the phase difference minus setup/hold requirements of the capture flop minus any known skew bound. If the phase relationship is fixed by a PLL or divider, the constraint is simply the normal setup/hold check under the defined clocks; no extra exception is added unless an explicit multicycle or false-path justification exists",
+    "wrong_way": "Blindly applying set_clock_groups -asynchronous to any crossing, which disables all timing checks and hides real violations when the clocks are actually synchronous",
+    "defense": "Show the common root clock, the generation relationship (divider/PLL), and the static phase offset; demonstrate that the timed window is still positive after OCV",
+    "signoff_risk": "Treating a synchronous crossing as async: silent functional failure when the phase relationship is violated by jitter or mis-lock. Over-constraining a true sync crossing: unnecessary timing ECOs on a path that already has adequate phase margin",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "7nm-and-below larger on-chip variation makes the residual phase margin after OCV smaller, so engineers more often add explicit skew bounds"
+  },
+  {
+    "pattern_name": "early over-constraint with planned relaxation",
+    "situation": "During floorplan / placement / early CTS the design is intentionally given tighter constraints than the final target so that implementation produces extra margin",
+    "derivation": "Choose a final target period T_final. For early stages use T_early = T_final * (1-k) where k is typically 0.05-0.15. Keep the same exceptions (false paths, multicycle) but scale only the clock period or the I/O delays. After CTS and before final routing, restore T_final and re-optimize. The value of k is chosen so that the extra margin roughly equals the expected degradation from CTS latency, routing detour and OCV increase",
+    "wrong_way": "Leaving the over-constraint in place through signoff, or relaxing too early (before CTS) so that the recovered margin is immediately consumed by later stages",
+    "defense": "Show the planned schedule of constraint tightening/relaxation points and the measured margin recovery at each stage; cite historical degradation numbers from similar blocks",
+    "signoff_risk": "Never relaxing: final timing is artificially tight, causing needless area/power or frequency loss. Relaxing too early or too much: late-stage violations appear that could have been avoided by keeping pressure on the tools longer",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "node_era_note": "7nm-and-below higher late-stage degradation from routing and variation usually forces a larger early k than was common at 28nm"
+  },
+  {
+    "pattern_name": "virtual clock for external I/O modeling",
+    "situation": "Chip-level or block-level I/O must be timed against an external device whose clock is not present inside the design",
+    "derivation": "create_clock -name VIRTUAL_IF -period T on a virtual object (or on a port that is later declared virtual). Then set_input_delay / set_output_delay relative to VIRTUAL_IF, using the external device's output-valid / input-setup numbers plus board uncertainty. The virtual clock is never used as a source for any on-chip generated clock; it exists only to anchor the external delays",
+    "wrong_way": "Attaching the external delay numbers to an internal clock, which incorrectly applies on-chip OCV and latency to an off-chip path and can create optimistic or pessimistic checks depending on the latency values",
+    "defense": "Show the external device datasheet timing, the board-trace uncertainty, and that the virtual clock has no network latency inside the design",
+    "signoff_risk": "Too-tight external numbers: chip fails timing against a board that would actually work. Too-loose numbers: chip passes STA but fails in the real system when the external device is slower or the board is longer than assumed",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "generated / divided clock constraint",
+    "situation": "A clock is produced by a divider, clock gate with enable, or PLL feedback inside the design",
+    "derivation": "create_generated_clock -source <master> -divide_by N (or -edges / -edge_shift for non-integer or phase-shifted cases) on the divider output pin. The tool then automatically derives the period and waveform. For a clock gate used only as an enable, prefer set_clock_gating_check or a generated clock with -combinational if the intent is to model the gated clock as a real clock network. Always verify that the generated clock is not also constrained by a conflicting create_clock on the same pin",
+    "wrong_way": "Creating a primary create_clock on the divider output with a manually computed period; this severs the phase relationship to the master and disables correct inter-clock timing and latency propagation",
+    "defense": "Show the divider RTL or schematic, the exact edge relationship, and that report_clocks shows the generated clock correctly parented to the master",
+    "signoff_risk": "Missing or wrong generated-clock definition: inter-clock paths are timed with incorrect period or phase, producing both false violations and missed real violations. Over-constraining with an extra create_clock: double-counting of latency and skew",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "asynchronous interface quasi-static constraint",
+    "situation": "Data crosses between two truly asynchronous clocks (no known phase relationship) and the design uses synchronizers",
+    "derivation": "set_clock_groups -asynchronous -group {clkA} -group {clkB} (or the equivalent set_false_path between the two clock domains). Then separately constrain the synchronizer chain: the first synchronizer flop is allowed to go metastable; the path from the first to the second synchronizer flop is timed for the full destination period (or a multicycle if the synchronizer is multi-stage and the protocol allows). No setup/hold check is required on the async arrival itself; the constraint only ensures the synchronizer resolves before the data is consumed",
+    "wrong_way": "Leaving the async paths timed as ordinary synchronous paths (produces meaningless violations) or forgetting to time the synchronizer-to-logic paths, allowing the metastable value to be sampled by downstream logic",
+    "defense": "Show the synchronizer structure, the MTBF calculation or stage count, and that set_clock_groups covers exactly the async domains without accidentally cutting synchronous paths",
+    "signoff_risk": "Missing async exception: flood of false violations that hide real problems. Overly broad async exception that also cuts a synchronous path: real timing bug reaches silicon. Under-constraining the synchronizer output path: functional failure under rare phase alignments",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "7nm-and-below higher metastability susceptibility sometimes forces an extra synchronizer stage compared with 28nm practice"
+  },
+  {
+    "pattern_name": "pre-implementation inter-block budget handshake",
+    "situation": "Two blocks that will later be integrated must each be given I/O constraints now, before either is fully implemented",
+    "derivation": "Agree on a common interface clock period T. Allocate a shared interconnect budget I (wire, muxing, or feed-through). Remaining budget B = T - M - I is split by negotiation according to relative expected logic depth or by equal share if unknown. Block A receives output_delay = its share of B plus half of I; Block B receives the complementary input_delay. Both sides document the assumed numbers so that later integration can re-balance if one side closes with excess margin",
+    "wrong_way": "Each block independently assumes it can consume most of the period, producing a pair of constraints that cannot be satisfied simultaneously when the blocks are stitched",
+    "defense": "Present the written budget table signed by both owners, the reserved margin, and the plan for re-budgeting after first integration timing",
+    "signoff_risk": "Budgets that sum to more than available period: integration fails and both blocks must be reopened. Budgets that are collectively too pessimistic: both blocks over-design, wasting area and power",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "node_era_note": "no-era-difference-recalled"
+  }
+]

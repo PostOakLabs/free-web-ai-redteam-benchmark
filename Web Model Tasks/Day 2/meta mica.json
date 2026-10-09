@@ -1,0 +1,127 @@
+[
+  {
+    "case_name": "Reserve-coverage test - full backing",
+    "inputs": {
+      "token_supply": {"value": 10000000, "unit": "tokens"},
+      "par_value": {"value": 1, "unit": "EUR per token"},
+      "aggregate_claims": {"value": 10000000, "unit": "EUR", "formula": "supply * par"},
+      "reserve_cash_credit_institution": {"value": 3500000, "unit": "EUR"},
+      "reserve_gov_bonds_market": {"value": 6800000, "unit": "EUR"},
+      "total_reserve_market": {"value": 10300000, "unit": "EUR", "formula": "cash + bonds"}
+    },
+    "computation": {
+      "step_1_aggregate_claims": "10,000,000 * 1 EUR = 10,000,000 EUR",
+      "step_2_total_reserve": "3,500,000 + 6,800,000 = 10,300,000 EUR",
+      "step_3_coverage_ratio": "10,300,000 / 10,000,000 = 1.03",
+      "step_4_coverage_pct": "1.03 * 100 = 103%",
+      "step_5_test_threshold": "Full backing >= 100% per Article 36(7)"
+    },
+    "result": {
+      "coverage_ratio": 1.03,
+      "coverage_pct": 103,
+      "regulatory_verdict": "adequate",
+      "against_which_test": "full-backing reserve coverage >=100% of aggregate claims",
+      "pass_fail": "pass, 103% >= 100%"
+    },
+    "article_basis": "Article 36(1) obligation to constitute and maintain reserve at all times; Article 36(7) aggregate value shall be at least equal to aggregate value of claims against issuer from holders in circulation; Article 36(4)(d) minimum 30% in deposits (context, not threshold for this case)",
+    "tail_convention": "Coverage ratio is higher-is-better metric. LOW tail (low coverage) is adverse. This test examines adverse LOW tail by checking if coverage <100% fails. Does not examine favorable high tail.",
+    "weakest_point": "Market values of reserve assets assumed observable without bid-ask; does not test liquidity maturity buckets or custody segregation; uses single point-in-time valuation, not average over day"
+  },
+  {
+    "case_name": "Own-funds computation - ART percentage-of-reserve and fixed minimum",
+    "inputs": {
+      "average_reserve_6m_daily_close": {"value": 30000000, "unit": "EUR", "definition": "average amount at end of each calendar day over preceding six months per Article 35(1) second subpara"},
+      "fixed_overheads_preceding_year": {"value": 1200000, "unit": "EUR"},
+      "quarter_fixed_overheads": {"value": 300000, "unit": "EUR", "formula": "1,200,000 / 4"},
+      "fixed_minimum": {"value": 350000, "unit": "EUR", "source": "Article 35(1)(a)"},
+      "pct_non_significant": {"value": 0.02, "unit": "dimensionless", "source": "Article 35(1)(b) 2%"},
+      "pct_significant": {"value": 0.03, "unit": "dimensionless", "source": "Article 45(5) 3% for significant ART"},
+      "actual_own_funds_held": {"value": 650000, "unit": "EUR"}
+    },
+    "computation": {
+      "step_1_avg_reserve": "30,000,000 EUR given",
+      "step_2_pct_test_non_sig": "30,000,000 * 0.02 = 600,000 EUR",
+      "step_3_pct_test_sig": "30,000,000 * 0.03 = 900,000 EUR",
+      "step_4_quarter_overheads": "1,200,000 / 4 = 300,000 EUR",
+      "step_5_requirement_non_sig": "max(350,000, 600,000, 300,000) = 600,000 EUR",
+      "step_6_requirement_sig": "max(350,000, 900,000, 300,000) = 900,000 EUR",
+      "step_7_compare_actual_vs_non_sig": "650,000 >= 600,000 => adequate for non-significant",
+      "step_8_compare_actual_vs_sig": "650,000 < 900,000 => inadequate for significant, shortfall 250,000 EUR"
+    },
+    "result": {
+      "own_funds_requirement_non_significant_ART": {"value": 600000, "unit": "EUR"},
+      "own_funds_requirement_significant_ART": {"value": 900000, "unit": "EUR"},
+      "actual_own_funds": {"value": 650000, "unit": "EUR"},
+      "regulatory_verdict_non_sig": "adequate against Article 35(1) max test",
+      "regulatory_verdict_sig": "inadequate against Article 45(5) 3% test, would need additional 250,000 EUR",
+      "against_which_test": "own-funds highest-of fixed minimum EUR 350k, percentage of average reserve (2% or 3% if significant), quarter fixed overheads"
+    },
+    "article_basis": "Article 35(1) first subparagraph points (a) EUR 350k, (b) 2% of average amount of reserve assets referred to in Article 36, (c) quarter fixed overheads; Article 35(1) second subpara definition average end of each calendar day over preceding six months; Article 45(5) percentage set at 3% for issuers of significant asset-referenced tokens; Article 35(2) composition CET1; Article 35(3) and (5) supervisory add-on up to +20% and stress-based +20-40% (percentages stated from EUR-Lex verification)",
+    "tail_convention": "Own funds coverage is higher-is-better metric. LOW tail (low own funds vs requirement) is adverse. This test examines adverse LOW tail by checking max requirement and comparing actual own funds below threshold fails. Does not examine favorable high tail.",
+    "weakest_point": "Fixed overheads calculation per Article 67(3) delegated not detailed; average reserve calculation assumes daily data available; does not include potential supervisory add-ons under Article 35(3) and 35(5) which could increase requirement by 20-40%"
+  },
+  {
+    "case_name": "Stressed-coverage case - reserve decline with haircuts",
+    "inputs": {
+      "base_total_reserve": {"value": 10300000, "unit": "EUR"},
+      "base_composition": {
+        "cash": {"value": 3500000, "unit": "EUR", "haircut_stress": {"value": 0, "unit": "percent"}},
+        "gov_bonds": {"value": 6800000, "unit": "EUR", "haircut_stress": {"value": 10, "unit": "percent"}}
+      },
+      "aggregate_claims": {"value": 10000000, "unit": "EUR"},
+      "stress_scenario": "Interest rate shock + credit spread widening"
+    },
+    "computation": {
+      "step_1_base_reserve": "3,500,000 + 6,800,000 = 10,300,000",
+      "step_2_stressed_cash": "3,500,000 * (1 - 0.00) = 3,500,000 EUR",
+      "step_3_stressed_bonds": "6,800,000 * (1 - 0.10) = 6,800,000 * 0.9 = 6,120,000 EUR",
+      "step_4_stressed_total": "3,500,000 + 6,120,000 = 9,620,000 EUR",
+      "step_5_stressed_coverage_ratio": "9,620,000 / 10,000,000 = 0.962",
+      "step_6_stressed_coverage_pct": "96.2%",
+      "step_7_shortfall": "10,000,000 - 9,620,000 = 380,000 EUR below full backing"
+    },
+    "result": {
+      "stressed_reserve": {"value": 9620000, "unit": "EUR"},
+      "stressed_coverage_ratio": 0.962,
+      "stressed_coverage_pct": 96.2,
+      "regulatory_verdict": "inadequate",
+      "against_which_test": "full-backing Article 36(7) aggregate value at least equal to claims, under stressed values; also triggers recovery plan assessment per Article 46",
+      "shortfall": {"value": 380000, "unit": "EUR"}
+    },
+    "article_basis": "Article 36(7) full backing test; Article 35(5) regular stress testing including interest rate shocks; Article 45(4) liquidity stress testing for significant tokens; Article 46 recovery plan when fails to comply with reserve requirements",
+    "tail_convention": "Coverage ratio is higher-is-better. LOW tail is adverse. Stress test examines adverse LOW tail by applying negative haircuts to reserve assets (decline in value). Explicitly does NOT examine favorable HIGH tail (increase in reserve value) which would incorrectly show improvement. Adverse direction correctly chosen as reserve decrease.",
+    "weakest_point": "Haircuts 0% and 10% are illustrative scenario, not regulatory prescribed; does not model correlation between assets or de-peg of token reference; does not include 30% minimum deposits in credit institutions per Article 36(4)(d) liquidity requirement"
+  },
+  {
+    "case_name": "Redemptions-at-par case",
+    "inputs": {
+      "initial_supply": {"value": 10000000, "unit": "tokens"},
+      "initial_reserve": {"value": 10300000, "unit": "EUR", "composition": "cash 3,500,000 + bonds 6,800,000"},
+      "initial_coverage": {"value": 1.03, "unit": "ratio"},
+      "redemption_request": {"value": 500000, "unit": "tokens"},
+      "par_value": {"value": 1, "unit": "EUR per token"},
+      "redemption_amount": {"value": 500000, "unit": "EUR", "formula": "500,000 * 1"}
+    },
+    "computation": {
+      "step_1_obligation": "Holder claim per Article 49(4) / Article 39: redeem at par in funds other than e-money, 500,000 EUR",
+      "step_2_pay_from_cash": "Cash before 3,500,000 - 500,000 = 3,000,000 EUR",
+      "step_3_new_reserve_total": "3,000,000 + 6,800,000 = 9,800,000 EUR",
+      "step_4_new_supply": "10,000,000 - 500,000 = 9,500,000 tokens",
+      "step_5_new_claims": "9,500,000 * 1 = 9,500,000 EUR",
+      "step_6_new_coverage": "9,800,000 / 9,500,000 = 1.031578947 = 103.1578947%",
+      "step_7_match_principle": "Issuance/redemption matched by increase/decrease in reserve per Article 36(6)"
+    },
+    "result": {
+      "redemption_payout": {"value": 500000, "unit": "EUR"},
+      "new_reserve": {"value": 9800000, "unit": "EUR"},
+      "new_supply": {"value": 9500000, "unit": "tokens"},
+      "new_coverage_ratio": 1.031578947,
+      "new_coverage_pct": 103.1578947,
+      "regulatory_verdict": "adequate after redemption",
+      "against_which_test": "redemption at par obligation per Article 49(4) EMT and Article 36(6) matching principle, plus full-backing Article 36(7) after operation"
+    },
+    "article_basis": "Article 49(3) issuance at par and on receipt of funds; Article 49(4) redemption at any time at par in funds other than electronic money; Article 36(6) issuance and redemption always matched by corresponding increase/decrease in reserve; Article 36(7) post-redemption reserve still >= claims; Article 39 rights of redemption for ART holders (general)",
+    "tail_convention": "Coverage after redemption is higher-is-better. LOW tail (coverage dropping below 100% after redemption) is adverse. This test examines adverse LOW tail by verifying coverage remains >=100% after paying redemption. Does not examine favorable high tail. For redemption amount itself, higher payout is adverse for issuer liquidity, so test examines high payout amount as adverse.",
+    "weakest_point": "Assumes instant settlement from cash bucket without selling bonds at discount; does not model intraday liquidity or 30% deposit minimum; assumes no fees; real redemption may require pro-rata asset sale per investment policy Article 38"
+  }
+]

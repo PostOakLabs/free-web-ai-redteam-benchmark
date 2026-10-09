@@ -1,0 +1,31 @@
+```json
+[
+  {
+    "task": 1,
+    "steps": "Tier A factor: 130461/124331. 124331×1.0493 = 124331+4973.24+1118.979+37.2993 = 130460.5183. Remainder: 130461-130460.5183 = 0.4817. 0.4817/124331 = 0.00000388. Factor = 1.049304.\nTier B factor: 3914/3730. 3730×1.0493 = 3730+182.77+1.119+... = 3913.889. Remainder: 3914-3913.889 = 0.111. 0.111/3730 = 0.0000298. Factor = 1.049330.\nTier C factor: 26092/24866. 24866×1.049304 = 24866+1218.434+7.559264 = 26091.993264. Remainder: 0.006736. 0.006736/24866 = 0.00000027. Factor = 1.049304.\nTier D factor: 1305/1243. 1243×1.049304 = 1243+60.907+0.377872 = 1304.284872. Remainder: 0.715128. 0.715128/1243 = 0.000575. Factor = 1.049879.\n\nConsistency: Tiers A and C share factor 1.049304; Tier B=1.049330; Tier D=1.049879. NOT consistent with a single uniform factor applied independently to all four tiers with round-to-nearest-dollar (proof: for round-to-nearest, Tier A requires f∈[1.049296,1.049305) but Tier D requires f∈[1.049477,1.049558), which do not overlap). Consistent with stated 4.9% in the sense that the actual CPI-U ratio ≈4.930% rounds to 4.9% at one decimal.",
+    "answer": "A=1.049304, B=1.049330, C=1.049304, D=1.049879. Tiers A and C consistent with a single ~4.930% CPI-U factor. Tier B and D are NOT consistent with direct independent adjustment — they are derived values (see Task 2 inferred rule). Four factors are mutually consistent with 4.9% headline only via rounding (4.930%→4.9%).",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 2,
+    "steps": "Inferred rounding rule: Tiers A and C are directly adjusted by the CPI-U factor and rounded to the nearest $1. Tier B = 3% × adjusted Tier A, rounded to nearest $1. Tier D = 5% × adjusted Tier C, rounded to nearest $1. Evidence: 3%×$124331=$3729.93→$3730 (Tier B 2023 ✓); 5%×$24866=$1243.30→$1243 (Tier D 2023 ✓); 3%×$130461=$3913.83→$3914 (Tier B 2024 ✓); 5%×$26092=$1304.60→$1305 (Tier D 2024 ✓). All four checks pass with round-to-nearest-dollar.\n\nProjection with factor 1.034:\nTier A: $130461×1.034 = $130461 + $130461×0.034. $130461×0.03=$3913.83. $130461×0.004=$521.844. Sum=$4435.674. Total=$134896.674. Round→$134,897.\nTier C: $26092×1.034 = $26092 + $26092×0.034. $26092×0.03=$782.76. $26092×0.004=$104.368. Sum=$887.128. Total=$26979.128. Round→$26,979.\nTier B: 3%×$134897 = $4046.91. Round→$4,047.\nTier D: 5%×$26979 = $1348.95. Round→$1,349.",
+    "answer": "Projected 2025: Tier A=$134,897; Tier B=$4,047; Tier C=$26,979; Tier D=$1,349. Rounding rule: direct CPI-U × round-to-nearest-$1 for A,C; B=3%×A rounded; D=5%×C rounded.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 3,
+    "steps": "Projected Tier A: $134,897. Actual Tier A: $134,841. Difference: $134897-$134841 = $56 (projection overshoots).\nExact factor: $134841/$130461. Compute: 134841-130461=4380. 4380/130461. 130461×0.033=4305.213. 4380-4305.213=74.787. 74.787/130461=0.000573. So 4380/130461=0.033573. Factor=1.033573.\nVerify: 130461×0.033573 = 3913.83+391.383+65.2305+9.13227+0.391383 = 4379.967. 130461+4379.967=134840.967. Rounded→134841. ✓\nExact percentage: 3.3573%. Stated 3.4% = 3.4000%. Discrepancy: 3.4000%-3.3573% = 0.0427 percentage points = 4.27 basis points. Dollar check: $130461×0.000427 = $55.71 ≈ $56. ✓",
+    "answer": "Projected $134,897 vs actual $134,841: $56 too high. Exact factor = 1.033573 (3.3573%). Discrepancy = 4.27 basis points from the stated 3.4%.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 4,
+    "steps": "The stated 3.4% is a one-decimal-place headline rounding. The actual CPI-U ratio used by CFPB is computed from specific BLS CPI-U index values (typically a particular month such as June or July). The ratio of those specific values is approximately 3.357%, which rounds to 3.4% when expressed to one decimal place (hundredths digit 5 → round up). Applying 3.4% instead of 3.357% to the $130,461 base introduces $130461×0.000427 ≈ $56 of overshoot, which is exactly the observed discrepancy. This is a precision-of-input error, not a rounding-convention or methodology error. The same effect was present in the 2024 adjustment (headline 4.9% vs actual ≈4.930%) but was too small to notice because all tier values happened to round correctly.",
+    "answer": "The '3.4 percent' is a headline rounding of the actual CPI-U ratio ≈3.357%. The CFPB uses specific BLS index values, not a rounded percentage. The 4.3 bp precision loss alone accounts for the full $56 discrepancy. No rounding-convention or methodology error is involved.",
+    "evidence_level": "computed"
+  },
+  {
+    "weakest_point": "The 5% percentage used for Tier D is inferred purely from the data ($1243/$24866 ≈ 5.00%) and is not verified against the actual Regulation Z text. If Regulation Z defines Tier D's derivation differently — e.g., as a lump-sum threshold unrelated to Tier C, or with a different percentage — then the inferred rounding rule for B and D is wrong, and the four-factor 'inconsistency' might instead reflect four independent adjustments with mixed ceiling/round-to-nearest conventions. This would not change the Task 3 result (which depends only on Tier A), but Tasks 1 and 2 would need revision."
+  }
+]
+```

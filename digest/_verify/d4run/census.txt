@@ -1,0 +1,73 @@
+Web Model Tasks/Day 4/chatgpt alpha.json
+Web Model Tasks/Day 4/chatgpt lvs.json
+Web Model Tasks/Day 4/chatgpt niagara.json
+Web Model Tasks/Day 4/chatgpt p4.json
+Web Model Tasks/Day 4/deepseek alpha.json
+Web Model Tasks/Day 4/deepseek lvs.json
+Web Model Tasks/Day 4/deepseek niagara.json
+Web Model Tasks/Day 4/deepseek p4.json
+Web Model Tasks/Day 4/deepseek pphysical.json
+Web Model Tasks/Day 4/gemini alpha.json
+Web Model Tasks/Day 4/gemini lvs.json
+Web Model Tasks/Day 4/gemini niagara.json
+Web Model Tasks/Day 4/gemini p4.json
+Web Model Tasks/Day 4/gemini pphysical.json
+Web Model Tasks/Day 4/glm 5.3 flash alpha.json
+Web Model Tasks/Day 4/glm 5.3 flash lvs.json
+Web Model Tasks/Day 4/glm 5.3 flash niagara.json
+Web Model Tasks/Day 4/glm 5.3 flash p4.json
+Web Model Tasks/Day 4/glm 5.3 flash pphysical.json
+Web Model Tasks/Day 4/grok alpha.json
+Web Model Tasks/Day 4/grok lvs.json
+Web Model Tasks/Day 4/grok niagara.json
+Web Model Tasks/Day 4/grok p4.json
+Web Model Tasks/Day 4/grok pphysical.json
+Web Model Tasks/Day 4/kimi alpha.json
+Web Model Tasks/Day 4/kimi lvs.json
+Web Model Tasks/Day 4/kimi niagara.json
+Web Model Tasks/Day 4/kimi p4.json
+Web Model Tasks/Day 4/kimi pphysical.json
+Web Model Tasks/Day 4/longcat alpha.json
+Web Model Tasks/Day 4/longcat lvs.json
+Web Model Tasks/Day 4/longcat p4.json
+Web Model Tasks/Day 4/longcat pphysical.json
+Web Model Tasks/Day 4/meta alpha.json
+Web Model Tasks/Day 4/meta lvs.json
+Web Model Tasks/Day 4/meta niagara.json
+Web Model Tasks/Day 4/meta p4.json
+Web Model Tasks/Day 4/meta pphysical.json
+Web Model Tasks/Day 4/mimo alpha.json
+Web Model Tasks/Day 4/mimo lvs.json
+Web Model Tasks/Day 4/mimo niagara.json
+Web Model Tasks/Day 4/mimo p4.json
+Web Model Tasks/Day 4/mimo pphysical.json
+Web Model Tasks/Day 4/minimax 2.7 alpha.json
+Web Model Tasks/Day 4/minimax 2.7 lvs.json
+Web Model Tasks/Day 4/minimax 2.7 niagara.json
+Web Model Tasks/Day 4/minimax 2.7 p4.json
+Web Model Tasks/Day 4/minimax 2.7 pphysical.json
+Web Model Tasks/Day 4/minimax m3 alpha.json
+Web Model Tasks/Day 4/minimax m3 p4.json
+Web Model Tasks/Day 4/mistral alpha.json
+Web Model Tasks/Day 4/mistral lvs.json
+Web Model Tasks/Day 4/mistral niagara.json
+Web Model Tasks/Day 4/mistral p4.json
+Web Model Tasks/Day 4/mistral pphysical.json
+Web Model Tasks/Day 4/qwen alpha.json
+Web Model Tasks/Day 4/qwen lvs.json
+Web Model Tasks/Day 4/qwen niagara.json
+Web Model Tasks/Day 4/qwen p4.json
+Web Model Tasks/Day 4/qwen pphysical.json
+Web Model Tasks/Day 4/solar lvs.json
+Web Model Tasks/Day 4/solar niagara.json
+Web Model Tasks/Day 4/solar pphysical.json
+Web Model Tasks/Day 4/sonnet alpha.json
+Web Model Tasks/Day 4/sonnet lvs.json
+Web Model Tasks/Day 4/sonnet niagara.json
+Web Model Tasks/Day 4/sonnet p4.json
+Web Model Tasks/Day 4/sonnet pphysical.json
+Web Model Tasks/Day 4/yuanbao lvs.json
+Web Model Tasks/Day 4/yuanbao niagara.json
+Web Model Tasks/Day 4/yuanbao p4.json
+Web Model Tasks/Day 4/yuanbao power.json
+Web Model Tasks/Day 4/yuanbao pphysical.json

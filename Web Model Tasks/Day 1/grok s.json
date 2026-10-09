@@ -1,0 +1,185 @@
+[
+  {
+    "family": "ISO 26262-5 hardware architectural metrics",
+    "formulas": [
+      {
+        "name": "SPFM (Single-Point Fault Metric)",
+        "expression": "SPFM = 1 - (Σ(λ_SPF + λ_RF) / Σλ)",
+        "variables": [
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults", "units": "FIT or h^-1"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults", "units": "FIT or h^-1"},
+          {"symbol": "Σλ", "meaning": "sum of failure rates of all safety-related hardware elements", "units": "FIT or h^-1"}
+        ],
+        "worked_example": "Given Σλ = 20 FIT, Σ(λ_SPF + λ_RF) = 0.2 FIT: SPFM = 1 - (0.2 / 20) = 1 - 0.01 = 0.99 = 99%.",
+        "authority": "ISO 26262-5",
+        "clause_locator": "ISO 26262-5:2018 clause 8.4.5 (and related Annex)",
+        "known_uncertainty": "Exact clause number for the formula statement; targets confirmed across secondary sources."
+      },
+      {
+        "name": "LFM (Latent Fault Metric)",
+        "expression": "LFM = 1 - (Σλ_MPF,L / Σ(λ - λ_SPF - λ_RF))",
+        "variables": [
+          {"symbol": "λ_MPF,L", "meaning": "failure rate of latent multiple-point faults", "units": "FIT or h^-1"},
+          {"symbol": "λ", "meaning": "failure rate of safety-related hardware elements", "units": "FIT or h^-1"},
+          {"symbol": "λ_SPF", "meaning": "single-point fault failure rate", "units": "FIT or h^-1"},
+          {"symbol": "λ_RF", "meaning": "residual fault failure rate", "units": "FIT or h^-1"}
+        ],
+        "worked_example": "Given Σλ = 20 FIT, Σ(λ_SPF + λ_RF) = 0.2 FIT, Σλ_MPF,L = 1.98 FIT: denominator = 20 - 0.2 = 19.8; LFM = 1 - (1.98 / 19.8) = 1 - 0.1 = 0.90 = 90%.",
+        "authority": "ISO 26262-5",
+        "clause_locator": "ISO 26262-5:2018 clause 8.4.6",
+        "known_uncertainty": "Exact clause locator for formula."
+      },
+      {
+        "name": "PMHF (Probabilistic Metric for random Hardware Failures)",
+        "expression": "PMHF ≈ Σ(λ_SPF + λ_RF + λ_MPF,detected residual contribution) over the item (exact summation depends on safety-mechanism coverage model); target is an absolute residual failure rate.",
+        "variables": [
+          {"symbol": "PMHF", "meaning": "average probability of a hazardous failure per hour over lifetime", "units": "h^-1 or FIT"}
+        ],
+        "worked_example": "If residual uncontrolled failure rate sums to 8 FIT, PMHF = 8 FIT = 8 × 10^-9 h^-1, which satisfies ASIL D target < 10 FIT.",
+        "authority": "ISO 26262-5",
+        "clause_locator": "ISO 26262-5:2018 clause 9.4.2 / Table for PMHF targets",
+        "known_uncertainty": "Precise algebraic expansion of PMHF when multiple safety mechanisms and duty cycles are present."
+      },
+      {
+        "name": "ASIL target values",
+        "expression": "ASIL B: SPFM ≥ 90% (recommended), LFM ≥ 60% (recommended), PMHF < 100 FIT; ASIL C: SPFM ≥ 97%, LFM ≥ 80% (recommended), PMHF < 100 FIT; ASIL D: SPFM ≥ 99%, LFM ≥ 90%, PMHF < 10 FIT. ASIL A has no mandatory metric targets.",
+        "variables": [],
+        "worked_example": "A design with SPFM = 98%, LFM = 85%, PMHF = 50 FIT meets ASIL C but not ASIL D (SPFM and PMHF fail ASIL D thresholds).",
+        "authority": "ISO 26262-5",
+        "clause_locator": "ISO 26262-5 tables for hardware architectural metrics (SPFM/LFM) and PMHF",
+        "known_uncertainty": "Whether ASIL B SPFM/LFM are strictly mandatory or recommended in the edition cited."
+      }
+    ],
+    "edge_cases": [
+      "Σλ = 0 (no safety-related hardware) makes SPFM/LFM undefined — calculator must reject or flag.",
+      "Denominator of LFM (Σ(λ - λ_SPF - λ_RF)) = 0 when every fault is single-point or residual — LFM undefined or conventionally 100%.",
+      "Target comparison is ≥ for SPFM/LFM percentages and < for PMHF absolute rate; equality on SPFM/LFM passes, equality on PMHF target fails."
+    ]
+  },
+  {
+    "family": "JEDEC FIT-rate math (JESD85-class)",
+    "formulas": [
+      {
+        "name": "Chi-square upper-confidence FIT point estimate",
+        "expression": "λ (failures per device-hour) = χ²(α, 2f+2) / (2 × ss × t × AF); FIT = λ × 10^9",
+        "variables": [
+          {"symbol": "χ²(α, ν)", "meaning": "chi-square value at confidence level α with ν = 2f+2 degrees of freedom", "units": "dimensionless"},
+          {"symbol": "f", "meaning": "number of observed failures", "units": "count"},
+          {"symbol": "ss", "meaning": "sample size", "units": "devices"},
+          {"symbol": "t", "meaning": "test duration per device", "units": "hours"},
+          {"symbol": "AF", "meaning": "acceleration factor", "units": "dimensionless"},
+          {"symbol": "FIT", "meaning": "failures in time", "units": "failures per 10^9 device-hours"}
+        ],
+        "worked_example": "f = 0, ss = 231, t = 1000 h, 60% CL → χ²(0.6, 2) ≈ 1.8326; AF = 27.5 (example); λ = 1.8326 / (2 × 231 × 1000 × 27.5) ≈ 1.442e-10; FIT = 1.442e-10 × 1e9 ≈ 0.144 (illustrative; real AF yields ~50 FIT at 55 °C for the common 0-fail 231×1000 h case when AF≈1.83/ (2×231×1000)×1e9 / target).",
+        "authority": "JEDEC JESD85",
+        "clause_locator": "JESD85 / JESD85A methods for calculating failure rates in units of FITs",
+        "known_uncertainty": "Exact χ² quantile for 60% CL with 2 dof; worked AF must be recomputed from Arrhenius for the concrete temperatures."
+      },
+      {
+        "name": "Arrhenius acceleration factor",
+        "expression": "AF = exp( (Ea / k) × (1/T_use - 1/T_test) )",
+        "variables": [
+          {"symbol": "Ea", "meaning": "activation energy of the failure mechanism", "units": "eV"},
+          {"symbol": "k", "meaning": "Boltzmann constant ≈ 8.617333262145×10^-5", "units": "eV/K"},
+          {"symbol": "T_use", "meaning": "use (junction or ambient) temperature", "units": "K"},
+          {"symbol": "T_test", "meaning": "test temperature", "units": "K"}
+        ],
+        "worked_example": "Ea = 0.7 eV, T_test = 125 °C = 398.15 K, T_use = 55 °C = 328.15 K: (1/328.15 - 1/398.15) ≈ 0.000535; (Ea/k) ≈ 8120.3; AF = exp(8120.3 × 0.000535) ≈ exp(4.344) ≈ 77.0 (order-of; precise recalculation required for production use). Common industry reference often quotes ~40–80 depending on exact constants.",
+        "authority": "JEDEC JESD85 / industry practice for HTOL derating",
+        "clause_locator": null,
+        "known_uncertainty": "Exact numerical AF for 125 °C→55 °C at 0.7 eV depends on constant precision; typical published values around 77 or lower with slightly different k."
+      },
+      {
+        "name": "Typical activation energies and caveats",
+        "expression": "Common default Ea = 0.7 eV for many silicon failure mechanisms when mechanism-specific data are unavailable; mechanism-specific Ea (e.g., 0.3–1.0 eV range) should be used when known.",
+        "variables": [
+          {"symbol": "Ea", "meaning": "activation energy", "units": "eV"}
+        ],
+        "worked_example": "Using Ea = 0.7 eV for HTOL derating from 125 °C to 55 °C is the industry default cited in multiple vendor FIT notes when no better data exist.",
+        "authority": "Industry practice referencing JESD85",
+        "clause_locator": null,
+        "known_uncertainty": "Ea is mechanism- and technology-dependent; 0.7 eV is a conventional average, not universal."
+      }
+    ],
+    "edge_cases": [
+      "f = 0 still yields a non-zero upper-bound FIT via χ²(α, 2); calculator must not return zero.",
+      "T_use ≥ T_test makes AF ≤ 1 (deceleration); calculator must allow but flag.",
+      "Confidence level α and degrees of freedom must match the chosen χ² table; mismatch produces incorrect upper bounds."
+    ]
+  },
+  {
+    "family": "EAR advanced-computing parameters (ECCN 3A090)",
+    "formulas": [
+      {
+        "name": "Total Processing Performance (TPP)",
+        "expression": "TPP = 2 × MacTOPS × bit_length_of_the_operation, aggregated over all processing units on the IC (TPP = TPP1 + TPP2 + … + TPPn)",
+        "variables": [
+          {"symbol": "MacTOPS", "meaning": "theoretical peak tera (10^12) multiply-accumulate operations per second (D = A×B+C)", "units": "10^12 MAC/s"},
+          {"symbol": "bit_length_of_the_operation", "meaning": "largest bit-length of the inputs to the multiply operation", "units": "bits"},
+          {"symbol": "TPP", "meaning": "total processing performance", "units": "dimensionless aggregate as defined"}
+        ],
+        "worked_example": "300 MacTOPS at 16-bit: TPP = 2 × 300 × 16 = 9600. 150 MacTOPS at 16-bit: TPP = 2 × 150 × 16 = 4800 (exactly the a.1 threshold example given in the regulation).",
+        "authority": "EAR / CCL ECCN 3A090 Technical Note 2",
+        "clause_locator": "15 CFR Supplement No. 1 to Part 774, ECCN 3A090 Technical Notes to 3A090.a and 3A090.b",
+        "known_uncertainty": "None on the formula text; bit-length definition is the largest input bit-length to the multiply."
+      },
+      {
+        "name": "Performance density",
+        "expression": "performance density = TPP / die_area_relevant (as defined for the density threshold; exact denominator is the die area used in the regulatory definition)",
+        "variables": [
+          {"symbol": "TPP", "meaning": "total processing performance", "units": "as above"},
+          {"symbol": "performance density", "meaning": "TPP per unit area for the 3A090 density threshold", "units": "TPP per mm² (regulatory)"}
+        ],
+        "worked_example": "TPP = 1600 and performance density = 5.92 meets the a.2 threshold exactly.",
+        "authority": "EAR ECCN 3A090",
+        "clause_locator": "15 CFR Supplement No. 1 to Part 774, ECCN 3A090.a.2",
+        "known_uncertainty": "Exact regulatory definition of the area denominator for density (die area vs. other); threshold values themselves are stated in the regulation."
+      },
+      {
+        "name": "3A090.a control thresholds",
+        "expression": "Controlled under 3A090.a if (TPP ≥ 4800) OR (TPP ≥ 1600 AND performance density ≥ 5.92)",
+        "variables": [],
+        "worked_example": "IC with TPP = 5000 → controlled by a.1. IC with TPP = 2000 and density = 6.0 → controlled by a.2. IC with TPP = 2000 and density = 5.0 → not controlled by these a-thresholds.",
+        "authority": "EAR ECCN 3A090",
+        "clause_locator": "15 CFR Supplement No. 1 to Part 774, ECCN 3A090.a",
+        "known_uncertainty": "Additional .b/.c paragraphs exist with different thresholds; this entry covers the primary a-thresholds only."
+      }
+    ],
+    "edge_cases": [
+      "Multiple bit-lengths on one IC: regulation requires evaluating the highest TPP value achievable.",
+      "Aggregation across all processing units on the die; omitting a unit understates TPP.",
+      "Threshold-exactly-equal semantics: TPP = 4800 or density = 5.92 meets the 'or more' / 'or more' test and is controlled."
+    ]
+  },
+  {
+    "family": "CHIPS Act incentives math (IRC §48D)",
+    "formulas": [
+      {
+        "name": "Advanced manufacturing investment credit rate",
+        "expression": "Credit = rate × qualified_investment_basis; rate = 25% for qualified property placed in service after 31 Dec 2022 and before the later increase, and 35% for property placed in service thereafter (per current statute after WFTC Act amendment).",
+        "variables": [
+          {"symbol": "qualified_investment_basis", "meaning": "basis of qualified property placed in service that is part of an advanced manufacturing facility", "units": "USD"},
+          {"symbol": "rate", "meaning": "statutory credit percentage", "units": "dimensionless"}
+        ],
+        "worked_example": "Qualified investment basis = $100 M placed in service in the 35% period: credit = 0.35 × 100 M = $35 M.",
+        "authority": "26 U.S.C. §48D",
+        "clause_locator": "26 U.S.C. §48D(a)",
+        "known_uncertainty": "Exact transition date between 25% and 35% depends on the WFTC Act effective language; IRS pages state 25% through 2025 placements and 35% thereafter."
+      },
+      {
+        "name": "Advanced manufacturing facility definition (eligibility gate)",
+        "expression": "Facility whose primary purpose is manufacturing of semiconductors or semiconductor manufacturing equipment (qualitative primary-purpose test; regulations may use >50% output tests).",
+        "variables": [],
+        "worked_example": "A fab whose primary output is semiconductor wafers qualifies; an office building or non-manufacturing structure on the same campus does not.",
+        "authority": "26 U.S.C. §48D",
+        "clause_locator": "26 U.S.C. §48D(b)(3)",
+        "known_uncertainty": "Quantitative safe-harbor percentages appear in regulations, not the statute text itself."
+      }
+    ],
+    "edge_cases": [
+      "Property must be placed in service after 31 Dec 2022; earlier placements are outside the credit window.",
+      "Taxpayer must not be a 'foreign entity of concern' and must not have made an 'applicable transaction' in the year — binary eligibility gates outside pure arithmetic.",
+      "Credit is on basis of qualified property that is integral to the advanced manufacturing facility; non-integral or office portions are excluded from the basis."
+    ]
+  }
+]

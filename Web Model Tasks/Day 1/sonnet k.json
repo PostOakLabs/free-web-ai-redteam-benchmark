@@ -1,0 +1,58 @@
+```json
+[
+  {
+    "delta_name": "Wire delay vs. cell delay dominance in timing closure",
+    "at_28nm": "Cell (gate) delay and wire delay were both significant, but a 28nm engineer could often close timing by focusing on buffering, sizing, and logic restructuring — wire RC, while not negligible, rarely dominated the critical path unless the net was unusually long.",
+    "at_7nm_5nm": "Interconnect resistance scales up sharply as metal cross-section shrinks (resistivity increases at small dimensions due to grain-boundary and surface scattering effects on top of the geometric scaling), so wire delay — especially on lower/mid metal layers — increasingly dominates even moderate-length nets; a path that used to be gate-delay-dominated can flip to wire-delay-dominated with no netlist change, purely from the metal stack.",
+    "why_it_changed": "Copper interconnect resistivity rises non-linearly as wire width/thickness approach electron mean-free-path scales, on top of the straightforward geometric scaling of R with cross-sectional area; capacitance scales down more slowly than resistance scales up, so RC delay per unit length grows even as transistors get faster.",
+    "what_breaks": "A 28nm-trained engineer treats a timing violation as a drive-strength/buffering problem first and re-sizes or re-buffers the path — which barely moves the needle when the real bottleneck is wire RC on a long, resistive lower-metal route; the observable symptom is a fix that 'should have worked' by 28nm intuition producing only a few ps of improvement.",
+    "workflow_impact": "Placement and post-placement optimization now weigh net length and layer assignment far more heavily; timing-driven placement and layer-promotion (pushing critical nets to lower-resistance upper metal) become first-class levers rather than buffering alone.",
+    "confidence": 0.6
+  },
+  {
+    "delta_name": "Congestion character: channel routing vs. pin-access-driven congestion",
+    "at_28nm": "Congestion was mostly a channel/global-routing-resource problem — not enough tracks between cells or macros over a region — addressed with density management and channel sizing at the floorplan/placement stage.",
+    "at_7nm_5nm": "A large fraction of congestion is now local pin-access congestion: getting a via stack down to a standard cell's pin at all, given minimum-area rules, multi-patterning coloring constraints, and tightly pitched lower metal layers, can fail even when the surrounding global routing has plenty of track headroom.",
+    "why_it_changed": "Contacted poly pitch and metal pitch scaling outpaced via/contact scaling, so the physical access window to a cell's pin shrank faster than the cell itself; multi-patterning coloring further restricts which tracks/vias are legal near a given pin at the same time.",
+    "what_breaks": "A 28nm-trained engineer sees a 'congestion' report and reaches for the global-routing playbook (density screens, channel widening) when the real problem is local pin access; the observable symptom is that global overflow numbers look fine while detailed route still fails heavily around specific cell instances or macro pin clusters.",
+    "workflow_impact": "Pin-access-aware placement and pre-route pin-access checks became a distinct, earlier pipeline stage rather than something left entirely to the detailed router.",
+    "confidence": 0.55
+  },
+  {
+    "delta_name": "Signoff corner count explosion",
+    "at_28nm": "Signoff typically covered a manageable set of PVT corners (a handful of process/voltage/temperature combinations) plus maybe a couple of modes; the corner matrix was something an engineer could reason about by hand.",
+    "at_7nm_5nm": "The corner matrix multiplies out across more process splits (driven by finer-grained variation and multi-Vt/multi-channel-length options), more voltage domains from aggressive power management, and more operating modes (multiple power states, DVFS points), producing signoff matrices that are an order of magnitude larger and require dedicated corner-reduction or scenario-selection methodology just to keep runtime tractable.",
+    "why_it_changed": "Advanced nodes combine more process variation sources (needing finer PVT granularity) with far more aggressive on-chip power management (more voltage/frequency operating points), and both multiply independently into the signoff matrix.",
+    "what_breaks": "A 28nm-trained engineer signs off against 'the corners we always run' out of habit, missing that a new voltage domain or DVFS mode wasn't in that set; the observable symptom is a design that passes the signoff run shown in review but was never actually exercised at a corner/mode combination that exists in real silicon operation.",
+    "workflow_impact": "Corner/scenario reduction and prioritization becomes its own explicit methodology step (statistical or coverage-based corner selection) rather than 'run the standard set,' and signoff review has to explicitly audit corner/mode coverage rather than assume it.",
+    "confidence": 0.55
+  },
+  {
+    "delta_name": "Hold closure difficulty",
+    "at_28nm": "Hold closure was generally the easier of the two timing checks — hold margin was comfortable enough that hold violations were usually a late, mop-up-stage fix (a handful of delay cells here and there).",
+    "at_7nm_5nm": "Hold closure has become materially harder: tighter clock uncertainty budgets, more aggressive useful-skew clocking, and increased on-chip variation between launch and capture paths shrink hold margin, so hold violations are more numerous and can require real buffer/delay insertion effort comparable to setup closure, not just late-stage mop-up.",
+    "why_it_changed": "OCV/POCV-derated variation between nominally-matched launch and capture clock paths grows as a fraction of the (now much smaller) clock period at high frequency, and useful-skew optimization deliberately trades setup margin for hold margin in ways that leave less hold slack to begin with.",
+    "what_breaks": "A 28nm-trained engineer treats hold as a cheap afterthought to be fixed with a few delay buffers at the very end; the observable symptom on a 7nm/5nm block is a hold-fix pass that itself introduces enough additional cell area/routing to reopen congestion or setup timing that was previously closed.",
+    "workflow_impact": "Hold fixing becomes an earlier, iterative part of the closure loop (often interleaved with setup optimization rather than following it), and POCV-aware hold analysis runs earlier in the flow.",
+    "confidence": 0.5
+  },
+  {
+    "delta_name": "IR drop / electromigration: afterthought vs. first-class constraint",
+    "at_28nm": "IR/EM analysis was typically a checkpoint late in the flow — the power grid was sized with reasonable margin up front and IR/EM signoff was mostly a confirmation step rather than a design driver.",
+    "at_7nm_5nm": "Current density per unit area rises with transistor density and switching activity while metal cross-section for a given track shrinks, so IR drop and EM margin are tight enough that power-grid design and even placement decisions are made with IR/EM in mind from the start — it's a first-class constraint competing directly with routing and cell-placement resources.",
+    "why_it_changed": "Higher transistor/switching density per unit area increases current draw per unit area faster than metal cross-sectional area (and thus current-carrying capacity) scales, tightening the IR/EM margin that used to be comfortable.",
+    "what_breaks": "A 28nm-trained engineer defers power-grid/IR consideration to a late signoff check as before; the observable symptom on a 7nm/5nm block is a design that closes timing and DRC cleanly but fails IR/EM signoff late, requiring grid rework that now directly competes with already-tight routing resources rather than being a separable fix.",
+    "workflow_impact": "IR/EM-aware placement and power-grid co-design become part of the floorplan/placement stage itself rather than a downstream signoff-only check.",
+    "confidence": 0.55
+  },
+  {
+    "delta_name": "Utilization targets and why they moved",
+    "at_28nm": "Placement utilization targets in the 75–85% range were commonly workable, since routing resources and pin access were generally not the binding constraint at that density.",
+    "at_7nm_5nm": "Practical utilization targets are typically lower (often closer to the 60–75% range depending on the block and cell mix), because pin-access congestion, multi-patterning coloring restrictions, and power-grid routing resource contention all bind at lower nominal densities than they used to.",
+    "why_it_changed": "The routing-resource-limiting factor shifted from 'raw track availability' (which scales reasonably with node) to pin-access and coloring constraints (which do not scale as favorably), so the density at which routing becomes the bottleneck moved down.",
+    "what_breaks": "A 28nm-trained engineer sets a floorplan utilization target based on old-node intuition (e.g. 80%) on a 7nm/5nm block; the observable symptom is a block that looks comfortably under-dense on paper but hits severe local congestion and pin-access DRC at detailed route because the effective routing-limited density ceiling is lower than expected.",
+    "workflow_impact": "Utilization planning at floorplan stage now needs node-specific calibration data (from prior tapeouts on that node/library) rather than a rule-of-thumb percentage carried over from the previous node.",
+    "confidence": 0.5
+  }
+]
+```

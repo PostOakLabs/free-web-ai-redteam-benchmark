@@ -1,0 +1,168 @@
+```json
+{
+  "receipt_kinds": [
+    {
+      "kind": "composite",
+      "description": "Contains a vector of SegmentReceipt objects, one per execution segment. Each segment receipt carries its own STARK proof (seal) and a claim for that segment's execution range.",
+      "produced_by": "Executor — produced immediately after guest program execution, before any compression.",
+      "typical_use": "Debugging, local verification. Not suitable for on-chain or resource-constrained verification due to size."
+    },
+    {
+      "kind": "succinct",
+      "description": "A single STARK proof covering the entire execution. Produced by compressing segment receipts via lift (single segment → succinct) and join (merge two succinct receipts into one).",
+      "produced_by": "Prover pipeline: composite → lift each segment → join iteratively → single succinct receipt.",
+      "typical_use": "Off-chain verification where STARK verification cost is acceptable. Intermediate step before Groth16 wrapping."
+    },
+    {
+      "kind": "groth16",
+      "description": "A Groth16 proof over BN254 wrapping the succinct receipt's STARK proof. The most compact form, suitable for on-chain verification (e.g., Ethereum EIP-197 precompile).",
+      "produced_by": "wrap operation — converts a succinct receipt's STARK proof into a Groth16 proof over BN254.",
+      "typical_use": "On-chain verification, cross-chain bridges, any context requiring minimal proof size and constant-time verification."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Vec<u8> — serialized Groth16 proof. Contains BN254 group elements (A ∈ G1, B ∈ G2, C ∈ G1). Approximately 256 bytes for the raw proof; risc0 may prepend version/control metadata bytes.",
+      "meaning": "The cryptographic proof attesting to the validity of the claim. Encodes that the prover knows a valid execution trace yielding the stated claim digest.",
+      "verifier_must_check": "Deserialize the Groth16 proof from seal bytes. Verify it against the BN254 verifying key with the claim digest (computed from the claim) as the public input. The verifying key must correspond to the correct circuit version.",
+      "failure_if_skipped": "Attacker submits arbitrary bytes as the seal. The receipt becomes cryptographically meaningless — any forged or copied proof is accepted without assurance that the claimed computation occurred."
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim struct containing: pre (Digest), post (Digest), exit_code (ExitCode), input (Digest), output (Digest). Exact field names may vary across risc0 versions (e.g., pre_state vs pre).",
+      "meaning": "The statement being proved: which program (image ID) executed, with what inputs, producing what outputs, and how it terminated.",
+      "verifier_must_check": "Compute claim_digest = hash(canonical_serialize(claim)). Verify this matches the public input in the Groth16 proof. Separately: (a) claim.pre matches expected image ID, (b) claim.exit_code is acceptable, (c) provided journal bytes hash to the journal_digest in claim.output.",
+      "failure_if_skipped": "Claim-substitution forgery: attacker takes a valid receipt for program X, replaces the claim with program Y's image ID and a forged journal. Verifier accepts it because it only checked Groth16 mathematical validity (which is for the original claim_digest, not the substituted one)."
+    },
+    {
+      "field": "verifier_parameters",
+      "type_shape": "Digest (32 bytes) — hash/identifier of the verifying key and control root for the circuit version that produced this receipt.",
+      "meaning": "Binds the receipt to a specific version of the risc0 circuit suite. The verifier uses this digest to look up the correct BN254 verifying key and expected control root.",
+      "verifier_must_check": "Look up the verifying key corresponding to this digest from a trusted source. Reject if the digest is unknown, unrecognized, or from a deprecated version.",
+      "failure_if_skipped": "Verifier uses a verifying key from a different circuit version. Two failure modes: (1) valid receipts are rejected (availability/DoS), or (2) if an older version had a soundness bug, attacker crafts a proof under the weaker version and verifier accepts it."
+    }
+  ],
+  "claim_structure": {
+    "fields": [
+      {
+        "field": "pre",
+        "type": "Digest (32 bytes)",
+        "meaning": "Image ID — a Merkle-root digest of the guest ELF binary's memory layout. Uniquely identifies the program that was executed."
+      },
+      {
+        "field": "post",
+        "type": "Digest (32 bytes)",
+        "meaning": "Post-execution state digest — the Merkle root of the final memory state after execution completes."
+      },
+      {
+        "field": "exit_code",
+        "type": "ExitCode enum — variants include Halted(u32), Paused(u32), SystemSplit",
+        "meaning": "How the guest program terminated. Halted(0) = clean exit. Halted(n) = exit with code n. SystemSplit = execution split by host (segment boundary). Paused = execution paused for multi-session continuation."
+      },
+      {
+        "field": "input",
+        "type": "Digest (32 bytes)",
+        "meaning": "Hash of the input bytes provided to the guest program. Binds the proof to specific inputs."
+      },
+      {
+        "field": "output",
+        "type": "Digest (32 bytes)",
+        "meaning": "Hash covering both the journal and the proof assumptions. Computed as hash(journal_digest || assumptions_digest). Commits to the program's claimed outputs."
+      }
+    ],
+    "claim_digest_computation": "The ReceiptClaim fields are serialized into a canonical byte representation and hashed to produce the 32-byte claim digest. SHA-256 is the most likely hash function, though the internal STARK hash (Poseidon or similar) may be used in some contexts. The claim digest is the value that appears as the public input to the Groth16 proof.",
+    "journal_digest_computation": "SHA-256 of the raw journal bytes. The journal is the guest program's committed output — the bytes the guest explicitly writes via env::commit().",
+    "output_digest_computation": "output = hash(journal_digest || assumptions_digest). Assumptions_digest is a digest of the list of assumptions (receipts the guest verified during execution). If no assumptions exist, assumptions_digest is likely a zero or sentinel digest. Exact concatenation order and hash function may vary by version."
+  },
+  "binding_chain": [
+    {
+      "step": 1,
+      "description": "Guest program writes journal bytes during execution via the commit syscall."
+    },
+    {
+      "step": 2,
+      "description": "journal_digest = SHA-256(journal_bytes). Fixed-length commitment to variable-length journal."
+    },
+    {
+      "step": 3,
+      "description": "Assumptions (if any) are collected — each is a receipt the guest verified. assumptions_digest = hash of serialized assumptions list."
+    },
+    {
+      "step": 4,
+      "description": "output_digest = hash(journal_digest || assumptions_digest). Binds journal and assumptions into a single digest."
+    },
+    {
+      "step": 5,
+      "description": "ReceiptClaim assembled: {pre=image_id, post=post_state_digest, exit_code, input=input_digest, output=output_digest}."
+    },
+    {
+      "step": 6,
+      "description": "claim_digest = hash(canonical_serialize(ReceiptClaim)). Single 32-byte value representing the entire claim."
+    },
+    {
+      "step": 7,
+      "description": "During STARK proving, claim_digest (and possibly the control root) are included as public inputs to the AIR constraints."
+    },
+    {
+      "step": 8,
+      "description": "The wrap operation converts the STARK proof into a Groth16 proof over BN254. claim_digest is the public input to the Groth16 circuit. The Groth16 circuit internally verifies the STARK proof."
+    },
+    {
+      "step": 9,
+      "description": "Verifier computes claim_digest from the received claim, then verifies the Groth16 seal against the BN254 verifying key with claim_digest as public input. The verifying key is identified by verifier_parameters."
+    },
+    {
+      "step": 10,
+      "description": "The control root is a Merkle root over all circuit control IDs (main executor, recursion circuits, lift, join, wrap). It is embedded in or derived from the Groth16 verifying key. Checking the verifying key implicitly checks the control root."
+    }
+  ],
+  "version_coupling": {
+    "groth16_verifying_key": "Circuit-version-specific. Each version of the risc0 circuits produces a distinct BN254 verifying key generated during trusted setup. Using the wrong key causes proof verification to fail or, in degenerate cases, could accept invalid proofs if keys share structure.",
+    "control_root": "A Merkle root over all circuit control IDs for a given version. Changes when any circuit in the system changes. Must match the expected value for the verifier's version. Embedded in the verifying key.",
+    "control_ids": "Per-circuit identifiers (32-byte digests). Each circuit (main executor, recursion/continuation, lift, join, wrap) has its own control ID derived from its constraint system. All must be internally consistent within a version.",
+    "claim_serialization": "The canonical byte encoding of ReceiptClaim may change across versions (field order, padding, domain separators). A serialization change alters the claim digest for the same logical claim, causing public input mismatch.",
+    "what_breaks_on_mismatch": "If verifier uses v1.x verifying key for a v2.x receipt: Groth16 proof verification fails (proof generated for different circuit constraints). If claim serialization differs: claim_digest mismatch → public input mismatch → verification fails. Worst case: if two versions share a verifying key but differ in claim semantics, a valid proof for one version could be misinterpreted as proving a different statement in the other version (semantic forgery)."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Not checking claim digest against Groth16 public inputs",
+      "check": "After deserializing the claim, independently compute claim_digest = hash(serialize(claim)). Extract the public input used in Groth16 verification. Assert they are equal.",
+      "failure": "Claim-substitution forgery: attacker takes a valid receipt for program X, replaces the claim with program Y's image ID and a fabricated journal. Verifier accepts because it only checked Groth16 mathematical validity for the original claim_digest."
+    },
+    {
+      "bug": "Not verifying journal bytes against journal digest in the claim",
+      "check": "Compute SHA-256 of the provided journal bytes. Verify it matches the journal_digest component embedded in claim.output.",
+      "failure": "Journal tampering: attacker modifies journal bytes (e.g., changes a transaction amount, swaps an address) without invalidating the receipt, because the verifier never checks that the presented journal matches the committed digest."
+    },
+    {
+      "bug": "Using a stale or wrong verifying key / control root",
+      "check": "Verify that verifier_parameters in the receipt matches the expected digest for the current trusted version. Maintain a whitelist of acceptable parameter digests. Reject unknown digests.",
+      "failure": "Version-rollback attack: if an older circuit version had a known soundness vulnerability, attacker crafts a proof under that weaker version. Verifier accepts because it never checked which version's key to use."
+    },
+    {
+      "bug": "Not checking exit code",
+      "check": "Inspect claim.exit_code. Reject if not the expected exit code (typically Halted(0) for successful execution). Define a policy for acceptable exit codes.",
+      "failure": "Incomplete-execution acceptance: attacker proves a program executed but it terminated with SystemSplit or Halted(non-zero). The journal may contain partial, garbage, or adversarial results. Verifier treats output as valid because it only checked cryptographic validity."
+    },
+    {
+      "bug": "Not verifying image_id matches the expected program",
+      "check": "Compare claim.pre (image ID) against the known-good image ID for the expected guest program. This value should be hardcoded or loaded from a trusted source.",
+      "failure": "Arbitrary-program forgery: attacker compiles a malicious guest program that produces a valid receipt with attacker-controlled journal contents. Verifier accepts because it checked cryptographic validity but not which program was proven."
+    },
+    {
+      "bug": "Accepting a composite receipt where a succinct or groth16 receipt is required",
+      "check": "Check the receipt kind/version tag. If the verification context requires on-chain verification or a single compressed proof, reject composite receipts.",
+      "failure": "Composite receipts contain individual segment proofs not compressed into a single proof. Accepting them in contexts that assume a single proof may allow partial verification — individual segments may not cover the full execution, or join/consistency checks between segments may not have been performed."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "HIGH confidence. The composite → lift/join → succinct → wrap → groth16 pipeline is well-documented in risc0 documentation and blog posts. The naming ('succinct' vs 'snark') may vary across versions.",
+    "groth16_receipt_fields": "MODERATE confidence. The seal/claim/verifier_parameters structure is my best reconstruction from risc0 source and docs. Exact field names in the Rust struct may differ (e.g., 'verifier_parameters' could be 'metadata' or 'control_root'). The seal size (~256 bytes) is standard for BN254 Groth16 but risc0 may include additional framing bytes.",
+    "claim_structure": "MODERATE confidence. The fields pre/post/exit_code/input/output match my reading of risc0-zkp and risc0-zkvm source. Exact field names (pre vs pre_state) may differ across versions. Whether a 'tag' field exists for domain separation is uncertain. The hash function for claim_digest is likely SHA-256 but could be Poseidon in some internal contexts.",
+    "binding_chain": "MODERATE-HIGH confidence. The chain from journal → digest → claim → public inputs → seal is architecturally sound and consistent with risc0's design. The exact hash function at each step (SHA-256 vs Poseidon vs other) is uncertain — risc0 uses multiple hash functions for different purposes.",
+    "version_coupling": "MODERATE confidence. Verifying key and control root being version-dependent is standard for circuit-based proof systems and consistent with risc0's design. The control root as a Merkle tree of control IDs matches my understanding but exact terminology and structure may differ.",
+    "common_verifier_bugs": "HIGH confidence for the general categories — these are fundamental to any zk-receipt verification system. The specific attack descriptions are reasoned from the architecture, not from published CVEs or risc0 security advisories. The claim-substitution and journal-tampering bugs are the most critical and most likely to appear in real implementations."
+  }
+}
+```

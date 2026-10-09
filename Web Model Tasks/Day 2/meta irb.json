@@ -1,0 +1,156 @@
+[
+  {
+    "case_name": "Corporate PD 0.5% LGD 45% M2.5",
+    "inputs": {
+      "pd": 0.005,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1
+    },
+    "computation": {
+      "R_formula": "R = 0.12 * (1 - exp(-50*PD))/(1 - exp(-50)) + 0.24 * (1 - (1 - exp(-50*PD))/(1 - exp(-50))) = 0.24 - 0.12*A where A=(1-exp(-50*PD))/(1-exp(-50))",
+      "A": 0.22119921692859512,
+      "R": 0.21345609396856857,
+      "Phi_inv_PD": -2.5758293035489,
+      "Phi_inv_PD_label": "Phi^-1(0.005) = -2.5758293035489",
+      "Phi_inv_0_999": 3.090232306167813,
+      "Phi_inv_0_999_check": "3.090232306167813 rounds to 3.0902 as required",
+      "sqrt_R": 0.46201308852517214,
+      "sqrt_1_minus_R": 0.8868731059353595,
+      "sqrt_R_div_sqrt_1_minus_R": 0.520967,
+      "inner_argument_formula": "(Phi^-1(PD) + sqrt(R)*Phi^-1(0.999)) / sqrt(1-R)",
+      "inner_argument_alternative_grouping": "Phi^-1(PD)/sqrt(1-R) + sqrt(R/(1-R))*Phi^-1(0.999)",
+      "inner_argument_value": -1.2945499461336958,
+      "Phi_inner": 0.09773776443735055,
+      "Phi_inner_formula": "Phi(inner_argument)",
+      "b_PD_formula": "b(PD) = (0.11852 - 0.05478*ln(PD))^2",
+      "b_PD": 0.16708622985488109,
+      "M": 2.5,
+      "maturity_factor_formula": "(1 + (M-2.5)*b(PD)) / (1 - 1.5*b(PD))",
+      "maturity_factor": 1.3344531081344764,
+      "K_before_maturity_formula": "K_before = LGD*Phi(inner) - PD*LGD",
+      "K_before_maturity": 0.04173199399680775,
+      "K_after_maturity": 0.05568938909768941,
+      "K_after_formula": "K_after = K_before * maturity_factor",
+      "risk_weight": 0.6961173637211177,
+      "risk_weight_pct": 69.61173637211176,
+      "risk_weight_formula": "RW = K_after * 12.5 * EAD"
+    },
+    "result": {
+      "k_pct": 5.568938909768941,
+      "risk_weight_pct": 69.61173637211176
+    },
+    "formula_basis": "R(PD)=0.12*(1-exp(-50*PD))/(1-exp(-50))+0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD)=(0.11852-0.05478*ln(PD))^2; maturity_factor=(1+(M-2.5)*b)/(1-1.5*b); K=[LGD*N((N^-1(PD)+sqrt(R)*N^-1(0.999))/sqrt(1-R))-PD*LGD]*maturity_factor where N=Phi, N^-1=Phi^-1; RW=K*12.5",
+    "known_benchmark": "No single widely-cited published benchmark recalled for PD=0.5% LGD 45% M2.5 corporate; internal consistency check: RW ~60-75% range expected per Basel II calibration; computed 69.61% fits expected monotonic increase vs PD 1%",
+    "weakest_point": "No published benchmark to anchor; weakest point is reliance on numerical Phi^-1 implementation; value -2.5758293 verified against high-precision normal quantile"
+  },
+  {
+    "case_name": "Corporate PD 1% LGD 45% M2.5",
+    "inputs": {
+      "pd": 0.01,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1
+    },
+    "computation": {
+      "R_formula": "R = 0.12 * (1 - exp(-50*PD))/(1 - exp(-50)) + 0.24 * (1 - (1 - exp(-50*PD))/(1 - exp(-50)))",
+      "A": 0.3934693402873666,
+      "R": 0.192783679165516,
+      "Phi_inv_PD": -2.3263478740408408,
+      "Phi_inv_PD_check": "-2.3263478740408408 rounds to -2.3263 as required by hard rule",
+      "Phi_inv_0_999": 3.090232306167813,
+      "Phi_inv_0_999_check": "3.090232306167813 rounds to 3.0902 as required",
+      "sqrt_R": 0.43907138276767255,
+      "sqrt_1_minus_R": 0.8984521806053364,
+      "inner_argument_formula": "(Phi^-1(PD) + sqrt(R)*Phi^-1(0.999)) / sqrt(1-R)",
+      "inner_argument_value": -1.0790950517201592,
+      "Phi_inner": 0.14027267845651598,
+      "b_PD_formula": "b(PD) = (0.11852 - 0.05478*ln(PD))^2",
+      "b_PD": 0.13748613089693737,
+      "M": 2.5,
+      "maturity_factor_formula": "(1 + (M-2.5)*b(PD)) / (1 - 1.5*b(PD))",
+      "maturity_factor": 1.2598095009238282,
+      "K_before_maturity": 0.05862270530543219,
+      "K_after_maturity": 0.07385344111364119,
+      "risk_weight": 0.9231680139205148,
+      "risk_weight_pct": 92.31680139205149
+    },
+    "result": {
+      "k_pct": 7.385344111364119,
+      "risk_weight_pct": 92.31680139205149
+    },
+    "formula_basis": "R(PD)=0.12*(1-exp(-50*PD))/(1-exp(-50))+0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD)=(0.11852-0.05478*ln(PD))^2; maturity_factor=(1+(M-2.5)*b)/(1-1.5*b); K=[LGD*Phi((Phi^-1(PD)+sqrt(R)*Phi^-1(0.999))/sqrt(1-R))-PD*LGD]*maturity_factor; RW=K*12.5",
+    "known_benchmark": "Basel II/III calibration documents and industry examples cite approx 92% risk weight for corporate PD 1% LGD 45% M2.5 foundation. Computed 92.3168% matches benchmark within 0.32pp; difference due to rounding and precise b(PD). Match confirmed.",
+    "weakest_point": "Maturity factor 1/(1-1.5*b) amplifies small b errors; b computed from ln(PD) sensitive to log precision but verified"
+  },
+  {
+    "case_name": "Corporate PD 3% LGD 45% M2.5",
+    "inputs": {
+      "pd": 0.03,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1
+    },
+    "computation": {
+      "R_formula": "R = 0.12 * (1 - exp(-50*PD))/(1 - exp(-50)) + 0.24 * (1 - (1 - exp(-50*PD))/(1 - exp(-50)))",
+      "A": 0.7768698398515702,
+      "R": 0.14677561921781157,
+      "Phi_inv_PD": -1.8807936081512509,
+      "Phi_inv_0_999": 3.090232306167813,
+      "sqrt_R": 0.3831130632304406,
+      "sqrt_1_minus_R": 0.9237014565227167,
+      "inner_argument_formula": "(Phi^-1(PD) + sqrt(R)*Phi^-1(0.999)) / sqrt(1-R)",
+      "inner_argument_value": -0.7544485702827217,
+      "Phi_inner": 0.22528995806032892,
+      "b_PD": 0.09647810097676261,
+      "M": 2.5,
+      "maturity_factor": 1.1692038507647522,
+      "K_before_maturity": 0.08788048112714802,
+      "K_after_maturity": 0.10275019694092061,
+      "risk_weight": 1.2843774617615076,
+      "risk_weight_pct": 128.43774617615077
+    },
+    "result": {
+      "k_pct": 10.27501969409206,
+      "risk_weight_pct": 128.43774617615077
+    },
+    "formula_basis": "R(PD)=0.12*(1-exp(-50*PD))/(1-exp(-50))+0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD)=(0.11852-0.05478*ln(PD))^2; maturity_factor=(1+(M-2.5)*b)/(1-1.5*b); K=[LGD*Phi((Phi^-1(PD)+sqrt(R)*Phi^-1(0.999))/sqrt(1-R))-PD*LGD]*maturity_factor; RW=K*12.5",
+    "known_benchmark": "No exact published benchmark recalled for PD 3% but Basel corporate curve shows RW ~120-135% for this bucket; computed 128.44% is within expected range; no disagreement to report",
+    "weakest_point": "Phi(inner) at -0.7544 in region where small inner error causes larger Phi change; verified via high-precision NormalDist"
+  },
+  {
+    "case_name": "Corporate PD 10% LGD 45% M2.5",
+    "inputs": {
+      "pd": 0.1,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1
+    },
+    "computation": {
+      "R_formula": "R = 0.12 * (1 - exp(-50*PD))/(1 - exp(-50)) + 0.24 * (1 - (1 - exp(-50*PD))/(1 - exp(-50)))",
+      "A": 0.9932620530009145,
+      "R": 0.12080855363989025,
+      "Phi_inv_PD": -1.2815515655446008,
+      "Phi_inv_0_999": 3.090232306167813,
+      "sqrt_R": 0.34757524888848207,
+      "sqrt_1_minus_R": 0.9376520923882747,
+      "inner_argument_formula": "(Phi^-1(PD) + sqrt(R)*Phi^-1(0.999)) / sqrt(1-R)",
+      "inner_argument_value": -0.22125829429620272,
+      "Phi_inner": 0.4124456607660607,
+      "b_PD": 0.05985636818667657,
+      "M": 2.5,
+      "maturity_factor": 1.098640989344795,
+      "K_before_maturity": 0.14060054734472732,
+      "K_after_maturity": 0.15446952443723092,
+      "risk_weight": 1.9308690554653865,
+      "risk_weight_pct": 193.08690554653865
+    },
+    "result": {
+      "k_pct": 15.446952443723092,
+      "risk_weight_pct": 193.08690554653865
+    },
+    "formula_basis": "R(PD)=0.12*(1-exp(-50*PD))/(1-exp(-50))+0.24*(1-(1-exp(-50*PD))/(1-exp(-50))); b(PD)=(0.11852-0.05478*ln(PD))^2; maturity_factor=(1+(M-2.5)*b)/(1-1.5*b); K=[LGD*Phi((Phi^-1(PD)+sqrt(R)*Phi^-1(0.999))/sqrt(1-R))-PD*LGD]*maturity_factor; RW=K*12.5",
+    "known_benchmark": "Basel curve peaks near PD 10-20% with RW ~180-220% for LGD 45% corporate M2.5; computed 193.09% fits that peak region; no specific contradictory benchmark cited",
+    "weakest_point": "At high PD, K = LGD*Phi(...) - PD*LGD involves subtraction of two similar-sized numbers (0.1856 - 0.045), amplifying relative error; high precision retained"
+  }
+]

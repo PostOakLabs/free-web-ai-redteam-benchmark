@@ -1,0 +1,100 @@
+[
+  {
+    "case_name": "Parametric ES 97.5% Normal P&L",
+    "inputs": {"distribution": "Normal(0,1)", "alpha": 0.975, "z_alpha": 1.9600, "phi_z": 0.05844, "scale_units": "unit-variance"},
+    "computation": {
+      "alpha": 0.975,
+      "1_minus_alpha": 0.025,
+      "z_alpha_quantile": 1.9600,
+      "VaR_alpha_formula": "z_alpha * sigma",
+      "VaR_alpha_unit_sigma": 1.9600,
+      "phi_z_formula": "standard normal pdf at z_alpha",
+      "phi_z_value": 0.05844,
+      "ES_multiplier_formula": "phi(z_alpha) / (1 - alpha)",
+      "ES_multiplier_numerator": 0.05844,
+      "ES_multiplier_denominator": 0.025,
+      "ES_multiplier_value": 2.3376,
+      "ES_formula": "ES_alpha = sigma * phi(z_alpha) / (1 - alpha)",
+      "ES_unit_sigma_value": 2. "ES_to_VaR_ratio_formula": "ES_alpha / VaR_alpha = [phi(z_alpha)/(1-alpha)] / z_alpha",
+      "ES_to_VaR_ratio": 1.1926530612,
+      "VaR_multi": 1.9600,
+      "ES_minus_VaR_spread": "ES_alpha - VaR_alpha = sigma * (phi(z_alpha)/(1-alpha) - z_alpha)",
+      "ES_minus_VaR_spread_value": 0.3776
+    },
+    "result": {"ES_unit_sigma": 2.3376, "VaR_unit_sigma": 1.9600, "ES_to_VaR_ratio": 1.1927, "units": "multiples of sigma (unit variance)"},
+    "formula_basis": "ES_alpha = sigma * phi(Phi^{-1}(alpha)) / (1 - alpha); VaR_alpha = sigma * Phi^{-1}(alpha). Anchored to BCBS MAR33.97 ES at the 97.5th percentile of the loss distribution (stressed or current per the bucket). The 97.5% ES multiplier (2.3376) is strictly greater than the VaR multiplier (1.9600); the ratio phi(z)/(z*(1-alpha)) at z=1.9600 equals 1.1927.",
+    "weakest_point": "This case uses a unit-variance, zero-mean normal — no volatility scaling or stressed period choice is made. Real MAR33 ES uses an internally modelled distribution with specific liquidity horizons and stress calibration; the value 2.3376 is the textbook multiplier, not the regulatory capital number."
+  },
+  {
+    "case_name": "Parametric ES 99% Normal P&L",
+    "inputs": {"distribution": "Normal(0,1)", "alpha": 0.99, "z_alpha": 2.3263, "phi_z": 0.02665, "scale_units": "unit-variance"},
+    "computation": {
+      "alpha": 0.99,
+      "1_minus_alpha": 0.01,
+      "z_alpha_quantile": 2.3263,
+      "VaR_alpha_unit_sigma": 2.3263,
+      "phi_z_value": 0.02665,
+      "ES_multiplier_numerator": 0.02665,
+      "ES_multiplier_denominator": 0.01,
+      "ES_multiplier_value": 2.6650,
+      "ES_unit_sigma_value": 2.6650,
+      "ES_to_VaR_ratio_formula": "[phi(z_alpha)/(1-alpha)] / z_alpha",
+      "ES_to_VaR_ratio": 1.1455675040,
+      "ES_minus_VaR_spread_value": 0.3387
+    },
+    "result": {"ES_unit_sigma": 2.6650, "VaR_unit_sigma": 2.3263, "ES_to_VaR_ratio": 1.1456, "units": "multiples of sigma (unit variance)"},
+    "formula_basis": "ES_alpha = sigma * phi(z_alpha) / (1 - alpha); VaR_alpha = sigma * z_alpha. At 99%, multiplier 2.6650 vs VaR multiplier 2.3263; ratio . Anchored to BCBS MAR33.97 reference but MAR33 itself mandates 97.5%; the 99% case here is included as a comparative sanity check, not as the regulatory threshold.",
+    "weakest_point": "MAR33 specifies ES at 97.5%, not 99%; this case exists to confirm that the ES/VaR distinction holds across confidence levels and that the multiplier phi(z)/(1-alpha) monotonically relates to VaR."
+  },
+  {
+    "case_name": "Liquidity-Horizon-Scaled ES per MAR33 sqrt(LH/10)",
+    "inputs": {"risk_factor_category": "FX (illustrative)", "base_LH_days": 10, "scaled_LH_days": 20, "base_vol_units": "sigma_10d", "base_ES_97.5_multiplier": 2.3376},
+    "computation": {
+      "base_LH_days": 10,
+      "scaled_LH_days": 20,
+      "scale_factor_formula": "sqrt(LH_scaled / LH_base)",
+      "scale_factor_value": 1.4142135624,
+      "sigma_10d_units": 1.0,
+      "sigma_20d_units": "sigma_10d * sqrt(20/10)",
+      "sigma_20d_value": 1.4142135624,
+      "base_ES_formula": "sigma_10d * phi(z_0.975) / (1 - 0.975)",
+      "base_ES_value": 2.3376,
+      "scaled_ES_formula": "ES_10d * sqrt(LH_scaled/LH_base)  [equivalent to applying sigma_20d with same density/quantile]",
+      "scaled_ES_value": 3.3063485672,
+      "ratio_scaled_to_base": 1.4142135624,
+      "z_0.975": 1.9600,
+      "phi_z_0.975": 0.05844,
+      "ES_multiplier": 2.3376,
+      "variance_scaling_note": "variance scales linearly with horizon under square-root-of-time; ES scales as sqrt(LH/10) per MAR33."
+    },
+    "result": {"scaled_ES_units": "multiples of sigma_10d", "scaled_ES_value": 3.3063, "scale_factor": 1.4142, "units": "ES expressed in 10d-base sigma units, scaled to 20d horizon"},
+    "formula_basis": "ES_alpha(LH) = ES_alpha(10d) * sqrt(LH/10) sigma_10d * sqrt(L * phi(z_alpha)/(1-alpha). Anchored to MAR33.32 (liquidity horizon assignment per risk factor) and MAR33.46-49 (ES scaling). LH=20 days chosen as illustrative; FX LHs in MAR33 are 10 days by default, but the formula holds for any LH category.",
+    "weakest_point": "The sqrt(LH/10) scaling assumes i.i.d. returns and constant volatility over the horizon. MAR33 explicitly recognises this is an approximation and applies additional adjustments (correlation, diversification, stressed period). The case isolates the mechanical sqrt-of-time scaling only."
+  },
+  {
+    "case_name": "Historical Simulation ES 97.5% from N=20 P&L Sample",
+    "inputs": {"N": 20, "alpha": 0.975, "tail_fraction": 0.025, "sample_unit": "loss in currency units", "convention_for_fractional": "linear interpolation between adjacent order statistics (the BCBS MAR33 text does not specify fractional-observation handling; this convention is named explicitly here)"},
+    "computation": {
+      "N": 20,
+      "alpha": 0.975,
+      "tail_size_formula": "N * (1 - alpha)",
+      "tail_size_exact": 0.5,
+      "sample_losses_descending": [3.82, 3.41, 3.05, 2.88, 2.74, 2.55, 2.31, 2.14, 1.98, 1.83, 1.70, 1.55, 1.41, 1.22, 1.05, 0.88, 0.71, 0.54, 0.36, 0.17],
+      "order_statistic_indices_1_to_20_descending": "1=largest, 20=smallest",
+      "tail_selection_rule_at_97.5pct_for_N_20": "(N*(1-alpha) = 0.5) => average the top 0.5 observations; linear interpolation between rank 1 and rank 2 adopted as convention",
+      "rank_1_value": 3.82,
+      "rank_2_value": 3.41,
+      "interpolation_formula": "ES = (1 - f) * x_(1) + f * x_(2),  with f = (N*(1-alpha)) - floor(N*(1-alpha)) = 0.5",
+      "interpolation_f": 0.5,
+      "ES_interpolated": "(1 - 0.5)*3.82 + 0.5*3.41 = 1.91 + 1.705 = 3.615",
+      "ES_value": 3.615,
+      "alternative_convention_integer_tail": "ES = mean of floor(N*(1-alpha))=0 tail obs is undefined; with ceil convention ES = x_(1) = 3.82 (single-worst-loss convention). Both conventions stated for transparency; the interpolation convention is the primary reported value.",
+      "mean_of_full_sample_for_reference": 1.8775,
+      "median_index": "between ranks 10 and 11",
+      "median_value": 1.765
+    },
+    "result": {"ES_97.5_value": 3.615, "units": "loss in currency units", "convention": "linear interpolation between order statistics 1 and 2 at fractional index N*(1-alpha)=0.5", "tail_points_used": ["x_(1)=3.82 (weight 0.5)", "x_(2)=3.41 (weight 0.5)"]},
+    "formula_basis": "ES_alpha = (1/N) * sum of the N*(1-alpha) largest losses, or interpolated equivalent. Anchored to BCBS MAR33.97 / MAR33.46-52 (internal model ES based on historical simulation). The tail-selection rule with N=20 and alpha=0.975 yields a non-integer tail count (0.5); the convention adopted (linear interpolation) is named explicitly because the BCBS text is silent on fractional-tail handling for the HS case.",
+    "weakest_point": "Two unstated conventions in MAR33 affect this number materially: (a) fractional tail observations (N*(1-alpha) non-integer) — interpolation chosen here vs ceil/floor alternatives would yield 3.82 or undefined; (b) MAR33 mandates a 12.5-month stressed period or specific window construction — the 20-observation sample here is illustrative only and does not represent a real MAR33 12-month stressed ES. The ES= a textbook HS tail average, not a regulatory capital number."
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "example_id": "Example 5.3.7-1",
+    "article": "Article 5.3.7(a)",
+    "fact_pattern": "A Co (UPE) owns 50% of B Co 1 and 100% of B Co 2. B Co 1 is a Flow-through Entity in Country B; A Co has a PE in Country B. B Co 1 earns EUR 1,000 GloBE Income, incurs EUR 200 Eligible Payroll Costs, and has EUR 400 Eligible Tangible Assets in Country B. 50% of B Co 1's payroll and assets are allocated to the PE; 45% are allocated to B Co 2.",
+    "computation": "1. B Co 1 GloBE Income reduced by EUR 50 (non-Group Entity share) → EUR 950. 2. EUR 500 allocated to PE → EUR 450 remaining. 3. Payroll allocation: PE gets 50% × 200 = 100; B Co 2 gets 45% × 200 = 90; remainder 10 not included. 4. Tangible asset allocation: PE gets 50% × 400 = 200; B Co 2 gets 45% × 400 = 180; remainder 20 not included.",
+    "result": "The Substance-based Income Exclusion for B Co 1 is computed by allocating eligible payroll and tangible assets to the PE and B Co 2 based on ownership and income allocation, with the remainder excluded.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The example does not compute a final SBIE amount or top-up tax; it only illustrates allocation."
+  },
+  {
+    "example_id": "Example 5.5.2-1",
+    "article": "Article 5.5.2",
+    "fact_pattern": "ABC Group uses calendar year. B Co (only entity in Jurisdiction B) created 1 July Year 1. Year 1: GloBE Revenue EUR 1m, GloBE Income EUR 50k. Year 2: Revenue EUR 1m, Income EUR 100k. Year 3: Revenue EUR 3m, Loss EUR 200k.",
+    "computation": "1. Year 1 is a short fiscal year (6 months), so revenue and income are annualized: Revenue = 2 × 1m = 2m; Income = 2 × 50k = 100k. 2. Three-year average revenue = (2m + 1m + 3m) / 3 = 2m. 3. Three-year average income = (100k + 100k + (-200k)) / 3 = 0.",
+    "result": "Average revenue (EUR 2m) < EUR 10m and average income (EUR 0) < EUR 1m, so the de minimis exclusion applies and Top-up Tax for Year 3 is deemed zero if elected.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The example assumes only one entity and no other adjustments; real-world applications may be more complex."
+  },
+  {
+    "example_id": "Example 9.1.1-1",
+    "article": "Article 9.1.1",
+    "fact_pattern": "A Co, in Country A (20% CIT, worldwide tax system), becomes subject to GloBE for FY ending 31 Dec 2023. In 2022, A Co earned interest income of 100 from Country B, suffered withholding tax of 30, used 20 as tax credit in 2022, and carried forward 10 (DTA of 10 in financial accounts). Also in 2022, A Co incurred R&D expenditure and received an investment tax credit of 10 (DTA of 10).",
+    "computation": "Deferred tax assets (DTA) from foreign tax credit carry-forward (10) and investment tax credit carry-forward (10) are recast at the Minimum Rate (15%) because the domestic rate (20%) is ≥ 15%. Recast DTA = (10 / 20%) × 15% = 7.5 for each carry-forward.",
+    "result": "Recast deferred tax asset for each carry-forward is EUR 7.5.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The example assumes the domestic tax rate is 20%; if it were lower, the recast would differ."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.2.1 (Top-up Tax)",
+    "fact_pattern": "Jurisdiction Z has GloBE Income of EUR 1,000 and Adjusted Covered Taxes of EUR 120. The Minimum Rate is 15%.",
+    "computation": "1. ETR = Adjusted Covered Taxes / GloBE Income = 120 / 1,000 = 12%. 2. Top-up Tax Percentage = Minimum Rate - ETR = 15% - 12% = 3%. 3. Excess Profit = GloBE Income (no SBIE applied) = 1,000. 4. Jurisdictional Top-up Tax = Top-up Tax Percentage × Excess Profit = 3% × 1,000 = 30.",
+    "result": "Jurisdictional Top-up Tax = EUR 30.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "This is a generic example; the actual OECD examples may include additional adjustments like SBIE or deferred taxes."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.3 (SBIE with Transitional Rates)",
+    "fact_pattern": "Jurisdiction X has GloBE Income of EUR 500. Eligible Payroll Costs = EUR 200; Eligible Tangible Assets = EUR 300. Fiscal Year 2024 (transitional rates: payroll 9.4%, tangible 6.6%).",
+    "computation": "1. Payroll Carve-out = 9.4% × 200 = 18.8. 2. Tangible Asset Carve-out = 6.6% × 300 = 19.8. 3. SBIE = 18.8 + 19.8 = 38.6. 4. Excess Profit = GloBE Income - SBIE = 500 - 38.6 = 461.4.",
+    "result": "Excess Profit subject to top-up tax = EUR 461.4 (before applying ETR).",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Transitional rates vary by year; this example assumes 2024 rates, which may not match a specific published example."
+  }
+]

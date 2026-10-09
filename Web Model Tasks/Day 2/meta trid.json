@@ -1,0 +1,64 @@
+[
+  {
+    "case_name": "Zero tolerance violation - lender origination and affiliate",
+    "fees": [
+      {"name": "Lender origination fee - paid to creditor", "bucket": "zero_tolerance", "le_amount": 1200, "cd_amount": 1300},
+      {"name": "Appraisal fee - paid to creditor affiliate", "bucket": "zero_tolerance", "le_amount": 500, "cd_amount": 500},
+      {"name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 250, "cd_amount": 250}
+    ],
+    "computation": "Per-bucket sums: zero_tolerance Σle=1200+500+250=1950, Σcd=1300+500+250=2050. Zero-tolerance per-fee check per 19(e)(3)(i): origination 1300>1200 increase 100 = violation; appraisal 500=500 pass; transfer tax 250=250 pass. 10% bucket Σle=0 Σcd=0 threshold 0. No-limit bucket Σle=0 Σcd=0. Total increase zero bucket = 100.",
+    "violations": {"zero_tolerance": {"violates": true, "cure_amount": 100, "detail": "origination fee exceeds LE by 100"}, "ten_pct_aggregate": {"violates": false, "cure_amount": 0}, "no_limit": {"violates": false, "cure_amount": 0}},
+    "clause_basis": "Zero tolerance per 12 CFR 1026.19(e)(3)(i) - fees paid to creditor, affiliate, or where creditor did not permit shopping, and transfer taxes cannot increase; cure per 1026.19(f)(2)(v) refund + corrected CD within 60 days after consummation",
+    "weakest_point": "Transfer tax bucket assignment is zero tolerance, correct, but some state transfer taxes may be classified separately; still zero tolerance"
+  },
+  {
+    "case_name": "10% aggregate PASS with mixed directions - aggregate-vs-aggregate core",
+    "fees": [
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 150, "cd_amount": 175},
+      {"name": "Title search - borrower can shop, selects from lender list", "bucket": "ten_pct_aggregate", "le_amount": 400, "cd_amount": 350},
+      {"name": "Pest inspection - borrower can shop, selects from lender list", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 220}
+    ],
+    "computation": "10% bucket Σle=150+400+200=750, Σcd=175+350+220=745. 10% threshold = Σle*0.10 = 75. Max allowed Σcd = Σle+threshold = 825. Aggregate comparison = Σcd - Σle = 745-750 = -5 (DECREASE). Correct test per 19(e)(3)(ii) is aggregate-vs-aggregate, NOT sum-of-increases. Sum-of-increases incorrect method = (175-150)+(220-200)=25+20=45. Sum-of-decreases = 50. Net aggregate -5 pass. Even if using sum-of-increases 45<75 still pass here but method wrong; distinction explicit: decrease offsets increase. Zero bucket Σ=0, no-limit Σ=0.",
+    "violations": {"zero_tolerance": {"violates": false, "cure_amount": 0}, "ten_pct_aggregate": {"violates": false, "cure_amount": 0, "aggregate_increase": -5, "threshold": 75}, "no_limit": {"violates": false, "cure_amount": 0}},
+    "clause_basis": "10% tolerance per 12 CFR 1026.19(e)(3)(ii) - recording fees and third-party services where creditor permits shopping and borrower selects from creditor written list per 19(e)(1)(vi); aggregate increase limited to 10%; zero tolerance per (e)(3)(i); no-limit per (e)(3)(iii)",
+    "weakest_point": "Bucket assignment for pest inspection assumes service required by creditor and borrower did shop from list; if not required by creditor would be no-limit"
+  },
+  {
+    "case_name": "10% aggregate FAIL with mixed directions - violation due to aggregate",
+    "fees": [
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 260},
+      {"name": "Title closing protection letter - from lender list", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 280},
+      {"name": "Survey fee - from lender list", "bucket": "ten_pct_aggregate", "le_amount": 100, "cd_amount": 160}
+    ],
+    "computation": "10% bucket Σle=200+300+100=600, Σcd=260+280+160=700. Threshold = Σle*0.10 = 60. Max allowed Σcd = 660. Aggregate comparison Σcd vs Σle = 700 vs 600 = increase 100. 100 > 60 => violates (e)(3)(ii) by 40. Mixed directions: +60, -20, +60. Correct aggregate-vs-aggregate increase = 100, cure = Σcd - (Σle+threshold) = 700-660=40. Incorrect sum-of-increases method would compute sum of positive deltas =60+60=120, claim increase 120 >60 and cure 60, overstating cure because it ignores -20 decrease. The rule is Σcd compared to Σle, not sum of increases.",
+    "violations": {"zero_tolerance": {"violates": false, "cure_amount": 0}, "ten_pct_aggregate": {"violates": true, "cure_amount": 40, "aggregate_increase": 100, "threshold": 60, "max_allowed": 660}, "no_limit": {"violates": false, "cure_amount": 0}},
+    "clause_basis": "10% tolerance violation per 12 CFR 1026.19(e)(3)(ii) aggregate test; cure per 12 CFR 1026.19(f)(2)(v) refund excess over 10% threshold (40) within 60 days; distinction aggregate-vs-aggregate vs sum-of-increases is load-bearing per Comment 19(e)(3)(ii)-1",
+    "weakest_point": "Survey fee classification as 10% assumes creditor requires it and provided list; if borrower could shop and chose provider not on list it would move to no-limit and change result"
+  },
+  {
+    "case_name": "No-limit PASS despite large increase - borrower shops outside list",
+    "fees": [
+      {"name": "Survey fee - borrower permitted to shop, selects provider NOT on lender list", "bucket": "no_limit", "le_amount": 350, "cd_amount": 750},
+      {"name": "HOA document fee - service not required by creditor", "bucket": "no_limit", "le_amount": 100, "cd_amount": 120}
+    ],
+    "computation": "No-limit bucket Σle=350+100=450, Σcd=750+120=870, increase 420. Per 19(e)(3)(iii) there is no tolerance limit for (A) services borrower shops for and selects provider not on list, (B) services not required by creditor. Therefore no violation regardless of amount. Zero bucket Σle=0 Σcd=0, 10% bucket Σle=0 Σcd=0 threshold 0.",
+    "violations": {"zero_tolerance": {"violates": false, "cure_amount": 0}, "ten_pct_aggregate": {"violates": false, "cure_amount": 0}, "no_limit": {"violates": false, "cure_amount": 0}},
+    "clause_basis": "No tolerance limit per 12 CFR 1026.19(e)(3)(iii) - charges for third-party services where creditor permits shopping per 19(e)(1)(vi) and borrower selects provider not on written list, and charges for services not required by creditor; not subject to (e)(3)(i) or (ii)",
+    "weakest_point": "HOA doc fee bucket as no-limit assumes not required by creditor; if required by creditor and borrower could shop from list it would be 10%"
+  },
+  {
+    "case_name": "Combined three buckets - zero fail + 10% pass mixed + no-limit pass",
+    "fees": [
+      {"name": "Lender underwriting fee - paid to creditor", "bucket": "zero_tolerance", "le_amount": 800, "cd_amount": 850},
+      {"name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 300, "cd_amount": 300},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 120, "cd_amount": 130},
+      {"name": "Title exam - borrower can shop, from lender list", "bucket": "ten_pct_aggregate", "le_amount": 350, "cd_amount": 320},
+      {"name": "Pest inspection - from lender list", "bucket": "ten_pct_aggregate", "le_amount": 180, "cd_amount": 200},
+      {"name": "Survey - borrower can shop, selects NOT on list", "bucket": "no_limit", "le_amount": 400, "cd_amount": 600}
+    ],
+    "computation": "Zero bucket Σle=800+300=1100, Σcd=850+300=1150, per-fee: underwriting 850>800 increase 50 violation, transfer tax 300=300 pass. Cure zero=50. 10% bucket Σle=120+350+180=650, Σcd=130+320+200=650, threshold=650*0.10=65, max allowed=715, aggregate increase=0 pass despite mixed +10, -30, +20 net 0. Aggregate-vs-aggregate =0, not sum-of-increases 30. No-limit bucket Σle=400 Σcd=600 increase 200 allowed per (e)(3)(iii). Total cure =50+0+0=50.",
+    "violations": {"zero_tolerance": {"violates": true, "cure_amount": 50}, "ten_pct_aggregate": {"violates": false, "cure_amount": 0, "aggregate_increase": 0, "threshold": 65}, "no_limit": {"violates": false, "cure_amount": 0}},
+    "clause_basis": "Zero per 19(e)(3)(i) violation cure 50 per 19(f)(2)(v); 10% aggregate per 19(e)(3)(ii) pass because Σcd=650 <= Σle*1.10=715 with mixed directions offsetting; no-limit per 19(e)(3)(iii) pass; total cure 50",
+    "weakest_point": "Title exam bucket assumes from list; if borrower selected not on list it would shift to no-limit and make 10% bucket Σle=300 Σcd=330 still pass but threshold changes"
+  }
+]

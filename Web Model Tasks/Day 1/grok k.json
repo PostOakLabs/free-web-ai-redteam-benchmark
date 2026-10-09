@@ -1,0 +1,92 @@
+[
+  {
+    "delta_name": "Timing closure dominance shifts from cell delay to wire RC + variation",
+    "at_28nm": "Cell delay still dominated most critical paths; wire delay was secondary except on long nets. Global derates and modest OCV were enough; useful skew and buffering closed most gaps.",
+    "at_7nm_5nm": "Wire RC and via resistance dominate even medium-length paths. AOCV/POCV tables, stage-based OCV, and path-based analysis become mandatory; margin is consumed by variation more than by mean delay.",
+    "why_it_changed": "Metal resistivity and via resistance rose sharply while gate delay continued to improve; BEOL RC no longer scaled with the transistor. Local layout effects and random variation also grew relative to nominal delay.",
+    "what_breaks": "A 28 nm engineer applies flat derates and expects buffering alone to fix WNS; the symptom is a persistent negative tail of paths whose delay is almost pure wire/via and that barely move with cell upsizing.",
+    "workflow_impact": "Signoff STA and extraction stages absorbed heavy AOCV/POCV setup, path-based analysis, and more frequent ECOs driven by parasitic updates rather than cell sizing.",
+    "confidence": 0.92
+  },
+  {
+    "delta_name": "Congestion character moves from channel routing to pin-access and via density",
+    "at_28nm": "Overflow was mostly channel or density driven; widening a corridor or lowering local utilization usually fixed it. Pin access was rarely the limiter.",
+    "at_7nm_5nm": "Pin access, via pillars, and local track starvation around high-pin cells and macros dominate. Channels can look clear in GR yet detail-route fails because escape tracks and via stacks are exhausted.",
+    "why_it_changed": "Tighter contacted poly pitch, more complex design rules, and multi-patterning/via constraints reduced the number of legal pin-escape combinations per cell; standard-cell pin density rose relative to available tracks.",
+    "what_breaks": "Engineer lowers density screens or widens channels and sees GR overflow drop, yet DRCs remain high; the symptom is remaining violations clustered on cell pins and via enclosures rather than pure spacing in open channels.",
+    "workflow_impact": "Placement and detailed-route stages absorbed pin-access aware legalization, via-pillar planning, and more iterative density + pin-access co-optimization.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Via and pin-access rules become first-class DRC drivers",
+    "at_28nm": "Most DRC effort was spacing, short, and metal-density related. Via enclosure and cut rules existed but rarely dominated the violation count after a clean GR.",
+    "at_7nm_5nm": "Via enclosure, via spacing, min-cut, and color-aware via rules generate a large fraction of remaining DRCs even when metal spacing is clean. Pin-access DRCs appear late and are expensive to fix.",
+    "why_it_changed": "Multi-patterning and (later) EUV via layers imposed stricter enclosure and coloring constraints; via resistance also forced multi-cut or pillar structures whose geometry is rule-heavy.",
+    "what_breaks": "Team treats residual DRCs as ordinary spacing problems and runs more detail-route iterations; the symptom is violation counts that barely fall until via-pillar or pin-swap changes are introduced.",
+    "workflow_impact": "Detailed route and physical verification absorbed via-pillar construction, color-aware checks, and earlier pin-access audits.",
+    "confidence": 0.88
+  },
+  {
+    "delta_name": "Power-grid versus signal-routing resource tension intensifies",
+    "at_28nm": "Power straps occupied noticeable but manageable resources; signal routing could usually go around or under with modest congestion impact. IR was often closed late.",
+    "at_7nm_5nm": "Dense power meshes and via farms required for IR/EM steal a much larger fraction of local tracks. Congestion and IR become coupled: thinning the grid for routability immediately creates IR hotspots.",
+    "why_it_changed": "Higher current densities, lower supply voltages, and higher via/metal resistance forced more frequent straps and more via arrays just to keep IR within 5–10 %; those structures sit on the same layers signals need.",
+    "what_breaks": "Engineer thins power straps to clear congestion and later finds IR or EM violations that require the straps to be put back, re-creating the original overflow; or leaves the dense grid and cannot close DRCs.",
+    "workflow_impact": "Floorplan and power-planning stages absorbed earlier IR-aware grid design and joint congestion/IR budgeting; post-route IR fixes became common ECO drivers.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Multi-patterning / coloring constraints enter placement and routing",
+    "at_28nm": "Double-patterning existed on some layers but was largely handled inside the router; placement rarely needed explicit color awareness.",
+    "at_7nm_5nm": "Coloring (LELE or SADP) constraints affect legal cell placement, abutment, and routing track assignment. Odd-cycle coloring conflicts and color-aware spacing become placement and GR concerns.",
+    "why_it_changed": "Multiple patterning was required to print pitches below the single-exposure limit; each pattern has its own spacing and can interact with neighboring cells and wires, turning a pure geometric problem into a coloring problem.",
+    "what_breaks": "28 nm engineer ignores color during placement; the symptom is late routing or DRC failures that only appear when the color-aware deck is applied, often requiring cell flips or moves that disturb timing.",
+    "workflow_impact": "Placement and routing stages absorbed color-aware legalization and coloring checks; physical verification decks grew color-specific rules.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Library Vt and cell-mix strategy becomes more constrained",
+    "at_28nm": "Multi-Vt libraries (SVT/LVT/HVT) were mixed freely for power-timing trade-offs; large LVT regions were common on critical paths.",
+    "at_7nm_5nm": "LVT/ULVT use is tightly budgeted because of leakage and variation; more reliance on intermediate Vt flavors, power-intent (UPF) driven swaps, and careful physical separation of Vt regions to control leakage and LDE.",
+    "why_it_changed": "Leakage current and variation of low-Vt devices grew relative to their delay benefit; finFET and later processes also introduced stronger layout-dependent effects that make indiscriminate Vt mixing risky.",
+    "what_breaks": "Engineer liberally swaps to LVT to close timing as at 28 nm; the symptom is power or leakage numbers that blow the budget, or new variation-induced timing failures in the low-Vt islands.",
+    "workflow_impact": "Optimization and power-intent stages absorbed stricter Vt budgets, leakage recovery loops, and more frequent power-vs-timing re-optimization.",
+    "confidence": 0.87
+  },
+  {
+    "delta_name": "Clock distribution moves toward shorter trees, more useful skew, and mesh/hybrid styles",
+    "at_28nm": "Conventional buffered H-trees or spines with moderate latency were standard; global skew targets of tens of ps were achievable with ordinary CTS.",
+    "at_7nm_5nm": "Latency and variation force shorter local trees, heavier use of useful skew, and in some blocks clock meshes or hybrid mesh-tree structures to keep skew inside the tighter variation budget.",
+    "why_it_changed": "Wire RC and variation make long clock paths both slow and uncertain; the same BEOL that hurts data paths hurts the clock, so absolute latency and local skew must be reduced.",
+    "what_breaks": "Engineer builds a classic deep H-tree with 28 nm style skew targets; the symptom is large OCV-induced residual skew, hold failures after CTS, and power numbers dominated by the clock network.",
+    "workflow_impact": "CTS and post-CTS optimization absorbed useful-skew scheduling, local-skew constraints, and occasional mesh planning; hold fixing after CTS became heavier.",
+    "confidence": 0.84
+  },
+  {
+    "delta_name": "Signoff corner count explodes",
+    "at_28nm": "A handful of setup/hold corners (SS/FF, a few RC corners, maybe one low-voltage) were typical; most blocks closed on <10–15 STA views.",
+    "at_7nm_5nm": "Dozens of corners become routine: multiple voltages, temperatures, RC extremes, aging, and statistical or AOCV views. Liberate or path-based analysis is often required on top.",
+    "why_it_changed": "Lower Vdd, higher relative variation, aging (BTI/HCI), and more complex BEOL made the extreme corners both more numerous and more divergent from the nominal.",
+    "what_breaks": "Engineer signs off on the old “main” corners and discovers late that an aging or low-voltage corner is failing by hundreds of ps; the symptom is a sudden new negative WNS after the corner set is expanded.",
+    "workflow_impact": "Signoff STA and regression infrastructure absorbed massive corner farming, prioritization of which corners drive ECOs, and more automated corner-reduction techniques.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "IR and EM move from late check to first-class design constraint",
+    "at_28nm": "Static IR was often checked late; dynamic IR and EM were secondary. Grid was sized with margin and rarely forced placement changes.",
+    "at_7nm_5nm": "Early dynamic IR, vector-based analysis, and EM are required. Power-grid density and via arrays constrain placement and routing from the start; IR/EM ECOs compete with timing ECOs.",
+    "why_it_changed": "Lower Vdd reduced noise margin, current densities rose, and via/metal resistance made local voltage drop and EM limits tighter; a grid that “looked fine” at 28 nm fails at 7 nm.",
+    "what_breaks": "Engineer treats IR as a post-route clean-up item; the symptom is late IR hotspots that require strap or via insertion, which then re-break congestion and timing.",
+    "workflow_impact": "Floorplan, placement, and power-analysis stages absorbed early IR budgeting and iterative grid-vs-routability trade-offs; signoff added dynamic IR and EM signoff gates.",
+    "confidence": 0.91
+  },
+  {
+    "delta_name": "Hold closure becomes systematically harder",
+    "at_28nm": "Hold was closed with modest buffering and small useful-skew adjustments; most hold problems were local and fixed late with little setup impact.",
+    "at_7nm_5nm": "Hold is chronically difficult because of higher variation, tighter min-delay margins, and clock paths that themselves vary. Hold buffers frequently re-break setup, and min-pulse-width / min-period checks add extra constraints.",
+    "why_it_changed": "On-chip variation and AOCV make the hold side of the distribution wider; at the same time data-path min delays shrank relative to clock uncertainty, leaving less natural margin.",
+    "what_breaks": "Engineer applies the old late hold-buffer ECO style and watches setup WNS collapse or new hold violations appear in other corners; the symptom is oscillating setup/hold ECOs that never converge cleanly.",
+    "workflow_impact": "Post-CTS and signoff stages absorbed earlier hold-aware CTS, more sophisticated useful-skew, and multi-corner hold fixing that is co-optimized with setup.",
+    "confidence": 0.88
+  }
+]

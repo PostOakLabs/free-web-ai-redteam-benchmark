@@ -1,0 +1,130 @@
+Here is my best-effort genre map for Task 1. I have been honest about confidence levels — only the POWER4 circuit/physical-design paper is verified per the document; everything else reflects what I can genuinely name, with appropriate uncertainty.
+
+```json
+[
+  {
+    "title": "POWER4 system microarchitecture",
+    "authors_if_known": "J. M. Tendler, J. S. Dodson, J. S. Fields Jr., H. Le, B. Sinharoy",
+    "venue": "IBM Journal of Research and Development",
+    "year": 2002,
+    "pages_if_known": "Vol. 46, No. 1, pp. 5–26",
+    "what_design_decisions_it_covers": "System-level microarchitecture of POWER4: pipeline organization, fetch/decode/dispatch, execution units, memory hierarchy, SMP interconnect; provides architectural context for the physical implementation described in the companion paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "The circuit and physical design of the POWER4 microprocessor",
+    "authors_if_known": "J. Warnock et al.",
+    "venue": "IBM Journal of Research and Development",
+    "year": 2002,
+    "pages_if_known": "Vol. 46, No. 1, pp. 27–52",
+    "what_design_decisions_it_covers": "Physical design methodology, circuit design techniques, clock distribution, power grid design, timing closure flow, custom-vs-synthesis tradeoffs, design automation for POWER4",
+    "confidence": 1.0
+  },
+  {
+    "title": "The Alpha 21264 Microprocessor",
+    "authors_if_known": "R. E. Kessler",
+    "venue": "IEEE Micro",
+    "year": 1999,
+    "pages_if_known": "Vol. 19, No. 2",
+    "what_design_decisions_it_covers": "Alpha 21264 design decisions including out-of-order execution implementation, physical design choices, custom circuit techniques, and performance optimization tradeoffs",
+    "confidence": 0.8
+  },
+  {
+    "title": "A 200 MHz 64-b Dual-Issue CMOS Microprocessor",
+    "authors_if_known": null,
+    "venue": "IEEE Journal of Solid-State Circuits",
+    "year": 1995,
+    "pages_if_known": "Vol. 30, No. 11",
+    "what_design_decisions_it_covers": "DEC Alpha 21164 circuit and physical design including custom circuit techniques, clock distribution, and high-frequency implementation decisions",
+    "confidence": 0.75
+  },
+  {
+    "title": "A 0.18μm CMOS IA-32 Processor with a 4GHz Integer Execution Unit",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2001,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "Intel Pentium 4 high-frequency circuit and physical design including rapid execution engine, deep pipeline, and timing closure at 4 GHz",
+    "confidence": 0.7
+  },
+  {
+    "title": "The Implementation of the Next-Generation 64-Bit Itanium Microprocessor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2002,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "Itanium 2 (McKinley) physical implementation including circuit design, power distribution, and timing closure for the EPIC architecture",
+    "confidence": 0.65
+  },
+  {
+    "title": "POWER6: A 4.6 GHz Microprocessor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2007,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "POWER6 high-frequency circuit and physical design including 65nm SOI, dual-core implementation, and timing closure at 4.6 GHz",
+    "confidence": 0.6
+  },
+  {
+    "title": "The Implementation of the POWER7 Processor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2010,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "POWER7 8-core 45nm SOI implementation including circuit techniques, power management, and physical design methodology",
+    "confidence": 0.6
+  },
+  {
+    "title": "Cell Broadband Engine Processor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2005,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "IBM/Sony/Toshiba Cell BE heterogeneous multi-core implementation including high-frequency SPE design, Element Interconnect Bus, and physical design across multiple voltage/frequency domains",
+    "confidence": 0.7
+  },
+  {
+    "title": "The UltraSPARC-III Processor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2000,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "Sun UltraSPARC III physical design and implementation including custom circuit techniques and timing closure methodology",
+    "confidence": 0.6
+  },
+  {
+    "title": "The IBM eServer z990 Microprocessor",
+    "authors_if_known": null,
+    "venue": "IBM Journal of Research and Development",
+    "year": 2004,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "IBM z990 mainframe processor implementation including physical design methodology and high-reliability design techniques; I am less certain of the exact title and year",
+    "confidence": 0.5
+  },
+  {
+    "title": "The IBM System z10 Processor",
+    "authors_if_known": null,
+    "venue": "IBM Journal of Research and Development",
+    "year": 2009,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "z10 processor implementation including high-frequency custom circuit design, physical design methodology, and mainframe-class reliability requirements",
+    "confidence": 0.5
+  },
+  {
+    "title": "The SPARC64 V Processor",
+    "authors_if_known": null,
+    "venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": 2004,
+    "pages_if_known": null,
+    "what_design_decisions_it_covers": "Fujitsu SPARC64 V high-frequency processor implementation including custom circuit design and timing closure for enterprise/server applications",
+    "confidence": 0.5
+  }
+]
+```
+
+**Honesty notes:**
+
+- The IBM J. R&D POWER4 volume (Vol. 46, No. 1, 2002) very likely contained additional companion papers (verification, packaging), but I cannot confidently name their exact titles, so I have not included them.
+- ISSCC papers (entries 5–10) tend to emphasize circuit techniques and final performance numbers more than the "problems hit and decisions made during closure" narrative that the exemplar POWER4 paper provides. They are in the genre but often at the shallower end of it.
+- IBM J. R&D papers (entries 1–2, 11–12) tend to be the richest implementation retrospectives, closest to the Warnock et al. exemplar.
+- `extracted_episodes` is empty because no source text was attached in this chat.

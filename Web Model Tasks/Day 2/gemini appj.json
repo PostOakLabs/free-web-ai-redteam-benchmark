@@ -1,0 +1,65 @@
+[
+{
+"case_name": "Single Advance, Single Payment (Section (c)(2) Example)",
+"appendix_basis": "Appendix J to Part 1026, Section (c)(2)(i)",
+"inputs": {
+"amount_financed": 1000.00,
+"finance_charge": 60.00,
+"total_of_payments": 1060.00,
+"term": "1 year (single payment)"
+},
+"unit_period_analysis": "The unit period is 1 year. The number of unit periods from advance to payment is unit_period = 1, with no fractional unit period.",
+"computation": "Actuarial equation: Amount Financed = Payment / (1 + i)^1, where i is the periodic rate. $1000.00 = $1060.00 / (1 + i)^1 => 1 + i = 1.060 => i = 0.06 or 6.00%. Annual Percentage Rate (APR) = periodic rate * number of unit periods per year = 6.00% * 1 = 6.00%.",
+"result_apr": "6.00%",
+"doc_vs_general": "confident-in-appendix-j",
+"weakest_point": "Simplest possible case; does not test complex fractional unit-period fractions."
+},
+{
+"case_name": "Regular Monthly Payment Schedule (Section (c)(1) Example)",
+"appendix_basis": "Appendix J to Part 1026, Section (c)(1)",
+"inputs": {
+"amount_financed": 5000.00,
+"monthly_payment": 439.43,
+"number_of_payments": 12,
+"finance_charge": 273.16
+},
+"unit_period_analysis": "The interval between payments is equal (1 month). The unit period is defined as 1 month. The number of unit periods per year (w) is 12. First period is equal to the unit period (fractional period f = 0, full periods t = 1).",
+"computation": "Actuarial equation: A = P * [(1 - (1 + i)^-n) / i], where A = 5000.00, P = 439.43, n = 12. Solving 5000 = 439.43 * [(1 - (1 + i)^-12) / i] yields monthly periodic rate i = 0.00833333 (0.833333%). Annual Percentage Rate (APR) = 12 * i = 12 * 0.833333% = 10.00%.",
+"result_apr": "10.00%",
+"doc_vs_general": "confident-in-appendix-j",
+"weakest_point": "Standard level repayment amortization; does not exercise odd day formulas."
+},
+{
+"case_name": "Irregular First Period with Odd Days (Long First Period)",
+"appendix_basis": "Appendix J to Part 1026, Section (b)(5) and (c)(3)",
+"inputs": {
+"amount_financed": 1000.00,
+"monthly_payment": 90.00,
+"number_of_payments": 12,
+"total_of_payments": 1080.00,
+"advance_date": "2026-01-01",
+"first_payment_date": "2026-02-15"
+},
+"unit_period_analysis": "Unit period is 1 month (30 days by Appendix J standard month rules or exact days depending on calculation method; using standard unit period = 1 month = 30 days). The first period is 45 days. Number of full unit periods (t) = 1, fractional period (f) = 15/30 = 0.5.",
+"computation": "Actuarial equation: A = sum [ P_k / ((1 + f*i) * (1 + i)^(k-1)) ]. Here A = 1000.00, P_k = 90.00 for k = 1..12, f = 0.5. 1000 = sum_{k=1}^{12} [ 90 / ((1 + 0.5*i) * (1 + i)^(k-1)) ]. Solving for monthly rate i gives i ≈ 0.0117025. APR = 12 * i = 14.043% rounded to nearest quarter of 1% or 0.1% per Regulation Z (14.04% or 14.0%).",
+"result_apr": "14.04%",
+"doc_vs_general": "constructed-from-general-APR-knowledge",
+"weakest_point": "Counting convention for odd days in fractional first period (exact day count vs. 30-day month convention under Appendix J rules)."
+},
+{
+"case_name": "Irregular Payment Schedule (Balloon Payment)",
+"appendix_basis": "Appendix J to Part 1026, Section (c)(4)",
+"inputs": {
+"amount_financed": 10000.00,
+"monthly_payments": 110.00,
+"number_of_regular_payments": 23,
+"final_balloon_payment": 9000.00,
+"total_payments_count": 24
+},
+"unit_period_analysis": "Unit period is 1 month. All intervals are regular unit periods (1 month each, no fractional periods). total periods n = 24.",
+"computation": "Actuarial equation: A = sum_{k=1}^{23} [ 110 / (1 + i)^k ] + [ 9000 / (1 + i)^24 ]. For A = 10000, solving for i yields monthly rate i ≈ 0.0063284 (0.63284%). Annual Percentage Rate (APR) = 12 * i = 7.594% -> rounded to nearest 0.125% or 0.1% as required by Reg Z = 7.59%.",
+"result_apr": "7.59%",
+"doc_vs_general": "constructed-from-general-APR-knowledge",
+"weakest_point": "Numerical iteration step for non-standard payment stream."
+}
+]

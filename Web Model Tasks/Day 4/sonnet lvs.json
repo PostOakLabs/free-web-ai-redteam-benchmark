@@ -1,0 +1,156 @@
+```json
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Read the LVS tool's summary report for net count mismatch and short/open net lists before opening layout",
+        "why_first": "cheapest — text report takes seconds and immediately buckets the failure as shorts vs opens vs missing nets",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether the mismatch count changed between the last clean run and this run by diffing extraction/LVS logs or checksums",
+        "why_first": "rules out whether this is a new failure from a recent layout/netlist edit vs a pre-existing latent issue",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Cross-reference the reported net names against recent ECO or metal-fill/via-fill script changes",
+        "why_first": "fill and ECO scripts are the most common source of accidental shorts/opens, so ruling this in/out early is high yield",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Confirm the extraction deck/rule file version matches the signoff version for this block",
+        "why_first": "a stale or mismatched extraction ruledeck can fabricate phantom shorts/opens that aren't real, cheap to rule out",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run extraction/LVS on the same GDS with fill (metal/dummy) layers stripped out",
+        "rules_in": "fill-induced short confirmed if the short disappears once fill polygons are excluded",
+        "rules_out": "fill is excluded as cause if the short persists identically with fill removed"
+      },
+      {
+        "experiment": "Isolate the failing net(s) and view them in a layout viewer highlighted against the schematic connectivity, zoomed at the reported coordinate",
+        "rules_in": "confirms a real physical short/open if two unconnected shapes visibly touch or a required via/contact is missing at that coordinate",
+        "rules_out": "rules out a real geometric defect if the shapes look correctly connected/separated, pointing instead to an extraction or naming issue"
+      },
+      {
+        "experiment": "Re-run LVS with a hierarchical vs flat extraction setting (or vice versa) on the suspect block",
+        "rules_in": "hierarchy/black-box mismatch confirmed if the error appears only in one mode (e.g., flat merges two same-named nets across instances)",
+        "rules_out": "excludes hierarchy artifact if the failure is identical in both flat and hierarchical runs"
+      },
+      {
+        "experiment": "Diff the current GDS layer/purpose mapping table against the last known-good signoff mapping",
+        "rules_in": "layer-map error confirmed if a layer number was reassigned (e.g., a via layer mapped to the wrong GDS number) causing phantom opens",
+        "rules_out": "excludes layer-map cause if mapping tables are byte-identical to the last clean run"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing or malformed via/contact at a macro or block boundary (abutment stitching error)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Metal or dummy fill script accidentally bridging two nets or a fill exclusion region not applied",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "GDS layer/purpose mapping mismatch between layout and extraction ruledeck",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.45
+      },
+      {
+        "cause": "Same-name net merge artifact from a multi-instance or multi-corner parallel LVS run mixing partial results",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.4
+      },
+      {
+        "cause": "Genuine open due to a routing DRC waiver that removed a required via without an alternate path",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.3
+      }
+    ],
+    "classic_trap": "Assuming the reported short/open is a real physical defect and spending hours in the layout editor before checking whether it's an artifact of stale extraction decks, fill scripts, or a merged/aggregated multi-run report",
+    "node_era_note": "at 7nm-and-below, double/multi-patterning coloring and complex via arrays make fill- and coloring-induced phantom shorts noticeably more common than at 28nm, where opens are more often genuine routing/via omissions"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Read the LVS property/parameter mismatch report to see which parameter (W, L, M, fingers) differs and by how much",
+        "why_first": "cheapest — immediately tells you whether it's a sizing tolerance issue vs a structurally different device",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether the flagged devices are concentrated in one macro, one library cell, or scattered randomly across the block",
+        "why_first": "localizes whether the cause is a single bad library cell/generator vs a global extraction setting",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Confirm the schematic netlist and layout were both regenerated from the same design revision/tag",
+        "why_first": "rules out the most common trivial cause — comparing a stale netlist against updated layout or vice versa",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check device parameter comparison tolerance settings (W/L rounding, multiplier merging rules) in the LVS run deck",
+        "why_first": "many size 'mismatches' are false positives from overly tight tolerance or differing merge rules, cheap to verify",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-extract just the flagged instance in isolation and inspect its measured W/L against the layout ruler/measurement tool directly",
+        "rules_in": "real layout sizing error confirmed if the physically measured geometry disagrees with the schematic value",
+        "rules_out": "extraction/rounding artifact excluded from layout if the physical geometry actually matches schematic intent"
+      },
+      {
+        "experiment": "Toggle device parallel-merging (multiplier/finger combination) on/off in the LVS options and re-run on the flagged devices",
+        "rules_in": "confirms a merge-rule mismatch if extra devices disappear or sizes reconcile once merging rules match schematic's multiplier convention",
+        "rules_out": "excludes merge-rule cause if extra/mis-sized devices persist regardless of merge setting"
+      },
+      {
+        "experiment": "Diff the PDK device model/generator version used to build the schematic symbol against the version used for the layout PCell",
+        "rules_in": "PCell/generator version skew confirmed if the two were built from different PDK releases with different default parameters",
+        "rules_out": "excludes version skew if both trace to the identical PDK release and generator hash"
+      },
+      {
+        "experiment": "Search the layout for extra devices at the exact reported coordinates and check if they belong to an ESD, decap, or tap-cell insertion pass",
+        "rules_in": "confirms extra devices are from an automated insertion flow (ESD/decap/well-tap) if their location and type match that flow's placement pattern",
+        "rules_out": "excludes automated insertion if extra devices are in random hand-drawn areas with no relation to those flows"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Stale or unmerged parallel device fingers/multiplier not matching schematic's device statement (M value mismatch)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Automated decap, ESD, or well-tap/filler insertion adding devices not present in the source schematic",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "PCell/generator parameter default drift between schematic symbol version and layout PCell version",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.4
+      },
+      {
+        "cause": "Manual layout edit (hand-tweaked transistor for DRC/timing fix) not back-annotated to schematic",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.45
+      },
+      {
+        "cause": "Comparing netlist and layout extracted from mismatched design revisions/tags",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.35
+      }
+    ],
+    "classic_trap": "Chasing the reported W/L discrepancy as a real sizing bug when it's actually a device-merging/multiplier convention mismatch between the schematic netlister and the layout extractor",
+    "node_era_note": "at 7nm-and-below, multi-fin/multi-fin-pitch FinFET device declarations make finger/fin-count merging mismatches far more common than at 28nm planar, where W/L rounding tolerance was the dominant nuisance"
+  }
+]
+```

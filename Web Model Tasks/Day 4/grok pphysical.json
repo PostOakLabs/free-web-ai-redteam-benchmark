@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Primarily static circuit design strategy",
+    "where_in_paper": "Circuit design",
+    "decision": "Adopt a predominantly static-circuit design strategy, with dynamic circuits used only sparingly in SRAMs and other critical regions of the processor core.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Power dissipation was a significant concern, and it was a key factor; SOI technology uncertainties associated with the floating-body effect and its impact on noise immunity and decoupling capacitance; size and logical complexity of the chip posed risks to meeting the schedule; choosing a simple, robust circuit style helped to minimize overall risk.",
+    "outcome": "Complementary static circuits were used predominantly; dynamic circuits limited to some register files, array circuitry, and some load/store unit circuitry.",
+    "quote_as_recalled": "These constraints led to the adoption of a primarily static-circuit design strategy, with dynamic circuits used only sparingly in SRAMs and other critical regions of the processor core.",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page number and whether any specific dynamic alternatives were explicitly rejected beyond 'sparingly'",
+    "confidence": 0.95
+  },
+  {
+    "title": "Single chip-wide global clock domain without skew feedback",
+    "where_in_paper": "Clock design",
+    "decision": "Use a single chip-wide global clock domain with no skew feedback or adjustment settings, driven by one centrally placed PLL, with buffered H-trees to 64 sector buffers driving tunable sector trees into a single full-chip clock grid.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Simple clock timing and rapid bring-up; primary goals of minimum clock uncertainty margin and timing simplicity; resulting modeled skew was negligible so clock timing consisted only of an uncertainty due to model and process errors assumed identical for each of the 15200 global clock pins.",
+    "outcome": "Measured jitter of 35 ps and skew of 20 ps; ability to neglect modeled skew and use a simple constant clock uncertainty contributed to rapid chip-timing progress; correct-by-design methodology without feedback or adjustment circuitry.",
+    "quote_as_recalled": "Simple clock timing and rapid bring-up were facilitated by using a single chip-wide global clock domain with no skew feedback or adjustment settings.",
+    "page_guess": 31,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact wording of the full multi-sentence rationale cluster",
+    "confidence": 0.92
+  },
+  {
+    "title": "Global signal slew-rate limit of one-third cycle time",
+    "where_in_paper": "Circuit design",
+    "decision": "Set and enforce a global slew rate limit equal to one third of the cycle time for all signals (local and global) across the whole chip.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Ensure a robust design, minimizing the effects of coupled noise on chip timing and also minimizing the effects of wiring-process variability on overall path delay; nets with poor slew more sensitive to device process variations and modeling uncertainties; chip cycle-time goals also had to include the slew-limit targets.",
+    "outcome": "Approximately 100000 buffers and inverters added to maintain slew rates; real hardware would function at desired cycle time only if slew-limit targets also met.",
+    "quote_as_recalled": "A global slew rate limit equal to one third of the cycle time was set and enforced for all signals (local and global) across the whole chip.",
+    "page_guess": 33,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Precise count of added buffers as reported outcome",
+    "confidence": 0.93
+  },
+  {
+    "title": "Fourteen-wiring-track power-grid image for common-mode noise control",
+    "where_in_paper": "Power distribution",
+    "decision": "Adopt a fourteen-wiring-track image for the power grid (four tracks to power/ground, ten to signal), after redesigning rectangular metal C4 pads, instead of the prior wide power/ground buses repeated at wide intervals.",
+    "alternatives_or_rejected": "Typical prior IBM microprocessor power-distribution design of wide power/ground buses repeated along C4 rows (and relatively wide lower-level buses) which satisfied dc but not common-mode noise requirements.",
+    "rationale": "Early circuit analyses showed the prior design point would not satisfy common-mode noise requirements (<200 mV for worst-case wide-bus activity); solution was to use more power buses to reduce return-path inductance and resistance, creating more quiet wiring tracks.",
+    "outcome": "Power grid that came closest to meeting dc-noise, common-mode-noise, quiet-wiring-track, and wirability requirements; exceptions allowed if power/ground at least 25% of tracks and no more than ten signal wires between power buses.",
+    "quote_as_recalled": "the power grid that came closest to meeting the dc-noise, common-mode-noise, quiet-wiring-track, and wirability requirements was a fourteen-wiring-track image.",
+    "page_guess": 41,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page and whether 250 nF or 300 nF decoupling is the final reported figure",
+    "confidence": 0.9
+  },
+  {
+    "title": "Hierarchical four-level design methodology with contracts for concurrent work",
+    "where_in_paper": "Design methodology",
+    "decision": "Organize the chip physically and logically in a four-level hierarchy (macro, unit, core, chip) with contracts (early size and timing budgets) enabling concurrent design across levels and separation of logic entry/simulation from circuit design/floorplanning/timing.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Facilitates concurrent design across all four levels; provided that the proper contracts have been created, all of this work can proceed independently and in parallel; further parallelism by separating logic entry and simulation from circuit design, floorplanning, and timing.",
+    "outcome": "At completion of high-level design, consistent contracts in place across all levels; design progressed through high-level, schematic, and physical phases with increasing refinement; multi-site team synchronized via Common Tools Environment.",
+    "quote_as_recalled": "This hierarchy facilitates concurrent design across all four levels.",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames this as a weighed decision versus a pure description of the adopted methodology",
+    "confidence": 0.88
+  }
+]

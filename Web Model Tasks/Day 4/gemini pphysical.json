@@ -1,0 +1,58 @@
+[
+{
+"title": "Grid-based Clock Distribution Network Design",
+"where_in_paper": "Clock Distribution",
+"decision": "A full-chip sector-buffer grid-based clock distribution network was implemented using a tuned tree-to-grid topology to minimize skew across the dual-core die.",
+"alternatives_or_rejected": "Pure H-tree distribution without a grid, or non-buffered uniform grids.",
+"rationale": "A driven sector grid balances load variations and reduces overall skew caused by process, voltage, and temperature variations across a large multi-core die.",
+"outcome": "Achieved tight full-chip clock skew control supporting sub-nanosecond clock cycle targets (1 GHz+ operations).",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 33,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "The exact structural nomenclature used for the clock sector drivers in the text.",
+"confidence": 0.85
+},
+{
+"title": "Dynamic Circuit Family Selection (Dynamic vs. Static Logic)",
+"where_in_paper": "Circuit Families and Logic Implementation",
+"decision": "Selective use of dynamic (domino) logic was restricted to critical timing paths such as execution unit ALUs and register files, while static CMOS logic was chosen for the vast majority of control and non-critical paths.",
+"alternatives_or_rejected": "Widespread use of dynamic logic throughout the chip for high speed.",
+"rationale": "Dynamic logic incurs significant area, power, noise susceptibility, and design complexity penalties. Limiting dynamic circuits to bandwidth- and delay-critical blocks maximized performance while maintaining design robustness and power efficiency.",
+"outcome": "Met frequency goals without exposing non-critical paths to unnecessary noise margin risks or high dynamic power dissipation.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 29,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Specific static-to-dynamic percentage breakdown mentioned in the text.",
+"confidence": 0.8
+},
+{
+"title": "Timing Closure and Static Timing Analysis Methodology",
+"where_in_paper": "Timing Methodology and Design Closure",
+"decision": "Employed static timing analysis (EinsTimer) coupled with explicit RC extraction and interconnect delay modeling, integrating layout and timing optimization loops.",
+"alternatives_or_rejected": "Dynamic simulation-driven timing verification for full-chip timing closure.",
+"rationale": "Full-chip dynamic simulation is computationally intractable for millions of transistors with fine-grained interconnect parasitic effects.",
+"outcome": "Allowed fast iteration loops during physical design to converge on timing closure across critical global wire paths.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 42,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Confusing exact CAD tool names with general IBM tool flow papers of that era.",
+"confidence": 0.75
+},
+{
+"title": "On-Die Power Distribution and Decoupling Capacitance",
+"where_in_paper": "Power Distribution and Decoupling",
+"decision": "Integrated extensive thin-oxide decoupling capacitors (decaps) directly under global bus wires and in macro white space across the chip.",
+"alternatives_or_rejected": "Relying strictly on off-chip/package decoupling or thick-oxide/off-macro capacitance.",
+"rationale": "High di/dt noise caused by simultaneous switching in high-frequency multi-core microprocessors requires low-inductance local charge reservoirs to prevent voltage droop.",
+"outcome": "Suppressed high-frequency supply voltage droop and stabilized power supply rails during rapid workload changes.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 38,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Specific decap cell structure details mentioned in this paper versus generic IBM SOI physical design papers.",
+"confidence": 0.7
+}
+]

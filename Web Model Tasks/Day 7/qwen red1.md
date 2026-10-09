@@ -1,0 +1,21 @@
+As a principal engineer reviewing this draft, I found several internal inconsistencies, logical contradictions, and technical framing errors based strictly on the provided record. Here is the attack and the required corrections:
+
+### 1. Direct Quote Truncation (Internal Inconsistency)
+*   **The Flaw:** The `direct_quote.text` field only contains the first half of the fix: *"we could finish GRT by changing the routing layer adjustments from 0.45 to 0.2."* However, the `chosen_intervention` explicitly relies on a two-part fix and quotes the user as saying: *"...We also changed the number of congestion iterations to 35 to complete BoomTile."*
+*   **The Fix:** The `direct_quote` must capture the full statement that forms the basis of the intervention. Update `direct_quote.text` to include both sentences.
+
+### 2. Pronoun/Attribution Collision (Internal Inconsistency)
+*   **The Flaw:** The `gaps` array states: *"We (eder-matheus) note the layer-adjustment is documented..."* This conflates the voice of the dataset authors ("We") with the specific GitHub user who commented on the issue ("eder-matheus"). 
+*   **The Fix:** Separate the voices. Change to: *"eder-matheus notes that the layer-adjustment is documented..."* or *"We note that eder-matheus points out the layer-adjustment is documented..."*
+
+### 3. "Swept" vs. "Chosen Intervention" Contradiction (Logical Inconsistency)
+*   **The Flaw:** `candidates_considered` claims that increasing congestion iterations was *"asked early on and swept, default 30"*. Yet, `chosen_intervention` claims the fix was that *"We also changed the number of congestion iterations to 35"*. If a parameter sweep was already performed and settled on 30, 35 cannot logically be a novel "chosen intervention" without explaining why the earlier sweep missed it (e.g., it only worked in combination with the layer adjustment). If "swept" is a typo for "dismissed" or "swept under the rug", the terminology is ambiguous and unprofessional.
+*   **The Fix:** Clarify the history. Change `candidates_considered` to: *"Increasing the number of overflow/congestion iterations (initially left at the default 30 / initially dismissed)..."*
+
+### 4. Misframing of Low Density vs. Local Congestion (Technical Implausibility)
+*   **The Flaw:** The `prior_state` and `observation` express surprise that the design failed GRT despite a low placement density: *"Placement density was only 0.24... yet the design failed GRT"* and *"20k routing congestion DRCs while placement density is only 0.24."* However, the text immediately notes the congestion is localized *"around the macro"*. In physical design, large macros create local routing blockages and force detours, causing severe local congestion regardless of low *global* cell density. Framing this as an anomaly is technically misleading.
+*   **The Fix:** Rephrase to acknowledge that local macro bottlenecks caused the failure despite low global density. *"20k routing congestion DRCs occurred due to local bottlenecks around the macro, despite a low global placement density of 0.24."*
+
+### 5. Stale Closure vs. Merge Status (Phrasing Inconsistency)
+*   **The Flaw:** The `gaps` array states: *"The issue was closed automatically as not_planned/Stale in 2026; whether the reported parameter change was actually merged as a code change is not stated."* If a GitHub issue is closed by a stale bot in 2026 (nearly two years after the 2024 quote), it definitively means the issue was abandoned without a linked PR closing it. Stating that the merge status is "not stated" contradicts the definitive nature of a "Stale" closure.
+*   **The Fix:** Reframe the gap to reflect the reality of the closure. *"The issue was closed automatically as Stale in 2026, confirming that the reported parameter change was never formally merged via a linked PR before the thread was abandoned."* (Or, if acknowledging that a PR *could* have been merged without linking to the issue, state: *"The issue was closed as Stale in 2026; while no PR was linked to close this specific issue, whether the parameters were quietly merged into the ORFS asap7 config elsewhere is not stated."*)

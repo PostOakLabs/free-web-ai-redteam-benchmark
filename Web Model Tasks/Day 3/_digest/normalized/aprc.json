@@ -1,0 +1,1001 @@
+[
+ {
+  "model": "chatgpt",
+  "file": "chatgpt aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "The €100 arrangement fee is paid by the borrower at t=0, so the net amount received at t=0 is €9,900.",
+     "The 24 repayments of €450 occur at monthly intervals t=1/12 through t=24/12 years.",
+     "APRC X is an annual actuarial rate, so each monthly cash flow is discounted by (1+X)^(m/12)."
+    ],
+    "equation": "9900 = 450/(1+X)^(1/12) + 450/(1+X)^(2/12) + ... + 450/(1+X)^(24/12)",
+    "iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-2625.3856938; iteration 2 X=0.2500000000, f(X)=-1268.8682561; iteration 3 X=0.1250000000, f(X)=-324.9330215; converged X=0.08836422310 with PV residual approximately 0; APRC=(1+X), since X itself is the annual actuarial rate in the equation, so APRC=8.8%.",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Full €3,000 credit limit is assumed drawn immediately and remains outstanding for the assumed 3-month duration.",
+     "The borrowing rate of 12% nominal per annum is charged monthly, giving €30 interest per month on €3,000.",
+     "The €25 monthly account fee is charged at the end of each of the three months.",
+     "At month 3 the €3,000 principal is also repaid.",
+     "The 3-month duration is used as the stipulated/default assumption where the duration is not otherwise determinable."
+    ],
+    "equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3090/(1+X)^(3/12)",
+    "iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-53.59299525; iteration 2 X=0.2500000000, f(X)=81.33615608; iteration 3 X=0.3750000000, f(X)=10.03998220; converged X=0.39383397314 with PV residual approximately 0; APRC=39.4%.",
+    "aprc_pct": 39.4
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "The full €1,500 limit is assumed drawn immediately.",
+     "Because the open-end credit repayment pattern is otherwise unspecified, repayment is assumed to occur in 12 equal monthly instalments, following the directive's assumption-logic for an indeterminable repayment schedule.",
+     "The nominal rate is 18% per annum with monthly compounding, so the monthly rate is 1.5%.",
+     "There are no additional fees or charges."
+    ],
+    "equation": "1500 = 137.51998936/(1+X)^(1/12) + 137.51998936/(1+X)^(2/12) + ... + 137.51998936/(1+X)^(12/12), where 137.51998936 = 1500*0.015/(1-(1.015)^(-12))",
+    "iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-166.1268240; iteration 2 X=0.2500000000, f(X)=-34.62574620; iteration 3 X=0.1250000000, f(X)=49.13306940; converged X=0.19561817146 with PV residual approximately 0; APRC=19.6%.",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Because the amount of drawdown is otherwise unascertainable, the full €5,000 limit is assumed drawn at t=0.",
+     "The €200 broker fee is financed into the balance at t=0 rather than paid separately in cash at t=0.",
+     "The resulting financed balance is €5,200.",
+     "The €5,200 balance accrues the stated 8% nominal annual rate for one year, so the single repayment at t=12 months is €5,616.",
+     "The APRC equation treats €5,000 as the amount actually advanced to the consumer; the financed €200 fee increases the repayment balance rather than reducing the t=0 cash proceeds."
+    ],
+    "equation": "5000 = 5616/(1+X), where 5616 = 5200*1.08 = (5000+200)*1.08",
+    "iterations": "Bisection on X over [0,1]: iteration 1 X=0.5000000000, f(X)=-1256.0000000; iteration 2 X=0.2500000000, f(X)=-507.2000000; iteration 3 X=0.1250000000, f(X)=-8.0000000; converged X=0.12320000000 with PV residual approximately 0; APRC=12.3%.",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "Case 2 is the most assumption-sensitive. The supplied task fixes a 3-month duration but does not fully specify the exact timing/settlement convention for monthly overdraft interest, monthly account fees, and principal repayment. The calculation assumes monthly interest and fees are cash repayments at months 1, 2, and 3, with the €3,000 principal repaid at month 3; a different directive-prescribed cash-flow convention would change the APRC.",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 2 is the most assumption-sensitive. The supplied task fixes a 3-month duration but does not fully specify the exact timing/settlement convention for monthly overdraft interest, monthly account fees, and principal repayment. The calculation assumes monthly interest and fees are cash repayments at months 1, 2, and 3, with the €3,000 principal repaid at month 3; a different directive-prescribed cash-flow convention would change the APRC."
+   }
+  ],
+  "_provenance": {
+   "file": "chatgpt aprc.json",
+   "model": "chatgpt",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "deepseek",
+  "file": "deepseek aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Arrangement fee paid at t=0 treated as a payment",
+     "24 equal monthly repayments starting one month after drawdown",
+     "Months of equal length 1/12 year",
+     "No other costs"
+    ],
+    "equation": "10000 = 100 + 450 * Σ_{i=1}^{24} (1+X)^(-i/12)",
+    "iterations": "Iter1: X=0.08 => S=22.16 (f=+0.16); Iter2: X=0.09 => S=21.98 (f=-0.02); Iter3: X=0.0889 => S=22.02 (f=+0.02); Converged X=0.0891 => S=22.00 (f≈0)",
+    "aprc_pct": 8.9,
+    "weakest_point": "Rounding of monthly payment to euros; no exact payment amount given, so we assumed 450 exactly. The APRC is sensitive to the exact timing of the fee payment (t=0 assumed)."
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Overdraft assumption per Directive 2008/48/EC Annex I Part II point (d): full amount drawn immediately, duration assumed 3 months",
+     "Interest at 12% nominal per annum charged monthly on outstanding balance",
+     "Monthly account fee paid at end of each month",
+     "Repayment of principal at end of 3 months"
+    ],
+    "equation": "3000 = 55*(1+X)^(-1/12) + 55*(1+X)^(-2/12) + 3055*(1+X)^(-3/12), where 55 = 3000*0.01 + 25, 3055 = 3000 + 30 + 25",
+    "iterations": "Iter1: X=0.20 => PV=3027.14 (f=+27.14); Iter2: X=0.25 => PV=2996.22 (f=-3.78); Iter3: X=0.24375 => PV=2999.99 (f≈-0.01); Converged X=0.2439 => PV=3000.00",
+    "aprc_pct": 24.4,
+    "weakest_point": "Interest is assumed to be paid monthly (as it is charged), but the directive’s assumption for APRC might treat all interest as paid at the end if not specified. Also, the duration assumption (3 months) is a default that may not match actual practice."
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Open-end credit assumption per Annex I Part II point (e): credit provided for 1 year; repaid in 12 equal monthly instalments",
+     "Interest at 18% nominal per annum monthly compounding",
+     "No fees",
+     "Monthly payment computed using the nominal rate to amortize the principal"
+    ],
+    "equation": "1500 = 137.52 * Σ_{i=1}^{12} (1+X)^(-i/12), where 137.52 = 1500 * 0.015*(1.015)^12 / ((1.015)^12 - 1)",
+    "iterations": "Iter1: X=0.19 => S=10.93 (PV=1502.9); Iter2: X=0.20 => S=10.89 (PV=1497.6); Iter3: X=0.1956 => S=10.907 (PV=1500.0); Converged X=0.195618 (effective annual rate from (1+0.18/12)^12-1)",
+    "aprc_pct": 19.6,
+    "weakest_point": "The monthly payment is rounded to 2 decimals; any rounding affects the APRC slightly. Also, the assumption of 12 equal monthly instalments is a default; if the agreement specified a different schedule, the APRC would differ."
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Unascertainable drawdown: per Directive 2008/48/EC Annex I Part II point (c), assume full amount drawn immediately",
+     "Single repayment at 12 months",
+     "8% nominal interest on the total drawdown",
+     "Broker fee of €200 is financed into the balance, so drawdown = 5000 + 200 = 5200",
+     "Repayment = 5200 * (1 + 0.08) = 5616"
+    ],
+    "equation": "5200 = 5616 / (1+X)",
+    "iterations": "Iter1: X=0.07 => RHS=5248.6 (f=+48.6); Iter2: X=0.08 => RHS=5200.0 (f=0); Iter3: X=0.09 => RHS=5152.3 (f=-47.7); Converged X=0.08 exactly.",
+    "aprc_pct": 8.0,
+    "weakest_point": "The key distinction: a financed fee is included in the drawdown and does not appear as a separate payment at t=0, unlike a cash fee which would reduce the net proceeds and increase the APR. Here, the APRC equals the nominal rate because the fee is fully financed and the only cost is interest on the total amount."
+   }
+  ],
+  "_provenance": {
+   "file": "deepseek aprc.json",
+   "model": "deepseek",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "gemini",
+  "file": "gemini aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Interval of one month is 1/12 of a year",
+     "Net amount drawn is €10,000 less €100 arrangement fee paid at t=0 (€9,900)"
+    ],
+    "equation": "10000 - 100 = sum_{k=1}^{24} 450 * (1 + X)^(-k/12)",
+    "iterations": "i_monthly = 0.006497 (monthly rate); Iteration 1: X=0.070 -> PV=9968; Iteration 2: X=0.080 -> PV=9869; Iteration 3: X=0.0768 -> PV=9900.5; Convergence: X = 0.0769 (7.69%)",
+    "aprc_pct": 7.7
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Article 17 / Annex I assumption: overdraft with no fixed duration assumed drawn in full for 3 months",
+     "Repayments occur in equal monthly instalments starting 1 month after drawdown",
+     "Monthly borrowing interest: €3,000 * (12% / 12) = €30",
+     "Monthly account fee: €25",
+     "Total monthly payment for months 1 and 2: €55 (interest + fee)",
+     "Total payment at month 3: €3,055 (principal + interest + fee)"
+    ],
+    "equation": "3000 = 55*(1+X)^(-1/12) + 55*(1+X)^(-2/12) + 3055*(1+X)^(-3/12)",
+    "iterations": "Iteration 1: X=0.20 -> PV=3018; Iteration 2: X=0.25 -> PV=2983; Iteration 3: X=0.225 -> PV=3001; Convergence: X = 0.2260 (22.60%)",
+    "aprc_pct": 22.6
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Annex I open-end credit assumption: credit drawn immediately and in full, repaid in 12 equal monthly instalments",
+     "Monthly interest rate r = 18% / 12 = 1.5%",
+     "Monthly instalment A = 1500 * [0.015(1.015)^12] / [(1.015)^12 - 1] = €137.52"
+    ],
+    "equation": "1500 = sum_{k=1}^{12} 137.52 * (1 + X)^(-k/12)",
+    "iterations": "Iteration 1: X=0.18 -> PV=1504; Iteration 2: X=0.20 -> PV=1489; Iteration 3: X=0.195 -> PV=1493; Convergence: X = 0.1956 (19.56%)",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Directive assumption for unascertainable drawdowns: total amount of credit drawn immediately in full (€5,000)",
+     "Credit duration assumed to be 1 year with a single repayment at 12 months",
+     "Financed fee distinction: the €200 fee is added to the principal balance at t=0 so borrower receives €5,000 cash out of total loan balance of €5,200. Interest accrues on €5,200 (8% of €5,200 = €416), making total repayment €5,616 at t=1 year. (A t=0 cash fee reduces net drawdown to €4,800 with interest calculated only on €5,000)."
+    ],
+    "equation": "5000 = 5616 * (1 + X)^(-1)",
+    "iterations": "Direct calculation: 1 + X = 5616 / 5000 = 1.1232; Iteration 1: X=0.120 -> PV=5014.29; Iteration 2: X=0.130 -> PV=4969.91; Iteration 3: X=0.1232 -> PV=5000.00; Convergence: X = 0.1232 (12.32%)",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "In Case 2, the exact treatment of fees and principal repayment schedule for overdrafts under Annex I assumptions vary across member state implementations (e.g., whether interest and fees are paid monthly with full principal repaid at month 3 vs. linear principal amortisation across 3 months).",
+  "trailing_objects": [
+   {
+    "weakest_point": "In Case 2, the exact treatment of fees and principal repayment schedule for overdrafts under Annex I assumptions vary across member state implementations (e.g., whether interest and fees are paid monthly with full principal repaid at month 3 vs. linear principal amortisation across 3 months)."
+   }
+  ],
+  "_provenance": {
+   "file": "gemini aprc.json",
+   "model": "gemini",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "glm 5.3 flash",
+  "file": "glm 5.3 flash aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Start date = first drawdown, t=0; intervals in years with month = 1/12 year (Annex I/III remark (c): year = 12 equal months, so integer months are exactly k/12)",
+     "The EUR 100 arrangement fee is a charge payable at conclusion: it enters the payments side D at s=0 with discount factor (1+X)^0 = 1 (basic equation: D_l covers repayments AND payments of charges)",
+     "Agreement runs full agreed term; both parties perform as scheduled (Art. 19(3) / Art. 30(3)-type assumption)",
+     "Result expressed to at least 1 decimal place, round half-up (remark (d))"
+    ],
+    "equation": "10000 = 100*(1+X)^0 + 450*SUM_{l=1..24}(1+X)^(-l/12)  <=>  SUM_{l=1..24}(1+X)^(-l/12) = 9900/450 = 22.0 (annuity factor a(24, i_m) with i_m = (1+X)^(1/12)-1)",
+    "iterations": "f(X) = 100 + 450*SUM(1+X)^(-l/12) - 10000\nIt1: X=0%: f = 100 + 450*24 - 10000 = +900.00 > 0 (rate too low); bracket [0%,10%]\nIt2: X=10%: i_m = 1.1^(1/12)-1 = 0.0079741, v^24 = 1.1^-2 = 0.8264463, SUM = 21.7635, PV = 100 + 9793.59 = 9893.59, f = -106.41 < 0 (too high) -> [0%,10%]\nIt3: X=5% (midpoint): i_m = 0.0040741, v^24 = 0.9070295, SUM = 22.8193, PV = 10368.69, f = +368.69 > 0 -> [5%,10%]\nIt4: X=7.5%: i_m = 0.0060449, v^24 = 0.8653326, SUM = 22.2791, PV = 10125.60, f = +125.60 > 0 -> [7.5%,10%]\nIt5: X=8.75%: i_m = 0.0070146, v^24 = 0.8455542, SUM = 22.0177, PV = 10007.96, f = +7.96 > 0 -> [8.75%,10%]\nIt6: X=9.375%: i_m = 0.0074956, v^24 = 0.8359184, SUM = 21.8883, PV = 9949.73, f = -50.27 < 0 -> [8.75%,9.375%]\nIt7: X=9.0625%: i_m = 0.0072554, v^24 = 0.8407156, SUM = 21.9546, PV = 9979.56, f = -20.44 < 0 -> [8.75%,9.0625%]\nRefine: X=8.83%: i_m = 0.0070763, SUM = 22.00127, PV = 10000.57, f = +0.57 > 0; X=8.84%: i_m = 0.0070840, SUM = 21.99925, PV = 9999.66, f = -0.34 < 0\nConvergence: interpolation -> X = 8.836%; check: SUM(8.836%) = 22.0000, 450*22.0 = 9900 = 10000-100, |f| < EUR 0.05 -> converged",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Annex I/III Part II(d): overdraft facility -> total amount deemed drawn in full at t=0 and for the whole duration of the agreement",
+     "Duration not determinable -> assumed to be 3 months (Part II(d), second sentence)",
+     "12% nominal p.a. charged monthly -> 1% per month on 3000 = EUR 30 interest at t=1/12, 2/12, 3/12; principal 3000 repaid at t=3/12 (agreement runs full assumed term, both parties perform)",
+     "EUR 25 monthly account fee treated as a charge at t=1/12, 2/12, 3/12 (remark (a): amounts/intervals need not be equal; here regular monthly as stated; obligatory account fees are in the total cost of credit)",
+     "Intervals = k/12 years; start = first drawdown; result 1 decimal place (remarks (b), (c), (d))"
+    ],
+    "equation": "3000 = 55*(1+X)^(-1/12) + 55*(1+X)^(-2/12) + 3055*(1+X)^(-3/12)   (55 = 30 interest + 25 fee; 3055 = 30 + 25 + 3000 principal)",
+    "iterations": "f(X) = 55(1+X)^(-1/12) + 55(1+X)^(-2/12) + 3055(1+X)^(-3/12) - 3000\nIt1: X=30%: factors 0.978374 / 0.957215 / 0.936514 -> PV = 53.81 + 52.65 + 2861.05 = 2967.51, f = -32.49 < 0 (too high)\nIt2: X=10%: factors 0.992089 / 0.984240 / 0.976454 -> PV = 54.56 + 54.13 + 2983.07 = 3091.77, f = +91.77 > 0 -> [10%,30%]\nIt3: X=20% (midpoint): factors 0.984921 / 0.970070 / 0.955443 -> PV = 54.17 + 53.35 + 2918.88 = 3026.40, f = +26.40 > 0 -> [20%,30%]\nIt4: X=25%: factors 0.981577 / 0.963492 / 0.945742 -> PV = 53.99 + 52.99 + 2889.24 = 2996.22, f = -3.78 < 0 -> [20%,25%]\nIt5: X=22.5%: factors 0.983230 / 0.966742 / 0.950530 -> PV = 54.08 + 53.17 + 2903.87 = 3011.12, f = +11.12 > 0 -> [22.5%,25%]\nIt6: X=23.75%: factors 0.982399 / 0.965108 / 0.948121 -> PV = 54.03 + 53.08 + 2896.51 = 3003.62, f = +3.62 > 0 -> [23.75%,25%]\nIt7: X=24.375%: factors 0.981987 / 0.964298 / 0.946928 -> PV = 54.01 + 53.04 + 2892.86 = 2999.91, f = -0.09 < 0 -> [23.75%,24.375%]\nConvergence: monthly-IRR form 3000 = 55v + 55v^2 + 3055v^3 gives i_m = 1.8334% (f(i_m=1.833%) = +0.03, f(i_m=1.8348%) = -0.12); X = (1.018334)^12 - 1 = 24.36%; check X=24.36%: |f| < EUR 0.05 -> converged",
+    "aprc_pct": 24.4
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Annex I/III Part II(e): open-end credit (not an overdraft) -> credit deemed provided for 1 year from the initial drawdown; capital repaid in equal monthly payments starting 1 month after drawdown; final payment clears capital, interest and charges",
+     "Instalment sized as an annuity at the contractual monthly rate i_m = 0.18/12 = 0.015: A = 1500*0.015/(1-1.015^(-12)) = 137.5196 (an equal-capital-plus-interest-on-balance schedule is flow-equivalent at 1.5%/month and yields the same APRC)",
+     "No other fees -> APRC is purely the annualisation of the monthly internal rate",
+     "Intervals = k/12 years; start = first drawdown; result 1 decimal place (remarks (b), (c), (d))"
+    ],
+    "equation": "1500 = 137.5196 * SUM_{l=1..12}(1+X)^(-l/12),  where 137.5196 = 1500*0.015/(1-1.015^(-12))",
+    "iterations": "f(X) = 137.5196*SUM(1+X)^(-l/12) - 1500\nIt1: X=25%: i_m = 1.25^(1/12)-1 = 0.0187693, v^12 = 0.8, SUM = 10.6557, PV = 1465.35, f = -34.65 < 0 (too high)\nIt2: X=18%: i_m = 0.0138884, v^12 = 1/1.18 = 0.8474576, SUM = 10.9832, PV = 1510.40, f = +10.40 > 0 -> [18%,25%]\nIt3: X=21.5% (midpoint): i_m = 0.0163611, v^12 = 0.8230453, SUM = 10.8157, PV = 1487.35, f = -12.64 < 0 -> [18%,21.5%]\nIt4: X=19.75%: i_m = 0.0151330, v^12 = 0.8350731, SUM = 10.8985, PV = 1498.76, f = -1.25 < 0 -> [18%,19.75%]\nIt5: X=18.875%: i_m = 0.0145128, v^12 = 0.8412198, SUM = 10.9410, PV = 1504.60, f = +4.60 > 0 -> [18.875%,19.75%]\nIt6: refinement: X=19.5%: i_m = 0.0149563, v^12 = 0.8368201, SUM = 10.9108, PV = 1500.45, f = +0.45 > 0; X=19.625%: i_m = 0.0150447, v^12 = 0.8359457, SUM = 10.9044, PV = 1499.57, f = -0.43 < 0 -> root in [19.5%,19.625%]\nConvergence: X=19.5625%: SUM = 10.9075, PV = 1500.00, |f| < EUR 0.05 -> converged; analytic confirmation: instalments built at i_m = 1.5% imply (1+X)^(1/12) = 1.015, X = 1.015^12 - 1 = 19.5618%",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Unascertainable drawdown -> the full limit is deemed drawn at the earliest date, t=0 (Part II(a)/(f)(i) logic: freedom or uncertainty of drawdown => immediate drawdown in full)",
+     "Financed broker fee: the total sums made available = 5000 + 200 = 5200 at t=0 (the creditor disburses EUR 200 to the broker on the consumer's behalf), so the fee enters the DRAWDOWN side as part of C_1 = 5200",
+     "8% nominal applied as a flat 8% over the single 12-month term on the financed balance: interest = 5200*0.08 = 416; single repayment 5616 at t=1 (annual accrual assumed for a single-payment term)",
+     "Start = first drawdown; single interval of exactly 1 year; result 1 decimal place (remarks (b), (c), (d))"
+    ],
+    "equation": "5200 = 5616*(1+X)^(-1)",
+    "iterations": "f(X) = 5616*(1+X)^(-1) - 5200\nIt1: X=10%: 5616/1.1 = 5105.45, f = -94.55 < 0 (too high)\nIt2: X=5%: 5616/1.05 = 5348.57, f = +148.57 > 0 (too low) -> [5%,10%]\nIt3: X=7.5% (midpoint): 5616/1.075 = 5224.19, f = +24.19 > 0 -> [7.5%,10%]\nIt4: X=8.75%: 5616/1.0875 = 5164.14, f = -35.86 < 0 -> [7.5%,8.75%]\nIt5: X=8.125%: 5616/1.08125 = 5193.99, f = -6.01 < 0 -> [7.5%,8.125%]\nIt6: X=7.8125%: 5616/1.078125 = 5209.04, f = +9.04 > 0 -> [7.8125%,8.125%]\nIt7: X=7.96875%: 5616/1.0796875 = 5201.51, f = +1.51 > 0 -> [7.96875%,8.125%]\nConvergence: analytic closure (1+X) = 5616/5200 = 1.08 exactly -> X = 8.000%; check: 5616/1.08 = 5200.00, f = 0.00 -> converged",
+    "aprc_pct": 8.0
+   }
+  ],
+  "weakest_point": "Case 4's rate convention: '8% nominal' is applied as a flat 8% over the single 12-month term (interest 416 on the financed balance 5200, repayment 5616, APRC 8.0%); if the nominal rate is instead compounded monthly - the convention used in cases 2-3 and the usual meaning of 'nominal' - the repayment is 5200*(1+0.08/12)^12 = 5631.60 and the APRC becomes 8.3%. Secondary divergence risk: case 2 assumes the EUR 25 fee is collected monthly in arrears alongside interest; collecting all fees upfront (75 at t=0) shifts cash flows earlier and raises the APRC to roughly 24.8%. Case 1's fee placement is safe (fee at s=0 vs net-of-fee drawdown are algebraically identical), and case 3's result is invariant to the equal-instalment vs equal-capital reading of Part II(e).",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 4's rate convention: '8% nominal' is applied as a flat 8% over the single 12-month term (interest 416 on the financed balance 5200, repayment 5616, APRC 8.0%); if the nominal rate is instead compounded monthly - the convention used in cases 2-3 and the usual meaning of 'nominal' - the repayment is 5200*(1+0.08/12)^12 = 5631.60 and the APRC becomes 8.3%. Secondary divergence risk: case 2 assumes the EUR 25 fee is collected monthly in arrears alongside interest; collecting all fees upfront (75 at t=0) shifts cash flows earlier and raises the APRC to roughly 24.8%. Case 1's fee placement is safe (fee at s=0 vs net-of-fee drawdown are algebraically identical), and case 3's result is invariant to the equal-instalment vs equal-capital reading of Part II(e)."
+   }
+  ],
+  "_provenance": {
+   "file": "glm 5.3 flash aprc.json",
+   "model": "glm 5.3 flash",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "grok",
+  "file": "grok aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "immediate full drawdown of 10000 at t=0",
+     "arrangement fee of 100 paid at t=0 (net proceeds 9900 or fee as t=0 outflow)",
+     "24 equal monthly repayments of 450 starting at t=1/12",
+     "year fraction = 1/12 per month",
+     "no other charges"
+    ],
+    "equation": "10000 = 100 + sum_{k=1 to 24} 450/(1+X)^{k/12}",
+    "iterations": "net drawdown form preferred: 9900 = 450 * a where a = sum_{k=1..24} (1+X)^{-k/12}; trial X=0.08: monthly factor r=(1.08)^{1/12}≈1.006434, annuity factor (1-r^{-24})/(r-1)≈22.024, RHS≈9910.8; trial X=0.081: r≈1.00651, factor≈21.99, RHS≈9895.5; trial X=0.0805: interpolate ≈9903; converge X≈0.0803 → 8.0% after rounding to 1 dp",
+    "aprc_pct": 8.0
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Part II (d) overdraft: total amount of credit deemed drawn down in full and for the whole duration",
+     "duration not known → assume 3 months",
+     "borrowing rate 12% nominal p.a. charged monthly → monthly rate 1%",
+     "€25 monthly account fee charged each month",
+     "interest + fees paid at end of each month; principal repaid at end of 3 months"
+    ],
+    "equation": "3000 = (3000*0.01 + 25)/(1+X)^{1/12} + (3000*0.01 + 25)/(1+X)^{2/12} + (3000 + 3000*0.01 + 25)/(1+X)^{3/12}",
+    "iterations": "monthly interest=30; cashflows 55,55,3085; trial X=0.20: disc factors ≈0.9840,0.9683,0.9529 → RHS≈54.12+53.26+2940≈3047; trial X=0.22: factors≈0.9830,0.9663,0.9499 → RHS≈53.07+53.15+2930≈3036; trial X=0.25: factors≈0.9811,0.9627,0.9447 → RHS≈53.96+52.95+2914≈3021; converge ≈0.28 → 28.0%",
+    "aprc_pct": 28.0
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Part II (e)(i) open-end: credit provided for a period of 1 year from initial drawdown; final payment clears balance of capital, interest and charges",
+     "full amount 1500 drawn at t=0",
+     "12 equal monthly instalments",
+     "nominal 18% p.a. monthly compounding → monthly rate 1.5%",
+     "standard annuity repayment of principal + interest"
+    ],
+    "equation": "1500 = sum_{k=1 to 12} PMT/(1+X)^{k/12} where PMT = 1500 * (0.015*(1.015)^12)/((1.015)^12-1) ≈ 1500*0.09168 ≈ 137.52",
+    "iterations": "PMT≈137.52; trial X=0.18: monthly r=(1.18)^{1/12}≈1.0139, annuity factor≈11.255 → RHS≈1548; trial X=0.195: r≈1.0149, factor≈11.12 → RHS≈1529; trial X=0.21: r≈1.0160, factor≈10.99 → RHS≈1511; converge X≈0.218 → 21.8%",
+    "aprc_pct": 21.8
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "freedom of drawdown → Part II (a): total amount of credit deemed drawn down immediately and in full at t=0",
+     "single repayment at 12 months",
+     "nominal rate 8% → interest = 5000*0.08 = 400 (or on financed amount)",
+     "broker fee 200 financed into the balance at t=0 → total amount advanced/owed becomes 5200"
+    ],
+    "equation": "5000 = (5200 + 400)/(1+X)^1   (financed fee increases the repayment obligation; net amount received by consumer is still 5000)",
+    "iterations": "repayment=5600; 5000=5600/(1+X) → 1+X=1.12 → X=0.12 exactly; no iteration needed beyond direct solve; convergence immediate",
+    "aprc_pct": 12.0
+   }
+  ],
+  "weakest_point": "Case 2 cash-flow timing (whether interest and monthly fees are charged in arrears and whether principal is repaid only at the end of the assumed 3 months) is the most assumption-sensitive; small changes in intra-period convention move the APRC by several points",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 2 cash-flow timing (whether interest and monthly fees are charged in arrears and whether principal is repaid only at the end of the assumed 3 months) is the most assumption-sensitive; small changes in intra-period convention move the APRC by several points"
+   }
+  ],
+  "_provenance": {
+   "file": "grok aprc.json",
+   "model": "grok",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "kimi",
+  "file": "kimi aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Article 19(3) — agreement remains valid and obligations fulfilled",
+     "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+     "Assumption (g) Annex I Part II — single-sum costs payable at the date of conclusion when timing is known"
+    ],
+    "equation": "10000 = 100 + Σ_{k=1}^{24} 450 / (1+X)^(k/12)",
+    "iterations": "Bisection on [0.05, 0.10]: iter 1 c=0.075000 f(c)=−125.00; iter 2 c=0.087500 f(c)=−7.97; iter 3 c=0.093750 f(c)=+49.37; converged in 36 iterations to |f(c)|<1e−12, root X=0.0883642231",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Article 19(3) — agreement remains valid and obligations fulfilled",
+     "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+     "Assumption (d) Annex I Part II — overdraft: amount remains drawn for full duration; duration assumed 3 months where not determinable",
+     "Assumption (g) Annex I Part II — interest charges payable together with capital repayments; recurrent charges (monthly fee) payable at regular intervals"
+    ],
+    "equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3055/(1+X)^(3/12)  [monthly interest 3000×0.01=30 plus fee 25=55; final month adds principal 3000]",
+    "iterations": "Bisection on [0.20, 0.30]: iter 1 c=0.250000 f(c)=+3.78; iter 2 c=0.225000 f(c)=−11.12; iter 3 c=0.237500 f(c)=−3.62; converged in 37 iterations to |f(c)|<1e−12, root X=0.2435965779",
+    "aprc_pct": 24.4
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Article 19(3) — agreement remains valid and obligations fulfilled",
+     "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+     "Assumption (e)(i) Annex I Part II — open-end credit other than overdraft: duration assumed 1 year",
+     "Assumption (e)(ii) Annex I Part II — capital repaid in equal monthly instalments (125/month) with interest on declining balance at 1.5%/month"
+    ],
+    "equation": "1500 = 147.50/(1+X)^(1/12) + 145.625/(1+X)^(2/12) + 143.75/(1+X)^(3/12) + 141.875/(1+X)^(4/12) + 140.00/(1+X)^(5/12) + 138.125/(1+X)^(6/12) + 136.25/(1+X)^(7/12) + 134.375/(1+X)^(8/12) + 132.50/(1+X)^(9/12) + 130.625/(1+X)^(10/12) + 128.75/(1+X)^(11/12) + 126.875/(1+X)^(12/12)",
+    "iterations": "Bisection on [0.15, 0.20]: iter 1 c=0.175000 f(c)=−13.47; iter 2 c=0.187500 f(c)=−5.26; iter 3 c=0.193750 f(c)=−1.20; converged in 36 iterations to |f(c)|<1e−12, root X=0.1956181715",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Article 19(3) — agreement remains valid and obligations fulfilled",
+     "Assumption (a) Annex I Part II — freedom of drawdown implies full immediate drawdown of the limit"
+    ],
+    "equation": "5000 = 5616 / (1+X)^1  [financed fee: balance 5200 = 5000 + 200; repayment 5200×1.08 = 5616 at 12 months]",
+    "iterations": "Closed-form: X = 5616/5000 − 1 = 0.1232; bisection verify on [0.10, 0.15]: iter 1 c=0.125000 f(c)=+8.00; iter 2 c=0.112500 f(c)=−48.09; iter 3 c=0.118750 f(c)=−19.89; converged to X=0.1232000000. Financed fee enters by enlarging the balance that bears interest (5200 vs 5000), whereas a cash fee at t=0 would appear as an immediate charge reducing net credit: 5000 = 200 + 5400/(1+X) → X=12.5%.",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "Case 2 (overdraft) — the treatment of monthly interest and fee timing is the most assumption-sensitive step. National implementations diverge on whether assumption (d)'s 'amount remains drawn for the duration' permits interest capitalization into a single end-of-term repayment, or requires monthly interest payments in arrears as done here. The fee timing (in arrears vs in advance) and whether the final month double-counts interest+fee also vary across software, making this the highest-divergence case.",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 2 (overdraft) — the treatment of monthly interest and fee timing is the most assumption-sensitive step. National implementations diverge on whether assumption (d)'s 'amount remains drawn for the duration' permits interest capitalization into a single end-of-term repayment, or requires monthly interest payments in arrears as done here. The fee timing (in arrears vs in advance) and whether the final month double-counts interest+fee also vary across software, making this the highest-divergence case."
+   }
+  ],
+  "_provenance": {
+   "file": "kimi aprc.json",
+   "model": "kimi",
+   "family": "aprc",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "mimo",
+  "file": "mimo aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Standard CCD Annex I actuarial PV method, periods in years",
+     "€100 arrangement fee at t=0 treated as a charge on the repayment (right) side of the PV equation"
+    ],
+    "equation": "10000 = 100 + 450·∑(k=1..24)(1+X)^(-k/12)  ⟹  9900 = 450·[1-(1+r)^(-24)]/r, r=(1+X)^(1/12)−1",
+    "iterations": "Iter1 X=5.0%: r=0.004074, AF=22.820, RHS=10369.0, res=+369.0; Iter2 X=10.0%: r=0.007974, AF=21.765, RHS=9894.3, res=−105.7; Iter3 X=8.5%: r=0.006821, AF=22.069, RHS=10031.1, res=+31.1; Convergence X=8.84%: r=0.007086, AF=22.000, RHS=10000.0, res=0.0",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Full credit limit €3000 drawn for the whole duration (Annex I Part 2 §1)",
+     "Duration deemed 3 months where not determinable (Annex I Part 2 §2)",
+     "12% nominal p.a. charged monthly → monthly rate 1% → €30/mo interest on €3000",
+     "€25 monthly account fee included as cost of credit per Art. 3(g): charges paid in connection with the credit agreement",
+     "Principal €3000 repaid as single bullet at end of month 3"
+    ],
+    "equation": "3000 = 55·(1+X)^(-1/12) + 55·(1+X)^(-2/12) + 3055·(1+X)^(-3/12), where 55 = 30 interest + 25 fee, 3055 = 30+25+3000 principal",
+    "iterations": "Iter1 X=12.0%: r_m=0.009489, RHS=3078.1, res=+78.1; Iter2 X=50.0%: r_m=0.03437, RHS=2865.0, res=−135.0; Iter3 X=31.0%: r_m=0.02276, RHS=2961.9, res=−38.1; Convergence X=24.3%: r_m=0.018295, RHS=3000.3, res=+0.3",
+    "aprc_pct": 24.3
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Open-end credit: full limit €1500 drawn immediately (Annex I Part 2 §1)",
+     "Duration deemed 1 year where not determinable (Annex I Part 2 §2)",
+     "12 equal monthly instalments as natural decomposition of 1-year assumed duration",
+     "Instalment computed at contractual rate 1.5%/month: PMT = 1500×0.015/(1−1.015^(−12)) = €137.52",
+     "No other fees"
+    ],
+    "equation": "1500 = 137.52·∑(k=1..12)(1+X)^(-k/12)  ⟹  1500 = 137.52·[1-(1+r)^(-12)]/r, r=(1+X)^(1/12)−1",
+    "iterations": "Iter1 X=15.0%: r=0.01171, AF=11.138, RHS=1531.8, res=+31.8; Iter2 X=25.0%: r=0.01877, AF=10.655, RHS=1465.3, res=−34.7; Iter3 X=20.0%: r=0.01531, AF=10.886, RHS=1497.1, res=−2.9; Convergence X=19.56%: r=0.01500, AF=10.908, RHS=1500.0, res=0.0",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Full credit limit €5000 drawn at t=0 when drawdown pattern unascertainable (Annex I Part 2 §1)",
+     "€200 broker fee financed into balance → principal becomes €5200; fee enters the PV equation embedded in the repayment cash flow at t=12 months (right side, discounted), not as a separate t=0 cash outflow",
+     "Single repayment at 12 months: €5200 × 1.08 = €5616",
+     "8% nominal p.a. = 8% effective for the single annual period"
+    ],
+    "equation": "5000 = 5616·(1+X)^(-1), where 5616 = (5000+200)×1.08. Cash-fee alternative for comparison: 5000 = 200 + 5400·(1+X)^(-1)",
+    "iterations": "Iter1 X=8.0%: RHS=5616/1.08=5200.0, res=+200.0; Iter2 X=20.0%: RHS=5616/1.20=4680.0, res=−320.0; Iter3 X=14.0%: RHS=5616/1.14=4926.3, res=−73.7; Convergence X=12.32%: RHS=5616/1.1232=5000.0, res=0.0",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "Case 2 — classification of the €25 monthly account fee as a credit cost under Art. 3(g). If a national transposition deems the fee a general banking service rather than a charge 'in connection with the credit agreement,' it is excluded from the APRC, collapsing the rate from ≈24.3% to ≈13.1%. The directive's boundary between credit-specific and general account charges is the single assumption most likely to diverge across member-state implementations.",
+  "_provenance": {
+   "file": "mimo aprc.json",
+   "model": "mimo",
+   "family": "aprc",
+   "parse_status": "recovered",
+   "transforms_applied": [
+    "read-trailing-fence:weakest_point",
+    "strip-leading-prose"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "minimax 2.7",
+  "file": "minimax 2.7 aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Arrangement fee of EUR 100 treated as financed charge added to amount financed (per EU CCD Annex I: all charges relating to the credit agreement are included in the total charge for credit, and financed charges are added to the amount financed rather than deducted as upfront cash outflows)",
+     "Repayments of EUR 450 per month commence one month after drawdown (t=1 through t=24)",
+     "No other charges; loan is fully drawn at t=0",
+     "APRC expressed as nominal annual rate = 12 x monthly rate (EU CCD Annex I method)"
+    ],
+    "equation": "10 100 = 450 * a_bar(24|i_monthly) where a_bar(24|i) = (1 - (1+i)^-24) / i; APRC = 12 * i_monthly",
+    "iterations": "Iter1: i=0.005, a_bar=22.5629, PV=10 153.29 (PV > 10 100, rate too low). Iter2: i=0.006, a_bar=22.2899, PV=10 030.47 (PV < 10 100, rate too high). Iter3: i=0.0055, a_bar=22.4258, PV=10 091.62 (PV < 10 100, bisection midpoint). Convergence: i_monthly=0.0054326, APRC=6.519% -> 6.5%",
+    "aprc_pct": 6.5,
+    "weakest_point": "Whether the arrangement fee is a financed charge (added to amount_financed=10 100, giving APRC=6.5%) or an upfront cash fee (consumer net-receives 9900, giving APRC=8.7%). EU CCD Annex I includes all charges in the total cost of credit; the financed treatment is the standard interpretation, but implementations vary on whether upfront fees reduce the amount received vs. inflate the repayment stream. The APRC differs by ~2.2 percentage points between the two treatments."
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Full credit limit of EUR 3000 assumed drawn for the whole duration (EU CCD Article 6.2 overdraft provision: when the amount or date of drawings cannot be determined, the full limit is assumed to be drawn in full at the start)",
+     "Duration of 3 months used because the agreement has no fixed duration and no repmt schedule (EU CCD Art. 6.2 default assumption)",
+     "Nominal rate 12% p.a. charged monthly = 1% per month on outstanding balance",
+     "Monthly account fee of EUR 25 treated as recurring charge included in repayment stream (Annex I: all charges consumer is required to pay in connection with the credit agreement are included)",
+     "Principal repaid in 3 equal monthly instalments of 3000/3 = 1000; interest = 1% x 3000 = 30/month; total monthly payment = 1030 + 25 = 1055"
+    ],
+    "equation": "3000 = 1055 * a_bar(3|i_monthly) where a_bar(3|i) = (1 - (1+i)^-3) / i; APRC = 12 * i_monthly",
+    "iterations": "Iter1: i=0.027, a_bar=2.8450, PV=3001.48 (PV > 3000, rate too low). Iter2: i=0.028, a_bar=2.8395, PV=2995.70 (PV < 3000, rate too high). Iter3: i=0.0273, a_bar=2.8434, PV=2999.74 (very close, rate slightly low). Convergence: i_monthly=0.027255, APRC=32.706% -> 32.7%",
+    "aprc_pct": 32.7,
+    "weakest_point": "Whether the EUR 25/month account fee is included in the APRC cash flow stream (monthly payment = 1055) or treated as a separate fee reducing the amount financed. If excluded from the APRC calculation and treated as a separately-charged fee, the monthly payment for APRC purposes would be 1030 (interest+principal only) and the APRC would be significantly higher. Additionally, the 3-month duration is a default assumption; a longer assumed duration would lower the APRC substantially."
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Full limit of EUR 1500 drawn immediately at t=0 (open-end credit, drawdown date not specified, worst-case full draw assumed)",
+     "Repayment assumed as 12 equal monthly instalments (EU CCD Art. 6.2 open-end credit provision: where repayment structure cannot be determined, 12 equal monthly instalments are the standard default assumption based on typical annual credit cycle)",
+     "Rate 18% nominal p.a. monthly compounding: i_monthly_stated = 0.18/12 = 0.015",
+     "No other fees per problem statement",
+     "Monthly payment computed as standard amortising PMT: 1500 x 0.015 x (1.015)^12 / ((1.015)^12 - 1) = 137.52"
+    ],
+    "equation": "1500 = 137.52 * a_bar(12|i_monthly); APRC = 12 * i_monthly (or equivalently (1+i_monthly)^12 - 1 for effective annual)",
+    "iterations": "Iter1: i=0.0143, a_bar=10.9552, PV=1506.56 (PV > 1500, rate too low). Iter2: i=0.0145, a_bar=10.9416, PV=1504.68 (PV > 1500, rate still too low). Iter3: i=0.0144, a_bar=10.9484, PV=1505.62 (PV > 1500). Convergence: i_monthly=0.014998, APRC_nominal=17.997% -> 18.0%; APRC_effective=(1.014998)^12-1=19.56% -> 19.6%",
+    "aprc_pct": 18.0,
+    "weakest_point": "EU CCD APRC can be expressed as nominal annual (12 x monthly rate = 18.0%) or as effective annual rate ((1+i_monthly)^12 - 1 = 19.6%). The directive does not always make the distinction explicit in consumer-facing materials; some member-state implementations use nominal, others effective. The difference is 1.6 pp. Additionally, the 12-instalment default for open-end credit is a reasonable inference from Art. 6.2 but the directive does not explicitly mandate this figure."
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Full credit limit of EUR 5000 assumed drawn at t=0 (EU CCD Art. 6.2: when drawdown date cannot be ascertained, full amount drawn at commencement is assumed; the alternative would be to use average existing practise, but full immediate drawdown is the conservative default)",
+     "EUR 200 broker fee financed into the credit balance (added to amount financed, not deducted as upfront cash payment)",
+     "Amount financed = 5000 + 200 = 5200",
+     "Single repayment at 12 months: 5200 x (1 + 0.08) = 5616 (interest = 416)",
+     "Rate 8% nominal annual, monthly charging: i_monthly_stated = 0.08/12",
+     "Financed fee treatment: the fee is added to the balance (not paid separately at t=0), so the consumer pays interest on the fee for 12 months; this differs from an upfront cash fee which would reduce the net amount received without inflating the repayment amount"
+    ],
+    "equation": "5200 = 5616 * (1+i_monthly)^-12; i_monthly = (5200/5616)^(-1/12) - 1; APRC = 12 * i_monthly",
+    "iterations": "Iter1: v^12 = 0.925926, i_monthly = 0.00635, APRC = 7.6%. Iter2: (refined) v^12 = 0.925926, i_monthly = (0.925926)^(-1/12) - 1. Iter3: compute 12th root precisely: (0.925926)^(-1/12) = exp((1/12)*ln(1/0.925926)) = exp((1/12)*0.07696) = exp(0.006413) = 1.006434. Convergence: i_monthly=0.006434, APRC=7.721% -> 7.7%",
+    "aprc_pct": 7.7,
+    "weakest_point": "Whether the broker fee is financed into the balance (APRC=7.7%) or paid as an upfront cash fee (APRC=8.0%). If paid as a cash fee at t=0, the consumer net-receives 4800 and repays 5400 at month 12, giving APRC = 8.0% (the stated rate). The financed treatment lowers the APRC because the fee is spread over 12 months. The distinction is the single most consequential assumption in this case, producing a 0.3 pp divergence. Directive Art. 19 requires all charges to be included, but does not universally mandate financed treatment for all fee types."
+   }
+  ],
+  "_provenance": {
+   "file": "minimax 2.7 aprc.json",
+   "model": "minimax 2.7",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "minimax m3",
+  "file": "minimax m3 aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "CCD Art. 19(2)(a): X is the annual rate equating present value of drawdowns to present value of repayments and charges",
+     "CCD Annex I (method A, monthly compounding): t measured in years, actuarial method, unit period = 1 month = 1/12 year",
+     "CCD Art. 17(2): the €100 arrangement fee paid at t=0 is a charge included on the repayments side",
+     "Actuarial method: discrete compound interest, (1+X)^(t_i) where t_i in years; X solved on the function f(X) = sum D_j*(1+X)^(-t_j) - sum R_i*(1+X)^(-t_i)"
+    ],
+    "equation": "f(X) = 100*(1+X)^(-0) - [100*(1+X)^0 + 450*sum_{k=1..24} (1+X)^(-k/12)] = 0, where the €100 fee is netted against the t=0 drawdown on the LHS so equation reads: 10000 - 100 = 9900 = sum_{k=1..24} 450*(1+X)^(-k/12). Equivalently: 9900*(1+X)^(24/12..1/12 annuity factor) = 450 * (1 - (1+X)^(-24))/((1+X)^(1/12)-1).",
+    "iterations": "Bracketed between X_low=0.005 (monthly=0.5% → APR ≈6.17%) and X_high=0.0125 (monthly=1.25% → APR≈16.08%).\n  Iter 1 (bisection mid 0.008750): a_month = 0.008750, a_annuity factor (1-(1+a)^-24)/a = 21.8296; PV_repayments = 450*21.8296/((1+a)^0) — direct: PV = 450 * sum_{k=1..24}(1.008750)^-k = 450*21.1395 = 9512.8 → 9900 > 9512.8, f>0, raise X.\n  Iter 2 (X=0.010000): PV of 24 pmts at i=1%/mo: a-angle-24 = (1-1.01^-24)/0.01 = 21.195 PV = 450*21.195 = 9537.7 → still <9900, raise X.\n  Iter 3 (X=0.011250): a-angle-24 at 1.125%/mo = (1-1.01125^-24)/0.01125 = 20.598; PV = 450*20.598 = 9269.0 → wait, this is LOWER than 9537.7, but X is higher — recalculation: a-angle-24 DECREASES as rate rises, so PV should fall as X rises; 9269 < 9900, f>0, still raise X.\n  Convergence: monotonic PV falls as X rises. At X=0.02 (≈2%/mo): a-angle-24 = 16.936, PV=7621<9900. At X=0.005: a-angle-24=21.8296, PV=9823. At X=0.003:≈9946. Interpolating: PV=9900 at a-angle=22.0, which corresponds to monthly rate ≈0.0049, annualised nominal ≈5.9%, effective (1.0049^12-1) ≈ 6.06%.\n  Solve precisely: f(0.004917)→ a-angle-24 = (1-1.004917^-24)/0.004917 = 22.0000 → PV=450*22=9900.00 exactly. APR_effective = (1.004917)^12 - 1 = 0.06071 = 6.07%. Per Annex I 'rate per annum' is the nominal-equivalent stated X itself only when compound unit = 1 year; with monthly compounding the conventional display is (1+X)^12-1. The CCD typically reports effective (actuarial) annual rate, so APRC ≈ 6.1%.",
+    "aprc_pct": 6.1
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "CCD Annex I Part II §6 (unascertainable drawdowns): where the credit limit can be drawn down in different amounts, assume the ENTIRE credit limit is drawn atthis is the directive's safety-favours-consumer default)",
+     "CCD Art. 17(2): charges financed by the creditor are treated as drawdowns, not as a t=0 cash fee",
+     "CCD Annex I general rule: a single repayment at month 12 is the unascertainable-schedule default when timing of repayments is unascertainable; here we apply it as a clean test case"
+    ],
+    "equation": "LHS drawdowns at t=0: principal €5000 + financed broker fee €200 = €5200 treated as a single t=0 drawdown (the fee inflates the amount the consumer is obliged to repay, so it sits on the drawdowns side of the equation, NOT on the repayments side as a t=0 fee). Repayments side: month-12 payment = 5200*(1+0.08) = 5616 (simple interest since nominal 8% with single payment). For the actuarial form: 5200 = 5616*(1+X)^-12.",
+    "iterations": "Solve (1+X)^12 = 5616/5200 = 1.08 → 1+X = 1.08^(1/12) = 1.006434 → X = 0.006434 (monthly rate).\n  Direct check at X=0.006434: (1.006434)^12 = 1.0800 → 5200*1.0800 = 5616.00. PV: 5616*(1.006434)^-12 = 5616/1.08 = 5200. f=0.\n  Iteration count for the solver: 1 (closed-form). For mechanical solvers shown: iter 1 X=0.005 → PV of 5616 at 0.005/12 = (1.005)^12*... Actually re-run: 5616*(1.005)^-12 = 5616/1.0617 = 5289.7 > 5200, f<0, LOWER X. Iter 2 X=0.007: 5616*(1.007)^-12 = 5616/1.0872 = 5166.0 < 5200, f>0. Iter 3 X=0.0064: 5616*(1.0064)^-12 = 5204.6, f>0. Convergence between 0.0064 and 0.007; true value 0.006434.\n  Annual: effective APR = (1.006434)^12 - 1 = 8.00% (because the 8% nominal is itself a single-period-of-12-months rate; no compounding gain). Reported APRC = 8.0%.\n  Note on financed fee: had the €200 been a t=0 CASH fee (not financed), the equation would be 5000 = 5616*(1+X)^-12 - 200 — but that violates PV balance unless we re-interpret: a cash fee at t=0 INCREASES the effective cost because the consumer pays €200 immediately PLUS repays the full €5200. The PV equation would be 5000 = 200 + 5200*(1+X)^-12 → X higher than 8%. The 'financed' treatment LOWERS the headline APRC vs. cash-paid fee because the fee gets amortised.",
+    "aprc_pct": 8.0
+   }
+  ],
+  "weakest_point": "Case 2: the directive's Annex I overdraft assumptions (Part II §2 default 3-month duration, §3 instalment structure) are applied to a clean test case, but in real-world APRC computations the most common source of divergence between implementations is (a) whether the monthly €25 fee is placed on the REPAYMENTS side at its respective t_i (correct per Art. 17(2) and Annex I) or netted into the instalment by the calculator's internal amortisation, and (b) the periodicity convention — the directive requires solving for X as a rate per 'unit period' (here 1 month) and then stating it as an annual rate, but the conversion (multiply by 12 vs. (1+X)^12-1) differs across national transpositions. For this specific 3-month overdraft, the conversion only modestly affects the number (effective 30.5% vs nominal 26.9%), but a single national transposition could publish either. This is the highest-divergence risk in the set.",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 2: the directive's Annex I overdraft assumptions (Part II §2 default 3-month duration, §3 instalment structure) are applied to a clean test case, but in real-world APRC computations the most common source of divergence between implementations is (a) whether the monthly €25 fee is placed on the REPAYMENTS side at its respective t_i (correct per Art. 17(2) and Annex I) or netted into the instalment by the calculator's internal amortisation, and (b) the periodicity convention — the directive requires solving for X as a rate per 'unit period' (here 1 month) and then stating it as an annual rate, but the conversion (multiply by 12 vs. (1+X)^12-1) differs across national transpositions. For this specific 3-month overdraft, the conversion only modestly affects the number (effective 30.5% vs nominal 26.9%), but a single national transposition could publish either. This is the highest-divergence risk in the set."
+   }
+  ],
+  "unparseable_fused": "cases 2+3 fused with no '},{' (char 4699); case-2 aprc 30.5 present-but-unparseable per gate",
+  "_provenance": {
+   "file": "minimax m3 aprc.json",
+   "model": "minimax m3",
+   "family": "aprc",
+   "parse_status": "truncated-recovered",
+   "transforms_applied": [
+    "element-wise-recovery",
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": true,
+   "recovered_items": 2,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "mistral",
+  "file": "mistral aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Full drawdown at t=0",
+     "24 equal monthly repayments",
+     "Arrangement fee at t=0"
+    ],
+    "equation": "10100 = sum(450 / (1 + X)^(t/12) for t in 1..24)",
+    "iterations": [
+     {
+      "iteration": 0,
+      "rate": 0.5,
+      "pv": 2825.3856937854143
+     },
+     {
+      "iteration": 1,
+      "rate": 0.25,
+      "pv": 1468.86825609498
+     },
+     {
+      "iteration": 2,
+      "rate": 0.125,
+      "pv": 524.9330215391637
+     },
+     {
+      "convergence": 0.06716448755469173
+     }
+    ],
+    "aprc_pct": 6.7
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Full €3,000 drawn for 3 months",
+     "12% nominal rate charged monthly",
+     "€25 monthly fee"
+    ],
+    "equation": "3000 = (3000 * (1 + 0.01)^3 + 75) / (1 + X)^(0.25)",
+    "iterations": [
+     {
+      "iteration": 0,
+      "rate": 0.5,
+      "pv": 139.2837059655808
+     },
+     {
+      "iteration": 1,
+      "rate": 0.25,
+      "pv": 5.873802832018555
+     },
+     {
+      "iteration": 2,
+      "rate": 0.125,
+      "pv": -74.03971304706101
+     },
+     {
+      "convergence": 0.24023904278874397
+     }
+    ],
+    "aprc_pct": 24.0
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Full €1,500 drawn at t=0",
+     "12 equal monthly repayments",
+     "18% nominal rate monthly compounding"
+    ],
+    "equation": "1500 = sum(125 / (1 + X)^(t/12) for t in 1..12)",
+    "iterations": [
+     {
+      "iteration": 0,
+      "rate": 0.5,
+      "pv": 287.56428229756943
+     },
+     {
+      "iteration": 1,
+      "rate": 0.25,
+      "pv": 168.03522470601524
+     },
+     {
+      "iteration": 2,
+      "rate": 0.125,
+      "pv": 91.90191493223028
+     },
+     {
+      "convergence": 9.313225746154785e-10
+     }
+    ],
+    "aprc_pct": 18.0
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Full €5,000 drawn at t=0",
+     "Single repayment at 12 months",
+     "8% nominal rate",
+     "€200 fee financed at t=0"
+    ],
+    "equation": "5200 = 5616 / (1 + X)",
+    "iterations": [
+     {
+      "iteration": 0,
+      "rate": 0.5,
+      "pv": 1456.0
+     },
+     {
+      "iteration": 1,
+      "rate": 0.25,
+      "pv": 707.1999999999998
+     },
+     {
+      "iteration": 2,
+      "rate": 0.125,
+      "pv": 208.0
+     },
+     {
+      "convergence": 0.0800000000745058
+     }
+    ],
+    "aprc_pct": 8.0
+   }
+  ],
+  "weakest_point": "Assumption of full drawdown for the entire duration in overdraft and open-end credit cases",
+  "trailing_objects": [
+   {
+    "weakest_point": "Assumption of full drawdown for the entire duration in overdraft and open-end credit cases"
+   }
+  ],
+  "_provenance": {
+   "file": "mistral aprc.json",
+   "model": "mistral",
+   "family": "aprc",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "qwen",
+  "file": "qwen aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Full EUR 10000 is drawn at t=0.",
+     "The EUR 100 arrangement fee is paid at t=0 and included as a charge at t=0, equivalently net proceeds are EUR 9900.",
+     "Repayments are monthly at times k/12 for k=1..24.",
+     "X is an effective annual rate; monthly discounting uses (1+X)^(-1/12)."
+    ],
+    "equation": "10000 = 100 + sum_{k=1}^{24} 450/(1+X)^(k/12)",
+    "iterations": "Let i=(1+X)^(1/12)-1, so 9900=450*a_24(i). Bisection f(i)=450*a_24(i)-9900: [0.0060,0.0080]; 1) mid 0.0070, f ~= +9.69; 2) [0.0070,0.0080] mid 0.0075, f ~= -49.86; 3) [0.0070,0.0075] mid 0.00725, f ~= -20.30; convergence i ~= 0.0070817 gives PV=9900.00 and X=(1+i)^12-1 ~= 0.0883697.",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Overdraft additional assumption: the full EUR 3000 limit is drawn immediately.",
+     "Overdraft duration is assumed to be 3 months because the overdraft is repayable on demand / not determinable.",
+     "Borrowing rate 12% nominal per annum charged monthly gives EUR 30 interest each month on the EUR 3000 drawn balance.",
+     "The EUR 25 monthly account fee and the EUR 30 monthly interest are paid as charged at months 1, 2 and 3; principal is repaid at month 3."
+    ],
+    "equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3055/(1+X)^(3/12)",
+    "iterations": "Let i=(1+X)^(1/12)-1. f(i)=55/(1+i)+55/(1+i)^2+3055/(1+i)^3-3000. Bisection: [0.0100,0.0300]; 1) mid 0.0200, f ~= -14.42; 2) [0.0100,0.0200] mid 0.0150, f ~= +29.12; 3) [0.0150,0.0200] mid 0.0175, f ~= +7.25; convergence at i=55/3000=0.0183333 gives PV=3000.00 and X=(1+i)^12-1 ~= 0.2435966.",
+    "aprc_pct": 24.4
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Open-end credit additional assumption: the EUR 1500 limit is drawn immediately in full.",
+     "Repayment is assumed in 12 equal monthly instalments; source-logic: where open-end credit has no fixed repayment schedule, the directive's additional assumptions close the balance over 12 monthly instalments.",
+     "Instalment amount is computed using the stated borrowing rate 18% nominal per annum compounded monthly, i.e. i=0.015 per month.",
+     "No fees or charges other than interest."
+    ],
+    "equation": "1500 = 137.52 * sum_{k=1}^{12} (1+X)^(-k/12), where 137.52 = 1500 / a_12(0.015)",
+    "iterations": "Let i=(1+X)^(1/12)-1 and A=137.52. f(i)=A*a_12(i)-1500. Bracketing/iteration checks: 1) i=0.0140, f ~= +9.40; 2) i=0.0160, f ~= -9.30; 3) mid i=0.0150, f ~= 0.00; convergence at i=0.0150 gives PV=1500.00 and X=(1.015)^12-1 ~= 0.195618.",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Drawdown timing is unascertainable, so under the additional assumption the full EUR 5000 is deemed drawn immediately at t=0.",
+     "Repayment is a single payment at 12 months as specified.",
+     "Nominal rate 8% is applied for one year; no monthly compounding is specified.",
+     "The EUR 200 broker fee is financed into the balance at t=0, so it is added to the amount on which interest accrues and appears in the single final payment, not as a cash charge at t=0."
+    ],
+    "equation": "5000 = ((5000 + 200) * 1.08) / (1+X) = 5616/(1+X)",
+    "iterations": "f(X)=5616/(1+X)-5000. Bisection: endpoints f(0.10)=+105.45, f(0.15)=-116.52; 1) mid 0.1250, f=-8.00; 2) [0.10,0.1250] mid 0.1125, f ~= +48.09; 3) [0.1125,0.1250] mid 0.11875, f ~= +19.89; convergence X=0.1232 gives 5616/1.1232=5000.00.",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "The overdraft case is most likely to diverge: the directive's additional assumptions fix a 3-month duration but do not make fully explicit whether monthly interest and account fees are paid as incurred, capitalised into the balance, or settled at the end; I used paid-as-incurred monthly charges, while capitalisation or end settlement changes the APRC by several tenths. The financed broker fee in case 4 is also timing-sensitive because it defers the charge into the final payment instead of reducing t=0 net proceeds.",
+  "trailing_objects": [
+   {
+    "weakest_point": "The overdraft case is most likely to diverge: the directive's additional assumptions fix a 3-month duration but do not make fully explicit whether monthly interest and account fees are paid as incurred, capitalised into the balance, or settled at the end; I used paid-as-incurred monthly charges, while capitalisation or end settlement changes the APRC by several tenths. The financed broker fee in case 4 is also timing-sensitive because it defers the charge into the final payment instead of reducing t=0 net proceeds."
+   }
+  ],
+  "_provenance": {
+   "file": "qwen aprc.json",
+   "model": "qwen",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "sonnet",
+  "file": "sonnet aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "Actuarial method: PV of drawdowns = PV of repayments+charges, discounted at monthly periods, then annualized via (1+i_month)^12 - 1",
+     "The €100 arrangement fee, paid at conclusion (t=0), is treated as DEDUCTED from the loan proceeds actually made available to the consumer — net amount drawn down used in the equation is €10,000 - €100 = €9,900, while the repayment schedule (24 × €450) remains based on the full €10,000 nominal principal",
+     "Repayments of €450 occur at t=1,2,...,24 months (ordinary annuity, first payment one month after drawdown, as stated)"
+    ],
+    "equation": "9900 = 450 * [1-(1+i)^-24]/i, solve for monthly i; APRC = (1+i)^12 - 1",
+    "iterations": "Iter1: i=0.0060 -> annuity factor f(i)=(1-(1+i)^-24)/i = 22.286 (target factor = 9900/450 = 22.000, too high). Iter2: i=0.0070 -> f(i)=22.022 (still slightly high). Iter3: i=0.0072 -> f(i)=21.968 (now too low). Linear interpolation between iter2/iter3 gives i≈0.007082. Convergence check: f(0.007082)=22.001 ≈ 22.000 (residual 0.001, accepted). Converged monthly i≈0.7082%.",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Duration of the overdraft assumed to be 3 months, per the case's explicit instruction (note: this is NOT the CCD Annex I default assumption of 1 year for credit without a fixed duration — the case text directed a 3-month assumption, which is followed here rather than the directive's own general default)",
+     "Full credit limit (€3,000) treated as drawn down at t=0 and outstanding for the entire 3-month assumed duration, per the directive's additional assumption for undetermined drawdown patterns",
+     "12% nominal per annum charged monthly = 1.00% monthly rate, compounding monthly onto the outstanding balance",
+     "€25 monthly account fee assumed payable at the end of each month (t=1,2,3 in months), i.e. concurrently with any interest settlement at t=3",
+     "Single balloon repayment of principal + compounded interest at t=3 (end of assumed duration), since no interim principal repayment schedule is specified"
+    ],
+    "equation": "3000 = 25*(1+i)^-1 + 25*(1+i)^-2 + [3000*(1.01)^3 + 25]*(1+i)^-3, where 3000*(1.01)^3 = 3090.903, so final t=3 cash flow = 3115.903; solve monthly i, then APRC=(1+i)^12-1",
+    "iterations": "Iter1: i=0.0100 -> PV=24.7525+24.5074+3024.35=3073.61 (target 3000, too high, PV must fall). Iter2: i=0.0200 -> PV=24.5098+24.0292+2936.66=2985.20 (now too low). Iter3: i=0.0181 -> PV=24.5556+24.1189+2953.58=3002.25 (slightly high). Refine: i=0.0183 -> PV=24.5507+24.1094+2950.85=2999.51 (slightly low). Convergence check: interpolating between iter3(0.0181) and the 0.0183 trial gives i≈0.018264, PV≈3000.0 (residual <0.3, accepted).",
+    "aprc_pct": 24.3
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Full €1,500 limit drawn immediately (stated in case)",
+     "Repayment structure of 12 equal monthly instalments is an assumed simplification for this worked case (source-logic: mirrors the directive's general fallback of assuming a plausible, fully-amortizing repayment schedule when the actual open-end repayment pattern is not otherwise specified) — this is NOT a specific numbered CCD Annex I assumption being cited, but a constructed convention for tractability",
+     "18% nominal per annum, monthly compounding = 1.5% monthly rate, applied uniformly to both the amortization schedule and the discounting rate",
+     "No fees or charges other than interest, so the equal instalment is exactly the standard amortizing-loan payment at the same rate used for discounting"
+    ],
+    "equation": "1500 = A * [1-(1.015)^-12]/0.015, where A is solved as the standard annuity payment: A = 1500*0.015/[1-(1.015)^-12] = 137.52; since drawdown and repayment side are both built from i=0.015 by construction, APRC = (1.015)^12 - 1 directly",
+    "iterations": "No iterative root-finding required: because the instalment amount A was derived directly from the stated 1.5%-monthly rate as a standard amortization formula, the PV equation is satisfied exactly at i=0.015 by construction (closed-form; residual = 0 by definition). Convergence check: substituting i=0.015 back into the PV equation reproduces 1500 exactly (verified algebraically, not iteratively).",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Full €5,000 limit drawn down at t=0, assumed because the case specifies an 'unascertainable drawdown timing/pattern,' and the directive's general fallback in such cases is to assume the maximum/full amount is drawn immediately (a conservative, fully-drawn assumption analogous to the overdraft full-drawdown convention)",
+     "Rate of 8% nominal per annum applied as simple annual compounding over the single 12-month period (since there is only one compounding interval between drawdown and the single repayment, nominal annual and effective annual coincide here)",
+     "The €200 broker fee is FINANCED into the balance: it is added to the outstanding principal (5000+200=5200) at t=0 and therefore itself accrues interest at 8% for the year, but it is NOT part of the amount actually made available to the consumer for their own use — so the 'amount of credit' on the drawdown side of the APRC equation remains €5,000, while the repayment side is based on the grown 5200 balance"
+    ],
+    "equation": "5000 = [(5000+200)*1.08] * (1+X)^-1 = 5616*(1+X)^-1",
+    "iterations": "No iterative solving required: single drawdown / single repayment pair gives a closed-form solution. (1+X) = 5616/5000 = 1.1232, so X = 0.1232. Convergence check: substituting X=0.1232 back gives 5616/1.1232 = 5000.0 exactly (verified algebraically).",
+    "aprc_pct": 12.3
+   }
+  ],
+  "weakest_point": "The single largest source of potential divergence from the directive's exact prescribed method is the fee-treatment convention chosen in cases 1 and 4 (whether an upfront/financed fee reduces the net drawdown, is added to the repayment stream, or is added to the accruing principal) — the CCD Annex I text is prescriptive about which convention applies to which fee type, and this computation applied a self-consistent but explicitly-chosen convention rather than one confirmed against the annex's literal fee-classification rules. Secondary risk: case 2's fee-timing assumption (fees paid at month-end, interest compounding monthly rather than simple) and its use of a 3-month duration (as instructed, not the directive's own general 1-year default) are both assumptions of convenience rather than verified annex-mandated treatments.",
+  "trailing_objects": [
+   {
+    "financed_vs_cash_fee_note": "Contrast for case 4: a financed fee is added to the principal balance and therefore compounds at the credit's own interest rate for the full period before being repaid, inflating the total repayment (5200*1.08=5616) while leaving the discounted drawdown side unchanged at 5000. A t=0 CASH fee instead reduces the net amount actually drawn down (e.g. 5000-200=4800) while the repayment obligation is computed on the original undiminished principal (5000*1.08=5400) — giving a different equation (4800 = 5400*(1+X)^-1, X=0.125=12.5%) and a different APRC (12.5% vs 12.3%) even though the fee amount and nominal rate are identical, because in the financed case the fee itself earns interest for the period whereas in the cash case it does not."
+   },
+   {
+    "weakest_point": "The single largest source of potential divergence from the directive's exact prescribed method is the fee-treatment convention chosen in cases 1 and 4 (whether an upfront/financed fee reduces the net drawdown, is added to the repayment stream, or is added to the accruing principal) — the CCD Annex I text is prescriptive about which convention applies to which fee type, and this computation applied a self-consistent but explicitly-chosen convention rather than one confirmed against the annex's literal fee-classification rules. Secondary risk: case 2's fee-timing assumption (fees paid at month-end, interest compounding monthly rather than simple) and its use of a 3-month duration (as instructed, not the directive's own general 1-year default) are both assumptions of convenience rather than verified annex-mandated treatments."
+   }
+  ],
+  "_provenance": {
+   "file": "sonnet aprc.json",
+   "model": "sonnet",
+   "family": "aprc",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-trailing-objects:2"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ },
+ {
+  "model": "yuanbao",
+  "file": "yuanbao aprc.json",
+  "items": [
+   {
+    "case": 1,
+    "assumptions_invoked": [
+     "€100 arrangement fee paid at t=0 is treated as a charge at t=0, reducing the net amount made available to the consumer: net drawdown = €10,000 - €100 = €9,900 at t=0",
+     "24 equal monthly repayments of €450 commence one month after drawdown: times t = k/12 years for k = 1..24",
+     "Periods expressed in years; one month = 1/12 year (Annex I remark (c), 30.41666 days/month, so 1 month = 1/12 exactly)",
+     "Result rounded to one decimal place per Annex I remark (d) (round half up)"
+    ],
+    "equation": "9900(1+X)^0 = 450(1+X)^(-1/12) + 450(1+X)^(-2/12) + ... + 450(1+X)^(-24/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+4224.210611; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+2625.385694; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+1268.868256; convergence: f(0.088364)=+6.59e-08 (root bracketed to tolerance, X=0.088364)",
+    "aprc_pct": 8.8
+   },
+   {
+    "case": 2,
+    "assumptions_invoked": [
+     "Annex I Part II assumption (d): for overdrafts the total amount is deemed to be drawn in full for the whole duration of the contract",
+     "Duration not determinable => assumed 3 months (directive's fallback of 3 months / one quarter = 0.25 years) per Annex I Part II assumption (c)",
+     "12% nominal per annum charged monthly => monthly rate = 12%/12 = 1%; interest on €3,000 for 3 months = €3,000*((1.01)^3 - 1) = €90.90",
+     "€25 monthly account fee for 3 months = €75.00; total repaid at 3 months = €3,000 + €90.90 + €75.00 = €3,165.90",
+     "All charges (interest + fees) paid as a single repayment at t = 3/12 years; one month = 1/12 year; result to one decimal place"
+    ],
+    "equation": "3000(1+X)^0 = 3165.90(1+X)^(-3/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+337.803516; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+139.283706; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+5.873803; convergence: f(0.240239)=+4.68e-09 (root bracketed to tolerance, X=0.240239)",
+    "aprc_pct": 24.0
+   },
+   {
+    "case": 3,
+    "assumptions_invoked": [
+     "Annex I Part II assumption (a): where the consumer has freedom of drawdown (open-end credit), the total credit is deemed to be drawn immediately and in full => €1,500 at t=0",
+     "Repayment in 12 equal monthly instalments (source-logic: assumption of equal amortisation over the assumed 12-month horizon, one month = 1/12 year)",
+     "18% nominal per annum, monthly compounding => monthly rate i = 0.18/12 = 1.5%; payment p = 1500 / sum_{k=1..12}(1.015)^(-k) = €137.52",
+     "No other fees; result to one decimal place"
+    ],
+    "equation": "1500(1+X)^0 = 137.52(1+X)^(-1/12) + 137.52(1+X)^(-2/12) + ... + 137.52(1+X)^(-12/12)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+343.652598; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+166.126824; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+34.625746; convergence: f(0.195618)=-8.56e-09 (root bracketed to tolerance, X=0.195618)",
+    "aprc_pct": 19.6
+   },
+   {
+    "case": 4,
+    "assumptions_invoked": [
+     "Unascertainable drawdown => Annex I Part II assumption (a): total credit deemed drawn immediately and in full at t=0, so €5,000 drawn at t=0",
+     "€200 broker fee financed into the balance at t=0 => added to the amount drawn/borrowed, giving drawdown = €5,000 + €200 = €5,200 at t=0 (this is why it differs from a t=0 cash fee: see below)",
+     "Single repayment at 12 months; 8% nominal per annum => repayment = €5,200 * 1.08 = €5,616 at t = 1 year",
+     "One month = 1/12 year; result to one decimal place"
+    ],
+    "equation": "5200(1+X)^0 = 5616(1+X)^(-1)",
+    "iterations": "iter1: lo=0.000000, hi=2.000000, mid=1.000000, f=+2392.000000; iter2: lo=0.000000, hi=1.000000, mid=0.500000, f=+1456.000000; iter3: lo=0.000000, hi=0.500000, mid=0.250000, f=+707.200000; convergence: f(0.080000)=-6.17e-08 (root bracketed to tolerance, X=0.080000 exactly)",
+    "aprc_pct": 8.0,
+    "financed_fee_note": "A t=0 cash fee reduces the net amount made available to the consumer (net drawdown = principal - fee), leaving the repayment stream unchanged - it raises the APRC because the consumer receives less up front. A fee financed into the balance instead increases the drawn amount (drawdown rises from €5,000 to €5,200) while the repayment is calculated on that larger balance; here the repayment is 8% of €5,200, so the APRC remains exactly 8% - the fee is silently amortised into the loan rather than paid out of pocket."
+   }
+  ],
+  "weakest_point": "Case 2 is the most assumption-heavy and therefore most likely to diverge from the directive's exact method: the treatment of the €25 monthly fee and monthly interest (single lump repayment at 3 months vs. deducted/charged each month), the 3-month duration fallback, and whether the fee reduces the net drawdown or is a separate charge all affect the PV equation. Case 1's treatment of the arrangement fee as a t=0 charge (reducing net drawdown to €9,900 rather than a separate outflow) is the next-most-likely divergence point. The monthly-to-year conversion uses exactly 1/12 throughout, consistent with the Annex convention.",
+  "trailing_objects": [
+   {
+    "weakest_point": "Case 2 is the most assumption-heavy and therefore most likely to diverge from the directive's exact method: the treatment of the €25 monthly fee and monthly interest (single lump repayment at 3 months vs. deducted/charged each month), the 3-month duration fallback, and whether the fee reduces the net drawdown or is a separate charge all affect the PV equation. Case 1's treatment of the arrangement fee as a t=0 charge (reducing net drawdown to €9,900 rather than a separate outflow) is the next-most-likely divergence point. The monthly-to-year conversion uses exactly 1/12 throughout, consistent with the Annex convention."
+   }
+  ],
+  "_provenance": {
+   "file": "yuanbao aprc.json",
+   "model": "yuanbao",
+   "family": "aprc",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-trailing-objects:1"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 4,
+   "prompt_expects": 4
+  }
+ }
+]

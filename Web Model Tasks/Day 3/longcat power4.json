@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Dual-core single-die design for server workloads",
+    "where_in_paper": "Introduction / system-level design objectives",
+    "decision": "Integrate two full 64-bit PowerPC processor cores on a single POWER4 die (first commercial single-chip dual-core server processor).",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To enable a single-chip symmetric multiprocessor (SMP) and to unify the i-series and p-series server platforms on one hardware design, improving performance and time-to-market.",
+    "outcome": "POWER4 became the first production single-chip dual-core server CPU, supporting up to 32-way SMP via multi-chip modules and enabling the eServer p690 (Regatta) and i-series systems.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact wording of the SMP-on-a-chip rationale and page number are not directly confirmed from the paper text.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Clock-frequency philosophy: frequency vs. microarchitectural balance",
+    "where_in_paper": "Clock-frequency and performance-philosophy discussion",
+    "decision": "Prioritize a balanced microarchitecture with moderate frequency (1 GHz+) and wide execution (up to 200 in-flight instructions) rather than chasing the highest possible clock rate.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To avoid the power, thermal, and microarchitectural imbalance that would come with a narrower, frequency-focused design; the goal was to sustain high throughput across both commercial and technical workloads.",
+    "outcome": "POWER4 achieved 1.1–1.3 GHz initial frequencies with a wide, deeply pipelined superscalar core and delivered leading server performance without extreme clock rates.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 10,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The precise section name and the exact quote are not verified against the original paper.",
+    "confidence": 0.65
+  },
+  {
+    "title": "RAS approach: convert hard machine-check interrupts to synchronous software-handled events",
+    "where_in_paper": "Reliability, Availability, Serviceability (RAS) section",
+    "decision": "Design the error-handling architecture so that, where possible, hardware-detected errors are converted from asynchronous machine-check aborts into synchronous, software-recoverable interrupts, with redundancy for uncorrectable cases.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To eliminate unnecessary system downtime from transient hardware errors and to allow the operating system to recover gracefully, improving overall system availability.",
+    "outcome": "POWER4 could transparently handle many error conditions without crashing, supporting the high-availability requirements of enterprise server partitions.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 18,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact phrasing of the synchronous-interrupt conversion and the page number are not confirmed from the paper.",
+    "confidence": 0.65
+  },
+  {
+    "title": "Interconnect and SMP fabric: on-chip fabric controller with distributed L2/L3",
+    "where_in_paper": "System interconnect and memory hierarchy",
+    "decision": "Use an on-chip fabric controller to manage inter-processor and L2/L3 cache coherency traffic, enabling scalable multi-chip SMP configurations.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To support glueless multi-chip SMP scaling (up to 32-way) and to control data flow between on-chip L2 and off-chip L3 caches without a centralized bottleneck.",
+    "outcome": "POWER4 multi-chip modules (up to 8 dies) and the fabric controller allowed efficient, scalable SMP systems such as the 32-way p690.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 14,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The term 'fabric controller' and its exact description are recalled from secondary summaries, not directly verified in the paper.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Branch prediction: hybrid local/global with selector table",
+    "where_in_paper": "Instruction fetch and branch prediction",
+    "decision": "Implement a hybrid dynamic branch predictor combining a local history table, a global history table (16k-entry), and a selector table that chooses the better predictor per branch.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To achieve high prediction accuracy across diverse workload types by leveraging both per-branch local patterns and global correlation history.",
+    "outcome": "The hybrid predictor delivered very high accuracy, supporting the wide superscalar pipeline and two-branch-per-cycle prediction capability.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 12,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact predictor sizes and the selector-table mechanism are recalled from a secondary source and not directly confirmed from the paper.",
+    "confidence": 0.6
+  }
+]
+```

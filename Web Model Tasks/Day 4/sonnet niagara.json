@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Throughput over single-thread performance",
+    "where_in_paper": "Introduction / design philosophy",
+    "decision": "Optimize the processor for aggregate throughput on commercial server workloads rather than single-thread performance",
+    "alternatives_or_rejected": "Designing for high single-thread performance via deep pipelines, aggressive out-of-order execution, and high clock frequency, as in traditional high-performance processors",
+    "rationale": "Target commercial server workloads (web, database) exhibit high thread-level parallelism and memory latency-bound behavior, so many simpler threads can better utilize resources than one fast thread",
+    "outcome": "Resulted in a design with many simple cores and threads rather than a few complex high-frequency cores",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact framing/wording of the throughput-vs-single-thread argument is not something I can reproduce precisely, though the general thrust is well established",
+    "confidence": 0.5
+  },
+  {
+    "title": "Simple, short pipeline cores rather than complex cores",
+    "where_in_paper": "Core microarchitecture section",
+    "decision": "Use simple, single-issue, shallow (short) pipeline cores instead of complex superscalar out-of-order cores",
+    "alternatives_or_rejected": "Complex out-of-order superscalar cores were rejected because their area and power cost would limit the number of cores/threads that could fit on the chip",
+    "rationale": "Given a fixed power and area budget, more simple cores with multiple threads yield higher aggregate throughput on server workloads than fewer complex cores",
+    "outcome": "Enabled 8 cores each with multiple hardware threads to fit within the chip's power/area budget",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall this trade-off being central to the paper but cannot verify the exact comparative language used against out-of-order designs",
+    "confidence": 0.45
+  },
+  {
+    "title": "Fine-grained multithreading per core to hide memory latency",
+    "where_in_paper": "Core/pipeline description",
+    "decision": "Each core supports four hardware threads with fine-grained (cycle-by-cycle) thread switching to hide memory and pipeline stall latency",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Single-threaded execution on a simple, shallow pipeline would leave the pipeline stalled frequently on cache misses; interleaving multiple threads keeps the pipeline busy",
+    "outcome": "Improved core utilization and overall throughput despite each individual thread being relatively slow",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain whether the paper specifies exactly 'four threads per core' versus this being from general Niagara/T1 knowledge",
+    "confidence": 0.4
+  },
+  {
+    "title": "Shared L2 cache and single floating-point unit design",
+    "where_in_paper": "Cache/memory system and chip organization section",
+    "decision": "Use a single shared on-chip L2 cache banked and shared across all 8 cores, and a single shared floating-point unit shared among cores",
+    "alternatives_or_rejected": "Per-core private L2 caches and per-core dedicated floating-point units were implicitly rejected as inefficient given the target workloads' low floating-point demands and the benefit of a shared, coherent L2 for the crossbar-connected cores",
+    "rationale": "Commercial server workloads are integer-heavy with low floating-point usage, so a single shared FPU was sufficient, and a shared banked L2 simplified coherence among the many cores",
+    "outcome": "Reduced chip area/power devoted to floating-point hardware and provided a unified coherent cache accessible to all cores via a crossbar",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The details of L2 banking and crossbar interconnect, and whether the single-shared-FPU rationale is stated exactly this way, may be blending with general T1 knowledge",
+    "confidence": 0.35
+  },
+  {
+    "title": "Power efficiency as a first-order design constraint",
+    "where_in_paper": "Power/design goals section",
+    "decision": "Explicitly designed for low power consumption relative to throughput delivered (performance-per-watt), influencing core simplicity and clock frequency choices",
+    "alternatives_or_rejected": "Pursuing maximum single-core clock frequency at the cost of higher power draw was rejected in favor of a lower-frequency, higher-thread-count approach",
+    "rationale": "Datacenter power and cooling costs made performance-per-watt a critical metric, not just raw performance",
+    "outcome": "Paper reports a chip with substantially lower power consumption than comparable-throughput conventional processors of the era",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "weakest_point": "I am not confident the power/performance-per-watt argument is elaborated in this specific short IEEE Micro paper versus being more general Niagara marketing/architecture knowledge",
+    "confidence": 0.25
+  }
+]
+```

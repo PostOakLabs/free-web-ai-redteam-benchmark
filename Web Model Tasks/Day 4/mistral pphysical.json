@@ -1,0 +1,76 @@
+[
+  {
+    "title": "Hierarchical H-tree global clock distribution topology",
+    "where_in_paper": "Clock Distribution Network",
+    "decision": "Adopted a balanced hierarchical H-tree for global clock distribution to minimize skew",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Achieve sub-10-ps clock skew to support multi-GHz operation across the large die",
+    "outcome": "Successfully met clock skew targets for high-frequency synchronization",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "exact skew value and whether H-tree was explicitly compared to alternatives",
+    "confidence": 0.85
+  },
+
+  {
+    "title": "Copper interconnect for upper metal layers in power grid",
+    "where_in_paper": "Power Distribution and Interconnect",
+    "decision": "Used copper for upper metal layers in the power distribution network",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Reduce resistance and improve electromigration reliability for high current density",
+    "outcome": "Enabled higher current carrying capacity and reduced IR drop in the power grid",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "exact metal layers where copper was introduced",
+    "confidence": 0.9
+  },
+
+  {
+    "title": "Corner-based static timing analysis with OCV derating",
+    "where_in_paper": "Timing Methodology",
+    "decision": "Employed corner-based static timing analysis with on-chip variation (OCV) derating",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Account for manufacturing variations while maintaining computational tractability for full-chip timing closure",
+    "outcome": "Achieved timing closure with acceptable margins across all operational corners",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 40,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "specific OCV derating factors and corner models used",
+    "confidence": 0.8
+  },
+
+  {
+    "title": "Symmetrical floorplan for L2 cache and processor cores",
+    "where_in_paper": "Physical Integration and Floorplanning",
+    "decision": "Adopted a symmetrical floorplan with L2 cache arrays surrounding processor cores",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Optimize wire lengths, reduce latency, and balance thermal distribution",
+    "outcome": "Minimized average memory access latency and improved thermal uniformity",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "exact floorplan configuration and whether alternatives were explicitly evaluated",
+    "confidence": 0.7
+  },
+
+  {
+    "title": "Shielding and spacing rules for critical signal nets",
+    "where_in_paper": "Signal Integrity and Noise Management",
+    "decision": "Implemented strict shielding and minimum spacing rules for critical signal nets",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Prevent crosstalk-induced delays in high-frequency critical paths",
+    "outcome": "Reduced noise-related timing failures to acceptable levels",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 45,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "specific shielding implementation details and which nets were protected",
+    "confidence": 0.7
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "case_name": "Regular monthly transaction - single advance, level monthly payments",
+    "appendix_basis": "Appendix J, general actuarial equation (i = 2 x n x A / (P x (N + 1))) for unit period of one month, regular transaction",
+    "inputs": {
+      "amount_financed_A": 2200.00,
+      "payments": "12 equal monthly payments of 200.00",
+      "payment_schedule_detail": "Payments 1 through 12 each = 200.00, first payment 30 days from consummation",
+      "finance_charge": 200.00,
+      "unit_period": "1 month"
+    },
+    "unit_period_analysis": "Per Appendix J, when the interval between payments and the interval between consummation and first payment are regular and equal (one month), the unit period is one month and no fraction (f) appears in the equation.",
+    "computation": "Equation: A = P x [ (1 - (1 + i)^-N) / i ], but Appendix J provides the closed-form for level unit-period payments: i = 2 x n x A / (P x (N + 1)) only as an approximation; the official Appendix J general equation is solved iteratively. Setting up with A=2200, N=12, P=200, and f=0 (unit period = 1 month between payments and to first payment), the iteration is: i = [ 200 / 2200 - (1 - (1+i)^-12) ] -> solve by successive substitution. Trial i = 0.005 monthly: PV = 200 x (1 - 1.005^-12)/0.005 = 200 x 11.61893 = 2323.79 (too high). Trial i = 0.012: PV = 200 x (1 - 1.012^-12)/0.012 = 200 x 11.07989 = 2215.98 (still high). Trial i = 0.013: PV = 200 x (1 - 1.013^-12)/0.013 = 200 x 11.01533 = 2203.07 (high). Trial i = 0.0132: PV = 200 x (1 - 1.0132^-12)/0.0132 = 200 x 10.99917 = 2199.83 (target 2200). Step: monthly i approx 0.0132.",
+    "result_apr": "Monthly i approx 0.0132; Nominal APR = 0.0132 x 12 = 0.1584 = 15.84%; per Appendix J rounding to nearest 1/8 of 1% (0.125%) -> 15.875%.",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Appendix J's exact equation form for level-payment unit-period cases is what I am reconstructing; the closed-form i = 2nA/(P(N+1)) is a known shortcut sometimes labelled as 'Appendix J' but is not the general equation. The iteration is correct in direction but the precise equation Appendix J specifies should be re-checked against the regulation text."
+  },
+  {
+    "case_name": "Irregular first period - odd days (odd-day fractional first period, monthly thereafter)",
+    "appendix_basis": "Appendix J, fractional period treatment with fraction f applied to the first unit period",
+    "inputs": {
+      "amount_financed_A": 2000.00,
+      "payments": "12 monthly payments of 180.00, first payment 47 days after consummation (i.e., one monthly unit period plus 17 odd days)",
+      "payment_schedule_detail": "First payment = 180 at 47 days; payments 2-12 each = 180 at       "unit_period_length_days": 30,
+      "odd_days": 17
+    },
+    "unit_period_analysis": "Per Appendix J, the unit period is one month. The first payment is one full unit period plus a fraction f = 17/30 of a unit period from the date the first payment period begins. The general equation has the first payment discounted by (1 + i)^(-1 - f) and subsequent payments by full unit periods.",
+    "computation": "Equation: 2000 = 180 x (1+i)^(-1 - f) + 180 x Sigma_{k=1}^{11} (1+i)^(-(1+f+k)), where f = 17/30 = 0.56667. The factor multiplying every term is (1+i)^-f, so 2000 x (1+i)^f = 180 x (1+i)^-1 + 180 x Sigma_{k=1}^{11} (1+i)^(-(1+k)). Equivalently, 2000 x (1+i)^0.56667 = 180 x a-angle-12 at i (standard annuity factor for 12 monthly payments). Iterating: try monthly i = 0.010. Annuity factor a-angle-12 at 1% = 11.25508. RHS = 180 x 11.25508 x (1.01)^(-0.56667) = 2025.91 x 0.99434 = 2014.43 (above 2000). Try i = 0.0125: a-angle-12 = 11.07989; RHS = 180 x 11.07989 x (1.0125)^(-0.56667) = 1994.38 x 0.99297 = 1980.40 (below 2000). Interpolating: i approx 0.0116 monthly; L0 x (1.0116)^0.56667 = 2000 x 1.00657 = 2013.14 (close to RHS at i=0.0116 ~2010). Step: i approx 0.0115 monthly.",
+    "result_apr": "Monthly i approx 0.0115; Nominal APR = 0.0115 x 12 = 0.138 = 13.8%; Appendix J round to nearest 1/8 of 1% -> 13.875%.",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Fraction direction (1+i)^f placement: Appendix J discounts the first payment by (1+i)^-(1+f), which is what I did; but the algebra I used (pulling (1+i)^f to the LHS as a multiplier) is a rearranged check, and the exact equation Appendix J publishes for the odd-day case should be verified term-by-term."
+  },
+  {
+    "case_name": "Single-advance, single-payment transaction (one payment only)",
+    "appendix_basis": "Appendix J, single-payment equation i = 2 x n x A / (P x (N + 1)) is NOT used; general equation is used directly",
+    "inputs": {
+      "amount_financed_A": 1000.00,
+      "payment": "Single payment of 1100.00 in 6 months",
+      "payment_schedule_detail": "P1 = 1100.00 at 6 months; no intermediate payments",
+      "unit_period": "1 month"
+    },
+    "unit_period_analysis": "Per Appendix J, when there is a single payment at the end of N unit periods, the general equation reduces to a simple present-value equation; no annuity-factor expansion is required and no fraction applies because the single payment is at an integer number of unit periods.",
+    "computation": "Equation: A = P x (1+i)^-N, with A = 1000, P = 1100, N = 6. Solve for i: (1+i)^6 = 1100/1000 = 1.10. So 1+i = 1.10^(1/6) = 1.016008. Step: i monthly = 0.016008.",
+    "result_apr": "Monthly i = 0.016008; Nominal APR = 0.016008 x 12 = 0.19210 = 19.21%; Appendix J round to nearest 1/8 of 1% -> 19.250%.",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Direction of compounding and unit-period count: the equation A = P(1+i)^-N with N = 6 for a 6-month single payment is the standard Appendix J form for a single-payment transaction, but Appendix J's published example may specify a different denominator (e.g., 12 unit periods with 6 odd ones) depending on how 'months' vs 'unit periods' is defined; the underlying arithmetic should still produce a similar APR."
+  },
+  {
+    "case_name": "Irregular payment schedule - varying payment amounts at varying intervals",
+    "appendix_basis": "Appendix J, general equation with multiple payments and fractional periods per payment",
+    "inputs": {
+      "amount_financed_A": 5000.00,
+      "payments": [
+        {"amount": 100.00, "timing": "day 30"},
+        {"amount": 150.00, "timing": "day 65 (1 month + 35 odd days after prior)"},
+        {"amount": 2000.00, "timing": "day 180 (one full unit period + odd days after prior)"},
+        {"amount": 3200.00, "timing": "day 365 (end of year)"}
+      ],
+      "unit_period_days": 30
+    },
+    "unit_period_analysis": "Per Appendix J, each payment is discounted by (1+i)^-(n_j - 1 + f_j), where n_j is the integer number of full unit periods between consummation and payment j, and f_j is the fractional unit period (odd days / unit-period length) for the last incomplete period. For payment 1: n_1, f_1=0 (30 days = 1 unit period exactly). For payment 2: interval 35 days from prior payment, n_2=2, f_2 = (35-30)/30 = 0.1667. For payment 3: interval from prior 115 days, n_3=4, f_3=(115-120)/30 -> but the timing 180 days from consummation means n_3 = 6, f_3=0 (180/30=6 exactly). For payment 4: 365 days from consummation, n_4=12, f_4=(365-360)/30 = 5/30 = 0.1667.",
+    "computation": "Equation: 5000 = 100 x (1+i)^-1 + 150 x (1+i)^-(2 + 0.1667) + 2000 x (1+i)^-6 + 3200 x (1+i)^-(12 + 0.1667). Solve iteratively. Trial i = 0.010 monthly: RHS = 100/1.01 + 150/(1.01^2.1667) + 2000/(1.01^6) + 3200/(1.01^12.1667) = 99.01 + 146.85 + 1884.363.63 = 4963.85 (below 5000). Try i = 0.0095: RHS approx 5006. Step: i approx 0.0096 monthly.",
+    "result_apr": "Monthly i approx 0.0096; Nominal APR approx = 0.0096 x 12 = 0.1152 = 11.52%; Appendix J round to nearest 1/8 of 1% -> 11.500%.",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Fraction-direction and which payment uses a fraction: Appendix J defines fractions relative to the beginning of the unit period containing the payment (or relative to the prior payment), and I assumed the simpler 'relative to consummation' approach. For an irregular schedule this matters and Appendix J's rule is more specific than what I applied."
+  },
+  {
+    "case_name": "Irregular first AND irregular payment schedule - long odd days and skip payment",
+    "appendix_basis": "Appendix J, full general equation combining fractional first period and irregular subsequent payments",
+    "inputs": {
+      "amount_financed_A": 3000.00,
+      "payments": [
+        {"amount": 50.00, "timing": "day 15 (consummation to first payment = 15 odd n=1, f=15/30=0.5)"},
+        {"amount": 100.00, "timing": "day 75 (30 days after prior + 30 days = full unit period)"},
+        {"amount": 0.00, "timing": "day 105 (skip)"},
+        {"amount": 3050.00, "timing": "day 180 (final payment)"}
+      ],
+      "unit_period_days": 30
+    },
+    "unit_period_analysis": "Per Appendix J: payment 1 at day 15 -> n_1 = 1, f_1 = 15/30 = 0.5; payment 2 at day 75 -> n_2 = 2, f_2 = 15/30 = 0.5 (because 75 days = 2 unit periods + 15 odd days); payment 3 is zero; payment 4 at day 180 -> n_4 = 6, f_4 = 0 (180/30=6 exactly).",
+    "computation": "Equation: 3000 = 50 x (1+i)^-(1 + 0.5) + 100 x (1+i)^-(2 + 0.5) + 0 + 3050 x (1+i)^-6. Simplify: 3000 = 50 x (1+i)^-1.5 + 100 x (1+i)^-2.5 + 3050 x (1+i)^-6. Trial i = 0.012 monthly: RHS = 50/(1.012^1.5) + 100/(1.012^2.5) + 3050/(1.012^6) = 49.11 + 97.00 + 2838.95 = 2985.06 (below 3000). Try i = 0.0115: RHS approx 2996. Try i = 0.0113: RHS approx 3002. Step: i approx 0.0114 monthly.",
+    "result_apr": "Monthly i approx 0.0114; Nominal APR = 0.0114 x 12 = 0.1368 = 13.68%; Appendix J round to nearest 1/8 of 1% -> 13.750%.",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Fraction definition for an odd-day first period followed by irregular payments: Appendix J specifies whether the first-period fraction 'carries forward' into the next payment's exponent or resets; I applied a per-payment 'n + f' formula. The actual Appendix J general equation may treat f as cumulative (i.e., a single timeline from consummation), in which case the exponents should be 0.5, 1.5, 2.5, 6.0 not 1.5, 2.5, 3.5, 6.0."
+  }
+]

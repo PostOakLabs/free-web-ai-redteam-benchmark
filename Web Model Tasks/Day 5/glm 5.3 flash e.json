@@ -1,0 +1,124 @@
+```json
+[
+  {
+    "calculation": "ISO 26262 hardware architectural metric: Single-Point Fault Metric (SPFM) and its ASIL-dependent minimum targets",
+    "formula_or_test": "SPFM = (Σλ_i − Σλ_SPF,i − Σλ_RF,i) / Σλ_i = 1 − (Σλ_SPF + Σλ_RF)/Σλ, summed over all hardware elements i of the safety-related hardware design; λ_SPF = rate of single-point faults (not covered by any safety mechanism), λ_RF = rate of residual faults (covered only by a mechanism with insufficient diagnostic coverage), λ_i = base failure rate. Targets: SPFM ≥ 90% (ASIL B), ≥ 97% (ASIL C), ≥ 99% (ASIL D); no target at ASIL A.",
+    "inputs": ["base failure rate λ_i (FIT) of each element, e.g., from IEC 61709 / SN 29500-type data", "single-point fault rate λ_SPF per element (from diagnostic-coverage decomposition)", "residual fault rate λ_RF per element", "target ASIL of the item"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4 (SPFM evaluation; target values table)",
+    "publicly_retrievable": "paywalled",
+    "volatility": "low — target values (90/97/99) unchanged between 2009 and 2018 editions; ISO revision cycle is multi-year",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "ISO 26262 hardware architectural metric: Latent Fault Metric (LFM) and its ASIL-dependent minimum targets",
+    "formula_or_test": "LFM = (Σλ_i − Σλ_SPF − Σλ_RF − Σλ_MP) / (Σλ_i − Σλ_SPF − Σλ_RF); λ_MP = rate of latent (undetected) multiple-point faults, i.e., multiple-point faults not detectable by latent-fault mechanisms. Targets: LFM ≥ 60% (ASIL B), ≥ 80% (ASIL C), ≥ 90% (ASIL D); no target at ASIL A.",
+    "inputs": ["base failure rate λ_i per element (FIT)", "single-point fault rate λ_SPF per element", "residual fault rate λ_RF per element", "latent multiple-point fault rate λ_MP per element (after latent-fault diagnostic coverage)", "target ASIL"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4 (LFM evaluation; target values table)",
+    "publicly_retrievable": "paywalled",
+    "volatility": "low — targets (60/80/90) unchanged 2009→2018",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "ISO 26262 probabilistic hardware metric: Probabilistic Metric for random Hardware Failures (PMHF) and ASIL targets",
+    "formula_or_test": "PMHF = Σ_m [λ_SPF,m + λ_RF,m + λ_MP,m-contribution] over safety-goal-violating failure modes m, with latent/multiple-point fault terms weighted by their exposure time over the mission profile; expressed in FIT. Targets: PMHF < 10 FIT (ASIL D), < 100 FIT (ASIL C); no PMHF target for ASIL A/B in the 2018 edition. NOTE: the normative text defines the evaluation method; the lifetime-integrated latent-fault weighting is the standard's Annex-provided computation approach — verify the exact expression, I state the common engineering form.",
+    "inputs": ["λ_SPF, λ_RF per failure mode (FIT)", "latent multiple-point fault rates and latent-fault detection coverage", "exposure time / mission profile assumptions", "operational lifetime"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.5 (PMHF evaluation; target values table)",
+    "publicly_retrievable": "paywalled",
+    "volatility": "low — targets (10 FIT / 100 FIT) unchanged 2009→2018",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "SIL threshold bands for probability of dangerous failure (IEC 61508: PFD_avg for low-demand mode, PFH for high-demand/continuous mode)",
+    "formula_or_test": "Threshold test. Low-demand mode, PFD_avg: SIL 1 ∈ [1e-2, 1e-1), SIL 2 ∈ [1e-3, 1e-2), SIL 3 ∈ [1e-4, 1e-3), SIL 4 ∈ [1e-5, 1e-4). High-demand/continuous mode, PFH (per hour): SIL 1 ∈ [1e-6, 1e-5), SIL 2 ∈ [1e-7, 1e-6), SIL 3 ∈ [1e-8, 1e-7), SIL 4 ∈ [1e-9, 1e-8). These bands are the parent of the ISO 26262 hardware-metric logic used for safety ICs.",
+    "inputs": ["mode of operation (low demand vs high demand/continuous)", "PFD_avg or PFH of the safety function (from fault-tree / reliability block diagram calculation)"],
+    "authority": "IEC 61508-1:2010, Functional safety of electrical/electronic/programmable electronic safety-related systems — Part 1: General requirements",
+    "clause_locator": "Clause 7.6 (probability of dangerous failure requirements, tables)",
+    "publicly_retrievable": "paywalled",
+    "volatility": "low — SIL bands unchanged across 1998/2010 editions",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "DO-254 Design Assurance Level (DAL) assignment from failure-condition severity (deterministic table lookup; DO-254 itself contains no numeric coverage/reliability formulas)",
+    "formula_or_test": "DAL = F(failure condition): Catastrophic → DAL A; Hazardous/Severe-Major → DAL B; Major → DAL C; Minor → DAL D; No Effect → DAL E. The DAL then fixes the required objectives (verification rigor, independence) in the DO-254 objectives tables. NOTE: included because this is the only deterministic mapping in the DO-254 family — it is a lookup, not arithmetic.",
+    "inputs": ["failure condition classification per hardware function from the system safety assessment (14 CFR/CS 25.1309, SAE ARP4754A context)"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80, Design Assurance Guidance for Airborne Electronic Hardware (free U.S. companion: FAA AC 20-152A)",
+    "clause_locator": null,
+    "publicly_retrievable": "paywalled",
+    "volatility": "low — base text stable since 2000; AC 20-152A updated 2017",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "CHIPS Act 25% Advanced Manufacturing Investment Credit (AMIC) and its 10-year foreign-expansion recapture test",
+    "formula_or_test": "Credit = 25% × qualified investment (qualified property, including construction-in-progress, for semiconductor manufacturing within an advanced manufacturing facility), for facilities whose construction begins before 2027; the credit is refundable/direct-pay. Recapture: a 'significant transaction' that materially expands semiconductor manufacturing capacity in a foreign country of concern within the 10-year period triggers repayment of 100% of the credit (plus interest). Treasury final regulations issued September 2024.",
+    "inputs": ["qualified investment (USD)", "construction start date (< Jan 1, 2027)", "placed-in-service date", "facts on capacity-expansion transactions involving foreign countries of concern within the 10-year period"],
+    "authority": "CHIPS and Science Act of 2022, Pub. L. No. 117-167, div. A, §10701, codified at 26 U.S.C. §48D (Advanced Manufacturing Investment Credit)",
+    "clause_locator": "26 U.S.C. §48D",
+    "publicly_retrievable": "free",
+    "volatility": "medium — statutory 25% rate fixed; §1.48D regulatory guidance finalized 2024 and subject to further IRS/Treasury or legislative change",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "Total Processing Performance (TPP) of an advanced computing IC in TOPS (U.S. semiconductor export-control parameter)",
+    "formula_or_test": "TPP = 2 × Σ_u (MAC_u × f_u), summed over all processor units u on the IC, where MAC_u = number of multiply-accumulate operations per clock cycle (counted per the rule's bit-length rules for each supported precision) and f_u = processor frequency in GHz; the factor 2 converts MACs to operations. Measured in TOPS; aggregation rules apply for multi-unit/multi-die parts.",
+    "inputs": ["MAC operations per cycle per processor unit, per supported bit length", "processor frequency per unit (GHz)", "number of processor units on the IC (per aggregation rules)"],
+    "authority": "U.S. Export Administration Regulations (EAR), 15 CFR §772.1 definitions ('Total Processing Performance', 'MAC'), added by 87 FR 62186 (Oct. 7, 2022), amended by 88 FR 73458 (Oct. 17, 2023) and later rules",
+    "clause_locator": "15 CFR §772.1",
+    "publicly_retrievable": "free",
+    "volatility": "high — parameter family amended repeatedly 2022–2025 (Oct 2023, Dec 2024, Jan 2025 AI-diffusion rule and subsequent 2025 revisions); verify current eCFR text",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "ECCN 3A090 classification test for advanced computing ICs (TPP and Performance Density Ratio cut points)",
+    "formula_or_test": "Per the Oct. 17, 2023 structure: 3A090.a if TPP ≥ 4800 TOPS, or TPP ≥ 2400 TOPS with Performance Density Ratio (PDR) < 590; 3A090.b if 1600 ≤ TPP < 2400, or TPP ≥ 2400 with PDR ≥ 590; PDR = TPP ÷ applicable die area (mm²) per §772.1. NOTE: these cut points are from the Oct. 2023 text; the 3A090 structure has been amended since (Dec. 2024 / 2025) — treat exact current thresholds as unverified against the latest eCFR.",
+    "inputs": ["TPP (TOPS) computed per §772.1", "applicable die area (mm²) per §772.1", "performance density ratio (TOPS/mm²)"],
+    "authority": "EAR, ECCN 3A090, Category 3, Supplement No. 1 to 15 CFR part 774, as added 87 FR 62186 (Oct. 7, 2022), amended 88 FR 73458 (Oct. 17, 2023) and later",
+    "clause_locator": "ECCN 3A090.a / 3A090.b (15 CFR pt. 774 Supp. 1)",
+    "publicly_retrievable": "free",
+    "volatility": "high — thresholds and structure revised multiple times since 2022",
+    "confidence": 0.55
+  },
+  {
+    "calculation": "Failure rate in FIT (failures per 10^9 device-hours) from life-test data, with chi-square confidence bounds",
+    "formula_or_test": "Point estimate: FIT = (r × 10^9) / T, where r = observed failures, T = accumulated device-hours. Statistical upper bound at confidence C: FIT_UCL = χ²(1−C, 2r+2) × 10^9 / (2T); e.g., zero failures at 60% confidence → FIT_UCL ≈ 0.916 × 10^9 / T.",
+    "inputs": ["observed failures r", "accumulated device-hours T", "confidence level C (e.g., 60%)", "χ² quantile value"],
+    "authority": "JEDEC Standard JESD85, 'Methods for Calculating Failure Rates in Units of FITs'",
+    "clause_locator": null,
+    "publicly_retrievable": "free",
+    "volatility": "low — stable since 2001",
+    "confidence": 0.82
+  },
+  {
+    "calculation": "Electromigration median time to failure and acceleration factor (Black's equation, parameters per JEDEC model tables)",
+    "formula_or_test": "MTTF = A × J^(−n) × exp(Ea / (k_B × T)); acceleration factor AF_EM = MTTF_use/MTTF_stress = (J_stress/J_use)^(−n) × exp[(Ea/k_B)(1/T_use − 1/T_stress)]. J in A/cm², T in K, k_B = 8.617×10⁻⁵ eV/K, n = current-density exponent (≈1–2 per model variant), Ea = activation energy selected from the JEP122 model-parameter tables, A = process-dependent prefactor from characterization.",
+    "inputs": ["current density J at use and stress (A/cm²)", "temperature at use and stress (K)", "Ea (eV) from model table", "current exponent n", "prefactor A"],
+    "authority": "JEDEC JEP122 (e.g., JEP122-G), 'Failure Mechanisms and Models for Silicon Semiconductor Devices' (equation originates in J. R. Black, 1969)",
+    "clause_locator": null,
+    "publicly_retrievable": "free",
+    "volatility": "low — model parameter tables revised infrequently (A→G editions)",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "Arrhenius temperature acceleration factor for temperature-driven reliability tests (HTOL / operating-life derating)",
+    "formula_or_test": "AF = exp[(Ea/k_B) × (1/T_use − 1/T_stress)], T in kelvin, k_B = 8.617×10⁻⁵ eV/K, Ea per mechanism/model-parameter table (≈0.7 eV is the common HTOL default in industry practice); converts stress-temperature test hours into equivalent use-condition hours.",
+    "inputs": ["activation energy Ea (eV) from mechanism table", "use junction temperature (K)", "stress test temperature (K)"],
+    "authority": "JEDEC JEP122 (model parameter tables), applied within JESD22-A108 temperature-life-stress test practice",
+    "clause_locator": null,
+    "publicly_retrievable": "free",
+    "volatility": "low",
+    "confidence": 0.87
+  },
+  {
+    "calculation": "Microcircuit parts-stress reliability prediction failure rate (MIL-HDBK-217F model, in failures per 10^6 hours)",
+    "formula_or_test": "λ_p = π_Q × (C_1 × π_T × π_V + C_2 × π_E) × π_L, where C_1/C_2 = die-complexity coefficients from part-type tables (gate/bit/transistor counts), π_T = temperature factor (Arrhenius form of junction temperature), π_V = voltage-stress derating factor, π_Q = quality factor (program level), π_E = environment factor, π_L = learning factor.",
+    "inputs": ["die complexity C_1, C_2 (technology/table lookup)", "junction temperature (°C) → π_T", "voltage stress ratio → π_V", "quality level → π_Q", "operating environment → π_E", "years in production → π_L"],
+    "authority": "MIL-HDBK-217F, Reliability Prediction of Electronic Equipment, Notice 2 (Feb. 1995), Section 5.1 (Microcircuit Devices)",
+    "clause_locator": "Section 5.1",
+    "publicly_retrievable": "free",
+    "volatility": "none — handbook canceled and frozen (1990s), still widely cited; commercial successor 217Plus is separately licensed",
+    "confidence": 0.78
+  }
+]
+```

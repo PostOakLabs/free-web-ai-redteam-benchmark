@@ -1,0 +1,91 @@
+```json
+[
+  {
+    "case_name": "Case 1 — Convergent: direct + through ≥50%-owned intermediary",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": true},
+      {"id": "X", "blocked": true}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 60},
+      {"from": "A", "to": "X", "pct": 30},
+      {"from": "B", "to": "X", "pct": 40}
+    ],
+    "computation": "Step 1 — Determine if B is blocked:\n  A owns 60% of B → 60% ≥ 50% → B is blocked.\n\nStep 2 — Compute A's aggregate ownership in X:\n  Path 1 (direct): A → X = 30%.\n  Path 2 (through B): B is blocked because A controls B (≥50%). Under OFAC's full-attribution rule, B's entire 40% stake in X is attributed to A. Contribution = 40%.\n  Aggregate = 30% + 40% = 70%.\n\nStep 3 — Apply 50% test to X:\n  70% ≥ 50% → X is blocked.\n\nRule applied: Full attribution through ≥50%-owned intermediary. A does NOT get 60% × 40% = 24%; A gets the full 40% because B itself is blocked and its holdings are treated as A's.",
+    "blocked_verdicts": "B is blocked (A owns 60%). X is blocked (A's aggregate = 70%).",
+    "guidance_basis": "OFAC FAQ 397/398: entities owned 50% or more by blocked persons are themselves blocked; a blocked entity's holdings in other entities are treated as held by the blocking person for purposes of the 50% aggregate test.",
+    "weakest_point": "Full attribution (A gets 40%, not 24%) is my confident reading of OFAC guidance, but OFAC has not published a worked numerical example confirming this exact arithmetic; some practitioners may interpret 'indirect ownership' as multiplicative even through controlled intermediaries."
+  },
+  {
+    "case_name": "Case 2 — Convergent: direct + through <50%-owned intermediary (multiplicative path)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "C", "blocked": false},
+      {"id": "X", "blocked": true}
+    ],
+    "edges": [
+      {"from": "A", "to": "C", "pct": 30},
+      {"from": "A", "to": "X", "pct": 40},
+      {"from": "C", "to": "X", "pct": 50}
+    ],
+    "computation": "Step 1 — Determine if C is blocked:\n  A owns 30% of C → 30% < 50% → C is NOT blocked.\n\nStep 2 — Compute A's aggregate ownership in X:\n  Path 1 (direct): A → X = 40%.\n  Path 2 (through C): C is not blocked, so full attribution does NOT apply. A's indirect interest is multiplicative: 30% × 50% = 15%.\n  Aggregate = 40% + 15% = 55%.\n\nStep 3 — Apply 50% test to X:\n  55% ≥ 50% → X is blocked.\n\nCritical distinction from Case 1: If full attribution applied here (as it does through ≥50%-owned intermediaries), A would get 50% through C, and aggregate would be 40% + 50% = 90%. The difference (55% vs 90%) shows why the attribution-vs-multiplication distinction is load-bearing.",
+    "blocked_verdicts": "C is NOT blocked (A owns only 30%). X is blocked (A's aggregate = 55%).",
+    "guidance_basis": "OFAC FAQ 397/398: full attribution applies only through entities that are themselves blocked (≥50% owned by blocked persons). For non-controlled intermediaries, OFAC looks at the blocked person's proportionate (multiplicative) interest.",
+    "weakest_point": "OFAC's guidance does not explicitly state the multiplicative formula for non-controlled intermediaries in a worked example; this is the widely accepted interpretation but is inferred from the principle that full attribution only applies to blocked entities."
+  },
+  {
+    "case_name": "Case 3 — Chain through majority-owned intermediary (A→B→C→D)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": true},
+      {"id": "C", "blocked": true},
+      {"id": "D", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 70},
+      {"from": "B", "to": "C", "pct": 60},
+      {"from": "C", "to": "D", "pct": 30}
+    ],
+    "computation": "Step 1 — B: A owns 70% of B → 70% ≥ 50% → B is blocked.\n\nStep 2 — C: B is blocked and B owns 60% of C. Full attribution: A is attributed B's full 60% stake in C. A's aggregate in C = 60% → 60% ≥ 50% → C is blocked.\n\nStep 3 — D: C is blocked and C owns 30% of D. Full attribution: A is attributed C's full 30% stake in D. A's aggregate in D = 30% → 30% < 50% → D is NOT blocked.\n\nNote: The chain propagates full attribution at each level because each intermediary (B, then C) is itself blocked. The blocking status cascades: A blocks B, B's blocking causes C to be blocked, but C's 30% in D is insufficient to block D.",
+    "blocked_verdicts": "B is blocked (70%). C is blocked (60% attributed). D is NOT blocked (30% attributed, below 50%).",
+    "guidance_basis": "OFAC FAQ 397/398: the 50% rule applies 'directly or indirectly'; each level of the chain is evaluated — once an entity is blocked, its holdings are attributed upward to the blocking person, and the test repeats for the next entity in the chain.",
+    "weakest_point": "Whether OFAC's full attribution truly cascades through multiple levels (A→B→C→D) or only through one level of indirection is not explicitly confirmed in a published OFAC example; the cascading interpretation is the standard reading but has not been tested in enforcement to my knowledge."
+  },
+  {
+    "case_name": "Case 4 — Multiple blocked persons converging on same target",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": true},
+      {"id": "X", "blocked": true}
+    ],
+    "edges": [
+      {"from": "A", "to": "X", "pct": 25},
+      {"from": "B", "to": "X", "pct": 30}
+    ],
+    "computation": "Step 1 — Identify all blocked persons with ownership in X:\n  A (blocked) owns 25% of X directly.\n  B (blocked) owns 30% of X directly.\n\nStep 2 — Aggregate blocked ownership in X:\n  25% + 30% = 55%.\n\nStep 3 — Apply 50% test:\n  55% ≥ 50% → X is blocked.\n\nNote: Neither A nor B individually reaches 50%, but the rule aggregates across ALL blocked persons ('individually or in the aggregate'). This is not a convergent-graph case (different blocked persons, not the same owner through multiple paths), but it tests the 'in the aggregate' prong of the rule.",
+    "blocked_verdicts": "X is blocked (aggregate blocked ownership = 55%).",
+    "guidance_basis": "OFAC FAQ 397: the 50% test applies to ownership 'individually or in the aggregate' by one or more blocked persons. Multiple blocked persons' stakes are summed.",
+    "weakest_point": "This case is straightforward and low-ambiguity. The weakest point is that it does not test indirect ownership or full attribution — it only tests the direct-aggregate rule."
+  },
+  {
+    "case_name": "Case 5 — Complex convergent: direct + chain through non-blocked intermediary (mixed attribution)",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": true},
+      {"id": "C", "blocked": false},
+      {"id": "D", "blocked": true}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 70},
+      {"from": "A", "to": "D", "pct": 25},
+      {"from": "B", "to": "C", "pct": 40},
+      {"from": "C", "to": "D", "pct": 70}
+    ],
+    "computation": "Step 1 — B: A owns 70% of B → B is blocked.\n\nStep 2 — C: B is blocked and B owns 40% of C. Full attribution: A is attributed 40% of C. A's aggregate in C = 40% → 40% < 50% → C is NOT blocked.\n\nStep 3 — D: Compute A's aggregate ownership.\n  Path 1 (direct): A → D = 25%.\n  Path 2 (through B→C→D): C is NOT blocked, so full attribution does NOT apply at the C→D step. A's indirect interest through C is multiplicative: A's attributed interest in C (40%) × C's interest in D (70%) = 28%.\n  Aggregate = 25% + 28% = 53%.\n\nStep 4 — Apply 50% test to D:\n  53% ≥ 50% → D is blocked.\n\nThis case combines both attribution methods in one graph: full attribution through B (≥50%-owned) to determine A's interest in C, then multiplicative through C (<50%-owned) to determine A's indirect interest in D. The two methods interact at the C node.",
+    "blocked_verdicts": "B is blocked (70%). C is NOT blocked (40% attributed). D is blocked (25% direct + 28% indirect = 53%).",
+    "guidance_basis": "OFAC FAQ 397/398: full attribution through blocked entities (B), multiplicative through non-blocked entities (C). The 50% test is applied at each entity in the chain to determine which attribution method applies at the next level.",
+    "weakest_point": "The interaction point at C — where full attribution determines A's interest in C (40%), and then that 40% is used multiplicatively for the C→D link — is the most uncertain step. OFAC has not published a worked example with this exact mixed-attribution pattern. If OFAC instead applied full attribution all the way through (treating B's indirect holdings via C as fully attributable), A would get 70% of D through C, and aggregate would be 25% + 70% = 95%. The correct treatment hinges on whether the 'blockability' of C (not blocked at 40%) triggers the multiplicative method."
+  }
+]
+```

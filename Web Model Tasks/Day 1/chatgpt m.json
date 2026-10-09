@@ -1,0 +1,52 @@
+[
+{
+"title": "Target a much higher clock frequency with a much deeper pipeline",
+"where_in_paper": "Clock Rates",
+"decision": "The Pentium 4 was designed around a greater-than-1.6× higher main-clock-frequency target than the P6 family on the same process technology, using a pipeline about twice as deep as P6.",
+"alternatives_or_rejected": "The paper does not present a named alternative architecture that was rejected; it explicitly discusses the tradeoff between higher frequency/deeper pipelining and lower efficiency, longer branch/cache-miss penalties, greater complexity, and deeper buffering.",
+"rationale": "The stated objective was to obtain an industry-leading clock rate by putting fewer gates of logic in each pipeline stage. The authors acknowledge that deeper pipelines reduce efficiency at a given clock rate and increase penalties, but state that the much higher clock rate can more than compensate; they give 50% more frequency versus roughly 30% more net performance as an example.",
+"outcome": "At introduction, the 1.5 GHz Pentium 4 ran at about 1.5× the frequency of the Pentium III, and its misprediction pipeline was 20 stages versus 10 for P6.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Run different chip sections at different clock frequencies",
+"where_in_paper": "Clock Rates",
+"decision": "The design uses multiple clock frequencies: the critical ALU-bypass loop runs at the 3 GHz fast clock, most of the chip runs at half that frequency, some sections at one-quarter, and the bus logic at 100 MHz.",
+"alternatives_or_rejected": "The paper does not describe a specific rejected uniform-frequency design, but explicitly says that running most sections at half the fast-clock frequency makes them much easier to design.",
+"rationale": "Only the critical ALU-bypass execution loop required the highest frequency. Slowing other sections reduces their design difficulty while allowing the performance-critical loop to achieve the target frequency.",
+"outcome": "The Pentium 4 combined a 3 GHz fast clock with slower-clocked portions of the processor, including 100 MHz bus logic, rather than requiring every section to operate at the highest frequency.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98
+},
+{
+"title": "Use an Execution Trace Cache instead of making the high-frequency front end repeatedly decode IA-32 instructions",
+"where_in_paper": "Front End — Trace Cache",
+"decision": "The Pentium 4 makes the Trace Cache its primary L1 instruction cache and stores already-decoded IA-32 instructions as uops between the decoder and execution core.",
+"alternatives_or_rejected": "The paper contrasts this with conventional instruction caches, which store IA-32 instruction bytes and require decoding when fetched. It argues that a high-bandwidth IA-32 decoder would require several pipeline stages and would make branch-misprediction recovery slower because the corrected target would have to be decoded again.",
+"rationale": "IA-32 instructions are cumbersome to decode because they have variable lengths and many options. Caching decoded uops removes decoding from the main execution loop and lets the processor resume from the corrected branch target without re-decoding those instructions.",
+"outcome": "The Trace Cache holds up to 12K uops, delivers up to three uops per clock, and is reported to have a hit rate similar to an 8–16 KB conventional instruction cache. The paper also reports that the combined branch predictors reduce misprediction rate by about one-third versus P6.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Keep the high-speed integer ALU loop deliberately small",
+"where_in_paper": "Integer and Floating-Point Execution Units — Low Latency Integer ALU",
+"decision": "The Pentium 4 puts only the essential, frequently used integer ALU functions into the high-speed, double-frequency ALU-bypass loop, while placing less-frequent functions such as multiply, shifts, flag logic, and branch processing elsewhere.",
+"alternatives_or_rejected": "The paper does not name a single rejected implementation, but explicitly argues against putting those less-frequent functions into the key low-latency loop because the high-speed core must be kept as small as possible.",
+"rationale": "The high-speed loop is constrained by metal length and loading. The authors state that approximately 60–70% of uops in typical integer programs use the loop, so optimizing the common operations there provides broad benefit without making the critical loop larger and slower.",
+"outcome": "The design achieves an effective one-half-main-clock ALU latency for dependent operations. A staggered add lets only a 16-bit adder and its input multiplexers complete within a fast clock cycle, while less-common operations use separate hardware.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Use a simple second FP/SSE port rather than a second full-featured execution unit",
+"where_in_paper": "FP/SSE Execution Units",
+"decision": "The design uses one full FP/SSE execution port plus a simpler second port specialized for FP/SSE moves and store-data primitives.",
+"alternatives_or_rejected": "Early in development, the team had two full FP/SSE execution units. The paper explicitly says this cost a lot of hardware and did not provide much performance for most FP/SSE applications, so it was replaced by the simpler second port.",
+"rationale": "The simpler port captured most of the performance benefit of a second full-featured port at substantially lower die-size and power cost. The authors also note that many FP/multimedia workloads have balanced multiply/add mixes, so interleaving those operations could provide useful throughput without fully duplicating the execution hardware.",
+"outcome": "The resulting FP/SSE organization provided most of the performance of a second full-featured port with much less die size and power cost; the paper reports the resulting FP/SSE throughput and peak 6 GFLOPS single-precision or 3 GFLOPS double-precision performance at 1.5 GHz.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 1.0
+}
+]

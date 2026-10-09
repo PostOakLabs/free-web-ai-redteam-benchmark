@@ -1,0 +1,151 @@
+```json
+[
+  {
+    "family": "ISO 26262-5 hardware architectural metrics",
+    "formulas": [
+      {
+        "name": "Single-Point Fault Metric (SPFM)",
+        "expression": "SPFM = (1 - (Σλ_SPF + Σλ_RF) / Σλ) × 100%",
+        "variables": [
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults", "units": "FIT"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults", "units": "FIT"},
+          {"symbol": "λ", "meaning": "total failure rate of all hardware components (safe + dangerous + multipoint)", "units": "FIT"}
+        ],
+        "worked_example": "Suppose a hardware element has total failure rate λ = 1000 FIT. Single-point faults λ_SPF = 50 FIT and residual faults λ_RF = 30 FIT. Then SPFM = (1 - (50+30)/1000) × 100% = (1 - 80/1000) × 100% = 0.92 × 100% = 92%. This meets ASIL B (≥90%) but not ASIL C (≥97%).",
+        "authority": "ISO 26262-5:2018, Annex C",
+        "clause_locator": null,
+        "known_uncertainty": "The exact formula may also include a term for multiple-point faults depending on the interpretation; some variants include λ_MPF in the denominator."
+      },
+      {
+        "name": "Latent Fault Metric (LFM)",
+        "expression": "LFM = (1 - Σλ_MPF_L / (Σλ - Σλ_SPF - Σλ_RF)) × 100%",
+        "variables": [
+          {"symbol": "λ_MPF_L", "meaning": "failure rate of latent multipoint faults", "units": "FIT"},
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults", "units": "FIT"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults", "units": "FIT"},
+          {"symbol": "λ", "meaning": "total failure rate of all hardware components", "units": "FIT"}
+        ],
+        "worked_example": "With λ = 1000 FIT, λ_SPF = 50, λ_RF = 30, and λ_MPF_L = 100 FIT, the denominator = 1000 - 50 - 30 = 920 FIT. LFM = (1 - 100/920) × 100% = (1 - 0.1087) × 100% = 89.13%. This meets ASIL B (≥60%) and ASIL C (≥80%) but not ASIL D (≥90%).",
+        "authority": "ISO 26262-5:2018, Annex C",
+        "clause_locator": null,
+        "known_uncertainty": "The denominator definition can vary; some interpretations use total dangerous failure rate excluding safe faults."
+      },
+      {
+        "name": "Probabilistic Metric for Random Hardware Failures (PMHF)",
+        "expression": "PMHF = Σ λ_i × (1 - DC_i) × t_lifetime",
+        "variables": [
+          {"symbol": "λ_i", "meaning": "failure rate of component i", "units": "FIT"},
+          {"symbol": "DC_i", "meaning": "diagnostic coverage for component i", "units": "dimensionless"},
+          {"symbol": "t_lifetime", "meaning": "lifetime of the system (typically 8760 hours/year × years)", "units": "hours"}
+        ],
+        "worked_example": "A system has a single component with λ = 100 FIT and DC = 90% (0.9). Lifetime = 10 years = 87600 hours. PMHF = 100 × (1 - 0.9) × 87600 = 100 × 0.1 × 87600 = 876000 failures per 10^9 hours? Wait: λ is in FIT (failures per 10^9 hours). So PMHF = (100 × 0.1) / 10^9 × 87600 = 10 / 10^9 × 87600 = 8.76e-4 failures per hour? Actually PMHF is typically expressed in FIT. So PMHF = 10 FIT (since 10 / 10^9 hours = 10 FIT). This meets ASIL D (<10 FIT) if exactly 10 FIT, but ASIL D requires <10 FIT.",
+        "authority": "ISO 26262-5:2018, Annex C",
+        "clause_locator": null,
+        "known_uncertainty": "The exact PMHF formula can be more complex, including multiple fault combinations and time-dependent terms; the simplified version above is common in FMEDA."
+      }
+    ],
+    "edge_cases": [
+      "When Σλ = 0 (no failure rate), SPFM and LFM are undefined; treat as 100% by convention.",
+      "When denominator for LFM is zero (all failures are SPF or RF), LFM is undefined; treat as 0% or N/A.",
+      "When PMHF is exactly at the threshold (e.g., exactly 10 FIT for ASIL D), the standard requires strict inequality (<10 FIT), so it fails."
+    ]
+  },
+  {
+    "family": "JEDEC FIT-rate math",
+    "formulas": [
+      {
+        "name": "FIT rate point estimate from accelerated test data",
+        "expression": "FIT = (χ²(α, 2r+2) × 10^9) / (2 × N × H × AF)",
+        "variables": [
+          {"symbol": "χ²", "meaning": "chi-square value for given confidence level and degrees of freedom", "units": "dimensionless"},
+          {"symbol": "α", "meaning": "confidence level (e.g., 0.6 for 60% confidence)", "units": "dimensionless"},
+          {"symbol": "r", "meaning": "number of observed failures", "units": "count"},
+          {"symbol": "N", "meaning": "sample size", "units": "count"},
+          {"symbol": "H", "meaning": "test duration (hours)", "units": "hours"},
+          {"symbol": "AF", "meaning": "acceleration factor (from Arrhenius or other model)", "units": "dimensionless"}
+        ],
+        "worked_example": "Suppose N=77 devices tested for H=1000 hours at accelerated stress, with r=0 failures. For 60% confidence, χ²(0.6, 2) = 1.832 (from chi-square tables for 2 degrees of freedom). AF = 100 (assumed). Then FIT = (1.832 × 10^9) / (2 × 77 × 1000 × 100) = 1.832e9 / 15,400,000 = 118.96 FIT.",
+        "authority": "JEDEC JESD85 (Methods for Calculating Failure Rates in Units of FITs)",
+        "clause_locator": null,
+        "known_uncertainty": "The exact chi-square values depend on the confidence level; JESD85 provides tables for 60% and 90% confidence. The formula assumes a constant failure rate (exponential distribution)."
+      },
+      {
+        "name": "Arrhenius acceleration factor",
+        "expression": "AF = exp((Ea / k) × (1/T_use - 1/T_test))",
+        "variables": [
+          {"symbol": "Ea", "meaning": "activation energy (eV)", "units": "eV"},
+          {"symbol": "k", "meaning": "Boltzmann constant (8.617333262145e-5 eV/K)", "units": "eV/K"},
+          {"symbol": "T_use", "meaning": "use temperature (Kelvin)", "units": "K"},
+          {"symbol": "T_test", "meaning": "test temperature (Kelvin)", "units": "K"}
+        ],
+        "worked_example": "Ea = 0.7 eV, T_use = 55°C = 328.15 K, T_test = 125°C = 398.15 K. k = 8.617e-5 eV/K. 1/T_use = 1/328.15 = 0.003047, 1/T_test = 1/398.15 = 0.002512. Difference = 0.000535. (Ea/k) = 0.7 / 8.617e-5 = 8123. So AF = exp(8123 × 0.000535) = exp(4.346) = 77.1.",
+        "authority": "JEDEC JESD85; Arrhenius equation",
+        "clause_locator": null,
+        "known_uncertainty": "Typical Ea values for semiconductor failure mechanisms range from 0.3 to 1.0 eV; exact value depends on the failure mechanism (e.g., electromigration, oxide breakdown)."
+      }
+    ],
+    "edge_cases": [
+      "If N=0 or H=0, division by zero; FIT is undefined.",
+      "If r=0 and confidence level is 60%, the chi-square value is for 2 degrees of freedom; for 90% confidence, it's for 2 degrees of freedom as well but with different value.",
+      "If T_test = T_use, AF = 1 (no acceleration)."
+    ]
+  },
+  {
+    "family": "EAR advanced-computing parameters",
+    "formulas": [
+      {
+        "name": "Total Processing Performance (TPP)",
+        "expression": "TPP = Σ_i [2 × MacTOPS_i × bit_length_i]",
+        "variables": [
+          {"symbol": "MacTOPS_i", "meaning": "theoretical peak number of Tera (10^12) operations per second for multiply-accumulate computation (D = A × B + C) for processing unit i", "units": "TOPS"},
+          {"symbol": "bit_length_i", "meaning": "largest bit-length of the inputs to the multiply operation for processing unit i", "units": "bits"},
+          {"symbol": "i", "meaning": "index over all digital processing units on the integrated circuit", "units": "dimensionless"}
+        ],
+        "worked_example": "A GPU has 100 processing units, each with MacTOPS = 5 TOPS at 8-bit precision (bit_length = 8). TPP = 100 × (2 × 5 × 8) = 100 × 80 = 8000. This exceeds the 4800 threshold for ECCN 3A090.a.",
+        "authority": "15 CFR Appendix Supplement No. 1 to Part 774, Technical Note 2 to 3A090.a and 3A090.b; EAR ECCN 3A090",
+        "clause_locator": "15 CFR 774, Supp. 1, 3A090 (Technical Notes)",
+        "known_uncertainty": "The formula uses 'bit length of the operation' which is the largest bit-length of the inputs, not the output. The aggregation sums over all processing units."
+      },
+      {
+        "name": "Performance density",
+        "expression": "Performance density = TPP / applicable die area",
+        "variables": [
+          {"symbol": "TPP", "meaning": "Total Processing Performance", "units": "dimensionless (but effectively operations)"},
+          {"symbol": "applicable die area", "meaning": "area of all logic dies manufactured with a non-planar transistor architecture, in mm²", "units": "mm²"}
+        ],
+        "worked_example": "TPP = 8000 (from above). Applicable die area = 800 mm². Performance density = 8000 / 800 = 10.0. This exceeds the 5.92 threshold for 3A090.a.2.",
+        "authority": "15 CFR Appendix Supplement No. 1 to Part 774, Technical Note 2 to 3A090.a and 3A090.b",
+        "clause_locator": "15 CFR 774, Supp. 1, 3A090 (Technical Notes)",
+        "known_uncertainty": "The 'applicable die area' definition is specific to non-planar transistor architectures (FinFET, GAA)."
+      }
+    ],
+    "edge_cases": [
+      "If the integrated circuit has no digital processing units, TPP = 0.",
+      "If the bit length is 0, the term contributes 0.",
+      "If the die area is 0 or not applicable, performance density is undefined."
+    ]
+  },
+  {
+    "family": "CHIPS Act incentives math",
+    "formulas": [
+      {
+        "name": "Advanced Manufacturing Investment Credit (48D)",
+        "expression": "Credit = (25% or 35%) × Qualified Investment",
+        "variables": [
+          {"symbol": "Qualified Investment", "meaning": "basis of qualified property placed in service that is part of an advanced manufacturing facility", "units": "USD"},
+          {"symbol": "Rate", "meaning": "25% for property placed in service after Dec. 31, 2022 and before Jan. 1, 2026; 35% for property placed in service after Dec. 31, 2025", "units": "dimensionless"}
+        ],
+        "worked_example": "A semiconductor manufacturer invests $100 million in qualified property (equipment) placed in service in 2024. The credit = 25% × $100M = $25M. If placed in service in 2027, the credit = 35% × $100M = $35M.",
+        "authority": "Internal Revenue Code Section 48D (as added by CHIPS Act of 2022 and amended by WFTC Act of 2025)",
+        "clause_locator": "IRC § 48D",
+        "known_uncertainty": "The exact percentage for 2026 and later may be subject to further legislation; the WFTC Act of 2025 increased it to 35% for post-2025, but this could change."
+      }
+    ],
+    "edge_cases": [
+      "If qualified investment is zero, credit is zero.",
+      "If property is placed in service exactly on Dec. 31, 2025, it may qualify for 25% or 35% depending on the exact date of placement in service; the statute uses 'placed in service after December 31, 2025' for the 35% rate, so Dec. 31, 2025 is still 25%.",
+      "If the facility does not have a 'primary purpose' of manufacturing semiconductors or semiconductor equipment, it is not an advanced manufacturing facility and the credit does not apply."
+    ]
+  }
+]
+```

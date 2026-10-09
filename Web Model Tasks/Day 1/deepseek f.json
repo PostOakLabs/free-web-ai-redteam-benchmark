@@ -1,0 +1,296 @@
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      "Global route overflow histogram shows >5% overflow concentrated in <10% of gcells, especially near macro corners and channels, not spread uniformly.",
+      "Detail-route DRC count after first routing iteration is >1000, with the majority being 'short' violations in the same macro-adjacent bins.",
+      "Placement utilization in congested areas is >85% (at 28nm) or >75% (at 7nm) while average utilization is under 70%, indicating local density peaks.",
+      "Route completion fails with 'unroutable' error after multiple iterations, yet the total wirelength is within expected bounds."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Hard macro placements (SRAMs/PHYs) create narrow channels with insufficient routing tracks for the number of signals crossing.",
+        "distinguishing_check": "Overlay the macro boundary map with the routing overflow map; if overflow bins align exactly with macro-to-macro gaps and are absent elsewhere, confirm macro channel blockage.",
+        "check_cost": "hours",
+        "typical_fix": "Shift macros to widen the most critical channels by 5–10% of their width, or reassign signal pin layers to use higher metal layers exiting the channel.",
+        "fix_cost": "hours to days (depending on timing impact)"
+      },
+      {
+        "cause": "Standard-cell placement density too high in a region due to an overly aggressive area target, causing local grid shortage.",
+        "distinguishing_check": "Run a cell-density heatmap and overlay with overflow map; if high density >80% correlates with overflow, confirm. Check total utilization is not the issue.",
+        "check_cost": "minutes",
+        "typical_fix": "Add placement blockages to spread cells into adjacent less-congested regions, or increase chip area slightly.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Power grid stripes (at higher metal layers) and signal routing blockages consume a significant portion of the routing tracks, reducing available wire resources.",
+        "distinguishing_check": "Compare available tracks per layer (subtracting power grid/blockages) against the global route demand per layer; if demand exceeds available tracks on layers where stripes are dense, this is the cause.",
+        "check_cost": "hours",
+        "typical_fix": "Reduce the number of power stripes in that region (if IR drop allows), or move blockages to lower-utilization layers.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Floorplan aspect ratio too extreme (e.g., very long and narrow), forcing long global wires through a narrow middle corridor.",
+        "distinguishing_check": "Examine the overflow map for a single dense band across the center; check the aspect ratio and wirelength distribution for that corridor.",
+        "check_cost": "hours",
+        "typical_fix": "Re‑floorplan to a more square aspect ratio, or add a reserved routing corridor with higher track count.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "High fanout net clustering creates many local branches, causing congestion in small areas.",
+        "distinguishing_check": "Look at failing gcells and identify if a small number of high-fanout nets (e.g., resets/scan-enables) account for >50% of the overflow in those bins.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert buffers to split the fanout and redistribute wires, or route that net on a dedicated higher layer.",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Veterans check macro placement first (highest prior probability in 28nm/7nm blocks with many hard macros), then power-grid interference, then density, then floorplan shape, then fanout nets – because each subsequent check requires more simulation overhead but targets less common cases.",
+    "classic_trap": "Misdiagnosing as a placement-density problem and respreading cells, when the root cause is actually macro channel blockage – respreading worsens the issue by moving cells away from macros but does nothing to open the routing channels.",
+    "confidence": 0.9
+  },
+  {
+    "failure_class": "FAIL_TIMING (setup)",
+    "symptoms": [
+      "WNS (Worst Negative Slack) between -100ps and -500ps on a few dozen paths, while TNS (Total Negative Slack) is moderate (~10-50ns), and the failing paths share a common clock-gating cell or a common point in the clock tree.",
+      "WNS is large (> -1ns) and TNS is huge (>500ns), with thousands of failing paths spread across unrelated hierarchical modules and data paths.",
+      "Failing paths have a very high net delay contribution (>60% of total path delay) despite short logical levels, indicating slow wires.",
+      "Failing paths all originate from the same launch clock domain and capture into the same capture clock domain (or cross-domain) with marginal positive slack on all other paths."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock skew imbalance between launch and capture flops – local clock tree insertion delays vary by >50ps due to uneven buffer placements.",
+        "distinguishing_check": "Extract clock arrival times at the launch and capture flops for the failing paths; if the skew (launch - capture) is positive and >50ps larger than the budget, confirm. Check the clock tree report for balance.",
+        "check_cost": "hours",
+        "typical_fix": "Rebalance the clock tree by adjusting buffer sizing or placement near the capture flops to reduce skew.",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Excessive logic depth (number of cell levels) in the data path, causing a long cell delay contribution.",
+        "distinguishing_check": "List the cell delay contributions per failing path; if the average logic level is >10 for a 28nm process at 1GHz, and net delay is normal, this is the cause.",
+        "check_cost": "minutes",
+        "typical_fix": "Restructure RTL to pipeline the combinational logic, or swap in faster (but larger) standard cells.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Physical placement separation between the launching and capturing flops is large, leading to high wire RC delay.",
+        "distinguishing_check": "Measure the Manhattan distance between flop pairs on failing paths; if the average distance >200µm (for a small block) and net delay dominates, confirm.",
+        "check_cost": "minutes",
+        "typical_fix": "Place the flops closer together via a placement constraint, or use intermediate buffers with repeaters.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Constraint error: a multicycle path or false path is mis-constrained, leading to an overly tight setup check.",
+        "distinguishing_check": "Check the SDC: if the failing paths are between clock domains with asynchronous relationship or are known designer-intended multicycle paths (e.g., write/read of SRAM), confirm by design spec.",
+        "check_cost": "hours",
+        "typical_fix": "Add the correct multicycle or false-path constraint, or adjust the clock phase.",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Cross-talk noise from adjacent aggressor nets couples into the data path, increasing effective delay on wire segments.",
+        "distinguishing_check": "Run a signal integrity (SI) delay analysis; if the SI-induced delay adds >50ps to the failing paths, confirm. Look for parallel long wires.",
+        "check_cost": "hours",
+        "typical_fix": "Shield the victim net, increase spacing, or skew aggressors to reduce coupling.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check SDC first (cheapest, quickest to fix), then clock skew (common at high frequency), then placement distance, then logic depth, then SI – because SI analysis is expensive and often a secondary effect.",
+    "classic_trap": "Assuming it is a logic-depth problem and rewriting RTL, when the actual issue is a 50ps clock skew imbalance that can be fixed by a local clock tree adjustment in a few hours.",
+    "confidence": 0.92
+  },
+  {
+    "failure_class": "FAIL_TIMING (hold)",
+    "symptoms": [
+      "Hold violations appear on hundreds of short paths, with negative slack typically between -50ps and -200ps, clustered near the same clock domains or within the same physical region.",
+      "All failing paths have very low logic depth (1–2 cells) and very short wire lengths, but they exhibit large clock skew (capture clock arriving earlier than launch clock).",
+      "Hold violations appear only after fixing setup, because inserting buffers for setup increases wire delay but also increases clock skew.",
+      "Violations are localized to flops that have undergone useful-skew adjustments during setup fixing."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Uneven clock tree skew – the capture flop receives the clock significantly earlier than the launch flop (negative skew), leaving insufficient hold margin.",
+        "distinguishing_check": "Extract the local skew between launch and capture clock pins; if skew (capture - launch) < -100ps for most failing paths, confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Add a delay buffer on the capture clock path to delay the clock arrival, or rebalance the tree.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Excessive clock jitter or uncertainty margin added in the SDC, artificially shrinking the hold window.",
+        "distinguishing_check": "Check the clock uncertainty value applied for hold (often 0 or negative); if it is positive, it may be too aggressive. Compare with the datasheet.",
+        "check_cost": "minutes",
+        "typical_fix": "Reduce or remove the hold uncertainty if it was overly conservative (or ensure it matches reality).",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Data path is too short – minimal combinational delay between two flops in the same clock domain, leaving no margin for local skew.",
+        "distinguishing_check": "Examine the path report; if the data path has only a clock-to-Q delay of the launch flop plus a single buffer and a short wire, and the total delay < skew + hold requirement, confirm.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert a delay buffer (or two) in the data path to add delay, or insert a clock delay on the capture clock.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock gating cell inserted in the capture clock path without balancing its delay against non-gated paths.",
+        "distinguishing_check": "Check if the failing flops share a clock-gating cell that is present only on the capture side; compare with flops that pass – those without the gate have no violation.",
+        "check_cost": "hours",
+        "typical_fix": "Add a matching delay element on the ungated clock paths to balance the clock tree, or remove the gating if not needed.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Cross-die or on-chip variation (OCV) mismodeled – using a single global derate instead of stage-based derates makes hold look worse.",
+        "distinguishing_check": "Recalculate hold slack using custom OCV derates (e.g., path-based) and see if violations disappear; also check if physical distance causes mismatch.",
+        "check_cost": "hours",
+        "typical_fix": "Use more accurate OCV derate tables or implement advanced OCV (AOCV) coefficients.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check clock skew first (most common cause in high-frequency designs), then SDC uncertainty (very cheap), then data path length, then gating cells, then OCV – because OCV tuning is a longer iterative process.",
+    "classic_trap": "Adding a large delay buffer to every failing path, which then creates new setup violations on the same paths or on nearby paths, entering a fix-loops cycle.",
+    "confidence": 0.88
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      "Static IR drop report shows >5% VDD drop in core regions, but dynamic IR drop (with toggle activity) shows >10% peak drop, causing timing violations on paths that pass static analysis.",
+      "Timing failures are highly activity-dependent – only occur during certain functional patterns (e.g., vector scan), not during static timing analysis.",
+      "Multiple cells in a contiguous region show simultaneous slowdown, visible as grouping of setup violations in the same physical area with similar path delays.",
+      "Power rails show high local current density (exceeding 100 mA/µm) in electromigration checks near high-switching macros."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient on-chip power grid density – the metal mesh is too sparse for the peak current demand, creating local voltage sag.",
+        "distinguishing_check": "Overlay the IR drop map with the power grid pitch; if the drop is maximal at the center of the grid tiles and reduces near stripes, confirm. Run a grid resistance extraction.",
+        "check_cost": "hours",
+        "typical_fix": "Add more power stripes or increase metal width in the grid (if area allows), or add decoupling capacitors.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Excessive simultaneous switching activity (SSA) in a small area – a large number of flops or clock gates toggle at the same clock edge, drawing a large current spike.",
+        "distinguishing_check": "Run a vector-based dynamic IR analysis with the maximum-toggling functional pattern; if the drop peak coincides with the clock edge and the toggling cell density is high, confirm.",
+        "check_cost": "hours (simulation)",
+        "typical_fix": "Add local decoupling capacitance, stagger clock gating enables, or reduce the number of flops per clock buffer.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Package/PCB power delivery impedance too high, causing AC droop that is not captured by on-chip DC analysis.",
+        "distinguishing_check": "Check the board-level PDN impedance and compare with the chip's current step response; if the droop frequency matches board resonance, confirm.",
+        "check_cost": "days (requires system simulation)",
+        "typical_fix": "Add more package decoupling capacitors, adjust package via count, or change on-chip decap distribution.",
+        "fix_cost": "weeks"
+      },
+      {
+        "cause": "Clock tree buffers are concentrated in one area (due to floorplan) and draw a large current simultaneously, causing a hot spot.",
+        "distinguishing_check": "Run a per-instance current map; if the highest drop region coincides with clock buffer density > average by 5x, confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Spread clock buffers across the chip, or use multiple smaller clock trees to reduce peak current.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Missing or insufficient power vias connecting the on-chip grid to the package bumps, increasing local resistance.",
+        "distinguishing_check": "Extract the via density map; if the drop occurs near regions with fewer vias per area, confirm by comparing with bump map.",
+        "check_cost": "hours",
+        "typical_fix": "Add more vias in the floorplan, or repartition the power bump assignment.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check on-chip grid density first (simplest to spot with static analysis), then dynamic activity via vector simulation (next likely), then via/bump integrity, then package – because package fixes are expensive and require cross-team coordination.",
+    "classic_trap": "Treating a dynamic IR drop issue as a static one and thickening the grid everywhere, which wastes area and does not solve the current spike caused by simultaneous toggling.",
+    "confidence": 0.85
+  },
+  {
+    "failure_class": "FAIL_CTS (clock tree)",
+    "symptoms": [
+      "Clock skew histogram shows a long tail >100ps beyond target, with a small subset of flops (e.g., <5%) having much larger insertion delays than the rest.",
+      "Clock transition (slew) violations appear at sinks, with slew >500ps at 28nm (or >200ps at 7nm) on many clock endpoints, often clustered near macros.",
+      "Timing reports show a consistent 'clock path pessimism' that varies widely between paths, indicating clock tree imbalance.",
+      "Post‑CTS setup violations are uniformly worse than pre‑CTS estimated slacks by a constant factor (e.g., all slacks degrade by 100ps), suggesting a systematic clock latency issue."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Uneven distribution of clock sinks due to floorplan – a dense cluster of flops requires many buffers, leading to long branches to sparse areas.",
+        "distinguishing_check": "Plot the flop density heatmap and overlay with clock tree buffer placement; if sparse areas have very few buffers but long wires, while dense areas have many, confirm imbalance.",
+        "check_cost": "hours",
+        "typical_fix": "Insert dummy buffers or route the clock spine to balance the tree, or adjust floorplan to distribute flops more evenly.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Macros (SRAMs/PHYs) block clock routing, forcing detours that add excessive wire delay to certain sinks.",
+        "distinguishing_check": "Check the physical path of the clock net; if it must route around a large macro, and the delayed sinks are exactly those on the far side, confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Add a dedicated clock channel around the macro, or use a higher metal layer to jump over it, or split the clock tree into two separate balanced trees.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Clock gating cells inserted without regard to delay balancing – some gated branches have significantly different insertion delays than ungated ones.",
+        "distinguishing_check": "Compare insertion delays of gated vs ungated sinks that share the same root; if the difference exceeds 100ps consistently, confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Add delay compensation on the faster branches, or replace clock gating with enable flops that have balanced clock paths.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Incorrect clock tree synthesis constraints – target skew or target latency set too aggressively, causing the tool to insert many buffers that create other issues.",
+        "distinguishing_check": "Review the CTS constraint file; if the target skew is <20ps (unrealistic for the process) or the target latency is very tight, suspect over‑constraint.",
+        "check_cost": "minutes",
+        "typical_fix": "Relax the target skew to a feasible value (e.g., 50ps for 28nm) and rerun CTS.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Different clock domains routed with different buffer types or different metal layers, causing systematic skew between domains.",
+        "distinguishing_check": "Compare insertion delays of the two domains; if one is consistently >200ps longer, and they share the same root, check the buffer cell library and layer assignment.",
+        "check_cost": "hours",
+        "typical_fix": "Harmonize the buffer type and route layer assignments for all clocks, or add offset compensation.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check floorplan/macro blockage first (most common in large blocks), then clock gating balance, then constraints, then per‑domain differences – because floorplan issues are visually obvious and yield high impact fixes.",
+    "classic_trap": "Re‑running CTS with more iterations and hoping the skew improves, without first identifying that the root cause is a physical blockage that no amount of buffer insertion can overcome.",
+    "confidence": 0.9
+  },
+  {
+    "failure_class": "FAIL_DRC (routing DRCs)",
+    "symptoms": [
+      "After detailed routing, the DRC report shows >500 violations, predominantly of the 'short' and 'spacing' types on a single metal layer (e.g., M4).",
+      "Antenna violations appear on a large number of nets, typically those connected to gate inputs of standard cells, concentrated in certain regions.",
+      "Via density violations (minimum via count per area) are flagged in areas with high signal pin density, often near macros.",
+      "DRC violations are not random – they cluster around the same macro-adjacent channels that showed congestion in the routing stage."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient track utilization in a specific layer due to a high density of long parallel nets, leading to spacing violations.",
+        "distinguishing_check": "Run a layer‑by‑layer track usage heatmap; if the violating layer has >85% track utilization in that area, and the spacing rule is tight (e.g., min spacing 0.1µm), confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Spread nets to adjacent layers, or increase the area of the block, or change the wiring pitch (if allowed).",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Antenna effect – long metal segments connected to gate oxide are accumulating charge during plasma etching, exceeding antenna ratio limits.",
+        "distinguishing_check": "Extract antenna ratio per net from the DRC report; if nets with > allowable ratio have no diode, confirm.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert antenna diodes at the gate inputs, or jumper the long segment using a higher metal layer (break and route up) to reduce the accumulated area.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Via density violations occur because the standard cells have limited pin access (e.g., only one metal layer for pin connection) causing many vias on adjacent tracks.",
+        "distinguishing_check": "Check the cell pin access map; if violating vias are all on the same cell rows, confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Switch to a cell library with better pin access, or add via arrays manually, or rotate the cell orientation to use different layers.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Signal routing is forced to use a lower metal layer due to high macro blockage on upper layers, leading to local density violations on that lower layer.",
+        "distinguishing_check": "Compare the DRC violation map with the macro/blockage map; if violations appear only in areas where upper metal layers are blocked (e.g., by power stripes or macros), confirm.",
+        "check_cost": "hours",
+        "typical_fix": "Reserve more tracks on upper layers by reducing power stripe density or repositioning macro pins.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "The DRC rule deck is overly conservative for the corner (e.g., using worst‑case spacing), and the violations disappear with a less restrictive rule set.",
+        "distinguishing_check": "Check if the violations are just at the minimum spacing (exactly the rule limit) and are all of the same type; try relaxing to the foundry's recommended not mandatory rule.",
+        "check_cost": "hours (consult foundry)",
+        "typical_fix": "Update the rule deck to the correct corner, or negotiate waivers with the foundry.",
+        "fix_cost": "weeks (if waiver)"
+      }
+    ],
+    "ordering_rationale": "Check antenna first (easiest to fix with diodes/jumpers, and often a known issue), then track utilization per layer (most common in high-density blocks), then via density, then blockage-driven layer forcing, then rule‑deck conservatism – because antenna fixes are cheap and quick.",
+    "classic_trap": "Re‑routing the entire block when the DRCs are all antenna violations that could have been fixed by adding a single diode per violating net in minutes.",
+    "confidence": 0.87
+  }
+]

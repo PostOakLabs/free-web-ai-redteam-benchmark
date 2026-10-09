@@ -1,0 +1,98 @@
+[
+  {
+    "vector_name": "number_negative_zero",
+    "input_json": "-0",
+    "canonical_output": "0",
+    "rule": "RFC8785 3.2.2.3: ES6 Number.prototype.toString(-0) => 0",
+    "divergence_trap": "Naive keeps -0 as -0, JSON.stringify(-0) in some envs preserves -0? Actually JS returns 0, but Python keeps -0",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_integer_vs_float",
+    "input_json": "1.0",
+    "canonical_output": "1",
+    "rule": "RFC8785 3.2.2.3: shortest round-tripping decimal, 1.0 -> 1",
+    "divergence_trap": "Plain parser preserves 1.0",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_beyond_2pow53",
+    "input_json": "9007199254740993",
+    "canonical_output": "9007199254740992",
+    "rule": "RFC8785 3.2.2.3: numbers are IEEE-754 doubles, 9007199254740993 not representable, nearest is 9007199254740992",
+    "divergence_trap": "Arbitrary-precision keeps original 9007199254740993",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_exponent_boundary_1e20_1e21",
+    "input_json": "",
+    "canonical_output": "[100000000000000000000,1e+21]",
+    "rule": "RFC8785 3.2.2.3: ES6 ToString uses exponent when exponent < -6 or >21; 1e20 stays plain 100000000000000000000, 1e21 becomes 1e+21 with mandatory + sign",
+    "divergence_trap": "Naive outputs without plus or [1E+20,1E+21] uppercase E, or keeps plain for both",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_tiny_boundary_1e-6_1e-7",
+    "input_json": "[0.000001,0.0000001]",
+    "canonical_output": "[0.000001,1e-7]",
+    "rule": "RFC8785 3.2.2.3: ES6 ToString uses exponent for <1e-6; 0.000001 stays plain, 0.0000001 becomes 1e-7",
+    "divergence_trap": "Naive keeps [0.000001,0.0000001] plain or converts both to exponent",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_solidus_not_escaped",
+    "input_json": "{\"a\":\"b\\/c\"}",
+    "canonical_output": "{\"a\":\"b/c\"}",
+    "rule": "RFC8785 3.2.2.2: only \" \\ and U+0000-U+001F escaped; solidus / MUST NOT be escaped",
+    "divergence_trap": "Naive that escapes / as \\/ keeps {\"a\":\"b\\/c\"}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_control_escaping",
+    "input_json": "\"\\u0008\\u0000\\u000A\"",
+    "canonical_output": "\"\\b\\u0000\\n\"",
+    "rule": "RFC8785 3.2.2.2: U+0008->\\b, U+000C->\\f, U+000A->\\n, U+000D->\\r, U+0009->\\t, others U+0000-U+001F -> \\u00xx lowercase",
+    "divergence_trap": "Naive escapes all controls as \\u00xx, producing \"\\u0008\\u0000\\u000a\" or upper-case hex",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_surrogate_pair_emoji",
+    "input_json": "\"\\uD83D\\uDE00\"",
+    "canonical_output": "\"😀\"",
+    "rule": "RFC8785 3.2.2.2: strings UTF-8, non-ASCII not escaped; surrogate pair \\uD83D\\uDE00 decodes to U+1F600 and must be emitted as literal UTF-8 😀, not as surrogate escapes",
+    "divergence_trap": "Naive keeps \"\\uD83D\\uDE00\" or outputs \"\\ud83d\\ude00\" lower-case, or escapes as two \\u escapes",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_unicode_no_normalization",
+    "input_json": "\"e\\u0301\"",
+    "canonical_output": "\"é\"",
+    "rule": "RFC8785 3.2.2.2: JCS does NOT perform Unicode normalization; e+U+0301 combining remains decomposed, distinct from U+00E9 composed",
+    "divergence_trap": "NFC normalizer converts e\\u0301 to é (\\u00e9), losing distinction",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "key_order_utf16_surrogate_vs_bmp",
+    "input_json": "{\"\":1,\"𐀀\":2}",
+    "canonical_output": "{\"𐀀\":2,\"\":1}",
+    "rule": "RFC8785 3.2.3: member names sorted by UTF-16 code units; U+10000 = = < =, so U+10000 sorts before U+E000, opposite of code-point order 57344<65536",
+    "divergence_trap": "Naive code-point sort (Python, Rust BTree) puts U+E000 first: {\"\":1,\"𐀀\":2}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "structural_empty_nesting",
+    "input_json": "{\"b\":{\"c\":[]},\"a\":{}}",
+    "canonical_output": "{\"a\":{},\"b\":{\"c\":[]}}",
+    "rule": "RFC8785 3.2.1 no whitespace, 3.2.3 recursive UTF-16 key sort, 3.2.4 arrays preserve order, empty object {} and empty array [] canonical",
+    "divergence_trap": "Naive keeps input order b before a or adds spaces/newlines",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "structural_duplicate_key_illegal",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": "ERROR_DUPLICATE_KEY",
+    "rule": "RFC8785 3.2.3 / RFC8259: object member names MUST be unique; duplicate keys make JSON invalid for JCS and must be rejected",
+    "divergence_trap": "Plain JSON.parse takes last value and outputs {\"a\":2} silently, masking duplicate-key attack",
+    "certainty": "probable"
+  }
+][55296][56320][57344]

@@ -1,0 +1,57 @@
+```json
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "Actuarial method: PV of drawdowns = PV of repayments+charges, discounted at monthly periods, then annualized via (1+i_month)^12 - 1",
+      "The €100 arrangement fee, paid at conclusion (t=0), is treated as DEDUCTED from the loan proceeds actually made available to the consumer — net amount drawn down used in the equation is €10,000 - €100 = €9,900, while the repayment schedule (24 × €450) remains based on the full €10,000 nominal principal",
+      "Repayments of €450 occur at t=1,2,...,24 months (ordinary annuity, first payment one month after drawdown, as stated)"
+    ],
+    "equation": "9900 = 450 * [1-(1+i)^-24]/i, solve for monthly i; APRC = (1+i)^12 - 1",
+    "iterations": "Iter1: i=0.0060 -> annuity factor f(i)=(1-(1+i)^-24)/i = 22.286 (target factor = 9900/450 = 22.000, too high). Iter2: i=0.0070 -> f(i)=22.022 (still slightly high). Iter3: i=0.0072 -> f(i)=21.968 (now too low). Linear interpolation between iter2/iter3 gives i≈0.007082. Convergence check: f(0.007082)=22.001 ≈ 22.000 (residual 0.001, accepted). Converged monthly i≈0.7082%.",
+    "aprc_pct": 8.8
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "Duration of the overdraft assumed to be 3 months, per the case's explicit instruction (note: this is NOT the CCD Annex I default assumption of 1 year for credit without a fixed duration — the case text directed a 3-month assumption, which is followed here rather than the directive's own general default)",
+      "Full credit limit (€3,000) treated as drawn down at t=0 and outstanding for the entire 3-month assumed duration, per the directive's additional assumption for undetermined drawdown patterns",
+      "12% nominal per annum charged monthly = 1.00% monthly rate, compounding monthly onto the outstanding balance",
+      "€25 monthly account fee assumed payable at the end of each month (t=1,2,3 in months), i.e. concurrently with any interest settlement at t=3",
+      "Single balloon repayment of principal + compounded interest at t=3 (end of assumed duration), since no interim principal repayment schedule is specified"
+    ],
+    "equation": "3000 = 25*(1+i)^-1 + 25*(1+i)^-2 + [3000*(1.01)^3 + 25]*(1+i)^-3, where 3000*(1.01)^3 = 3090.903, so final t=3 cash flow = 3115.903; solve monthly i, then APRC=(1+i)^12-1",
+    "iterations": "Iter1: i=0.0100 -> PV=24.7525+24.5074+3024.35=3073.61 (target 3000, too high, PV must fall). Iter2: i=0.0200 -> PV=24.5098+24.0292+2936.66=2985.20 (now too low). Iter3: i=0.0181 -> PV=24.5556+24.1189+2953.58=3002.25 (slightly high). Refine: i=0.0183 -> PV=24.5507+24.1094+2950.85=2999.51 (slightly low). Convergence check: interpolating between iter3(0.0181) and the 0.0183 trial gives i≈0.018264, PV≈3000.0 (residual <0.3, accepted).",
+    "aprc_pct": 24.3
+  },
+  {
+    "case": 3,
+    "assumptions_invoked": [
+      "Full €1,500 limit drawn immediately (stated in case)",
+      "Repayment structure of 12 equal monthly instalments is an assumed simplification for this worked case (source-logic: mirrors the directive's general fallback of assuming a plausible, fully-amortizing repayment schedule when the actual open-end repayment pattern is not otherwise specified) — this is NOT a specific numbered CCD Annex I assumption being cited, but a constructed convention for tractability",
+      "18% nominal per annum, monthly compounding = 1.5% monthly rate, applied uniformly to both the amortization schedule and the discounting rate",
+      "No fees or charges other than interest, so the equal instalment is exactly the standard amortizing-loan payment at the same rate used for discounting"
+    ],
+    "equation": "1500 = A * [1-(1.015)^-12]/0.015, where A is solved as the standard annuity payment: A = 1500*0.015/[1-(1.015)^-12] = 137.52; since drawdown and repayment side are both built from i=0.015 by construction, APRC = (1.015)^12 - 1 directly",
+    "iterations": "No iterative root-finding required: because the instalment amount A was derived directly from the stated 1.5%-monthly rate as a standard amortization formula, the PV equation is satisfied exactly at i=0.015 by construction (closed-form; residual = 0 by definition). Convergence check: substituting i=0.015 back into the PV equation reproduces 1500 exactly (verified algebraically, not iteratively).",
+    "aprc_pct": 19.6
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "Full €5,000 limit drawn down at t=0, assumed because the case specifies an 'unascertainable drawdown timing/pattern,' and the directive's general fallback in such cases is to assume the maximum/full amount is drawn immediately (a conservative, fully-drawn assumption analogous to the overdraft full-drawdown convention)",
+      "Rate of 8% nominal per annum applied as simple annual compounding over the single 12-month period (since there is only one compounding interval between drawdown and the single repayment, nominal annual and effective annual coincide here)",
+      "The €200 broker fee is FINANCED into the balance: it is added to the outstanding principal (5000+200=5200) at t=0 and therefore itself accrues interest at 8% for the year, but it is NOT part of the amount actually made available to the consumer for their own use — so the 'amount of credit' on the drawdown side of the APRC equation remains €5,000, while the repayment side is based on the grown 5200 balance"
+    ],
+    "equation": "5000 = [(5000+200)*1.08] * (1+X)^-1 = 5616*(1+X)^-1",
+    "iterations": "No iterative solving required: single drawdown / single repayment pair gives a closed-form solution. (1+X) = 5616/5000 = 1.1232, so X = 0.1232. Convergence check: substituting X=0.1232 back gives 5616/1.1232 = 5000.0 exactly (verified algebraically).",
+    "aprc_pct": 12.3
+  },
+  {
+    "financed_vs_cash_fee_note": "Contrast for case 4: a financed fee is added to the principal balance and therefore compounds at the credit's own interest rate for the full period before being repaid, inflating the total repayment (5200*1.08=5616) while leaving the discounted drawdown side unchanged at 5000. A t=0 CASH fee instead reduces the net amount actually drawn down (e.g. 5000-200=4800) while the repayment obligation is computed on the original undiminished principal (5000*1.08=5400) — giving a different equation (4800 = 5400*(1+X)^-1, X=0.125=12.5%) and a different APRC (12.5% vs 12.3%) even though the fee amount and nominal rate are identical, because in the financed case the fee itself earns interest for the period whereas in the cash case it does not."
+  },
+  {
+    "weakest_point": "The single largest source of potential divergence from the directive's exact prescribed method is the fee-treatment convention chosen in cases 1 and 4 (whether an upfront/financed fee reduces the net drawdown, is added to the repayment stream, or is added to the accruing principal) — the CCD Annex I text is prescriptive about which convention applies to which fee type, and this computation applied a self-consistent but explicitly-chosen convention rather than one confirmed against the annex's literal fee-classification rules. Secondary risk: case 2's fee-timing assumption (fees paid at month-end, interest compounding monthly rather than simple) and its use of a 3-month duration (as instructed, not the directive's own general 1-year default) are both assumptions of convenience rather than verified annex-mandated treatments."
+  }
+]
+```

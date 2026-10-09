@@ -1,0 +1,31 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is a substantive technical review exercise I can engage with as a knowledge discussion. Here's my analysis of the draft case study:
+
+---
+
+**Verdict: PLAUSIBLE-WITH-CORRECTIONS**
+
+The overall scenario is realistic and the causal chain is sound, but several specific numbers and claims deserve scrutiny.
+
+**Key objections:**
+
+1. **214,000 DRC violations from 3.8% global-route overflow** — This ratio is suspect. 3.8% global-route overflow is moderate; it typically produces thousands to low tens of thousands of detailed-route DRCs, not 214,000. That number suggests either the overflow was much worse than 3.8% (perhaps 15-25%), or the DRC count includes non-routing DRCs (antenna, metal density) that shouldn't be attributed solely to congestion. A more realistic number for 3.8% overflow concentrated in six channels might be 20,000-60,000 DRCs.
+
+2. **Pin-swap on two macros resolving significant congestion** — Pin swaps on hard macros are constrained by the macro's internal layout; you can only swap functionally equivalent pins. On most macros, the number of swappable pin groups is limited. Claiming this meaningfully contributed to dropping overflow from 3.8% to 0.6% is optimistic unless those two macros happened to have the highest-fanout pins in the worst channels. The contribution was likely minor compared to the density screens and routing rule relaxation.
+
+3. **340 violations closing to 0 in two repair iterations** — This is plausible but tight. Two repair iterations typically handle a few hundred DRCs cleanly. The number is believable if the remaining 340 were simple spacing or via violations.
+
+4. **Unchanged utilization at 71.5%** — If density screens were applied (max 65% in the channel regions), utilization in those regions dropped. The block-level utilization might stay at 71.5% if cells were redistributed rather than removed, but this should be stated explicitly. If cells were moved out of the channels, they went somewhere — that destination region's density increased.
+
+5. **−12 ps WNS degradation** — Plausible for a pin-swap and density redistribution, but the draft should specify whether this was setup or hold degradation, and at which corner.
+
+**Missing from the story:**
+
+- What happened to hold timing after the routing rule relaxation (relaxed spacing increases coupling, which affects hold)
+- Whether the routing rule relaxation was foundry-approved or required a waiver
+- How long the entire recovery took (wall-clock time from first detailed route failure to clean closure)
+- Whether the power grid was affected by the cell redistribution
+- What the TNS impact was, not just WNS
+
+**Most defensible part:** The decision to reject the floorplan rework given frozen top-level feedthroughs and power-grid dependencies — this is exactly the kind of constraint that makes real projects choose workarounds over the "obvious" fix.
+
+**Overall note:** The scenario is architecturally sound and the decision logic is realistic. The main weakness is the DRC violation count, which is implausibly high for the stated overflow percentage. Either the overflow was worse than reported or the DRC count includes non-congestion violations. Fix the numbers and this is a credible case study.

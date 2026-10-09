@@ -1,0 +1,72 @@
+[
+{
+"title": "Execution Trace Cache vs. Conventional Instruction L1 Cache",
+"where_in_paper": "Trace Cache / Instruction Fetch and Decode",
+"decision": "Remove the conventional instruction L1 cache from the main pipeline and replace it with an Execution Trace Cache that caches decoded x86 micro-ops (uops) in their dynamically executed path order.",
+"alternatives_or_rejected": "Traditional instruction L1 cache that stores raw x86 instruction bytes requiring fetch-time instruction decoding and alignment every cycle.",
+"rationale": "x86 instructions are variable length and complex to decode; decoding them at high target clock frequencies would require excessive pipeline stages and power. Storing already-decoded uops eliminates decode latency/power on cache hits and delivers high uop bandwidth even across target branches.",
+"outcome": "Delivered a high-bandwidth uop stream (up to 3 uops per cycle) directly to the execution engine while bypassing x86 instruction decoding during normal loop/trace execution.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 3,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact section heading name used for the Trace Cache discussion",
+"confidence": 0.95
+},
+{
+"title": "Double-Pumped Fast ALU Execution Engine",
+"where_in_paper": "Execution Engine / Rapid Execution Engine",
+"decision": "Run core integer ALUs at twice the main core processor clock frequency (e.g. 2x clock speed), enabling simple ALU operations to complete in half a main clock cycle.",
+"alternatives_or_rejected": "Standard single-frequency ALUs executing one operation per main clock cycle.",
+"rationale": "High-frequency clock targets make latency (in clock cycles) for simple integer operations critical to dependent instruction chains; double-pumping the ALUs cuts dependent integer latency in half and effectively doubles integer throughput per unit area.",
+"outcome": "Achieved sub-nanosecond integer execution latency for low-latency operations like addition and subtraction.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 6,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Whether specific double-pumped ALU circuit schematics were detailed in this specific ITJ overview paper",
+"confidence": 0.9
+},
+{
+"title": "Deep Pipeline Strategy for High Frequency (Hyper Pipelining)",
+"where_in_paper": "Overview / Pipeline Architecture",
+"decision": "Implement a deep 20-stage branch misprediction penalty pipeline (Hyper Pipelining) to drastically reduce logic gate delays per stage.",
+"alternatives_or_rejected": "Shallow pipeline architectures (e.g., 10-stage P6 pipeline).",
+"rationale": "Reducing logic levels per clock stage allows scaling the processor to significantly higher operational clock frequencies in a given process node, yielding overall higher performance despite higher branch mispredict penalties.",
+"outcome": "Enabled gigahertz-plus clock frequencies far exceeding previous generation P6 processors.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 2,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact wording used to introduce the 20-stage count figure in the text",
+"confidence": 0.9
+},
+{
+"title": "Advanced Branch Prediction Engine Architecture",
+"where_in_paper": "Branch Prediction",
+"decision": "Implement a large branch target buffer (BTB) combined with an advanced dynamic branch prediction algorithm incorporating both global and local history to drive the trace cache.",
+"alternatives_or_rejected": "Basic static branch prediction or smaller P6-style branch target buffers.",
+"rationale": "Because the deep 20-stage pipeline imposes a severe clock-cycle penalty on branch mispredictions, prediction accuracy had to be significantly higher than prior microarchitectures to maintain net IPC.",
+"outcome": "Reduced branch misprediction frequency significantly relative to older processors, protecting deep pipeline throughput.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 4,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Specific software benchmark misprediction reduction percentages quoted in text",
+"confidence": 0.85
+},
+{
+"title": "Point-to-Point 400 MHz Quad-Pumped System Bus",
+"where_in_paper": "System Bus Architecture",
+"decision": "Utilize a 100 MHz physical system bus clock that is quad-pumped (4x data transfer per cycle) to provide 400 MHz equivalent data transfer rate (3.2 GB/s bandwidth).",
+"alternatives_or_rejected": "Single- or dual-data-rate system buses bounded by the physical clock frequency.",
+"rationale": "The high-frequency execution core and trace cache demand immense memory bandwidth to prevent stall states, which traditional bus clocking schemes could not supply within system board noise/electrical constraints.",
+"outcome": "Delivered up to 3.2 GB/s of system interconnect bandwidth to support streaming applications and high-speed memory.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 7,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact figure numbers for the system bus timing diagram in the paper",
+"confidence": 0.85
+}
+]

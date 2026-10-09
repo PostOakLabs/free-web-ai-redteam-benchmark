@@ -1,0 +1,130 @@
+```json
+[
+  {
+    "pattern_name": "Block-Boundary Output/Input Delay Budget Split",
+    "situation": "Two blocks (A and B) share a clock and are being implemented independently. Block A feeds data to Block B through top-level routing. Each block needs its own SDC with boundary delay constraints.",
+    "derivation": "1. Combinational-path budget = T_period - T_setup - T_clock_uncertainty.  Example at 500 MHz: 2000ps - 50ps (confidence 0.5) - 120ps (confidence 0.6) = 1830ps.  2. Estimate interconnect delay from floorplan: T_inter ≈ 300-500ps for a moderate top-level route (confidence 0.5).  3. Split remaining time by estimated block complexity: T_A_budget / T_B_budget proportional to each block's combinational-depth × gate-delay estimate.  4. set_output_delay on A = T_inter + T_B_budget.  5. set_input_delay on B = T_A_budget + T_inter.  6. Verify self-consistency: A's available = budget - output_delay = T_A_budget; B's available = budget - input_delay = T_B_budget.",
+    "wrong_way": "(a) set_output_delay = T_inter only, ignoring capture-block share → A is under-constrained internally and B is over-constrained by the amount of B's budget that A silently consumed.  (b) 50/50 split regardless of complexity → one block starved, the other has excessive slack.  (c) Forgetting clock_uncertainty → budget is 100-200ps optimistic, and the error accumulates silently through integration.",
+    "defense": "Present the floorplan-derived interconnect estimate, each block's gate-equivalent count or combinational depth, and the resulting slack distribution. If one block's initial implementation shows very negative or very positive slack, adjust the split and re-budget.",
+    "signoff_risk": "Too-tight output delay on A: Block A over-designed (area/power bloat) and may still fail, blocking integration. Too-loose output delay on A: A finishes easily but the interconnect + B path overflows the period at integration, requiring either interconnect buffering (area + power) or A re-implementation (schedule risk).",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "arithmetic_confidence": {
+      "period_2000ps": 0.9,
+      "setup_50ps": 0.5,
+      "uncertainty_120ps": 0.6,
+      "interconnect_400ps": 0.5,
+      "split_55_45": 0.5
+    },
+    "node_era_note": "At 7nm, interconnect RC is much higher so the interconnect share of the budget grows from roughly 20-25% to 30-40% (confidence 0.6), changing the typical split ratio."
+  },
+  {
+    "pattern_name": "False Path vs Multicycle Path Decision for Inter-Clock Paths",
+    "situation": "Two clock domains exist in the design. The engineer must decide whether paths between them should be set_false_path, set_multicycle_path, or constrained as single-cycle.",
+    "derivation": "1. Determine if clocks share a common root (same PLL or oscillator).  2. If NO common root → clocks are asynchronous → false-path the data paths, but constrain synchronizer paths separately (see Synchronizer Max-Delay pattern).  3. If common root with different frequencies → compute LCM period: LCM(T_A, T_B). MCP_setup = LCM / T_capture.  4. Always set MCP_hold = MCP_setup - 1 to move the hold check to the correct launch-capture edge pair.  5. If same frequency with known phase offset → model with set_clock_latency -source and constrain as single-cycle with the offset accounted for.",
+    "wrong_way": "(a) set_false_path on a path whose clocks share a root → real timing violation ignored, silicon failure.  (b) set_multicycle_path N -setup without also setting set_multicycle_path (N-1) -hold → tool performs hold check on wrong edge: either generates false hold violations (area waste from unnecessary buffers) or misses real hold violations.  (c) Blanket set_false_path between two domains to 'clean up reports' → masks paths that should be timed, including paths through combinational logic between domains that bypass the synchronizer.",
+    "defense": "Show the clock-generation schematic (PLL → divider → clock tree) proving the relationship. Present the LCM edge diagram with launch and capture edges marked. Demonstrate the hold-edge adjustment is correct by showing the actual waveform.",
+    "signoff_risk": "False path too aggressive: real path untimed, functional silicon failure. False path too conservative (should be false but isn't): wasted optimization cycles and area, but functionally safe. Multicycle without hold adjustment: false hold violations waste area, or real hold violations on the wrong edge escape to silicon.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "arithmetic_confidence": {
+      "LCM_calculation": 0.9,
+      "hold_adjustment_rule": 0.85
+    },
+    "node_era_note": "no-era-difference-recalled — the logical decision tree is the same regardless of process node."
+  },
+  {
+    "pattern_name": "set_max_delay on Synchronizer Clock-Domain Crossing",
+    "situation": "A signal crosses from clock domain A to domain B through a 2-FF synchronizer. The path to the first synchronizer flop needs a real timing constraint, not a false-path.",
+    "derivation": "1. The path from the source register in domain A to the D pin of the FIRST synchronizer flop in domain B IS timed.  2. set_max_delay on this path = T_capture_period (ensures data arrives within one capture cycle without demanding single-cycle tightness).  3. set_false_path -hold on this same path (hold timing is meaningless through a synchronizer because metastability makes the capture-edge relationship non-deterministic).  4. Paths through the second synchronizer flop onward: set_false_path (data is now synchronized).  5. Identify each synchronizer instance explicitly by cell name or by hierarchical path — do not rely on clock-domain crossing auto-detection.",
+    "wrong_way": "(a) set_false_path on the entire crossing including the path to the first flop → path can be arbitrarily long, widening the metastability window and degrading MTBF.  (b) Apply normal set_max_delay without setting -hold false_path → tool inserts hold buffers on the synchronizer path, adding latency that may exceed the max_delay target or defeat the purpose.  (c) set_max_delay globally to all paths between the two domains instead of targeting the synchronizer flop → over-constrains data paths that should be false-path'd.",
+    "defense": "List each synchronizer instance by hierarchical name. Show the set_max_delay value justified as one capture-clock period. Reference the MTBF requirement (from reliability spec) that justifies the synchronizer depth. Show that hold-false-path is applied to prevent buffer insertion.",
+    "signoff_risk": "Too-tight max_delay: unnecessary optimization on synchronizer paths, area waste, possible routing congestion near synchronizer cells. Too-loose max_delay: data arrives late, first flop samples transitioning data, MTBF degrades or functional failure. Missing hold false-path: tool inserts delay buffers that increase latency on the synchronizer path, partially defeating the max_delay constraint.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "arithmetic_confidence": {
+      "max_delay_equals_capture_period": 0.75
+    },
+    "node_era_note": "At 7nm, faster clock frequencies mean the absolute max_delay value is smaller, making the path-to-synchronizer constraint tighter and increasing the chance that even a modest-length route violates it."
+  },
+  {
+    "pattern_name": "Over-Constraining at Synthesis with Gradual Relaxation Toward Signoff",
+    "situation": "Starting implementation of a new block. Target clock period is known, but the design will degrade during CTS (insertion delay), routing (parasitics), and signoff (OCV, IR-drop). The constraint must leave room for this degradation.",
+    "derivation": "1. At synthesis: target period × (1 - early_margin). Typical early_margin = 25-30% (confidence 0.6). At 500 MHz (2ns): synthesize to ~1.4-1.5ns.  2. After placement: relax to period × (1 - mid_margin). Typical mid_margin = 10-15% (confidence 0.5). Target ~1.7-1.8ns.  3. After CTS: relax to period × (1 - late_margin). Typical late_margin = 3-5% (confidence 0.6).  4. At signoff: use full period with all parasitics, OCV, IR-drop annotated.  5. The margin values are calibrated from prior tapeouts at the same node on the same team's designs.",
+    "wrong_way": "(a) Synthesize to 100% of period from the start → after CTS and routing add 200-400ps of degradation, design is significantly negative → many ECO iterations, schedule risk.  (b) Synthesize to 50% of period → massive over-design: area 20-40% larger than necessary (confidence 0.5), power significantly higher, and the tool optimizes paths that don't need it.  (c) Relax constraints too aggressively between stages (e.g., jump from 70% to 100% after placement) → catch timing problems too late when they're expensive to fix.",
+    "defense": "Present the empirical degradation curve from the team's prior designs at the same node: average insertion-delay as % of period, average routing-parasitic impact, typical OCV impact. Show the margin schedule matches this historical data.",
+    "signoff_risk": "Over-constrained at synthesis: area and power waste but functionally safe — expensive chip, meets schedule. Under-constrained at synthesis: area-efficient but timing closure becomes a multi-iteration nightmare at signoff — tapeout delay risk, possible missed market window.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "arithmetic_confidence": {
+      "early_margin_25_30_pct": 0.6,
+      "mid_margin_10_15_pct": 0.5,
+      "late_margin_3_5_pct": 0.6,
+      "degradation_200_400ps": 0.5
+    },
+    "node_era_note": "At 7nm, OCV derates and IR-drop effects are larger, so the early margin typically needs to be 35-40% versus 25-30% at 28nm (confidence 0.6). The relaxation schedule has more stages."
+  },
+  {
+    "pattern_name": "Async FIFO Gray-Code Pointer Synchronization Constraints",
+    "situation": "An asynchronous FIFO bridges two clock domains. Gray-code pointers cross from write domain to read domain (and vice versa) through synchronizer chains. The constraint must protect data integrity while bounding pointer propagation delay.",
+    "derivation": "1. Data path through FIFO: set_false_path from write-clock domain to read-clock domain on data bits (FIFO depth protects data — no timing constraint needed).  2. Gray-code pointer bits from write side to read side: set_max_delay = T_read_period per bit (ensures each pointer update arrives within one read-clock cycle).  3. Similarly for read-to-write pointer: set_max_delay = T_write_period.  4. set_false_path -hold on all pointer synchronizer paths (hold timing meaningless through synchronizers).  5. Each pointer bit gets an independent set_max_delay to ensure all bits of the same pointer arrive within the same capture window.",
+    "wrong_way": "(a) set_false_path on everything including pointer bits → pointer propagation is unconstrained, may take many cycles, FIFO full/empty detection becomes unreliable, data corruption through read-before-write-complete or write-before-read-complete.  (b) set_max_delay on pointer bits to a value much larger than the capture period → pointer update delayed by multiple cycles, requiring deeper FIFO than implemented, functional overflow/underflow.  (c) Using set_multicycle_path on pointer bits instead of set_max_delay → meaningless for truly asynchronous clocks with no fixed phase relationship.",
+    "defense": "Show the FIFO depth analysis: depth must be greater than 2 × (max_delay / period) for safe full/empty detection. List each pointer bit's max_delay constraint. Reference synchronizer MTBF analysis for the chosen synchronizer depth. Show waveform diagram of pointer update timing.",
+    "signoff_risk": "Unconstrained pointer (false path): subtle data corruption when write side overwrites data before read side consumes it — extremely hard to reproduce in simulation, manifests as rare data errors in silicon. Over-constrained pointer (max_delay too tight): area waste from buffer insertion on pointer paths, possible routing congestion near synchronizers, but functionally safe.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "arithmetic_confidence": {
+      "max_delay_equals_capture_period": 0.7,
+      "depth_greater_than_2x_ratio": 0.6
+    },
+    "node_era_note": "At 7nm, faster clock frequencies mean the absolute max_delay is smaller and FIFO depth requirements are proportionally larger for the same synchronization latency budget."
+  },
+  {
+    "pattern_name": "Generated/Divided Clock Constraint Derivation",
+    "situation": "A flip-flop or latch divides the master clock by N, producing a slower clock that drives downstream logic. The SDC must correctly define the generated clock and its relationship to the master.",
+    "derivation": "1. Define master clock first: create_clock -name mclk -period T [get_ports mclk_pin].  2. Define generated clock: create_generated_clock -name gclk -source [get_pins div_reg/CK] -divide_by N [get_pins div_reg/Q].  3. Generated period = N × T.  4. Source pin MUST be the clock-input pin of the divider register (CK), not the data-output pin (Q). The tool traces from source to output automatically.  5. Set clock uncertainty on the generated clock domain: includes master PLL jitter + divider-edge jitter + guard band.  6. For paths between master and generated domains: compute edge relationships and determine if multicycle constraints are needed (fast-to-slow may need MCP; slow-to-fast is typically single-cycle).",
+    "wrong_way": "(a) create_clock on the divider output with a manually specified period instead of create_generated_clock → the tool does not know the master-generated relationship, cannot compute inter-domain timing, latency and insertion delay are wrong.  (b) Specify -source as div_reg/Q (output pin) instead of div_reg/CK (clock pin) → tool fails to trace through the divider correctly, latency calculation wrong by the divider's clock-to-Q delay.  (c) Forgetting clock uncertainty on the generated clock → zero jitter assumed, timing too optimistic by the jitter amount.  (d) Not handling the edge relationship between master and generated clocks → hold violations on fast-to-slow crossings that are invisible in single-edge analysis.",
+    "defense": "Show the clock-generation RTL or schematic. Present the waveform diagram with master and generated edges aligned. Prove the edge relationship (which master edge corresponds to which generated edge). Demonstrate that uncertainty is set for both domains.",
+    "signoff_risk": "Wrong generated period: all downstream timing wrong — paths either over-constrained (area waste) or under-constrained (silicon failure). Missing inter-domain constraints: paths between master and generated clock untimed, functional failure. Wrong source pin: latency off by the divider's clk-to-Q delay, setup/hold margins incorrect.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.8,
+    "arithmetic_confidence": {
+      "generated_period_NxT": 0.95,
+      "source_pin_CK_not_Q": 0.9
+    },
+    "node_era_note": "no-era-difference-recalled — the SDC construct is identical; at 7nm jitter is proportionally larger relative to the period, making the uncertainty setup more critical but not changing the pattern."
+  },
+  {
+    "pattern_name": "Virtual Clock and IO Delay Budgeting for External Interfaces",
+    "situation": "Chip IO ports interface with external components (memory, PHY, other chips). The internal clock tree does not reach the IO, and the external timing reference may differ from the internal clock.",
+    "derivation": "1. Create a virtual clock matching the external reference: create_clock -name virt_clk -period T_ext (no physical pin, or on a reference clock input).  2. For input ports: set_input_delay -clock virt_clk -max D_in [get_ports data_in].  D_in = T_ext_clk2q (from external chip datasheet) + T_board_trace (from PCB extraction) + T_margin.  3. For output ports: set_output_delay -clock virt_clk -max D_out [get_ports data_out].  D_out = T_board_trace + T_ext_setup (from external chip datasheet) + T_margin.  4. T_margin = 10-15% of T_ext (confidence 0.6).  5. T_board_trace = from PCB team's post-layout extraction or pre-layout estimate: typically 0.5-3ns depending on board (confidence 0.5).  6. Internal clock defined separately on the actual clock input pin of the chip.",
+    "wrong_way": "(a) set_input_delay relative to the internal clock instead of the virtual clock → tool includes internal clock-tree latency in the IO timing calculation. The external device does not see the internal clock tree, so this is wrong by the clock-tree latency amount.  (b) Forgetting the board trace delay → timing optimistic by 0.5-3ns, silicon works in the lab but fails on the actual board with real trace lengths.  (c) Using the internal clock period when it differs from the external period → constraining to the wrong frequency, either over- or under-constraining IO paths.",
+    "defense": "Present the external chip datasheet with highlighted timing parameters (clk-to-output, setup time). Show the PCB team's trace-delay extraction report. Display the resulting IO timing budget with the margin clearly separated. Show a timing diagram with external and internal clock edges.",
+    "signoff_risk": "Input delay too tight: internal paths to IO registers over-designed, area/power waste. Input delay too loose: data arrives at IO register too late, IO interface fails on actual board. Output delay too tight: output path over-designed. Output delay too loose: data arrives at external receiver too late, external device fails to capture.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.75,
+    "arithmetic_confidence": {
+      "margin_10_15_pct": 0.6,
+      "trace_delay_0.5_3ns": 0.5,
+      "datasheet_accuracy": 0.8
+    },
+    "node_era_note": "At lower nodes with multi-GHz SerDes IO, the trace delay is a much larger fraction of the period and jitter is more significant, making the IO budget much tighter and the margin more critical (confidence 0.7)."
+  },
+  {
+    "pattern_name": "Clock Uncertainty Budget Decomposition",
+    "situation": "Setting set_clock_uncertainty for a clock domain. The value must aggregate multiple real-world sources of timing variation, and the correct value changes as the design progresses through the flow.",
+    "derivation": "1. Total uncertainty = T_jitter + T_skew + T_guard.  2. T_jitter (PLL output jitter): from PLL datasheet or PLL team characterization. Typically 2-5% of period (confidence 0.6). At 500 MHz: 2ns × 3% ≈ 60ps.  3. T_skew (clock tree skew): before CTS, use an estimate based on design size — typically 50-150ps (confidence 0.5). After CTS, use the actual reported skew from CTS timing reports.  4. T_guard (margin): 5-15% of (jitter + skew) (confidence 0.5).  5. Apply at each flow stage: (a) Pre-CTS synthesis/implementation: set_clock_uncertainty = jitter + skew_estimate + guard. (b) Post-CTS: set_clock_uncertainty = jitter + guard (remove skew_estimate since actual skew is now known). (c) Inter-clock crossings: add additional inter-clock uncertainty on top (typically larger, covering both PLLs' jitter).",
+    "wrong_way": "(a) Single flat uncertainty value for the entire flow → too optimistic before CTS (skew unknown), too pessimistic after CTS (estimated skew still in the number).  (b) Forgetting to reduce uncertainty after CTS → design over-constrained by the estimated-skew amount, unnecessary buffering and area waste.  (c) Using PLL jitter alone without skew → underestimate by 50-150ps, silicon fails under clock-tree skew conditions especially at worst-case PVT corners.  (d) Same uncertainty for intra-domain and inter-domain paths → inter-domain uncertainty should be larger because it covers jitter from two independent PLLs.",
+    "defense": "Show the PLL jitter specification (datasheet excerpt). Show the CTS skew report (or estimation methodology if pre-CTS). Present a table of uncertainty values at each flow stage. Demonstrate that inter-clock uncertainty is appropriately larger than intra-clock.",
+    "signoff_risk": "Uncertainty too large: over-designed clock tree, extra buffers and area, power waste — functionally safe but expensive. Uncertainty too small: timing violations under real jitter + skew conditions, functional failure at high temperature or low voltage corners — these failures are often intermittent and hard to diagnose.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "arithmetic_confidence": {
+      "jitter_2_5_pct": 0.6,
+      "skew_50_150ps": 0.5,
+      "guard_5_15_pct": 0.5
+    },
+    "node_era_note": "At 7nm, PLL jitter is a larger fraction of the period (faster clocks, similar absolute jitter), and OCV derates effectively increase the skew component, so total uncertainty is a much larger fraction of the period than at 28nm (confidence 0.7)."
+  }
+]
+```

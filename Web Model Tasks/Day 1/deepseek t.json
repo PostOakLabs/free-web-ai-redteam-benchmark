@@ -1,0 +1,161 @@
+[
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Low SPFM (fails ASIL B)",
+    "inputs": {
+      "λ_total": "1000 FIT",
+      "λ_SPF": "200 FIT",
+      "λ_RF": "50 FIT",
+      "λ_MPF_latent": "100 FIT (not used in SPFM formula but included for completeness)",
+      "λ_safe": "650 FIT (not used)"
+    },
+    "computation": "SPFM = (1 - (λ_SPF + λ_RF) / λ_total) × 100% = (1 - (200+50)/1000) × 100% = (1 - 250/1000) × 100% = (1 - 0.25) × 100% = 0.75 × 100% = 75%",
+    "expected_output": {
+      "SPFM": "75%",
+      "ASIL_targets_met": "None (ASIL B requires ≥90%)"
+    },
+    "discriminates": "Tests a non‑compliant case with SPFM far below any ASIL threshold.",
+    "known_uncertainty": "The formula may also include safe faults in the denominator in some interpretations; the ISO standard uses total hardware failure rate."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Boundary ASIL B (exactly 90%)",
+    "inputs": {
+      "λ_total": "1000 FIT",
+      "λ_SPF": "50 FIT",
+      "λ_RF": "50 FIT"
+    },
+    "computation": "SPFM = (1 - (50+50)/1000) × 100% = (1 - 100/1000) × 100% = (1 - 0.10) × 100% = 90%",
+    "expected_output": {
+      "SPFM": "90%",
+      "ASIL_targets_met": "ASIL B (≥90%), but not ASIL C (≥97%)"
+    },
+    "discriminates": "Regulatory boundary for ASIL B; exactly on the threshold.",
+    "known_uncertainty": "ASIL B requires ≥90% per ISO 26262-5:2018; ambiguity about rounding (exact equality is acceptable)."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Boundary ASIL C (exactly 97%)",
+    "inputs": {
+      "λ_total": "1000 FIT",
+      "λ_SPF": "15 FIT",
+      "λ_RF": "15 FIT"
+    },
+    "computation": "SPFM = (1 - (15+15)/1000) × 100% = (1 - 30/1000) × 100% = (1 - 0.03) × 100% = 97%",
+    "expected_output": {
+      "SPFM": "97%",
+      "ASIL_targets_met": "ASIL B and C (≥97%), but not ASIL D (≥99%)"
+    },
+    "discriminates": "Regulatory boundary for ASIL C; tests the strict inequality for ASIL D.",
+    "known_uncertainty": "ASIL C threshold is 97% as per ISO 26262-5:2018; the exact equality is acceptable."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Zero failures, 60% confidence",
+    "inputs": {
+      "N": "1000 devices",
+      "H": "1000 hours",
+      "r": "0 failures",
+      "confidence_α": "0.60 (60%)",
+      "Ea": "0.7 eV",
+      "T_use": "55°C (328.15 K)",
+      "T_stress": "125°C (398.15 K)"
+    },
+    "computation": "AF = exp((Ea/k) × (1/T_use - 1/T_stress))\nEa/k = 0.7 / 8.617e-5 = 8123.45 K\n1/T_use = 1/328.15 = 0.003047, 1/T_stress = 1/398.15 = 0.002512\nDifference = 0.000535\nAF = exp(8123.45 × 0.000535) = exp(4.346) = 77.1\nχ²(0.60, 2) = 1.832 (for r=0, df=2)\nFIT = (χ² × 1e9) / (2 × N × H × AF)\n= (1.832 × 1e9) / (2 × 1000 × 1000 × 77.1)\n= 1.832e9 / (2,000,000 × 77.1 = 154,200,000)\n= 11.88 FIT",
+    "expected_output": {
+      "AF": "77.1",
+      "FIT": "11.88 FIT"
+    },
+    "discriminates": "Typical early‑life test with no failures, using standard 60% confidence JEDEC factor.",
+    "known_uncertainty": "Chi‑square values for 60% confidence are from JESD85 tables; AF uses typical Ea=0.7eV which may vary by failure mechanism."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "With failures (r=2) and 60% confidence",
+    "inputs": {
+      "N": "500 devices",
+      "H": "2000 hours",
+      "r": "2 failures",
+      "confidence_α": "0.60",
+      "Ea": "0.7 eV",
+      "T_use": "55°C",
+      "T_stress": "125°C"
+    },
+    "computation": "AF = 77.1 (same as above)\nFor r=2, degrees of freedom = 2r+2 = 6\nχ²(0.60, 6) = 6.211 (from JESD85 table)\nFIT = (6.211 × 1e9) / (2 × 500 × 2000 × 77.1)\nDenominator: 2 × 500 × 2000 = 2,000,000; × 77.1 = 154,200,000\nFIT = 6.211e9 / 154,200,000 = 40.27 FIT",
+    "expected_output": {
+      "AF": "77.1",
+      "FIT": "40.27 FIT"
+    },
+    "discriminates": "Case with multiple failures; tests the chi‑square scaling with degrees of freedom.",
+    "known_uncertainty": "Chi‑square value for 6 df and 60% confidence is approximate from standard table; minor variations exist."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Boundary 10 FIT (ASIL D typical target)",
+    "inputs": {
+      "N": "1000 devices",
+      "H": "1190 hours",
+      "r": "0 failures",
+      "confidence_α": "0.60",
+      "Ea": "0.7 eV",
+      "T_use": "55°C",
+      "T_stress": "125°C"
+    },
+    "computation": "AF = 77.1 (same as above)\nχ²(0.60, 2) = 1.832\nFIT = (1.832 × 1e9) / (2 × 1000 × 1190 × 77.1)\nDenominator: 2 × 1000 × 1190 = 2,380,000; × 77.1 = 183,498,000\nFIT = 1.832e9 / 183,498,000 ≈ 9.98 ≈ 10.0 FIT",
+    "expected_output": {
+      "AF": "77.1",
+      "FIT": "10.0 FIT"
+    },
+    "discriminates": "Boundary case for PMHF target of 10 FIT (common for ASIL D) – tests the ability to design a test with a specific FIT result.",
+    "known_uncertainty": "The 10 FIT target is a typical ASIL D PMHF requirement; this vector uses 60% confidence and zero failures, which gives an upper bound."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "Below 3A090.a threshold",
+    "inputs": {
+      "processing_units": [
+        {"MacTOPS": 200, "bit_length": 8}
+      ]
+    },
+    "computation": "TPP = Σ [2 × MacTOPS × bit_length]\nUnit 1: 2 × 200 × 8 = 3200\nTotal TPP = 3200\nThreshold for 3A090.a is 4800; 3200 < 4800, so not controlled.",
+    "expected_output": {
+      "TPP": "3200",
+      "threshold_met": "No (below 4800)"
+    },
+    "discriminates": "Typical low‑performance chip, not subject to export controls.",
+    "known_uncertainty": "The threshold is 4800 as per current EAR (3A090.a); performance density not considered here."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "Boundary at 4800 threshold",
+    "inputs": {
+      "processing_units": [
+        {"MacTOPS": 300, "bit_length": 8}
+      ]
+    },
+    "computation": "TPP = 2 × 300 × 8 = 4800\nThreshold is 4800; the regulation uses '4800 or more' so this meets the threshold.",
+    "expected_output": {
+      "TPP": "4800",
+      "threshold_met": "Yes (at threshold)"
+    },
+    "discriminates": "Tests the boundary condition: exactly equal to the TPP threshold triggers control.",
+    "known_uncertainty": "The exact wording of the EAR: '4800 or more'; equality is sufficient."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "Above 4800 threshold",
+    "inputs": {
+      "processing_units": [
+        {"MacTOPS": 400, "bit_length": 8},
+        {"MacTOPS": 100, "bit_length": 16}
+      ]
+    },
+    "computation": "Unit 1: 2 × 400 × 8 = 6400\nUnit 2: 2 × 100 × 16 = 3200\nTotal TPP = 6400 + 3200 = 9600\n9600 > 4800, so controlled.",
+    "expected_output": {
+      "TPP": "9600",
+      "threshold_met": "Yes (above 4800)"
+    },
+    "discriminates": "Combination of multiple units with different bit widths; tests summation.",
+    "known_uncertainty": "The formula sums over all digital processing units; bit length is the largest input bit length for each unit."
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Out-of-Order Window Size vs Clock Cycle Trade-off",
+    "where_in_paper": "Out-of-Order Execution",
+    "decision": "Balanced 80-entry instruction window against clock cycle time impact",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Larger window improves ILP but increases cycle time; 80 entries was the optimal balance point for the target clock frequency",
+    "outcome": "Achieved both high ILP and high clock frequency",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Whether the paper explicitly frames this as a trade-off with the 80-entry number",
+    "confidence": 0.6
+  },
+  {
+    "title": "Clustered Integer Execution Units",
+    "where_in_paper": "Execution Core Design",
+    "decision": "Organized integer execution units into clusters to reduce wire delay",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Reduces long wire delays that would otherwise limit clock frequency in a wide-issue design",
+    "outcome": "Enabled 6-issue superscalar execution at high clock rates",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Specific number of clusters and exact wire delay considerations",
+    "confidence": 0.7
+  },
+  {
+    "title": "Instruction Cache Replication for Bandwidth",
+    "where_in_paper": "Memory Hierarchy",
+    "decision": "Replicated instruction caches to provide multiple fetch ports",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Increases instruction fetch bandwidth to feed the wide-issue pipeline",
+    "outcome": "Reduced instruction fetch bottlenecks in the 6-issue design",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Exact replication factor and whether alternatives were explicitly discussed",
+    "confidence": 0.6
+  },
+  {
+    "title": "Wire-Delay-Driven Floorplanning Methodology",
+    "where_in_paper": "Physical Design",
+    "decision": "Adopted wire-delay-driven floorplanning to minimize critical path delays",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Prioritizes placement of critical path components to meet aggressive clock frequency targets",
+    "outcome": "Achieved clock frequencies exceeding 600 MHz with balanced wire lengths",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Specific floorplanning methodology details and whether it was presented as a decision",
+    "confidence": 0.7
+  }
+]

@@ -1,0 +1,54 @@
+```json
+[
+  {
+    "title": "Throughput-over-single-thread philosophy",
+    "where_in_paper": "Abstract / Introduction",
+    "decision": "Design Niagara for high throughput on commercial server workloads (databases, Web services) rather than maximizing single-thread performance.",
+    "alternatives_or_rejected": "The alternative would have been a conventional high-frequency, high-ILP core like those used in general-purpose processors. That approach was rejected because commercial server applications have low ILP, high cache miss rates, and many unpredictable branches, making single-thread performance gains difficult.",
+    "rationale": "Commercial server workloads exhibit massive thread-level parallelism (TLP) with many parallel client requests. A thread-rich architecture can exploit this TLP to deliver higher sustained throughput per watt, which is the key metric for data centers where power and cooling are the primary constraints.",
+    "outcome": "Niagara implements 8 simple cores, each with 4 threads, for a total of 32 hardware threads on a single die, targeting high throughput with low power consumption.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Fine-grain multithreading within each core",
+    "where_in_paper": "Section on multithreading / pipeline",
+    "decision": "Implement fine-grain (interleaved) multithreading, where threads are selected on a cycle-by-cycle basis, rather than coarse-grain (switch-on-event) multithreading.",
+    "alternatives_or_rejected": "The alternative is coarse-grain multithreading, where a thread runs until a long-latency event (e.g., cache miss) occurs. Coarse-grain was rejected because it leaves execution units idle during cache misses, reducing throughput.",
+    "rationale": "Fine-grain multithreading hides memory latency by switching to another thread every cycle, keeping the pipeline busy even when one thread stalls on a cache miss. This is essential for commercial workloads with high cache miss rates.",
+    "outcome": "Each core has a single 6-stage SPARC pipeline, with 4 threads sharing it. Thread selection occurs every cycle based on a policy considering LRU status, instruction type, cache misses, traps, and resource conflicts.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Simple, single-issue cores instead of complex out-of-order cores",
+    "where_in_paper": "Core architecture section",
+    "decision": "Use simple, single-issue, in-order SPARC cores rather than complex, out-of-order, superscalar cores.",
+    "alternatives_or_rejected": "The alternative would have been a smaller number of more powerful out-of-order cores. However, out-of-order cores consume significant area and power, which is inefficient for workloads with low ILP.",
+    "rationale": "Commercial server applications have low ILP, so the complex logic for out-of-order execution would be largely wasted. A simple core allows more cores per die, increasing total throughput and improving performance per watt.",
+    "outcome": "The chip contains 8 simple cores, each with a single-issue, in-order 6-stage pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Shared on-chip L2 cache and high-bandwidth crossbar",
+    "where_in_paper": "Memory subsystem section",
+    "decision": "Implement a 3-Mbyte, 12-way set-associative, 4-way banked L2 cache shared by all cores, connected via a high-bandwidth crossbar interconnect.",
+    "alternatives_or_rejected": "Alternatives include a distributed L2 cache (per core) or a directory-based cache coherence protocol. Distributed caches would increase complexity and require coherence traffic; a shared L2 simplifies coherence and reduces off-chip accesses.",
+    "rationale": "A shared L2 cache minimizes off-chip memory accesses, which are expensive in terms of latency and power. The crossbar provides high bandwidth (up to 200 GB/s) to handle the aggregate demand from 8 cores.",
+    "outcome": "The L2 cache is 3 Mbyte, 12-way set-associative, and 4-way banked, shared by all 32 threads. It is connected to the cores via a crossbar with up to 200 GB/s bandwidth.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Power-efficient design targeting 60 W",
+    "where_in_paper": "Power / Introduction",
+    "decision": "Design the processor to operate within a 60 W power budget, targeting high performance per watt for data center deployments.",
+    "alternatives_or_rejected": "The alternative would have been a higher-power design focused on maximum absolute performance, but data centers are limited by power and cooling envelopes.",
+    "rationale": "Commercial server deployments are constrained by power delivery and heat dissipation. A low-power design allows higher density and lower operating costs, making performance per watt the key metric.",
+    "outcome": "Niagara achieved its performance goals within a 60 W power budget, delivering high throughput for commercial workloads.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  }
+]
+```

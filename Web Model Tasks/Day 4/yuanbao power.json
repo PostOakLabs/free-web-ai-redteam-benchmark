@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Clustered integer execution with duplicated integer register files",
+    "where_in_paper": "Ebox / Integer Execution Unit section",
+    "decision": "Split the four integer units into two clusters (U0, U1), each with its own copy of the 80-entry integer register file (4 read / 6 write ports per copy), kept coherent with a 1-cycle cross-cluster write delay.",
+    "alternatives_or_rejected": "A single unified integer register file with 8 read and 6 write ports — rejected because its physical width would stretch the datapath and exceed the cycle-time target.",
+    "rationale": "Fewer read/write ports per register file reduce datapath width so the register file does not become the cycle-time limiter; the 1-cycle inter-cluster penalty costs only ~1% performance per simulation.",
+    "outcome": "21264 achieves 500–600 MHz cycle time; simulated performance loss from the inter-cluster delay is ~1%, and from static subcluster pre-assignment is 1–2%.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact 1% / 1–2% simulation figures and the explicit '8 read / 6 write rejected' wording are corroborated by a contemporary Microprocessor Report article drawn from the same design team; the paper may phrase it differently.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Performance leadership via high clock speed + out-of-order, not brainiac-style widening",
+    "where_in_paper": "Architecture highlights / Introduction",
+    "decision": "Pursue performance leadership by combining a uniquely high clock (500–600 MHz at 0.35 µm, six metal layers) with advanced out-of-order and speculative execution, while remaining software-compatible with prior Alpha generations.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A unique combination of high clock speeds and advanced microarchitectural techniques, including many forms of out-of-order and speculative execution, provide exceptional core computational performance.",
+    "outcome": "30+ SPECint95 and 58+ SPECfp95; 50–200% faster than 21164 on many applications while keeping the same 4-instruction fetch width.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper frames this as an explicit decision against a 'brainiac' alternative, or simply reports it as the achieved combination.",
+    "confidence": 0.75
+  },
+  {
+    "title": "20-entry integer issue queue bounded by pick-2 arbitration circuit",
+    "where_in_paper": "Issue Queue / Iqueue section",
+    "decision": "Size the integer issue queue at 20 entries, arbitrating up to 4 issues per cycle via two pick-2 arbiters (upper and lower subclusters), where each queued instruction may await at most two of the four integer units.",
+    "alternatives_or_rejected": "A fully general pick-4 arbitration across all four units — not solvable within the target cycle time, so rejected.",
+    "rationale": "The fundamental circuit loop (grant in cycle N, request in cycle N+1) must close within one cycle; a general pick-4 solution would not meet cycle time, so the design limits each instruction to awaiting at most two units, accepting some throughput degradation versus an ideal scheme.",
+    "outcome": "Up to 4 integer instructions issued per cycle; simulation used to quantify the performance cost of the pick-2 limitation and asymmetric arbiter.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The 'pick-4 not solvable' phrasing is most explicitly stated in a later physical-technology retrospective citing the 21264 issue logic; the IEEE Micro paper may describe it less bluntly.",
+    "confidence": 0.6
+  },
+  {
+    "title": "64 KB primary I- and D-caches with line/way prediction to hide set-associativity latency",
+    "where_in_paper": "Fetch stage / Instruction cache section",
+    "decision": "Implement 64 KB 2-way set-associative I-cache and 64 KB D-cache (each 2-way), augmented with a line predictor and a way predictor so that branch-redirect fetch can occur with no fetch bubble.",
+    "alternatives_or_rejected": "8 KB primary caches as in 21164 — rejected because their small size caused high miss rates and frequent 6-cycle L2 accesses, hurting performance despite being single-cycle accessible.",
+    "rationale": "Line and way prediction combines the advantages of set-associative behaviour with the fast access time of a direct-mapped cache, eliminating fetch bubbles and supporting 4-instruction-per-cycle fetch at 500+ MHz.",
+    "outcome": "21264 sustains 4 instructions fetched per cycle; cache miss latency to off-chip L2 is 13 cycles, with up to 8 outstanding misses.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The 21164 8 KB comparison and 'rejected' framing comes from a contemporary Microprocessor Report article; the IEEE Micro paper itself may not state the 8 KB alternative as explicitly rejected.",
+    "confidence": 0.55
+  }
+]

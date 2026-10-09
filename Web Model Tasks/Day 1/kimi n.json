@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Balanced global clock tree with local clock buffers",
+    "where_in_paper": "Clock distribution",
+    "decision": "Implement a balanced global clock tree feeding local clock buffers (LCBs) that distribute clocks to sequential elements across the die",
+    "alternatives_or_rejected": "A single centrally buffered clock, an unbalanced clock distribution, or a pure clock mesh without local buffering",
+    "rationale": "A balanced tree provides deterministic, controllable skew across the large die; local buffers allow tuning for varying capacitive loads and enable fine-grained clock gating",
+    "outcome": "Low global clock skew was maintained across the multi-core floorplan, supporting high-frequency operation",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.6
+  },
+  {
+    "title": "Mixed static and dynamic circuit families",
+    "where_in_paper": "Circuit design / Circuit families",
+    "decision": "Use dynamic domino logic for performance-critical datapaths (floating-point units, register files, cache arrays) and static CMOS for control and irregular logic",
+    "alternatives_or_rejected": "Using only static CMOS throughout the design, or using only dynamic logic everywhere",
+    "rationale": "Dynamic circuits deliver higher speed and smaller area for wide, regular datapath functions, while static CMOS offers better noise immunity and design productivity for irregular control logic",
+    "outcome": "Frequency targets were met in the datapaths, while control logic remained robust and manageable to design",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.65
+  },
+  {
+    "title": "Hierarchical timing closure with macro budgets",
+    "where_in_paper": "Timing methodology / Timing closure",
+    "decision": "Adopt a hierarchical static timing closure flow in which individual macros and units were timed to agreed interface budgets, rather than performing flat full-chip timing",
+    "alternatives_or_rejected": "Flat static timing analysis across the entire 170-million-transistor chip",
+    "rationale": "Flat timing on a design of this size was computationally prohibitive and would have serialized the design process; hierarchical budgets enabled parallel macro development and faster iteration",
+    "outcome": "Timing closure was achieved within the design schedule, with full-chip verification used as a final sign-off step",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.6
+  },
+  {
+    "title": "Full-custom macros for regular structures",
+    "where_in_paper": "Design methodology / Macro design",
+    "decision": "Employ full-custom design for regular, performance-critical macros such as caches, register files, and datapaths, while using standard-cell and semi-custom flows for control logic",
+    "alternatives_or_rejected": "A purely standard-cell ASIC methodology for the entire chip, or full-custom design for all logic including irregular control blocks",
+    "rationale": "Full-custom layout achieves maximum density, performance, and bit-line symmetry for regular array structures; standard-cell tools are far more efficient for the irregular control logic that dominates by instance count",
+    "outcome": "Optimal area and performance for arrays and datapaths, with manageable design effort and schedule for control logic",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.55
+  }
+]

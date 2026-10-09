@@ -1,0 +1,114 @@
+[
+  {
+    "case_name": "PD 0.5% LGD 45%",
+    "inputs": {
+      "pd": 0.005,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.213456,
+      "phi_inv_pd": -2.575829,
+      "phi_inv_999": 3.090232,
+      "inner_phi_arg": -1.294551,
+      "phi_at_arg": 0.097726,
+      "k_before_maturity": 0.041727,
+      "b_pd": 0.167086,
+      "maturity_adjustment_factor": 1.33446,
+      "k_after_maturity": 0.055683,
+      "risk_weight": 0.69604
+    },
+    "result": {
+      "k_pct": 5.5683,
+      "risk_weight_pct": 69.60
+    },
+    "formula_basis": "K = LGD * N[(G(PD) + sqrt(R)*G(0.999))/sqrt(1-R)] - LGD*PD; K_final = K * (1 + (M-2.5)*b)/(1 - 1.5*b); b = (0.11852 - 0.05478*ln(PD))^2; RW = K_final * 12.5 * EAD",
+    "known_benchmark": null,
+    "weakest_point": "manual Φ⁻¹ and Φ approximations (within ±0.1 RW%)"
+  },
+  {
+    "case_name": "PD 1% LGD 45%",
+    "inputs": {
+      "pd": 0.01,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.192784,
+      "phi_inv_pd": -2.326348,
+      "phi_inv_999": 3.090232,
+      "inner_phi_arg": -1.079095,
+      "phi_at_arg": 0.140273,
+      "k_before_maturity": 0.058623,
+      "b_pd": 0.137486,
+      "maturity_adjustment_factor": 1.25981,
+      "k_after_maturity": 0.073853,
+      "risk_weight": 0.92316
+    },
+    "result": {
+      "k_pct": 7.3853,
+      "risk_weight_pct": 92.32
+    },
+    "formula_basis": "K = LGD * N[(G(PD) + sqrt(R)*G(0.999))/sqrt(1-R)] - LGD*PD; K_final = K * (1 + (M-2.5)*b)/(1 - 1.5*b); b = (0.11852 - 0.05478*ln(PD))^2; RW = K_final * 12.5 * EAD",
+    "known_benchmark": "Basel calibration ~92 % RW; computation matches within 0.3 RW%",
+    "weakest_point": "manual Φ⁻¹ and Φ approximations (within ±0.1 RW%)"
+  },
+  {
+    "case_name": "PD 3% LGD 45%",
+    "inputs": {
+      "pd": 0.03,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.146776,
+      "phi_inv_pd": -1.880794,
+      "phi_inv_999": 3.090232,
+      "inner_phi_arg": -0.754449,
+      "phi_at_arg": 0.225292,
+      "k_before_maturity": 0.087881,
+      "b_pd": 0.096478,
+      "maturity_adjustment_factor": 1.16920,
+      "k_after_maturity": 0.102751,
+      "risk_weight": 1.28439
+    },
+    "result": {
+      "k_pct": 10.2751,
+      "risk_weight_pct": 128.44
+    },
+    "formula_basis": "K = LGD * N[(G(PD) + sqrt(R)*G(0.999))/sqrt(1-R)] - LGD*PD; K_final = K * (1 + (M-2.5)*b)/(1 - 1.5*b); b = (0.11852 - 0.05478*ln(PD))^2; RW = K_final * 12.5 * EAD",
+    "known_benchmark": null,
+    "weakest_point": "manual Φ⁻¹ and Φ approximations (within ±0.1 RW%)"
+  },
+  {
+    "case_name": "PD 10% LGD 45%",
+    "inputs": {
+      "pd": 0.1,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.120809,
+      "phi_inv_pd": -1.281552,
+      "phi_inv_999": 3.090232,
+      "inner_phi_arg": -0.221258,
+      "phi_at_arg": 0.412447,
+      "k_before_maturity": 0.140601,
+      "b_pd": 0.059856,
+      "maturity_adjustment_factor": 1.09865,
+      "k_after_maturity": 0.154471,
+      "risk_weight": 1.93089
+    },
+    "result": {
+      "k_pct": 15.4471,
+      "risk_weight_pct": 193.09
+    },
+    "formula_basis": "K = LGD * N[(G(PD) + sqrt(R)*G(0.999))/sqrt(1-R)] - LGD*PD; K_final = K * (1 + (M-2.5)*b)/(1 - 1.5*b); b = (0.11852 - 0.05478*ln(PD))^2; RW = K_final * 12.5 * EAD",
+    "known_benchmark": null,
+    "weakest_point": "manual Φ⁻¹ and Φ approximations (within ±0.1 RW%)"
+  }
+]

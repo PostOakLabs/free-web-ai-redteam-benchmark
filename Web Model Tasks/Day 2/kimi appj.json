@@ -1,0 +1,118 @@
+ [
+  {
+    "case_name": "Regular monthly payments — Appendix J (c)(1)(i)",
+    "appendix_basis": "Appendix J to 12 CFR Part 1026, (c)(1)(i)",
+    "inputs": {
+      "amount_financed": 5000,
+      "payment_schedule": "24 monthly payments",
+      "payment_amounts": "$230 each",
+      "advance_date": "1-10-78",
+      "first_payment_date": "2-10-78",
+      "finance_charge": null
+    },
+    "unit_period_analysis": "Unit-period = 1 month (the common period occurring most frequently). Unit-periods per year (w) = 12. Per Appendix J (b)(5)(ii), the number of full unit-periods between two dates is the number of months measured back from the later date. From 1-10-78 to 2-10-78 = 1 full month with 0 remaining days. Therefore t = 1, f = 0.",
+    "computation": "Special form for single-advance regular payments: A = (1/((1+fi)(1+i)^t)) * P * a_n_due(1+i). Substituting values: 5000 = (1/((1+0*i)(1+i)^1)) * 230 * ((1-(1+i)^(-24))/i)*(1+i). This simplifies to the ordinary-annuity form: 5000 = 230 * (1-(1+i)^(-24))/i. Solved for the unit-period rate i by iteration (e.g., Newton-Raphson or bisection carried to sufficient precision): i ≈ 0.0080714234. Annual percentage rate I = w*i = 12 * 0.0080714234 = 0.096857... Rounded to two decimals per Appendix J: 9.69%.",
+    "result_apr": "9.69%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None; values, dates, and APR are verbatim from the official Appendix J example and the equation reproduces the stated rate to within rounding."
+  },
+  {
+    "case_name": "Irregular first period (long first period) — Appendix J (c)(1)(ii)",
+    "appendix_basis": "Appendix J to 12 CFR Part 1026, (c)(1)(ii)",
+    "inputs": {
+      "amount_financed": 6000,
+      "payment_schedule": "36 monthly payments",
+      "payment_amounts": "$200 each",
+      "advance_date": "2-10-78",
+      "first_payment_date": "4-1-78",
+      "finance_charge": null
+    },
+    "unit_period_analysis": "Unit-period = 1 month (most frequent common period). Unit-periods per year (w) = 12. Per Appendix J (b)(5)(ii), measure back from the later date (4-1-78): one full month is 3-1-78 to 4-1-78, so t = 1. The remaining fraction is measured forward from the earlier date to the beginning of the first full unit-period: 2-10-78 to 3-1-78 = 19 days. Fraction f = 19/30. The fractional-period rate is f*i per Appendix J (b)(6).",
+    "computation": "Special form: A = (1/((1+fi)(1+i)^t)) * P * a_n_due(1+i). Substituting values: 6000 = (1/((1+(19/30)i)(1+i)^1)) * 200 * ((1-(1+i)^(-36))/i)*(1+i). Solved for i by iteration: i ≈ 0.0098470902. Annual percentage rate I = w*i = 12 * 0.0098470902 = 0.118165... Rounded to two decimals per Appendix J: 11.82%.",
+    "result_apr": "11.82%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None; follows the official example exactly. The 19-day odd-period fraction (19/30) is the distinctive Appendix J unit-period rule that diverges from generic calendar-day APR math."
+  },
+  {
+    "case_name": "Single-advance, single-payment — Appendix J (c)(5)(i)",
+    "appendix_basis": "Appendix J to 12 CFR Part 1026, (c)(5)(i)",
+    "inputs": {
+      "amount_financed": 1000,
+      "payment_schedule": "single payment",
+      "payment_amounts": "$1080",
+      "advance_date": "1-3-78",
+      "payment_date": "9-15-78",
+      "finance_charge": "$80"
+    },
+    "unit_period_analysis": "Single-advance, single-payment transaction. Per Appendix J (b)(4)(ii), the unit-period shall be the term of the transaction, not exceeding 1 year. The term is 255 days (less than 1 year), so unit-period = 255 days. Per Appendix J (b)(5)(vii), for a term less than a year not equal to a whole number of months, unit-periods in the term = 1 and unit-periods per year (w) = 365/255. From 1-3-78 to 9-15-78 = 255 days, so t = 1, f = 0.",
+    "computation": "Special form (Form 4): A = P/((1+fi)(1+i)^t). Substituting values: 1000 = 1080/((1+0*i)(1+i)^1). Direct algebraic solution: 1+i = 1080/1000 = 1.08, so i = 0.08. (Form 1 gives the same result directly: I = 100*w*(P/A - 1) = 100*(365/255)*(1080/1000 - 1) = 11.4510...%) Annual percentage rate I = w*i = (365/255)*0.08 = 0.114510... Rounded to two decimals per Appendix J: 11.45%.",
+    "result_apr": "11.45%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None; the direct algebraic solution confirms the iteration result exactly. The unit-period rule (255-day unit-period, w = 365/255) is the Appendix J-specific feature."
+  },
+  {
+    "case_name": "Irregular final payment — Appendix J (c)(3)(i)",
+    "appendix_basis": "Appendix J to 12 CFR Part 1026, (c)(3)(i)",
+    "inputs": {
+      "amount_financed": 5000,
+      "payment_schedule": "24 monthly payments",
+      "payment_amounts": "$230 regular, $280 final",
+      "advance_date": "1-10-78",
+      "first_payment_date": "2-10-78",
+      "finance_charge": null
+    },
+    "unit_period_analysis": "Unit-period = 1 month. Unit-periods per year (w) = 12. Regular first period: from 1-10-78 to 2-10-78 = 1 full month, so t = 1, f = 0. The final payment is irregular in amount but occurs at the regular time (the 24th monthly interval from the first payment).",
+    "computation": "Special form for odd final payment: A = (1/((1+fi)(1+i)^t)) * [P * a_{n-1}_due(1+i) + Pn/(1+i)^{n-1}]. Substituting values: 5000 = (1/((1+0*i)(1+i)^1)) * [230 * ((1-(1+i)^(-23))/i)*(1+i) + 280/(1+i)^23]. Solved for i by iteration: i ≈ 0.0087503907. Annual percentage rate I = w*i = 12 * 0.0087503907 = 0.105005... Rounded to two decimals per Appendix J: 10.50%.",
+    "result_apr": "10.50%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "None; follows the official example exactly. The equation structure (annuity due for first n-1 payments plus discounted final payment) is the Appendix J special form for this irregularity."
+  },
+  {
+    "case_name": "Complex single advance with irregular payment schedule — Appendix J (c)(6)(iii)",
+    "appendix_basis": "Appendix J to 12 CFR Part 1026, (c)(6)(iii)",
+    "inputs": {
+      "amount_financed": 39688.56,
+      "payment_schedule": "360 monthly payments, constant for 12 months at a time",
+      "payment_amounts": {
+        "year_1": 291.81,
+        "year_2": 300.18,
+        "year_3": 308.78,
+        "year_4": 317.61,
+        "year_5": 326.65,
+        "year_6": 335.92,
+        "year_7": 345.42,
+        "year_8": 355.15,
+        "year_9": 365.12,
+        "year_10": 375.33,
+        "year_11": 385.76,
+        "year_12": 385.42,
+        "year_13": 385.03,
+        "year_14": 384.62,
+        "year_15": 384.17,
+        "year_16": 383.67,
+        "year_17": 383.13,
+        "year_18": 382.54,
+        "year_19": 381.9,
+        "year_20": 381.2,
+        "year_21": 380.43,
+        "year_22": 379.6,
+        "year_23": 378.68,
+        "year_24": 377.69,
+        "year_25": 376.6,
+        "year_26": 375.42,
+        "year_27": 374.13,
+        "year_28": 372.72,
+        "year_29": 371.18,
+        "year_30": 369.5
+      },
+      "advance_date": "4-10-78",
+      "first_payment_date": "6-1-78",
+      "finance_charge": null
+    },
+    "unit_period_analysis": "Unit-period = 1 month (most frequent common period). Unit-periods per year (w) = 12. Per Appendix J (b)(5)(ii), measure back from 6-1-78: one full month is 5-1-78 to 6-1-78, so t = 1. Remaining fraction measured forward from 4-10-78 to 5-1-78 = 21 days, so f = 21/30. The 360 payments are irregular because the amount changes each year (12 payments at one amount, then 12 at the next, etc.).",
+    "computation": "General equation for single advance with varying payments: A = (1/((1+fi)(1+i)^t)) * SUM_{j=1}^{360} P_j/(1+i)^{j-1}. Substituting values: 39688.56 = (1/((1+(21/30)i)(1+i)^1)) * SUM_{k=0}^{359} P_{k+1}/(1+i)^k, where P_1...P_12 = 291.81, P_13...P_24 = 300.18, P_25...P_36 = 308.78, P_37...P_48 = 317.61, P_49...P_60 = 326.65, P_61...P_72 = 335.92, P_73...P_84 = 345.42, P_85...P_96 = 355.15, P_97...P_108 = 365.12, P_109...P_120 = 375.33, P_121...P_132 = 385.76, P_133...P_144 = 385.42, P_145...P_156 = 385.03, P_157...P_168 = 384.62, P_169...P_180 = 384.17, P_181...P_192 = 383.67, P_193...P_204 = 383.13, P_205...P_216 = 382.54, P_217...P_228 = 381.90, P_229...P_240 = 381.20, P_241...P_252 = 380.43, P_253...P_264 = 379.60, P_265...P_276 = 378.68, P_277...P_288 = 377.69, P_289...P_300 = 376.60, P_301...P_312 = 375.42, P_313...P_324 = 374.13, P_325...P_336 = 372.72, P_337...P_348 = 371.18, P_349...P_360 = 369.50. Solved for i by iteration: i ≈ 0.0081667606. Annual percentage rate I = w*i = 12 * 0.0081667606 = 0.098001... Rounded to two decimals per Appendix J: 9.80%.",
+    "result_apr": "9.80%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "The 360-term summation is rendered compactly via sigma notation with grouped annual amounts; every payment value is exact from the official example, but a mechanical recomputation must expand the summation to 360 individual terms."
+  }
+]

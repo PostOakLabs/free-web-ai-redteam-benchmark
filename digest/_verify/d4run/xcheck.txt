@@ -1,0 +1,112 @@
+==============================================================================
+A. SECTION 2.4 — corpus recall of the two sentences memorial-3 corrected
+==============================================================================
+
+--- branch-predictor success rate ---
+    provenance      : Alpha ep00 outcome, corrected 5% -> 90% on 2026-09-08
+    paper (normalised) matches /90%?\s*to\s*100%/ : 1
+    paper (normalised) matches /\b5%\s*to\s*100%/ : 0
+    corpus recalls PAPER-TRUE value : 1 ['meta']
+    corpus recalls the WRONG value  : 0 []
+    corpus silent on this sentence  : 14
+
+--- line/way prediction accuracy ---
+    provenance      : Alpha ep06 outcome, corrected 95% -> 85% on 2026-09-08
+    paper (normalised) matches /85%?\s*to\s*100%/ : 1
+    paper (normalised) matches /\b95%\s*to\s*100%/ : 0
+    corpus recalls PAPER-TRUE value : 2 ['chatgpt', 'meta']
+    corpus recalls the WRONG value  : 0 []
+    corpus silent on this sentence  : 13
+
+==============================================================================
+B. SECTION 2.3 — numeric convergence, then checked against the paper
+==============================================================================
+
+--- alpha  (15 models, ground truth Alpha21264-pagemarked.txt) ---
+     5/15 models say 64 kb            -> IN-PAPER  (hits 4 via numeral+'kb')
+     5/15 models say 600 mhz          -> IN-PAPER  (hits 4 via numeral+'mhz')
+     3/15 models say 80 entries       -> IN-PAPER  (hits 1 via numeral+'entry')
+
+--- niagara  (14 models, ground truth Niagara-pagemarked.txt) ---
+     9/14 models say 32 threads       -> IN-PAPER  (hits 5 via numeral+'thread')
+     3/14 models say 16 kb            -> IN-PAPER  (hits 1 via numeral+'kb')
+     3/14 models say 8 kb             -> IN-PAPER  (hits 1 via numeral+'kb')
+     3/14 models say 4 threads        -> IN-PAPER  (hits 7 via spelled-out+'thread')
+     3/14 models say 3 mb             -> IN-PAPER  (hits 1 via numeral+'mb')
+
+--- p4  (15 models, ground truth Pentium4-pagemarked.txt) ---
+     7/15 models say 1.5 ghz          -> IN-PAPER  (hits 6 via numeral+'ghz')
+     6/15 models say 20 stages        -> IN-PAPER  (hits 1 via numeral+'stag')
+     4/15 models say 3 ghz            -> IN-PAPER  (hits 2 via numeral+'ghz')
+     4/15 models say 400 mhz          -> IN-PAPER  (hits 2 via numeral+'mhz')
+     4/15 models say 3.2 gb           -> IN-PAPER  (hits 4 via numeral+'gb')
+     4/15 models say 1 ghz            -> IN-PAPER  (hits 2 via numeral+'ghz')
+     3/15 models say 100 mhz          -> IN-PAPER  (hits 2 via numeral+'mhz')
+     3/15 models say 8 kb             -> IN-PAPER  (hits 2 via numeral+'kb')
+     3/15 models say 256 kb           -> IN-PAPER  (hits 1 via numeral+'kb'+dehyphen)
+
+--- pphysical  (14 models, ground truth POWER4-cpd-pagemarked.txt) ---
+     4/14 models say 1 ghz            -> IN-PAPER  (hits 4 via numeral+'ghz')
+
+==============================================================================
+C. ADDENDUM — per-model per-paper recall verdicts (for TALLY-42 cross-grading)
+==============================================================================
+
+model           paper       ent assert verb para  T3  T4  decl   pg±2
+chatgpt         alpha         5      5    3    2   0   0     0    5/5
+deepseek        alpha         5      0    0    0   0   0     5    0/0
+gemini          alpha         5      0    0    0   0   0     5    0/0
+glm 5.3 flash   alpha         5      0    0    0   0   0     5    0/0
+grok            alpha         5      5    5    0   0   0     0    5/5
+kimi            alpha         5      5    4    1   0   0     0    5/5
+longcat         alpha         5      0    0    0   0   0     5    0/0
+meta            alpha         5      5    5    0   0   0     0    5/5
+mimo            alpha         5      0    0    0   0   0     5    0/0
+minimax 2.7     alpha         5      0    0    0   0   0     5    0/0
+minimax m3      alpha         4      0    0    0   0   0     4    0/0
+mistral         alpha         4      0    0    0   0   0     4    0/0
+qwen            alpha         4      0    0    0   0   0     4    0/0
+sonnet          alpha         4      0    0    0   0   0     4    0/0
+yuanbao         alpha         4      0    0    0   0   0     4    0/0
+chatgpt         niagara       5      5    5    0   0   0     0    5/5
+deepseek        niagara       5      4    0    2   0   2     1    2/2
+gemini          niagara       5      0    0    0   0   0     5    0/0
+glm 5.3 flash   niagara       5      5    0    2   0   3     0    1/2
+grok            niagara       5      5    5    0   0   0     0    5/5
+kimi            niagara       5      0    0    0   0   0     5    0/0
+meta            niagara       5      0    0    0   0   0     5    0/0
+mimo            niagara       5      0    0    0   0   0     5    0/0
+minimax 2.7     niagara       4      0    0    0   0   0     4    0/0
+mistral         niagara       5      0    0    0   0   0     5    0/0
+qwen            niagara       5      0    0    0   0   0     5    0/0
+solar           niagara       5      0    0    0   0   0     5    0/0
+sonnet          niagara       5      0    0    0   0   0     5    0/0
+yuanbao         niagara       5      0    0    0   0   0     5    0/0
+chatgpt         p4            5      5    3    2   0   0     0    5/5
+deepseek        p4            5      4    2    1   0   1     1    0/0
+gemini          p4            5      0    0    0   0   0     5    0/0
+grok            p4            5      5    5    0   0   0     0    3/3
+kimi            p4            5      5    5    0   0   0     0    5/5
+longcat         p4            5      5    0    0   0   5     0    0/0
+meta            p4            5      5    5    0   0   0     0    5/5
+mimo            p4            5      0    0    0   0   0     5    0/0
+minimax 2.7     p4            5      0    0    0   0   0     5    0/0
+minimax m3      p4            4      0    0    0   0   0     4    0/0
+mistral         p4            5      0    0    0   0   0     5    0/0
+qwen            p4            5      0    0    0   0   0     5    0/0
+sonnet          p4            4      0    0    0   0   0     4    0/0
+yuanbao         p4            4      0    0    0   0   0     4    0/0
+deepseek        pphysical     5      4    2    1   1   0     1    2/4
+gemini          pphysical     4      0    0    0   0   0     4    0/0
+glm 5.3 flash   pphysical     5      5    0    0   0   5     0    0/0
+grok            pphysical     5      5    5    0   0   0     0    5/5
+kimi            pphysical     5      0    0    0   0   0     4    0/0
+longcat         pphysical     5      0    0    0   0   0     5    0/0
+meta            pphysical     4      0    0    0   0   0     4    0/0
+mimo            pphysical     5      0    0    0   0   0     5    0/0
+minimax 2.7     pphysical     4      0    0    0   0   0     4    0/0
+mistral         pphysical     5      0    0    0   0   0     5    0/0
+qwen            pphysical     5      0    0    0   0   0     5    0/0
+solar           pphysical     4      0    0    0   0   0     4    0/0
+sonnet          pphysical     5      0    0    0   0   0     5    0/0
+yuanbao         pphysical     5      0    0    0   0   0     5    0/0

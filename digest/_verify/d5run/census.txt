@@ -1,0 +1,80 @@
+Web Model Tasks/Day 5/chatgpt e.json
+Web Model Tasks/Day 5/chatgpt red1.json
+Web Model Tasks/Day 5/chatgpt red3.json
+Web Model Tasks/Day 5/chatgpt regz.json
+Web Model Tasks/Day 5/chatgpt strings.json
+Web Model Tasks/Day 5/deepseek e.json
+Web Model Tasks/Day 5/deepseek red1.json
+Web Model Tasks/Day 5/deepseek red3.json
+Web Model Tasks/Day 5/deepseek regz.json
+Web Model Tasks/Day 5/deepseek strings.json
+Web Model Tasks/Day 5/gemini e.json
+Web Model Tasks/Day 5/gemini red1.json
+Web Model Tasks/Day 5/gemini red3.json
+Web Model Tasks/Day 5/gemini regz.json
+Web Model Tasks/Day 5/gemini strings.json
+Web Model Tasks/Day 5/glm 5.3 flash e.json
+Web Model Tasks/Day 5/glm 5.3 flash red1.json
+Web Model Tasks/Day 5/glm 5.3 flash red3.json
+Web Model Tasks/Day 5/glm 5.3 flash regz.json
+Web Model Tasks/Day 5/glm 5.3 flash strings.json
+Web Model Tasks/Day 5/grok e.json
+Web Model Tasks/Day 5/grok red1.json
+Web Model Tasks/Day 5/grok red3.json
+Web Model Tasks/Day 5/grok regz.json
+Web Model Tasks/Day 5/grok strings.json
+Web Model Tasks/Day 5/kimi e.json
+Web Model Tasks/Day 5/kimi red1.json
+Web Model Tasks/Day 5/kimi red3.json
+Web Model Tasks/Day 5/kimi regz.json
+Web Model Tasks/Day 5/kimi strings.json
+Web Model Tasks/Day 5/longcat e.json
+Web Model Tasks/Day 5/longcat red1.json
+Web Model Tasks/Day 5/longcat red3.json
+Web Model Tasks/Day 5/longcat regz.json
+Web Model Tasks/Day 5/longcat strings.json
+Web Model Tasks/Day 5/meta e.json
+Web Model Tasks/Day 5/meta red1.json
+Web Model Tasks/Day 5/meta red3.json
+Web Model Tasks/Day 5/meta regz.json
+Web Model Tasks/Day 5/meta strings.json
+Web Model Tasks/Day 5/mimo e.json
+Web Model Tasks/Day 5/mimo red1.json
+Web Model Tasks/Day 5/mimo red3.json
+Web Model Tasks/Day 5/mimo regz.json
+Web Model Tasks/Day 5/mimo strings.json
+Web Model Tasks/Day 5/minara e.json
+Web Model Tasks/Day 5/minara red1.json
+Web Model Tasks/Day 5/minara regz.json
+Web Model Tasks/Day 5/minaria red3.json
+Web Model Tasks/Day 5/minaria strings.json
+Web Model Tasks/Day 5/minimax 2.7 e.json
+Web Model Tasks/Day 5/minimax 2.7 red1.json
+Web Model Tasks/Day 5/minimax 2.7 red3.json
+Web Model Tasks/Day 5/minimax 2.7 regz.json
+Web Model Tasks/Day 5/minimax 2.7 strings.json
+Web Model Tasks/Day 5/mistral e.json
+Web Model Tasks/Day 5/mistral red1.json
+Web Model Tasks/Day 5/mistral red3.json
+Web Model Tasks/Day 5/mistral regz.json
+Web Model Tasks/Day 5/mistral strings.json
+Web Model Tasks/Day 5/qwen e.json
+Web Model Tasks/Day 5/qwen red1.json
+Web Model Tasks/Day 5/qwen red3.json
+Web Model Tasks/Day 5/qwen regz.json
+Web Model Tasks/Day 5/qwen strings.json
+Web Model Tasks/Day 5/solar e.json
+Web Model Tasks/Day 5/solar red1.json
+Web Model Tasks/Day 5/solar red3.json
+Web Model Tasks/Day 5/solar regz.json
+Web Model Tasks/Day 5/solar strings.json
+Web Model Tasks/Day 5/sonnet e.json
+Web Model Tasks/Day 5/sonnet red1.json
+Web Model Tasks/Day 5/sonnet red3.json
+Web Model Tasks/Day 5/sonnet regz.json
+Web Model Tasks/Day 5/sonnet strings.json
+Web Model Tasks/Day 5/yuanbao e.json
+Web Model Tasks/Day 5/yuanbao red1.json
+Web Model Tasks/Day 5/yuanbao red3.json
+Web Model Tasks/Day 5/yuanbao regz.json
+Web Model Tasks/Day 5/yuanbao strings.json

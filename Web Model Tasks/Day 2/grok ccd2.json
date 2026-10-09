@@ -1,0 +1,145 @@
+[
+  {
+    "case_name": "basic_single_drawdown_equal_instalments",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I (basic equation) / Directive (EU) 2023/2225 Annex III equivalent; no numbered numerical example recalled",
+    "inputs": {
+      "credit_amount_drawdown": {"value": 1000, "unit": "EUR", "timing": "t=0 immediate full drawdown"},
+      "repayment_schedule": [
+        {"amount": 300, "timing_years": 1},
+        {"amount": 300, "timing_years": 2},
+        {"amount": 300, "timing_years": 3},
+        {"amount": 300, "timing_years": 4}
+      ],
+      "charges": {"value": 0, "unit": "EUR"}
+    },
+    "equation_setup": "1000 = 300/(1+X)^1 + 300/(1+X)^2 + 300/(1+X)^3 + 300/(1+X)^4",
+    "computation": [
+      "Solve Σ C_k / (1+X)^{t_k} = Σ D_l / (1+X)^{s_l} for X",
+      "Trial X=0.077: RHS ≈ 300*(0.9285 + 0.8621 + 0.8005 + 0.7433) ≈ 300*3.3344 ≈ 1000.32",
+      "Trial X=0.0775: RHS slightly under 1000",
+      "Interpolate / iterate to X ≈ 0.0771"
+    ],
+    "result_aprc": "7.7 % (rounded to at least one decimal place per annex remark (d); 7.71 rounded to 7.7)",
+    "assumptions_applied": [
+      "immediate full drawdown (Part II (a))",
+      "starting date = first drawdown (t1=0)",
+      "intervals in years / fractions (12 equal months convention available)",
+      "credit remains valid for agreed period; obligations fulfilled on dates specified",
+      "result accuracy at least one decimal; round half-up"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "No exact numerical annex example matched; iteration precision and day-count (365 vs 12*30.41666) can shift the final digit"
+  },
+  {
+    "case_name": "charges_paid_at_conclusion",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I + Part II assumptions; no numbered numerical example recalled",
+    "inputs": {
+      "credit_amount_drawdown": {"value": 5000, "unit": "EUR", "timing": "t=0"},
+      "upfront_charge": {"value": 100, "unit": "EUR", "timing": "t=0 (paid at conclusion, treated as negative flow or added to cost)"},
+      "repayment_schedule": [
+        {"amount": 1400, "timing_years": 1},
+        {"amount": 1400, "timing_years": 2},
+        {"amount": 1400, "timing_years": 3},
+        {"amount": 1400, "timing_years": 4}
+      ]
+    },
+    "equation_setup": "5000 = 100 + 1400/(1+X)^1 + 1400/(1+X)^2 + 1400/(1+X)^3 + 1400/(1+X)^4   (equivalently net drawdown 4900 on left if charge deducted from proceeds)",
+    "computation": [
+      "Net amount received by consumer = 5000 - 100 = 4900 if charge deducted at drawdown",
+      "Equation becomes 4900 = 1400 * Σ_{k=1 to 4} 1/(1+X)^k",
+      "Annuity factor 4 periods: solve 4900/1400 = 3.5 = Σ 1/(1+X)^k",
+      "Trial X=0.055: annuity factor ≈ 3.5056",
+      "Trial X=0.0555 ≈ 3.499 → X ≈ 0.0553"
+    ],
+    "result_aprc": "5.5 % (rounded to one decimal)",
+    "assumptions_applied": [
+      "immediate full drawdown",
+      "charges included in total cost of credit (Art 19 / equivalent)",
+      "charge at conclusion treated as flow at t=0",
+      "equal monthly/annual intervals; 12 equal months option",
+      "rounding to ≥1 decimal"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Treatment of the t=0 charge (deduct from drawdown vs add to right-hand side) must be consistent; annex is silent on exact algebraic placement but both preserve NPV=0"
+  },
+  {
+    "case_name": "irregular_intervals",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I remarks (a)(c); no numbered numerical example recalled",
+    "inputs": {
+      "credit_amount_drawdown": {"value": 2000, "unit": "EUR", "timing": "t=0"},
+      "repayment_schedule": [
+        {"amount": 500, "timing_years": 0.5},
+        {"amount": 600, "timing_years": 1.25},
+        {"amount": 700, "timing_years": 2.0},
+        {"amount": 400, "timing_years": 3.0}
+      ],
+      "charges": {"value": 0}
+    },
+    "equation_setup": "2000 = 500/(1+X)^0.5 + 600/(1+X)^1.25 + 700/(1+X)^2 + 400/(1+X)^3",
+    "computation": [
+      "Solve non-linear equation by iteration",
+      "Trial X=0.12: RHS = 500/1.0583 + 600/1.1554 + 700/1.2544 + 400/1.4049 ≈ 472.5 + 519.3 + 558.0 + 284.7 ≈ 1834.5 (too low)",
+      "Trial X=0.08: RHS ≈ 500/1.0392 + 600/1.1006 + 700/1.1664 + 400/1.2597 ≈ 481.1 + 545.2 + 600.1 + 317.5 ≈ 1943.9",
+      "Trial X=0.06: RHS ≈ 500/1.0296 + 600/1.0772 + 700/1.1236 + 400/1.1910 ≈ 485.6 + 557.0 + 623.0 + 335.8 ≈ 2001.4",
+      "Interpolate ≈ 0.0602"
+    ],
+    "result_aprc": "6.0 % (rounded to one decimal)",
+    "assumptions_applied": [
+      "intervals expressed in years and fractions of a year (remark (c))",
+      "year = 365 days or 12 equal months of 30.41666 days",
+      "starting date = first drawdown",
+      "amounts/intervals need not be equal (remark (a))",
+      "rounding ≥1 decimal"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Exact day-count fraction (actual/365 vs 12-equal-month) alters the exponents and therefore the solved X at the second decimal"
+  },
+  {
+    "case_name": "open_end_credit_one_year_assumption",
+    "annex_basis": "Directive 2008/48/EC Annex I Part II (e)(i) open-end assumption; Directive (EU) 2023/2225 Annex III corresponding",
+    "inputs": {
+      "credit_amount_drawdown": {"value": 3000, "unit": "EUR", "timing": "t=0 full under assumption"},
+      "assumed_duration": {"value": 1, "unit": "year"},
+      "final_payment_clears_balance": true,
+      "borrowing_rate_example": {"value": 0.10, "unit": "fraction"},
+      "other_charges": {"value": 50, "unit": "EUR", "timing": "t=1"}
+    },
+    "equation_setup": "3000 = (3000*(1+0.10) + 50) / (1+X)^1",
+    "computation": [
+      "Under Part II (e)(i): credit provided for 1 year; final payment clears capital + interest + charges",
+      "Interest = 3000 * 0.10 = 300; total repayment = 3000 + 300 + 50 = 3350",
+      "3000 = 3350 / (1+X) → 1+X = 3350/3000 = 1.11667 → X = 0.11667"
+    ],
+    "result_aprc": "11.7 % (rounded to one decimal)",
+    "assumptions_applied": [
+      "Part II (e)(i): open-end credit assumed 1-year duration from initial drawdown; final payment clears all",
+      "immediate full drawdown",
+      "fixed rate for calculation period",
+      "rounding to ≥1 decimal"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The 1-year truncation is an explicit regulatory assumption that can diverge sharply from actual open-end behaviour; any different residual balance assumption changes X materially"
+  },
+  {
+    "case_name": "overdraft_facility_3month_assumption",
+    "annex_basis": "Directive 2008/48/EC Annex I Part II (d) overdraft assumption; successor Annex III equivalent",
+    "inputs": {
+      "credit_amount_drawdown": {"value": 1000, "unit": "EUR", "timing": "t=0 full"},
+      "assumed_duration_if_unknown": {"value": 0.25, "unit": "years (3 months)"},
+      "interest_and_charges_example": {"value": 40, "unit": "EUR total for period"}
+    },
+    "equation_setup": "1000 = (1000 + 40) / (1+X)^0.25",
+    "computation": [
+      "Part II (d): duration unknown → assume 3 months; full drawdown for whole duration",
+      "1040 = 1000 * (1+X)^0.25 → (1+X)^0.25 = 1.04 → 1+X = 1.04^4 ≈ 1.16986 → X ≈ 0.1699"
+    ],
+    "result_aprc": "17.0 % (rounded to one decimal)",
+    "assumptions_applied": [
+      "Part II (d): overdraft duration unknown → 3-month assumption; full drawdown",
+      "intervals as fractions of a year",
+      "rounding ≥1 decimal"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The 3-month regulatory default is highly stylised; actual utilisation patterns or different charge timing produce large APRC dispersion"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "case_name": "Parametric ES & VaR at 97.5% (normal)",
+    "inputs": {
+      "distribution": "normal",
+      "mu": 0,
+      "sigma": 1,
+      "alpha": 0.975,
+      "z_alpha": 1.9600,
+      "phi_z": 0.05844,
+      "units": "P&L units"
+    },
+    "computation": {
+      "VaR_multiplier": "z_alpha = 1.9600",
+      "ES_multiplier": "phi(z_alpha) / (1-alpha) = 0.05844 / 0.025 = 2.3376",
+      "VaR": "mu + sigma  VaR_multiplier = 0 + 1  1.9600 = 1.9600",
+      "ES": "mu + sigma  ES_multiplier = 0 + 1  2.3376 = 2.3376",
+      "note": "ES is tail mean, VaR is quantile; ES > VaR"
+    },
+    "result": {
+      "VaR": 1.9600,
+      "ES": 2.3376,
+      "units": "P&L units"
+    },
+    "formula_basis": "For normal P&L: VaR_α = μ + σ z_α; ES_α = μ + σ φ(z_α)/(1-α). MAR33 anchors the 97.5% ES as the risk measure for FRTB.",
+    "weakest_point": "Rounding of φ(1.96) to 4 decimals; exact φ(1.96)=0.058440...; multiplier 2.3376 is exact given the rounded φ."
+  },
+  {
+    "case_name": "Parametric ES & VaR at 99% (normal)",
+    "inputs": {
+      "distribution": "normal",
+      "mu": 0,
+      "sigma": 1,
+      "alpha": 0.99,
+      "z_alpha": 2.3263,
+      "phi_z": 0.02665,
+      "units": "P&L units"
+    },
+    "computation": {
+      "VaR_multiplier": "z_alpha = 2.3263",
+      "ES_multiplier": "phi(z_alpha) / (1-alpha) = 0.02665 / 0.01 = 2.665",
+      "VaR": "mu + sigma  VaR_multiplier = 0 + 1  2.3263 = 2.3263",
+      "ES": "mu + sigma  ES_multiplier = 0 + 1  2.665 = 2.665",
+      "note": "ES is tail mean, VaR is quantile; ES > VaR"
+    },
+    "result": {
+      "VaR": 2.3263,
+      "ES": 2.665,
+      "units": "P&L units"
+    },
+    "formula_basis": "Same as above with α=0.99.",
+    "weakest_point": "Rounding of φ(2.3263) to 4 decimals; exact value 0.026648...; ES multiplier 2.665 exact given rounded φ."
+  },
+  {
+    "case_name": "Liquidity-horizon-scaled ES (MAR33 √(LH/10))",
+    "inputs": {
+      "base_ES_0.975_per_10d": 2.3376,
+      "liquidity_horizon_days": 20,
+      "scaling_factor_formula": "sqrt(LH/10)",
+      "units": "P&L units"
+    },
+    "computation": {
+      "LH": 20,
+      "scaling_factor": "sqrt(20/10) = sqrt(2) = 1.4142",
+      "scaled_ES": "base_ES  scaling_factor = 2.3376  1.4142 = 3.3059"
+    },
+    "result": {
+      "scaled_ES": 3.3059,
+      "units": "P&L units"
+    },
+    "formula_basis": "MAR33 scales ES by √(LH/10) where LH is the liquidity horizon in days. Base ES is the 10-day ES at 97.5%.",
+    "weakest_point": "Assuming base ES is the 10-day ES from case 1; scaling factor exact for LH=20."
+  },
+  {
+    "case_name": "Historical-simulation ES from 20 P&L observations at 97.5%",
+    "inputs": {
+      "sample_size_N": 20,
+      "alpha": 0.975,
+      "P&L_values": [-4.8, -3.2, -2.5, -1.8, -1.2, -0.9, -0.5, -0.2, 0.1, 0.3, 0.5, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5, 3.0, 4.0],
+      "units": "P&L units"
+    },
+    "computation": {
+      "sorted_P&L": "ascending (losses negative)",
+      "tail_fraction": "1-alpha = 0.025",
+      "tail_size_raw": "N  (1-alpha) = 20  0.025 = 0.5",
+      "convention": "Take worst ceil(0.5) = 1 observation",
+      "tail_observations": "index 1: -4.8",
+      "ES_raw": "average of worst 1 = -4.8",
+      "ES_loss": "4.8",
+      "VaR_quantile": "2.5% quantile of P&L via linear interpolation: Q(0.025) = X1 + (0.025N - 1)(X2 - X1) = -4.8 + 0.5(-3.2 - (-4.8)) = -4.8 + 0.51.6 = -4.0",
+      "VaR_loss": "4.0",
+      "distinction": "ES (tail mean) = 4.8, VaR (quantile) = 4.0; ES > VaR"
+    },
+    "result": {
+      "ES": 4.8,
+      "VaR": 4.0,
+      "units": "P&L units (loss)"
+    },
+    "formula_basis": "Historical ES_α = (1/(1-α))  (1/N)  sum_{i=1}^{k} X_{(i)} with k = ceil(N*(1-α)) as adopted convention; VaR_α = -Q(α) where Q(α) is α-quantile of P&L. MAR33 uses 97.5% ES.",
+    "weakest_point": "Fractional tail size (0.5) requires a convention; chose ceil to include 1 observation. Alternative conventions (e.g., interpolation) could yield slightly different ES."
+  }
+]

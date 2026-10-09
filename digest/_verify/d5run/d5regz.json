@@ -1,0 +1,162 @@
+{
+ "chatgpt": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+trailing-content",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "deepseek": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 8,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": false
+ },
+ "gemini": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+trailing-content",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "glm 5.3 flash": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+fence-close+fenced",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "grok": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "kimi": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "longcat": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "meta": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "mimo": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+fence-close+fenced",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "minara": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "minimax 2.7": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+fence-close+fenced",
+  "score": 5,
+  "t1": 1,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": false
+ },
+ "mistral": {
+  "gradable": true,
+  "max": 9,
+  "parse": "raw-newline-escape",
+  "score": 2,
+  "t1": 1,
+  "t2": 1,
+  "t3_bp": false,
+  "t3_factor": false
+ },
+ "qwen": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "solar": {
+  "gradable": false,
+  "note": "PROSE-NOT-JSON",
+  "parse": "FAILED",
+  "score": null,
+  "t1": null,
+  "t2": null,
+  "t3_bp": null,
+  "t3_factor": null
+ },
+ "sonnet": {
+  "gradable": true,
+  "max": 9,
+  "parse": "clean+fenced+trailing-content",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ },
+ "yuanbao": {
+  "gradable": true,
+  "max": 9,
+  "parse": "raw-newline-escape",
+  "score": 9,
+  "t1": 4,
+  "t2": 4,
+  "t3_bp": true,
+  "t3_factor": true
+ }
+}

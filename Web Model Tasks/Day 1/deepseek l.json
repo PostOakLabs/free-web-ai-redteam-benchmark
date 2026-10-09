@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Out-of-order and speculative execution for ILP",
+    "where_in_paper": "Abstract and overview sections (likely early in the paper)",
+    "decision": "Implement extensive out-of-order and speculative execution to increase instruction-level parallelism (ILP).",
+    "alternatives_or_rejected": "The paper contrasts this with the simpler in-order execution of previous processors. The alternative would have been to rely solely on higher clock speeds and compiler optimization, which was deemed insufficient to achieve the performance goals.",
+    "rationale": "The paper states the goal was to 'execute 2.0-2.4 billion instructions per second' and achieve 'industry-leading performance'[reference:0]. The chosen approach enables reordering instructions to overcome data dependencies and branch delays[reference:1].",
+    "outcome": "The 21264 could issue up to 4 integer and 2 floating-point instructions per cycle[reference:2], achieving 30+ SPECint95 and 58+ SPECfp95[reference:3].",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Aggressive branch prediction with tournament predictor",
+    "where_in_paper": "Section on branch prediction (likely detailed in the paper)",
+    "decision": "Implement a tournament-style branch predictor combining multiple prediction mechanisms.",
+    "alternatives_or_rejected": "The paper discusses the problem of biased branches polluting prediction tables[reference:4]. Alternatives considered include simpler predictors (e.g., static or last-time prediction), but they are insufficient for the performance targets.",
+    "rationale": "To support the deep out-of-order pipeline, accurate branch prediction was critical to avoid costly mispredictions. The paper explicitly notes that many branches are biased and require specialized handling[reference:5].",
+    "outcome": "The predictor contributed to the high IPC and overall performance, with the paper noting that branch mispredicts are a key performance metric[reference:6].",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "High-bandwidth memory system integration",
+    "where_in_paper": "Section on memory system (likely part of the architecture overview)",
+    "decision": "Integrate a high-bandwidth memory system with on-chip caches and a high-speed bus interface.",
+    "alternatives_or_rejected": "The paper contrasts this with the previous-generation Alpha 21164's memory system, noting the ES40 system has 'about five times the memory bandwidth of the 4100'[reference:7].",
+    "rationale": "To feed the high-performance execution core, a high-bandwidth memory system was essential. The paper notes the 21264 owes its performance to 'a high-bandwidth memory system'[reference:8].",
+    "outcome": "The design includes a 64 KB two-way set-associative data cache, a level-two cache, and a bus interface unit[reference:9][reference:10].",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Clustered execution engine design",
+    "where_in_paper": "Section on execution engine (likely near the end of the paper)",
+    "decision": "Use a clustered design for the execution engine, with separate integer and floating-point queues and register files.",
+    "alternatives_or_rejected": "The paper notes that a clustered design is 'Simpler'[reference:11] compared to a fully unified design, which would require more complex wiring and scheduling logic.",
+    "rationale": "The clustered approach simplifies the design and allows for higher clock speeds by reducing wire delays and complexity. The paper explicitly mentions the execution engine uses a clustered design[reference:12].",
+    "outcome": "The design includes separate issue queues for integer (20 entries) and floating-point (15 entries) instructions, and separate register files (80 integer, 72 floating-point)[reference:13].",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Line and way prediction for instruction fetch",
+    "where_in_paper": "Section on speculative execution or fetch engine",
+    "decision": "Implement line and way prediction to accelerate instruction fetch and reduce cache access latency.",
+    "alternatives_or_rejected": "The paper likely considered simply using a larger cache or multi-ported cache, but these have area and power costs.",
+    "rationale": "To support the high-frequency, wide-issue pipeline, the instruction fetch must be fast and accurate. Line and way prediction allows the fetch engine to predict which cache line and way will be accessed, reducing latency[reference:14].",
+    "outcome": "The feature is listed as a key part of the speculative execution mechanism[reference:15].",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  }
+]

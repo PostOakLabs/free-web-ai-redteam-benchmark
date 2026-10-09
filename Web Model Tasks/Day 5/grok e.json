@@ -1,0 +1,122 @@
+[
+  {
+    "calculation": "Single-Point Fault Metric (SPFM) target values by ASIL",
+    "formula_or_test": "SPFM ≥ 90% (ASIL B), ≥ 97% (ASIL C), ≥ 99% (ASIL D); no quantitative target for ASIL A",
+    "inputs": ["ASIL level of safety goal"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "8.4.5 / Table 4",
+    "publicly_retrievable": false,
+    "volatility": "stable across 2011/2018 editions; targets fixed",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Latent-Fault Metric (LFM) target values by ASIL",
+    "formula_or_test": "LFM ≥ 60% (ASIL B, recommended), ≥ 80% (ASIL C, recommended), ≥ 90% (ASIL D); no quantitative target for ASIL A",
+    "inputs": ["ASIL level of safety goal"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "8.4.6 / Table 5",
+    "publicly_retrievable": false,
+    "volatility": "stable across 2011/2018 editions; targets fixed",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Probabilistic Metric for random Hardware Failures (PMHF) target values by ASIL",
+    "formula_or_test": "PMHF < 100 FIT (10^{-7}/h) for ASIL B/C; < 10 FIT (10^{-8}/h) for ASIL D; no quantitative target for ASIL A",
+    "inputs": ["ASIL level of safety goal"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "9.4.2 / Table 6",
+    "publicly_retrievable": false,
+    "volatility": "stable across 2011/2018 editions; targets fixed",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Single-Point Fault Metric (SPFM) formula",
+    "formula_or_test": "SPFM = 1 − (Σλ_SPF + Σλ_RF) / Σλ_SR  (where λ_SR is sum of failure rates of safety-related hardware elements; safe faults excluded from both numerator and denominator)",
+    "inputs": ["λ_SPF (single-point fault rates)", "λ_RF (residual fault rates)", "λ_SR (safety-related failure rates)"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Annex C.2",
+    "publicly_retrievable": false,
+    "volatility": "stable; formula fixed in standard",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "Latent-Fault Metric (LFM) formula",
+    "formula_or_test": "LFM = 1 − Σλ_MPF,L / (Σλ_SR − Σλ_SPF − Σλ_RF)",
+    "inputs": ["λ_MPF,L (latent multi-point fault rates)", "λ_SR", "λ_SPF", "λ_RF"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Annex C.3",
+    "publicly_retrievable": false,
+    "volatility": "stable; formula fixed in standard",
+    "confidence": 0.9
+  },
+  {
+    "calculation": "Total Processing Performance (TPP) for ECCN 3A090 classification",
+    "formula_or_test": "TPP = 2 × MacTOPS × bit_length_of_the_operation, aggregated over all processing units on the IC; MacTOPS is theoretical peak tera (10^{12}) multiply-accumulate operations per second (D = A × B + C)",
+    "inputs": ["MacTOPS per processing unit", "bit length of the operation (largest input bit-length to multiply)", "number of processing units"],
+    "authority": "Export Administration Regulations (EAR), Commerce Control List, ECCN 3A090",
+    "clause_locator": "Technical Note 2 to 3A090.a and 3A090.b",
+    "publicly_retrievable": true,
+    "volatility": "thresholds and formula updated periodically via Federal Register (e.g., 2022–2025 rules)",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "ECCN 3A090.a control thresholds",
+    "formula_or_test": "IC controlled if TPP ≥ 4800, or TPP ≥ 1600 and performance density ≥ 5.92 (performance density = TPP / applicable die area in mm^{2})",
+    "inputs": ["TPP", "applicable die area"],
+    "authority": "Export Administration Regulations (EAR), Commerce Control List, ECCN 3A090",
+    "clause_locator": "3A090.a",
+    "publicly_retrievable": true,
+    "volatility": "thresholds revised in successive AC/S rules (2022–2025)",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "ECCN 3A090.b control thresholds",
+    "formula_or_test": "IC controlled if (TPP ≥ 2400 and < 4800 and performance density ≥ 1.6 and < 5.92) or (TPP ≥ 1600 and performance density ≥ 3.2 and < 5.92)",
+    "inputs": ["TPP", "performance density"],
+    "authority": "Export Administration Regulations (EAR), Commerce Control List, ECCN 3A090",
+    "clause_locator": "3A090.b",
+    "publicly_retrievable": true,
+    "volatility": "thresholds revised in successive AC/S rules (2022–2025)",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Advanced Manufacturing Investment Credit amount (CHIPS Act)",
+    "formula_or_test": "Credit = 25% of qualified investment (basis of qualified property placed in service that is part of an advanced manufacturing facility) for property placed in service after 31 Dec 2022 and on or before 31 Dec 2025; 35% thereafter",
+    "inputs": ["basis of qualified property", "placed-in-service date"],
+    "authority": "26 U.S.C. § 48D (Advanced manufacturing investment credit), as amended by CHIPS Act of 2022 and subsequent legislation",
+    "clause_locator": "§ 48D(a)",
+    "publicly_retrievable": true,
+    "volatility": "rate increased from 25% to 35% by 2025 legislation; construction begin-by date 31 Dec 2026",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Temperature acceleration factor (Arrhenius model) for semiconductor reliability",
+    "formula_or_test": "A_T = exp[(E_aa / k) × (1/T_U − 1/T_A)] where k = 8.617 × 10^{-5} eV/K, temperatures in Kelvin",
+    "inputs": ["E_aa (apparent activation energy, eV)", "T_U (use junction temperature, K)", "T_A (accelerated/test junction temperature, K)"],
+    "authority": "JEDEC JESD91 (Method for Developing Acceleration Models for Electronic Device Failure Mechanisms) / common industry practice referenced in JESD85",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "model form stable for decades; E_aa values mechanism-specific and updated with technology",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "FIT rate from accelerated life test data (chi-squared method)",
+    "formula_or_test": "FIT = [χ^{2}(%CL, 2f+2) × 10^9] / (2 × t × ss × AF) where f = number of failures, t = test hours, ss = sample size, AF = acceleration factor",
+    "inputs": ["number of failures f", "test duration t (hours)", "sample size ss", "acceleration factor AF", "confidence level %CL"],
+    "authority": "JEDEC JESD85 (Methods for Calculating Failure Rates in Units of FITs)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "calculation method stable; χ^{2} tables fixed",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "Primary-purpose test for advanced manufacturing facility under § 48D",
+    "formula_or_test": "Primary purpose satisfied if more than 50% of the facility’s potential output (measured by costs of production, revenue in arm’s-length transaction, or units produced) is derived from manufacturing of semiconductors or semiconductor manufacturing equipment",
+    "inputs": ["fraction of potential output attributable to semiconductor or semiconductor-equipment manufacturing"],
+    "authority": "26 CFR § 1.48D (final regulations implementing 26 U.S.C. § 48D)",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "threshold set in 2024 final regulations; may be refined by future guidance",
+    "confidence": 0.9
+  }
+]

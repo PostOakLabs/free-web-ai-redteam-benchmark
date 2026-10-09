@@ -1,0 +1,153 @@
+[
+{
+"title": "Late detailed-route overflow concentrated around SRAM channels",
+"design_context": "28nm, approximately 1.0M placeable instances, 82 SRAM hard macros, 4 clock domains plus generated clocks, commercial P&R and commercial synthesis tools.",
+"prior_state": {
+"wns_ns": -0.074,
+"tns_ns": -12.8,
+"global_route_overflow_percent": 0.0,
+"utilization_percent": 76.8,
+"drc_count": 0
+},
+"observation": {
+"details": "The post-CTS optimization run looked clean at the global-routing stage, but the first detailed-route attempt produced localized routing failures. Global-route analysis showed about 1.9% total overflow, with the overflow concentrated in four narrow channels between SRAM columns; two channels exceeded 8% local overflow while most of the rest of the block remained below 1%.",
+"severity": "HIGH"
+},
+"hypothesis": "The dominant problem was local track and pin-access demand in the SRAM channels rather than excessive overall placement density, so a global utilization reduction or macro-floorplan change would spend schedule and introduce churn without directly addressing the concentrated demand.",
+"candidates_considered": [
+{
+"action": "Reduce overall placement density by approximately 5 percentage points and repeat placement, CTS, and route.",
+"rejected_because": "This would consume at least one full closure iteration and risk perturbing clock-tree and timing results that were already substantially converged; it also addressed block-wide density rather than the localized channels."
+},
+{
+"action": "Move several SRAM macros to widen the congested channels.",
+"rejected_because": "The SRAMs were already aligned with power-grid and floorplan constraints, so macro movement would require floorplan, power-grid, CTS, and timing revalidation with a high risk of several days of downstream churn."
+},
+{
+"action": "Globally relax selected routing constraints and increase routing resources on the affected layers.",
+"rejected_because": "A global routing-rule change could trade the local problem for coupling, antenna, or DRC problems elsewhere and would require another detailed-route signoff pass."
+}
+],
+"chosen_intervention": "The engineer kept the floorplan and macro locations fixed, then correlated the overflow map with pin-density and high-fanout-net entry locations. Several small logic clusters immediately adjacent to the worst SRAM channels were incrementally spread into available whitespace, low-fanout buffers were moved out of the channels, and routing constraints were locally guided so the highest-demand nets approached the SRAMs using complementary layers rather than competing in the same channel. The block was then rerun through incremental placement and detailed routing.",
+"post_state": {
+"wns_ns": -0.101,
+"tns_ns": -18.6,
+"global_route_overflow_percent": 0.3,
+"utilization_percent": 76.4,
+"drc_count": 0
+},
+"expert_assessment": "This is a sensible late-stage intervention because it attacks the spatial correlation between congestion, pin access, and channel demand without disturbing the macro floorplan. The lesson transfers when overflow is strongly localized; it would not transfer to a genuinely global routing-capacity shortage or a floorplan whose channels are intrinsically too narrow.",
+"confidence": 0.86,
+"failure_class": "FAIL_CONGESTION",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "The stated magnitude of improvement from local spreading and routing guidance is tool- and design-dependent and is the detail most worth expert review."
+},
+{
+"title": "Violation-count and depth pattern exposed a clock-constraint problem",
+"design_context": "16nm, approximately 930k placeable instances, 61 macros, 5 clock domains with generated clocks, commercial P&R and commercial synthesis tools.",
+"prior_state": {
+"wns_ns": -0.312,
+"tns_ns": -67.5,
+"violating_endpoints": 367,
+"utilization_percent": 75.9,
+"drc_count": 0
+},
+"observation": {
+"details": "The setup report contained 367 violating endpoints, but the worst 120 paths were tightly clustered between -0.27ns and -0.31ns. About 79% of those paths crossed the same clock-domain boundary, and many shared the same launch clock and a common generated-clock relationship. The failing endpoints were spread across several physical regions rather than concentrated in one placement area.",
+"severity": "CRITICAL"
+},
+"hypothesis": "The large number of similarly deep violations sharing one clock relationship but not one physical region indicated a common constraint or clock-definition error rather than a logic-depth or placement problem; physical optimization should be deferred until the timing model was validated.",
+"candidates_considered": [
+{
+"action": "Upsize cells and insert buffers on the worst violating cones.",
+"rejected_because": "The violations were distributed across hundreds of endpoints, so broad upsizing would add area and power while increasing congestion before establishing that the required arrival times were correct."
+},
+{
+"action": "Run a global placement/timing optimization pass focused on the violating endpoints.",
+"rejected_because": "The optimization would risk moving already-clean logic and consume a closure iteration, while the common-clock signature provided stronger evidence for a constraint issue than a placement issue."
+},
+{
+"action": "Add a broad multicycle exception between the two clock domains.",
+"rejected_because": "No architectural evidence established that the transfers were intentionally multi-cycle; suppressing the violations would create a functional signoff risk and could mask a real timing requirement."
+}
+],
+"chosen_intervention": "The engineer first inspected the clock definitions and compared the reported required times for representative paths from the affected domain. The generated clock at the receiving boundary had an incorrect waveform relationship, making the active capture edge earlier than intended for the affected paths. The engineer corrected the SDC waveform definition, reloaded the constraints, regenerated timing reports, and only then resumed physical optimization on the residual violations.",
+"post_state": {
+"wns_ns": -0.067,
+"tns_ns": -8.9,
+"violating_endpoints": 44,
+"utilization_percent": 75.9,
+"drc_count": 0
+},
+"expert_assessment": "The strongest part of the decision is the diagnosis from the report shape: many similarly sized failures sharing a clock relationship are a reason to validate constraints before touching implementation. The method would not transfer to a broad distribution of violations with heterogeneous depths, unrelated clocks, and clear physical clustering.",
+"confidence": 0.91,
+"failure_class": "FAIL_TIMING",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "The exact WNS improvement depends on the erroneous waveform relationship and top-level clock assumptions, so the numerical transition should be checked against a real SDC scenario."
+},
+{
+"title": "Interface budget derived from end-to-end timing rather than a symmetric split",
+"design_context": "28nm, approximately 710k placeable instances, 49 SRAM and other hard macros, 3 primary clock domains plus one generated clock, commercial P&R and commercial synthesis tools.",
+"prior_state": {
+"clock_period_ns": 2.0,
+"block_a_output_budget_ns": 0.46,
+"block_b_input_budget_ns": 0.60,
+"clock_uncertainty_ns": 0.08,
+"wns_ns": -0.086,
+"tns_ns": -2.7,
+"utilization_percent": 72.1,
+"drc_count": 0
+},
+"observation": {
+"details": "The boundary budget gave Block A only 0.46ns for its output-to-interface timing while Block B had 0.60ns allocated on the receiving side. Measured Block B implementation across representative corners generally consumed about 0.41-0.44ns, while several Block A paths were failing by approximately 0.09ns. The end-to-end transfer still had measurable margin when analyzed with the top-level clock assumptions.",
+"severity": "MODERATE"
+},
+"hypothesis": "The original allocation was unnecessarily conservative on Block B relative to its demonstrated implementation delay and was making Block A solve a tighter problem than required; the interface budget should be derived from the end-to-end period, uncertainty, and measured downstream requirement rather than an arbitrary fixed split.",
+"candidates_considered": [
+{
+"action": "Keep the existing 0.46ns Block A budget and close the remainder with cell upsizing and buffering.",
+"rejected_because": "The affected interface cones would require additional buffering and upsizing, with likely area and leakage cost and some risk of worsening local congestion, even though the top-level timing budget did not require that severity."
+},
+{
+"action": "Split the 2.0ns period symmetrically between the two blocks.",
+"rejected_because": "A symmetric allocation would discard measured information about the actual receiving-side delay and could allow either block to consume more budget than its implementation needs, causing later integration churn."
+},
+{
+"action": "Declare the boundary false-path because the interface is associated with a control protocol rather than ordinary dataflow.",
+"rejected_because": "The transfer is still synchronously consumed in the active operating mode, so removing the timing requirement would create a functional signoff hole rather than a valid budget derivation."
+}
+],
+"chosen_intervention": "The engineer reconstructed the top-level transfer budget from the 2.0ns period and 0.08ns uncertainty, reviewed Block B's measured worst-case input-side delay, and reserved 0.46ns for Block B including its guardband. The remaining explicit interface allowance was assigned to Block A as 0.52ns. The block-level SDC constraints were updated so both blocks used the same documented end-to-end assumptions, and both were rerun against the top-level budget.",
+"post_state": {
+"clock_period_ns": 2.0,
+"block_a_output_budget_ns": 0.52,
+"block_b_input_budget_ns": 0.46,
+"clock_uncertainty_ns": 0.08,
+"wns_ns": -0.024,
+"tns_ns": -0.7,
+"utilization_percent": 72.1,
+"drc_count": 0
+},
+"expert_assessment": "This is the right class of decision when both blocks are sufficiently characterized to support an evidence-based budget rather than a symmetric allocation. The lesson does not transfer unchanged when downstream implementation is highly volatile, the operating modes are incompletely characterized, or the interface timing relationship is actually asynchronous or intentionally multi-cycle.",
+"confidence": 0.82,
+"failure_class": "SDC_BUDGET",
+"source_basis": "constructed-example",
+"weakest_point": "The exact 0.52ns versus 0.46ns allocation is a plausible worked example, but organizations differ in how they derive guardbands and interface budgets."
+},
+{
+"title": "Design closure lessons from the IBM POWER4 microprocessor",
+"venue_or_publication": "IBM Journal of Research and Development",
+"year": 2002,
+"what_it_covers": "Detailed design and implementation experience for the POWER4 microprocessor, including physical design methodology, timing, wiring, clocking, and design closure challenges at a large scale.",
+"why_relevant": "It is a named, public engineering account of real high-performance ASIC physical-design implementation and discusses practical closure constraints rather than presenting only abstract methodology.",
+"confidence": 0.94
+},
+{
+"title": "The Implementation of the IBM z10 Microprocessor",
+"venue_or_publication": "IBM Journal of Research and Development",
+"year": 2008,
+"what_it_covers": "Large-scale processor implementation methodology and physical-design considerations for the IBM z10 generation, including timing, power, wiring, and implementation closure.",
+"why_relevant": "It provides public engineering discussion of physical implementation tradeoffs and closure at an advanced processor scale, useful as a source of real-world failure modes and recovery strategies.",
+"confidence": 0.9
+}
+]

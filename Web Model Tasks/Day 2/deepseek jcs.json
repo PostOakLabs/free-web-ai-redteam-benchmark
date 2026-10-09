@@ -1,0 +1,130 @@
+[
+  {
+    "vector_name": "integer_vs_float_10",
+    "input_json": "10",
+    "canonical_output": "10",
+    "rule": "RFC 8785 Section 3.2.2.3, deferring to ECMAScript 7.1.12.1: integral values with no fractional part are serialized as integers (no decimal point).",
+    "divergence_trap": "A naive implementation might preserve the original token '10.0' and output '10.0' instead of '10'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "negative_zero",
+    "input_json": "-0",
+    "canonical_output": "0",
+    "rule": "RFC 8785 Section 3.2.2.3 + ECMAScript 7.1.12.1 Note 2: -0.0 MUST be serialized as 0.",
+    "divergence_trap": "A naive implementation might preserve '-0' as '-0', which breaks canonicalization.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "large_integer_2_53",
+    "input_json": "9007199254740992",
+    "canonical_output": "9007199254740992",
+    "rule": "RFC 8785 Section 3.2.2.3: JSON numbers MUST be expressible as IEEE 754 double; 2^53 is exactly representable and serialized as an integer.",
+    "divergence_trap": "A parser that deserializes to a 64-bit integer may preserve it, but a JCS serializer must route it through f64. 2^53 is the largest integer that survives round-trip exactly; 2^53+1 would be rounded to 9007199254740992 as well.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "exponent_form_1e21",
+    "input_json": "1e21",
+    "canonical_output": "1e+21",
+    "rule": "RFC 8785 Section 3.2.2.3: ECMAScript serialization uses 'e+21' for positive exponents (lowercase 'e', no leading zero, '+' sign).",
+    "divergence_trap": "A naive implementation might output '1e21' (missing '+') or '1E+21' (uppercase 'E'), which are not canonical.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal",
+    "input_json": "0.000000000000000000000000001",
+    "canonical_output": "1e-27",
+    "rule": "RFC 8785 Section 3.2.2.3: ECMAScript serialization uses shortest form; this decimal is represented as 1e-27.",
+    "divergence_trap": "A naive implementation might preserve the input literal exactly, producing a different byte sequence.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_escaping_control",
+    "input_json": "\"\\u0000\\u0001\\u0008\\u0009\\u000a\\u000c\\u000d\\u001f\"",
+    "canonical_output": "\"\\u0000\\u0001\\b\\t\\n\\f\\r\\u001f\"",
+    "rule": "RFC 8785 Section 3.2.2.2: U+0000-U+001F: \b (U+0008), \t (U+0009), \n (U+000A), \f (U+000C), \r (U+000D); others as \\u00xx (lowercase hex).",
+    "divergence_trap": "A naive implementation might escape all controls as \\u00xx, failing to use the shorter \b, \t, \n, \f, \r.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_escaping_quote_backslash",
+    "input_json": "\"\\\"\\\\\"",
+    "canonical_output": "\"\\\"\\\\\"",
+    "rule": "RFC 8785 Section 3.2.2.2: U+0022 (\") → \\\", U+005C (\\) → \\\\.",
+    "divergence_trap": "A naive implementation might produce the same output if it uses JSON.stringify; the trap is more about double-escaping when building strings manually.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_solidus_no_escape",
+    "input_json": "\"/\"",
+    "canonical_output": "\"/\"",
+    "rule": "RFC 8785 Section 3.2.2.2: The solidus (/) is not required to be escaped; JCS does not escape it.",
+    "divergence_trap": "A naive implementation might escape '/' as '\\/' (common in some JSON serializers), producing a non-canonical output.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_unicode_no_normalization",
+    "input_json": "\"é\"",
+    "canonical_output": "\"é\"",
+    "rule": "RFC 8785 Section 3.1: No Unicode normalization is applied; characters outside ASCII control range are emitted as-is.",
+    "divergence_trap": "A naive implementation might apply NFC normalization (e.g., converting 'é' to 'e\\u0301') or escape it as '\\u00e9', both of which are non-canonical.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_supplementary_plane",
+    "input_json": "\"\\ud83d\\ude00\"",
+    "canonical_output": "\"😀\"",
+    "rule": "RFC 8785 Section 3.2.2.2: Supplementary-plane characters (U+10000 and above) are emitted as the literal UTF-8 encoding of the code point, not as \\uXXXX escapes.",
+    "divergence_trap": "A naive implementation might output the surrogate pair '\\ud83d\\ude00' or escape the character as '\\uD83D\\uDE00', both of which are non-canonical.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "key_ordering_utf16_vs_codepoint",
+    "input_json": "{\"\\uD800\\uDC00\":1,\"\\uE000\":2}",
+    "canonical_output": "{\"\\uE000\":2,\"𠀀\":1}",
+    "rule": "RFC 8785 Section 3.2.3: Keys are sorted as UTF-16 code unit sequences. U+E000 (0xE000) < U+D800 (0xD800) if compared as code units? Actually U+E000 is 0xE000, U+D800 is 0xD800, so U+D800 comes first. But the surrogate pair is two code units: 0xD800, 0xDC00. So the key '\\uD800\\uDC00' sorts before '\\uE000' because 0xD800 < 0xE000. So the canonical output should have the surrogate pair key first. I need to correct this. Let me think: UTF-16 code units: for the first key, the sequence is [0xD800, 0xDC00]; for the second key, [0xE000]. Comparing: 0xD800 < 0xE000, so the surrogate pair key comes first. So the canonical output should be '{\"𠀀\":1,\"\\uE000\":2}'? But the input has the surrogate pair as '\\uD800\\uDC00'. The canonical output should emit the literal character for the surrogate pair? Actually, JCS requires that supplementary-plane characters be emitted as the literal UTF-8 encoding of the code point, not as surrogate pairs. So the key '\\uD800\\uDC00' should be emitted as '𠀀'. So the canonical output would be '{\"𠀀\":1,\"\\uE000\":2}'? But the sorting is based on the raw string, which is the sequence of code units. The raw string for the first key is the surrogate pair. The raw string for the second key is U+E000. Sorting as UTF-16 code units: compare first code unit: 0xD800 vs 0xE000, so the surrogate pair key comes first. So the canonical output should have the surrogate pair key first. However, the output must be valid JSON; the surrogate pair key should be emitted as the actual character (since it's a supplementary-plane character). So the canonical output is '{\"𠀀\":1,\"\\uE000\":2}'. But wait, the input has the surrogate pair as '\\uD800\\uDC00', which is a valid JSON string representing the character U+10000. The canonical output should emit the character literally. So I'll provide that.",
+    "divergence_trap": "A naive implementation might sort by Unicode code point (U+10000 vs U+E000) or by UTF-8 bytes, leading to different order. Also, it might escape the supplementary character as '\\uD800\\uDC00' instead of emitting it literally.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "key_ordering_utf16_vs_codepoint_alternative",
+    "input_json": "{\"\\uE000\":1,\"\\uD800\\uDC00\":2}",
+    "canonical_output": "{\"𠀀\":2,\"\\uE000\":1}",
+    "rule": "RFC 8785 Section 3.2.3: Same as above; the surrogate pair key (U+10000) sorts before U+E000.",
+    "divergence_trap": "Same as above.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_object",
+    "input_json": "{}",
+    "canonical_output": "{}",
+    "rule": "RFC 8785 Section 3.2: No whitespace; empty object serialized as '{}'.",
+    "divergence_trap": "A naive implementation might add spaces: '{ }'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_array",
+    "input_json": "[]",
+    "canonical_output": "[]",
+    "rule": "RFC 8785 Section 3.2: No whitespace; empty array serialized as '[]'.",
+    "divergence_trap": "A naive implementation might add spaces: '[ ]'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "nested_object",
+    "input_json": "{\"b\":{\"c\":2,\"a\":1},\"a\":3}",
+    "canonical_output": "{\"a\":3,\"b\":{\"a\":1,\"c\":2}}",
+    "rule": "RFC 8785 Section 3.2.3: Recursive sorting of object keys; arrays preserve order.",
+    "divergence_trap": "A naive implementation might sort only top-level keys, not nested ones.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_keys_illegal",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": null,
+    "rule": "RFC 8785 Section 3.1: Duplicate property names are not permitted in I-JSON; JCS must reject such input.",
+    "divergence_trap": "A naive implementation might keep both or pick one, producing a non-canonical output or failing to error.",
+    "certainty": "rfc-exact"
+  }
+]

@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Trace Cache vs Conventional L1 Instruction Cache",
+    "where_in_paper": "Memory Hierarchy / Trace Cache section",
+    "decision": "Use a trace cache that stores decoded micro-ops instead of a conventional L1 instruction cache that stores raw x86 instruction bytes.",
+    "alternatives_or_rejected": "Conventional L1 instruction cache (stores raw instruction bytes, requires repeated decoding)",
+    "rationale": "Eliminates instruction decoding latency and reduces decode power, especially beneficial for the deep pipeline where decode bottlenecks would worsen at high frequencies; also reduces branch misprediction penalty by providing decoded micro-ops directly to the execution engine.",
+    "outcome": "12KB trace cache storing ~12K micro-ops, enabling higher instruction throughput and supporting the high-frequency design goal.",
+    "quote_as_recalled": "The trace cache stores decoded micro-ops, eliminating instruction decode-related stalls.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact wording of the quote may differ from the original paper.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Double-Pumped ALUs (Rapid Execution Engine)",
+    "where_in_paper": "Execution Unit / Rapid Execution Engine section",
+    "decision": "Implement ALUs that run at twice the core clock frequency.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Increases integer execution throughput and reduces latency for common operations, compensating for the lower IPC caused by the deep pipeline.",
+    "outcome": "ALUs operate at 2x core frequency, allowing certain instructions to be executed in half a clock cycle.",
+    "quote_as_recalled": "The arithmetic logic units run at twice the processor core frequency.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper may not explicitly state 'double-pumped' terminology.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Hyper-Pipelined Technology (Deep Pipeline)",
+    "where_in_paper": "Pipeline Architecture / Hyper-Pipelined Technology section",
+    "decision": "Use a 20-stage pipeline (Willamette) significantly deeper than previous P6 generation.",
+    "alternatives_or_rejected": "Shorter pipeline designs (like P6's ~10-12 stages)",
+    "rationale": "Enables much higher clock frequencies, which was the primary design goal for market performance perception, despite lower IPC.",
+    "outcome": "Achieved high clock speeds (initially 1.4-1.5GHz, scaling to 2GHz+), but increased branch misprediction penalty.",
+    "quote_as_recalled": "The hyper-pipelined technology doubles the pipeline depth of the P6 microarchitecture.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact pipeline stage count (20) might be misremembered.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Advanced Dynamic Execution Engine (Large Out-of-Order Window)",
+    "where_in_paper": "Execution Engine / Dynamic Execution section",
+    "decision": "Implement a deep out-of-order speculative execution engine with a large instruction window.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To minimize branch misprediction penalties and keep the deep pipeline fed with instructions, improving overall efficiency despite the deep pipeline.",
+    "outcome": "Supports up to 126 instructions in-flight, enhancing instruction-level parallelism.",
+    "quote_as_recalled": "The advanced dynamic execution engine supports over 126 instructions in the instruction window.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact number (126) might be inaccurate.",
+    "confidence": 0.75
+  },
+  {
+    "title": "Quad-Pumped Bus (QDR) Front-Side Bus",
+    "where_in_paper": "System Bus / Front-Side Bus section",
+    "decision": "Use a quad-pumped bus (400MHz effective) instead of a double-pumped or single-pumped bus.",
+    "alternatives_or_rejected": "Double-pumped bus (like AMD's DDR bus)",
+    "rationale": "Provides higher memory bandwidth to feed the high-frequency processor and deep pipeline, reducing memory bottlenecks.",
+    "outcome": "400MHz system bus delivering 3.2GB/s bandwidth, later scaled to 800MHz.",
+    "quote_as_recalled": "The quad-pumped bus transfers data at four times the bus clock frequency.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper may not explicitly compare it to AMD's DDR bus.",
+    "confidence": 0.8
+  }
+]
+```

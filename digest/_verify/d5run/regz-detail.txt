@@ -1,0 +1,24 @@
+REFERENCE (computed by this script, not transcribed)
+  task1 factors 6dp : A=1.049304, B=1.049330, C=1.049304, D=1.049879
+  task2 proj x1.034 : A=134897, B=4047, C=26979, D=1349
+  task3 implied A   : 1.033573  gap vs 1.034 = -4.27 bp; projection 134897 vs official 134841 = -56
+
+### chatgpt          t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean+trailing-content]
+### deepseek         t1=4/4  t2=4/4  t3factor=n  t3bp=Y  score=8/9  [clean]
+### gemini           t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean+trailing-content]
+### glm 5.3 flash    t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean+fence-close+fenced]
+### grok             t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### kimi             t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### longcat          t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### meta             t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### mimo             t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean+fence-close+fenced]
+### minara           t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### minimax 2.7      t1=1/4  t2=4/4  t3factor=n  t3bp=Y  score=5/9  [clean+fence-close+fenced]
+      task1 missing tiers: ['A', 'C', 'D'] (expected A=1.049304, C=1.049304, D=1.049879)
+### mistral          t1=1/4  t2=1/4  t3factor=n  t3bp=n  score=2/9  [raw-newline-escape]
+      task1 missing tiers: ['A', 'B', 'C'] (expected A=1.049304, B=1.049330, C=1.049304)
+      task2 missing tiers: ['A', 'B', 'C'] (expected A=134897, B=4047, C=26979)
+### qwen             t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean]
+### solar            NOT GRADABLE (FAILED)
+### sonnet           t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [clean+fenced+trailing-content]
+### yuanbao          t1=4/4  t2=4/4  t3factor=Y  t3bp=Y  score=9/9  [raw-newline-escape]

@@ -1,0 +1,145 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is an excellent technical topic I can discuss substantively. Here are the key practice deltas between the 28nm and 7nm/5nm eras:
+
+---
+
+**1. Wire Delay vs. Cell Delay Dominance**
+
+**At 28nm:** Wire delay was significant but cell delay still dominated on many paths. A well-placed block could close timing with moderate routing effort. Wire RC was manageable, and a single metal layer delay model was often sufficient for early estimates.
+
+**At 7nm/5nm:** Wire resistance scaled poorly relative to cell delay — copper resistivity increases at narrower dimensions due to electron surface scattering and barrier layer thickness becoming a larger fraction of the wire cross-section. Wire delay now dominates on most paths, especially global routes. A path's timing is more sensitive to placement and routing than to cell sizing.
+
+**Why it changed:** Copper resistivity increases non-linearly below ~100nm wire width. Barrier/liner layers (TaN/Ta) consume a fixed thickness, leaving less actual copper at advanced nodes.
+
+**What breaks:** A 28nm-trained engineer focuses optimization effort on cell sizing and Vt swapping, expecting the placer to handle wire delays. At 7nm, this barely moves the needle — the critical paths need placement changes or routing layer promotion, not cell swaps. Symptom: TNS doesn't improve despite aggressive cell optimization.
+
+**Workflow impact:** Placement and floorplanning stages became much more timing-critical; early wireload estimates became unreliable, forcing physically-aware synthesis earlier.
+
+---
+
+**2. Multi-Patterning and Color-Aware Placement**
+
+**At 28nm:** Single-patterning lithography. The placer didn't need to consider coloring — any legal placement could be routed with a single exposure.
+
+**At 7nm (pre-EUV on some layers):** Metal layers required double or triple patterning (SADP/SAQP). Adjacent wires on the same layer needed different "colors" (different masks). The placer had to be color-aware to avoid creating uncolorable configurations.
+
+**Why it changed:** Feature sizes shrank below the resolution limit of 193nm immersion lithography. Multiple exposures were needed to print features that a single exposure couldn't resolve.
+
+**What breaks:** A 28nm-trained engineer runs placement without enabling coloring constraints. The result: placement looks clean, but routing fails with thousands of coloring violations that can't be fixed without re-placement. Symptom: a large gap between global-route quality and detailed-route DRC count.
+
+**Workflow impact:** Placement tools added coloring-aware legality checks. Floorplanning had to account for coloring conflicts in macro channel regions.
+
+---
+
+**3. Via and Pin-Access DRC Becoming Dominant**
+
+**At 28nm:** DRC violations were primarily spacing and width violations. Vias were relatively large and pin access was straightforward — most pins were reachable from multiple routing directions.
+
+**At 7nm/5nm:** Via-to-via spacing, via-to-pin spacing, and pin-access-driven DRC became the dominant violation categories. Pins shrank and became harder to reach; some pins were only accessible from one routing direction due to metal pitch and via enclosure rules.
+
+**Why it changed:** Metal pitch shrank dramatically (from ~100nm at 28nm to ~40nm at 7nm), via sizes shrank proportionally, and minimum via-to-via spacing rules became very restrictive. Multi-patterning added additional coloring constraints on via layers.
+
+**What breaks:** A 28nm-trained engineer focuses on congestion and timing during placement, assuming DRC closure is a routing-stage problem. At 7nm, pin access issues during placement create DRC violations that no amount of routing optimization can fix. Symptom: detailed-route DRC count stays high despite multiple routing iterations.
+
+**Workflow impact:** Pin-access analysis moved into the placement stage. Placement tools added pin-access-driven legalization.
+
+---
+
+**4. Signoff Corner Explosion**
+
+**At 28nm:** Typically 2-4 signoff corners (SS/FF/TT, maybe one voltage/temperature variant each). A single OCV derate (flat percentage) was often sufficient.
+
+**At 7nm/5nm:** 10-20+ signoff corners, including multiple voltage points, temperature variants, and process corners. AOCV (Advanced OCV) or POCV (Parametric OCV) tables replaced flat derates, with depth-dependent and distance-dependent variation modeling.
+
+**Why it changed:** Transistor variation increased (both systematic and random). At advanced nodes, within-die variation became comparable to die-to-die variation, requiring statistical rather than flat derate modeling. Multiple voltage domains and power management modes added more operating points.
+
+**What breaks:** A 28nm-trained engineer uses a flat derate and checks 2-3 corners. At 7nm, this misses violations that appear at specific corner/voltage/temperature combinations. Symptom: silicon fails at a corner that wasn't checked, or timing margins are wildly pessimistic at some corners and optimistic at others.
+
+**Workflow impact:** Signoff runtime increased dramatically. Teams adopted multi-corner multi-mode (MCMM) analysis as standard, and signoff tools had to handle concurrent optimization across all corners.
+
+---
+
+**5. IR Drop and EM: From Afterthought to First-Class**
+
+**At 28nm:** IR drop analysis was typically done once near signoff. Electromigration (EM) rules existed but were rarely a binding constraint. Power grid design was relatively straightforward — add enough metal stripes and you're fine.
+
+**At 7nm/5nm:** IR drop became a first-class design constraint that drives floorplanning and placement decisions. Dynamic IR drop (voltage droops during switching activity) can cause timing failures that static analysis misses. EM rules became much tighter due to higher current densities in narrower wires.
+
+**Why it changed:** Supply voltage scaled down (from ~1.0V to ~0.75V), leaving less margin for voltage droop. Current density in narrower wires increased relative to EM limits. Transistor switching speeds increased, creating sharper current transients.
+
+**What breaks:** A 28nm-trained engineer designs the power grid as a late-stage task and checks only static IR drop. At 7nm, dynamic IR drop causes intermittent timing failures in high-activity regions. Symptom: timing violations that appear and disappear depending on workload patterns, not caught by static timing analysis.
+
+**Workflow impact:** IR drop analysis moved earlier in the flow, often into floorplanning. Power grid design became iterative with placement optimization.
+
+---
+
+**6. Hold Closure Difficulty**
+
+**At 28nm:** Hold violations were relatively easy to fix — insert delay buffers, done. Hold fixing typically added 5-10% to cell count and was a routine last-mile task.
+
+**At 7nm/5nm:** Hold closure became much harder. Clock skew increased (due to more complex clock trees and variation), data paths became faster (shorter cell delays at low Vt), and the combination created more hold violations. Hold buffers themselves were subject to variation, making fixes less predictable.
+
+**Why it changed:** Faster cell delays at low Vt (used for performance) combined with increased clock skew from variation created a wider hold violation window. The ratio of data-path speed to clock-path skew worsened.
+
+**What breaks:** A 28nm-trained engineer allocates minimal schedule time for hold closure and expects it to be routine. At 7nm, hold closure consumes weeks and requires multiple iterations. Symptom: hold TNS grows with each ECO iteration rather than converging.
+
+**Workflow impact:** Hold-aware placement and CTS became important. Some teams adopted hold-first optimization strategies.
+
+---
+
+**7. Utilization Targets**
+
+**At 28nm:** 75-80% placement utilization was common and achievable. Routing congestion was manageable at these levels.
+
+**At 7nm/5nm:** Effective utilization targets dropped to 60-70% in practice, despite denser libraries. The reason: routing resources were consumed by multi-patterning constraints, via restrictions, and pin-access blockages, leaving less effective routing capacity per unit area.
+
+**Why it changed:** Metal pitch shrank but routing layers didn't increase proportionally. Multi-patterning consumed routing resources (coloring conflicts reduce effective track count). Pin-access rules created placement blockages around macros.
+
+**What breaks:** A 28nm-trained engineer pushes utilization to 75%+ at 7nm. The result: catastrophic routing congestion and DRC violations that can't be closed. Symptom: global-route overflow above 10% and detailed-route DRC count in the hundreds of thousands.
+
+**Workflow impact:** Floorplanning became more critical, with utilization targets set early and enforced throughout the flow.
+
+---
+
+**8. Clock Distribution Style**
+
+**At 28nm:** Traditional H-tree or balanced clock tree synthesis (CTS) with a single clock source. Clock skew targets were typically 50-100ps. CTS was a relatively predictable stage.
+
+**At 7nm/5nm:** Clock distribution became more complex — mesh-based or hybrid clock networks, clock grid structures, and multi-source clock trees. Skew targets tightened to 20-30ps, but variation made them harder to achieve. Clock gating became more aggressive, creating more clock domains and more complex balancing requirements.
+
+**Why it changed:** Increased variation made single-source trees harder to balance. Higher frequencies required tighter skew. Power management added more clock gating, creating more domains to balance.
+
+**What breaks:** A 28nm-trained engineer runs standard CTS without considering mesh or hybrid approaches. At 7nm, the resulting clock tree has too much skew variation across the die. Symptom: timing violations that correlate with physical location (one corner of the die is fast, another is slow).
+
+**Workflow impact:** CTS became a more iterative stage, often requiring multiple strategies and manual intervention.
+
+---
+
+**9. Library and Vt Mixing Strategy**
+
+**At 28nm:** Typically 2-3 Vt libraries (HVT, LVT, sometimes SVT). Vt mixing was straightforward — use LVT on critical paths, HVT elsewhere. The number of Vt choices was small enough to manage manually.
+
+**At 7nm/5nm:** 4-6 Vt options (uHVT, HVT, SVT, LVT, ULVT, sometimes custom). The granularity increased, and the power/timing tradeoff became more complex. Multi-Vt optimization became a critical step, with tools needing to consider leakage, dynamic power, and timing simultaneously across many more options.
+
+**Why it changed:** Process technology offered more Vt options to manage the power-performance tradeoff at lower supply voltages. Leakage power became a larger fraction of total power, making Vt selection more impactful.
+
+**What breaks:** A 28nm-trained engineer uses a simple two-Vt strategy (LVT for critical, HVT for everything else). At 7nm, this wastes power on non-critical paths (could use uHVT) and misses timing on semi-critical paths (could use SVT instead of HVT). Symptom: either excessive leakage power or unnecessary timing violations.
+
+**Workflow impact:** Multi-Vt optimization became a dedicated step in the flow, with more sophisticated algorithms needed to navigate the larger design space.
+
+---
+
+**10. Congestion Character: Pin Access vs. Channel Routing**
+
+**At 28nm:** Congestion was primarily about routing channel capacity — were there enough tracks between macros and in dense regions? Global-route overflow was the main congestion metric.
+
+**At 7nm/5nm:** Congestion shifted toward pin-access-driven congestion. Even in regions with available routing tracks, pins that could only be accessed from one direction created local congestion hotspots. The congestion pattern became more localized and harder to predict from global-route metrics alone.
+
+**Why it changed:** Pin sizes shrink, via enclosure rules tightened, and metal pitch reduced the number of routing directions accessible from each pin. Some pins became "single-access" — reachable from only one routing layer and direction.
+
+**What breaks:** A 28nm-trained engineer looks at global-route overflow as the congestion indicator. At 7nm, global-route overflow may look clean, but detailed route fails due to pin-access congestion. Symptom: a disconnect between global-route quality and detailed-route DRC count.
+
+**Workflow impact:** Pin-access analysis became a standard pre-placement check. Congestion analysis tools added pin-access-aware metrics alongside traditional track-utilization metrics.
+
+---
+
+These reflect the major practice shifts I'm aware of between the 28nm and 7nm/5nm eras. The specific numbers (utilization targets, skew values, corner counts) vary by team, foundry, and design complexity. My knowledge reflects practices up to mid-2025; the 3nm/2nm era may introduce additional shifts I'm not fully up to date on.

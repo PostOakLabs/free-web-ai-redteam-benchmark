@@ -1,0 +1,21 @@
+{"verdict": "SOUND-WITH-RESERVATIONS",
+ "objections": [
+   {"claim_attacked": "observation: metal1 usage 1043.75% alongside prior_state's claim that OBS blocks M1–M5 leaving only M6 free",
+    "objection": "If M1–M5 are genuinely blocked by RAM OBS over the macros, a metal1 usage figure over 1000% for the design as a whole is plausible only as a localized/edge statistic (e.g., overflow concentrated in the narrow free channels around the RAMs) rather than a chip-wide average; the record does not clarify whether this figure is global or localized, so its scale is asserted without the qualification needed to judge it consistent with the OBS-blocking hypothesis.",
+    "severity": "minor",
+    "confidence": 0.55},
+   {"claim_attacked": "chosen_intervention: 'No single code intervention was adopted' paired with hypothesis listing multiple specific candidate root causes as if diagnosis narrowed to them",
+    "objection": "The hypothesis field presents several distinct, sometimes competing explanations (resource-accounting mismatch, macro placement/halos, RAM CLASS, density) but the thread explicitly never adjudicates between them per the gaps field; treating these as 'the hypothesis' risks implying a settled explanatory chain when the record shows an open disagreement that was never resolved to a single cause.",
+    "severity": "minor",
+    "confidence": 0.5}
+ ],
+ "mechanism_check": "N-D — no intervention was adopted in the thread, so there is no chosen mechanism to evaluate against post_state; the episode itself is a diagnosis-only record rather than a fix-outcome record.",
+ "evidence_check": "ASSERT — post_state is a participant's qualitative conclusion ('groute map is wrong, without macros this should be easily routable') with no re-measured congestion, overflow, or DRC numbers given after any change.",
+ "attribution_check": "SUPPORTS — the quote is attributed to a named participant (maliberty) with a date, and its content directly supports the record's closing framing that the design's extreme density makes routability doubtful.",
+ "missing_from_story": [
+   "Any resolution or decision on which of the listed candidate causes (resource-accounting semantics, macro halos, RAM CLASS, density) was actually responsible, since the thread leaves this explicitly unresolved.",
+   "Whether risc2 was ever successfully routed under any parameter set, or confirmed as fundamentally unroutable as testcase.",
+   "Any follow-on issue or PR the thread may have spawned to fix the RUDY-vs-GRT display/accounting discrepancy specifically, versus the macro-placement problem.",
+   "Numeric congestion/overflow values under any of the proposed candidate fixes, to show whether any of them measurably helped."
+ ],
+ "most_defensible_part": "The observation field's numeric GRT report values (metal1 1043.75%, total 194.23%, overflow 180004, 62 failed instances) presented as raw reported figures without claiming they were resolved."}

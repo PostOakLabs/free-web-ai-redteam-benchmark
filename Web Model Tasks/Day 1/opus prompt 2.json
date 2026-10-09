@@ -1,0 +1,296 @@
+**PROMPT A output:**
+
+```json
+[
+  {
+    "title": "28nm SRAM-channel congestion found at first detailed route; frozen floorplan forced a density-screen and NDR-scoping recovery instead of macro re-placement",
+    "design_context": {
+      "node": "28nm",
+      "placeable_instances": 1050000,
+      "hard_macros": 78,
+      "macro_type": "single- and dual-port SRAMs, 6 distinct sizes, arranged in 5 stacks along the north and west edges",
+      "clock_domains": 3,
+      "metal_stack": "8 routing layers, M1-M4 thin (1x), M5-M6 intermediate (2x), M7-M8 thick (upper, mostly power)",
+      "tools": "commercial synthesis, commercial P&R, commercial sign-off STA and extraction"
+    },
+    "prior_state": {
+      "stage": "first detailed-route attempt, after post-CTS optimization reported clean",
+      "placement_utilization_pct": 70.0,
+      "post_cts_wns_ns": -0.140,
+      "post_cts_tns_ns": -38.0,
+      "global_route_overflow_pct_blockwide": 3.1,
+      "gr_overflow_in_macro_channels": "7 channels between SRAM stacks, 3-5 gcell columns wide, local overflow 28-45% on M3/M4",
+      "post_cts_congestion_verdict": "block-level GR summary reported 3.1% overflow and was signed off as routable",
+      "schedule": "8 working days to a hard top-level integration handoff"
+    },
+    "observation": "Detailed route stalled rather than converged: violation count went 260k, 190k, 178k, 175k over four route-opt iterations, i.e. an obvious asymptote well above zero. Spatially, 88% of remaining violations sat inside the 7 SRAM channels, which occupy under 3% of the block area, and were dominated by shorts on M3/M4 plus unreachable pins on cells wedged against macro edges. The block-average 3.1% overflow number that had cleared post-CTS review was arithmetically true and diagnostically worthless.",
+    "severity": "HIGH",
+    "hypothesis": "The block is locally over-subscribed, not globally congested. Two demands landed in the same narrow channels: the placer treated the channels as ordinary free area and legalized non-critical combinational logic into them because they were the largest contiguous open regions left after macro placement, and CTS subsequently routed clock trunks with non-default rules through the same channels to reach flops on the far side of the SRAM stacks. Channel routing supply on M3/M4 is fixed by the macro pitch, so demand grew while supply could not. Any block-global remedy therefore pays full cost for a defect confined to 3% of the area.",
+    "candidates_considered": [
+      {
+        "action": "Re-place the SRAM stacks to widen the 7 channels and open proper routing corridors.",
+        "rejected_because": "Macro placement had already been exported upward: top-level feedthrough locations and the power-grid stripe pattern were derived from it and integrated. Moving macros forces top-level re-integration plus a fresh IR/EM sign-off on the rebuilt grid, estimated 2.5-3 weeks against 8 days of schedule."
+      },
+      {
+        "action": "Drop overall placement utilization from 70% to ~62% by growing the block outline.",
+        "rejected_because": "The outline is fixed by the top-level partition, so the area would have to come out of the neighbouring block, and the remedy does not address the defect anyway - thinning the whole block does not add a single M3 track between two abutting SRAMs."
+      },
+      {
+        "action": "Re-run placement from scratch with global congestion effort raised to high.",
+        "rejected_because": "Throws away the placement the clock tree was built on, so CTS and all post-CTS timing work is redone: 3-4 full flow days, and no reason to expect a different outcome, since the tool's own cost function had already chosen those channels once at high effort."
+      },
+      {
+        "action": "Route with DRC waivers and clean up the residue by hand in the final days.",
+        "rejected_because": "175k violations is three orders of magnitude beyond manual-repair scale, and every subsequent ECO would be made against a database that cannot be signed off - the downstream churn swamps the days it appears to save."
+      },
+      {
+        "action": "Add routing blockages over the channels to keep signal routing out of them entirely.",
+        "rejected_because": "The channels are the only path from the logic core to the SRAM pins on the far side; blocking them converts a congestion problem into an unroutable-by-construction one, and it also strands the CTS trunks already built through them."
+      }
+    ],
+    "chosen_intervention": "Three local changes applied together, with macro placement and clock-tree topology untouched: (1) graduated partial placement blockages over the 7 channels and their 12um halos - 60% density in the channel body, 40% at the macro-abutting edge - forcing incremental placement to evacuate non-critical logic while leaving the channels open as routing resource; (2) an NDR audit, which found a double-width/double-space rule applied to an entire 64-bit datapath bus rather than only its long top-level segments; the rule was re-scoped to segments over 200um, returning M3/M4 track supply inside the channels; (3) in-place restructuring of two high-fanout one-hot mux trees whose sink pins sat in the channels, rebuilt as balanced fanout-limited trees to cut local pin density. Then incremental place-opt with the clock tree preserved (placement legalization and timing recovery only, no CTS rebuild), followed by a fresh detailed route.",
+    "post_state": {
+      "placement_utilization_pct": 70.0,
+      "global_route_overflow_pct_blockwide": 0.7,
+      "worst_channel_local_overflow_pct": 9,
+      "detailed_route_violations_first_pass": 2400,
+      "detailed_route_violations_after_three_repair_iterations": 0,
+      "wns_ns": -0.175,
+      "tns_ns": -52.0,
+      "elapsed": "4.5 working days including two full detailed-route runs",
+      "note": "Timing got worse, not better: WNS lost 35 ps and TNS 14 ns, because logic evicted from the channels drove longer nets to the SRAM pins. That was accepted as the price of routability and recovered afterwards by ordinary post-route timing ECO."
+    },
+    "expert_assessment": "Right call under a frozen floorplan, and the move that actually mattered was refusing to accept a block-average congestion number as a routability verdict - 3.1% global concealed 45% local, and the post-CTS sign-off that cleared it was reading the wrong statistic. The general lesson is that congestion is a spatial quantity and must be reviewed as a map against the macro geometry, and that a blanket non-default routing rule is one of the most common self-inflicted supply reductions in a macro-dense block. It would not transfer to a genuinely globally congested block - utilization in the high 80s with diffuse overflow - where density screens only relocate the problem and the honest answer is a floorplan or utilization change.",
+    "confidence": 0.62,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The recovery from 175k violations to 2,400 on the first route after these three changes is the least defensible number - a real channel-congestion recovery of that magnitude usually also needs macro halo or pin-access adjustments and more than one route iteration, so the effect size attributed to density screens plus NDR re-scoping may be overstated."
+  },
+  {
+    "title": "A 4,200-endpoint failure that was one generated-clock definition: diagnosing from the slack histogram before running any tool",
+    "design_context": {
+      "node": "7nm",
+      "placeable_instances": 850000,
+      "hard_macros": 34,
+      "clock_domains": "2 functional - a 1.6 GHz core clock and a divide-by-2 peripheral clock generated inside the block - plus a scan clock",
+      "tools": "commercial synthesis, commercial P&R, commercial sign-off STA"
+    },
+    "prior_state": {
+      "stage": "post-placement, pre-CTS, first full-block timing report after an SDC revision",
+      "wns_ns": -1.42,
+      "tns_ns": -820,
+      "failing_endpoints": 4200,
+      "total_endpoints": 310000,
+      "previous_run_wns_ns": -0.085,
+      "previous_run_failing_endpoints": 41,
+      "netlist_delta_between_runs": "none - identical netlist, identical floorplan, identical placement seed"
+    },
+    "observation": "Failing endpoints went 41 to 4,200 and WNS -85 ps to -1.42 ns with no netlist change. The histogram shape was the whole diagnosis: about 3,900 of the 4,200 endpoints sat inside a 60 ps band centred on -1.35 ns - a spike, not a tail - and every one of them was captured by the generated peripheral clock, launched by the core clock, and reported a required time implying a launch-to-capture window near half a period rather than a full one. The remaining ~300 were the pre-existing population, distributed normally.",
+    "severity": "CRITICAL",
+    "hypothesis": "This is a constraint defect, not a physical or logic-depth one, and the three signatures separate cleanly. A physical/placement problem yields a broad, smooth slack distribution across clock groups with a long tail and correlates with net length. A logic-depth problem yields a small number of failures with distinct path topologies and large, differing violations. A dense spike of thousands of endpoints sharing one launch clock, one capture clock, and one slack value can only come from a term common to all of them - a timing-model quantity, here the generated clock's edge relationship, which after the SDC revision placed the capture edge half a period early on every core-to-peripheral crossing.",
+    "candidates_considered": [
+      {
+        "action": "Launch incremental timing optimization on the 4,200 endpoints overnight, since schedule was tight and the tool was otherwise idle.",
+        "rejected_because": "Optimizing against a wrong constraint spends real area and leakage buying margin that does not exist, and the upsized, buffer-heavy result has to be reverted once the constraint is corrected - a day of tool time plus a non-trivial untangling cost, on a netlist that was correct to begin with."
+      },
+      {
+        "action": "Suspect a placement or flow regression and re-run placement with higher timing effort.",
+        "rejected_because": "Inputs were byte-identical to the passing run, so the hypothesis was already falsified before the run started; a 6-hour placement cycle to test it is unaffordable on a daily-turn schedule."
+      },
+      {
+        "action": "Declare the core-to-peripheral crossings asynchronous and set_false_path them - which would have cleared 3,900 violations in one line.",
+        "rejected_because": "The two clocks are synchronous and phase-related by construction. A false path removes setup and hold checking on genuine single-cycle transfers, deferring a real functional failure to silicon, which is the most expensive place to find one."
+      },
+      {
+        "action": "Absorb the shortfall by relaxing clock uncertainty on the peripheral domain.",
+        "rejected_because": "1.35 ns is roughly a full half-period - far outside any defensible uncertainty budget - so this disguises a constraint error as pessimism removal and corrupts every subsequent margin judgement on that domain."
+      }
+    ],
+    "chosen_intervention": "No tool run until the constraint was checked. Pulled the STA clock report for both SDC revisions and diffed the generated-clock definitions. The divide-by-2 peripheral clock had been rewritten from an edge-based create_generated_clock (explicit source edges chosen so the derived active edge aligns with the source rising edge) to a divide-by form that did not preserve that phase relationship, so the engine selected the half-cycle-earlier capture edge on every core-to-peripheral path. Restored the edge-based definition, cross-checked it against the divider RTL to confirm the divider flop's Q toggles on the source rising edge, then added a clock-report diff to the SDC regression so an edge-relationship change cannot land silently again.",
+    "post_state": {
+      "wns_ns": -0.095,
+      "tns_ns": -3.4,
+      "failing_endpoints": 47,
+      "netlist_delta": "none - no cell sized, added, or removed",
+      "elapsed": "about 90 minutes from report to corrected SDC, one STA re-run",
+      "note": "The residual 47 are the previous run's 41 plus 6 exposed by the recheck; closed later by ordinary optimization. WNS is 10 ps worse than the old 41-endpoint run because of those 6, not because of the fix."
+    },
+    "expert_assessment": "Correct sequence, and the cheap part is the part that mattered: the shape of the violation set is evidence, and reading it costs minutes against a tool run's hours. The general lesson is that a step change in failure count with no netlist change is a constraint hypothesis until proven otherwise, and the discriminator is clustering - shared clock plus shared slack value means a shared term in the model. It does not transfer to a failure count that grows gradually run over run; that shape is usually genuine physical degradation, and hunting an SDC culprit there wastes the day.",
+    "confidence": 0.66,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The precise mechanism - that rewriting an edge-based create_generated_clock into a divide-by form shifts the capture edge by exactly half a period - is the detail most likely to be stated imprecisely; a reviewer should check whether that SDC change really produces a half-cycle capture shift in a commercial engine, or whether the realistic version of this bug involves a missing waveform inversion on a negative-edge-derived divider."
+  },
+  {
+    "title": "Asymmetric interface budget derived from logic depth, and why the configuration path got a multicycle rather than the false path that was asked for",
+    "design_context": {
+      "node": "16nm",
+      "placeable_instances": "block A 640k, block B 900k; the budget is derived at the A-to-B boundary",
+      "hard_macros": "A: 18, B: 61",
+      "clock_domains": "one 800 MHz clock (1.25 ns) shared by both blocks; a configuration-write path from an APB-style bus runs in the same domain",
+      "tools": "commercial synthesis for block budgeting, commercial P&R, commercial sign-off STA"
+    },
+    "prior_state": {
+      "stage": "boundary-constraint derivation, before either block's first place-and-route",
+      "clock_period_ns": 1.25,
+      "top_level_interconnect_estimate_ns": 0.22,
+      "clock_uncertainty_ns": 0.06,
+      "budget_left_for_A_output_plus_B_input_ns": 0.97,
+      "placeholder_split": "50/50 - set_output_delay 0.485 ns on A, set_input_delay 0.485 ns at B",
+      "measured_depth_A_side": "registered output through at most 2 levels of buffering",
+      "measured_depth_B_side": "7 levels of address decode and comparison before the first capture flop"
+    },
+    "observation": "Trial synthesis under the placeholder split showed A closing its interface paths with 310 ps of positive slack while B failed 120 interface endpoints by up to 190 ps. B's optimizer responded exactly as expected - upsizing the decode cone and inserting a parallel comparator - spending an estimated 4% of B's interface-cone cell area to buy margin that A was simultaneously discarding.",
+    "severity": "MODERATE",
+    "hypothesis": "A boundary budget is a resource allocation, not a symmetry principle. The correct split is proportional to the logic depth each side must actually cover; an even split under-serves a deep receiver and over-serves a shallow driver, and the optimizer converts that mis-allocation directly into area and leakage on the receiving side while the driver banks slack it has no way to spend.",
+    "candidates_considered": [
+      {
+        "action": "Keep 50/50 and let block B absorb the shortfall through optimization, adding a pipeline stage in the decode if it cannot.",
+        "rejected_because": "A pipeline stage changes cycle-level interface behaviour, so it needs an RTL change, a verification re-run, and architecture sign-off - weeks of downstream churn spent to avoid redoing constraint arithmetic."
+      },
+      {
+        "action": "Split strictly by measured depth: 250 ps to A, 720 ps to B.",
+        "rejected_because": "It leaves A with essentially no room for top-level buffering that had not yet been placed. When the real top-level route came in worse than the 220 ps estimate, the entire shortfall would land on the block already signed off, forcing a re-open of A."
+      },
+      {
+        "action": "Declare the configuration-write subset a false path, since software writes those registers once at boot and never during traffic - which is what was requested.",
+        "rejected_because": "Those writes are synchronous same-domain transfers. A false path removes hold checking as well as setup, and the hold check on that short, lightly-loaded path is the one actually protecting it; a boot-only path can still be sampled wrong on the cycle after the write, producing an intermittent silicon-visible failure."
+      },
+      {
+        "action": "Pad the top-level interconnect estimate from 220 ps to 400 ps for safety, shrinking both sides' budgets.",
+        "rejected_because": "Unearned pessimism at a boundary buys area on both sides simultaneously, and it destroys the ability to detect a genuine top-level route regression later, because the estimate no longer tracks any measured quantity."
+      }
+    ],
+    "chosen_intervention": "Split the 970 ps by measured logic depth with a deliberate reserve rather than by convention: A constrained to deliver within about 350 ps of its launch edge, B given an input arrival of 620 ps, leaving B roughly 630 ps for its 7-level decode - depth-proportional, but holding back margin on A's side against top-level route growth rather than handing B the theoretical maximum. Separately, the configuration-write group was constrained with set_multicycle_path -setup 2 together with the matching set_multicycle_path -hold 1, justified from the RTL rather than from convenience: the bus write strobe and the register capture are two cycles apart by protocol, and the paired hold multicycle keeps the hold check on the correct adjacent-edge relationship instead of removing it. Both decisions were recorded in a boundary-constraint note carrying the depth measurements and the RTL protocol citation, so the derivation - not just the numbers - reached sign-off.",
+    "post_state": {
+      "A_interface_slack_ns": 0.045,
+      "B_interface_slack_ns": 0.030,
+      "B_interface_failing_endpoints": 0,
+      "B_interface_cone_area_vs_50_50": "-3.6% cells (the parallel comparator and the upsizing were never inserted)",
+      "config_path_setup_slack_ns": 0.71,
+      "config_path_hold_slack_ns": 0.042,
+      "note": "Both sides now carry thin positive slack by construction. The split spends the budget, it does not create any - A's comfortable 310 ps cushion is gone, which is the intended outcome, not a regression."
+    },
+    "expert_assessment": "Budgeting by logic depth rather than by halves is the right default, and the multicycle-versus-false-path call is the part worth generalizing: a false path is defensible only when the transfer has genuinely no timing relationship, and a same-domain, protocol-spaced write always has one - the paired -setup 2 / -hold 1 form keeps the hold check that actually protects it. It does not transfer to interfaces where the far-side depth is not yet known, where an even split is the honest placeholder, nor to boundaries against hard IP whose input requirement is fixed by its datasheet and is not yours to allocate.",
+    "confidence": 0.6,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The set_multicycle_path -setup 2 / -hold 1 pairing is presented as the generally correct form, but the right hold multiplier depends on the actual launch/capture edge relationship and on whether the transfer is same-edge or opposite-edge triggered, so a reviewer should verify it against the real protocol timing rather than accepting the conventional pairing."
+  }
+]
+```
+
+**PROMPT C output** (separate fresh chat, no tools — deliberately short, since almost nothing in this category survives an honest naming test):
+
+```json
+[
+  {
+    "title": "ISSCC / VLSI Symposium chip-design session papers describing physical-implementation challenges of specific processors",
+    "venue_or_publication": "IEEE International Solid-State Circuits Conference (ISSCC) and Symposium on VLSI Circuits",
+    "year": "annual, 1954-present",
+    "what_it_covers": "Per-chip implementation papers that occasionally disclose real closure obstacles - clock distribution schemes chosen after a first approach failed, power-delivery and IR constraints that forced floorplan changes, thermal or variation effects discovered in silicon.",
+    "why_relevant": "One of the few venues where implementation detail on a named, real chip is published rather than genericized. Directly relevant to episode realism.",
+    "confidence": 0.9,
+    "honesty_note": "The venues certainly exist and certainly contain such material; I cannot name a specific paper, its authors, or its year with confidence, so this entry is a venue pointer, not a source. Anyone using it must do the search themselves."
+  },
+  {
+    "title": "ISPD (International Symposium on Physical Design) contest reports and invited industry talks",
+    "venue_or_publication": "ACM International Symposium on Physical Design",
+    "year": "annual, 1997-present; routing/placement/timing contests recurring through the 2010s and 2020s",
+    "what_it_covers": "Contest problem statements built from industrial benchmarks - notably detailed-routing, global-routing, gate-sizing and clock-tree contests - plus invited talks from EDA and design houses on where real flows break down.",
+    "why_relevant": "The contest benchmark descriptions encode what actually goes wrong in industrial blocks (congestion hotspots, macro channels, pin access), and the invited talks are the closest thing to public war stories in the field.",
+    "confidence": 0.85,
+    "honesty_note": "Series and contest tracks are real; specific contest years, titles and organizers are not stated here because I cannot name them reliably."
+  },
+  {
+    "title": "DAC (Design Automation Conference) Designer Track / user-track presentations",
+    "venue_or_publication": "ACM/IEEE Design Automation Conference",
+    "year": "annual; the designer/user track has run for many years",
+    "what_it_covers": "Practitioner talks, distinct from the research track, in which working teams describe methodology problems and recoveries on real projects - often the closest public analogue to a postmortem.",
+    "why_relevant": "Genuinely practitioner-authored, which is exactly the register the dataset needs; the failure-and-recovery arc is often explicit.",
+    "confidence": 0.8,
+    "honesty_note": "Venue and track are real. I cannot name a single specific talk, speaker, or year, so this cannot be followed without an independent search."
+  },
+  {
+    "title": "OpenROAD and OpenLane / LibreLane project issue trackers and design-flow reports",
+    "venue_or_publication": "GitHub (The-OpenROAD-Project and associated repositories)",
+    "year": "roughly 2019-present, ongoing",
+    "what_it_covers": "Public, reproducible flow runs on open designs, with issues, regressions and fix discussions visible end to end - including congestion failures, routing non-convergence, timing and CTS problems on real (if small) blocks.",
+    "why_relevant": "Uniquely valuable because the failure AND the artifact are both public and reproducible, which is the only category here that can graduate an item to 'reproduced' rather than merely 'retrospective'. Also directly aligned with the project's own LibreLane reproduction path.",
+    "confidence": 0.85,
+    "honesty_note": "The projects and their public trackers exist; the characterization of their contents is from general familiarity, and no specific issue is named."
+  },
+  {
+    "title": "The Chip Design / physical-design practitioner discussion communities",
+    "venue_or_publication": "Long-running EDA and chip-design forums and Q&A sites",
+    "year": "2000s-present",
+    "what_it_covers": "Practitioner threads on congestion, CTS, timing-closure and SDC problems, sometimes with detailed back-and-forth diagnosis.",
+    "why_relevant": "The differential-diagnosis reasoning in these threads is close in form to what the dataset wants to capture, even when the specifics are thin.",
+    "confidence": 0.5,
+    "honesty_note": "Deliberately unnamed. I believe several such forums exist and have existed for two decades, but I am not confident enough in any specific site name, ownership or current status to assert one, and naming a plausible-sounding forum would be exactly the fabrication this prompt is guarding against."
+  }
+]
+```
+
+**PROMPT B output** (live web access available; two authoritative pages fetched this run, the rest reached via search summaries only, and graded accordingly):
+
+```json
+[
+  {
+    "cell": "1. SharedArrayBuffer + cross-origin isolation (COOP/COEP) requirements, Chrome/Edge/Firefox/Safari current stable - any 2026 changes?",
+    "claim": "Cross-origin isolation is still obtained by serving Cross-Origin-Opener-Policy: same-origin together with Cross-Origin-Embedder-Policy: require-corp (or credentialless, Chromium-only) on the top-level document, and SharedArrayBuffer remains gated on the resulting crossOriginIsolated state in Chrome (desktop 92+, Android 88+), Edge (92+) and Firefox (79+). No authoritative evidence of a 2026 change was found. Safari's current-stable behaviour is NOT claimed - it was not verified.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+    "retrieved": "2026-08-31",
+    "confidence": "medium - widely believed and consistent across MDN and web.dev summaries, and long-standing, but reached via search-result summaries rather than by fetching and reading the compat table; the 'nothing changed in 2026' half is absence of evidence, not verification",
+    "notes": "Supporting page not directly read: https://web3.dev - use https://web.dev/articles/coop-coep. Safari/WebKit is the explicit gap; fill from a WebKit release note or the MDN browser-compat table read directly. Watch the Document-Isolation-Policy proposal (W3C TAG review https://tag-github-bot.w3.org/review/995) as the standards-track work most likely to change this cell; its status is unverified."
+  },
+  {
+    "cell": "2a. WebGPU compute-shader availability, Chrome/Edge/Firefox/Safari current stable",
+    "claim": "VERIFIED from the WebGPU implementation-status wiki. Chrome/Chromium including Edge: shipping since 113 on Mac, Windows x86/x64 and ChromeOS; Linux Intel Gen12+ since 144; Linux NVIDIA (Wayland) since 147; Windows ARM64 and remaining platforms still require --enable-unsafe-webgpu. Firefox: shipping on Windows since 141, macOS Apple Silicon since 145 on macOS 26+ and since 147 on all macOS versions; Linux and Android are Nightly-only with Mozilla expecting to ship in 2026. Safari: enabled by default in macOS 26, iOS 26, iPadOS 26 and visionOS 26.",
+    "url": "https://github.com/gpuweb/gpuweb/wiki/Implementation-Status",
+    "retrieved": "2026-08-31",
+    "confidence": "high - fetched and read this run; it is the vendor-maintained status page for the working group",
+    "notes": "Compute-shader support is not tracked separately from core WebGPU on that page - compute pipelines are part of core, so availability follows core availability, but that is an inference and not a quoted statement. Note the platform granularity: 'Firefox ships WebGPU' is false for Linux and Android as of this retrieval, which matters if proving targets Linux desktop."
+  },
+  {
+    "cell": "2b. Is WebGPU 'timestamp-query' exposed to web content by default in Chrome/Edge/Firefox/Safari?",
+    "claim": "UNVERIFIED",
+    "url": "https://github.com/gpuweb/gpuweb/wiki/Implementation-Status",
+    "retrieved": "2026-08-31",
+    "confidence": "none - I fetched the authoritative implementation-status page and it does not mention timestamp-query availability or flags at all; no other page was read",
+    "notes": "This remains the single most important unfilled cell for proving-workload measurement, and it is now a verified gap rather than a mere omission: the working group's own status page does not cover it. Unread candidate source: https://web3dsurvey.com/webgpu/features/timestamp-query (real-world availability telemetry, secondary). Historically timestamp-query was flag- or policy-gated in Chrome for Spectre-style timing reasons; whether that holds in 2026 stable is unresolved. Classify as 'measure in a real browser, don't research'."
+  },
+  {
+    "cell": "3. WASM feature status per browser: threads, SIMD128, relaxed-SIMD, JSPI, memory64",
+    "claim": "UNVERIFIED as a per-browser matrix. I attempted the authoritative source, https://webassembly.org/features/, and could not extract the table: the page renders it via client-side script and the fetched content contained only 'Loading table, please wait...'. Reporting the secondary-source picture for triage only, explicitly not as a claim: blog summaries state WebAssembly 3.0 became a W3C standard in September 2025 consolidating memory64 and relaxed-SIMD, place Wasm 3.0 in Chrome 119+/Firefox 120+/Safari 18.2+, describe relaxed-SIMD as unflagged in Firefox since 2025 but still flagged in Safari, and put JSPI at phase 4 shipping in Chrome but flagged in Firefox. Threads remain gated on SharedArrayBuffer and therefore on cell 1.",
+    "url": "https://webassembly.org/features/",
+    "retrieved": "2026-08-31",
+    "confidence": "none for the per-browser matrix - the authoritative page did not yield its table to a fetch, and every version number above comes from vendor-independent blogs reached via search. Those sources are internally inconsistent (Wasm 3.0 described as a September-2025 standard yet supported since Chrome 119, a substantially older release), which is itself evidence the attributions are unreliable",
+    "notes": "Do not use any number in this cell without re-verification. The table is JavaScript-rendered, so it needs a real browser session or the MDN compat data pulled from its JSON source rather than a text fetch - which makes this a second 'measure, don't research' item. Safari relaxed-SIMD and Firefox JSPI flag status are the two entries most likely to be stale."
+  },
+  {
+    "cell": "4. Inside a cross-origin iframe: can an embedded page obtain cross-origin isolation and WebGPU access? (the wallet-embedding cell)",
+    "claim": "Partial. Isolation half: an embedded cross-origin document can participate in a cross-origin isolated top-level context, and Chromium offers two mechanisms - COEP: credentialless (Chromium-only, shipped Chrome 96) and the iframe 'credentialless' attribute (on by default from Chrome 110), which loads the frame in an empty context without cookies and without access to its origin's normal storage. Non-Chromium support for COEP: credentialless was not verified. WebGPU half: UNVERIFIED - no source reached addressed whether an embedded cross-origin frame can obtain a GPUAdapter, or whether a permissions-policy allow attribute governs it.",
+    "url": "https://developer.chrome.com/blog/iframe-credentialless",
+    "retrieved": "2026-08-31",
+    "confidence": "medium for the isolation half - Chrome for Developers is authoritative for Chromium behaviour, though reached via search summary rather than direct read; none for the WebGPU half",
+    "notes": "Supporting pages not read directly: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/IFrame_credentialless and https://wicg.github.io/anonymous-iframe/. The practical trap for wallet embedding: credentialless buys isolation at the cost of the frame's cookies and storage, which is usually precisely what a wallet needs, so this mechanism may be unusable for the actual use case even where it is supported. The load-bearing sub-question - WebGPU inside a cross-origin frame - is a third 'measure, don't research' item."
+  },
+  {
+    "cell": "5. Published 2026 measurements of in-browser proving with a reproducible test setup",
+    "claim": "No 2026-dated in-browser proving measurement was found. Two 2025 candidates surfaced, neither verified by reading: (a) FibRace, described as a large-scale benchmark of client-side proving on mobile devices, attributed to KKRT Labs (Cairo M prover) and Hyli, September 2025, arXiv 2510.14693, with an attributed result that in-browser p256 ECDSA proving was largely impractical across several schemes and only Noir reached limited usability; (b) a WebGPU compute-shader integration with StarkWare's Stwo/S-two prover reported at 5x on constraint-polynomial evaluation and 2x on the overall pipeline, sourced only to a community news post, with neither hardware nor harness identified. ZKProphet (arXiv 2509.22684) measures ZK proving on GPUs but is not in-browser.",
+    "url": "https://arxiv.org/pdf/2510.14693",
+    "retrieved": "2026-08-31",
+    "confidence": "low - titles, an arXiv identifier and attributed figures from a search summary; the paper was not opened, no public harness repository was located, reproducibility was not confirmed, and the dates are 2025 rather than the 2026 the cell requests. The Stwo/WebGPU figures rest on a single secondary source (https://www.webgpu.com/news/zk-proofs-webgpu-boost/) and should be treated as unconfirmed",
+    "notes": "FibRace is the strongest lead - fetch arXiv 2510.14693 directly and extract the harness repository, device list and proof systems covered. Caveat for the matrix: FibRace as described targets mobile devices, adjacent to but not the same as in-browser."
+  }
+]
+```
+
+Honesty notes on the run, outside the JSON:
+
+- **A**: clean, self-consistent, all three `source_basis` honestly `composite-of-common-practice`. No named public case — consistent with your v2 observation that models don't volunteer sources inside A.
+- **C**: five entries, all venue/project pointers rather than nameable individual sources, each carrying an explicit `honesty_note` admitting that. By your rubric that is closer to T2 than T1 — no follow-up "name more like X" is possible, because nothing here is an X. I added `honesty_note` beyond your schema; drop it if strict-field validation matters.
+- **B**: better than the v1 run on cell 2a (fetched the authoritative gpuweb page — high confidence, and it corrects the earlier vaguer version-summary picture). Cell 2b upgrades from "didn't check" to a verified gap: the working group's own status page does not cover timestamp-query. Cell 3 went the other way — `webassembly.org/features` renders its table via JavaScript, so a text fetch returns nothing usable, and the cell is now honestly UNVERIFIED instead of low-confidence-filled.
+
+Three items for the zkprof "measure in a real browser, don't research" list: timestamp-query default exposure, the WASM feature matrix (needs a real browser session or MDN's compat JSON), and WebGPU availability inside a cross-origin iframe.

@@ -1,0 +1,248 @@
+[
+  {
+    "review_gate": "floorplan review",
+    "purpose": "Catches macro placement, pin access, power grid, and top-level timing budget errors that become exponentially expensive to fix after placement starts. Once cells are placed, moving a macro invalidates placement, CTS, and extracted parasitics.",
+    "checks": [
+      {
+        "question": "Show me the pin-access analysis for every macro with >100 pins. How many accessible routing tracks exist on each pin-bearing edge?",
+        "evidence_demanded": "Macro pin accessibility report from the floorplanning tool, showing track count per edge and pin density.",
+        "red_flag": "Any macro with <2 accessible routing tracks on >20% of its pin-bearing edge.",
+        "why_it_matters": "Post-CTS congestion in macro channels is the #1 cause of late-stage floorplan reopening; if pins are inaccessible at floorplan time, no amount of routing optimization fixes it."
+      },
+      {
+        "question": "Show me the channel width histogram between all adjacent macro pairs. What is the narrowest channel?",
+        "evidence_demanded": "Channel width measurement report or floorplan ruler dump.",
+        "red_flag": "Any channel between macros <1.5x the standard cell height on 28nm, or <2.0x on 7nm (finer pitch = more tracks needed for pin access).",
+        "why_it_matters": "Narrow channels force the router to detour through congested standard-cell regions, creating hotspots that appear only in detailed route."
+      },
+      {
+        "question": "Show me the early power rail IR drop analysis for the planned power grid.",
+        "evidence_demanded": "Static IR drop simulation with estimated switching current.",
+        "red_flag": ">10% Vdd drop on any power strap segment, or any macro region without a direct power strap within 50um.",
+        "why_it_matters": "IR drop shifts cell delay non-uniformly; fixing it after placement requires adding straps, which conflicts with existing routes and macros."
+      },
+      {
+        "question": "Where is the clock root relative to the clock input pin, and what is the estimated insertion delay?",
+        "evidence_demanded": "Floorplan overlay showing clock input port, planned root location, and estimated Manhattan distance.",
+        "red_flag": "Clock input >500um from planned root on a >2 GHz design (7nm) or >1000um on 28nm without a planned intermediate buffer tree.",
+        "why_it_matters": "Excessive root-to-source distance burns skew budget before the clock tree even starts; CTS cannot compensate for a physically misplaced root."
+      },
+      {
+        "question": "Show me the planned utilization map with macro regions excluded. What is the peak planned density?",
+        "evidence_demanded": "Utilization heatmap from the floorplan tool.",
+        "red_flag": ">85% planned utilization on a block with >50 macros, or >75% on a block with >150 macros.",
+        "why_it_matters": "Macros are placement blockages; high macro count reduces effective area and the utilization number is misleadingly optimistic."
+      },
+      {
+        "question": "Show me the signal-to-bump assignment for high-speed interfaces (>5 Gbps).",
+        "evidence_demanded": "Bump map or IO ring assignment spreadsheet.",
+        "red_flag": "High-speed signals assigned to bumps >3 mm from their destination macro without a registered repeater plan.",
+        "why_it_matters": "Long unbuffered high-speed traces introduce ISI and timing uncertainty that is difficult to close at the block level."
+      },
+      {
+        "question": "Show me the placement blockage and keepout strategy around analog macros and in macro channels.",
+        "evidence_demanded": "Floorplan layer showing hard blockages, soft blockages, and keepout rings.",
+        "red_flag": "No keepout around analog macros, or no soft blockage gradient within 2 cell rows of macro edges.",
+        "why_it_matters": "Standard cells placed against macro edges block pin access; analog macros without keepouts suffer noise coupling."
+      },
+      {
+        "question": "Show me the top-level-to-block timing budget spreadsheet. What fraction of the clock period is allocated to each interface?",
+        "evidence_demanded": "Budget allocation table with input delay, output delay, and wire budget per interface.",
+        "red_flag": "Any interface budget >30% of the clock period without measured wire delay or pre-layout simulation justification.",
+        "why_it_matters": "Arbitrary budgets force one block to over-optimize while the other under-utilizes margin; the mismatch appears as a top-level timing crisis."
+      }
+    ],
+    "kill_questions": [
+      "Show me the pin access report for the three largest macros; if any edge has insufficient tracks, we stop.",
+      "What is the maximum distance from any clock input to the planned clock root? If it exceeds the skew budget, we stop."
+    ],
+    "waiver_culture": "Macro spacing waivers are common when die area is tight and management wants to hit a footprint target; the cost is a 2-4 week iteration later when detailed route cannot resolve pin access and the floorplan must be reopened after CTS is complete.",
+    "confidence": 0.85
+  },
+  {
+    "review_gate": "pre-CTS review",
+    "purpose": "Catches placement quality and congestion trends before the clock tree is synthesized. After CTS, fixing placement requires re-synthesizing the clock tree and re-extracting, making iteration expensive.",
+    "checks": [
+      {
+        "question": "Show me the placement density histogram in 100um x 100um bins. Where is the peak density?",
+        "evidence_demanded": "Density heatmap and histogram from the placement tool.",
+        "red_flag": ">90% density in any 100um x 100um window, or >85% in any macro channel region.",
+        "why_it_matters": "High local density prevents clock buffer insertion and degrades routability; CTS will insert buffers into the only available space, worsening congestion."
+      },
+      {
+        "question": "Show me the global route congestion map. What is the overflow percentage by region?",
+        "evidence_demanded": "Global route congestion report with overflow percentage per tile.",
+        "red_flag": ">5% overflow in any macro channel, or >3% in the standard-cell core.",
+        "why_it_matters": "Global route is optimistic; if it already shows overflow, detailed route will abort with hundreds of thousands of shorts."
+      },
+      {
+        "question": "Show me the WNS and TNS histogram by clock group. What does the slack distribution look like?",
+        "evidence_demanded": "Pre-CTS timing report with slack histograms per clock group.",
+        "red_flag": "WNS < -200ps on any clock group, or a tail of paths below -100ps exceeding 1% of total paths.",
+        "why_it_matters": "Pre-CTS timing should be optimistic (no clock skew yet); a deeply negative WNS here means constraints are wrong or placement is fundamentally poor."
+      },
+      {
+        "question": "Show me the macro placement legalization report. Did any macro move from its floorplan target?",
+        "evidence_demanded": "Legalization delta report showing macro displacement.",
+        "red_flag": "Any macro moved >10um from its floorplan target, or any macro rotated from its planned orientation.",
+        "why_it_matters": "Macro movement after floorplan review invalidates pin access analysis and channel width calculations."
+      },
+      {
+        "question": "Show me the estimated clock tree insertion delay and total capacitance per clock domain.",
+        "evidence_demanded": "Clock tree estimation report from the CTS engine.",
+        "red_flag": "Estimated insertion delay >30% of the clock period, or estimated total capacitance exceeding the driver strength of the planned root buffer.",
+        "why_it_matters": "Excessive insertion delay burns setup slack; oversized root buffers create IR drop and electromigration issues."
+      },
+      {
+        "question": "Show me the top 20 critical paths overlaid on the layout. Do any traverse macro channels or high-density regions?",
+        "evidence_demanded": "Path visualization with physical overlay.",
+        "red_flag": "Any critical path traversing a macro channel with <3 available routing tracks, or any path with >30% of its wire length in >85% density regions.",
+        "why_it_matters": "Critical paths in congested regions will worsen after CTS buffer insertion and crosstalk optimization; they need to be rerouted now."
+      },
+      {
+        "question": "Show me the scan chain length estimate and the scan clock timing budget.",
+        "evidence_demanded": "Scan synthesis report with chain length and clock skew estimate.",
+        "red_flag": "Scan chain length exceeds the ATPG clock period budget, or scan clock skew >100ps without a dedicated scan clock tree.",
+        "why_it_matters": "Scan failures at manufacturing test are expensive to debug; fixing them requires ECOs or slower test clocks that reduce throughput."
+      },
+      {
+        "question": "Show me the post-placement power rail IR drop analysis with actual cell placements.",
+        "evidence_demanded": "Static IR drop report with cell placement overlay.",
+        "red_flag": ">8% IR drop on any power strap, or any region with >1000 cells and no power via stack within 25um.",
+        "why_it_matters": "IR drop increases cell delay non-linearly; cells in drop regions become timing outliers that are invisible in nominal-corner analysis."
+      }
+    ],
+    "kill_questions": [
+      "What is the worst negative slack by clock group? If any group is worse than -300ps pre-CTS, we stop—CTS cannot close a 300ps gap.",
+      "Show me the congestion map. Are there any macro channels with >10% overflow? If yes, we stop and fix the floorplan."
+    ],
+    "waiver_culture": "Pre-CTS timing waivers are common when the team is 'planning to fix it in CTS optimization'; the cost is that clock tree synthesis can realistically buy only 50-100ps of setup slack, and a -300ps pre-CTS WNS almost always becomes a -200ps post-route WNS requiring a metal spin.",
+    "confidence": 0.88
+  },
+  {
+    "review_gate": "pre-tapeout timing signoff review",
+    "purpose": "Verifies that the design meets timing across all process corners, modes, and signoff conditions before mask generation. This is the last gate where fixing timing does not require a metal layer change or silicon respin.",
+    "checks": [
+      {
+        "question": "Show me the multi-corner multi-mode signoff report. Is every corner clean with zero waived violations?",
+        "evidence_demanded": "Final signoff timing report covering all PVT corners and functional/test modes.",
+        "red_flag": "Any setup violation >20ps on the signoff corner list without a written, signed waiver from the project lead and the timing architect.",
+        "why_it_matters": "Silicon operates at all corners; a violation at a single corner means functional failure for some fraction of dies."
+      },
+      {
+        "question": "Show me the clock gating efficiency report per clock domain. What percentage of flip-flops are gated?",
+        "evidence_demanded": "Clock gating report from the power analysis tool.",
+        "red_flag": "<85% gating efficiency on any clock domain with >10,000 flip-flops, or any domain with >5% of registers ungated due to tool limitations.",
+        "why_it_matters": "Ungated clocks burn dynamic power and create unnecessary switching noise that degrades analog and memory performance."
+      },
+      {
+        "question": "Show me the top 50 crosstalk (SI) aggressor-victim pairs. What is the crosstalk delta on critical paths?",
+        "evidence_demanded": "Signal integrity report with delta delay per path.",
+        "red_flag": "Any path where crosstalk delta exceeds 15% of total path delay on 7nm, or 10% on 28nm, or any path where delta exceeds 50ps absolute.",
+        "why_it_matters": "Crosstalk is corner-dependent and can push a nominally clean path into violation under voltage droop or temperature variation."
+      },
+      {
+        "question": "Show me the OCV/POCV margin consumption breakdown. How much of the clock period is consumed by derating?",
+        "evidence_demanded": "Margin breakdown report showing OCV/POCV derate per path group.",
+        "red_flag": "OCV/POCV margin consumes >40% of the clock period on any path, or any path where the margin exceeds the actual logic delay.",
+        "why_it_matters": "Excessive derating indicates poor path balancing or insufficient clock tree optimization; it leaves no margin for silicon variation."
+      },
+      {
+        "question": "Show me the hold closure report by clock group. Are there any hold violations?",
+        "evidence_demanded": "Hold timing report with WNS and TNS per clock group.",
+        "red_flag": "Any hold violation >30ps without a pre-validated ECO script, or any inter-clock hold violation.",
+        "why_it_matter": "Hold violations cause functional failure at fast corners; inter-clock hold violations are especially dangerous because they involve clock skew and require careful ECO validation."
+      },
+      {
+        "question": "Show me the clock skew histogram per clock domain. What is the max skew and the skew distribution?",
+        "evidence_demanded": "Clock skew report with histogram and max/min per domain.",
+        "red_flag": "Max skew >10% of clock period for any domain, or a bimodal skew distribution indicating clock tree imbalance.",
+        "why_it_matters": "Skew directly consumes setup slack; bimodal distributions indicate local clock tree defects that may worsen under process variation."
+      },
+      {
+        "question": "Show me the ECO change list. How many cells are touched, and on which layers?",
+        "evidence_demanded": "ECO implementation report with cell count and layer changes.",
+        "red_flag": "ECO touching >5% of total cells, or any ECO requiring metal layer changes above M2 (which would invalidate the current mask set).",
+        "why_it_matters": "Late ECOs introduce risk of new DRC/LVS violations and require re-extraction; metal-layer ECOs are effectively respins."
+      },
+      {
+        "question": "Show me the signal integrity report for high-speed DDR interfaces with package models included.",
+        "evidence_demanded": "IO timing report with package parasitics and SI analysis.",
+        "red_flag": "Any DDR interface with <0.1 UI (unit interval) setup or hold margin, or any interface with eye height <150mV.",
+        "why_it_matters": "Package and board effects dominate IO timing; insufficient margin means system-level failure that cannot be fixed on-chip."
+      },
+      {
+        "question": "Show me the derate table validation. Are the foundry-default OCV tables replaced with silicon-correlated data?",
+        "evidence_demanded": "Correlation report comparing simulated vs. measured silicon delay on test structures.",
+        "red_flag": "Using foundry-default derates without silicon correlation on a new process node (<2 years old).",
+        "why_it_matters": "Default derates are conservative and can mask real timing problems or force over-design; uncorrelated derates on new nodes have been wrong by 20%."
+      }
+    ],
+    "kill_questions": [
+      "Are there any setup violations on the signoff corner list that do not have a written waiver signed by both the project lead and the timing architect? If yes, we stop.",
+      "Show me the hold closure report. Are there any hold violations >30ps without a ready-to-run ECO script? If yes, we stop."
+    ],
+    "waiver_culture": "Small setup violations (-10 to -30ps) on non-critical paths are routinely waived with a 'silicon margin' argument, especially on mature nodes; the cost is occasional functional failures at corner-case voltage and temperature that require a metal spin or a firmware workaround to disable the failing feature.",
+    "confidence": 0.9
+  },
+  {
+    "review_gate": "physical verification signoff review",
+    "purpose": "Confirms that the layout is manufacturable and electrically correct. This gate catches shorts, opens, antenna damage, density violations, and ERC errors that would cause yield loss or functional failure in silicon.",
+    "checks": [
+      {
+        "question": "Show me the final DRC report for all layers. Is the core area completely clean?",
+        "evidence_demanded": "Full-chip DRC report with violation coordinates and layer information.",
+        "red_flag": "Any DRC violation in the core logic area. Waivers are permitted only in the seal ring, scribe line, or bond pad regions with foundry approval.",
+        "why_it_matters": "Core DRC violations cause manufacturing defects; even a single unwaived violation can kill yield on an entire wafer lot."
+      },
+      {
+        "question": "Show me the LVS comparison report. Are there zero netlist-to-layout mismatches, zero shorts, and zero opens?",
+        "evidence_demanded": "LVS report with extracted netlist comparison.",
+        "red_flag": "Any net mismatch, short, open, or soft-connect. Even a single floating net can cause functional failure.",
+        "why_it_matters": "LVS errors mean the manufactured chip does not match the verified netlist; they are the most expensive errors to find in silicon."
+      },
+      {
+        "question": "Show me the antenna ratio report. Does every gate meet the foundry antenna rule?",
+        "evidence_demanded": "Antenna check report with ratio per gate and protection diode status.",
+        "red_flag": "Any gate with antenna ratio exceeding the foundry limit without a protection diode or jumper layer.",
+        "why_it_matters": "Antenna damage during plasma etch degrades gate oxide and causes parametric drift or early-life failure."
+      },
+      {
+        "question": "Show me the ERC report. Are there any floating well ties, missing substrate contacts, or voltage crossings?",
+        "evidence_demanded": "ERC report with electrical rule violations.",
+        "red_flag": "Any floating well tie, missing substrate contact in a standard-cell row, or signal crossing between voltage domains without a level shifter.",
+        "why_it_matters": "ERC errors cause latch-up, excessive leakage, or logic-level mismatches that destroy functionality."
+      },
+      {
+        "question": "Show me the metal density maps for every routing layer. Are all windows within foundry limits?",
+        "evidence_demanded": "Density check report with sliding-window analysis per layer.",
+        "red_flag": "Any window with density <30% or >70% (or foundry-specific limits) on any metal layer, excluding dummy fill regions.",
+        "why_it_matters": "Low density causes CMP dishing and thickness variation; high density causes erosion and polishing defects, both of which shift resistance and capacitance."
+      },
+      {
+        "question": "Show me the EM report for power rails and wide signal buses. Is every segment within 10% of the limit?",
+        "evidence_demanded": "Electromigration analysis report with current density per segment.",
+        "red_flag": "Any power rail or bus segment with EM margin <10%, or any via array with current density exceeding the foundry limit.",
+        "why_it_matters": "EM failures are progressive; they cause resistance increase, IR drop degradation, and eventual open circuits over the product lifetime."
+      },
+      {
+        "question": "Show me the ESD protection checklist. Does every IO cell have ESD protection and a continuous ESD rail?",
+        "evidence_demanded": "ESD verification report and schematic overlay.",
+        "red_flag": "Any IO cell without ESD protection devices, or any break in the ESD power rail around the die periphery.",
+        "why_it_matters": "ESD failures destroy chips during handling and test; a single unprotected pin can fail the entire die."
+      },
+      {
+        "question": "Show me the die edge checks. Is there any active circuitry within the seal ring keepout?",
+        "evidence_demanded": "Die edge verification report with keepout overlay.",
+        "red_flag": "Any active device, metal trace, or via within the seal ring keepout zone (typically 10-20um from the die edge, foundry-specific).",
+        "why_it_matters": "Seal ring damage during wafer dicing can propagate into active circuitry if the keepout is violated."
+      }
+    ],
+    "kill_questions": [
+      "Is the DRC report clean in the core area with zero unwaived violations? If no, we stop.",
+      "Does the LVS report show 100% match with zero shorts, zero opens, and zero soft-connects? If no, we stop."
+    ],
+    "waiver_culture": "Antenna violations on small gates are often waived with 'the gate oxide will survive' arguments, especially on mature nodes where plasma damage is better understood; the cost is occasional gate oxide damage during etch that shows up as parametric drift or early-life failure, sometimes caught only at burn-in test.",
+    "confidence": 0.92
+  }
+]

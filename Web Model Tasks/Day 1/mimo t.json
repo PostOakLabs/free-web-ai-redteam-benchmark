@@ -1,0 +1,99 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But these are well-defined mathematical calculations where I can work through the arithmetic and flag my uncertainties honestly. Here's my best effort:
+
+---
+
+## Family 1: ISO 26262 SPFM
+
+**Formulas I'm using:**
+- SPFM = 1 - (λ_SPF + λ_RF) / λ_total
+- LFM = 1 - λ_MPF,latent / (λ_total - λ_SPF - λ_RF)
+- λ_total = λ_SPF + λ_RF + λ_MPF,detected + λ_MPF,latent + λ_safe
+
+**Vector 1: Mid-range, meets ASIL C for LFM but not ASIL B for SPFM**
+
+Inputs: λ_SPF=10, λ_RF=5, λ_MPF,det=20, λ_MPF,lat=15, λ_safe=50 (all in FIT)
+
+Step 1: λ_total = 10+5+20+15+50 = 100 FIT
+Step 2: SPFM = 1 - (10+5)/100 = 1 - 0.15 = 0.85 = 85%
+Step 3: LFM = 1 - 15/(100-15) = 1 - 15/85 = 1 - 0.1765 = 82.35%
+
+Result: SPFM=85% (fails ASIL B≥90%), LFM=82.35% (meets ASIL C≥80%, fails ASIL D≥90%)
+
+**Vector 2: Exactly at ASIL D boundary (SPFM=99%)**
+
+Inputs: λ_SPF=0.5, λ_RF=0.5, λ_MPF,det=45, λ_MPF,lat=4.5, λ_safe=49.5 (all FIT)
+
+Step 1: λ_total = 0.5+0.5+45+4.5+49.5 = 100 FIT
+Step 2: SPFM = 1 - 1/100 = 0.99 = 99% (exactly meets ASIL D)
+Step 3: LFM = 1 - 4.5/(100-1) = 1 - 4.5/99 = 1 - 0.04545 = 95.45% (meets ASIL D≥90%)
+
+**Vector 3: Just below ASIL B (SPFM=89.5%)**
+
+Inputs: λ_SPF=8.5, λ_RF=2, λ_MPF,det=30, λ_MPF,lat=10, λ_safe=49.5 (all FIT)
+
+Step 1: λ_total = 8.5+2+30+10+49.5 = 100 FIT
+Step 2: SPFM = 1 - 10.5/100 = 0.895 = 89.5% (fails ASIL B)
+Step 3: LFM = 1 - 10/(100-10.5) = 1 - 10/89.5 = 1 - 0.1117 = 88.83% (meets ASIL C)
+
+**Known uncertainty:** I'm fairly confident in the SPFM formula. The LFM denominator — whether it's (λ_total - λ_SPF - λ_RF) or (λ_MPF + λ_safe) — I believe are equivalent, but I'm not 100% certain the standard uses exactly this grouping.
+
+---
+
+## Family 2: JEDEC FIT from Accelerated Test
+
+**Formulas:**
+- AF = exp[(Ea/k) × (1/T_use - 1/T_test)]
+- k = 8.617 × 10^-5 eV/K
+- FIT = χ²(α, 2(r+1)) / (2 × N × t × AF) × 10^9
+
+**Vector 1: Zero failures, moderate acceleration**
+
+Inputs: Ea=0.7 eV, T_use=55°C=328.15K, T_test=125°C=398.15K, N=1000, t=1000 hr, r=0, confidence=60%
+
+Step 1: Ea/k = 0.7/8.617e-5 = 8123.5 K
+Step 2: 1/T_use - 1/T_test = 1/328.15 - 1/398.15 = 0.003047 - 0.002512 = 0.000535 K^-1
+Step 3: Exponent = 8123.5 × 0.000535 = 4.346
+Step 4: AF = exp(4.346) = 77.0
+Step 5: χ²(0.60, 2) = 1.833 (for r=0, df=2(0+1)=2)
+Step 6: FIT = 1.833 / (2 × 1000 × 1000 × 77.0) × 10^9 = 1.833 / 1.54×10^8 × 10^9 = 11.9 FIT
+
+**Vector 2: Two failures, high confidence**
+
+Inputs: Ea=0.7 eV, T_use=40°C=313.15K, T_test=150°C=423.15K, N=500, t=2000 hr, r=2, confidence=90%
+
+Step 1: Ea/k = 8123.5 K
+Step 2: 1/313.15 - 1/423.15 = 0.003193 - 0.002363 = 0.000830 K^-1
+Step 3: Exponent = 8123.5 × 0.000830 = 6.742
+Step 4: AF = exp(6.742) = 848.5
+Step 5: χ²(0.90, 6) = 10.645 (for r=2, df=2(2+1)=6)
+Step 6: FIT = 10.645 / (2 × 500 × 2000 × 848.5) × 10^9 = 10.645 / 1.697×10^9 × 10^9 = 6.27 FIT
+
+**Vector 3: One failure, lower acceleration (boundary for a hypothetical 100 FIT spec)**
+
+Inputs: Ea=1.0 eV, T_use=25°C=298.15K, T_test=125°C=398.15K, N=300, t=1500 hr, r=1, confidence=60%
+
+Step 1: Ea/k = 1.0/8.617e-5 = 11605.0 K
+Step 2: 1/298.15 - 1/398.15 = 0.003354 - 0.002512 = 0.000842 K^-1
+Step 3: Exponent = 11605.0 × 0.000842 = 9.771
+Step 4: AF = exp(9.771) = 17,530
+Step 5: χ²(0.60, 4) ≈ 4.044 (for r=1, df=2(1+1)=4)
+Step 6: FIT = 4.044 / (2 × 300 × 1500 × 17530) × 10^9 = 4.044 / 1.578×10^10 × 10^9 = 0.256 FIT
+
+**Known uncertainty:** The chi-squared values I'm recalling from memory — χ²(0.60,2)=1.833, χ²(0.90,6)=10.645, χ²(0.60,4)≈4.044 — I'm moderately confident in but these should be verified against a chi-squared table. The formula structure (whether it's one-sided or two-sided, and the exact degrees-of-freedom convention) I'm fairly confident about but not certain.
+
+---
+
+## Family 3: EAR TPP
+
+**Honest assessment:** I am NOT confident enough in the exact current EAR/ECCN 3A090 formula definitions and threshold values to produce reliable test vectors. The regulation has been updated multiple times since October 2022, and the specific definitions of "adjusted peak performance," the bit-width aggregation rules, and the current threshold values are details I could easily get wrong.
+
+What I can state with moderate confidence:
+- TPP involves aggregating peak computational performance across all chips in an IC package
+- The performance density formula divides TPP by die area
+- The thresholds have been revised since the initial rule
+
+Rather than produce vectors with potentially wrong formulas or outdated thresholds, I'd recommend checking the current Bureau of Industry and Security (BIS) Federal Register notices for the authoritative definitions. If you can share the current formula text, I can work through the arithmetic reliably.
+
+---
+
+**Overall honesty note:** The ISO 26262 and JEDEC FIT vectors are my strongest — the formulas are well-established and the arithmetic is self-consistent. The EAR TPP vectors I'm declining to produce because the regulatory details are too uncertain and the cost of getting them wrong is high. For all vectors, the chi-squared values and the ISO 26262 LFM denominator grouping should be verified against primary sources before use in any calculator.

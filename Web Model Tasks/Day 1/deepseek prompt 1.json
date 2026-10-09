@@ -1,0 +1,59 @@
+[
+  {
+    "title": "Late routing congestion resolved by pin-swap and density-guide tweaks instead of floorplan respin",
+    "design_context": "node: 7nm, instance_count: 1.2M, macro_count: 80, clock_domains: 3, tool_family: \"commercial P&R\"",
+    "prior_state": "utilization 72%, global route overflow 5.8%, WNS -65 ps, TNS -1200 ps, DRC count 215",
+    "observation": "Post-CTS detailed routing showed 5.8% overflow in two central regions, with 215 DRC violations (mostly short spacing). Severity: HIGH.",
+    "hypothesis": "The congestion is driven by high pin density around macro boundaries and excessive feedthroughs in those zones, not by global placement density.",
+    "candidates_considered": [
+      {"action": "Respin floorplan to spread macros and widen channels", "rejected_because": "schedule risk: would add 2 weeks of physical re-implementation and re-verification, missing tapeout deadline."},
+      {"action": "Increase placement utilization target to 75% to force cells out of congested areas", "rejected_because": "would worsen congestion by increasing cell density in already crowded bins, likely increasing DRCs."},
+      {"action": "Add an extra metal layer for routing", "rejected_because": "mask cost and fab schedule change unacceptable at this stage; would also require new PDK validation."}
+    ],
+    "chosen_intervention": "Swapped pin assignments on 12 high-fanout nets at macro interfaces to reduce feedthrough crossings; added route guides restricting the top two congested bins to use only lower metal layers; lowered cell density target from 72% to 68% in the top 5% congested bins via placement blockage.",
+    "post_state": "congestion overflow 1.1%, WNS -35 ps, TNS -400 ps, DRC count 45",
+    "expert_assessment": "Correct call given the tapeout crunch; the pin-swap and guided routing addressed the root cause (macro pin distribution) without redoing the floorplan. The lesson is to always run pin-density analysis before detailed routing; this fix would not transfer to cases where congestion comes from global logic density, where floorplan changes are unavoidable.",
+    "confidence": 0.78,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific reduction in overflow from 5.8% to 1.1% with only pin swaps and local density changes may be optimistic; the expert should verify the route-guide effectiveness and DRC reduction."
+  },
+  {
+    "title": "Timing closure failure diagnosed by path-shape signature as a systematic clock-uncertainty issue",
+    "design_context": "node: 16nm, instance_count: 0.8M, macro_count: 30, clock_domains: 2, tool_family: \"commercial P&R with static timing\"",
+    "prior_state": "WNS -95 ps, TNS -2500 ps, failing paths: 312, worst slack distribution -50 to -150 ps, all share a common clock tree segment.",
+    "observation": "Timing report showed 312 paths failing by 50–150 ps, with 90% sharing the same last three clock buffers; no single data path dominated. Severity: MODERATE (still fixable but urgent).",
+    "hypothesis": "The common clock tree path introduces systematic skew variation due to an over-pessimistic OCV derate at the specific V/T corner; this is a constraint-modeling error, not a logic or placement problem.",
+    "candidates_considered": [
+      {"action": "Upsize 100 cells along the data paths to gain 80 ps", "rejected_because": "area +2% and power +3% with only marginal gain; would also require re-placement of surrounding cells."},
+      {"action": "Swap to lower-Vt libraries for all failing paths", "rejected_because": "leakage power would increase ~15%, exceeding the chip's standby budget; thermal risk."},
+      {"action": "Respin clock tree to rebalance skew", "rejected_because": "schedule: would require 3 days of clock-tree re-synthesis and full STA re-run, pushing other signoff activities."}
+    ],
+    "chosen_intervention": "Reduced the clock uncertainty margin by 10 ps only for the problematic corner after re-analyzing silicon characterization data; applied a per-corner derate adjustment in the SDC for that clock domain, leaving other corners unchanged.",
+    "post_state": "WNS -20 ps, TNS -150 ps, failing paths: 18",
+    "expert_assessment": "The diagnosis was sound because the shared-clock signature strongly pointed to systematic skew; adjusting the derate is cheap and low-risk if backed by characterization. However, the fix is only transferable to designs with similar silicon data; without that confidence, a more conservative upsizing would be preferred.",
+    "confidence": 0.82,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 10 ps uncertainty reduction is an assumed value; the expert should verify the actual derate characterization and ensure no other corners become affected by this change."
+  },
+  {
+    "title": "SDC budget derivation at block boundary: switching to multicycle constraints instead of tightening clock period",
+    "design_context": "node: 28nm, instance_count: 0.5M, macro_count: 50, clock_domains: 2 (1.5 GHz and 800 MHz), tool_family: \"commercial synthesis and STA\"",
+    "prior_state": "Cross-boundary setup slack WNS -100 ps, TNS -800 ps for paths from the 1.5 GHz domain to the 800 MHz domain (handshake-like control signals).",
+    "observation": "The violated paths are control signals that are sampled by a synchronizer; the functional specification allows up to 2 cycles for these signals to settle. Severity: MODERATE.",
+    "hypothesis": "The current SDC treats these paths as single-cycle, which is overly pessimistic; they should be multicycle (2 cycles) because the downstream logic only samples after the second clock edge.",
+    "candidates_considered": [
+      {"action": "Tighten the inter-block budget from 2.0 ns to 1.8 ns to force faster logic", "rejected_because": "would require resizing ~50 cells in both blocks, adding 3% area and 4% power, and delay the integration schedule by 1 week for re-synthesis."},
+      {"action": "Increase the clock period of the 1.5 GHz domain to 1.2 GHz to create margin", "rejected_because": "would reduce overall CPU performance by ~20%, failing the performance target."},
+      {"action": "Insert a manual pipeline register at the boundary", "rejected_because": "would add a full cycle of latency that breaks the handshake protocol; not functional."}
+    ],
+    "chosen_intervention": "Modified the SDC to apply `set_multicycle_path -setup 2 -hold 1` on the cross-domain control paths, and added a corresponding clock-group asynchronous exception for the synchronizer's meta-stability flops; kept the original 2.0 ns budget for the remaining data paths.",
+    "post_state": "WNS 0 ps (met), TNS 0 ps, all cross-boundary setup violations cleared.",
+    "expert_assessment": "Right decision because it aligns the constraint with the actual functional behavior without area or schedule penalties. The key lesson is to always review the functional specification before applying brute-force timing fixes. This would not transfer to cases where the paths are truly single-cycle data paths, where multicycle would hide real timing failures.",
+    "confidence": 0.85,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The assumption that the handshake allows exactly 2 cycles is based on the functional spec; the reviewer should double-check the synchronizer design to ensure that the multicycle exception does not violate hold or metastability requirements."
+  }
+]

@@ -1,0 +1,197 @@
+[ 프롬프트 A — 순수 JSON 배열 출력 ]
+
+```json
+[
+  {
+    "title": "Post-CTS routing congestion in macro channels resolved by macro halo adjustment, not router effort",
+    "design_context": "28nm, ~1.05M placeable instances, 78 SRAM hard macros, 3 clock domains (1.2 GHz core, 600 MHz memory, 300 MHz IO), commercial P&R and synthesis tools",
+    "prior_state": {
+      "post_cts_wns_ns": 0.24,
+      "post_cts_tns_ns": 0.0,
+      "global_route_overflow_percent": 19.4,
+      "overflow_localized_to_macro_channels": true,
+      "macro_channel_overflow_bins": 47,
+      "uniform_overflow_bins": 3,
+      "utilization_percent": 76.2,
+      "drc_count": 12,
+      "drc_types": ["min-width", "antenna"]
+    },
+    "observation": "After post-CTS optimization reported clean WNS (+0.24ns) and zero TNS, the first detailed-routing attempt revealed 19.4% global route overflow concentrated in 47 bins around macro channel pinch points; only 3 bins showed uniform overflow elsewhere. 12 DRC violations (min-width and antenna) in the same macro-adjacent regions. Severity: HIGH.",
+    "hypothesis": "Post-CTS optimization had absorbed congestion into the global route by over-constraining internal routes; when detailed routing tried to realize those paths, the physical macro channel bottlenecks (narrow gaps between tightly packed SRAMs) could not accommodate the routed nets. The overflow shape — concentrated at macro boundaries rather than uniform — confirms a placement/macro-packing problem, not a global router effort problem.",
+    "candidates_considered": [
+      {
+        "action": "Increase detailed router effort: higher rip-up count, more iterations, aggressive congestion-driven re-route",
+        "rejected_because": "The overflow is structural (physical channel capacity exceeded by macro packing), not a search deficiency. Additional router effort had already been tried at global route stage (3 iterations with increasing effort, overflow only dropped from 22% to 19%). Each detailed-routing iteration with high effort consumes ~6 hours on the shared farm and the schedule allows only 2 more routing attempts before the integration deadline. Effort would not resolve a physical capacity issue."
+      },
+      {
+        "action": "Apply layer directives to force more routing onto lower-priority metals (M5/M6) in congested channels",
+        "rejected_because": "The 28nm process has only 6 routing layers; M5/M6 already carry 60% of the routing in those channels per the global route report. Forcing more traffic onto layers already near capacity would create new DRC violations (min-width and spacing on tighter-pitch lower layers) and likely increase antenna violations. The foundry PDK restricts M5/M6 antenna current limits below what additional routing would draw."
+      },
+      {
+        "action": "Re-run placement with more aggressive spreading to open macro channels, then re-CTS and re-opt",
+        "rejected_because": "A full placement refresh plus re-CTS and post-CTS optimization would consume 3-4 days of engineer time plus 2 days of compute on the farm — blowing past the integration milestone by 5 days. The block is already at 76% utilization; spreading risks pushing utilization above 80% in adjacent regions, creating new congestion. The post-CTS WNS of +0.24ns is acceptable; re-CTS could degrade it."
+      },
+      {
+        "action": "Reduce macro halo sizes on the 78 SRAM macros from 12um to 8um, freeing channel width for routing while accepting a slight DRC risk that can be waived post-tapeout",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Reduced SRAM macro halo sizes from 12um to 8um on all 78 macros (4um reduction per macro edge). Re-ran a targeted placement refresh scoped only to cells within the macro halo zones (not full placement), then re-detailed-routed the affected channels with standard effort. The halo reduction opened ~4um of additional channel width per macro edge, sufficient for the congested routes. Engineering time: 1 day for halo adjustment + scoped placement; compute: 6 hours for scoped placement + 4 hours detailed route. Post-intervention, DRC count increased to 28 (all antenna violations in halo-adjacent zones), all resolvable with diode insertion at no timing cost.",
+    "post_state": {
+      "detailed_route_overflow_percent": 4.1,
+      "overflow_bins_macro_channels": 6,
+      "overflow_bins_uniform": 2,
+      "utilization_percent": 76.5,
+      "drc_count": 28,
+      "drc_resolvable_with_diodes": true,
+      "wns_ns": 0.21,
+      "tns_ns": 0.0,
+      "wns_degradation_ns": 0.03,
+      "notes": "WNS degraded 30ps from the scoped placement refresh displacing a few cells near macros, within acceptable margin. Overflow dropped from 19.4% to 4.1% — a 15.3 percentage point reduction from opening 4um of channel width across 78 macros."
+    },
+    "expert_assessment": "The right call. The congestion pattern (macro-channel-concentrated, not uniform) correctly identified a physical packing issue, not a router deficiency. Reducing halo sizes was the lowest-risk, lowest-schedule-impact fix that addressed the root cause. The 30ps WNS cost was acceptable given the 240ps margin. The lesson: when post-CTS looks clean but detailed routing shows macro-channel congestion, the fix is usually in the placement/macro-packing, not the router. This will not transfer when macros are too tightly spaced for any halo reduction (e.g., already at minimum foundry halo) or when the channel congestion is in a power-strip-dominated region where halo adjustment does not free routing space. Confidence reflects the technical soundness of the diagnosis and the realistic effect size of halo adjustment.",
+    "confidence": 0.72,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific overflow percentages (19.4% pre, 4.1% post) and DRC counts are plausible composites rather than from a named project; the exact WNS degradation (30ps) from a scoped placement refresh on a 1M-instance block is instance-dependent and could be larger on a denser design."
+  },
+  {
+    "title": "Timing violation report shape distinguished a clock-domain constraint error from a logic-depth problem",
+    "design_context": "28nm, ~780K placeable instances, 34 macros, 4 clock domains (1.6 GHz core, 800 MHz cache, 400 MHz bus, 200 MHz low-power), commercial P&R and synthesis",
+    "prior_state": {
+      "wns_ns": -0.62,
+      "tns_ns": -42.3,
+      "violating_paths_total": 3847,
+      "path_distribution_by_domain": {
+        "1.6GHz_core": 312,
+        "800MHz_cache": 3412,
+        "400MHz_bus": 89,
+        "200MHz_low_power": 34
+      },
+      "path_distribution_by_slack_range": {
+        "worse_than_-2ns": 87,
+        "between_-1ns_and_-2ns": 1243,
+        "between_-0.5ns_and_-1ns": 2517
+      },
+      "path_overlap_analysis": "89% of 800MHz cache domain violating paths share destination endpoints in a single 3-clock-cycle sequential chain (register file write-back stage through a 4-deep pipeline), same 14 cells appearing as start or end points in over 2000 paths",
+      "hold_wns_ns": 0.18,
+      "hold_tns_ns": 0.0
+    },
+    "observation": "3,847 setup-violating paths with WNS -0.62ns and TNS -42.3ns. The violation shape is highly distinctive: 89% of violations (3,412 paths) are in the 800 MHz cache domain, and 89% of THOSE share destination endpoints in a specific 3-cycle sequential chain (14 cells appearing as start/end in over 2000 paths). The remaining violations (435 paths) are spread across other domains with no clustering. Hold timing is clean (+0.18ns WNS). The concentration of violations on a small set of cells in one domain, with large Slack deficits on 87 paths (worse than -2ns), suggested a localized problem rather than a global logic-depth issue. Severity: CRITICAL.",
+    "hypothesis": "This is a constraint-problem signature, not a logic-depth problem. Three diagnostic features: (1) the massive concentration of violations on 14 cells in one domain (a logic-depth problem would show violations spread across many paths with similar slack deficits, not clustered on specific cells); (2) the hold timing is clean, which is inconsistent with a logic-depth problem where setup and hold often degrade together when logic is over-compressed; (3) the 87 paths worse than -2ns all trace to the same sequential chain, suggesting an incorrect clock uncertainty or a missing false path / multicycle path constraint on that chain. A physical/placement problem would show violations correlated with congestion maps or specific physical regions.",
+    "candidates_considered": [
+      {
+        "action": "Run aggressive retiming and logic duplication to break the 3-cycle sequential chain and reduce logic depth",
+        "rejected_because": "The chain is a functional pipeline (write-back through 4 pipeline stages with inter-stage registers already in place); further logic duplication would violate the pipeline protocol and could break the design functionally. The 14 cells are already pipeline registers — duplicating them destroys the pipeline structure. Also, retiming on 3,412 paths would consume 2-3 days of engineer time and the farm compute, with no guarantee of resolving the root cause if the problem is a constraint error."
+      },
+      {
+        "action": "Apply a global setup optimization pass with higher effort on all 3,847 paths",
+        "rejected_because": "The violation shape (concentrated on 14 cells, clean hold) indicates the optimizer is correctly optimizing to the wrong constraints. More optimization effort on unconstrained paths will not fix incorrectly constrained paths — it will just burn schedule (1-2 days of compute on the farm for a full-chip high-effort setup pass) and potentially degrade hold timing by inserting unnecessary buffers. The clean hold timing is a strong signal that the problem is constraint-specific, not a general logic-depth issue."
+      },
+      {
+        "action": "Re-place the 14 hot cells to improve their routing and reduce wireload",
+        "rejected_because": "The violation shape does not correlate with physical location — the 14 cells are spread across the physical design in different congestion regions, and their violating paths terminate in different physical areas. A placement fix would not address a constraint problem. Re-placement of 14 cells would also risk disrupting the carefully balanced pipeline placement that was tuned for the 800 MHz domain, potentially creating new violations."
+      },
+      {
+        "action": "Audit the clock specification for the 800 MHz cache domain: verify clock uncertainty, check for missing multicycle pathExceptions on the 3-cycle sequential chain (which legitimately has a 3-cycle latency requirement per the microarchitecture spec), verify that the 14 pipeline registers are correctly grouped in the SDC",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Audited the SDC for the 800 MHz cache domain. Found two issues: (1) the 3-cycle sequential chain (write-back pipeline) had NO multicycle path exception despite the microarchitecture spec requiring 3 cycles for that stage — the synthesis tool was trying to meet it in 1 cycle. (2) The clock uncertainty for the 800 MHz domain was set to ±50ps (assumed from a generic template) but the actual OCV analysis for this block showed ±80ps was appropriate — the tighter uncertainty was making the tool over-optimize to an unrealistic target, contributing to the 87 paths worse than -2ns. Applied a 2-cycle multicycle path exception on the setup check for the 3-cycle chain (correcting the 1-cycle misconception: the chain legitimately needs 3 cycles, but the SDC had it at 1), and corrected the clock uncertainty to ±80ps. Re-ran setup analysis only (no P&R changes). Engineering time: 4 hours for SDC audit and correction.",
+    "post_state": {
+      "wns_ns": 0.08,
+      "tns_ns": 0.0,
+      "violating_paths_total": 0,
+      "path_distribution_by_domain": {
+        "1.6GHz_core": 0,
+        "800MHz_cache": 0,
+        "400MHz_bus": 0,
+        "200MHz_low_power": 0
+      },
+      "hold_wns_ns": 0.18,
+      "hold_tns_ns": 0.0,
+      "multicycle_applied_paths": 3412,
+      "multicycle_cycles": 2,
+      "clock_uncertainty_corrected": "±50ps -> ±80ps (per OCV analysis)",
+      "notes": "All 3,412 cache domain violations resolved by applying the correct multicycle path exception. The 435 remaining path violations (other domains) were also resolved by the clock uncertainty correction (the ±80ps uncertainty was causing over-constraint on those domains too, and relaxing to the correct value gave enough slack). No P&R changes needed — pure SDC correction."
+    },
+    "expert_assessment": "Correct diagnosis and fix. The violation report's shape — massive concentration on a specific sequential chain, clean hold, no physical correlation — was the key diagnostic that separated a constraint problem from a logic-depth or placement problem. Applying the right multicycle exception and correcting the clock uncertainty resolved all violations without any P&R changes, which would have been impossible if the problem were physical. The lesson: always read the violation report's shape before reaching for the optimizer. Concentration on few cells + clean hold = constraint audit first. Will not transfer when violations are spread evenly across the design with similar slack deficits (then it IS a logic-depth problem, and retiming/logic changes are the right response) or when violations correlate with congestion hotspots (then it IS physical).",
+    "confidence": 0.78,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific cell count (14 cells, 3,412 paths) and the 3-cycle write-back pipeline detail are constructed composites; real designs may have different chain depths, different numbers of hot cells, and the clock uncertainty correction from ±50ps to ±80ps is a plausible but instance-specific value."
+  },
+  {
+    "title": "Inter-block SDC budget between 28nm CPU core and 28nm L2 cache: false-path rejection and multicycle derivation",
+    "design_context": "28nm, ~1.2M placeable instances total across two blocks (800K CPU core block + 400K L2 cache block), 52 macros (CPU: 18 SRAMs, L2: 34 SRAMs), 5 clock domains total (CPU: 1.2 GHz core, 600 MHz memory, 300 MHz peripheral; L2: 600 MHz cache coherence, 300 MHz cache interface), commercial P&R and synthesis tools, block boundary between CPU core block and L2 cache block",
+    "prior_state": {
+      "boundary_path_count": 2150,
+      "boundary_paths_cpu_to_l2": 1120,
+      "boundary_paths_l2_to_cpu": 1030,
+      "cpu_block_wns_ns": 0.14,
+      "cpu_block_tns_ns": 0.0,
+      "l2_block_wns_ns": 0.09,
+      "l2_block_tns_ns": 0.0,
+      "interface_clock": "600 MHz (shared memory clock domain)",
+      "interface_protocol": "3-cycle read latency, 2-cycle write latency per microarchitecture spec",
+      "boundary_sdc_state": "initial SDC with false path on all boundary paths (placeholder, awaiting budget derivation)"
+    },
+    "observation": "The CPU core block and L2 cache block were being integrated. The boundary SDC had a blanket false-path on all 2,150 boundary paths (placeholder from initial integration). The 600 MHz interface clock is shared between both blocks. The microarchitecture spec defines 3-cycle read latency and 2-cycle write latency for the CPU-to-L2 interface. The boundary paths include: 640 read data paths (CPU -> L2, 3-cycle latency requirement), 480 write data paths (CPU -> L2, 2-cycle latency requirement), 70 control paths (CPU -> L2, single-cycle handshake), and 960 return paths (L2 -> CPU, various latencies per transaction type). Severity: MODERATE (no timing failure yet because of false-path placeholder, but the design is not correctly constrained for sign-off).",
+    "hypothesis": "A blanket false-path on all boundary paths is incorrect — it would pass timing but fail functionally, because the 640 read data paths and 480 write data paths carry real data that must meet the 3-cycle and 2-cycle latency requirements respectively. The correct approach is to derive a per-path-group budget based on the microarchitecture latency spec, apply multicycle exceptions where the spec allows, and only false-path paths that are genuinely test-only or power-management-only. The diagnostic question is: which paths can be multicycle, which need tight single-cycle constraints, and which can be false-path'd?",
+    "candidates_considered": [
+      {
+        "action": "Apply a blanket 2-cycle multicycle exception to all 2,150 boundary paths (simplest SDC, passes timing easily)",
+        "rejected_because": "The 640 read data paths require 3-cycle latency per spec, not 2. A 2-cycle multicycle would make the design pass timing but fail functionally — reads would return data 1 cycle early, corrupting the pipeline. The 480 write data paths require 2-cycle latency, so a 2-cycle multicycle on writes is correct, but applying it uniformly to reads would break the design. The blanket approach loses the per-transaction-type latency differentiation that the spec requires."
+      },
+      {
+        "action": "Apply a tight single-cycle constraint to all 2,150 boundary paths (most conservative, no multicycle, no false paths)",
+        "rejected_because": "The 640 read data paths have a 3-cycle spec requirement — constraining them to 1 cycle would force the optimizer to meet an unrealistically tight timing target, driving excessive buffer insertion and logic duplication that would inflate area by an estimated 8-12% on the CPU block (based on prior similar interfaces) and degrade the 1.2 GHz core WNS by an estimated 0.15-0.2ns (the core block only has 0.14ns WNS margin). The 960 return paths have variable latency per transaction type (some are 1-cycle, some are 3-cycle) — a blanket 1-cycle constraint on all of them would over-constrain the 3-cycle transactions and cause the same area and timing degradation. The conservative approach wastes power, area, and timing margin on paths that legitimately have multi-cycle budgets."
+      },
+      {
+        "action": "Derive a per-group budget: 3-cycle multicycle on 640 read data paths (matching the spec), 2-cycle multicycle on 480 write data paths (matching the spec), single-cycle on 70 control paths (matching the spec), and per-transaction-type budget on the 960 return paths based on the transaction-type breakdown from the microarchitecture spec (1-cycle for ACK/invalidate, 2-cycle for snoop response, 3-cycle for cache line fill return). Reject the blanket 2-cycle approach because it under-budgets the reads; reject the blanket 1-cycle approach because it over-constrains everything and wastes area/timing/power.",
+        "rejected_because": null
+      }
+    ],
+    "chosen_intervention": "Derived a per-group SDC budget: (1) 640 read data paths: set_multicycle_path 3 (setup) on the CPU-to-L2 read data group, with the path start at the CPU core register launching the read and the path end at the L2 cache register capturing the data. The 3-cycle budget matches the microarchitecture spec's 3-cycle read latency. (2) 480 write data paths: set_multicycle_path 2 (setup) for the CPU-to-L2 write group. (3) 70 control paths: single-cycle constraint (set_multicycle_path 1, the default) — these are handshake signals that must be single-cycle per the protocol. (4) 960 return paths: broken into 3 sub-groups based on transaction type from the spec: 320 ACK/invalidate paths (1-cycle), 410 snoop response paths (2-cycle), 230 cache line fill return paths (3-cycle). Applied the corresponding set_multicycle_path values to each sub-group. Also applied false paths on 8 paths that were identified as power-management test-mode paths (not active during normal operation, confirmed with the CPU verification team). Total SDC engineering time: 1 day for budget derivation + SDC authoring. Verification: ran a post-SDC timing analysis (no P&R changes) — WNS was 0.02ns on the boundary (versus 0.0 with false path, but now correctly constrained), and the 1.2 GHz core WNS remained at 0.14ns (no degradation from the more accurate constraints).",
+    "post_state": {
+      "boundary_path_count": 2150,
+      "boundary_paths_correctly_constrained": 2142,
+      "boundary_paths_false_pathed": 8,
+      "cpu_block_wns_ns": 0.14,
+      "l2_block_wns_ns": 0.09,
+      "boundary_sdc_state": "per-group multicycle budget derived from microarchitecture spec, 8 false paths on test-mode signals",
+      "read_data_paths": {
+        "count": 640,
+        "multccycle_cycles": 3,
+        "spec_latency": "3-cycle",
+        "status": "correctly constrained"
+      },
+      "write_data_paths": {
+        "count": 480,
+        "multccycle_cycles": 2,
+        "spec_latency": "2-cycle",
+        "status": "correctly constrained"
+      },
+      "control_paths": {
+        "count": 70,
+        "multccycle_cycles": 1,
+        "spec_latency": "single-cycle",
+        "status": "correctly constrained"
+      },
+      "return_paths": {
+        "total": 960,
+        "ack_invalidate": {"count": 320, "cycles": 1, "status": "correctly constrained"},
+        "snoop_response": {"count": 410, "cycles": 2, "status": "correctly constrained"},
+        "cache_line_fill": {"count": 230, "cycles": 3, "status": "correctly constrained"}
+      },
+      "boundary_wns_ns": 0.02,
+      "test_mode_false_paths": 8,
+      "notes": "No P&R changes required. The per-group budget correctly reflects the microarchitecture spec's latency requirements. The 0.02ns boundary WNS (versus 0.0 with false path) is expected — the false path was hiding the real timing requirement, and now the paths are correctly constrained with appropriate budgets. The core block WNS is unchanged at 0.14ns, confirming the budget does not over-constrain the core."
+    },
+    "expert_assessment": "The right call. The key insight was that the microarchitecture spec's per-transaction-type latency requirements (3-cycle reads, 2-cycle writes, variable-latency returns) directly drove the SDC budget derivation — the SDC must reflect the spec, not convenience. Rejecting the blanket 2-cycle approach was critical because it would have caused functional failures on reads. Rejecting the blanket 1-cycle approach was critical because it would have wasted area, power, and timing margin on paths that legitimately had multi-cycle budgets. The lesson: always derive boundary SDC budgets from the microarchitecture spec's latency requirements, broken down by transaction type — never use blanket multicycle or blanket false-path shortcuts. Will not transfer when the interface protocol has uniform latency for all transaction types (then a simpler budget applies) or when the spec is ambiguous about latency requirements (then the budget must be derived from the verification team's formal protocol model, not the spec alone).",
+    "confidence": 0.75,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific path counts (640 reads, 480 writes, 70 control, 960 returns with sub-breakdowns) are constructed composites; real designs will have different counts and the per-transaction-type breakdown of return paths is illustrative. The 8 test-mode false paths are a plausible detail but would need confirmation from the verification team in a real project."
+  }
+]

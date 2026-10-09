@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Adoption of a 'Speed-Demon' Clock-Frequency Philosophy",
+    "where_in_paper": "Introduction and Guiding Principles",
+    "decision": "To prioritize high clock frequency (1.1-1.3 GHz) and IPC in parallel, marking a shift from the traditional IBM 'brainiac' (IPC-focused) approach to also embrace the 'speed-demon' (frequency-focused) philosophy.",
+    "alternatives_or_rejected": "The paper explicitly contrasts this with the previous approach where IBM UNIX-based systems were 'traditionally in the braniac camp'. It states that with POWER4, 'IBM opted to also embrace the speed-demon approach.'",
+    "rationale": "To maintain a leadership position and achieve best-of-breed operating frequencies, the design was revamped with new transistor-level tools and transformed complex control logic into regular data flow constructs. The system was designed to preserve balance as technology improvements allowed for even higher frequencies.",
+    "outcome": "POWER4 was initially introduced at 1.1 GHz and 1.3 GHz, surpassing other 64-bit microprocessors in key benchmarks.",
+    "quote_as_recalled": "In the ongoing debate between the 'speed demons' (high clock rate) and the 'braniacs' (more complex design but a higher instructions-per-cycle rate), IBM UNIX-based systems have traditionally been in the braniac camp. With the POWER4, IBM opted to also embrace the speed-demon approach.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a best guess based on the introduction section; the core quote is directly from the text.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Design of a Distributed Switch Interconnect Topology",
+    "where_in_paper": "System Overview / Interconnect Architecture",
+    "decision": "To use a novel 'distributed switch' interconnect topology for connecting POWER4 chips into systems up to a 32-way SMP, moving away from traditional bus-based or centralized switch designs.",
+    "alternatives_or_rejected": "The paper does not explicitly list rejected alternatives but implies that previous system topologies were insufficient for the performance and scalability goals.",
+    "rationale": "To leverage technology advances in circuit densities and module packaging to achieve high levels of performance suitable for server applications. The distributed switch allows for a scalable, high-bandwidth, low-latency fabric that is crucial for maintaining system balance as processor frequencies increase.",
+    "outcome": "The interconnect topology is referred to as a 'distributed switch' and is described as new to the industry, enabling the formation of large SMP systems.",
+    "quote_as_recalled": "The interconnect topology, referred to as a distributed switch, is new to the industry.",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper focuses on describing the topology rather than detailing why other specific alternatives (like crossbar or ring) were rejected, so the rationale is inferred from the goals.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Full System Design and Co-Design of Processor, Memory, and I/O",
+    "where_in_paper": "Guiding Principles / Introduction",
+    "decision": "To adopt a full system design approach where the processor core, memory subsystem, and I/O bridge chips are designed together as a cohesive system, rather than in isolation.",
+    "alternatives_or_rejected": "The paper contrasts this with an approach where components are designed independently. It implies that previous designs may have focused more on the processor in isolation.",
+    "rationale": "To optimize the system for SMP operation and high-throughput, multi-tasking environments. A new high-performance processor needs a new subsystem to effectively feed it. This marriage of process technology, packaging, and microarchitecture allows software to exploit the system effectively.",
+    "outcome": "The design includes integrated L2/L3 caches, a scalable memory subsystem, and a high-bandwidth I/O structure, all designed to work in concert to feed the powerful processor cores.",
+    "quote_as_recalled": "To optimize the system, we started with the full design in mind up front. This marriage with the process technology, packaging, and microarchitecture was designed to allow software to exploit them.",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "This is a guiding principle rather than a single decision, so pinpointing a specific quote is challenging, but the philosophy is clearly articulated.",
+    "confidence": 0.92
+  },
+  {
+    "title": "Emphasis on Mainframe-like RAS (Reliability, Availability, Serviceability)",
+    "where_in_paper": "Guiding Principles / System Design",
+    "decision": "To incorporate RAS features traditionally seen in mainframe systems into a UNIX server processor, including extensive error checking/correction, fault isolation, and redundant hardware.",
+    "alternatives_or_rejected": "The paper states that one does not achieve high levels of reliability by only choosing reliable parts and building ECC into major arrays, but requires an approach that eliminates outages and provides redundancy where errors cannot be eliminated.",
+    "rationale": "Servers have evolved to continuous operation and outages are not tolerated. The goal was to transform hard machine stops (checkstops) into synchronous machine interrupts to software, allowing it to circumvent problems if possible. This required a pervasive RAS design philosophy throughout the system.",
+    "outcome": "POWER4 systems included features like First Failure Data Capture, Built-In Self Test (BIST), and dynamic resource deallocation to handle errors without system downtime.",
+    "quote_as_recalled": "With POWER4, we accepted the principle that one does not achieve high levels of reliability by only choosing reliable parts and building error correction codes (ECC) into major arrays, but an approach that eliminated outages and provided redundancy where errors could not be eliminated was required.",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper discusses RAS philosophy broadly rather than detailing specific rejected alternatives like 'less aggressive ECC' or 'software-only recovery'.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Dual-Core Implementation on a Single Die",
+    "where_in_paper": "POWER4 Chip Overview / Introduction",
+    "decision": "To integrate two complete processor cores on a single silicon die, creating one of the first commercially available multi-core, general-purpose microprocessors.",
+    "alternatives_or_rejected": "The paper does not explicitly discuss rejected alternatives like building a faster single-core or a multi-chip module with two separate cores. However, it implies that the dual-core approach was necessary to achieve the performance and integration goals within the technology constraints of the time.",
+    "rationale": "To leverage increasing transistor budgets and achieve higher throughput in SMP environments. The dual-core design allowed for better resource sharing (e.g., L2 cache) and reduced off-chip communication latency compared to multi-chip solutions. It was a step towards the 'server on a chip' concept.",
+    "outcome": "The POWER4 chip contains two 64-bit PowerPC cores, a shared L2 cache, and a Core Interface Unit (CIU) that manages traffic between the cores and the cache. This design was crucial for the Regatta systems' performance.",
+    "quote_as_recalled": "The team successfully grafted two high-performance microprocessor cores on a single silicon chip — an industry first.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "While the dual-core fact is clearly in the paper, the paper itself may not use the phrase 'industry first' or explicitly detail rejected alternatives like a single-core with wider execution. The quote is from a secondary source describing the paper's content.",
+    "confidence": 0.85
+  }
+]
+```

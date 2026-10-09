@@ -1,0 +1,92 @@
+[
+  {
+    "pitfall_name": "JS-WASM BigInt Serialization Bottleneck",
+    "what_happens": "Passing large arrays of field elements (e.g., 2^20 elliptic curve points for MSM) from JS to WASM takes longer than the actual cryptographic computation.",
+    "why": "JS represents large integers as BigInts or floating-point numbers. Serializing an array of JS BigInts into a WASM linear memory buffer requires a JS-side loop that extracts limbs and writes them to a TypedArray. This JS loop is interpreted and lacks JIT optimization for custom struct packing, creating a massive CPU bottleneck before WASM even starts.",
+    "how_discovered": "Profiling shows 80% of the proving time is spent in JS glue code. Discovered after weeks of optimizing the WASM Rust/C++ code, only to realize the math wasn't the bottleneck.",
+    "mitigation": "Allocate all large buffers directly in WASM linear memory. Pass only pointers (i32) across the boundary. Perform all data loading, parsing, and struct packing inside WASM using a binary format.",
+    "affects": "performance",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "WebGPU Readback Synchronization Stalls",
+    "what_happens": "Reading the final proof or intermediate MSM results back to the CPU blocks the GPU pipeline, and the readback latency is mistakenly counted as GPU compute time in benchmarks.",
+    "why": "Calling `mapAsync` on a WebGPU buffer forces a CPU-GPU synchronization. If the developer awaits this on the main thread or forces a sync immediately after dispatch, it prevents the GPU from overlapping subsequent compute passes. The PCIe/bus transfer time dominates the metric.",
+    "how_discovered": "GPU trace tools show the GPU sitting idle waiting for the CPU to map the buffer. Benchmark numbers look terrible compared to native CUDA. Wastes weeks optimizing WGSL shaders when the bottleneck is bus transfer.",
+    "mitigation": "Use double or triple buffering for readbacks. Keep intermediate data (e.g., NTT outputs) on the GPU for subsequent shader passes and only map the final tiny proof output (a few KB) to the CPU.",
+    "affects": "measurement-validity",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "Background Tab Timer and Execution Throttling",
+    "what_happens": "Proving benchmarks run in a background tab show 10x-100x slower performance, leading to incorrect conclusions about algorithmic scaling or browser engine superiority.",
+    "why": "Browsers (Chrome, Firefox, Safari) aggressively throttle `setTimeout`, `requestAnimationFrame`, and sometimes suspend WebGPU/WASM execution in background tabs to save battery and CPU. `performance.now()` resolution may also be clamped.",
+    "how_discovered": "A benchmark script left running in a background tab reports absurdly high proving times. Discovered when comparing foreground vs background runs, leading to false claims about a new ZK library's speed.",
+    "mitigation": "Never benchmark in background tabs. Use Web Workers for long-running proofs to avoid blocking the main thread, but keep the page focused/foregrounded during measurement. Document the foreground requirement in the benchmark methodology.",
+    "affects": "measurement-validity",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "WASM32 Address Space Fragmentation and OOM",
+    "what_happens": "WASM memory growth (`memory.grow`) fails with an OOM error or causes a massive performance cliff mid-proof, even when the host machine has plenty of RAM.",
+    "why": "WASM32 has a hard 4GB address space limit. Cryptographic provers need large contiguous scratchpads for NTTs (e.g., 2^24 field elements). If memory is grown incrementally, the engine might need to relocate the entire heap if it can't extend it contiguously, or it simply hits the 4GB wall. WASM64 is not yet universally performant.",
+    "how_discovered": "`memory.grow` returns -1 or throws, or a sudden 5x slowdown occurs mid-proof when the heap is relocated. Discovered when scaling up circuit sizes from 2^18 to 2^20.",
+    "mitigation": "Pre-allocate the maximum required WASM memory upfront at instantiation. Avoid dynamic `memory.grow` during the hot proving loop. Use memory pooling inside WASM.",
+    "affects": "correctness",
+    "confidence": 0.90
+  },
+  {
+    "pitfall_name": "SharedArrayBuffer Cross-Origin Isolation Failures",
+    "what_happens": "The web prover works locally but fails in production or when embedded in documentation sites, throwing `ReferenceError: SharedArrayBuffer is not defined`.",
+    "why": "SAB requires Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers. Many CDNs, third-party analytics scripts, or embedded iframes break these headers or don't propagate them, causing the browser to disable SAB and thus WASM threads.",
+    "how_discovered": "Users report the prover is broken on the docs site. Dev console shows SAB is undefined. Wastes days debugging WASM thread pools when it's just a missing HTTP header.",
+    "mitigation": "Configure server headers correctly. Use a service worker to inject COOP/COEP headers if server config is immutable (e.g., GitHub Pages). Provide a single-threaded fallback for environments where isolation cannot be achieved.",
+    "affects": "deployment",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "WebGPU Timestamp Query Quantization",
+    "what_happens": "Developers try to measure the exact execution time of a compute shader (e.g., a single NTT butterfly pass) using WebGPU timestamp queries, but get 0, null, or highly quantized values (e.g., multiples of 50ns).",
+    "why": "Not all GPUs/drivers expose high-resolution timestamps to the web. Some drivers disable timestamp queries entirely for security (timing attacks). When available, the resolution is often limited by the GPU's internal clock domain or driver quantization, making micro-benchmarking impossible.",
+    "how_discovered": "Shader profiling shows all passes taking exactly 0.05ms regardless of workload size. Discovered when trying to optimize a single WGSL dispatch.",
+    "mitigation": "Use `performance.now()` around the entire `submit()` and `mapAsync()` cycle for macro-benchmarking. Accept that micro-profiling individual WebGPU dispatches is unreliable on the web compared to native Vulkan/Metal.",
+    "affects": "measurement-validity",
+    "confidence": 0.85
+  },
+  {
+    "pitfall_name": "SIMD Codegen Failing to Vectorize Field Arithmetic",
+    "what_happens": "Developers write WASM SIMD intrinsics expecting 4x speedups on modular arithmetic, but the generated WAT shows scalar `i64` operations.",
+    "why": "Cryptographic field math (e.g., Montgomery reduction) relies on wide multiplications (128-bit from 64-bit) and specific carry chains. WASM SIMD128 lacks native 64x64->128 bit integer multiply instructions and efficient carry extraction, forcing the compiler to scalarize the code or use inefficient shuffles.",
+    "how_discovered": "Inspecting the generated `.wat` file shows no SIMD instructions in the hot loop. Wastes weeks trying to tune Rust/C++ code that the compiler refuses to vectorize.",
+    "mitigation": "Hand-write WAT or use specific WASM SIMD intrinsics that map to available instructions. Often, it's better to rely on the scalar `i64` pipeline which is highly optimized in V8/SpiderMonkey, or use specific algebraic tricks that fit in 32-bit SIMD.",
+    "affects": "performance",
+    "confidence": 0.90
+  },
+  {
+    "pitfall_name": "JIT Warmup and Tiering Distortion",
+    "what_happens": "The first few proving iterations are very slow, and then suddenly speed up, or a slightly modified version of the code runs 2x slower because it fell off the JIT optimization tier.",
+    "why": "WASM engines use a baseline compiler for fast startup, then background-compile an optimized tier. If the hot loop changes or hits a deoptimization bail-out (e.g., due to memory bounds checks or specific JS-WASM boundary calls), it drops back to baseline.",
+    "how_discovered": "Benchmark variance is huge. Discovered by running 100 iterations and plotting the time per iteration, showing a step function. Leads to publishing 'average' times that are mathematically meaningless.",
+    "mitigation": "Always perform a 'warmup' phase (e.g., 5-10 dummy proofs) before starting the measurement timer. Ensure the hot path does not trigger JS interop that causes deoptimization.",
+    "affects": "measurement-validity",
+    "confidence": 0.95
+  },
+  {
+    "pitfall_name": "Mobile Browser Memory Kills (Jetsam)",
+    "what_happens": "The prover works perfectly on desktop browsers but is abruptly killed by the OS on iOS Safari or Android Chrome without a JS exception, just a page reload.",
+    "why": "Mobile OSes have aggressive jetsam/memory limits per tab (often ~1GB to 1.5GB on iOS). Cryptographic provers easily exceed this with large NTT scratchpads and WebGPU buffer allocations. The OS kills the process to save the system, and the browser just shows a 'Webpage reloaded' message.",
+    "how_discovered": "Works on desktop, fails on phone. No error in console. Discovered by testing on actual devices and seeing the tab crash silently.",
+    "mitigation": "Drastically reduce the supported circuit size on mobile. Stream intermediate results to disk (File System Access API or IndexedDB) instead of holding everything in RAM. Detect mobile user agents and disable the prover or warn the user.",
+    "affects": "deployment",
+    "confidence": 0.90
+  },
+  {
+    "pitfall_name": "Safari WebGPU Resource Limit Divergences",
+    "what_happens": "A WebGPU compute shader that compiles and runs perfectly on Chrome (Dawn) and Firefox fails to compile or hits resource limits on Safari (WebKit).",
+    "why": "Safari's WebGPU implementation has different default limits for `maxComputeWorkgroupSize`, `maxStorageBufferBindingSize`, and handles WGSL syntax or strictness slightly differently. Safari also historically lagged in enabling certain WebGPU features by default.",
+    "how_discovered": "'Shader compilation failed' or 'Buffer size exceeds limit' errors only on macOS/iOS Safari. Discovered during cross-browser compatibility testing.",
+    "mitigation": "Query `adapter.limits` at startup and dynamically adjust the compute dispatch workgroup sizes. Keep storage buffers under 256MB if possible, or request higher limits during `requestAdapter`.",
+    "affects": "deployment",
+    "confidence": 0.85
+  }
+]

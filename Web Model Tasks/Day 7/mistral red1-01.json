@@ -1,0 +1,52 @@
+{
+  "critique": {
+    "title": {
+      "issue": "Implies causal relationship between placement density (0.24) and routing congestion (20k DRCs) without evidence.",
+      "correction": "BoomTile/Megaboom: 20k routing congestion DRCs observed at 0.24 placement density"
+    },
+    "prior_state": {
+      "issue": "'Failed GRT' is ambiguous; does not specify failure mode (e.g., non-convergence, DRC violations, or timing).",
+      "correction": "GRT failed to complete due to 20k routing congestion DRCs."
+    },
+    "observation": {
+      "issue": "Congestion heatmap claim lacks verifiable evidence (e.g., screenshot, log, or data).",
+      "correction": "Congestion heatmap (not attached in record) reportedly showed a large region at the top of the die and around the macro."
+    },
+    "hypothesis": {
+      "issue_1": "'Too aggressive' for routing-layer adjustment (0.45) is undefined and lacks justification.",
+      "correction": "The GRT routing-layer adjustment of 0.45 (which increases estimated routing capacity) may be too high for this design, leading to overestimation of available routing resources and subsequent congestion."
+      },
+      "issue_2": "Global-route path 'looping around the macro' is speculative and unverified in this record.",
+      "correction": "A separate suspected cause, reported in issue #5971, is a global-route path looping around the macro many times (unverified in this record)."
+    },
+    "candidates_considered": {
+      "issue": "Lacks justification for why candidates were expected to resolve the issue and omits other potential candidates (e.g., routing priorities, design constraints).",
+      "correction": "Increasing congestion iterations (default 30) to allow more time for routing optimization; reducing routing layer adjustment from 0.45 to 0.2 to avoid overestimating routing capacity; macro-placement improvements (tracked in issue #5971) to reduce congestion around macros; adjusting routing priorities or design constraints (not explored in this thread)."
+    },
+    "chosen_intervention": {
+      "issue_1": "'Finish GRT' and 'complete BoomTile' are undefined (e.g., no DRCs, no timing violations, or successful routing stage completion).",
+      "correction": "GRT was reported to complete with 0 DRCs."
+      },
+      "issue_2": "Does not specify whether changes were applied in isolation or concurrently with other adjustments.",
+      "correction": "Reduced the routing layer adjustment from 0.45 to 0.2 and increased congestion iterations to 35. No other changes were reported in this thread."
+    },
+    "post_state": {
+      "issue": "Lacks measurable outcomes (e.g., DRC count, runtime) to verify resolution.",
+      "correction": "GRT was reported to complete with 0 DRCs (no post-fix DRC count or runtime was provided in the thread)."
+    },
+    "gaps": {
+      "issue": "Does not address lack of clarity in hypothesis or speculative nature of macro-loop root cause.",
+      "correction": [
+        "No measured post-fix DRC count or runtime is reported.",
+        "The issue was closed automatically as not_planned/Stale in 2026; whether the reported parameter change was merged as a code change is not stated.",
+        "No PR link for the fix. The macro-loop root cause is deferred to #5971 and was not resolved here.",
+        "The hypothesis about the routing-layer adjustment being 'too aggressive' lacks a definition or justification.",
+        "The macro-loop root cause is speculative and unverified in this record."
+      ]
+    },
+    "confidence": {
+      "issue": "Score of 0.8 is unjustified given lack of verifiable data and speculative claims.",
+      "correction": 0.5
+    }
+  }
+}

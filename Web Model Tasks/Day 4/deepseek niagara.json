@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Throughput-oriented design over single-thread performance",
+    "where_in_paper": "Introduction / Design Philosophy",
+    "decision": "The processor was designed to maximize overall throughput for commercial server workloads, rather than optimizing for single-thread performance.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Commercial server applications exhibit abundant thread-level parallelism and do not require high single-thread performance; focusing on throughput per watt and per area is more effective.",
+    "outcome": "A chip with eight simple cores and 32 hardware threads was realized, achieving high throughput with low power.",
+    "quote_as_recalled": "Niagara targets commercial server workloads, which have abundant thread-level parallelism.",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact wording of the quote may be slightly off; the page is the abstract/first page.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Use of fine-grained multithreading per core",
+    "where_in_paper": "Processor Architecture / Core Design",
+    "decision": "Each core implements fine-grained multithreading with four threads, switching threads on every cycle.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Fine-grained multithreading tolerates long memory latencies and functional-unit latencies without needing complex out-of-order execution, keeping the core simple and power-efficient.",
+    "outcome": "Each of the eight cores supports four threads, yielding 32 threads total; the pipeline is single-issue and in-order.",
+    "quote_as_recalled": "Each core is a simple, single-issue, in-order pipeline that supports four threads.",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact quote may be from a description of the pipeline; page 23 is the architecture section start.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Rejection of out-of-order execution in favor of multithreading",
+    "where_in_paper": "Core Architecture / Trade-offs",
+    "decision": "Out-of-order execution was not used; cores remain in-order.",
+    "alternatives_or_rejected": "Out-of-order execution was considered but rejected due to complexity, power, and area costs.",
+    "rationale": "The four-thread fine-grained multithreading already hides memory and execution latencies effectively, so the added complexity of OOO would not provide enough benefit for the target workloads.",
+    "outcome": "In-order cores were used, saving significant power and area while still achieving high throughput.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I cannot reproduce the verbatim quote; the rationale is synthesized from the paper's argument.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Shared L2 cache organization with crossbar interconnect",
+    "where_in_paper": "Memory System",
+    "decision": "A single, shared 3-MB L2 cache was used, organized into four banks, with a crossbar switch connecting the eight cores to these banks.",
+    "alternatives_or_rejected": "Private L2 caches per core were likely considered (common in other designs) but not explicitly detailed as a rejected alternative in this short paper; the paper emphasizes the shared design.",
+    "rationale": "A shared L2 cache reduces capacity waste and allows dynamic allocation among threads, while the crossbar provides low-latency, high-bandwidth access for all cores.",
+    "outcome": "The shared L2 cache and crossbar interconnect operate at the core frequency, providing 32 GB/s of bandwidth.",
+    "quote_as_recalled": "A shared 3-MB L2 cache is organized into four banks and is connected to the cores through a crossbar switch.",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact bandwidth number and quote might be approximate; page 25 is the memory system section.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Power efficiency as a primary design constraint",
+    "where_in_paper": "Power and Physical Implementation",
+    "decision": "Power consumption was a first-order design constraint, targeting less than 60 W at 1.2 V.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper explicitly states that power efficiency was critical for server density and cooling costs, driving the simple core and shared cache decisions.",
+    "outcome": "The chip achieved a power consumption of about 60 W, delivering high performance per watt for commercial workloads.",
+    "quote_as_recalled": "The chip dissipates less than 60 W at 1.2 V.",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact power number might be 60 W or close; the page guess is in the results section.",
+    "confidence": 0.85
+  }
+]
+```

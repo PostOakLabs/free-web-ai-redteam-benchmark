@@ -1,0 +1,94 @@
+[
+  {
+    "title": "28nm macro-channel congestion at first detailed route after clean post-CTS",
+    "design_context": "28nm, ~1.05M placeable instances, 82 hard macros (SRAM), 3 clocks 400MHz/200MHz/100MHz, commercial P&R",
+    "prior_state": "Util 74%, post-CTS WNS -38ps TNS -0.6ns, GR overflow 0.6% pre-route, 0 DRC, 6% of bins >85% density",
+    "observation": "First detailed route stalled 94% complete, 2100 opens, GR overflow 4.1% concentrated 92% in two vertical macro channels width 35um between SRAM columns, peak overflow 18% in M3/M4, pin density 580 per 100um in channel, severity: HIGH",
+    "hypothesis": "SRAM pin arrays facing channel plus M3/M4 PG straps aligned over channel created systematic M2/M3 access blockage, not uniform over-utilization.",
+    "candidates_considered": [
+      {
+        "action": "Expand floorplan 4% to reduce utilization to 68%",
+        "rejected_because": "Requires top-level re-integration and bump re-spin, 10-day schedule hit and area cost ~0.8mm2, invalidates pinout."
+      },
+      {
+        "action": "Rotate 50% of SRAMs 90deg to spread pins",
+        "rejected_because": "Requires full CTS rebuild, risk of timing regression >100ps on 400MHz domain and IR drop +12mV, needs Liberty re-char."
+      },
+      {
+        "action": "Insert hard placement blockage 8um in channels to force spreading",
+        "rejected_because": "Pushes cells to already dense periphery, worsens WNS by 60ps and still leaves pin access issue, area penalty."
+      },
+      {
+        "action": "Apply non-default rule doubling M2 pitch in channel",
+        "rejected_because": "Reduces available tracks further, trial run increased overflow to 3.1% and added 15% runtime."
+      }
+    ],
+    "chosen_intervention": "Kept floorplan, added 3um soft halo around macro pins in channels, swapped 16% of cells in channels from 9T to 12T low-pin-density variant, created route guide forcing 60% block on M2/M3 in first 1.5um above SRAM pins and promoting escape to M4, re-ran detailed route with 2-pass search honoring halo.",
+    "post_state": "GR overflow 0.22% peak 2.4%, detailed route 100% with 38 DRCs cleaned in 2nd pass, effective utilization 73.2%, WNS -72ps TNS -1.0ns, cost 34ps from spreading but acceptable",
+    "expert_assessment": "Right call for 28nm channel congestion - halo plus cell variant swap attacks pin-access root without floorplan churn. General lesson: check overflow concentration and pin density before assuming global congestion. Would not transfer if congestion were due to high-fanout signal trunk or power-mesh blockage.",
+    "confidence": 0.74,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 3um halo width is an estimate that must be calibrated to the foundry pin-access DRC deck for this SRAM type."
+  },
+  {
+    "title": "Many small shared-startpoint failures vs few large distributed failures",
+    "design_context": "28nm, 620k placeable instances, 10 macros, 1 clock 500MHz 2ns period, commercial synthesis and P&R",
+    "prior_state": "Util 67%, GR overflow 0.3%, WNS -380ps TNS -16ns, 11200 failing endpoints at post-route STA, no DRCs",
+    "observation": "Slack histogram 10400 endpoints -5ps to -70ps all from same input bus data_in[31:0], 2 logic levels to first flop, 87% share same input delay and clock uncertainty, 3 outliers -350ps to -380ps with 28 logic stages deep, severity: MODERATE",
+    "hypothesis": "Two distinct signatures: bulk small shared-startpoint failures indicates input constraint over-constrain, while 3 large outliers indicate true logic depth and placement distance problem needing separate fix.",
+    "candidates_considered": [
+      {
+        "action": "Upsize entire failing logic cone and add 120ps useful skew",
+        "rejected_because": "Adds 11% area and 15mW leakage for 10k paths that are constraint-driven, increases IR 9mV in input cluster with no benefit."
+      },
+      {
+        "action": "Re-place input flops 2um closer to pads",
+        "rejected_because": "Requires IO re-spin, 2-day schedule cost, does not fix 1.2ns input delay that is still 0.6x period and unrealistic."
+      },
+      {
+        "action": "Pipeline after inputs adding flop stage",
+        "rejected_because": "Changes latency 1 cycle, requires RTL change and full re-verification, not allowed in ECO window."
+      },
+      {
+        "action": "Relax clock uncertainty from 120ps to 250ps",
+        "rejected_because": "Hides real margin, risks hold and top-level failures, violates signoff methodology."
+      }
+    ],
+    "chosen_intervention": "Split fix by signature: for bulk, corrected set_input_delay from 1.2ns to 0.58ns per board spec and added set_input_transition 100ps, re-ran STA; for 3 outliers, did targeted placement pull 15um closer and upsized 8 cells on 28-stage paths, then re-routed those nets.",
+    "post_state": "Bulk 0 failures after constraint fix, outliers WNS -22ps TNS -0.08ns after placement fix, total failing 92 endpoints remaining, utilization unchanged, no area growth",
+    "expert_assessment": "Correct triage by report shape before touching netlist. Lesson: count sharing and histogram shape distinguishes constraint vs physical vs logic depth. Would not transfer if failures were evenly spread across clock domains with varied slack and no common startpoint.",
+    "confidence": 0.79,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The corrected 0.58ns input delay is plausible but would need confirmation from board-level SI report."
+  },
+  {
+    "title": "Output budget split between crypto core and interconnect fabric",
+    "design_context": "16nm, block A 1.0M instances 42 macros, block B 0.85M instances 18 macros, interface 128-bit at 800MHz 1.25ns, commercial P&R and STA",
+    "prior_state": "Top budget 1.25ns, initial 50/50: 0.625ns A clk-to-out and 0.625ns B in-to-reg, A WNS -95ps TNS -0.9ns, B WNS +210ps",
+    "observation": "A output paths failing 70-95ps, 6 stages XOR tree before output, B has large positive slack 180-210ps on same interface, no congestion, severity: MODERATE",
+    "hypothesis": "50/50 split over-constrains block A which has deeper pre-output logic; budget should weight by logic depth 65/35 to avoid unnecessary upsizing in A while preserving margin in B.",
+    "candidates_considered": [
+      {
+        "action": "Keep 50/50 and upsize A output logic",
+        "rejected_because": "Costs 3.5% area and 20mW power, creates IR hotspot near pins, marginal timing benefit only."
+      },
+      {
+        "action": "Move to 35/65 giving more to B (0.35ns A, 0.65ns B)",
+        "rejected_because": "Makes A WNS -180ps requiring floorplan change, no benefit as B already has slack, wastes power."
+      },
+      {
+        "action": "False path interface and close at top level",
+        "rejected_because": "Hides real timing, risk silicon failure at 800MHz, violates signoff methodology and would be caught in top STA."
+      }
+    ],
+    "chosen_intervention": "Allocated by FO4 depth: avg 12 FO4 in A after last flop vs 5 in B before first flop, set 0.78ns to A and 0.47ns to B, encoded as set_output_delay 0.47ns on A and set_input_delay 0.78ns on B with 50ps uncertainty, documented in SDC header with depth calculation.",
+    "post_state": "A WNS +12ps TNS +0.01ns, B WNS +48ps, top-level interface slack +18ps, no area change, no extra power",
+    "expert_assessment": "Right trade - budget follows depth not arbitrary half. General lesson: derive budgets from measured stage count and document rejected splits. Would not transfer if interface had CDC or multicycle where exception not budget is appropriate.",
+    "confidence": 0.77,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "FO4 depth counts 12 vs 5 are illustrative and would need real path-length extraction from STA in practice."
+  }
+]

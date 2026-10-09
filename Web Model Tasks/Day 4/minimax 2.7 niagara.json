@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Simple in-order cores over complex out-of-order cores for throughput workloads",
+    "where_in_paper": "Core design / architectural philosophy section",
+    "decision": "Designed simple, in-order, single-issue cores with no out-of-order execution, no speculative execution, minimal pipeline stages — in favor of having many cores and threads per chip",
+    "alternatives_or_rejected": "Complex out-of-order superscalar core (high single-thread performance approach)",
+    "rationale": "Server workloads are dominated by threads with memory-level parallelism; complex cores leave much of their transistor budget and pipeline capability unused on such workloads; simpler cores deliver better aggregate throughput per watt and per die area",
+    "outcome": "Niagara achieved high throughput on commercial server workloads; single-thread performance was lower than competing high-IPC designs but aggregate throughput was competitive or superior",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly lists out-of-order as a considered and rejected alternative, or whether it simply argues for the simple approach without framing it as a formal rejection of OoO; the paper_vs_general is high because this philosophy is well-attested in the paper, but explicit 'we considered X and rejected it' language may not be there",
+    "confidence": 0.75
+  },
+  {
+    "title": "8-core, 4-threads-per-core organization (32 total threads) as the core/thread balance point",
+    "where_in_paper": "Thread-level parallelism / chip organization section",
+    "decision": "Chose 8 cores with 4 strands (threads) each rather than either fewer more-complex cores or many more simpler threads",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "4 threads per core allowed the pipeline to be kept simple while hiding memory latency; 8 cores provided enough thread-level parallelism to keep the memory system busy; die area and power constraints bounded the total; this balance was driven by target workload characteristics (commercial server, database, web)",
+    "outcome": "Effective latency hiding; high utilization of the fetch/execute pipeline across diverse thread counts; marketed as a 32-way multithreaded processor",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact number 8×4 may be right but I am not 100% certain the paper explicitly states this specific trade-off rationale rather than just describing the architecture; the number itself (32 threads total) is definitely in the title and paper, but whether alternatives (e.g., 16 cores × 2 threads) were explicitly discussed is less certain",
+    "confidence": 0.7
+  },
+  {
+    "title": "Throughput-over-single-thread-performance as the primary design philosophy",
+    "where_in_paper": "Overall design philosophy / introduction",
+    "decision": "Optimized the design explicitly for aggregate throughput on multi-threaded workloads rather than single-thread peak performance",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Most server processor utilization is low because threads stall on memory; the best way to improve server performance is to improve throughput across many threads, not peak single-thread IPC; this is framed as a fundamental philosophy driving all other decisions",
+    "outcome": "Niagara succeeded in markets where thread count and memory bandwidth mattered more than single-thread speed; it underperformed on single-threaded and latency-sensitive workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "While the philosophy is strongly present in the paper, I'm uncertain whether it is stated as an explicit decision episode (we chose X over Y) or simply as a design philosophy framing throughout; the quote field is 'cannot-reproduce-verbatim' because I cannot recall a specific sentence verbatim even though the spirit is clear",
+    "confidence": 0.8
+  },
+  {
+    "title": "Shared L2 cache across all cores rather than private L2 per core",
+    "where_in_paper": "Cache hierarchy section",
+    "decision": "Implemented a shared 3MB L2 cache accessible by all 8 cores rather than private L2 per core",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Workload working sets vary across threads; a shared cache allows better utilization of the cache capacity across heterogeneous thread behavior; simplifies coherency; shared L2 with 8 ports or banked structure supports aggregate throughput goals",
+    "outcome": "Shared cache achieved good utilization across diverse thread working sets; coherency protocol remained manageable",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I believe the paper discusses shared vs. private cache tradeoffs but am not certain it explicitly frames shared L2 as a chosen alternative versus a private-L2 design that was considered and rejected; the shared cache description is definitely in the paper but the 'alternatives' framing may be my inference",
+    "confidence": 0.6
+  }
+]

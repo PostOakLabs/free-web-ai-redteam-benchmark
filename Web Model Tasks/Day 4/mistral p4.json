@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Trace Cache vs Conventional L1 Instruction Cache",
+    "where_in_paper": "Trace Cache",
+    "decision": "Implemented trace cache to replace traditional L1 instruction cache",
+    "alternatives_or_rejected": "Conventional L1 instruction cache",
+    "rationale": "Reduces branch misprediction penalties and improves instruction fetch bandwidth by storing pre-decoded dynamic instruction sequences",
+    "outcome": "Higher IPC through more efficient instruction delivery",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Cannot confirm the paper explicitly states the alternative was formally considered or rejected",
+    "confidence": 0.75
+  },
+  {
+    "title": "Double-Pumped ALU Implementation",
+    "where_in_paper": "Execution Units",
+    "decision": "Used double-pumped ALUs for simple integer and floating-point operations",
+    "alternatives_or_rejected": "Single-pumped ALUs for all operations",
+    "rationale": "Allows ALUs to operate at twice the core clock frequency, maintaining throughput in a deep pipeline without increasing power disproportionately",
+    "outcome": "Preserved ALU throughput at high clock rates",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper uses the term 'double-pumped' or describes the mechanism differently",
+    "confidence": 0.7
+  },
+  {
+    "title": "20-Stage Pipeline Depth Selection",
+    "where_in_paper": "Pipeline Design",
+    "decision": "Adopted a 20-stage pipeline",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Enables very high clock frequencies by breaking down operations into smaller, more balanced pipeline stages",
+    "outcome": "Achieved industry-leading clock speeds for the era",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact stage count and whether it was presented as an explicit trade-off decision",
+    "confidence": 0.8
+  },
+  {
+    "title": "Rapid Execution Engine Design",
+    "where_in_paper": "Execution Engine",
+    "decision": "Implemented rapid execution engine with fast, specialized ALUs for common operations",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Reduces execution latency for frequently used operations, improving single-thread performance",
+    "outcome": "Improved performance on common workloads despite deep pipeline",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Specific name 'rapid execution engine' and its exact role as described in the paper",
+    "confidence": 0.7
+  },
+  {
+    "title": "Memory Hierarchy Optimization for High Frequency",
+    "where_in_paper": "Memory Subsystem",
+    "decision": "Optimized L1 data cache size and associativity for high-frequency operation",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Balances hit rate and access latency to sustain performance in a deep-pipeline, high-clock-frequency design",
+    "outcome": "Efficient memory access supporting the aggressive clock targets",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Specific cache parameters and whether they were framed as deliberate design choices",
+    "confidence": 0.6
+  }
+]

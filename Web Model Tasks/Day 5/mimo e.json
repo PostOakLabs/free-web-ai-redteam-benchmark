@@ -1,0 +1,112 @@
+[
+  {
+    "calculation": "ASIL-rated SPFM target threshold",
+    "formula_or_test": "SPFM ≥ threshold, where SPFM = 1 − (Σλ_SPF + Σλ_RF) / Σλ_total; thresholds: ASIL B ≥ 90%, ASIL C ≥ 97%, ASIL D ≥ 99%; no SPFM requirement for ASIL A",
+    "inputs": ["λ_total: total failure rate of component", "λ_SPF: single-point faults failure rate", "λ_RF: residual faults failure rate"],
+    "authority": "ISO 26262:2018, Part 5 — Product development at the hardware level",
+    "clause_locator": "Table 4 (hardware architectural metrics targets)",
+    "publicly_retrievable": false,
+    "volatility": "low — unchanged between 2011 and 2018 editions of Part 5, though clause numbering shifted",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "ASIL-rated LFM target threshold",
+    "formula_or_test": "LFM ≥ threshold, where LFM = 1 − Σλ_RF / (Σλ_total − Σλ_SPF − Σλ_RF); thresholds: ASIL B ≥ 60%, ASIL C ≥ 80%, ASIL D ≥ 90%; no LFM requirement for ASIL A",
+    "inputs": ["λ_total: total failure rate of component", "λ_SPF: single-point faults failure rate", "λ_RF: residual faults failure rate"],
+    "authority": "ISO 26262:2018, Part 5 — Product development at the hardware level",
+    "clause_locator": "Table 4 (hardware architectural metrics targets)",
+    "publicly_retrievable": false,
+    "volatility": "low — unchanged between 2011 and 2018 editions of Part 5, though clause numbering shifted",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "ASIL-rated PMHF target threshold",
+    "formula_or_test": "PMHF < target, where PMHF = Σλ_SPF + Σλ_RF + Σ[λ_DP × (ratio_DP_d + ratio_DP_L)]; targets: ASIL A < 10⁻⁶/hr, ASIL B < 10⁻⁷/hr, ASIL C < 10⁻⁷/hr, ASIL D < 10⁻⁸/hr",
+    "inputs": ["λ_SPF: single-point fault rates", "λ_RF: residual fault rates", "λ_DP: dual-point fault failure rates", "ratio_DP_d: dual-point fault detection ratio", "ratio_DP_L: dual-point fault latent ratio"],
+    "authority": "ISO 26262:2018, Part 5 — Product development at the hardware level",
+    "clause_locator": "Table 6 or Table 7 (PMHF targets per ASIL); Annex A or B (PMHF calculation formula)",
+    "publicly_retrievable": false,
+    "volatility": "low",
+    "confidence": 0.78
+  },
+  {
+    "calculation": "FIT rate definition and calculation",
+    "formula_or_test": "FIT = failures / (10⁹ device-hours); equivalently, FIT = 10⁹ / MTBF_hours, where MTBF = total device-hours / number of failures",
+    "inputs": ["number of device failures observed", "total accumulated device operating hours"],
+    "authority": "JEDEC JESD85 — Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low — the FIT definition is stable across JEDEC revisions",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "Arrhenius thermal acceleration factor for semiconductor reliability testing",
+    "formula_or_test": "AF = exp[(Ea/k) × (1/T_use − 1/T_test)], where Ea is activation energy, k is Boltzmann constant (8.617 × 10⁻⁵ eV/K), T_use and T_test are absolute temperatures in Kelvin; common Ea values: ~0.7–0.9 eV for electromigration, ~0.3 eV for oxide defects",
+    "inputs": ["Ea: activation energy in eV", "k: Boltzmann constant", "T_use: use temperature in K", "T_test: test/stress temperature in K"],
+    "authority": "JEDEC JEP122 — Failure Mechanisms and Models for Silicon Semiconductor Devices",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "low — Arrhenius model and typical Ea values are stable across editions; specific Ea values for each mechanism may be updated as new data emerges",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "DRAM refresh interval requirement",
+    "formula_or_test": "tREFI = 64ms / N_rows; DDR2/DDR3: 64ms / 8192 rows = 7.8125μs per row; DDR4: 64ms / 8192 = 7.8125μs (with 1X refresh) or 3.906μs (with 2X refresh at extended temperature); DDR5: 64ms / 64K rows",
+    "inputs": ["N_rows: number of rows per bank (JEDEC-specified per generation)", "tREFI_max: maximum refresh interval (64ms standard temperature, 32ms extended temperature)"],
+    "authority": "JEDEC DDR SDRAM specifications: JESD79-2F (DDR2), JESD79-4C (DDR3), JESD79-4B (DDR4)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low per generation — values fixed at spec release; DDR4 added 2X refresh option",
+    "confidence": 0.7
+  },
+  {
+    "calculation": "Junction temperature estimation for ICs",
+    "formula_or_test": "T_J = T_A + P_D × Rθ_JA, where T_J is junction temperature, T_A is ambient temperature, P_D is power dissipation, and Rθ_JA is junction-to-ambient thermal resistance",
+    "inputs": ["T_A: ambient temperature in °C", "P_D: device power dissipation in watts", "Rθ_JA: junction-to-ambient thermal resistance in °C/W (characterized per JEDEC JESD51)"],
+    "authority": "JEDEC JESD51 series (thermal measurement methodology); also commonly referenced in ANSI/JEDEC standards for IC thermal characterization",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low — the formula is basic thermal physics; Rθ_JA measurement methodology in JESD51 is stable",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "CHIPS Act advanced manufacturing investment tax credit",
+    "formula_or_test": "Tax credit = 25% of qualified investment in an advanced manufacturing facility, applied against federal income tax; facility must be primarily for semiconductor manufacturing or semiconductor equipment manufacturing",
+    "inputs": ["qualified investment amount in the facility"],
+    "authority": "CHIPS and Science Act of 2022, Section 9902 (codified as 26 U.S.C. § 48D — Advanced Manufacturing Investment Credit)",
+    "clause_locator": "Section 9902",
+    "publicly_retrievable": true,
+    "volatility": "low — statutory percentage; implementation details in Treasury/IRS rulemaking may evolve",
+    "confidence": 0.82
+  },
+  {
+    "calculation": "CHIPS Act investment guardrails",
+    "formula_or_test": "Recipient of CHIPS Act incentives shall not make any significant transaction involving material expansion of semiconductor manufacturing capacity in a country of concern during a 10-year period; 'significant transaction' defined with threshold values for different semiconductor types (logic, DRAM, NAND)",
+    "inputs": ["dollar threshold of transaction", "semiconductor type being expanded", "country where expansion is proposed"],
+    "authority": "CHIPS and Science Act of 2022, Section 9902, subsection (d) (guardrails provisions); further defined in Commerce Department Final Rule",
+    "clause_locator": "Section 9902(d)",
+    "publicly_retrievable": true,
+    "volatility": "moderate — statutory text fixed, but Commerce Department threshold definitions may be updated through rulemaking",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "US Export Control ECCN 3A090 classification for advanced computing ICs",
+    "formula_or_test": "An integrated circuit is classified under ECCN 3A090 if it has either: total processing performance (TPP) meeting or exceeding a controlled threshold, OR interconnect bandwidth meeting or exceeding a controlled threshold (thresholds differ for PRC/non-PRC destinations and changed between Oct 2022 and Oct 2023 BIS rules); also applies to items meeting certain adjusted peak performance (APP) thresholds",
+    "inputs": ["total processing performance in TOPS or TPP equivalent", "interconnect bandwidth in GB/s", "destination country", "date of shipment (determines which version of threshold applies)"],
+    "authority": "US Export Administration Regulations (EAR), 15 CFR Part 736 et seq.; Bureau of Industry and Security (BIS) Advanced Computing and Semiconductor Export Controls rules (Oct 7, 2022; Oct 17, 2023; various updates)",
+    "clause_locator": "ECCN 3A090 in Commerce Control List Supplement No. 1 to Part 774",
+    "publicly_retrievable": true,
+    "volatility": "high — thresholds and classification criteria have been updated multiple times since October 2022; further revisions expected",
+    "confidence": 0.6
+  },
+  {
+    "calculation": "JEDEC wafer-level reliability lot sample size for HTOL qualification",
+    "formula_or_test": "Standard HTOL qualification: minimum 77 device-hours accumulated across 3 lots with ≥231 total device-hours to demonstrate ≤10% failure rate at 60% confidence; specific sampling plans defined per JEDEC or customer-specific requirements",
+    "inputs": ["number of devices tested", "test duration in hours", "number of failures observed", "target confidence level and allowable failure rate"],
+    "authority": "JEDEC JESD47 — Stress-Test-Driven Qualification of Integrated Circuits",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low — sampling requirements are stable across revisions",
+    "confidence": 0.55
+  }
+]

@@ -1,0 +1,146 @@
+```json
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Open the LVS report and look at the summary: net count, device count, and the specific mismatched net names — is it one net or hundreds?",
+        "why_first": "cheapest first move; immediately tells you single-instance vs systematic problem",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify the LVS rule file version and the source netlist (.cdl/.sp) version against the layout version — confirm all three are from the same design checkpoint",
+        "why_first": "rules out the most embarrassingly common root cause before any real debugging starts",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Open the layout in the viewer, find the mismatched net, and check: does the net have proper text/pin labels on the correct layer, and does it have valid geometric connections at every expected junction?",
+        "why_first": "this single visual check splits the three sub-classes (label missing, real geometric short, real missing connection) instantly",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Run a small-area LVS on just the cell/block containing the mismatched net (using a restricted region or cell-level extraction)",
+        "why_first": "isolates whether the problem is local to one block or emerges only at top-level due to abutment/overlap; dramatically narrows search space",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run extraction on the same GDS with the hierarchical device recognition rule for one suspect block disabled (or that block black-boxed), then re-run LVS",
+        "rules_in": "If the mismatch disappears when block X is black-boxed, the short/open is inside block X and the rest of the layout is clean",
+        "rules_out": "If the mismatch persists with block X black-boxed, the problem is at top level or in a different block entirely"
+      },
+      {
+        "experiment": "Check the extracted netlist for the mismatched net: does the extractor report it connected to the wrong geometric shapes, or does it report zero shapes connected?",
+        "rules_in": "If the net connects to unexpected shapes, it is a real geometric short or a layer-violation short; if zero shapes, the net label is missing or on the wrong layer",
+        "rules_out": "If the net shows the correct shapes but wrong connectivity, it may be a hierarchy boundary or pin-order mismatch rather than a geometric issue"
+      },
+      {
+        "experiment": "Temporarily add a manual text label on the correct pin layer at the known net location in layout and re-extract",
+        "rules_in": "If the LVS passes cleanly after adding one label, the root cause was a missing or mis-assigned label",
+        "rules_out": "If LVS still fails after the label fix, the issue is geometric (real short, missing via, missing shape)"
+      },
+      {
+        "experiment": "For suspected shorts: zoom into the shorted net region and query the extractor for which two nets share geometry; then toggle DRC 'short' marker layers and re-extract",
+        "rules_in": "If the short disappears when a DRC-cleaned version is used, there is a real DRC violation (spacing, enclosure) causing geometric short",
+        "rules_out": "If the short persists on a DRC-clean layout, the nets may be intentionally bridged at another level (e.g., a strap, a top-level tie-off, or a wrong connection in schematic)"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing or wrong-layer text/net label in layout — the net has valid geometry but the extractor cannot identify it because the label layer is absent, on the wrong layer, or has a typo",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "Real geometric short from metal shapes overlapping or violating spacing between two different nets — often caused by manual ECO edits, missing fill blockages, or routing DRC violations that slipped through",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Missing via or via on wrong layer — a vertical connection that exists in schematic but has no corresponding via shape or has a via on the wrong metal pair in layout",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Stale source netlist — the .cdl/.sp does not match the latest layout revision because a back-annotation or ECO flow dropped a change",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Hierarchy or pin-abutment mismatch at block boundaries — the top-level netlist assumes a pin connection that the block layout does not actually deliver at the abutment edge",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Assuming a net mismatch is 'just a label problem' and adding labels without checking geometry — sometimes the label was correctly absent because the net is genuinely shorted; the label masks the real short and it surfaces later in post-layout simulation or silicon. The converse is also common: spending hours chasing geometric shorts when the net simply needs a text label on the correct layer.",
+    "node_era_note": "At 7nm and below, multi-patterning (SADP/SAQP) splits a single logical metal layer into multiple mask layers; LVS must reconstruct the combined shape before checking connectivity, and shorts can appear between same-metal different-mask shapes that are invisible in the drawn view but physically short in silicon. At 28nm, single-patterning metals mean the drawn layout and the extracted shape are the same thing — this class of artifact does not arise."
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Read the LVS report's device summary: which device type has wrong count or wrong W/L/fingers? Is it one instance or all instances of that type?",
+        "why_first": "cheapest discriminator between a single-instance error and a systematic rule-file or parameter mismatch",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify that the LVS rule file's device recognition parameters (W/L extraction, finger counting, parallel/series merging policy) match the PDK version the layout was designed against",
+        "why_first": "rules out the most common root cause — stale or wrong LVS rule file — before opening the layout",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Open the specific device instance in the layout viewer and inspect: is the gate drawn with correct width and length? Are poly fingers correctly separated? Is the active region correct?",
+        "why_first": "direct visual verification splits drawn-geometry errors from extraction-rules errors in one pass",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-extract the layout with the parallel-device-merging option disabled (if the LVS tool supports it) and re-run LVS",
+        "rules_in": "If the device count now matches the schematic, the 'extra devices' were parallel transistors that the extractor merged into one; the schematic has them as separate instances",
+        "rules_out": "If the count still mismatches, the extra devices are real geometric features, not a merging artifact"
+      },
+      {
+        "experiment": "Run extraction in flat (non-hierarchical) mode on the cell containing the wrong-sized device and compare the extracted W/L values to the drawn geometry and to the schematic",
+        "rules_in": "If flat extraction matches the drawn geometry but hierarchical does not, there is a hierarchy-awareness bug in the extractor or rule file",
+        "rules_out": "If flat extraction also gives wrong sizes, the drawn geometry itself is wrong or the parameter extraction formula in the rule file is incorrect for this device type"
+      },
+      {
+        "experiment": "Compare the device recognition layer purposes/layer numbers in the LVS rule file against the actual GDS layer map used by the layout tool",
+        "rules_in": "If a layer mapping mismatch is found (e.g., active region on layer 65 in GDS but layer 62 in rule file), the extractor is reading the wrong layer and producing garbage device parameters",
+        "rules_out": "If all layer mappings are consistent, the problem is in the drawn geometry or in the extraction algorithm itself"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Parallel/series device merging policy mismatch — the LVS tool merges parallel transistors into one W=2W device while the schematic keeps them as two separate W devices, causing count mismatch and possibly wrong extracted W",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Multi-finger device: the extractor counts fingers differently from the schematic's representation — e.g., schematic has 1 device with fingers=4, extractor sees 4 separate gate stripes and reports 4 devices or reports wrong W",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Wrong LVS rule file or wrong PDK version — the extraction formula for device sizing changed between PDK versions (e.g., W is measured differently due to diffusion enclosure rules) but the layout was designed with the old PDK",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Extra devices from parasitic recognition — the extractor identifies diodes, parasitic BJTs, or parasitic MOS devices from well/substrate junctions that the schematic intentionally omits",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Drawn geometry genuinely wrong — a layout engineer changed a transistor width or length during an ECO and did not update the schematic or the ECO was incomplete",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      }
+    ],
+    "classic_trap": "Blaming the LVS rule file first when the layout geometry is actually wrong — engineers spend hours tweaking extraction parameters and parallel-merge settings when the real issue is that a single transistor was drawn 1um wider than intended during a late-stage ECO. The diagnostic move that breaks this trap is checking the drawn W/L against the schematic value in the viewer before touching the rule file.",
+    "node_era_note": "At 7nm and below with FinFETs, device 'size' is not W/L but number-of-fins, and fin pitch is fixed by the process; the extractor counts fins from the drawn pattern. Fin quantization rules and multi-fin merge/split policies create a whole class of 'wrong size' errors that simply do not exist at 28nm planar, where W is continuously variable and measured as drawn gate width."
+  }
+]
+```

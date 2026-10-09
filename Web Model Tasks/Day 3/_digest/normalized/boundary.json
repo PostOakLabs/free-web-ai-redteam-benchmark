@@ -1,0 +1,1323 @@
+[
+ {
+  "model": "chatgpt",
+  "file": "chatgpt boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase requires penalties that can exceed 2 percent, so exactly 2.00% does not trigger while 2.01% does. ([Consumer Financial Protection Bureau][1])"
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase is 'more than 36 months,' making 36 months non-triggering and 37 months triggering. ([Consumer Financial Protection Bureau][1])"
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase '1.5 or more percentage points' expressly includes the 1.50% boundary. ([Legal Information Institute][2])"
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FAIL"
+    },
+    "reasoning": "The pass condition says APR 'does not exceed' APOR by 2.25 or more percentage points, so the 2.25% boundary remains permissible and only a spread above it fails. ([Legal Information Institute][2])"
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "FAIL",
+     "above": "PASS"
+    },
+    "reasoning": "Both conditions are strict 'less than' tests, so (10.0M, 0.9M) fails on revenue, (9.9M, 1.0M) fails on income, and only (9.9M, 0.9M) satisfies both."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The stated phrase 'equal to or greater than' makes the stated 16.00% boundary inclusive, although the current OECD text identifies 17% rather than 16% as the transition rate for fiscal years beginning in 2026. ([OECD][3])"
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The operative phrase 'at least equal to' includes exactly 50% of SCR, so the floor is satisfied at and above the boundary."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "An affected-users condition framed as 'equal to or greater than' the minimum fires at the threshold and above it, but not below it."
+   }
+  ],
+  "weakest_point": "Rule 6 is the weakest point because the supplied premise says the 2026 transition rate is 16%, whereas current OECD material states that the Transition Rate is 17% for fiscal years beginning in 2026 and 2027; the inclusivity conclusion is clear, but the stated boundary value is not current. ([OECD][3])",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "chatgpt boundary.json",
+   "model": "chatgpt",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "strip-trailing-nonjson",
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "deepseek",
+  "file": "deepseek boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "Trigger requires penalty >2%, so exactly 2% does not exceed and below does not exceed."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "Trigger requires duration >36 months, so exactly 36 months does not fire."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Trigger fires when spread >=1.5 because 'or more' includes the boundary."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Pass condition fails when spread reaches 2.25 because '2.25 or more' includes the boundary."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "FIRE",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "De-minimis requires both revenue <10M and income <1M; equality on either fails the trigger; below=(9.9,0.9) fires, at=(10.0,0.9) and above=(9.9,1.0) pass."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Safe harbour condition is ETR >=16%, so exactly 16% qualifies."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Tier 1 floor requires ratio >=50%, so exactly 50% meets the threshold."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Significant incident triggers when users >= threshold, so boundary is inclusive."
+   }
+  ],
+  "weakest_point": "Rule 5: the de-minimis rule uses two separate 'less than' thresholds; the provided inputs are not a simple below/at/above series, making the assignment of verdicts to those labels less certain.",
+  "_provenance": {
+   "file": "deepseek boundary.json",
+   "model": "deepseek",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "unnest:rules"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "gemini",
+  "file": "gemini boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "does not fire",
+     "at": "does not fire",
+     "above": "fires"
+    },
+    "reasoning": "The operative trigger language 'exceed … more than 2 percent' uses a strict inequality (> 2.00%), so a penalty of exactly 2.00% does not breach the threshold."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "does not fire",
+     "at": "does not fire",
+     "above": "fires"
+    },
+    "reasoning": "The phrase 'more than 36 months' establishes a strict greater-than threshold (> 36), meaning a 36-month duration does not trigger the restriction."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "does not fire",
+     "at": "fires",
+     "above": "fires"
+    },
+    "reasoning": "The statutory test 'by 1.5 or more percentage points' includes the boundary value (>= 1.50), causing the HPCT classification to trigger at exactly 1.50."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "passes",
+     "at": "passes",
+     "above": "fails"
+    },
+    "reasoning": "The pass condition 'does not exceed … by 2.25 or more' negates an inclusive trigger (<= 2.25), meaning a spread of exactly 2.25 percentage points passes."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "fails",
+     "at": "fails",
+     "above": "passes"
+    },
+    "reasoning": "Both underlying tests use strict less-than conditions ('less than 10M' and 'less than 1M'), requiring revenue < 10.0M and income < 1.0M simultaneously."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "fails",
+     "at": "passes",
+     "above": "passes"
+    },
+    "reasoning": "The safe harbour rule explicit phrase 'equal to or greater than' makes the 16.00% threshold inclusive (>= 16.00%)."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "fails",
+     "at": "passes",
+     "above": "passes"
+    },
+    "reasoning": "The eligibility floor phrase 'at least equal to' creates an inclusive boundary (>= 50.00%), satisfying the requirement at exactly 50.00%."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "does not fire",
+     "at": "fires",
+     "above": "fires"
+    },
+    "reasoning": "The framing 'equal to or greater than' sets an inclusive lower bound (>= threshold), triggering the incident reporting obligation at exactly the threshold value."
+   }
+  ],
+  "weakest_point": "Rule 8 (NIS2 significant incident - users leg): The exact wording in NIS2 primary text (Article 23) uses broad qualitative criteria, whereas specific numerical thresholds are defined in the EU Implementing Regulation (2024/2690) across varying digital service sub-sectors rather than a single universal constant.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "gemini boundary.json",
+   "model": "gemini",
+   "family": "boundary",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "glm 5.3 flash",
+  "file": "glm 5.3 flash boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase 'can exceed, in total, more than 2 percent of the amount prepaid' uses strict 'more than,' so exactly 2.00% sits outside the trigger and only 2.01% fires."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "'More than 36 months after consummation' is strict, so 36 months exactly is outside the trigger and only 37 months fires."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "'Exceeds the average prime offer rate ... by 1.5 or more percentage points' is inclusive via 'or more,' so a spread of exactly 1.50 itself fires."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "The fail-side comparator '2.25 or more percentage points' is inclusive, so the pass condition holds strictly below 2.25 and a spread of exactly 2.25 fails to pass."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "(9.9M, 0.9M): FIRE",
+     "at": "(10.0M, 0.9M): NO FIRE on the revenue leg; (9.9M, 1.0M): NO FIRE on the income leg",
+     "above": "n/a — no listed pair exceeds a cap, and any pair with a leg at or above its cap yields NO FIRE"
+    },
+    "reasoning": "Both legs use strict 'less than,' so a pair qualifies only when strictly below both caps — 10.0M revenue is not less than 10M and 1.0M income is not less than 1M, so both boundary pairs fail while (9.9M, 0.9M) fires."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "'Equal to or greater than' the transition rate is inclusive, so a simplified ETR of exactly 16.00% clears the test."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "'At least equal to' 50% of SCR is inclusive, so a ratio of exactly 50.00% satisfies the Tier 1 floor."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The 'equal to or greater than' framing of the affected-users minimum is inclusive, so the threshold value itself fires."
+   }
+  ],
+  "weakest_point": "Rule 8: the final NIS2 Directive (EU) 2022/2555 defines 'significant incident' qualitatively (severe operational disruption, financial loss, or considerable material/non-material damage to other persons) with no numeric affected-users minimum in the operative text, so the 'equal to or greater than the minimum' users phrasing likely derives from the Commission proposal, impact-assessment thresholds, or a national transposition rather than text I can quote verbatim; a secondary caveat is rule 6, where the 16% rate depends on the transitional safe harbour's fiscal-year banding (15/16/17%) and the mapping of '2026 fiscal year' to 16% is taken as stipulated rather than verified.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "glm 5.3 flash boundary.json",
+   "model": "glm 5.3 flash",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "grok",
+  "file": "grok boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO",
+     "at": "NO",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' is a strict greater-than test, so the trigger fires only when the total exceeds 2%."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO",
+     "at": "NO",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'more than 36 months' is a strict greater-than test, so the trigger fires only after month 36."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO",
+     "at": "YES",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'exceeds ... by 1.5 or more percentage points' treats the 1.5 spread as inclusive, so the test fires at and above 1.5."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "NO",
+     "above": "NO"
+    },
+    "reasoning": "The pass condition 'does not exceed ... by 2.25 or more' fails (no pass) once the spread reaches the inclusive 2.25 threshold."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO",
+     "at": "NO",
+     "above": "YES"
+    },
+    "reasoning": "Both legs use the strict phrase 'less than', so the de-minimis rule applies only when revenue is under 10 M and income is under 1 M; the listed pairs therefore yield NO / NO / YES."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO",
+     "at": "YES",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'equal to or greater than' the 16% rate is inclusive, so the safe-harbour test passes at and above 16%."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO",
+     "at": "YES",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'at least equal to' 50% of SCR is inclusive, so the floor is met at and above 50%."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO",
+     "at": "YES",
+     "above": "YES"
+    },
+    "reasoning": "The operative phrase 'equal to or greater than' the minimum user count is inclusive, so the significant-incident leg fires at and above the threshold."
+   }
+  ],
+  "weakest_point": "Rule 5 — the exact pairing of the three listed (revenue, income) combinations to the below/at/above slots is the least verbatim-certain mapping from the given text.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "grok boundary.json",
+   "model": "grok",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "kimi",
+  "file": "kimi boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' imposes a strict floor, so a penalty capped at exactly 2.00 percent cannot trigger the HOEPA prepayment-penalty threshold."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 36 months' requires strict inequality, meaning the 36th month itself is inside the safe zone and only month 37 triggers coverage."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase '1.5 or more' treats the boundary inclusively, so a spread of exactly 1.50 percentage points is sufficient to classify the loan as higher-priced."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "Because the pass condition is 'does not exceed ... by 2.25 or more,' a spread of exactly 2.25 falls into the prohibited zone and the test fails."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "Both 'less than' conditions are strict, so touching either threshold—revenue at EUR 10 million or income at EUR 1 million—causes the de-minimis exception to fail."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive, so a simplified ETR of exactly 16.00 percent satisfies the transitional CbCR safe-harbour test."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive, so Tier 1 capital of exactly 50.00 percent of the SCR meets the Solvency II floor."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive, so an affected-user count exactly at the minimum threshold triggers the NIS2 significant-incident reporting obligation."
+   }
+  ],
+  "weakest_point": "Rule 4 (General QM price limit): the actual regulatory text may use 'more than 2.25 percentage points' rather than '2.25 or more,' which would flip the boundary from strict to inclusive and change the at-boundary verdict from FAIL to PASS.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "kimi boundary.json",
+   "model": "kimi",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "meta",
+  "file": "meta boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO_FIRE at 1.99%",
+     "at": "NO_FIRE at 2.00%",
+     "above": "FIRE at 2.01%"
+    },
+    "reasoning": "Operative phrase 'more than 2 percent' means >2%, so equality does not satisfy the trigger."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO_FIRE at 35 months",
+     "at": "NO_FIRE at 36 months",
+     "above": "FIRE at 37 months"
+    },
+    "reasoning": "Operative phrase 'more than 36 months' means >36, so 36 is not included."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO_FIRE at 1.49",
+     "at": "FIRE at 1.50",
+     "above": "FIRE at 1.51"
+    },
+    "reasoning": "Operative phrase 'by 1.5 or more' means >=1.5, so equality triggers."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS at 2.24",
+     "at": "FAIL at 2.25",
+     "above": "FAIL at 2.26"
+    },
+    "reasoning": "Pass requires NOT (>=2.25), i.e. <2.25, so '2.25 or more' inclusive threshold causes fail at and above."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS at (9.9M, 0.9M) - both < thresholds",
+     "at": "FAIL at (10.0M, 0.9M) and FAIL at (9.9M, 1.0M) - strict < fails on equality",
+     "above": "FAIL - any dimension >= threshold fails due to strict < and AND"
+    },
+    "reasoning": "Both legs use strict 'less than' (<), so equality on either leg fails the AND test."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL at 15.99%",
+     "at": "PASS at 16.00%",
+     "above": "PASS at 16.01%"
+    },
+    "reasoning": "Phrase 'equal to or greater than' means >=16%, so equality passes."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL at 49.99%",
+     "at": "PASS at 50.00%",
+     "above": "PASS at 50.01%"
+    },
+    "reasoning": "Phrase 'at least equal to' means >=50%, so equality satisfies the floor."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO_FIRE at threshold-1",
+     "at": "FIRE at threshold",
+     "above": "FIRE at threshold+1"
+    },
+    "reasoning": "Phrase 'equal to or greater than' means >= threshold, so equality triggers significant incident."
+   }
+  ],
+  "weakest_point": "Rule 8 NIS2 significant incident users leg - least certain verbatim EU text and national transposition vary between 'exceeds', 'more than', and 'equal to or greater than', and Rule 5 GloBE de-minimis revenue/income phrasing is also secondary source; 8 is weakest due to NIS2 implementing act vs directive wording.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "meta boundary.json",
+   "model": "meta",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "mimo",
+  "file": "mimo boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS — 1.99% is not 'more than' 2%; trigger does not fire.",
+     "at": "PASS — 2.00% equals but does not exceed 2%; 'more than' excludes the boundary.",
+     "above": "FIRE — 2.01% is 'more than' 2 percent of the amount prepaid."
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' imposes a strict inequality, so exactly 2.00% does not trigger the prepayment-penalty provision."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS — 35 months is not 'more than' 36 months.",
+     "at": "PASS — 36 months equals but does not exceed 36; 'more than' excludes the boundary.",
+     "above": "FIRE — 37 months is 'more than 36 months after consummation.'"
+    },
+    "reasoning": "The phrase 'more than 36 months' is a strict inequality, so a term of exactly 36 months falls outside the HOEPA duration trigger."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS — 1.49 pp spread does not reach the '1.5 or more' threshold.",
+     "at": "FIRE — 1.50 pp satisfies '1.5 or more percentage points'; the boundary is included.",
+     "above": "FIRE — 1.51 pp exceeds the threshold."
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' is inclusive of the boundary, so a spread of exactly 1.50 pp triggers the higher-priced covered transaction classification."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS — 2.24 pp spread is below '2.25 or more'; loan qualifies as General QM.",
+     "at": "FIRE — 2.25 pp spread satisfies '2.25 or more percentage points'; loan fails the QM price limit.",
+     "above": "FIRE — 2.26 pp spread exceeds the threshold; loan fails QM."
+    },
+    "reasoning": "The fail-side phrasing 'exceeds by 2.25 or more' is inclusive of 2.25, so the boundary value causes QM failure."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "FAIL — (10.0M rev, 0.9M inc): revenue of exactly EUR 10M is not 'less than' EUR 10M; de minimis unavailable despite income passing.",
+     "at": "FAIL — (9.9M rev, 1.0M inc): income of exactly EUR 1M is not 'less than' EUR 1M; de minimis unavailable despite revenue passing.",
+     "above": "PASS — (9.9M rev, 0.9M inc): both revenue < EUR 10M and income < EUR 1M; de minimis exclusion applies."
+    },
+    "reasoning": "Both conjuncts use 'less than,' a strict inequality that excludes the boundary values of exactly EUR 10M revenue and exactly EUR 1M income."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL — 15.99% is below the 16% transition rate; safe harbour not available.",
+     "at": "PASS — 16.00% satisfies 'equal to or greater than' 16%; the boundary is included.",
+     "above": "PASS — 16.01% exceeds the transition rate."
+    },
+    "reasoning": "The phrase 'equal to or greater than' is explicitly inclusive, so exactly 16.00% qualifies for the transitional CbCR safe harbour."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL — 49.99% of SCR falls short of the 'at least equal to' 50% Tier 1 floor.",
+     "at": "PASS — 50.00% satisfies 'at least equal to' 50% of SCR; the boundary is included.",
+     "above": "PASS — 50.01% exceeds the floor."
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive of the boundary, so exactly 50.00% of SCR meets the Tier 1 eligibility floor."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS — threshold−1 does not satisfy 'equal to or greater than' the minimum; incident not significant on the users leg.",
+     "at": "FIRE — threshold satisfies 'equal to or greater than'; the incident is significant.",
+     "above": "FIRE — threshold+1 exceeds the minimum; incident is significant."
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive, so exactly at the threshold triggers the significant-incident reporting obligation."
+   }
+  ],
+  "weakest_point": "Rule 4 (General QM price limit): Regulation Z §1026.43(e)(2)(vi) likely reads 'by more than 2.25 percentage points' (strict — excluding the boundary) rather than 'by 2.25 or more percentage points' (inclusive — as stated in the prompt). If the verbatim regulatory text is 'more than,' the verdict at exactly 2.25 pp flips from FIRE to PASS, making this the rule whose operative phrasing I am least confident the prompt has reproduced verbatim.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "mimo boundary.json",
+   "model": "mimo",
+   "family": "boundary",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "minimax 2.7",
+  "file": "minimax 2.7 boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE (1.99% ≤ 2.00%, not more than)",
+     "at": "NO FIRE (2.00% = 2.00%, equal is not more than)",
+     "above": "FIRE (2.01% > 2.00%, exceeds the threshold)"
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' is a strict inequality requiring values strictly greater than 2.00%."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE (35 months ≤ 36 months, not more than)",
+     "at": "NO FIRE (36 months = 36 months, not more than)",
+     "above": "FIRE (37 months > 36 months, exceeds)"
+    },
+    "reasoning": "The phrase 'more than 36 months' excludes 36 itself; only values strictly greater trigger."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO (1.49 pp < 1.50 pp, below the threshold)",
+     "at": "PASS (1.50 pp = 1.50 pp, exactly at the inclusive threshold)",
+     "above": "PASS (1.51 pp > 1.50 pp, exceeds)"
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' is inclusive of 1.5 exactly."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "strict (for the pass condition)",
+    "verdicts": {
+     "below": "PASS (2.24 pp < 2.25 pp, does not exceed by 2.25 or more)",
+     "at": "FAIL (2.25 pp = 2.25 pp, does exceed by 2.25 or more — not a passing spread)",
+     "above": "FAIL (2.26 pp > 2.25 pp, exceeds the pass ceiling)"
+    },
+    "reasoning": "The pass condition requires the spread to be less than 2.25 pp; 2.25 pp itself fails because it 'exceeds by 2.25 or more.'"
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO DE-MINIMIS (10.0M ≥ 10M, revenue not less than; 0.9M < 1M, income satisfied but both required)",
+     "at": "NO DE-MINIMIS (9.9M < 10M, revenue satisfied; 1.0M ≥ 1M, income not less than — both required)",
+     "above": "DE-MINIMIS (9.9M < 10M AND 0.9M < 1M, both strict conditions met)"
+    },
+    "reasoning": "Both 'less than' thresholds use strict inequalities; both must be satisfied simultaneously for the safe harbour to apply."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL (15.99% < 16.00%, not equal to or greater than)",
+     "at": "PASS (16.00% = 16.00%, equal to the transition rate)",
+     "above": "PASS (16.01% > 16.00%, greater than the transition rate)"
+    },
+    "reasoning": "The phrase 'equal to or greater than' includes the boundary value of exactly 16%."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL (49.99% < 50.00%, not at least equal to the 50% floor)",
+     "at": "PASS (50.00% = 50.00%, at least equal to the required floor)",
+     "above": "PASS (50.01% > 50.00%, exceeds the minimum requirement)"
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive of the 50% boundary."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO SIGNIFICANT INCIDENT (threshold−1 < threshold, below the minimum)",
+     "at": "SIGNIFICANT INCIDENT (threshold = threshold, exactly at the inclusive minimum)",
+     "above": "SIGNIFICANT INCIDENT (threshold+1 > threshold, exceeds the minimum)"
+    },
+    "reasoning": "The 'equal to or greater than' framing includes the threshold itself as a triggering value."
+   }
+  ],
+  "weakest_point": "Rule 5 (GloBE de-minimis): the rule text says 'EUR 10 million' and 'EUR 1 million' but actual GloBE regulations reference jurisdictional currency revenue thresholds that may not universally use EUR; the framing in my task may be a simplified proxy. Rule 6 (CbCR simplified ETR): the specific transition rate year (2026) and exact percentage (16%) may vary by jurisdiction or fiscal year; OECD Model Rules specify different thresholds for different periods. Rule 7 (Solvency II Tier 1): while 'at least equal to' is a reasonable paraphrase of the ≥50% requirement in Article 82 of the Solvency II Delegated Regulation, the precise regulatory citation should be verified.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "minimax 2.7 boundary.json",
+   "model": "minimax 2.7",
+   "family": "boundary",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "minimax m3",
+  "file": "minimax m3 boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' is strict (> 1.99% and 2.00% do not exceed it, while 2.01% does."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "NO FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 36 months after consummation' is strict (>36); 35 and 36 months do not exceed it, while 37 months does."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": null,
+     "at": null,
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'by 1.5 or more percentage points' is inclusive (>=1.5); 1.49 does not meet it, while 1.50 and 1.51 do.",
+    "_absent": {
+     "verdicts.at": true
+    }
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "NO PASS"
+    },
+    "reasoning": "The pass condition 'does not exceed ... by 2.25 or more percentage points' is inclusive at the upper bound (<=2.25); 2.24 and 2.25 pass, while 2.26 fails."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO DE-MINIMIS",
+     "at": "NO DE-MINIMIS",
+     "above": "DE-MINIMIS"
+    },
+    "reasoning": "Both conditions use 'less than' (strict): (10.0M, 0.9M) fails the revenue prong, (9.9M, 1.0M) fails the income prong, and (9.9M, 0.9M) meets both prongs."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO SAFE HARBOUR",
+     "at": "SAFE HARBOUR",
+     "above": "SAFE HARBOUR"
+    },
+    "reasoning": "The phrase 'equal to or greater than 16%' is inclusive (>=16%); 15.99% fails, while 16.00% and 16.01% satisfy the simplified ETR test."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO COMPLIANCE",
+     "at": "COMPLIANCE",
+     "above": "COMPLIANCE"
+    },
+    "reasoning": "The Tier 1 floor 'at least equal to 50% of SCR' is inclusive (>=50%); 49.99% breaches the floor, while 50.00% and 50.01% satisfy it."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO FIRE",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The threshold 'equal to or greater than the minimum' is inclusive (>=threshold); threshold-1 does not meet it, while threshold and threshold+1 do."
+   }
+  ],
+  "weakest_point": "Rule 5 (GloBE de-minimis): the inputs are expressed as currency figures rather than the precise EUR-denominated averages the OECD Model Rules specify, and the joint AND/OR structure between the two legs at the boundary depends on whether either failing leg disqual carve-out — the verdict assumes both legs must strictly hold, which is correct per Art. 1.1.2 but I am not fully certain the inputs map one-to-one to the rule's averaging semantics.",
+  "_provenance": {
+   "file": "minimax m3 boundary.json",
+   "model": "minimax m3",
+   "family": "boundary",
+   "parse_status": "recovered",
+   "transforms_applied": [
+    "unnest:rules",
+    "salvage:rule3-seam below-value-destroyed; at->null+_absent per gate"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "mistral",
+  "file": "mistral boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 2 percent' is strict; 2.00% is not 'more than 2%'."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 36 months' is strict; 36 months is not 'more than 36 months'."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'by 1.5 or more percentage points' is inclusive; 1.50% meets the threshold."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "PASS",
+     "above": "FIRE"
+    },
+    "reasoning": "The pass condition is 'does not exceed ... by 2.25 or more'; 2.25% is not 'more than 2.25%'."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "Both conditions ('less than EUR 10M' and 'less than EUR 1M') are strict; (10.0M, 0.9M) fails the first condition."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive; 16.00% meets the threshold."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive; 50.00% meets the threshold."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive; threshold meets the condition."
+   }
+  ],
+  "weakest_point": "Rule 5 (GloBE de-minimis)",
+  "weakest_point_reason": "The phrasing of the dual conditions ('less than EUR 10M AND less than EUR 1M') may vary in interpretation based on jurisdiction or context, and the exact wording of the operative text is critical.",
+  "_provenance": {
+   "file": "mistral boundary.json",
+   "model": "mistral",
+   "family": "boundary",
+   "parse_status": "fence-stripped",
+   "transforms_applied": [
+    "fence-strip",
+    "separate-weakest_point-from-rules-list",
+    "coerce-rule-key:str->int"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "qwen",
+  "file": "qwen boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO",
+     "at": "NO",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 2 percent' establishes a strict inequality (>), so the trigger fires only above 2.00%."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "NO",
+     "at": "NO",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 36 months' establishes a strict inequality (>), meaning the trigger fires only at 37 months and above."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "NO",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' establishes an inclusive inequality (>=), so the trigger fires at 1.50 and above."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "The phrase 'does not exceed ... by 2.25 or more' uses an inclusive threshold for the exceedance, meaning exactly 2.25 fails the pass condition."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "The phrase 'less than' establishes strict inequalities (<) for both revenue and income, so the test passes only when both are strictly below their respective thresholds."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the safe harbour passes at exactly 16.00% and above."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'at least equal to' establishes an inclusive inequality (>=), so the floor requirement passes at exactly 50.00% and above."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the incident threshold is met at the exact minimum and above."
+   }
+  ],
+  "weakest_point": "Rule 4 (General QM price limit) because the phrasing 'does not exceed ... by 2.25 or more' combines a negative condition with an inclusive threshold, making the exact boundary pass/fail logic prone to misinterpretation without reading the full regulatory context of 12 CFR 1026.43(e)(2).",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "qwen boundary.json",
+   "model": "qwen",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ },
+ {
+  "model": "yuanbao",
+  "file": "yuanbao boundary.json",
+  "items": [
+   {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "FAIL",
+     "above": "FIRE"
+    },
+    "reasoning": "\"more than 2 percent\" is strict inequality (>2%), so only values strictly greater than 2% trigger."
+   },
+   {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "FAIL",
+     "above": "FIRE"
+    },
+    "reasoning": "\"more than 36 months\" is strict (>36), so only durations strictly exceeding 36 months trigger."
+   },
+   {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "FIRE",
+     "above": "FIRE"
+    },
+    "reasoning": "\"1.5 or more percentage points\" is inclusive (>=1.5), so spreads at or above 1.5 trigger."
+   },
+   {
+    "rule": 4,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "\"does not exceed ... by 2.25 or more\" negates an inclusive condition, making the effective pass boundary strict (<2.25)."
+   },
+   {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+     "below": "PASS",
+     "at": "FAIL",
+     "above": "FAIL"
+    },
+    "reasoning": "\"less than\" is strict (<), so both revenue and income must be strictly below thresholds to pass; only the pair with both below passes."
+   },
+   {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "\"equal to or greater than 16%\" is inclusive (>=16%), so ETRs at or above 16% pass."
+   },
+   {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "\"at least equal to 50%\" is inclusive (>=50%), so ratios at or above 50% pass."
+   },
+   {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+     "below": "FAIL",
+     "at": "PASS",
+     "above": "PASS"
+    },
+    "reasoning": "\"equal to or greater than\" the minimum is inclusive (>=), so values at or above threshold pass."
+   }
+  ],
+  "weakest_point": "Rule 5 (GloBE de-minimis): I am least certain I have the exact verbatim phrasing of the OECD GloBE rules regarding the de-minimis exclusion, as the consolidated commentary may use slightly different formulations like 'is less than' versus 'does not exceed'.",
+  "weakest_point_reason": null,
+  "_provenance": {
+   "file": "yuanbao boundary.json",
+   "model": "yuanbao",
+   "family": "boundary",
+   "parse_status": "clean",
+   "transforms_applied": [
+    "separate-weakest_point-from-rules-list"
+   ],
+   "excluded_fields": [],
+   "truncated_bool": false,
+   "recovered_items": 8,
+   "prompt_expects": 8
+  }
+ }
+]

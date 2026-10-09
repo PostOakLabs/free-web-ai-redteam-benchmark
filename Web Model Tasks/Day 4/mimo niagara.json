@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Eight simple cores over fewer complex cores",
+    "where_in_paper": "Design philosophy / motivation section",
+    "decision": "Use 8 simple, single-issue, in-order SPARC cores rather than fewer complex out-of-order cores, targeting throughput (TPC-C, web-serving) over single-thread performance",
+    "alternatives_or_rejected": "The paper frames the alternative as conventional high-IPC out-of-order superscalar designs (implicitly those contemporaneous in the SPARC and x86 lines) that spend transistor/power budget on single-thread ILP extraction",
+    "rationale": "Server workloads expose abundant thread-level parallelism; a larger number of simpler cores at a given power and area budget yields higher total throughput than fewer complex cores for these workloads",
+    "outcome": "The design achieved 32 hardware threads on a single die with competitive throughput/watt for server workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper may not frame the rejected alternative as explicitly as I'm suggesting; the discussion might be more affirmative (describing the chosen path) than comparative (describing what was rejected).",
+    "confidence": 0.8
+  },
+  {
+    "title": "Four hardware threads per core via fine-grained multithreading",
+    "where_in_paper": "Thread unit / core architecture section",
+    "decision": "Implement 4 hardware threads per core, switching threads on pipeline stalls (e.g., cache misses) or on a cycle-by-cycle basis to hide latency",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Four threads per core hides long-latency memory accesses by issuing from other ready threads during stall cycles, improving pipeline utilization without increasing core complexity; this was likely described as a sweet-spot between area cost of additional thread contexts and throughput gain",
+    "outcome": "Each core achieves high pipeline utilization even under cache-miss-heavy server workloads because at least one thread is typically ready to issue",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not certain whether the paper explicitly calls this 'fine-grained' multithreading vs 'chip multithreading' (Sun's preferred term). The paper may describe the mechanism without discussing rejected alternative thread counts (2, 8, etc.).",
+    "confidence": 0.7
+  },
+  {
+    "title": "Simple single-issue in-order pipeline",
+    "where_in_paper": "Core pipeline description",
+    "decision": "Use a simple single-issue, in-order, roughly 6-stage pipeline per core, omitting out-of-order execution hardware, branch prediction complexity, and large reorder buffers",
+    "alternatives_or_rejected": "The alternative (out-of-order superscalar with deep pipelines) is implicitly argued against in terms of area and power cost relative to throughput benefit for the target workloads",
+    "rationale": "Complexity saved by avoiding OoO hardware is reinvested into more cores and more threads; the latency hiding from multithreading compensates for the low IPC per thread",
+    "outcome": "Each core consumes modest area and power, enabling 8 cores to fit within the target power envelope while delivering high aggregate throughput",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall the pipeline as roughly 6 stages but this specific depth may be slightly different (5 or 7 is possible). The paper may not explicitly list 'rejected alternatives' for pipeline design in a structured way.",
+    "confidence": 0.65
+  },
+  {
+    "title": "Shared L2 cache with crossbar interconnect",
+    "where_in_paper": "Cache hierarchy / memory subsystem section",
+    "decision": "Use a shared on-chip L2 cache (approximately 3MB, organized in 8 banks) connected to the 8 cores via a crossbar switch, with small per-core L1 caches (approximately 16KB instruction, 8KB data)",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A shared L2 allows efficient data sharing among threads and avoids replication; the crossbar provides low-latency, non-blocking access from any core to any L2 bank; small L1 caches keep per-core area small",
+    "outcome": "The cache hierarchy provided sufficient bandwidth and low enough average latency to keep the 32 threads fed with data for server workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Niagara-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The specific numbers (3MB L2, 8 banks, 16KB/8KB L1) are from my general knowledge of UltraSPARC T1. This paper almost certainly describes the cache hierarchy but I cannot confirm these exact figures appear in this specific IEEE Micro article rather than in the ISSCC or JSSC paper. The per-core L1 sizes might be wrong.",
+    "confidence": 0.55
+  },
+  {
+    "title": "Power efficiency as primary optimization target",
+    "where_in_paper": "Results / performance comparison section",
+    "decision": "Optimize for throughput per watt rather than peak single-thread performance; present and benchmark against prior designs on a per-watt basis",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Data-center power and cooling costs were becoming dominant constraints; a throughput/watt metric better captures the value proposition for the target server market",
+    "outcome": "The paper reports the processor achieving 32 threads at approximately 72W (or a similar low figure) and presents throughput-per-watt comparisons showing advantages over conventional designs",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The specific power number (72W) is from general knowledge and may not appear in this paper, or may be different here. The paper may use a different framing or metric for power efficiency. The exact comparisons presented may differ from what I'm attributing.",
+    "confidence": 0.6
+  }
+]
+```

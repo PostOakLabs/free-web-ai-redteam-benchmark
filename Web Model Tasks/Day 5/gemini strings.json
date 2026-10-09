@@ -1,0 +1,60 @@
+```json
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "Key sorting: Keys are sorted lexicographically by comparing their UTF-16 code units (or Unicode scalar values). Capital letters have lower code points than lowercase letters in ASCII/Unicode ('C' = U+0043 < 'a' = U+0061 < 'b' = U+0062), so 'C' comes first, followed by 'a', then 'b'.",
+      "Whitespace: All insignificant whitespace outside strings is removed."
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"x\":2,\"y\":1},{\"k\":null}],\"z\":true}}",
+    "rules_applied": [
+      "Recursive object key sorting: Keys in all object structures, including those deeply nested within arrays, are sorted by UTF-16 code unit order ('a' < 'z' for outer object, 'x' < 'y' for first array element object).",
+      "Array preservation: Array element order is strictly preserved and not sorted.",
+      "Whitespace: All optional structural whitespace is removed."
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1e+21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":1e+20,\"n5\":0,\"n6\":333333333.3333333}",
+    "rules_applied": [
+      "Number Serialization (ES6/ECMA-262 ToString rule): Numbers are serialized per IEEE 754 double precision float rules using ES6 ToString algorithm.",
+      "n1 (1e21): Integers with 21 or more digits use exponential notation with uppercase 'e' and an explicit plus sign for positive exponents ('1e+21').",
+      "n2 (1e-7): Numbers in range 10^-7 to 10^-1 use exponential notation ('1e-7').",
+      "n3 (0.000001 = 1e-6): Numbers in range 10^-6 <= x < 1 (where exponent >= -6) are formatted in standard decimal notation ('0.000001').",
+      "n4 (100000000000000000000 = 10^20): Has 21 digits total, formatted as exponent '1e+20'.",
+      "n5 (-0): Negative zero is serialized as '0' (without negative sign per ES6 ToString).",
+      "n6 (333333333.33333329): Rounded to nearest IEEE 754 64-bit double precision representation, yielding shortest representation '333333333.3333333'."
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"€\":\"euro\",\"ü\":\"umlaut\"}",
+    "rules_applied": [
+      "UTF-16 Code-Unit Key Sorting: Keys are ordered by comparing UTF-16 code unit sequence byte-by-byte/value-by-value.",
+      "'$' (U+0024, 36) < 'aa' ('a'=U+0061, 97) < '€' (U+20AC, 8364) < 'ü' (U+00FC, 252). Note that 'ü' (U+00FC) is higher than '€' (U+20AC) because 0x00FC < 0x20AC in numeric value, wait: 0x00FC (252) < 0x20AC (8364), so 'ü' comes BEFORE '€'. Wait: 252 (0x00FC) < 8364 (0x20AC). Therefore order is '$' (0x0024) < 'aa' (0x0061) < 'ü' (0x00FC) < '€' (0x20AC)."
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control\\u00a0 \"}",
+    "rules_applied": [
+      "Control Escape rules: Mandatory escapes for quotation mark (\\\"), backslash (\\\\), and control characters U+0000 through U+001F (e.g. \\n, \\t).",
+      "Unescaped Unicode: Non-control Unicode characters (including U+00A0 and printable characters like 'é' U+00E9) are output as literal unescaped UTF-8 code points.",
+      "No unnecessary hex escaping: Hex escapes (\\uXXXX) are prohibited unless required for control characters (U+0000 to U+001F)."
+    ]
+  },
+  {
+    "weakest_point": "Case 4: Verifying whether non-ASCII characters like U+00FC ('ü') and U+20AC ('€') sort according to raw Unicode scalar value / UTF-16 code unit integer comparison (0x00FC = 252 vs 0x20AC = 8364), which places 'ü' before '€'."
+  }
+]
+
+```

@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Splitting the integer execution resources into two duplicated clusters with a one-cycle inter-cluster penalty",
+    "where_in_paper": "Integer execution core / clustered microarchitecture description",
+    "decision": "The integer execution units and register file were split into two duplicated clusters, each with its own copy of the integer register file, rather than a single large unified integer register file and issue window feeding all integer functional units.",
+    "alternatives_or_rejected": "A single, larger unified integer register file/issue structure servicing all integer ALUs directly, which the paper frames as not scaling well at the target clock frequency due to wiring and port-count growth.",
+    "rationale": "As reasoned in the paper (to the best of my recall): a single large multi-ported register file able to feed many integer ALUs each cycle becomes wire- and area-limited at high clock rates, so duplicating a smaller register file across two clusters and paying a one-cycle penalty for cross-cluster operand communication was judged the better trade-off for reaching the target frequency.",
+    "outcome": "The design achieved higher clock frequency at the cost of occasional one-cycle bypass penalties for instructions needing operands produced in the other cluster.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  },
+  {
+    "title": "Tournament (hybrid local/global) branch predictor as a replacement for a simpler single-scheme predictor",
+    "where_in_paper": "Front-end / branch prediction description",
+    "decision": "The 21264 used a tournament predictor combining local and global history predictors with a chooser, rather than relying on a single global or single local predictor alone.",
+    "alternatives_or_rejected": "I recall this was framed against a simpler single-mechanism predictor (e.g. purely global-history), but I am not confident the paper itself lays out that comparison explicitly versus this being general knowledge about why tournament predictors were adopted in that era.",
+    "rationale": "General reasoning in this design generation was that different branch types are better predicted by different history mechanisms, so combining predictors with a chooser improves overall accuracy over any single scheme — but I cannot confidently attribute this specific rationale wording to this paper's text.",
+    "outcome": "Improved branch prediction accuracy contributing to deeper effective out-of-order execution, though I don't have confident recall of a specific reported accuracy number from this paper.",
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "confidence": 0.25
+  }
+]

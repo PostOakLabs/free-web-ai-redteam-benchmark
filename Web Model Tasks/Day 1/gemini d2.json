@@ -1,0 +1,95 @@
+{
+"genre_map": [
+{
+"title": "POWER4 system microarchitecture",
+"authors_if_known": "J. M. Tendler, J. S. Dodson, J. S. Fields Jr., H. Le, B. Sinharoy",
+"venue": "IBM Journal of Research and Development",
+"year": 2002,
+"pages_if_known": "5–26",
+"what_design_decisions_it_covers": "Microarchitectural implementation of the dual-core POWER4 processor, multi-core chip interconnect fabric, L2/L3 cache directory architecture, and SMP scalability decisions.",
+"confidence": 1.0
+},
+{
+"title": "Design and implementation of the POWER5 microprocessor",
+"authors_if_known": "J. Clabes, J. Friedrich, M. Sweet, J. DiLullo, S. Chu, D. Plass, J. Dawson, P. Muench, L. Powell, M. Floyd, B. Sinharoy, M. Lee, M. Goulet, J. Wagoner, N. Schwartz, S. Runyon, G. Gorman, P. Restle, R. Kalla, J. McGill, S. Dodson",
+"venue": "Design Automation Conference (DAC)",
+"year": 2004,
+"pages_if_known": "670–672",
+"what_design_decisions_it_covers": "Physical implementation and circuit tuning of POWER5 in 130nm SOI CMOS, multi-threshold voltage (multi-Vt) transistor assignment, dynamic clock gating, and area vs. performance trade-offs for simultaneous multithreading (SMT).",
+"confidence": 1.0
+},
+{
+"title": "A 600MHz superscalar RISC microprocessor",
+"authors_if_known": "B. A. Gieseke, R. L. Allmon, R. Bailey, B. Benschneider, S. M. Britton, L. Cloutier, S. Santhanam, et al.",
+"venue": "IEEE Journal of Solid-State Circuits",
+"year": 1997,
+"pages_if_known": "1603–1616",
+"what_design_decisions_it_covers": "Circuit design, global clock distribution, and physical floorplanning of the out-of-order Alpha 21264 (EV6) microprocessor in 0.35um CMOS.",
+"confidence": 0.95
+},
+{
+"title": "A 200-MHz 64-b dual-issue CMOS microprocessor",
+"authors_if_known": "D. W. Dobberpuhl, V. M. Pensak, R. W. Witek, et al.",
+"venue": "IEEE Journal of Solid-State Circuits",
+"year": 1992,
+"pages_if_known": "1555–1567",
+"what_design_decisions_it_covers": "Physical layout, custom circuit design techniques, dynamic logic usage, and power/clock distribution for the original DEC Alpha 21064 processor.",
+"confidence": 1.0
+},
+{
+"title": "Circuit design methodology for a 4.5 GHz 32-nm dual-core zEnterprise microprocessor",
+"authors_if_known": "G. Mayer, D. E. Hoffman, M. P. Vacek, et al.",
+"venue": "IBM Journal of Research and Development",
+"year": 2011,
+"pages_if_known": "1–14",
+"what_design_decisions_it_covers": "High-frequency clock tree design, noise mitigation, power grid optimization, and timing closure methodologies for IBM zEnterprise mainframe processors.",
+"confidence": 0.95
+},
+{
+"title": "Circuit design and implementation techniques for a 1GHz Itanium microprocessor",
+"authors_if_known": "S. Rusu, S. Tam, et al.",
+"venue": "IEEE Journal of Solid-State Circuits",
+"year": 2000,
+"pages_if_known": "1371–1380",
+"what_design_decisions_it_covers": "Physical implementation, clock network distribution, custom circuit design, and bus interface timing closure for Intel's first-generation Itanium architecture.",
+"confidence": 0.95
+},
+{
+"title": "UltraSPARC-I: A 64-bit UltraSPARC processor for technical computing",
+"authors_if_known": "D. Greenley et al.",
+"venue": "IEEE Micro",
+"year": 1995,
+"pages_if_known": "28–42",
+"what_design_decisions_it_covers": "Physical design partitioning, interconnect RC delay management, and execution pipeline timing trade-offs for Sun UltraSPARC-I.",
+"confidence": 0.9
+},
+{
+"title": "The circuit design of the POWER6 microprocessor",
+"authors_if_known": "J. S. Friedrich et al.",
+"venue": "IEEE International Solid-State Circuits Conference (ISSCC)",
+"year": 2007,
+"pages_if_known": "96–97",
+"what_design_decisions_it_covers": "Circuit tuning, custom dynamic logic replacement, power optimization, and clock skew management achieving 5+ GHz operation in 65nm SOI.",
+"confidence": 0.95
+},
+{
+"title": "A 1 GHz Alpha microprocessor",
+"authors_if_known": "P. E. Gronowski et al.",
+"venue": "IEEE Journal of Solid-State Circuits",
+"year": 1998,
+"pages_if_known": "1520–1527",
+"what_design_decisions_it_covers": "1 GHz operation physical design challenges in 0.18um CMOS, transmission line interconnect modeling, flip-chip packaging interaction, and low-power cache array implementation.",
+"confidence": 0.95
+},
+{
+"title": "Design and implementation of the AMD-K6 microprocessor",
+"authors_if_known": "X. Chen et al.",
+"venue": "IEEE Micro",
+"year": 1997,
+"pages_if_known": "14–22",
+"what_design_decisions_it_covers": "Physical design and timing closure of the x86 instruction decoder, x86-to-RISC translation matrix, and floorplan trade-offs for AMD-K6.",
+"confidence": 0.9
+}
+],
+"extracted_episodes": []
+}

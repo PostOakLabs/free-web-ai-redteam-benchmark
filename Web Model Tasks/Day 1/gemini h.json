@@ -1,0 +1,110 @@
+[
+{
+"pitfall_name": "Clamped performance.now() Resolution Under Non-Isolated Contexts",
+"what_happens": "Sub-millisecond proof execution stages (such as individual field operation micro-benchmarks or small point additions) report identical or heavily quantized duration values, creating stepped or zero-time benchmark results.",
+"why": "Browsers clamp high-resolution timer precision (typically to 1ms or 100μs, and up to 5ms in non-cross-origin-isolated pages) and add deliberate jitter to mitigate side-channel timing attacks like Spectre.",
+"how_discovered": "Discovered when small MSM or FFT sub-routines return 0.0ms or exact integer multiples of 5ms during micro-benchmarking, typically wasting 1-2 hours until timer resolution restrictions are identified.",
+"mitigation": "Enable Cross-Origin Opener Policy (COOP) and Cross-Origin Embedder Policy (COEP) headers to restore 5μs timer precision, or batch execution loops into 1000+ iteration runs to amortize timer quantization error.",
+"affects": "measurement-validity",
+"confidence": 0.98
+},
+{
+"pitfall_name": "WebGPU Pipeline Stall Included in Compute Benchmarks via mapAsync",
+"what_happens": "WebGPU proof generation benchmarks report execution times that are 2x-5x slower than real GPU execution, measuring host-GPU pipeline flushing and PCIe buffer mapping stalls rather than compute shader runtime.",
+"why": "Calling `gpuBuffer.mapAsync(GPUMapMode.READ)` forces the browser thread to wait for all queued GPU commands to finish and copy data back to host memory, serializing asynchronous GPU execution with CPU synchronization overhead.",
+"how_discovered": "Discovered when adding GPU profiling hooks causes overall prover throughput to drop dramatically while GPU core utilization remains near zero, taking 1-2 days of diagnostic tracing to isolate.",
+"mitigation": "Separate GPU command submission from result readback; benchmark submission-to-completion asynchronously using WebGPU timestamp queries on the GPU timeline rather than host-side wall-clock timing around `mapAsync`.",
+"affects": "measurement-validity",
+"confidence": 0.95
+},
+{
+"pitfall_name": "Tier-2 JIT Re-compilation Mid-Execution Skewing Early Proving Stage Metrics",
+"what_happens": "The first 1-3 proof generation runs exhibit massive latency spikes and non-reproducible variance, making cold-start prover performance appear 300%-500% slower than steady-state runs.",
+"why": "V8 and JavaScriptCore compile WebAssembly modules using a fast baseline compiler (Liftoff/BBQ) for instant execution, then tier-up hot functions to an optimizing compiler (TurboFan/OMG) asynchronously in the background during initial proof steps.",
+"how_discovered": "Discovered when benchmark variance remains extremely high across initial iterations despite fixed inputs, wasting half a day attempting to isolate non-existent algorithmic non-determinism.",
+"mitigation": "Run a dedicated, unmeasured warmup pass (e.g., 3-5 small dummy proofs) to force full WASM module tier-up compilation before recording performance metrics.",
+"affects": "measurement-validity",
+"confidence": 0.96
+},
+{
+"pitfall_name": "Boundary Array Allocation Triggering V8 GC Pauses Inside Proving Loops",
+"what_happens": "Intermittent, multi-hundred-millisecond latency spikes occur during witness generation or MSM execution, corrupting statistical variance in latency benchmarks.",
+"why": "Passing raw field elements or dynamic arrays across the JS-to-WASM boundary by instantiating new `Uint8Array` views or JS wrapper objects allocates garbage-collected objects on the JS V8 heap, triggering full GC sweeps mid-proof.",
+"how_discovered": "Discovered by inspecting Chrome DevTools Performance CPU profiles and observing major GC (Mark-Sweep-Compact) pauses overlapping with intensive WASM execution phases; typically takes 4-8 hours to trace.",
+"mitigation": "Pre-allocate static memory buffers inside the WASM linear heap at application initialization, and re-use fixed offset views directly without allocating new JS objects per proof step.",
+"affects": "measurement-validity",
+"confidence": 0.94
+},
+{
+"pitfall_name": "WebGPU Shader Micro-Benchmarking Failure via Disabled timestamp-query Feature",
+"what_happens": "Attempting to create a WebGPU query set with type `timestamp` throws a validation error or device loss, preventing direct on-GPU execution time measurement.",
+"why": "To prevent high-precision timing side-channel attacks, browsers (notably Chrome and Firefox) disable the `timestamp-query` WebGPU extension by default on production channels unless explicit developer flags are set.",
+"how_discovered": "Discovered immediately when calling `device.createQuerySet({ type: 'timestamp', ... })` fails in production builds, wasting hours searching for non-existent WebGPU specification syntax errors.",
+"mitigation": "Detect `timestamp-query` support at runtime and fall back to non-blocking pipeline-statistics or double-buffered host timing markers, requiring developers to run dedicated browser flags (`--enable-webgpu-developer-features`) during profiling.",
+"affects": "measurement-validity",
+"confidence": 0.97
+},
+{
+"pitfall_name": "Initial Compute Pipeline Creation Latency Polluting Proof Generation Metrics",
+"what_happens": "The first invocation of a WebGPU proving pipeline shows an extra 200ms–1500ms overhead that disappears on all subsequent proof runs.",
+"why": "Calls to `device.createComputePipelineAsync()` compile WGSL shaders into native GPU machine code (e.g., SPIR-V to DXIL/Metal MSL) on first load, which includes shader validation and platform JIT compilation.",
+"how_discovered": "Discovered when comparing single-proof execution vs batch execution averages, where the first proof heavily skews the arithmetic mean; takes 2-3 hours to isolate.",
+"mitigation": "Pre-compile and initialize all WebGPU compute pipelines asynchronously during application bootstrap before taking any measurement or accepting user proving requests.",
+"affects": "measurement-validity",
+"confidence": 0.95
+},
+{
+"pitfall_name": "WASM32 Address Space Limit Exhaustion during Large MSM/NTT Allocations",
+"what_happens": "Prover panics with an `unreachable` instruction or `out of memory` error when proving circuits requiring >2GB to 3GB of working memory, even on host machines with 64GB+ RAM.",
+"why": "Standard WASM (`wasm32`) uses 32-bit pointers restricting linear memory to a theoretical maximum of 4GB (and practical browser limits of 2GB–3GB due to browser heap fragmentation and contiguous region constraints).",
+"how_discovered": "Discovered when scaling circuit size from 2^18 to 2^20 gates; allocations for large NTT scratchpads or MSM bucket arrays fail catastrophically despite low CPU usage, wasting days on memory leak investigations.",
+"mitigation": "Optimize memory layouts using streamable in-place FFT algorithms, use custom chunked pool allocators, or target modern browser engines supporting the 64-bit WASM (`wasm64`) memory extension.",
+"affects": "deployment",
+"confidence": 0.98
+},
+{
+"pitfall_name": "Mobile Safari Silent Web Worker Process Termination on Heavy Memory Allocation",
+"what_happens": "Proving workloads running in Web Workers on iOS Safari crash abruptly without raising JS exception handlers or `window.onerror` callbacks, causing the page to refresh silently.",
+"why": "iOS Jetsam enforces strict per-tab and per-worker memory caps (~1.2GB–1.8GB depending on device hardware generation). Exceeding these limits triggers immediate kernel SIGKILL termination of the renderer process.",
+"how_discovered": "Discovered when web provers test clean on desktop Chrome/Safari but fail completely on mobile devices, taking 1-3 days of device log extraction via Xcode Console to identify Jetsam OOM kills.",
+"mitigation": "Implement aggressive memory streaming, bound peak memory usage below 1GB for mobile targets, and perform client device capability checks to delegate large proofs to server fallbacks.",
+"affects": "deployment",
+"confidence": 0.96
+},
+{
+"pitfall_name": "Third-Party Iframe Embedding Silently Stripping SharedArrayBuffer Support",
+"what_happens": "Multi-threaded WASM provers embedded in dApp host pages or wallet iframes fail to instantiate or silently fall back to single-threaded execution, slowing proving times by 8x-16x.",
+"why": "Cross-Origin Isolation requires both `COOP: same-origin` and `COEP: require-corp` headers, plus an explicit `allow=\"cross-origin-isolated\"` attribute on embedded iframes. If the parent frame lacks headers or permissions, `SharedArrayBuffer` is omitted from the iframe global object.",
+"how_discovered": "Discovered when deploying prover widgets into third-party wallet or dApp integration test suites; multi-threading works in isolation but breaks inside embedded contexts, taking days of header debugging.",
+"mitigation": "Check `crossOriginIsolated` and `typeof SharedArrayBuffer !== 'undefined'` at runtime before worker instantiation; gracefully degrade to worker-pool message passing or single-threaded proving when un-isolated.",
+"affects": "deployment",
+"confidence": 0.97
+},
+{
+"pitfall_name": "Compiler Failure to Vectorize 64-bit and 256-bit Field Operations with WASM SIMD128",
+"what_happens": "Enabling WASM SIMD target flags (`-C target-feature=+simd`) provides zero performance uplift for prime field arithmetic (e.g., Goldilocks, BabyBear, BN254), remaining stuck at scalar instruction speeds.",
+"why": "LLVM's WASM backend lacks auto-vectorization patterns for non-native wide integer operations (such as 64-bit carry-chain multiplication or 256-bit field reduction) mapping to 128-bit vector registers (`i64x2`), falling back to scalar emulation.",
+"how_discovered": "Discovered by disassembling compiled `.wasm` binaries using `wasm2wat` and observing scalar `i64.mul` and `i64.add` loops instead of `v128` instructions after benchmark gains measured 0%, taking 1-2 days.",
+"mitigation": "Write explicit SIMD intrinsics or custom assembly-level WASM representations that vectorize parallel field elements across vector lanes (e.g., packing four 32-bit field elements into a single `i32x4` SIMD vector) rather than relying on compiler auto-vectorization.",
+"affects": "performance",
+"confidence": 0.93
+},
+{
+"pitfall_name": "Redundant Serialization and Memory Copying across JS-WASM Boundary",
+"what_happens": "Passing large witness vectors or public inputs from JS to WASM consumes 30%-50% of overall proof setup time, creating severe throughput bottlenecks.",
+"why": "Passing standard JS typed arrays across `wasm` functions by value copies memory buffers between the JS heap and WASM linear memory space.",
+"how_discovered": "Discovered by profiling execution timelines and observing long execution times spent inside `TextEncoder` or `TypedArray.set` operations prior to actual cryptographic compute, taking 2-4 hours to diagnose.",
+"mitigation": "Allocate input buffers directly inside `wasm.memory` from JS using exported WASM allocation pointers (`malloc`), populating data directly in linear memory via typed array views (`new Uint8Array(wasm.memory.buffer, ptr, len)`).",
+"affects": "performance",
+"confidence": 0.96
+},
+{
+"pitfall_name": "Atomics and Unaligned Memory Access Contention Across WASM Thread Pools",
+"what_happens": "Multi-threaded WASM provers exhibit poor scaling beyond 4-8 threads, suffering severe performance regression due to bus lock contention.",
+"why": "Using `Atomics.wait`/`Atomics.notify` or unaligned atomic operations across shared WASM memory causes browser worker threads to enter frequent OS-level futex stalls and cache line invalidation loops.",
+"how_discovered": "Discovered when scaling thread counts from 4 to 16 threads results in flat or worsening proof times, accompanied by high thread state synchronization overhead in browser profilers; takes 1-2 days to isolate.",
+"mitigation": "Structure work distribution using lock-free lockless queues, align all shared memory buffers to 64-byte boundary offsets, and minimize fine-grained cross-thread atomic synchronization within core MSM/FFT inner loops.",
+"affects": "performance",
+"confidence": 0.91
+}
+]

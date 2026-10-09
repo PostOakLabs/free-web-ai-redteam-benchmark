@@ -1,0 +1,100 @@
+```json
+[
+  {
+    "case_name": "Basic single drawdown, single bullet repayment",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount_drawn": {"value": 1000, "unit": "EUR", "timing": "t=0 (immediate full drawdown)"},
+      "repayment": {"value": 1200, "unit": "EUR", "timing": "t=1 year"},
+      "charges": "none in this case"
+    },
+    "equation_setup": "Sum of drawdowns discounted = Sum of repayments discounted: C_0*(1+X)^0 = D_1*(1+X)^-1, i.e. 1000*(1+X)^0 = 1200*(1+X)^-1",
+    "computation": {
+      "step1": "1000 = 1200 / (1+X)",
+      "step2": "(1+X) = 1200/1000 = 1.2",
+      "step3": "X = 0.2000",
+      "note": "Closed-form solution possible since only one drawdown and one repayment; no iteration required"
+    },
+    "result_aprc": "20.0% (X=0.2000, exact single-cashflow-pair solution; no rounding ambiguity since the algebra is exact)",
+    "assumptions_applied": ["Immediate and full drawdown of the total amount of credit at t=0", "Single repayment treated as occurring exactly one year after drawdown (time unit = years, per the annex's standard interval convention)"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "This is a formula-knowledge construction chosen for its clean closed-form solvability, not a reproduction of a specific numbered annex worked example; I do not have confident verbatim recall of the annex's own basic-case numbers."
+  },
+  {
+    "case_name": "Single drawdown with charges paid at conclusion",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount_drawn": {"value": 1000, "unit": "EUR", "timing": "t=0"},
+      "charges_added_to_final_settlement": {"value": 50, "unit": "EUR", "timing": "t=1 year, paid together with the capital/interest settlement"},
+      "total_repayment_at_conclusion": {"value": 1150, "unit": "EUR", "timing": "t=1 year", "composition": "1000 principal + 100 interest + 50 charge"}
+    },
+    "equation_setup": "C_0 = D_1*(1+X)^-1, where D_1 is the TOTAL amount payable by the consumer including the charge (charge is part of the total cost of credit and enters the repayment side, not deducted from the drawdown): 1000 = 1150*(1+X)^-1",
+    "computation": {
+      "step1": "(1+X) = 1150/1000 = 1.15",
+      "step2": "X = 0.1500"
+    },
+    "result_aprc": "15.0% (X=0.1500, exact)",
+    "assumptions_applied": ["Amount of credit drawn down by the consumer is the FULL 1000 (the charge is not netted out of the drawdown)", "The charge, because it is payable by the consumer as part of the cost of credit, is added into the discounted repayment cash flow rather than treated as a separate cash flow stream", "Single repayment at t=1 year"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The directive distinguishes charges that reduce the amount effectively drawn down (netted, increasing the effective APRC) from charges added to the repayment obligation (as modeled here); which treatment applies depends on the specific charge type (e.g. arrangement fee deducted at drawdown vs. an insurance premium invoiced later), and I have applied the 'added to repayment' convention here by explicit choice, not because I recall this being the annex's mandated treatment for this charge type."
+  },
+  {
+    "case_name": "Irregular repayment intervals (fractional-year spacing)",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount_drawn": {"value": 1000, "unit": "EUR", "timing": "t=0"},
+      "repayment_1": {"value": 600, "unit": "EUR", "timing": "t=0.5 years"},
+      "repayment_2": {"value": 500, "unit": "EUR", "timing": "t=1.25 years"}
+    },
+    "equation_setup": "1000 = 600*(1+X)^-0.5 + 500*(1+X)^-1.25 (time exponents expressed in years, per the annex's year-fraction convention for intervals not equal to whole years)",
+    "computation": {
+      "trial_X_0.10": {"term1": "600*(1.10)^-0.5 = 600*0.953463 = 572.078", "term2": "500*(1.10)^-1.25 = 500*0.887635 = 443.817", "sum": 1015.895, "residual_vs_1000": 15.895},
+      "trial_X_0.15": {"term1": "600*(1.15)^-0.5 = 600*0.932505 = 559.503", "term2": "500*(1.15)^-1.25 = 500*0.839692 = 419.846", "sum": 979.349, "residual_vs_1000": -20.651},
+      "linear_interpolation_seed": "X ≈ 0.10 + 0.05*(15.895/(15.895+20.651)) = 0.12174",
+      "trial_X_0.121": {"term1": "600*(1.121)^-0.5 = 566.694", "term2": "500*(1.121)^-1.25 = 433.463", "sum": 1000.157, "residual": 0.157},
+      "trial_X_0.122": {"term1": "600*(1.122)^-0.5 = 566.441", "term2": "500*(1.122)^-1.25 = 432.979", "sum": 999.420, "residual": -0.580},
+      "final_interpolation": "X ≈ 0.121 + 0.001*(0.157/(0.157+0.580)) = 0.121213"
+    },
+    "result_aprc": "12.1% (X≈0.12121, iteratively solved; annex prescribes rounding to at least one decimal place, so 12.1% is reported — I am not fully confident of the exact tie-breaking/rounding-direction rule the annex specifies for the discarded digits)",
+    "assumptions_applied": ["Time measured in exact year-fractions from the drawdown date (0.5 and 1.25 years) rather than actual/365 day-count — I am treating 'year fraction' generically and have NOT applied a specific day-count convention (e.g., actual/365 vs actual/actual), which the annex does specify somewhere and which I am not confident reproducing precisely here", "Newton/secant-style iterative root-finding on the APRC equation, standard for the annex's prescribed method since no closed form exists with 2+ unevenly spaced cash flows"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "The day-count/interval convention for fractional-year spacing (e.g., whether 0.5 years is treated as exactly 182.5/365 or via a 30/360-style convention) is where the annex is prescriptive and where I have the least confident recall; I flagged this as unresolved rather than asserting a specific convention I'm unsure of, per the instruction that flagged-if-unsure beats asserted-wrong."
+  },
+  {
+    "case_name": "Multiple equal annual installments (amortizing structure)",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount_drawn": {"value": 5000, "unit": "EUR", "timing": "t=0"},
+      "repayment_1": {"value": 2000, "unit": "EUR", "timing": "t=1 year"},
+      "repayment_2": {"value": 2000, "unit": "EUR", "timing": "t=2 years"},
+      "repayment_3": {"value": 2000, "unit": "EUR", "timing": "t=3 years"}
+    },
+    "equation_setup": "5000 = 2000*(1+X)^-1 + 2000*(1+X)^-2 + 2000*(1+X)^-3",
+    "computation": {
+      "trial_X_0.09": {"terms": [1834.86, 1683.36, 1544.20], "sum": 5062.42, "residual": 62.42},
+      "trial_X_0.10": {"terms": [1818.18, 1652.89, 1502.63], "sum": 4973.70, "residual": -26.30},
+      "interpolation_seed": "X ≈ 0.09 + 0.01*(62.42/(62.42+26.30)) = 0.097036",
+      "trial_X_0.097": {"terms": [1823.16, 1661.98, 1515.00], "sum": 5000.14, "residual": 0.14},
+      "conclusion": "root is between 0.097 and 0.0971, essentially converged at X≈0.09703"
+    },
+    "result_aprc": "9.7% (X≈0.09703, iteratively solved to residual < 0.2 EUR on a 5000 EUR principal)",
+    "assumptions_applied": ["Whole-year intervals throughout (t=1,2,3), avoiding day-count ambiguity entirely", "Equal installment amounts (this is a simplifying choice for this worked case, not itself an annex assumption)", "Standard iterative solution of the annex's core equation with no charges included"],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Using whole-year, equal-installment cash flows sidesteps the day-count and irregular-interval issues that are the actual hard part of annex-compliant APRC calculation; this case is illustrative of the iterative method rather than a stress test of the annex's more delicate conventions."
+  },
+  {
+    "case_name": "Attempted reproduction of an official annex worked example",
+    "annex_basis": null,
+    "inputs": {"status": "not populated"},
+    "equation_setup": "not populated",
+    "computation": {
+      "attempt": "I do not have confident, verbatim recall of the specific numerical worked example(s) published in Annex I of Directive 2008/48/EC or Annex III of Directive (EU) 2023/2225, including their exact credit amounts, dates, and stated APRC results.",
+      "decision": "Rather than fabricate numbers and present them as if drawn from the actual annex text, I am leaving this case unpopulated. Inventing a plausible-looking 'official example' would misrepresent constructed content as document-sourced content, which is the specific failure mode this field's honesty labeling exists to prevent."
+    },
+    "result_aprc": "UNKNOWN — no numeric result asserted",
+    "assumptions_applied": [],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "This entire case is a non-result: I am declining to guess at annex-specific figures I cannot confidently recall, which satisfies the instruction's preference for a flagged gap over an asserted-but-possibly-wrong reproduction, but it also means the task's optional 5th requirement ('any annex example you can reproduce with its own numbers') is not actually fulfilled here."
+  }
+]
+```

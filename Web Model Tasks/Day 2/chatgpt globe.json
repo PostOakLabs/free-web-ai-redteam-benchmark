@@ -1,0 +1,49 @@
+[
+{
+"example_id": "Example 5.2.1 - 1",
+"article": "Article 5.2.1",
+"fact_pattern": "An MNE Group in Jurisdiction X has GloBE Income of 200 in Year 1 and 100 in Year 2. In Year 1 it has a domestic tax net operating loss of 100 and records a deferred tax asset of 15, producing negative tax expense of 15. In Year 2 the 100 net operating loss carry-forward eliminates current tax and the deferred tax asset of 15 reverses.",
+"computation": "Year 1: Adjusted Covered Taxes = 0 after removing the negative tax expense of 15; ETR = 0 / 200 = 0%; Top-up Tax = 200 × (15% − 0%) = 30; Excess Negative Tax Expense Carry-forward = 15. Year 2: tentative Adjusted Covered Taxes = 15 from reversal of the deferred tax asset; apply the 15 Excess Negative Tax Expense Carry-forward, giving Adjusted Covered Taxes = 15 − 15 = 0; ETR = 0 / 100 = 0%; Top-up Tax = 100 × (15% − 0%) = 15.",
+"result": "Top-up Tax is 30 in Year 1 and 15 in Year 2, with an Excess Negative Tax Expense Carry-forward of 15 established in Year 1 and used in Year 2.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "The example's administrative-procedure terminology is specific to the OECD guidance; the arithmetic and stated outcomes are explicit in the published example.  ([OECD][1])"
+},
+{
+"example_id": "Example 5.3.7(a) - 1",
+"article": "Article 5.3.7(a)",
+"fact_pattern": "B Co 1 is a Flow-through Entity with EUR 1,000 of GloBE Income, EUR 200 of Eligible Payroll Costs and EUR 400 of Eligible Tangible Assets in Country B. A Co owns 50% of B Co 1; B Co 2 owns 45%; non-Group Entities own 5%. A Co has a PE in Country B.",
+"computation": "GloBE Income: EUR 1,000 − EUR 50 allocable to non-Group Entities = EUR 950; EUR 950 − EUR 500 allocated to the PE = EUR 450 allocated to B Co 2. Payroll: EUR 200 × 50% = EUR 100 allocated to the PE; EUR 200 × 45% = EUR 90 allocated to B Co 2; EUR 200 − EUR 100 − EUR 90 = EUR 10 not included in a Constituent Entity's SBIE. Tangible Assets: EUR 400 × 50% = EUR 200 allocated to the PE; EUR 400 × 45% = EUR 180 allocated to B Co 2; EUR 400 − EUR 200 − EUR 180 = EUR 20 not included in a Constituent Entity's SBIE.",
+"result": "The PE receives EUR 100 of payroll costs and EUR 200 of tangible assets; B Co 2 receives EUR 90 of payroll costs and EUR 180 of tangible assets; EUR 10 of payroll costs and EUR 20 of tangible assets are excluded from the SBIE computation.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "This example illustrates allocation of the SBIE inputs rather than calculating the final percentage-rate carve-out or top-up tax itself. ([OECD][1])"
+},
+{
+"example_id": "Example 5.5.2 - 1",
+"article": "Article 5.5.2",
+"fact_pattern": "B Co was created July 1 of Year 1. Year 1 GloBE Revenue = EUR 1 million and GloBE Income = EUR 50,000 over six months. Year 2 GloBE Revenue = EUR 1 million and GloBE Income = EUR 100,000. Year 3 GloBE Revenue = EUR 3 million and GloBE Loss = EUR 200,000.",
+"computation": "Because Year 1 covers six months, annualize its amounts by 12/6 = 2. Adjusted Year 1 Revenue = 2 × EUR 1 million = EUR 2 million; adjusted Year 1 Income = 2 × EUR 50,000 = EUR 100,000. Three-year Average GloBE Revenue = (EUR 2 million + EUR 1 million + EUR 3 million) / 3 = EUR 2 million. Three-year Average GloBE Income/Loss = (EUR 100,000 + EUR 100,000 − EUR 200,000) / 3 = EUR 0.",
+"result": "Average GloBE Revenue is EUR 2 million, below EUR 10 million, and Average GloBE Income/Loss is EUR 0, below EUR 1 million. Therefore, if elected by the Filing Constituent Entity, Top-up Tax for B Co is deemed to be zero for Year 3.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "The document phrases the second threshold as Average GloBE Income or Loss being less than EUR 1 million; the arithmetic result is exactly EUR 0. ([OECD][1])"
+},
+{
+"example_id": "Example 9.1.1 - 1",
+"article": "Article 9.1.1",
+"fact_pattern": "A Co first becomes subject to the GloBE Rules for the fiscal year ending December 31, 2023. Country A has a 20% corporate income tax rate. In 2022 A Co earned EUR 100 of interest income subject to EUR 30 of foreign withholding tax; EUR 20 was usable as a tax credit and EUR 10 was carried forward, with a EUR 10 deferred tax asset. A Co also received a EUR 10 investment tax credit and recorded a EUR 10 deferred tax asset.",
+"computation": "For each EUR 10 tax-credit deferred tax asset: EUR 10 / 20% = EUR 50 of underlying tax-effected amount; EUR 50 × 15% Minimum Rate = EUR 7.5. Thus the foreign-tax-credit carry-forward DTA is recast from EUR 10 to EUR 7.5, and the investment-tax-credit carry-forward DTA is likewise recast from EUR 10 to EUR 7.5. Total recast DTA = EUR 7.5 + EUR 7.5 = EUR 15.",
+"result": "Both tax-credit carry-forward deferred tax assets are taken into account in the Transition Year and subsequent years and are each recast to EUR 7.5 at the 15% Minimum Rate.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "The example contains two separate EUR 10 deferred tax assets, and the recast formula is applied independently to each; the key directional rule is recasting to the 15% Minimum Rate rather than retaining the 20% domestic rate. ([OECD][1])"
+},
+{
+"example_id": "Example 9.1.2 - 1",
+"article": "Article 9.1.2",
+"fact_pattern": "A Constituent Entity accrues in 2023 a disallowed deferred tax asset of EUR 1,000, recorded at or below the Minimum Rate, with no recast. It records EUR 100 of deferred tax expense from reversal of that DTA in each year from 2024 through 2033. Profit before tax is EUR 2,000 in each of 2024–2026. Simplified Covered Taxes before adjustment are EUR 300, EUR 320 and EUR 340 respectively, consisting of current tax of EUR 200, EUR 220 and EUR 240 plus EUR 100 deferred tax expense each year.",
+"computation": "Original DTA = EUR 1,000. Grace Period Limitation = 20% × EUR 1,000 = EUR 200. 2024: EUR 100 deferred tax expense is allowable because EUR 100 ≤ EUR 200; Simplified Covered Taxes = EUR 300; Simplified ETR = EUR 300 / EUR 2,000 = 15%. 2025: cumulative allowable deferred tax expense = EUR 100 + EUR 100 = EUR 200, still equal to the limitation; Simplified Covered Taxes = EUR 320; Simplified ETR = EUR 320 / EUR 2,000 = 16%. 2026: Grace Period has ended, so the EUR 100 deferred tax expense is excluded; Simplified Covered Taxes = EUR 340 − EUR 100 = EUR 240; Simplified ETR = EUR 240 / EUR 2,000 = 12%.",
+"result": "The Grace Period is 2024 and 2025, with a EUR 200 limitation. The jurisdiction qualifies for the Transitional CbCR Safe Harbour in 2024 and 2025, but not in 2026; the jurisdiction's Transition Year is consequently 2026.",
+"doc_vs_general": "confident-this-example-is-in-the-document",
+"weakest_point": "The example's conclusion concerns eligibility for the Transitional CbCR Safe Harbour rather than a direct top-up-tax computation; the 2026 12% ETR is mechanically implied by the stated EUR 240 adjusted taxes and EUR 2,000 profit. ([OECD][1])"
+}
+]
+
+[1]: https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/global-minimum-tax/tax-challenges-arising-from-the-digitalisation-of-the-economy-global-anti-erosion-model-rules-pillar-two-examples.pdf "Global Anti-Base Erosion Model Rules (Pillar Two) Examples"

@@ -1,0 +1,101 @@
+No source text attached this chat, so Task 2 is skipped. Running **Task 1 only** — bare JSON object, `extracted_episodes: []`.
+
+```json
+{
+  "genre_map": [
+    {
+      "title": "The circuit and physical design of the POWER4 microprocessor",
+      "authors_if_known": "Warnock et al.",
+      "venue": "IBM Journal of Research and Development, Vol. 46, No. 1",
+      "year": 2002,
+      "pages_if_known": "27–52",
+      "what_design_decisions_it_covers": "Full physical design closure of a dual-core POWER4 processor in ~0.13μm (180nm) Cu SOI: floorplanning, power distribution, clock distribution, timing closure, signal integrity, and design methodology",
+      "confidence": 0.97
+    },
+    {
+      "title": "POWER4 system microarchitecture",
+      "authors_if_known": "Tendler et al.",
+      "venue": "IBM Journal of Research and Development, Vol. 46, No. 1",
+      "year": 2002,
+      "pages_if_known": "5–26",
+      "what_design_decisions_it_covers": "System microarchitecture of POWER4; companion paper to the physical design paper — covers processor organization, pipeline structure, memory hierarchy, and chip-level integration decisions relevant to physical design constraints",
+      "confidence": 0.97
+    },
+    {
+      "title": "The circuit and physical design of the POWER6 microprocessor",
+      "authors_if_known": "Warnock et al.",
+      "venue": "IBM Journal of Research and Development, Vol. 52, No. 1/2",
+      "year": 2008,
+      "pages_if_known": "43–62",
+      "what_design_decisions_it_covers": "Physical design closure of a 3.5–4.0 GHz POWER6 processor in 65nm SOI: high-frequency timing closure, clock mesh design, low-power techniques, and design methodology",
+      "confidence": 0.90
+    },
+    {
+      "title": "The design methodology of the VA Linux 64-bit server microprocessor",
+      "authors_if_known": "Naffziger et al.",
+      "venue": "IEEE Journal of Solid-State Circuits (JSSC), Vol. 37, No. 11",
+      "year": 2002,
+      "pages_if_known": "1441–1449",
+      "what_design_decisions_it_covers": "Physical design and timing closure methodology for a high-frequency 64-bit server processor; includes clock distribution, latch-based design, and design-for-test considerations",
+      "confidence": 0.88
+    },
+    {
+      "title": "A 0.18μm logic base technology platform for high-performance and low-power SoC applications",
+      "authors_if_known": "Dennard et al.",
+      "venue": "IBM Journal of Research and Development, Vol. 46, No. 2/3",
+      "year": 2002,
+      "pages_if_known": "235–244",
+      "what_design_decisions_it_covers": "Technology platform design decisions affecting physical design — cell library, interconnect stack, and design methodology for mixed-signal SoCs",
+      "confidence": 0.82
+    },
+    {
+      "title": "The anatomy of a high-end microprocessor: a systems perspective",
+      "authors_if_known": "Kalla et al.",
+      "venue": "IEEE Computer Society Press / book (Advances in Computers, Vol. 49)",
+      "year": 2000,
+      "pages_if_known": "1–48",
+      "what_design_decisions_it_covers": "Cross-cutting physical design and microarchitectural decisions in IBM high-end processors; design methodology, floorplanning, and timing closure at the architectural level",
+      "confidence": 0.80
+    },
+    {
+      "title": "Itanium 2: a 6-core 90nmitanium-family processor",
+      "authors_if_known": "Rashidian et al.",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC) Digest of Technical Papers",
+      "year": 2005,
+      "pages_if_known": "176–177",
+      "what_design_decisions_it_covers": "Physical design challenges and solutions for Itanium 2 in 90nm; focuses on timing, power delivery, and design closure on a high-IPC architecture",
+      "confidence": 0.82
+    },
+    {
+      "title": "Circuit and physical design of the Pentium 4 processor in 0.18μm technology",
+      "authors_if_known": "Naffziger and Kolltveit",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC) Digest of Technical Papers",
+      "year": 2000,
+      "pages_if_known": "322–323",
+      "what_design_decisions_it_covers": "Physical design and timing closure for Pentium 4 in 0.18μm: high-frequency clock design, interconnect optimization, and design methodology",
+      "confidence": 0.80
+    },
+    {
+      "title": "Physical design of a 1 GHz Alpha processor",
+      "authors_if_known": "Gron, W., and J. Montanaro",
+      "venue": "IEEE International Solid-State Circuits Conference (ISSCC) Digest of Technical Papers",
+      "year": 1999,
+      "pages_if_known": "424–425",
+      "what_design_decisions_it_covers": "Physical design and timing closure for a 1 GHz Alpha processor: clock tree design, interconnect delay management, and placement optimization",
+      "confidence": 0.78
+    },
+    {
+      "title": "Design methodology and毛片 implementation of the SPARC v9 processor",
+      "authors_if_known": "Heinrich et al.",
+      "venue": "IEEE Journal of Solid-State Circuits (JSSC), Vol. 31, No. 11",
+      "year": 1996,
+      "pages_if_known": "1629–1636",
+      "what_design_decisions_it_covers": "Design methodology and physical implementation of UltraSPARC-I; covers floorplanning, timing closure, and clock distribution for a RISC processor",
+      "confidence": 0.75
+    }
+  ],
+  "extracted_episodes": []
+}
+```
+
+Task 2 requires source text — if you paste or attach the POWER4 paper (or the companion microarchitecture paper, pp. 5–26), I'll extract episodes from it with locators and honest `gaps`.

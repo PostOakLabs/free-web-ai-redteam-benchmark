@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Deeply pipelined trace cache design (hyper pipelined technology) to reach very high clock frequency",
+    "where_in_paper": "Front-end / hyper pipelined technology and trace cache section",
+    "decision": "The Pentium 4 used a very deep pipeline (I recall roughly 20 stages) combined with a trace cache that stores decoded micro-ops rather than raw x86 instruction bytes, so the front end doesn't have to re-decode instructions on repeated execution of the same code path.",
+    "alternatives_or_rejected": "I recall the paper contrasting this against a conventional shallower-pipeline, instruction-cache-based front end (as used in prior x86 designs), arguing decode is expensive on x86 and re-decoding on every fetch of hot code wastes pipeline stages and power, but I'm not fully confident of the exact contrastive wording used.",
+    "rationale": "As I recall, the stated rationale was that the trace cache removes decode from the common hot-path execution loop and that the deep pipeline was necessary to hit substantially higher clock frequencies than prior-generation x86 cores, accepting a longer misprediction penalty as the tradeoff.",
+    "outcome": "The paper reports achieving significantly higher clock frequency than prior x86 implementations at the same process generation, at the cost of a longer branch misprediction penalty due to pipeline depth.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  },
+  {
+    "title": "Rapid execution engine — double-pumped ALUs running at twice core clock",
+    "where_in_paper": "Execution core / rapid execution engine section",
+    "decision": "Simple integer ALU operations were executed on 'double-pumped' ALUs that effectively operate at twice the core clock frequency, allowing back-to-back dependent simple integer operations to execute faster than a conventional single-cycle ALU at core clock would allow.",
+    "alternatives_or_rejected": "I recall this being framed against a conventional single-rate ALU design, but I do not have confident recall of the paper's exact stated alternative or the specific reasoning language used to reject it.",
+    "rationale": "General reasoning associated with this feature was that many integer operations are simple enough to be split across a half-cycle timing budget, letting dependent chains of simple ops resolve faster — I cannot confidently attribute the precise wording of this rationale to the paper itself versus general knowledge of the design.",
+    "outcome": "Reported effect was improved throughput on simple integer-dependent instruction sequences, though I don't have confident recall of a specific quantitative claim from this paper.",
+    "paper_vs_general": "from-general-P4-knowledge-not-necessarily-this-paper",
+    "confidence": 0.3
+  }
+]

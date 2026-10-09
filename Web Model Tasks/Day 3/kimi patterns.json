@@ -1,0 +1,114 @@
+```json
+[
+  {
+    "pattern_name": "Block boundary I/O delay budget for unimplemented blocks",
+    "situation": "Two blocks are being implemented in parallel and their top-level routing is not yet complete; input and output delays must be negotiated before physical integration.",
+    "derivation": "1. Start with clock period P. 2. Subtract clock uncertainty U (assumes 50 ps at 28nm, confidence 0.6) and setup margin M (assumes 10% of P, confidence 0.7) to get available budget B = P - U - M. 3. Estimate interconnect delay I from floorplan distance d and average intermediate-metal delay (assumes 120 ps/mm, confidence 0.6). 4. Negotiate split between launch and capture blocks based on RTL complexity; if complexity is equal, each gets (B - I)/2. 5. set_input_delay on the capture block = launch_budget + I = (B + I)/2. 6. set_output_delay on the launch block = capture_budget + I = (B + I)/2. 7. Document assumptions in the constraint header.",
+    "wrong_way": "Split the period 50/50 without accounting for interconnect distance or relative logic depth. One block receives an impossible budget while the other has unusable slack, and top-level integration fails because the slack-rich block was optimized for area rather than speed.",
+    "defense": "Show the floorplan distance, RTL complexity comparison such as pipeline depth or gate count, and reference actual achieved delays from a previous project on the same node.",
+    "signoff_risk": "Too tight -> block fails timing and requires a late ECO or respin. Too loose -> block passes standalone but top-level integration fails because the external delay was underestimated, requiring late-stage top-level buffer insertion.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "at 7nm and below, wire delay is less dominant but RC variation is higher, so margin increases and wire delay estimates are more uncertain"
+  },
+  {
+    "pattern_name": "False path versus multicycle path from control-signal analysis",
+    "situation": "A path in the netlist is not intended to be a single-cycle path, such as a register loaded by a decimated clock enable or a logically impossible combination.",
+    "derivation": "1. Trace the capturing flop's enable signal back to its source, which may be a counter, pulse generator, or gating logic equation. 2. Determine the minimum stable interval N in clock cycles from RTL inspection or simulation. 3. If the data source is guaranteed stable for N cycles and the capture only occurs on the Nth cycle, apply set_multicycle_path -setup N and set_multicycle_path -hold N-1. 4. If the path is logically never exercised for functional data transfer, such as a constant tie-off or scan-only path, apply set_false_path. 5. Verify with a waveform or formal property check before review.",
+    "wrong_way": "Declare a false path when the path is actually a multicycle functional path. The tool ignores the path entirely, so if the enable logic has a bug and the path is exercised in a single cycle, silicon fails silently because no timing check ever existed.",
+    "defense": "Show the RTL enable equation or a simulation waveform proving the N-cycle interval. For a false path, show the constant tie-off or mutually exclusive select logic that makes the path logically unreachable.",
+    "signoff_risk": "Too loose (false path when multicycle needed) -> functional failure if the path is accidentally exercised single-cycle. Too tight (multicycle when false path sufficient) -> wasted optimization effort and possible congestion from unnecessary buffering.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "node_era_note": "at 7nm and below, complex clock gating and enable logic make multicycle derivation harder; at 28nm, simple counter-based enables were more common"
+  },
+  {
+    "pattern_name": "Gray-code FIFO pointer CDC max_delay constraint",
+    "situation": "A clock-domain crossing carries gray-coded FIFO pointers from one domain to another.",
+    "derivation": "1. Identify source and destination clocks and determine the faster period P_fast = min(P_src, P_dest). 2. Gray-code encoding guarantees only one bit changes per increment, but the entire bus must propagate within one receiving clock period to avoid sampling a multi-bit transition. 3. Apply set_max_delay -datapath_only from source to destination equal to P_fast (confidence 0.8), or 0.8 times P_fast for margin (confidence 0.6). 4. Do not apply set_false_path, because that would remove all timing checks and allow arbitrary delay. 5. Optionally add set_bus_skew if the tool supports it.",
+    "wrong_way": "Set false path on the gray-code pointer bus. The tool ignores timing, so if a logic error causes two bits to toggle or if routing delay exceeds one clock period, the destination samples an invalid code and the FIFO corrupts data silently.",
+    "defense": "Show the gray-code encoding table and explain that max_delay ensures the single-bit transition is captured within one cycle. Reference the CDC verification report or protocol specification.",
+    "signoff_risk": "Too loose (false path) -> FIFO pointer mismatch, data loss, or system lock-up. Too tight (max_delay significantly less than P_fast) -> impossible routing, forced buffer chains, and power or area bloat.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "at 7nm and below, on-chip variation makes max_delay harder to meet, so some teams use quasi-synchronous schemes or hard FIFO macros instead"
+  },
+  {
+    "pattern_name": "Early-implementation over-constraining budget",
+    "situation": "Pre-CTS synthesis and placement need margin for unknown clock skew, variation, and late ECOs.",
+    "derivation": "1. Estimate expected post-CTS skew S from a previous project on the same node (assumes 80 ps at 28nm, confidence 0.6). 2. Estimate OCV impact D as a percentage of nominal period (assumes 15%, confidence 0.6). 3. Reserve ECO margin E (assumes 5% of P_nominal, confidence 0.5). 4. Compute effective period P_eff = P_nominal - S - (D * P_nominal) - (E * P_nominal). 5. Apply P_eff during synthesis and initial placement. 6. After CTS, measure actual skew S_actual and relax toward P_nominal if the actual skew is smaller than estimated.",
+    "wrong_way": "Over-constrain by a fixed large percentage such as 30% without a basis in estimated skew or variation. The tool inserts excessive buffers, causing congestion and power issues that are difficult to undo when relaxing later.",
+    "defense": "Present a spreadsheet with the skew estimate, OCV table from library characterization, and historical ECO count from a previous project on the same node.",
+    "signoff_risk": "Too tight -> excessive buffering, congestion, and power or area bloat that may not fully recover on relaxation. Too loose -> no headroom for CTS skew or late ECOs, causing a signoff crunch and potential silicon failure.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "at 7nm and below, AOCV and POCV replace flat OCV derates, so over-constraining uses statistical margins rather than flat period subtraction"
+  },
+  {
+    "pattern_name": "Virtual-clock-based IO delay from board and package parameters",
+    "situation": "The chip interfaces with external devices and the board-level clock arrives at the pad, requiring constraints that account for off-chip delays.",
+    "derivation": "1. Create a virtual clock V with the same period and waveform as the board clock. 2. Estimate package trace delay T_pkg (assumes 100 ps for wirebond, confidence 0.6). 3. Estimate PCB trace delay T_pcb from trace length and dielectric constant (assumes 6-7 ps/mm, confidence 0.7). 4. For inputs, set_input_delay = T_ext_tco + T_pcb + T_pkg. 5. For outputs, set_output_delay = T_pcb + T_pkg + T_ext_setup. 6. Reference virtual clock V on all IO constraints so that internal clock insertion delay is not incorrectly applied.",
+    "wrong_way": "Use the internal clock directly as the reference for set_input_delay without a virtual clock. The tool incorrectly accounts for internal clock latency, causing IO timing to be off by the insertion delay, which is on the order of 200-500 ps.",
+    "defense": "Show the board stackup, package length extraction or IBIS model, and the external device datasheet specifying Tco and setup values.",
+    "signoff_risk": "Too tight -> IO passes in block-level signoff but fails in system test. Too loose -> internal paths are over-optimized to compensate for the IO budget, wasting power and area.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "at 7nm and below, high-speed SerDes and source-synchronous interfaces dominate, making virtual-clock-based SDC less common than protocol-specific timing models"
+  },
+  {
+    "pattern_name": "RTL-complexity-based timing budget for unimplemented blocks",
+    "situation": "Two blocks have not yet been synthesized and there is no gate-level netlist to measure actual path delays, but a boundary budget must be established.",
+    "derivation": "1. Estimate combinational depth for each block from RTL by counting logic levels between flops, for example Block A at 8 levels and Block B at 4 levels. 2. Apply historical delay per level L from the same node library (assumes 35 ps per level at 28nm typical VT, confidence 0.6). 3. Compute raw estimates D_A = levels_A * L and D_B = levels_B * L. 4. Add margin M for unknown optimization (assumes 25%, confidence 0.5). 5. Allocate budget proportionally: Block_A_budget = P * D_A / (D_A + D_B + I), where I is estimated interconnect delay. 6. Set input and output delays to match the negotiated budgets.",
+    "wrong_way": "Split the clock period 50/50 regardless of logic depth or complexity. The deep block receives an impossible budget and requires late restructuring, while the shallow block finishes quickly with slack that cannot be transferred across the boundary.",
+    "defense": "Show the RTL levelization report and reference previous block actuals demonstrating the correlation between level count and achieved delay on the same node.",
+    "signoff_risk": "Too tight -> deep block fails timing and requires pipeline insertion or architecture change. Too loose -> shallow block is optimized for area rather than speed, and top-level integration fails because its output delay was underestimated.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.65,
+    "node_era_note": "at 7nm and below, delay per level varies widely with VT and track type, making raw level count less predictive"
+  },
+  {
+    "pattern_name": "Clock gating setup and hold check derivation",
+    "situation": "An integrated clock gating cell must be constrained so that the enable signal does not change near the active clock edge and create a glitch.",
+    "derivation": "1. Extract the ICG library setup T_setup_lib and hold T_hold_lib from the timing library, for example 40 ps setup and 30 ps hold (confidence 0.8). 2. Estimate clock skew U between the enable launch flop and the ICG cell based on the clock tree plan (assumes 50 ps, confidence 0.6). 3. Derive effective setup = T_setup_lib + U and effective hold = T_hold_lib + U, conservatively adding the skew magnitude regardless of direction. 4. Apply set_clock_gating_check -setup [effective_setup] -hold [effective_hold]. 5. Verify against the post-CTS skew report in the gating region.",
+    "wrong_way": "Use the raw library setup and hold values without adding skew uncertainty. If the enable launch flop and the ICG are physically separated, clock skew can cause the enable to arrive after the clock edge, producing a glitch on the gated clock.",
+    "defense": "Show the CTS skew estimate for the gating region and the library characterization values for the specific ICG cell.",
+    "signoff_risk": "Too loose -> clock glitches, functional failure, and sporadic silicon bugs. Too tight -> impossible to meet with realistic skew, causing the tool to insert unnecessary buffers on the enable path.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.7,
+    "node_era_note": "at 7nm and below, clock mesh and multi-source CTS reduce ICG skew sensitivity, but glitch windows are narrower due to higher frequency"
+  },
+  {
+    "pattern_name": "Combinational feedthrough max_delay budgeting",
+    "situation": "A hard macro or block contains a pure combinational path from an input pad to an output pad that must meet a system-level delay requirement.",
+    "derivation": "1. Determine the system-level requirement T_system from the top-level timing budget, for example 2 ns. 2. Subtract input pad delay T_inpad and output pad delay T_outpad from the library (assumes 100 ps each, confidence 0.7). 3. Compute remaining budget B = T_system - T_inpad - T_outpad. 4. Apply set_max_delay -datapath_only -from [input] -to [output] B. 5. Do not use set_false_path because the path must meet board-level timing.",
+    "wrong_way": "Leave the path unconstrained or apply set_false_path. If no clock is present the path is unchecked; if a virtual clock is present the tool may apply an arbitrary period. The path fails at board-level timing test.",
+    "defense": "Show the board-level timing budget and the pad delay extraction from the library, demonstrating that the macro budget is a derived subset of the system requirement.",
+    "signoff_risk": "Too loose -> system-level setup failure at board test. Too tight -> impossible macro timing that requires pipeline insertion or a specification change.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "at 7nm and below, pure combinational feedthroughs are rare due to high integration; at 28nm they were common in IO macros"
+  },
+  {
+    "pattern_name": "Post-CTS clock uncertainty update from actual skew",
+    "situation": "After clock tree synthesis, the pre-CTS pessimistic uncertainty must be replaced with realistic numbers for signoff.",
+    "derivation": "1. Run CTS and extract actual global skew S_global and local skew S_local from the CTS report. 2. Add PLL jitter J from the device datasheet. 3. Add margin M for residual on-chip variation (assumes 5% of period for setup, confidence 0.6). 4. Compute setup uncertainty = S_global + J + M. 5. Compute hold uncertainty = S_local + J + M_hold. 6. Replace the pre-CTS pessimistic uncertainty with these computed values. 7. Re-run static timing analysis.",
+    "wrong_way": "Keep the pre-CTS uncertainty, which was intentionally pessimistic to account for unknown skew. After CTS this double-counts the actual skew and causes over-design in the final stages.",
+    "defense": "Show the CTS skew report and the PLL jitter specification, and explain that the margin is a percentage of period based on historical variation from the same node.",
+    "signoff_risk": "Too tight -> area and power bloat from over-pessimism that cannot be recovered late in the flow. Too loose -> setup or hold failures at signoff if actual variation exceeds the reduced budget.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "node_era_note": "at 7nm and below, POCV and statistical timing reduce the need for flat uncertainty margins, though skew and jitter remain"
+  },
+  {
+    "pattern_name": "Mode-based case analysis for multiplexed clocks",
+    "situation": "A block has multiple clocks selected by a multiplexer, such as a functional clock and a slower test clock.",
+    "derivation": "1. Identify the select signal for the clock mux, for example TEST_EN. 2. Apply set_case_analysis 0 or 1 to the select pin to disable the inactive clock tree during each mode. 3. Derive constraints for functional mode with the functional clock period P_func. 4. Derive constraints for test mode with the test clock period P_test, which is often slower, for example by a factor of 10. 5. Run separate timing sessions or use multi-mode analysis. 6. Verify that no paths are timed between mutually exclusive clocks.",
+    "wrong_way": "Constrain both clocks simultaneously without case analysis. The tool analyzes cross-domain paths between functional and test flops, reporting massive false violations and causing over-design or impossible closure.",
+    "defense": "Show the mux RTL and the test protocol document specifying the clock frequencies and mode selection per test phase.",
+    "signoff_risk": "Too loose (no case analysis and modes switch dynamically) -> missing real paths in untested mode combinations. Too tight (both modes active) -> false violations, wasted engineering time, and over-optimization.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "at 7nm and below, UPF-based power intent and multi-mode multi-corner analysis formalize mode handling; at 28nm, manual set_case_analysis was more common"
+  }
+]
+```

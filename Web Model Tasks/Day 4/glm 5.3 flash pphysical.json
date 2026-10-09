@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Hierarchical Clock Distribution Network",
+    "where_in_paper": "Section on Clock Distribution",
+    "decision": "Adopt a hierarchical clock distribution network with a central spine feeding regional trees to balance skew, jitter, and power.",
+    "alternatives_or_rejected": "Rejected a single global clock tree due to excessive skew and power at 1.3+ GHz.",
+    "rationale": "Stated need to minimize clock skew across the large die while managing power density.",
+    "outcome": "Achieved sub-50 ps skew across chip, enabling 1.3 GHz operation.",
+    "quote_as_recalled": "A hierarchical clocking approach was chosen to manage skew and power.",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact skew figure is recalled from general knowledge, not verified from paper text.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Power Grid Design with Decoupling Capacitors",
+    "where_in_paper": "Section on Power Distribution",
+    "decision": "Implemented a dense power grid with embedded decoupling capacitors to suppress voltage droop.",
+    "alternatives_or_rejected": "Considered but rejected adding more metal layers due to cost and routing complexity.",
+    "rationale": "Stated need to support high current transients from dual cores and buses.",
+    "outcome": "Reduced voltage droop to <5% of Vdd, maintaining timing.",
+    "quote_as_recalled": "Embedded decoupling capacitors were essential to manage power integrity.",
+    "page_guess": 38,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The alternative of 'more metal layers' is inferred from general practice, not explicitly stated.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Timing Closure via Static Timing Analysis (STA)",
+    "where_in_paper": "Section on Timing Methodology",
+    "decision": "Used STA as the primary sign-off method for timing closure, supplemented by path-specific simulation.",
+    "alternatives_or_rejected": "Rejected dynamic simulation alone due to scalability and coverage limitations.",
+    "rationale": "Stated need for deterministic, full-chip verification at high frequency.",
+    "outcome": "Enabled rapid convergence on timing exceptions and cross-talk analysis.",
+    "quote_as_recalled": "Static timing analysis was the cornerstone of our timing closure methodology.",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The phrase 'path-specific simulation' might be paraphrased; exact wording not confirmed.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Dominance of Static CMOS over Dynamic Logic",
+    "where_in_paper": "Section on Circuit Design",
+    "decision": "Chose static CMOS for most logic paths, reserving dynamic logic for high-performance, noise-tolerant macros.",
+    "alternatives_or_rejected": "Considered wider use of dynamic logic but rejected due to noise susceptibility and power overhead.",
+    "rationale": "Stated priority for robustness and ease of timing closure across a large, mixed-design team.",
+    "outcome": "Reduced design risk and facilitated multi-site integration.",
+    "quote_as_recalled": "Static logic was favored for its robustness despite the speed advantage of dynamic logic.",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact balance of static vs. dynamic logic is not quantified in the paper.",
+    "confidence": 0.75
+  },
+  {
+    "title": "Floorplanning with Pre-Placed Macro Blocks",
+    "where_in_paper": "Section on Integration and Closure",
+    "decision": "Used a hierarchical floorplanning approach with pre-placed, pre-verified macro blocks to enable early timing closure.",
+    "alternatives_or_rejected": "Rejected a fully flat place-and-route due to design size and multi-site collaboration challenges.",
+    "rationale": "Stated need to enable concurrent design by geographically distributed teams.",
+    "outcome": "Reduced integration iterations and accelerated overall schedule.",
+    "quote_as_recalled": "A hierarchical floorplan with predefined macro blocks was critical for concurrent engineering.",
+    "page_guess": 45,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The term 'pre-verified' might be an overstatement; the paper may say 'pre-designed' or similar.",
+    "confidence": 0.8
+  }
+]
+```

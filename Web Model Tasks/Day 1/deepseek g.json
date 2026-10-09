@@ -1,0 +1,92 @@
+[
+  {
+    "pattern_name": "Block I/O delay budget split",
+    "situation": "When dividing a chip into hierarchical blocks, you need to set input and output delays for each block's ports, where the total period is split between the launching block's internal delay, the interconnect between blocks, and the capturing block's internal delay.",
+    "derivation": "Start with clock period T. Determine interconnect wire delay (T_wire) from floorplan estimates (e.g., 100ps/mm). Determine the launch block's internal clock-to-output (T_cko) and the capture block's setup time (T_setup). Then Input Delay = T_wire + T_setup; Output Delay = T_cko + T_wire. Alternatively, for a balanced budget, set Input Delay = Output Delay = (T - T_cko - T_setup - T_wire)/2, then add margin. Actual derivation: measure worst-case T_cko from synthesis and T_setup from library, add 20% optimism guardband, subtract from period, and allocate remaining to wiring with explicit clock jitter subtracted.",
+    "wrong_way": "Setting both input and output delays to 40% of the period without accounting for actual T_cko or T_setup, or forgetting to subtract clock jitter and clock skew. This leads to over-constrained internal logic or under-constrained I/O paths, causing late-stage ECOs when the block doesn't fit.",
+    "defense": "The budget is backed by a table of wire-length estimates from the physical floorplan, library characterization corners, and actual pre-CTS clock skew assumptions. A signed budget spreadsheet with worst-case corners and guardbands is maintained, reviewed by the top-level integrator.",
+    "signoff_risk": "Too tight: internal logic becomes over-constrained, causing excessive area and power, or failing timing unnecessarily. Too loose: top-level paths fail at signoff because inter-block wiring delay exceeds the budget, requiring late-stage floorplan changes or respin.",
+    "confidence": 0.95
+  },
+  {
+    "pattern_name": "False path versus multicycle decision",
+    "situation": "A path exists between two flops that is logically possible but does not need to complete in one cycle, e.g., enable signals, counter readouts, or test paths. Engineer must decide whether to set it as a false path (no timing check) or a multicycle path (allow N cycles).",
+    "derivation": "First, determine if the data is sampled only after N cycles by design spec (e.g., a state machine transition that occurs every 4 cycles). If so, derive multicycle: setup check uses (N-1) cycles as the launch edge to capture edge, hold check stays at same cycle (unless hold multicycle is also specified). The value N is derived from the design RTL control flow – count the minimum number of clock edges between a write and a read of that flop. If the path is never valid (e.g., scan-enable connecting to functional flops in normal mode, or mutually exclusive enables), mark false path.",
+    "wrong_way": "Marking a path as false when the data is actually sampled on a later cycle but the design assumes a specific latency – this can hide min-delay hold issues if the launch is too early. Conversely, marking a path as multicycle with N=3 when the actual data must be captured in 2 cycles, causing functional failures because the data is overwritten before capture.",
+    "defense": "The multicycle setting is cross-referenced with the RTL specification and simulation waveforms showing the exact number of cycles between writes and reads. The false path is justified by functional verification that the path is never sensitized during normal operation (e.g., mutually exclusive selects). A waiver form is signed by the design architect.",
+    "signoff_risk": "Too tight (multicycle N too small, or false path not applied): over-constrains, causing unnecessary buffering, area, and potential timing failures. Too loose (multicycle N too large, or false path applied incorrectly): under-constrains, causing functional hold or setup failures at silicon, often intermittent and hard to debug.",
+    "confidence": 0.93
+  },
+  {
+    "pattern_name": "Clock-domain crossing (CDC) constraint – asynchronous interface",
+    "situation": "Signals cross between two asynchronous clock domains (e.g., 500MHz and 400MHz with no phase relationship). Typically, synchronization flops (2 or 3 stages) are used.",
+    "derivation": "Apply `set_clock_groups -asynchronous -group {clkA} -group {clkB}`. This prevents the tool from analyzing any path between the two domains (both setup and hold). Alternatively, if a synchronous handshake exists, use `set_max_delay -datapath_only` with a value equal to the period of the receiving clock, plus an uncertainty margin, to ensure the setup is met but not overly restrict the source. The clock groups method is preferred for purely asynchronous.",
+    "wrong_way": "Constraining each path individually with a `set_max_delay` that is too small (e.g., half the receiving period) or forgetting to apply `-datapath_only`, which also includes clock skew pessimism, causing false violations. Another wrong way: using `set_false_path` on the synchronizer outputs but not on the input path, leaving a hold violation from the launch clock.",
+    "defense": "The CDC synchronization scheme is validated through structural checks (e.g., SpyGlass CDC) that confirm the synchronizer stages are present and no combinational logic exists between stages. The clock group constraint is a standard methodology per all foundry PDK guidelines.",
+    "signoff_risk": "Too tight (applying `set_max_delay` with small value): may force the tool to add buffers to meet a non-existent timing, wasting area and possibly causing hold issues. Too loose (forgetting to constrain at all, or false-path on all paths): the tool ignores a possible metastability path, and silicon may fail due to setup/hold at the synchronizer if the source flop launches too late relative to the destination clock edge.",
+    "confidence": 0.94
+  },
+  {
+    "pattern_name": "Virtual clock for external IO",
+    "situation": "Constraining chip-level I/O pins (e.g., to external memory or bus) where the external device has its own clock that is not present as a clock source inside the chip.",
+    "derivation": "Create a virtual clock in the SDC: `create_clock -name virtual_ext_clk -period T` (with appropriate waveform). Then set input delay relative to this virtual clock: `set_input_delay -clock virtual_ext_clk -max T_ext_setup`. The delay value is derived from the external device datasheet: if external memory has a setup time of T_setup_ext and a board trace delay of T_board, then max input delay = T_board + T_setup_ext. Output delay similarly uses external hold times.",
+    "wrong_way": "Using the internal chip clock to constrain the IO without accounting for the phase difference between the internal and external clock, or ignoring board delays. Another wrong way: setting both max and min delays without considering the external clock's uncertainty.",
+    "defense": "The virtual clock definition matches the external clock frequency and phase from the system specification. The delays are derived directly from the external component datasheet and board-level SI simulations, with a 10% guardband for aging. Reviewed with system engineers.",
+    "signoff_risk": "Too tight (overestimating external setup/hold): causes the chip to drive outputs earlier than necessary or sample inputs too late, possibly leading to interface failures. Too loose (underestimating): the chip interface will violate the external device timing at board level, causing system failures.",
+    "confidence": 0.92
+  },
+  {
+    "pattern_name": "Generated clock (clock divider) derivation",
+    "situation": "A digital clock divider (e.g., divide-by-2 or by-N) creates a synchronous derived clock from a master clock. This derived clock is used as a clock for downstream flops.",
+    "derivation": "Use `create_generated_clock -name div_clk -source master_clk -divide_by N -master_clock master_clk [get_pins divider_output]`. If the divider has an inherent phase offset, use `-edge_shift` or `-invert` to correctly set the edge. For a simple divide-by-2, the waveform is implicitly derived. The derivation requires the source pin and master clock to be correctly identified.",
+    "wrong_way": "Creating a new independent `create_clock` on the divider output with the same period, which ignores the phase relationship to the master and causes the STA tool to treat the two clocks as asynchronous, over‑constraining cross-domain paths or missing real phase relationships.",
+    "defense": "The generated clock definition is validated by running a `report_clock -generated` to confirm the waveform matches the RTL model (e.g., `if (cnt==N-1) toggle`). Also cross-check the divider ratio with the RTL design spec.",
+    "signoff_risk": "Too tight (wrong phase or edge): creates false setup/hold violations on paths between the master and derived clock domains, forcing unnecessary ECOs. Too loose (treating them as asynchronous): real synchronous paths between domains are not timed, leading to silicon failures due to clock skew mismatch at the divided edge.",
+    "confidence": 0.96
+  },
+  {
+    "pattern_name": "Over-constraining strategy during early implementation",
+    "situation": "Early in the implementation flow (synthesis or early place-and-route), before the final floorplan and CTS, engineers add extra margin to constraints (e.g., reduce target period by 10%) to anticipate degradation from routing, clock skew, and cross-talk.",
+    "derivation": "The over-constraint is derived from historical data: for the same process node, typical timing degradation from synthesis to post-route signoff is, say, 15%. So, synthesis target period = nominal period * 0.85. Additionally, add a fixed clock uncertainty (e.g., 80ps) to account for clock skew and jitter. The amount is calibrated against previous tapeouts of similar blocks.",
+    "wrong_way": "Applying a uniform 10% over-constraint to all paths without distinguishing between logic-heavy and wire-heavy paths, or not relaxing it as the design matures, leading to excessive buffering and area blowout.",
+    "defense": "The over-constraint factor is backed by a correlation report from earlier runs, showing that 85% of post-route paths meet the tighter target. It is reviewed weekly and relaxed stepwise as the design approaches signoff, with clear gates (e.g., after clock tree synthesis, reduce to 5%).",
+    "signoff_risk": "Too tight (kept too long): waste power and area, may cause hold violations due to excessive buffers, or push the schedule due to difficult timing closure. Too loose (not applied early): paths are grossly under‑constrained, and late-stage routing changes will be massive, causing schedule slips.",
+    "confidence": 0.9
+  },
+  {
+    "pattern_name": "Clock uncertainty budgeting (jitter + skew)",
+    "situation": "When creating a clock, the `set_clock_uncertainty` command adds guardband for clock jitter, PLL phase noise, and static skew. This is crucial for both setup and hold.",
+    "derivation": "Setup uncertainty = (peak-to-peak jitter) + (max static skew). Hold uncertainty = (local skew variation) – often negative for hold to add pessimism. Derive from the PLL datasheet (e.g., 50ps rms jitter, convert to pk-pk = 6*sigma = 300ps) and the clock tree skew target (e.g., 80ps). So setup uncertainty = 300 + 80 = 380ps. Hold uncertainty = - (jitter + skew) because hold must be safe; often set `set_clock_uncertainty -hold 50ps` to add margin, but actually we can set negative for hold if the tool doesn't handle jitter.",
+    "wrong_way": "Using the same value for setup and hold (positive for both), which adds pessimism to hold (making it harder) and is incorrect because jitter affects setup (sampling edge later) but hold does not have the same effect (both edges shift). Another wrong way: ignoring PLL jitter and using only a small skew number, resulting in unconservative setup.",
+    "defense": "The uncertainty values are taken directly from the PLL specification and the CTS skew target, and are validated by post-silicon measurement of previous chips. The hold uncertainty is derived from the minimum clock tree insertion delay spread, and is often set to a small negative value to add a margin, or `0` with OCV.",
+    "signoff_risk": "Too tight (overestimating uncertainty): causes setup violations that are not real, leading to unnecessary buffering and area. Too loose (underestimating): real skew or jitter will cause timing failures on silicon, especially at high frequencies.",
+    "confidence": 0.91
+  },
+  {
+    "pattern_name": "Constraining two related clocks with a known phase difference",
+    "situation": "Two clocks are generated from the same PLL but have a fixed phase offset (e.g., a 500MHz clock and a 250MHz clock derived from the same PLL with a 90° phase shift).",
+    "derivation": "Define both as generated clocks from the same master with `-edges` or `-divide_by`. Then use `set_clock_groups -physically_exclusive` (if they never coexist) or `set_clock_groups -logically_exclusive` if they can coexist but are muxed. For paths between them, the tool inherently knows the phase from the edge specifications. If the phase relationship is known (e.g., derived clock is 0ns shifted), no extra constraint is needed; if there is a fixed but known phase, the tool computes it. For a 90° offset, specify the exact edges using `-edge` and `-edge_shift`.",
+    "wrong_way": "Declaring them as asynchronous (`-asynchronous`) or not defining the phase relationship, causing the tool to treat them as unrelated and either not time cross-domain paths or time them with maximum pessimism. Also, using independent `create_clock` without specifying the source will break the phase information.",
+    "defense": "The phase relationship is verified by RTL simulation waveforms and by comparing the clock tree physical insertion delays. The SDC uses generated clocks with explicit edge values to reflect the RTL divider's output waveform.",
+    "signoff_risk": "Too tight (if treated as synchronous with wrong phase): false violations on cross-domain paths. Too loose (treated as asynchronous): real violations between domains are not caught, especially for hold.",
+    "confidence": 0.88
+  },
+  {
+    "pattern_name": "Constrain a memory interface (SRAM) with setup/hold windows",
+    "situation": "A block contains a memory macro (SRAM) with its own timing arcs for address/control/data setup and hold relative to its clock. The SRAM's clock may be a generated clock inside the macro.",
+    "derivation": "Obtain the memory's timing library (.lib) which defines setup and hold constraints on its pins relative to its clock. The STA tool automatically checks these. However, if the clock to the SRAM is inverted or phase-shifted, you must account for it. Derive by adding a generated clock on the SRAM clock pin if it's created internally, or by explicitly constraining the input delay to the SRAM pins using `set_input_delay` relative to the external clock, with the delay value = T_internal_path. More commonly, the memory compiler provides the `sdf` or `.lib`, and the tool handles it. The derivation is to ensure the clock tree on the SRAM clock pin matches the timing model's waveform.",
+    "wrong_way": "Forgetting to balance the clock tree to the SRAM clock pin, or using the wrong clock waveform (e.g., not inverting when the SRAM expects rising edge but the design provides falling), causing incorrect setup/hold checks.",
+    "defense": "The SDC explicitly defines the clock on the SRAM clock pin as a generated clock derived from the source, or uses the same master clock. Cross-check with the memory's datasheet that the clock edge and phase are correct.",
+    "signoff_risk": "Too tight (wrong clock definition): false violations that cause ECOs to fix around the memory. Too loose (missing constraints): real setup/hold on the SRAM pins cause functional errors (read/write failures) at silicon.",
+    "confidence": 0.89
+  },
+  {
+    "pattern_name": "Budgeting between two blocks using a top-level interconnect model",
+    "situation": "At top-level integration, two separate physical blocks (e.g., CPU core and L2 cache) are connected by a long bus. The timing budget must be split between the source block's output delay, the wire delay, and the sink block's input delay, but neither block is yet implemented in full.",
+    "derivation": "Start with the total cycle budget T. Subtract the PLL jitter and skew (S). Estimate the wire delay from the floorplan (T_wire) using resistance-capacitance extraction on an abstract route. Allocate the remaining time (T - S - T_wire) between source's clock-to-output (T_cko) and sink's setup (T_setup). Typically, the architect sets T_cko = T_setup = (T - S - T_wire)/2. This ratio is then used to define output delay for the source block and input delay for the sink block. If one block has known tight internal paths, adjust the ratio (e.g., 60/40).",
+    "wrong_way": "Not accounting for the interconnect wire delay at all, or using a simple lumped RC that underestimates the distributed RC. Also, ignoring the effect of clock skew between the two blocks (which may be physically separated).",
+    "defense": "The wire delay is estimated from a preliminary floorplan with actual pin locations and routed with a post-route wire model. The ratio is reviewed with both block owners, and a guardband (e.g., 10%) is applied to absorb ECOs. The final numbers are captured in a constraint spreadsheet.",
+    "signoff_risk": "Too tight (allocating too much to wire or setup): forces the blocks to be over-optimized, wasting area. Too loose: top-level wiring becomes impossible to close, forcing a respin or package redesign.",
+    "confidence": 0.93
+  }
+]

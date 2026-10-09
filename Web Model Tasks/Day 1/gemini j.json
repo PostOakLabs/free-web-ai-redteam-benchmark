@@ -1,0 +1,40 @@
+{
+"verdict": "PLAUSIBLE-WITH-CORRECTIONS",
+"objections": [
+{
+"claim_attacked": "pin-swap on two macro instances to move high-fanout pins away from the most congested channel",
+"objection": "Hard macro pin geometries are physically fixed in the LEF/GDS library views. A physical design engineer cannot perform an in-place pin-swap on a hard macro instance during P&R unless executing a netlist ECO to swap logically equivalent functional signals (such as address bits or dual-port memory buses) or modifying macro orientation.",
+"severity": "major",
+"corrected_version": "Executed a netlist ECO to swap functionally equivalent bus signals (e.g., SRAM address lines) to connect to pins situated outside the congested channel corridor.",
+"confidence": 0.95
+},
+{
+"claim_attacked": "non-default routing rules relaxed for two mid-layer metals within the channel regions only",
+"objection": "Non-default routing rules (NDRs) like double-width/double-spacing are applied to satisfy strict electromigration (EM) or signal integrity/crosstalk limits. Simply relaxing them back to default rules in high-density channels frees up routing tracks, but introduces unmentioned signoff risks regarding EM violations or crosstalk noise on those specific nets.",
+"severity": "minor",
+"corrected_version": "Reverted non-critical signal nets from 2S/2W NDRs to default rules inside the channel while re-assigning high-speed NDR nets to upper metal layers (M6/M7) above the macro stack.",
+"confidence": 0.90
+},
+{
+"claim_attacked": "detailed-route violations dropped to 340 on the next route pass... with a small WNS degradation (−12 ps)",
+"objection": "Applying a 65% placement density cap inside narrow 2–4 gcell channels post-CTS forces standard cells and clock tree buffers out of the channel. Lengthening wire interconnects and displacing logic post-CTS typically causes a more significant setup WNS hit on paths traversing those channels than a negligible −12 ps.",
+"severity": "major",
+"corrected_version": "Setup WNS degraded by −45 ps due to logic displacement, which was subsequently recovered via targeted gate sizing and Vth swapping during post-route incremental timing optimization.",
+"confidence": 0.88
+},
+{
+"claim_attacked": "detailed-route violations dropped from ~214,000 to 340 on the next route pass",
+"objection": "A 99.8% reduction in detailed routing DRCs on the immediate next route pass implies the initial 214,000 DRCs were entirely systematic GRC track over-subscription shorts. While track starvation causes DRC explosions, local logic displacement usually leaves residual pin-access congestion around channel entrances that requires a few iterative route passes to reach under 500 DRCs.",
+"severity": "minor",
+"corrected_version": "Detailed route DRCs dropped to ~2,800 on the initial global re-route pass, which then closed down to 340 after localized pin-access and track-assignment ECO steps.",
+"confidence": 0.85
+}
+],
+"missing_from_story": [
+"How clock tree buffers already placed inside the channels during CTS were handled when applying the 65% placement density screen (e.g., whether CTS buffers were frozen, relocated, or re-synthesized).",
+"Post-route signal integrity and electromigration (EM) verification results on the nets where Non-Default Routing Rules were relaxed.",
+"The localized utilization impact at the entrances/mouths of the six channels caused by displacing standard cell logic out of the channels."
+],
+"most_defensible_part": "The decision to reject macro floorplan widening due to frozen top-level power grid rails and feedthrough constraints, and using localized placement density blockages as the primary mechanism to resolve channel track exhaustion.",
+"overall_note": "The core engineering narrative and trade-off choices are realistic and accurately reflect standard post-CTS congestion triage. To make the postmortem technically rigorous, the mechanism for macro 'pin-swapping' must be clarified as a logical netlist/bus ECO, and the timing degradation from post-CTS logic displacement should reflect a more realistic WNS hit. Accounting for clock buffer handling during local cell displacement will complete an otherwise solid case study."
+}

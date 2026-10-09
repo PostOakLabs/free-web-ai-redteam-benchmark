@@ -1,0 +1,353 @@
+```json
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      {
+        "signature": "Global routing overflow hot spots, typically 5–25% in localized regions, not uniformly distributed; often concentrated in macro channels or around high-density standard-cell clusters",
+        "metric_shape": "overflow % per grid cell shows spikes; global route reports discrete hot-spot list rather than a blanket elevation"
+      },
+      {
+        "signature": "DRC violations appear in routing layers (shorts, spacing, via failures) but not in placement or CTS",
+        "metric_shape": "drc_count > 0, concentrated on specific metal layers; placement density maps show the affected region"
+      },
+      {
+        "signature": "Timing may or may not degrade — congestion can cause both setup and hold violations depending on whether delay increase or hold-margin reduction dominates",
+        "metric_shape": "wns may be slightly negative in the affected region; tns elevation correlates spatially with overflow regions"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Macro feedthrough channel too narrow — insufficient routing tracks between abutted macros",
+        "distinguishing_check": "Inspect floorplan: if overflow hot spots align with macro-to-macro channels, and overflow is worst on layers 3–5 (cell-pin-access layers), it's channel pinch. Look at the cell density immediately adjacent to macro boundaries.",
+        "check_cost": "minutes",
+        "typical_fix": "Add hard placement-buffer rows adjacent to macro edges; rerun detailed placement with congestion_effort=high",
+        "fix_cost": "hours to half a day"
+      },
+      {
+        "cause": "Standard-cell density too high in a region — placement spread insufficient",
+        "distinguishing_check": "Cell density heat map: if any region exceeds ~80% cell density and overflow aligns with it, placement is the bottleneck. Check if global router shows overflow on upper layers (M6+) rather than just M3–5.",
+        "check_cost": "minutes",
+        "typical_fix": "Increase placement effort; refine_place with congestion mode; optionally raise utilization target if die margin exists",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Power-ground strap saturation — routing detours around pg straps",
+        "distinguishing_check": "Overlay pg strap map with overflow map; if overflow tracks follow strap corridors, pg routing is crowding signal routes. Check IR-drop report for the same region.",
+        "check_cost": "minutes to hours",
+        "typical_fix": "Reroute pg with wider straps or move straps to unused layers; adjust pg net order to route after signal route",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Clock network routing congestion — clock buffers and cts routing competing with signals",
+        "distinguishing_check": "Overlay clock tree net routes with overflow map; if overflow concentrates near high-fanout clock sinks and on clock routing layers, clock is the culprit. Check if all failing nets share one clock domain.",
+        "check_cost": "minutes",
+        "typical_fix": "Clone high-fanout clock sinks; add clock buffer insertion at intermediate points; reduce clock wire width if allowed",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Macro pin-access congestion — too many pins trying to exit a macro on the same face",
+        "distinguishing_check": "Inspect macro pin assignments: if a macro has >20 outputs on one face and overflow surrounds that macro, pin access is the bottleneck. Check the macro's .lib for pin locations.",
+        "check_cost": "hours",
+        "typical_fix": "Work with macro vendor to remap pin locations; if internal to the design, use layer assignment directives to pre-route that face on upper metals",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check floorplan alignment first (seconds) — macro channel and density issues are the most common root cause and are visible without running any new analysis; then move to pg and clock overlays which require map inspection; pin-access and layer-specific issues last because they require macro library inspection and are rarer.",
+    "classic_trap": "Re-running placement without fixing the floorplan — adding refine_place iterations when the root cause is macro geometry that placement cannot overcome, wasting hours and masking the real problem.",
+    "confidence": 0.88
+  },
+  {
+    "failure_class": "FAIL_TIMING_SETUP",
+    "symptoms": [
+      {
+        "signature": "wns < 0 (setup), tns elevated; failing paths may be concentrated or spread",
+        "metric_shape": "Number of failing endpoints, slack distribution shape (unimodal cluster vs. scattered), and whether failures share a common hierarchy or clock domain — this shape is the primary triage signal"
+      },
+      {
+        "signature": "Critical path report shows paths missing by small margin (10–200 ps) vs. large margin (>500 ps)",
+        "metric_shape": "Small-margin failures suggest optimization opportunity; large-margin failures suggest a structural problem — the distribution tells you which class of fix to reach for"
+      },
+      {
+        "signature": "Violations may be localized to one block, one clock domain, or one macro interface",
+        "metric_shape": "Cross-domain failures point to SDC or CDC issues; within-domain failures point to logic depth or placement"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "SDC constraint too tight — boundary budget derived from wrong corner or wrong assumption",
+        "distinguishing_check": "If thousands of endpoints fail by near-identical margins (unimodal, tight distribution) all in one clock domain, and no single path dominates, the constraint is wrong. Check the SDC input_delay / output_delay values against the liberty corner used for analysis.",
+        "check_cost": "minutes",
+        "typical_fix": "Revise the SDC constraint to reflect the correct corner; re-run timing correlation",
+        "fix_cost": "minutes to hours"
+      },
+      {
+        "cause": "Logic depth too deep — too many sequential stages for the clock period",
+        "distinguishing_check": "Critical path report shows the failing path has >15 logic levels; fanout and wireload are modest. Check the pipeline depth of the failing module against the clock period.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert pipeline registers; restructure logic to reduce levels; reduce clock frequency if architecture allows",
+        "fix_cost": "days to weeks (logic change); hours (frequency derate)"
+      },
+      {
+        "cause": "Placement problem — cells too far apart, long wires, high fanout",
+        "distinguishing_check": "Critical path report shows high wire delay (as a fraction of total path delay) or high fanout on a specific net. Compare estimated delay vs. placed delay. Congestion may co-occur.",
+        "check_cost": "minutes",
+        "typical_fix": "Improve placement: refine_place with effort; target placement for high-fanout nets; add bufferHP cells",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Missing or incorrect multicycle / false-path constraint on a path that needs it",
+        "distinguishing_check": "A path that is genuinely multi-cycle (e.g. a RAM read with a known latency) will fail setup if analyzed as a single-cycle path. Check for missing set_multicycle_path or set_false_path on paths with known handshake latency.",
+        "check_cost": "minutes to hours",
+        "typical_fix": "Add appropriate multicycle or false-path constraint with documented justification",
+        "fix_cost": "minutes to hours"
+      },
+      {
+        "cause": "Clock skew or latency — large skew between launch and capture paths",
+        "distinguishing_check": "STA report shows significant skew on the failing endpoint; clock path report shows different latencies for launch vs. capture clock trees. Compare clock tree depths and buffer counts.",
+        "check_cost": "minutes",
+        "typical_fix": "Fix CTS: balance clock tree depths; add clock inverter cells; adjust useful skew intentionally if a specific path needs it",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Library timing characterization mismatch — .lib does not reflect actual silicon",
+        "distinguishing_check": "Timing correlation fails: STA says passing but silicon fails, or vice versa. Check if the liberty file's operating conditions (voltage, temperature, process) match the test conditions. At 7nm and below, this becomes more common due to modeling gaps.",
+        "check_cost": "hours to days",
+        "typical_fix": "Re-characterize library at the actual operating condition; apply sign-off derate; update the liberty file",
+        "fix_cost": "days to weeks"
+      }
+    ],
+    "ordering_rationale": "Read the violation shape first (seconds) — if it is a tight unimodal cluster in one domain, go straight to SDC (minutes); if it is a single deep path, go to logic depth; if it is scattered high-fanout paths, go to placement — this ordering avoids weeks of logic restructuring when the fix is a one-line SDC change.",
+    "classic_trap": "Restructuring logic or re-running placement without first checking the constraint — spending weeks fixing a problem that was set up wrong, discovered too late because no one re-read the SDC before touching the design.",
+    "confidence": 0.90
+  },
+  {
+    "failure_class": "FAIL_TIMING_HOLD",
+    "symptoms": [
+      {
+        "signature": "wns may be fine or positive, but hold slack is negative — hold violations are typically small margin (0–200 ps)",
+        "metric_shape": "Hold TNS is negative; number of hold-failing endpoints; violations often concentrated on short paths (few logic levels) and near registers"
+      },
+      {
+        "signature": "Hold failures are often widespread — many endpoints failing by similar small margins",
+        "metric_shape": "If hold violations appear across many paths simultaneously after a clock change or a clock-gating insertion, it's typically a systematic hold margin problem, not a per-path problem"
+      },
+      {
+        "signature": "Hold fixing can worsen setup, and vice versa — the two failure classes interact",
+        "metric_shape": "Hold fix adds buffer or delay; if utilization is already high, this can cause congestion or setup violations; the trade-off is visible in before/after reports"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock tree too balanced — launch and capture paths have nearly equal delay, leaving no hold margin",
+        "distinguishing_check": "Clock skew report shows very low skew on the failing path; the path has minimal logic delay. Hold violations after CTS that affect many short paths simultaneously point to over-balanced clock trees.",
+        "check_cost": "minutes",
+        "typical_fix": "Add clock delay (insert buffer on the faster clock path) or use useful skew to intentionally add margin; adjust CTS target skew",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Logic restructuring removed delay from a short path — hold margin consumed",
+        "distinguishing_check": "Hold violation appeared immediately after a specific ECO (e.g. gate merging, retiming, clock-gating insertion). The affected path has very few logic levels.",
+        "check_cost": "minutes",
+        "typical_fix": "Add hold-fixing buffers on the short path; revert or adjust the ECO",
+        "fix_cost": "minutes to hours"
+      },
+      {
+        "cause": "Clock domain crossing (CDC) path — data arrives too early relative to destination clock",
+        "distinguishing_check": "Hold violations are at CDC boundaries; the source and destination clocks have a known phase relationship. Check if a data path crosses from a faster to a slower clock domain without adequate synchronization delay.",
+        "check_cost": "minutes to hours",
+        "typical_fix": "Add pipeline registers or delay elements on the CDC path; adjust the CDC constraint",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Missing delay from cell library characterization — library model underestimates actual delay",
+        "distinguishing_check": "Correlation fails: STA passes but silicon shows hold failures. Check if the liberty file's min-delay corner (ff corner, fast process) is being used for hold analysis and whether it reflects actual fast-slow corner behavior at the target voltage.",
+        "check_cost": "hours",
+        "typical_fix": "Update hold margins; adjust derate factors; re-characterize library if the gap is large",
+        "fix_cost": "days to weeks"
+      },
+      {
+        "cause": "Power-up sequence or state-holding path — hold failure only in a specific mode",
+        "distinguishing_check": "Hold failures appear only in a specific functional mode (e.g. scan shift, low-power state retention). Check the mode-specific SDC and clock configuration for that mode.",
+        "check_cost": "hours",
+        "typical_fix": "Add mode-specific hold constraints; adjust retention cell placement",
+        "fix_cost": "hours to days"
+      }
+    ],
+    "ordering_rationale": "Check clock skew first (minutes) — systematic hold violations across many short paths are almost always a CTS balance problem; individual path failures after a specific ECO point to the recent change; library correlation issues last because they require more analysis and are rarer.",
+    "classic_trap": "Fixing hold by adding buffers without checking whether the clock tree is over-balanced — adding buffers to the data path when the real fix is adjusting the clock tree skew target wastes area and adds capacitive load.",
+    "confidence": 0.85
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      {
+        "signature": "Timing degrades inconsistently — different runs give different results, or timing gets worse as more of the chip activates",
+        "metric_shape": "wns oscillates between runs; critical path changes; timing failures correlate with specific functional modes or benchmarks — not a static set of paths"
+      },
+      {
+        "signature": "Local power-grid EM or voltage-drop report shows < Vdd at certain locations",
+        "metric_shape": "IR-drop analysis report shows voltage at specific cells; the worst-drop locations may be far from the power bumps"
+      },
+      {
+        "signature": "Hold violations appear (not setup) — fast cells switch faster when voltage is lower than expected, consuming hold margin",
+        "metric_shape": "Hold slack degrades more than setup; failures concentrate near switching-heavy blocks (CPU cores, memory interfaces)"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient PDN metal width or via count at a macro or high-power block",
+        "distinguishing_check": "IR-drop analysis shows worst drop at or near a macro's power pins or a high-switching block. Check the pg strap density in that region and the number of vias connecting metal layers.",
+        "check_cost": "hours",
+        "typical_fix": "Add pg straps; add more vias; widen existing metal; move power bumps closer to the affected region",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Dynamic current surge from simultaneous switching — worst-case pattern not captured in sign-off",
+        "distinguishing_check": "IR-drop report uses a vectorless estimate; if the actual switching pattern (e.g. a specific benchmark) causes more simultaneous switching, the vectorless analysis underestimates. Check if the failure correlates with a known worst-case pattern.",
+        "check_cost": "hours to days",
+        "typical_fix": "Add current clamps; spread switching across time with pipeline staging; update the pg analysis to use pattern-based vectors if available",
+        "fix_cost": "days to weeks"
+      },
+      {
+        "cause": "Bond wire or C4 bump inductance — package-level pdn issue",
+        "distinguishing_check": "IR-drop worst points are near the die edge where bond wires or bumps connect; chip-level pg simulation and package-level simulation show different results. Check the package model vs. the chip-level model correlation.",
+        "check_cost": "hours to days",
+        "typical_fix": "Work with package team: add more bumps; add mid-level capacitors; adjust bump placement",
+        "fix_cost": "weeks (package respin)"
+      },
+      {
+        "cause": "Clock tree switching surge — clock buffers all switching simultaneously",
+        "distinguishing_check": "IR-drop hot spots correlate with clock buffer locations; the worst drop coincides with the clock edge. Check if the clock network is a disproportionate fraction of total dynamic current at the moment of the clock edge.",
+        "check_cost": "hours",
+        "typical_fix": "Spread clock buffer switching: use clock gate enable patterns that stagger switching; add local decoupling capacitors near clock buffers",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check local pg density first (hours) — this is the most common die-level cause and is fixable with metal changes; bond wire and package issues last because they require cross-team investigation and may be unfixable without a package respin.",
+    "classic_trap": "Attributing timing variation to placement or library when the real cause is dynamic IR — running more placement iterations or re-characterizing the library fixes nothing if the voltage at the cell is below what the library model assumes.",
+    "confidence": 0.82
+  },
+  {
+    "failure_class": "FAIL_CTS",
+    "symptoms": [
+      {
+        "signature": "Clock skew report shows large skew (potentially hundreds of ps) between two points that should be balanced",
+        "metric_shape": "Clock latency difference between launch and capture; skew heat map shows distinct color gradient across the die"
+      },
+      {
+        "signature": "Setup or hold violations concentrate along clock domain boundaries or near large macros",
+        "metric_shape": "Failing paths share one clock domain; the skew on the failing endpoint is the dominant contributor to the timing violation"
+      },
+      {
+        "signature": "Clock tree depth varies wildly across the design — some paths go through 10 levels of clock buffers, others through 3",
+        "metric_shape": "Clock tree depth report shows high variance; some sinks are much deeper than others, creating latency imbalance"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock gate insertion created imbalanced tree — some branches have more or fewer gates than expected",
+        "distinguishing_check": "Clock tree depth report shows high variance; clock gate cells are present in some branches but not others, causing different effective depths. Overlay clock gate map with skew map.",
+        "check_cost": "minutes",
+        "typical_fix": "Rebalance: add dummy clock gates or adjust gate enable timing so all branches see similar effective delay; adjust CTS target skew to compensate",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Macro clock pins are in different locations — sink diversity causes depth variation",
+        "distinguishing_check": "Clock tree depth report shows that macro instances have shallower or deeper trees than standard-cell sinks; macros with buried clock pins (PLL, memory) are the worst offenders. Check the macro clock pin locations.",
+        "check_cost": "minutes",
+        "typical_fix": "Add level shifters or clock buffer trees specifically for macro clock pins; use macro-aware CTS; adjust clock routing to account for macro pin locations",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Useful skew misused — intentionally added skew to fix setup accidentally created hold violations",
+        "distinguishing_check": "Hold violations appeared after an intentional skew insertion; the hold-failing endpoints are exactly those where the skew was applied in the setup-fixing direction.",
+        "check_cost": "minutes",
+        "typical_fix": "Add compensating skew in the opposite direction on the hold-failing paths; or use a hold fixer on the affected paths",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "CTS not re-run after placement changes — clock tree is stale",
+        "distinguishing_check": "Placement was modified (ECO, optimization) after CTS; clock tree netlist has not been updated. Check if placement timestamps are newer than CTS timestamps.",
+        "check_cost": "minutes",
+        "typical_fix": "Rerun CTS from the current placement; verify clock tree still meets the skew target",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock buffer placement blocked by placement hard macros — tree routed around obstacles",
+        "distinguishing_check": "Clock tree route visualization shows detours; some clock buffers are placed far from their ideal location due to hard blockage. The resulting wire delay variation creates skew.",
+        "check_cost": "hours",
+        "typical_fix": "Add placement buffer zones for clock buffers; adjust floorplan to move hard macros away from clock critical paths; use clock buffer cloning",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check for stale CTS first (minutes) — it is the cheapest check and the most common reason skew suddenly appears after an ECO; then check clock gate distribution and macro pin locations (minutes) which are the next most common causes; useful skew and buffer placement last because they require more rework.",
+    "classic_trap": "Trying to fix skew by adding clock buffers at the leaf level without addressing the root cause — adding buffers to balance skew at the leaves when the real problem is upstream (gate distribution, macro pin diversity) creates a larger clock tree with more power and more variation, not a better one.",
+    "confidence": 0.84
+  },
+  {
+    "failure_class": "FAIL_DRC",
+    "symptoms": [
+      {
+        "signature": "Routing DRC failures appear on specific metal layers — spacing, short, or via failures",
+        "metric_shape": "drc_count > 0; failure list shows specific rule violations (e.g. metal-4 spacing, via-6 enclosure); the affected layer narrows the root cause significantly"
+      },
+      {
+        "signature": "DRC failures may be localized to a region or spread; spread failures suggest a rule deck problem, localized failures suggest a physical problem",
+        "metric_shape": "Hundreds of failures in one region = physical; tens of failures spread uniformly = rule deck or antenna model issue"
+      },
+      {
+        "signature": "DRC failures may appear only after specific steps — post-route vs. post-ECO vs. post-chip-level assembly",
+        "metric_shape": "DRC clean after place-and-route but fails after ECO = ECO introduced new geometry; DRC clean at block level but fails at chip assembly = interface mismatch"
+      }
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Spacing rule violation from ECO — a buffer or cell was placed too close to an existing route",
+        "distinguishing_check": "DRC failures are concentrated near a recently changed ECO; the failing rule is a spacing rule (e.g. metal-to-metal minimum distance). Check the ECO log for recently added cells.",
+        "check_cost": "minutes",
+        "typical_fix": "ECO route: rerun detail route in the affected region; if space is insufficient, move the ECO cell or add a blockages",
+        "fix_cost": "minutes to hours"
+      },
+      {
+        "cause": "Via redundancy failure — a single via used where double-via is required at this metal layer combination",
+        "distinguishing_check": "DRC failure is a via-enclosure or via-count rule; typically appears at a specific metal layer pair (e.g. M5–M6 at 7nm). Check the antenna and via density report.",
+        "check_cost": "minutes",
+        "typical_fix": "Run via doubling; reroute with via-count constraints; update routing strategy for that layer pair",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Antenna rule violation — wire connected to gate for too long without a diode or via to diffusion",
+        "distinguishing_check": "DRC failure is an antenna rule; appears on a long wire segment before a gate layer. Check the antenna ratio for the affected net and compare against the foundry rule.",
+        "check_cost": "minutes",
+        "typical_fix": "Add antenna diodes at the gate input; break the long wire with a via to a higher metal layer (jog the wire up and back down)",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Chip-assembly mismatch — block-level DRC-clean vs. top-level DRC-clean inconsistency",
+        "distinguishing_check": "DRC failures appear only at chip assembly; block-level verification was clean. Check whether the chip-level rule deck includes all block-level rules and whether the assembly boundary introduces new spacing interactions.",
+        "check_cost": "hours",
+        "typical_fix": "Update chip-level rule deck; add block-boundary spacing constraints; rerun block-level verification with chip-level context",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Routing over a macro — metal on top of hard macro without adequate clearance",
+        "distinguishing_check": "DRC failures are directly over a hard macro footprint; check the macro keep-out zone definition in the floorplan and whether routing has respected it.",
+        "check_cost": "minutes",
+        "typical_fix": "Add hard blockage over the macro; rerun routing; update the macro's keep-out zone if it is too small",
+        "fix_cost": "hours to days"
+      },
+      {
+        "cause": "Rule deck error — a spacing or via rule in the deck does not match the actual foundry deck",
+        "distinguishing_check": "DRC failures are spread across many instances and do not cluster; the same rule fails repeatedly; correlation with foundry documentation shows the deck value differs. Verify the rule deck against the foundry rule manual.",
+        "check_cost": "hours to days",
+        "typical_fix": "Update the rule deck; rerun routing verification; escalate to the foundry if the discrepancy is in their documentation",
+        "fix_cost": "hours to days (deck fix)"
+      }
+    ],
+    "ordering_rationale": "Check ECO log first (minutes) — localized failures after a recent change are almost always an ECO geometry issue; then check the macro keep-out and layer-specific via rules (minutes) which are common at advanced nodes; rule deck errors last because they require cross-referencing with foundry documentation and are rarer.",
+    "classic_trap": "Running a full route rerun to fix a few localized DRC failures — this is slow and may introduce new problems; the veteran targets the specific failing region and reroutes just that area, which takes minutes instead of hours.",
+    "confidence": 0.87
+  }
+]
+```

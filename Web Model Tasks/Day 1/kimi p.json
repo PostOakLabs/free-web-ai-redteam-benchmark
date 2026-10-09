@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Dual-core chip multiprocessing with shared L2 cache",
+    "where_in_paper": "Introduction / System overview",
+    "decision": "Integrate two complete processor cores on a single die with a unified L2 cache shared between them",
+    "alternatives_or_rejected": "A single larger out-of-order core targeting higher single-thread performance, or two cores each with private L2 caches",
+    "rationale": "Commercial server workloads exhibit abundant thread-level parallelism; two cores deliver higher aggregate throughput than one wider core, and a shared L2 improves cache utilization while simplifying coherency between the cores",
+    "outcome": "A dual-core chip delivering significantly higher throughput per socket on commercial benchmarks, with reduced off-chip coherency traffic compared to private-cache alternatives",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9,
+    "weakest_point": "The exact wording of the rationale; I am confident the dual-core/shared-L2 choice is central to the paper",
+    "provenance_note": ""
+  },
+  {
+    "title": "On-chip L3 controller with off-chip L3 data arrays",
+    "where_in_paper": "Cache hierarchy / L3 cache",
+    "decision": "Place the L3 cache controller and tags on the processor die while locating the L3 data SRAMs on separate chips in the multi-chip module",
+    "alternatives_or_rejected": "A fully on-die L3 (prohibitively large at the target capacity), or a fully off-chip L3 controller (higher latency and bandwidth constraints)",
+    "rationale": "This hybrid approach saves processor die area for cores and L2 while allowing flexible L3 capacities; it also keeps L3 access latency lower than a purely off-chip solution",
+    "outcome": "Scalable L3 configurations with lower access latency than prior off-chip-only designs, while preserving processor die area",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85,
+    "weakest_point": "Specific capacity numbers and exact latency claims may blend general product knowledge with the paper text",
+    "provenance_note": "The architectural decision direction is from the paper; specific L3 capacity ranges may come from broader POWER4 product knowledge"
+  },
+  {
+    "title": "Multi-banked shared L2 cache with crossbar interconnect",
+    "where_in_paper": "Cache hierarchy / L2 cache",
+    "decision": "Organize the shared L2 cache into multiple independent banks (slices) connected to the two cores via a crossbar rather than as a single monolithic array",
+    "alternatives_or_rejected": "A single monolithic L2 bank that would serialize accesses from the two cores and limit bandwidth",
+    "rationale": "Two aggressive out-of-order cores generate high concurrent demand for L2 bandwidth; a banked organization with a crossbar allows simultaneous independent accesses from both cores",
+    "outcome": "Sufficient L2 bandwidth to feed both cores without serialization bottlenecks, supporting high throughput on memory-intensive commercial workloads",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75,
+    "weakest_point": "Whether the paper explicitly frames the banked/crossbar organization as a weighed decision with a monolithic L2 as the rejected alternative, or merely describes the chosen structure",
+    "provenance_note": ""
+  },
+  {
+    "title": "Enterprise-class RAS with instruction retry and full ECC",
+    "where_in_paper": "Reliability, availability, and serviceability",
+    "decision": "Implement full ECC on all caches and data paths, plus hardware instruction retry and other autonomous fault-recovery mechanisms",
+    "alternatives_or_rejected": "Parity-only error detection without correction, or less extensive recovery that would require operating-system intervention on errors",
+    "rationale": "POWER4 targets enterprise and mainframe-class reliability; transient soft errors must be detected, corrected, and recovered from silently without interrupting application execution",
+    "outcome": "The ability to recover automatically from many transient hardware faults, achieving high system availability comparable to mainframe-class systems",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75,
+    "weakest_point": "Whether the paper explicitly contrasts ECC-plus-retry against parity-only as a rejected alternative, or simply describes the chosen RAS features",
+    "provenance_note": ""
+  },
+  {
+    "title": "Aggressive out-of-order superscalar core architecture",
+    "where_in_paper": "Processor core / Core microarchitecture",
+    "decision": "Implement a deeply pipelined, wide-issue out-of-order core with register renaming and speculative execution rather than a simpler in-order design",
+    "alternatives_or_rejected": "A simpler in-order core, or a less aggressive out-of-order design with narrower issue and shallower speculation",
+    "rationale": "High single-thread performance is still required to complement multi-core throughput; commercial workloads contain significant single-threaded components that benefit from aggressive instruction-level parallelism extraction",
+    "outcome": "A high-IPC core capable of sustaining the deep pipeline and high frequency, delivering strong single-thread performance within the dual-core system",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7,
+    "weakest_point": "Whether the paper explicitly frames the core complexity as a weighed decision against simpler alternatives, or primarily describes the resulting microarchitecture",
+    "provenance_note": ""
+  }
+]

@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Predominant use of complementary static CMOS circuits",
+    "where_in_paper": "Circuit Design / Circuit Styles",
+    "decision": "The design used complementary static CMOS circuits predominantly.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper states this choice was made for reasons mentioned earlier in the text, likely related to robustness, noise immunity, and design simplicity for a complex, high-frequency chip.",
+    "outcome": "Static CMOS was the primary circuit style used throughout the POWER4 design.",
+    "quote_as_recalled": "For reasons mentioned earlier, complementary static circuits were used predominantly in the design.",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess, and the specific 'reasons mentioned earlier' are not detailed here.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Hierarchical design methodology for concurrent engineering",
+    "where_in_paper": "Design Methodology",
+    "decision": "A hierarchical design methodology was employed, partitioning the chip into functional units.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "This approach enabled concurrent design efforts across multiple teams and sites, which was necessary given the chip's complexity and size.",
+    "outcome": "The hierarchical methodology allowed the multi-site design team to manage complexity and complete the design on schedule.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The quoted text is not reproduced verbatim, and the page number is an estimate.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Clock distribution network design",
+    "where_in_paper": "Clock Distribution",
+    "decision": "A single, global clock distribution network was designed to supply a 1.5 GHz clock from one PLL.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper emphasizes the clock distribution system's critical role in achieving high-speed operation and meeting project goals.",
+    "outcome": "The clock distribution system achieved a jitter of 35 ps and a skew of 20 ps across 15,200 pins.",
+    "quote_as_recalled": "The clock distribution on the Power4 dual-processor chip supplies a single critical 1.5 GHz clock from one SOI-optimized PLL to 15,200 pins on a large chip with 20 ps skew and 35 ps jitter.",
+    "page_guess": 40,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess; the quote is from a related paper but accurately reflects the content.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Limits on effective beta ratio (p-to-n strength)",
+    "where_in_paper": "Circuit Design / Circuit Styles",
+    "decision": "Limits were placed on the effective beta ratio (p-to-n strength ratio) for transistors.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The recommended procedure was to limit designs, especially in timing-critical paths, to specific stack heights for n-FETs and p-FETs to manage performance and variability.",
+    "outcome": "Designers were restricted to a maximum of 3 n-FETs and 2 p-FETs in series for timing-critical paths.",
+    "quote_as_recalled": "the recommended procedure was to limit designs (especially in timing-critical paths) to 3 and 2 for n-FETs and p-FETs",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number is a guess, and the quote may be slightly paraphrased.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Power distribution design to limit voltage drop",
+    "where_in_paper": "Power Distribution",
+    "decision": "The power distribution network was designed to limit voltage drop to less than 30 mV.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "This was necessary to ensure stable operation for power densities up to 1 W/mm².",
+    "outcome": "The design successfully limited the voltage drop to the target specification.",
+    "quote_as_recalled": "Power distribution design limits voltage drop to less than 30 mV for power densities up to 1 W/mm².",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "This detail is recalled from a summary of the paper's key takeaways and may not be a verbatim quote; the exact page number is an estimate.",
+    "confidence": 0.7
+  }
+]
+```

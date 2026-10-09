@@ -1,0 +1,190 @@
+[
+  {
+    "case_name": "Parametric ES at 97.5% — Normal P&L (zero mean)",
+    "inputs": {
+      "distribution": "Normal P&L, μ = 0, σ = $100 million",
+      "confidence_level": "α = 97.5%",
+      "z_quantile": "Φ⁻¹(0.975) = 1.9600",
+      "standard_normal_density": "φ(1.9600) = 0.05844 (to 4 decimals, as specified)"
+    },
+    "computation": [
+      "ES formula for normal: ES_α = μ + σ × φ(Φ⁻¹(α))/(1−α). With μ=0: ES_α = σ × φ(z_α)/(1−α)",
+      "VaR_α = μ + σ × Φ⁻¹(α) = σ × z_α (zero mean)",
+      "",
+      "VaR multiplier (97.5%): z_0.975 = Φ⁻¹(0.975) = 1.9600",
+      "ES multiplier (97.5%): φ(z_0.975)/(1−α) = φ(1.9600)/0.025 = 0.05844/0.025",
+      "  0.05844 ÷ 0.025 = 2.3376",
+      "",
+      "ES/VaR ratio: 2.3376 ÷ 1.9600 = 1.192653 → 1.1927",
+      "",
+      "Portfolio values (σ = $100M):",
+      "  VaR_97.5 = 100 × 1.9600 = $196.00M",
+      "  ES_97.5  = 100 × 2.3376 = $233.76M",
+      "",
+      "Verification of φ(1.9600):",
+      "  φ(1.9600) = (1/√(2π)) × exp(−1.96²/2)",
+      "  = 0.39894228 × exp(−1.9208) = 0.39894228 × 0.146517 = 0.058439",
+      "  Rounded to 4 decimals: 0.05844 ✓ (matches prompt-specified value)"
+    ],
+    "result": {
+      "var_975_multiplier": 1.9600,
+      "es_975_multiplier": 2.3376,
+      "es_to_var_ratio": 1.1927,
+      "var_975_dollars": "$196.00M",
+      "es_975_dollars": "$233.76M"
+    },
+    "formula_basis": "ES_α = μ + σ·φ(Φ⁻¹(α))/(1−α) for X ~ N(μ,σ²) (parametric ES under normality). VaR_α = μ + σ·Φ⁻¹(α). The ES multiplier φ(z)/(1−α) is the tail-integral factor; VaR uses only the quantile z. BCBS MAR33.4 establishes 97.5% ES as the FRTB market risk capital standard; the parametric normal approach applies this formula directly. The essential distinction: VaR is a quantile, ES is the mean of the entire tail beyond the quantile — hence the ES multiplier exceeds the VaR multiplier.",
+    "weakest_point": "The normality assumption is the fundamental limitation: real trading P&L exhibits fat tails (kurtosis > 3), so parametric ES under normality underestimates true tail risk. φ(1.9600) is specified to 4 decimals (0.05844); the exact value 0.058439 changes the ES multiplier by 0.000004 — negligible at portfolio scale but worth noting for exactness. The ES-vs-VaR distinction is exact here: VaR is the 97.5% quantile (1.96σ), ES is the mean of everything beyond (2.3376σ); conflating them would be the defect this case exists to catch."
+  },
+  {
+    "case_name": "Parametric ES at 99% — Normal P&L (zero mean)",
+    "inputs": {
+      "distribution": "Normal P&L, μ = 0, σ = $100 million",
+      "confidence_level": "α = 99%",
+      "z_quantile": "Φ⁻¹(0.99) = 2.3263",
+      "standard_normal_density": "φ(2.3263) = 0.02665 (to 4 decimals, as specified)"
+    },
+    "computation": [
+      "ES formula (normal, μ=0): ES_α = σ × φ(Φ⁻¹(α))/(1−α)",
+      "VaR_α = σ × Φ⁻¹(α)",
+      "",
+      "VaR multiplier (99%): z_0.99 = Φ⁻¹(0.99) = 2.3263",
+      "ES multiplier (99%): φ(z_0.99)/(1−α) = φ(2.3263)/0.01 = 0.02665/0.01",
+      "  0.02665 ÷ 0.01 = 2.6650",
+      "",
+      "ES/VaR ratio: 2.6650 ÷ 2.3263 = 1.145633 → 1.1456",
+      "",
+      "Portfolio values (σ = $100M):",
+      "  VaR_99 = 100 × 2.3263 = $232.63M",
+      "  ES_99  = 100 × 2.6650 = $266.50M",
+      "",
+      "Verification of φ(2.3263):",
+      "  φ(2.3263) = (1/√(2π)) × exp(−2.3263²/2)",
+      "  = 0.39894228 × exp(−2.705836) = 0.39894228 × 0.066812 = 0.026652",
+      "  Rounded to 4 decimals: 0.02665 ✓ (matches prompt-specified value)"
+    ],
+    "result": {
+      "var_99_multiplier": 2.3263,
+      "es_99_multiplier": 2.6650,
+      "es_to_var_ratio": 1.1456,
+      "var_99_dollars": "$232.63M",
+      "es_99_dollars": "$266.50M"
+    },
+    "formula_basis": "Same parametric normal ES as Case 1, at α=99%. ES_α = σ·φ(Φ⁻¹(α))/(1−α). At 99% the tail is thinner (1% vs 2.5%), so the ES multiplier (2.665) is higher than VaR (2.3263), but the ES/VaR ratio (1.1456) is lower than at 97.5% (1.1927) — a property of the normal distribution where extreme tail averages converge toward the quantile as α→1. Under fat-tailed distributions this ratio would increase, not decrease — a key diagnostic that the normal assumption is strained at extreme quantiles.",
+    "weakest_point": "At 99% the ES multiplier is more sensitive to φ precision: using φ=0.026652 (exact) gives ES multiplier 2.6652 vs 2.6650 — a 0.0002 difference. The normality assumption is more problematic at 99%; real tail behavior diverges sharply from normal at extreme quantiles. The ES/VaR ratio decreasing from 1.1927 (97.5%) to 1.1456 (99%) is correct for normal but would reverse for fat-tailed distributions — this inversion is itself a diagnostic that the parametric normal model is understating tail risk at high confidence levels."
+  },
+  {
+    "case_name": "Liquidity-horizon-scaled ES — Credit spread risk (high yield)",
+    "inputs": {
+      "risk_factor_category": "Credit spread risk — high yield",
+      "liquidity_horizon": "LH = 120 days (per FRTB liquidity horizon grid)",
+      "baseline_horizon": "10 days (FRTB standard baseline)",
+      "ten_day_es_input": "$18.7008M (parametric ES at 97.5%, σ_10 = $8M, derived as 8 × 2.3376)",
+      "scaling_structure": "√(LH/10) per MAR33"
+    },
+    "computation": [
+      "Step 1: Compute 10-day parametric ES (97.5%) for this risk factor",
+      "  σ_10 = $8M (10-day P&L volatility for this risk factor)",
+      "  ES_10 = σ_10 × φ(1.9600)/0.025 = 8 × 0.05844/0.025",
+      "  = 8 × 2.3376 = $18.7008M",
+      "",
+      "Step 2: Apply liquidity horizon scaling per MAR33",
+      "  Scaling factor = √(LH/10) = √(120/10) = √12",
+      "  √12 = 3.464101615...",
+      "  ES_LH = ES_10 × √(LH/10) = 18.7008 × 3.464101615",
+      "",
+      "  Multiplication breakdown:",
+      "  18.7008 × 3 = 56.1024",
+      "  18.7008 × 0.464101615 =",
+      "    18.7008 × 0.4 = 7.48032",
+      "    18.7008 × 0.06 = 1.122048",
+      "    18.7008 × 0.004 = 0.074803",
+      "    18.7008 × 0.000101615 = 0.001900",
+      "    Sum: 7.48032 + 1.122048 + 0.074803 + 0.001900 = 8.679071",
+      "  Total: 56.1024 + 8.679071 = 64.781471",
+      "",
+      "  ES_LH = $64.7815M → $64.78M"
+    ],
+    "result": {
+      "ten_day_es": "$18.70M",
+      "liquidity_horizon_days": 120,
+      "scaling_factor_sqrt_lh_over_10": 3.4641,
+      "scaled_es_120_day": "$64.78M"
+    },
+    "formula_basis": "ES_scaled = ES_10day × √(LH/10). BCBS MAR33.6-33.9 assigns each risk factor category a liquidity horizon LH (10 to 120 days, based on market liquidity characteristics) and scales the 10-day ES by √(LH/10) to capture the longer unwinding period in stressed markets. The square-root scaling follows the standard time-scaling rule for volatility under i.i.d. assumptions. High-yield credit spreads are assigned LH=120 days in the regulatory grid.",
+    "weakest_point": "The √(LH/10) scaling inherits the i.i.d.-normality assumption: the square-root-of-time rule is exact for volatility under i.i.d. normality but approximate for ES, which is a tail measure not governed by the same scaling. Additionally, the FRTB liquidity horizon grid is coarse (all high-yield credit spreads → 120 days regardless of instrument-specific liquidity), and the 10-day ES input ($18.70M) itself carries all the parametric normality-model risk from Cases 1-2. The scaled ES compounds both uncertainties."
+  },
+  {
+    "case_name": "Historical-simulation ES at 97.5% — 20 P&L observations",
+    "inputs": {
+      "sample_size": "n = 20 daily P&L observations (USD millions)",
+      "confidence_level": "α = 97.5%",
+      "pnl_values_worst_to_best": [
+        -12.5, -11.8, -10.2, -9.7, -8.3, -7.6, -6.9, -6.2, -5.8, -5.1,
+        -4.7, -4.2, -3.8, -3.1, -2.5, -1.9, -1.2, -0.6, -0.3, +0.1
+      ],
+      "expected_tail_size": "n × (1−α) = 20 × 0.025 = 0.5 observations"
+    },
+    "computation": [
+      "Step 1: Sort P&L observations from worst (most negative) to best (most positive)",
+      "  Rank 1:  −12.5  ← WORST — enters tail",
+      "  Rank 2:  −11.8",
+      "  Rank 3:  −10.2",
+      "  Rank 4:  −9.7",
+      "  Rank 5:  −8.3",
+      "  Rank 6:  −7.6",
+      "  Rank 7:  −6.9",
+      "  Rank 8:  −6.2",
+      "  Rank 9:  −5.8",
+      "  Rank 10: −5.1",
+      "  Rank 11: −4.7",
+      "  Rank 12: −4.2",
+      "  Rank 13: −3.8",
+      "  Rank 14: −3.1",
+      "  Rank 15: −2.5",
+      "  Rank 16: −1.9",
+      "  Rank 17: −1.2",
+      "  Rank 18: −0.6",
+      "  Rank 19: −0.3",
+      "  Rank 20: +0.1  ← BEST",
+      "",
+      "Step 2: Determine number of observations in the 97.5% tail",
+      "  Tail fraction = 1 − α = 1 − 0.975 = 0.025 (2.5%)",
+      "  Expected tail count = n × (1−α) = 20 × 0.025 = 0.5 observations",
+      "",
+      "Step 3: Apply fractional-observation convention",
+      "  CONVENTION: Ceiling of expected tail count",
+      "  k = ⌈(1−α) × n⌉ = ⌈0.5⌉ = 1",
+      "  This is the 'minimum tail' convention — take the worst k observations where k is the",
+      "  ceiling of the expected count. It is simple, conservative (includes the worst observation),",
+      "  and commonly used in practice for small-sample ES.",
+      "",
+      "  NOTE ON FRACTIONAL OBSERVATIONS (stated honestly as a convention):",
+      "  The FRTB text (BCBS MAR33) is silent on how to handle fractional tail counts.",
+      "  Alternative conventions exist and would change the result:",
+      "    • Floor convention: k = ⌊0.5⌋ = 0 — ES undefined (no observations in tail)",
+      "    • Interpolation: weight the worst observation by 0.5 and second-worst by 0.5,",
+      "      ES = 0.5×(−12.5) + 0.5×(−11.8) = −12.15 → $12.15M loss",
+      "    • Ceiling convention (used here): k = ⌈0.5⌉ = 1, ES = −12.5 → $12.50M loss",
+      "  With n=20, the choice between ceiling and interpolation changes ES by $0.35M.",
+      "",
+      "Step 4: Compute ES as the average of the tail observations",
+      "  Tail observations: {x_(1)} = {−12.5}",
+      "  ES_97.5 = (1/1) × (−12.5) = −12.5 (USD millions)",
+      "  Expressed as expected loss magnitude: $12.50M",
+      "",
+      "Step 5: Explicit tail membership",
+      "  Observations ENTERING the 97.5% tail: Rank 1 only (−12.5)",
+      "  Observations NOT in tail: Ranks 2-20 (all others)"
+    ],
+    "result": {
+      "observations_in_tail": 1,
+      "tail_observations": ["Rank 1: −12.5"],
+      "es_pnl_average": "−$12.50M",
+      "es_loss_magnitude": "$12.50M",
+      "convention": "Ceiling: k = ⌈(1−α)n⌉ = ⌈0.5⌉ = 1"
+    },
+    "formula_basis": "Empirical ES_α = (1/k) × Σ_{i=1}^{k} x_(i) where x_(i) are sorted P&L observations (worst first) and k = ⌈(1−α)n⌉ under the ceiling convention for fractional observations. BCBS MAR33 defines historical-simulation ES as the average of the worst (1−α)% of P&L observations. With n=20 and α=97.5%, expected tail size is 0.5 observations; the regulatory text does not specify how to handle this fractional case, so the ceiling convention is applied and named explicitly.",
+    "weakest_point": "The sample size (n=20) is critically small for ES estimation — only 1 observation enters the tail, making ES equal to a single data point (the sample minimum) rather than a robust tail average. The ceiling convention (k=1) was chosen over interpolation (which would give $12.15M, a $0.35M difference); the choice materially affects the result. With n=20, the 97.5% ES is barely distinguishable from the sample minimum — this illustrates why FRTB's historical simulation approach requires much larger samples (typically 250+ daily observations) to produce reliable tail estimates. The result is statistically fragile and convention-dependent."
+  }
+]

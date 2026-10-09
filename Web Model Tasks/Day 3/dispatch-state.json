@@ -1,0 +1,133 @@
+{
+  "run": "OPUS-BROWSER-DISPATCH-1",
+  "date": "2026-09-03",
+  "day_folder": "Web Model Tasks/Day 3/",
+  "mode": "supervised",
+  "prompt_id": "C1-BOUNDARY-VERDICTS",
+  "collect_open_min": 20,
+  "hard_stop_min": 40,
+  "tab_group_id": 1549947802,
+  "browser_device": "e3089cf9-8106-4ee8-a493-0fb3d4120d8f",
+  "not_dispatched": [
+    {
+      "model": "sonnet",
+      "status": "SKIPPED-NOTAB",
+      "note": "no claude.ai tab in group; Tim ruled run-9-without"
+    },
+    {
+      "model": "glm 5.3 flash",
+      "status": "SKIPPED-SUSPENDED",
+      "note": "chat.z.ai tab open but model SUSPENDED (wrong-paper case); guardrail forbids dispatch"
+    },
+    {
+      "model": "mimo",
+      "status": "SKIPPED-DROPPED",
+      "note": "aistudio.xiaomimimo.com tab open but model DROPPED; guardrail forbids dispatch"
+    }
+  ],
+  "pairs": [
+    {
+      "model": "meta",
+      "tabId": 139838985,
+      "url": "https://meta.ai/",
+      "pasted_at": "2026-09-03T10:28:09",
+      "status": "DISPATCHED",
+      "chat_url": "https://meta.ai/prompt/08862f64-6061-4e5f-a545-10f4fad2d662",
+      "verified_composer_len": 2131,
+      "verified_occurrences": 1
+    },
+    {
+      "model": "grok",
+      "tabId": 139839201,
+      "url": "https://grok.com/",
+      "pasted_at": "2026-09-03T10:31:41",
+      "status": "DISPATCHED",
+      "chat_url": "https://grok.com/c/7ffba67a-5dd7-49af-bbf0-a36ebe4afa80",
+      "verified_composer_len": 2138,
+      "verified_occurrences": 1
+    },
+    {
+      "model": "yuanbao",
+      "tabId": 139838994,
+      "url": "https://yuanbao.tencent.com/",
+      "pasted_at": "2026-09-03T10:36:52",
+      "status": "DISPATCHED",
+      "chat_url": "https://yuanbao.tencent.com/chat/naQivTmsDa",
+      "verified_composer_len": 2153,
+      "verified_occurrences": 1,
+      "note": "/chat/ redirects to existing thread id; verified 0 message nodes before paste, so chat was empty"
+    },
+    {
+      "model": "kimi",
+      "tabId": 139838986,
+      "url": "https://www.kimi.ai/",
+      "pasted_at": "2026-09-03T10:34:43",
+      "status": "DISPATCHED",
+      "chat_url": "https://www.kimi.ai/chat/1a067b15-30b2-879c-8000-09dbc6c159d9",
+      "verified_composer_len": 2131,
+      "verified_occurrences": 1,
+      "note": "send control is div.send-button-container, no aria-label; matcher widened to class names"
+    },
+    {
+      "model": "qwen",
+      "tabId": 139838990,
+      "url": "https://chat.qwen.ai/",
+      "pasted_at": "2026-09-03T10:40:25",
+      "status": "DISPATCHED",
+      "chat_url": "https://chat.qwen.ai/c/309d2b1f-39dc-4632-b9db-41212649d86a",
+      "verified_composer_len": 2131,
+      "verified_occurrences": 1,
+      "note": "TEXTAREA composer -> native value setter + input event; send needs full pointer event sequence, bare .click() ignored"
+    },
+    {
+      "model": "chatgpt",
+      "tabId": 139839199,
+      "url": "https://chatgpt.com/",
+      "pasted_at": null,
+      "status": "PENDING"
+    },
+    {
+      "model": "gemini",
+      "tabId": 139838936,
+      "url": "https://gemini.google.com/app",
+      "pasted_at": null,
+      "status": "PENDING"
+    },
+    {
+      "model": "deepseek",
+      "tabId": 139838983,
+      "url": "https://chat.deepseek.com/",
+      "pasted_at": "2026-09-03T10:44:43",
+      "status": "DISPATCHED",
+      "chat_url": "https://chat.deepseek.com/a/chat/s/9eb63a9e-6d13-421f-b56a-1091bd8a3824",
+      "verified_composer_len": 2131,
+      "verified_occurrences": 1,
+      "note": "send control has NO name/aria/class match; needed positional fallback (rightmost 20-90px button below composer)"
+    },
+    {
+      "model": "mistral",
+      "tabId": 139838984,
+      "url": "https://chat.mistral.ai/chat",
+      "pasted_at": null,
+      "status": "PENDING",
+      "note": "off-rotation, Tim-approved; has Day 2 C1 baseline"
+    },
+    {
+      "model": "minimax 2.7",
+      "tabId": 139838988,
+      "url": "https://agent.minimax.io/",
+      "pasted_at": null,
+      "status": "PENDING",
+      "note": "model selector read as MiniMax-M2.7 (probation)"
+    },
+    {
+      "model": "minimax-m3 (gmi)",
+      "tabId": 139838993,
+      "url": "https://console.gmicloud.ai/",
+      "pasted_at": null,
+      "status": "PENDING",
+      "note": "DROPPED model, Tim-approved as raw-API control; temp 0.5 top_p 0.9; label kept distinct from chat-surface files"
+    }
+  ],
+  "method": "javascript_tool: synthetic ClipboardEvent paste (non-bubbling) into largest visible composer; verify occurrences==1 + length + unicode BEFORE send; send via aria-label Send .click(); confirm composer emptied"
+}

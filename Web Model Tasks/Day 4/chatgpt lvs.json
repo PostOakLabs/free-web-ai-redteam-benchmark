@@ -1,0 +1,154 @@
+[
+{
+"symptom": "(7) LVS mismatch: missing, shorted, or open nets",
+"first_checks": [
+{
+"check": "Read the LVS object-count summary: source versus layout nets, ports, and devices, then classify whether the layout has fewer or more nets than the source.",
+"why_first": "Cheapest way to distinguish a likely short from a likely open before tracing geometry.",
+"check_cost": "minutes"
+},
+{
+"check": "Inspect the first/highest-level net mismatch and use the LVS debugger to highlight the corresponding source and layout nets.",
+"why_first": "One connectivity error can cascade into many apparent mismatches, so the earliest correspondence failure is usually more informative than the raw error count.",
+"check_cost": "minutes"
+},
+{
+"check": "Trace the highlighted layout connectivity through every layer transition, contact, and via, checking for an unintended touching shape or a missing connection.",
+"why_first": "This directly tests the physical mechanism after the report has localized the suspect net pair.",
+"check_cost": "minutes"
+},
+{
+"check": "If the geometry looks correct, verify ports/labels and the extraction/LVS inputs before changing layout geometry.",
+"why_first": "A missing, duplicated, or misplaced label can present as a connectivity error without the underlying metal topology being wrong.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Temporarily remove or isolate the suspected touching shape/via in a copy of the layout and rerun LVS.",
+"rules_in": "If the net merge disappears and the previously separated source nets correspond normally, the suspected physical short is confirmed.",
+"rules_out": "If the same net merge remains despite removing the suspected geometry, that geometry was not the root cause; investigate another connection or extraction interpretation."
+},
+{
+"experiment": "Temporarily restore/add the suspected missing via, contact, or metal segment in a copy and rerun LVS.",
+"rules_in": "If the two layout fragments collapse into the expected single net and the open-related mismatches disappear, the missing physical connection is confirmed.",
+"rules_out": "If the layout remains split, the suspected connection is not sufficient or the extraction rules do not recognize it."
+},
+{
+"experiment": "Run LVS on the exact same GDS while changing only the net-label/port attachment suspected of being wrong.",
+"rules_in": "If the connectivity mismatch changes or disappears without geometric routing changes, the label/port attachment was causal.",
+"rules_out": "If the same geometric net mismatch persists, labeling was not the primary cause."
+},
+{
+"experiment": "Compare the LVS extraction from the same merged layout used for DRC against the intended source netlist, rather than rerunning against a different layout/database revision.",
+"rules_in": "If the mismatch disappears when the correct layout artifact is used, the original failure was an input/provenance mismatch rather than layout connectivity.",
+"rules_out": "If it persists on the verified intended layout artifact, return to physical connectivity or extraction-rule interpretation."
+}
+],
+"common_root_causes": [
+{
+"cause": "Actual metal/via/contact short between two intended nets",
+"recalled_frequency": "common",
+"recall_confidence": 0.82
+},
+{
+"cause": "Missing via/contact or broken metal connection producing an open",
+"recalled_frequency": "common",
+"recall_confidence": 0.84
+},
+{
+"cause": "Incorrect or unattached net label/port causing an apparent connectivity mismatch",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.72
+},
+{
+"cause": "Wrong LVS input/layout revision or extraction-rule interpretation",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.61
+},
+{
+"cause": "A single severe short causing a large cascade of secondary net/device mismatches",
+"recalled_frequency": "common",
+"recall_confidence": 0.76
+}
+],
+"classic_trap": "Treating every reported net mismatch as an independent defect instead of finding the first physical short/open that caused the LVS correspondence to cascade.",
+"node_era_note": "no-era-difference-recalled"
+},
+{
+"symptom": "(8) LVS mismatch: wrong device sizes or extra devices",
+"first_checks": [
+{
+"check": "Confirm that connectivity is clean enough to trust the device correspondence, then inspect the device-count/type summary before chasing individual dimensions.",
+"why_first": "Device matching can be distorted by upstream shorts/opens, making a connectivity problem masquerade as missing, extra, or incorrectly sized devices.",
+"check_cost": "minutes"
+},
+{
+"check": "For a parameter mismatch, read the reported extracted versus source W/L and any multiplicity/finger-related properties for the matched device.",
+"why_first": "Cheapest way to distinguish a genuinely wrong drawn dimension from a device-recognition or device-combination issue.",
+"check_cost": "minutes"
+},
+{
+"check": "For an extra/missing device, highlight the unmatched extracted device and inspect the local diffusion, gate, well/body, and contact geometry that caused device recognition.",
+"why_first": "The extraction geometry—not the schematic instance name—is what determines whether an unintended device is created.",
+"check_cost": "minutes"
+},
+{
+"check": "Check the source/layout conventions for parallel fingers, multiplicity, dummy devices, and physical-only structures before editing geometry.",
+"why_first": "Extraction may legitimately combine or recognize structures differently from the schematic representation.",
+"check_cost": "hours"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Change only the suspect transistor's drawn gate/active geometry in a copy so that the extracted W or L should move materially toward the source value, then rerun LVS.",
+"rules_in": "If the reported extracted parameter changes in the predicted direction and the mismatch closes, the geometry was actually controlling the reported size.",
+"rules_out": "If the reported parameter does not respond as predicted, suspect extraction interpretation, device recognition, or the wrong matched device rather than the nominal drawn dimension."
+},
+{
+"experiment": "Temporarily remove the geometric feature suspected of creating the extra device—such as an unintended gate crossing active—and rerun LVS.",
+"rules_in": "If the extra extracted device disappears, that local geometry is the cause.",
+"rules_out": "If the extra device remains, inspect another recognition site or the extraction rules."
+},
+{
+"experiment": "Convert the suspect parallel/fingered geometry in a copy to an equivalent simpler representation while preserving electrical topology, then rerun LVS.",
+"rules_in": "If device count or reported multiplicity changes to match the source representation, the mismatch is a device-combination/finger-recognition issue.",
+"rules_out": "If the extracted device topology/count remains wrong, the cause is more likely actual geometry or device-recognition rules."
+},
+{
+"experiment": "Compare a clean extraction using the intended LVS deck/version against the failing extraction without changing layout geometry.",
+"rules_in": "If device recognition or reported dimensions change materially, the rule-deck/extraction configuration is implicated.",
+"rules_out": "If the same extra device and size mismatch reproduce, the layout/source representation remains the leading hypothesis."
+}
+],
+"common_root_causes": [
+{
+"cause": "Actual W/L geometry differs from the schematic/source value",
+"recalled_frequency": "common",
+"recall_confidence": 0.82
+},
+{
+"cause": "Unexpected device created by local gate/diffusion/well geometry",
+"recalled_frequency": "common",
+"recall_confidence": 0.77
+},
+{
+"cause": "Finger/multiplicity/parallel-device representation differs between source and extracted layout",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.74
+},
+{
+"cause": "Dummy or physical-only device is recognized or filtered differently than expected",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.63
+},
+{
+"cause": "Extraction/LVS rule-deck or configuration mismatch",
+"recalled_frequency": "rare",
+"recall_confidence": 0.58
+}
+],
+"classic_trap": "Editing transistor dimensions immediately when the real problem is that an upstream connectivity error caused the LVS engine to match the wrong devices, or that the extracted finger/multiplicity representation differs from the schematic representation.",
+"node_era_note": "At 7nm-and-below, fin-based device representation and foundry-specific extraction of fins/fingers and device parameters make device-recognition/debug conventions substantially more PDK-specific than conventional planar W/L debugging."
+}
+]

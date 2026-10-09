@@ -1,0 +1,53 @@
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "Full EUR 10000 is drawn at t=0.",
+      "The EUR 100 arrangement fee is paid at t=0 and included as a charge at t=0, equivalently net proceeds are EUR 9900.",
+      "Repayments are monthly at times k/12 for k=1..24.",
+      "X is an effective annual rate; monthly discounting uses (1+X)^(-1/12)."
+    ],
+    "equation": "10000 = 100 + sum_{k=1}^{24} 450/(1+X)^(k/12)",
+    "iterations": "Let i=(1+X)^(1/12)-1, so 9900=450*a_24(i). Bisection f(i)=450*a_24(i)-9900: [0.0060,0.0080]; 1) mid 0.0070, f ~= +9.69; 2) [0.0070,0.0080] mid 0.0075, f ~= -49.86; 3) [0.0070,0.0075] mid 0.00725, f ~= -20.30; convergence i ~= 0.0070817 gives PV=9900.00 and X=(1+i)^12-1 ~= 0.0883697.",
+    "aprc_pct": 8.8
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "Overdraft additional assumption: the full EUR 3000 limit is drawn immediately.",
+      "Overdraft duration is assumed to be 3 months because the overdraft is repayable on demand / not determinable.",
+      "Borrowing rate 12% nominal per annum charged monthly gives EUR 30 interest each month on the EUR 3000 drawn balance.",
+      "The EUR 25 monthly account fee and the EUR 30 monthly interest are paid as charged at months 1, 2 and 3; principal is repaid at month 3."
+    ],
+    "equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3055/(1+X)^(3/12)",
+    "iterations": "Let i=(1+X)^(1/12)-1. f(i)=55/(1+i)+55/(1+i)^2+3055/(1+i)^3-3000. Bisection: [0.0100,0.0300]; 1) mid 0.0200, f ~= -14.42; 2) [0.0100,0.0200] mid 0.0150, f ~= +29.12; 3) [0.0150,0.0200] mid 0.0175, f ~= +7.25; convergence at i=55/3000=0.0183333 gives PV=3000.00 and X=(1+i)^12-1 ~= 0.2435966.",
+    "aprc_pct": 24.4
+  },
+  {
+    "case": 3,
+    "assumptions_invoked": [
+      "Open-end credit additional assumption: the EUR 1500 limit is drawn immediately in full.",
+      "Repayment is assumed in 12 equal monthly instalments; source-logic: where open-end credit has no fixed repayment schedule, the directive's additional assumptions close the balance over 12 monthly instalments.",
+      "Instalment amount is computed using the stated borrowing rate 18% nominal per annum compounded monthly, i.e. i=0.015 per month.",
+      "No fees or charges other than interest."
+    ],
+    "equation": "1500 = 137.52 * sum_{k=1}^{12} (1+X)^(-k/12), where 137.52 = 1500 / a_12(0.015)",
+    "iterations": "Let i=(1+X)^(1/12)-1 and A=137.52. f(i)=A*a_12(i)-1500. Bracketing/iteration checks: 1) i=0.0140, f ~= +9.40; 2) i=0.0160, f ~= -9.30; 3) mid i=0.0150, f ~= 0.00; convergence at i=0.0150 gives PV=1500.00 and X=(1.015)^12-1 ~= 0.195618.",
+    "aprc_pct": 19.6
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "Drawdown timing is unascertainable, so under the additional assumption the full EUR 5000 is deemed drawn immediately at t=0.",
+      "Repayment is a single payment at 12 months as specified.",
+      "Nominal rate 8% is applied for one year; no monthly compounding is specified.",
+      "The EUR 200 broker fee is financed into the balance at t=0, so it is added to the amount on which interest accrues and appears in the single final payment, not as a cash charge at t=0."
+    ],
+    "equation": "5000 = ((5000 + 200) * 1.08) / (1+X) = 5616/(1+X)",
+    "iterations": "f(X)=5616/(1+X)-5000. Bisection: endpoints f(0.10)=+105.45, f(0.15)=-116.52; 1) mid 0.1250, f=-8.00; 2) [0.10,0.1250] mid 0.1125, f ~= +48.09; 3) [0.1125,0.1250] mid 0.11875, f ~= +19.89; convergence X=0.1232 gives 5616/1.1232=5000.00.",
+    "aprc_pct": 12.3
+  },
+  {
+    "weakest_point": "The overdraft case is most likely to diverge: the directive's additional assumptions fix a 3-month duration but do not make fully explicit whether monthly interest and account fees are paid as incurred, capitalised into the balance, or settled at the end; I used paid-as-incurred monthly charges, while capitalisation or end settlement changes the APRC by several tenths. The financed broker fee in case 4 is also timing-sensitive because it defers the charge into the final payment instead of reducing t=0 net proceeds."
+  }
+]

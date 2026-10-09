@@ -1,0 +1,58 @@
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "Arrangement fee of EUR 100 treated as financed charge added to amount financed (per EU CCD Annex I: all charges relating to the credit agreement are included in the total charge for credit, and financed charges are added to the amount financed rather than deducted as upfront cash outflows)",
+      "Repayments of EUR 450 per month commence one month after drawdown (t=1 through t=24)",
+      "No other charges; loan is fully drawn at t=0",
+      "APRC expressed as nominal annual rate = 12 x monthly rate (EU CCD Annex I method)"
+    ],
+    "equation": "10 100 = 450 * a_bar(24|i_monthly) where a_bar(24|i) = (1 - (1+i)^-24) / i; APRC = 12 * i_monthly",
+    "iterations": "Iter1: i=0.005, a_bar=22.5629, PV=10 153.29 (PV > 10 100, rate too low). Iter2: i=0.006, a_bar=22.2899, PV=10 030.47 (PV < 10 100, rate too high). Iter3: i=0.0055, a_bar=22.4258, PV=10 091.62 (PV < 10 100, bisection midpoint). Convergence: i_monthly=0.0054326, APRC=6.519% -> 6.5%",
+    "aprc_pct": 6.5,
+    "weakest_point": "Whether the arrangement fee is a financed charge (added to amount_financed=10 100, giving APRC=6.5%) or an upfront cash fee (consumer net-receives 9900, giving APRC=8.7%). EU CCD Annex I includes all charges in the total cost of credit; the financed treatment is the standard interpretation, but implementations vary on whether upfront fees reduce the amount received vs. inflate the repayment stream. The APRC differs by ~2.2 percentage points between the two treatments."
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "Full credit limit of EUR 3000 assumed drawn for the whole duration (EU CCD Article 6.2 overdraft provision: when the amount or date of drawings cannot be determined, the full limit is assumed to be drawn in full at the start)",
+      "Duration of 3 months used because the agreement has no fixed duration and no repmt schedule (EU CCD Art. 6.2 default assumption)",
+      "Nominal rate 12% p.a. charged monthly = 1% per month on outstanding balance",
+      "Monthly account fee of EUR 25 treated as recurring charge included in repayment stream (Annex I: all charges consumer is required to pay in connection with the credit agreement are included)",
+      "Principal repaid in 3 equal monthly instalments of 3000/3 = 1000; interest = 1% x 3000 = 30/month; total monthly payment = 1030 + 25 = 1055"
+    ],
+    "equation": "3000 = 1055 * a_bar(3|i_monthly) where a_bar(3|i) = (1 - (1+i)^-3) / i; APRC = 12 * i_monthly",
+    "iterations": "Iter1: i=0.027, a_bar=2.8450, PV=3001.48 (PV > 3000, rate too low). Iter2: i=0.028, a_bar=2.8395, PV=2995.70 (PV < 3000, rate too high). Iter3: i=0.0273, a_bar=2.8434, PV=2999.74 (very close, rate slightly low). Convergence: i_monthly=0.027255, APRC=32.706% -> 32.7%",
+    "aprc_pct": 32.7,
+    "weakest_point": "Whether the EUR 25/month account fee is included in the APRC cash flow stream (monthly payment = 1055) or treated as a separate fee reducing the amount financed. If excluded from the APRC calculation and treated as a separately-charged fee, the monthly payment for APRC purposes would be 1030 (interest+principal only) and the APRC would be significantly higher. Additionally, the 3-month duration is a default assumption; a longer assumed duration would lower the APRC substantially."
+  },
+  {
+    "case": 3,
+    "assumptions_invoked": [
+      "Full limit of EUR 1500 drawn immediately at t=0 (open-end credit, drawdown date not specified, worst-case full draw assumed)",
+      "Repayment assumed as 12 equal monthly instalments (EU CCD Art. 6.2 open-end credit provision: where repayment structure cannot be determined, 12 equal monthly instalments are the standard default assumption based on typical annual credit cycle)",
+      "Rate 18% nominal p.a. monthly compounding: i_monthly_stated = 0.18/12 = 0.015",
+      "No other fees per problem statement",
+      "Monthly payment computed as standard amortising PMT: 1500 x 0.015 x (1.015)^12 / ((1.015)^12 - 1) = 137.52"
+    ],
+    "equation": "1500 = 137.52 * a_bar(12|i_monthly); APRC = 12 * i_monthly (or equivalently (1+i_monthly)^12 - 1 for effective annual)",
+    "iterations": "Iter1: i=0.0143, a_bar=10.9552, PV=1506.56 (PV > 1500, rate too low). Iter2: i=0.0145, a_bar=10.9416, PV=1504.68 (PV > 1500, rate still too low). Iter3: i=0.0144, a_bar=10.9484, PV=1505.62 (PV > 1500). Convergence: i_monthly=0.014998, APRC_nominal=17.997% -> 18.0%; APRC_effective=(1.014998)^12-1=19.56% -> 19.6%",
+    "aprc_pct": 18.0,
+    "weakest_point": "EU CCD APRC can be expressed as nominal annual (12 x monthly rate = 18.0%) or as effective annual rate ((1+i_monthly)^12 - 1 = 19.6%). The directive does not always make the distinction explicit in consumer-facing materials; some member-state implementations use nominal, others effective. The difference is 1.6 pp. Additionally, the 12-instalment default for open-end credit is a reasonable inference from Art. 6.2 but the directive does not explicitly mandate this figure."
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "Full credit limit of EUR 5000 assumed drawn at t=0 (EU CCD Art. 6.2: when drawdown date cannot be ascertained, full amount drawn at commencement is assumed; the alternative would be to use average existing practise, but full immediate drawdown is the conservative default)",
+      "EUR 200 broker fee financed into the credit balance (added to amount financed, not deducted as upfront cash payment)",
+      "Amount financed = 5000 + 200 = 5200",
+      "Single repayment at 12 months: 5200 x (1 + 0.08) = 5616 (interest = 416)",
+      "Rate 8% nominal annual, monthly charging: i_monthly_stated = 0.08/12",
+      "Financed fee treatment: the fee is added to the balance (not paid separately at t=0), so the consumer pays interest on the fee for 12 months; this differs from an upfront cash fee which would reduce the net amount received without inflating the repayment amount"
+    ],
+    "equation": "5200 = 5616 * (1+i_monthly)^-12; i_monthly = (5200/5616)^(-1/12) - 1; APRC = 12 * i_monthly",
+    "iterations": "Iter1: v^12 = 0.925926, i_monthly = 0.00635, APRC = 7.6%. Iter2: (refined) v^12 = 0.925926, i_monthly = (0.925926)^(-1/12) - 1. Iter3: compute 12th root precisely: (0.925926)^(-1/12) = exp((1/12)*ln(1/0.925926)) = exp((1/12)*0.07696) = exp(0.006413) = 1.006434. Convergence: i_monthly=0.006434, APRC=7.721% -> 7.7%",
+    "aprc_pct": 7.7,
+    "weakest_point": "Whether the broker fee is financed into the balance (APRC=7.7%) or paid as an upfront cash fee (APRC=8.0%). If paid as a cash fee at t=0, the consumer net-receives 4800 and repays 5400 at month 12, giving APRC = 8.0% (the stated rate). The financed treatment lowers the APRC because the fee is spread over 12 months. The distinction is the single most consequential assumption in this case, producing a 0.3 pp divergence. Directive Art. 19 requires all charges to be included, but does not universally mandate financed treatment for all fee types."
+  }
+]

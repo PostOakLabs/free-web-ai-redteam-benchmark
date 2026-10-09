@@ -1,0 +1,248 @@
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      "Global route overflow > 5% concentrated in specific macro channels or block boundaries.",
+      "Detailed route fails with massive spacing/short violations in lower metal layers (M1-M3) localized to specific bounding boxes.",
+      "Placement utilization > 85% overall but local pin density > 95% in specific regions."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Macro placement creates narrow channels with high pin density.",
+        "distinguishing_check": "Plot GRT congestion map overlaid with macro bounding boxes; if red hotspots align with channel edges between large SRAMs, it is macro-channel congestion.",
+        "check_cost": "minutes",
+        "typical_fix": "Add routing blockages to force detours, shift macros to widen channels, or use partial placement blockages.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "High pin-density standard cells clustered together.",
+        "distinguishing_check": "Extract cell density map for high-pin-count cells; if hotspot correlates with logic cones of complex functions like bus muxes, it is cell-level congestion.",
+        "check_cost": "minutes",
+        "typical_fix": "Spread logic via placement padding, or swap to lower-pin-count equivalent cells if timing allows.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient upper-layer routing resources allocated to block.",
+        "distinguishing_check": "Check layer availability; if M4-M6 are blocked by top-level power straps or routing blockages, local congestion is forced into lower layers.",
+        "check_cost": "minutes",
+        "typical_fix": "Negotiate top-level routing layer assignment or add local routing blockages to push wires to higher layers.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Excessive feedthrough routing through block.",
+        "distinguishing_check": "Check terminal assignments; if many pins are on opposite sides of the block and internal logic is sparse in the middle, it is feedthrough.",
+        "check_cost": "minutes",
+        "typical_fix": "Re-pin the block or add dedicated routing channels.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check macro and boundary constraints first because they are the cheapest to identify and hardest to fix late in the flow.",
+    "classic_trap": "Blaming the global router for bad heuristics when the placement is physically unroutable due to macro channel starvation.",
+    "confidence": 0.95
+  },
+  {
+    "failure_class": "FAIL_TIMING (setup)",
+    "symptoms": [
+      "WNS is highly negative with TNS dominated by a few thousand paths sharing a common startpoint or clock.",
+      "WNS is moderate but TNS is massive, with failing paths spread uniformly across the design indicating a logic-depth problem.",
+      "WNS is localized exclusively to paths crossing hierarchy boundaries or clock domain crossings."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Unrealistic clock tree insertion delay or skew target at block boundary.",
+        "distinguishing_check": "Check the SDC boundary budget; if the arrival time at the block pin minus the required time equals the WNS exactly, the budget is too tight.",
+        "check_cost": "minutes",
+        "typical_fix": "Renegotiate block boundary budget or adjust top-level clock latency.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Logic depth too high for the target clock period.",
+        "distinguishing_check": "Path histogram shows a wall of paths failing by roughly the same amount; no single bottleneck gate stands out.",
+        "check_cost": "minutes",
+        "typical_fix": "Pipeline the logic, restructure RTL, or accept a slower clock.",
+        "fix_cost": "weeks"
+      },
+      {
+        "cause": "Placement congestion causing massive detours and high wire delays.",
+        "distinguishing_check": "Check wire delay percentage in the timing report; if wire delay > 60% of total path delay and correlates with GRT congestion hotspots, it is congestion-induced.",
+        "check_cost": "minutes",
+        "typical_fix": "Fix placement congestion or use useful skew.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Overly pessimistic OCV/AOCV derating on logically common paths.",
+        "distinguishing_check": "Compare WNS across corners; if it only fails on a specific slow corner with high OCV penalties, check if the path is logically common.",
+        "check_cost": "hours",
+        "typical_fix": "Apply path-specific or stage-specific SOCV/AOCV derating.",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Check boundary budgets and path histograms first to separate constraint errors from fundamental logic-depth issues before attempting local optimizations.",
+    "classic_trap": "Upsizing cells on a logic-depth problem, which only adds capacitance and worsens the WNS on the preceding stages.",
+    "confidence": 0.95
+  },
+  {
+    "failure_class": "FAIL_TIMING (hold)",
+    "symptoms": [
+      "Massive hold violations appearing immediately after CTS, mostly on short paths or scan chains.",
+      "Localized hold violations clustered around specific clock tree buffers or macro pins.",
+      "Hold violations that appear only after detailed routing due to wire delay changes."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock tree skew is too large locally.",
+        "distinguishing_check": "Plot clock insertion delays for launch and capture flops; if the delta is highly negative and localized to one clock branch, it is local CTS skew.",
+        "check_cost": "minutes",
+        "typical_fix": "Add clock tree constraints to balance that specific branch, or use useful skew.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Scan chain ordering creates extremely short paths between adjacent scan flops.",
+        "distinguishing_check": "Check if failing paths are exclusively scan_in to scan_out with zero logic levels; if yes, it is a scan chain hold issue.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert lockup latches or rely on scan compression tool to reorder and insert buffers.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Missing or insufficient min_delay constraints.",
+        "distinguishing_check": "Run timing with min delay report; if paths have no constraints and default to zero, the SDC is incomplete.",
+        "check_cost": "minutes",
+        "typical_fix": "Add proper set_min_delay or set_false_path for hold.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Crosstalk delay causing effective hold violations.",
+        "distinguishing_check": "Run SI-aware timing vs non-SI; if hold WNS drops significantly only with SI enabled, it is crosstalk-induced (more common at 28nm and below).",
+        "check_cost": "hours",
+        "typical_fix": "Space out aggressor and victim nets, or insert shielding.",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Check clock skew and scan chains first because they account for the vast majority of post-CTS hold violations and are cheap to diagnose.",
+    "classic_trap": "Inserting hold buffers globally without checking if the violation is actually caused by local clock skew, which just adds area and power.",
+    "confidence": 0.95
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      "Dynamic IR drop hotspots > 10% of VDD localized to specific regions during switching activity.",
+      "Static IR drop showing gradual voltage sag from power pads or bumps to the center of the die.",
+      "Timing degradation that only appears when IR-drop aware timing analysis is enabled."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient power strap density or width in the hotspot region.",
+        "distinguishing_check": "Overlay IR drop map with power grid map; if the hotspot aligns with a gap between wide upper-layer power straps, it is grid starvation.",
+        "check_cost": "minutes",
+        "typical_fix": "Add local power straps, widen existing ones, or add decap cells.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "High localized switching activity.",
+        "distinguishing_check": "Check toggle rates; if a specific module toggles at > 50% while others are < 10%, it is a localized activity hotspot.",
+        "check_cost": "hours",
+        "typical_fix": "Spread the logic, add decap, or reduce toggle rate via RTL changes.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Missing or high-resistance bumps in the package model.",
+        "distinguishing_check": "Check the static IR drop gradient; if the entire die sags uniformly and the gradient starts at the die edge, it is a package or bump issue.",
+        "check_cost": "hours",
+        "typical_fix": "Add more power bumps or improve package power planes.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Decap placement is too far from the switching instances.",
+        "distinguishing_check": "Measure distance from decap cells to the IR drop hotspot; if > 50um, the decap is ineffective for high-frequency dynamic droop.",
+        "check_cost": "minutes",
+        "typical_fix": "Move decap cells closer to the high-toggle-rate instances.",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Check local grid density and toggle rates first because they are the most common causes of localized dynamic droop and easiest to map visually.",
+    "classic_trap": "Adding decap cells randomly across the floorplan instead of targeting the specific high-frequency switching hotspots.",
+    "confidence": 0.90
+  },
+  {
+    "failure_class": "FAIL_CTS (clock tree)",
+    "symptoms": [
+      "Clock tree fails to meet target insertion delay or skew limits.",
+      "Max transition or max capacitance violations on clock buffers.",
+      "Clock tree routing fails with massive shorts or cannot be routed within the allocated blockages."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock tree structure has unbalanced branch lengths or fanouts.",
+        "distinguishing_check": "Report clock tree structure; if one branch drives thousands of flops and another drives hundreds, it is a structural imbalance.",
+        "check_cost": "minutes",
+        "typical_fix": "Add clock tree constraints to guide clustering, or add dummy flops to balance load.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Excessive clock gating cells creating huge local fanouts.",
+        "distinguishing_check": "Check fanout of ICGs; if a single ICG drives > 200 flops and causes local skew, it is ICG overloading (very common at 7nm/5nm due to multi-bit ICGs).",
+        "check_cost": "minutes",
+        "typical_fix": "Clone the ICG, break it into smaller banks, or use multi-bit ICGs.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock routing blockages are too aggressive or misplaced.",
+        "distinguishing_check": "Check clock DRCs and routing congestion; if clock buffers are pushed into tiny slivers of whitespace and fail transition, it is blockage-induced.",
+        "check_cost": "minutes",
+        "typical_fix": "Relax clock routing blockages or create dedicated clock channels.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Incorrect clock tree models or inaccurate RC tech file.",
+        "distinguishing_check": "Compare pre-CTS estimated skew vs post-CTS actual skew; if they diverge wildly, the estimation models are wrong.",
+        "check_cost": "hours",
+        "typical_fix": "Update wireload models or use physical-aware CTS.",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Check structural fanouts and ICG loading first because they are the root cause of most local skew and DRC issues in modern nodes.",
+    "classic_trap": "Tightening global skew targets to fix a local hotspot, which causes the CTS tool to insert massive amounts of buffering and wreck the design area.",
+    "confidence": 0.95
+  },
+  {
+    "failure_class": "FAIL_DRC (routing DRCs)",
+    "symptoms": [
+      "Detailed routing finishes but reports thousands of spacing or short violations on specific lower layers.",
+      "Max transition or max capacitance violations on signal nets post-route.",
+      "Antenna violations on long lower-layer routes."
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Placement congestion forcing router to use lower layers where design rules are tighter.",
+        "distinguishing_check": "Check DRC layer distribution; if 90% of spacing violations are on M2/M3 in a specific bounding box, it is local placement congestion.",
+        "check_cost": "minutes",
+        "typical_fix": "Fix placement congestion, add routing blockages on lower layers to force higher layers.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Non-Default Rules applied too aggressively.",
+        "distinguishing_check": "Check if DRCs are on nets with NDRs like double-width or spacing; if yes, the NDR is starving the router of resources.",
+        "check_cost": "minutes",
+        "typical_fix": "Relax NDRs for non-critical nets, or use partial NDRs.",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Missing or incorrect technology LEF spacing rules.",
+        "distinguishing_check": "Check if violations are systematic across the entire die on a specific layer; if yes, suspect LEF rule issues like missing parallel run length tables.",
+        "check_cost": "hours",
+        "typical_fix": "Fix the LEF file with foundry-corrected rules.",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "High fanout nets routed as daisy-chains causing max transition violations.",
+        "distinguishing_check": "Check max transition DRCs; if they occur on nets with fanout > 50, it is a high-fanout net buffering issue.",
+        "check_cost": "minutes",
+        "typical_fix": "Insert buffers during placement or synthesis, or use tree-routing.",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Check layer distribution and NDRs first because they quickly separate localized congestion issues from global constraint misconfigurations.",
+    "classic_trap": "Running the detailed router with higher effort levels to fix spacing violations that are actually caused by fundamental placement congestion.",
+    "confidence": 0.95
+  }
+]

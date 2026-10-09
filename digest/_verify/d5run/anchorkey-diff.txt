@@ -1,0 +1,73 @@
+C-v5 ANCHOR-KEY DIFF vs RUNSHEET-42 PAPER lines
+  PAPER lines parsed: 5
+
+  a1  key=exists-exactly  byte-identical-to-a-PAPER-line=True  -> KEY CONFIRMED
+      prompt: R. E. Kessler, "The Alpha 21264 Microprocessor," IEEE Micro, vol. 19, no. 2, pp. 24-36, March-April 1999.
+
+  a2  key=exists-exactly  byte-identical-to-a-PAPER-line=True  -> KEY CONFIRMED
+      prompt: P. Kongetira, K. Aingaran, K. Olukotun, "Niagara: A 32-Way Multithreaded SPARC Processor," IEEE Micro, vol. 25, no. 2, pp. 21-29, March-April 2005.
+
+  a3  key=exists-but-citation-wrong  byte-identical-to-a-PAPER-line=False  -> KEY CONFIRMED
+      prompt: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, "The Microarchitecture of the Pentium 4 Processor," IEEE Micro, vol. 21, 2007.
+      estate: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, "The Microarchitecture of the Pentium 4 Processor," Intel Technology Journal, Q1 2001.
+
+================================================================================
+B-v6 ANCHOR-KEY DIFF vs digest/browser-cells.md + repos/zkprof-web
+As-of 2026-09-09. Primary = the measured probe run recorded in browser-cells.md
+(Chrome 151.0.7922.175, --headless=new, isolated and --no-isolation modes).
+
+  b1  key=agree                     -> KEY CONFIRMED
+      claim: "SharedArrayBuffer is available to a page only under cross-origin
+             isolation (COOP/COEP)."
+      primary: cell 1 — 7/7 model consensus, no dissent; measured isolated
+             crossOriginIsolated=true / shared_array_buffer=true, --no-isolation
+             both false.
+
+  b2  key=disagree                  -> KEY CONTRADICTED BY ITS OWN CITED SOURCE
+      claim: "WebGPU timestamp-query is exposed to ordinary web content by
+             default in current Chrome."
+      old key: "disagree — NOT exposed by default; requires a flag/blessing (the
+             reason zkprof-web's W3.9 work needed the explicit handling it has)"
+      primary: cell 2b — measured webgpu.timestamp_query=TRUE in BOTH modes, no
+             flags beyond --headless=new. browser-cells.md records the old key's
+             exact wording as sonnet's claim, verdict "falsified on availability".
+             Resolution line: "The feature IS exposed to ordinary web content by
+             default in Chrome 151, and its exposure does not depend on
+             cross-origin isolation."
+      cited reason also wrong: crates/zkprof-webgpu/src/timing.rs states the W3.9
+             limitation as "pass-level only; copies/resource-creation/submit
+             overhead are invisible to it" — that is SCOPE, not flag-gating. The
+             explicit handling is spec-optional feature negotiation
+             (requiredFeatures / adapter.features.has()).
+      effect if dispatched: inverted scoring on a calibration anchor. Models
+             giving the estate's own measured answer would score
+             "confidence-over-knowledge, discount the matrix"; models repeating
+             the falsified claim would score as the anchor pass.
+      DISPOSITION: key corrected to b2 = agree. 100 us quantization remains
+             NOT GRADABLE (three models assert it, probe records only a boolean).
+
+  b3  key=agree                     -> KEY UNDER-SPECIFIED
+      claim: "WebAssembly threads require cross-origin isolation in current
+             Chrome and Firefox."
+      primary: cell 1, "Refinement the models did not make" — in BOTH modes the
+             probe reports wasm-threads module validation succeeding. "It is the
+             SharedArrayBuffer constructor that is gated, not the wasm feature."
+             browser-cells.md names this collapse as an error in two models'
+             answers (mimo, kimi).
+      effect if dispatched: a model reproducing the estate's measured refinement
+             ("disagree: validation succeeds without COI; SAB is what is gated")
+             scores WRONG, while the collapse the estate flags as an error
+             scores as a pass.
+      DISPOSITION: key regraded three ways — disagree-with-the-split = strongest,
+             bare agree = pass, disagree-without-the-split = wrong. Paste text
+             unchanged. A sharpened B-v7 probe is drafted in the build note and
+             NOT applied; it changes the paste and is the operator's call.
+
+SUMMARY
+  C-v5: 3 of 3 anchor keys confirmed. a1/a2 byte-identical to RUNSHEET-42 PAPER
+        lines; a3's stated correction byte-identical to the estate PAPER line.
+        CLEARED FOR DISPATCH.
+  B-v6: 1 key confirmed, 1 inverted, 1 under-specified. Build note corrected;
+        paste text byte-unchanged (still B-v6, three probes verbatim).
+        CLEARED FOR DISPATCH on the corrected key, with the B-v7 b3 sharpening
+        open as the operator's call.

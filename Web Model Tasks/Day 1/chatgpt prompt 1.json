@@ -1,0 +1,135 @@
+[
+{
+"title": "Late-route congestion from localized pin density",
+"design_context": "7nm, 1.2M placeable instances, 86 macros, 4 major clock domains plus generated clocks, commercial P&R and commercial synthesis flows.",
+"prior_state": {
+"wns_ns": -0.142,
+"tns_ns": -38.6,
+"congestion_overflow_percent": 6.8,
+"utilization_percent": 78.5,
+"drc_count": 0
+},
+"observation": {
+"details": "After CTS and during detailed routing, global overflow had fallen to 1.1% overall but two adjacent routing channels still showed 11.4% and 9.7% local overflow. About 73% of the unrouted/cut violations were concentrated in a 140um-wide corridor feeding three memory macros; timing degradation was also concentrated on nets entering the corridor, with 31 of the 100 worst setup paths crossing it.",
+"severity": "HIGH"
+},
+"hypothesis": "The failure was primarily a localized pin-access and track-demand problem around the macro corridor, not a block-wide utilization problem; widening placement or globally reducing density would have caused unnecessary churn while leaving the local access pattern largely intact.",
+"candidates_considered": [
+{
+"action": "Reduce target utilization across the affected region by about 8 percentage points and rerun placement through route.",
+"rejected_because": "The estimated placement-to-route restart would cost roughly 1.5 to 2 days, and moving the surrounding logic was expected to invalidate already-closed clock and timing relationships."
+},
+{
+"action": "Move one of the three memory macros by roughly 20um to widen the central channel.",
+"rejected_because": "The macro was already tied closely to a power-grid strap and clock-tree topology; moving it would require PG and CTS ECO work and carried a realistic risk of several hundred additional downstream changes."
+},
+{
+"action": "Add routing resources by relaxing selected noncritical upper-metal constraints and reserve extra tracks globally for the affected layer range.",
+"rejected_because": "A broader routing-rule change could increase coupling and antenna/DRC risk elsewhere and would require another detailed-route signoff pass, with little guarantee that the narrow corridor itself would improve enough."
+}
+],
+"chosen_intervention": "The engineer preserved the macro locations and overall placement, then identified the three worst pin-dense logic clusters feeding the corridor. Two clusters were incrementally spread into adjacent whitespace by about 6-10um, several low-fanout buffers were relocated outside the corridor, and route guides were added so the highest-demand nets entered the corridor on complementary tracks/layers. The flow was then rerun from incremental placement through detailed routing rather than a full floorplan restart.",
+"post_state": {
+"wns_ns": -0.108,
+"tns_ns": -24.7,
+"congestion_overflow_percent": 0.6,
+"utilization_percent": 78.1,
+"drc_count": 0
+},
+"expert_assessment": "This was a reasonable late-stage call because it attacked localized track demand and pin access while preserving macro and clock topology. The general lesson is to correlate congestion maps with pin density and net entry patterns before applying a global utilization fix; it would not transfer well to a genuinely block-wide capacity shortage or a corridor constrained by fixed power or clock structures.",
+"confidence": 0.84,
+"failure_class": "FAIL_CONGESTION",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "The exact effectiveness of the small cluster spreads and route guides is highly dependent on the router's detailed heuristic behavior and therefore is the part an expert should check first."
+},
+{
+"title": "Hundreds of setup violations that were really one constraint problem",
+"design_context": "16nm, 920k placeable instances, 58 macros, 5 clock domains with generated clocks, commercial synthesis and commercial P&R tools.",
+"prior_state": {
+"wns_ns": -0.386,
+"tns_ns": -91.4,
+"violating_endpoints": 428,
+"setup_paths_worst_100_shared_startpoints_percent": 82,
+"utilization_percent": 76.9
+},
+"observation": {
+"details": "The setup report showed 428 violating endpoints, but 82% of the worst 100 paths shared a small set of startpoints and the violation depth clustered tightly between -0.31ns and -0.39ns rather than forming a long tail. Most paths also crossed the same clock-domain boundary, and the reported required time was unexpectedly identical to the nearest picosecond across many endpoints.",
+"severity": "CRITICAL"
+},
+"hypothesis": "The narrow, highly repeated violation signature indicated a common constraint or clock-definition issue at one domain boundary rather than hundreds of independent logic or physical timing failures; optimizing cells before validating the clocks and exceptions would likely waste area and power without fixing the root cause.",
+"candidates_considered": [
+{
+"action": "Upsize the top violating combinational cells and insert additional buffers on the worst paths.",
+"rejected_because": "The affected path count was too large for a local ECO strategy, and widespread upsizing was projected to increase dynamic and leakage power while potentially worsening congestion in an already moderately utilized region."
+},
+{
+"action": "Run a broad placement/timing optimization pass to re-place the 428 violating endpoints.",
+"rejected_because": "A global optimization would consume a full closure iteration and risk perturbing paths that were already positive, with no evidence yet that the required-time calculation itself was correct."
+},
+{
+"action": "Add a multicycle exception across the clock-domain boundary to remove most of the reported setup failures.",
+"rejected_because": "The design intent had not established a multi-cycle transfer; adding the exception merely to improve the report would create a functional signoff risk and could mask a real interface requirement."
+}
+],
+"chosen_intervention": "Before changing netlist or placement, the engineer compared the path reports against the intended clock relationship and traced the repeated required-time value to the generated-clock definition at the receiving boundary. The generated clock had been defined with the correct period but an incorrect waveform edge relationship, causing the receiving edge to be modeled materially earlier than intended. The SDC clock waveform was corrected, then constraints were reloaded and timing was recomputed before any physical optimization.",
+"post_state": {
+"wns_ns": -0.061,
+"tns_ns": -7.8,
+"violating_endpoints": 37,
+"setup_paths_worst_100_shared_startpoints_percent": 38,
+"utilization_percent": 76.9
+},
+"expert_assessment": "The diagnostic sequence was the important part: a repeated violation signature justified checking constraints before touching implementation. The remaining failures after the correction are plausible physical/setup issues, but this approach would not transfer to a broad distribution of unrelated violations with varied required times and weak path sharing.",
+"confidence": 0.9,
+"failure_class": "FAIL_TIMING",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "The numerical shift from -0.386ns to -0.061ns assumes a generated-clock waveform error of roughly that magnitude, so the exact post-correction WNS should be verified against the actual clock relationship."
+},
+{
+"title": "Deriving an interface budget from the receiving block's real slack margin",
+"design_context": "28nm, 680k placeable instances, 52 macros, 3 primary clock domains with one related generated clock, commercial synthesis and commercial P&R tools.",
+"prior_state": {
+"interface_period_ns": 2.0,
+"source_block_internal_setup_budget_ns": 1.28,
+"interface_budget_ns": 0.46,
+"clock_uncertainty_ns": 0.08,
+"wns_ns": -0.094,
+"tns_ns": -3.1,
+"utilization_percent": 72.4
+},
+"observation": {
+"details": "At the block boundary, Block A was being asked to meet a 0.60ns output budget while Block B's input-side implementation was consistently using only about 0.36-0.40ns of the available 0.46ns interface allowance after accounting for clock uncertainty. Several late Block A paths were failing by roughly 0.09ns even though the end-to-end path through A and B still had measurable margin.",
+"severity": "MODERATE"
+},
+"hypothesis": "The initial fixed split over-allocated budget to Block B relative to its demonstrated physical need and forced Block A to close an unnecessarily aggressive endpoint requirement; the interface budget should instead be derived from measured receiving-side delay, explicit uncertainty, and a bounded margin rather than a symmetric split of the cycle.",
+"candidates_considered": [
+{
+"action": "Keep the original 0.60ns output requirement for Block A and solve it with additional buffering and cell upsizing.",
+"rejected_because": "Meeting the tighter budget was estimated to require roughly 4-6% additional cell area in the interface cone and would likely increase local congestion and leakage for only an interface-level accounting decision."
+},
+{
+"action": "Make the budgets symmetric at 1.0ns per block and rely on the end-to-end path to determine whether either side needed tightening later.",
+"rejected_because": "This would remove useful block-level guardrails and could allow Block B to consume far more than its demonstrated need, creating substantial integration churn when the final top-level path budget was re-established."
+},
+{
+"action": "Declare the interface false-path because the transfer was architecturally associated with a decoupled control mechanism.",
+"rejected_because": "The interface still carried data consumed synchronously in the active mode; removing the timing requirement would create a real functional signoff hole rather than solve a budget-allocation problem."
+}
+],
+"chosen_intervention": "The engineer reconstructed the end-to-end 2.0ns budget from the top-level clock definition, 0.08ns clock uncertainty, and measured Block B input-side delay across representative PVT corners. Block B was assigned 0.40ns for normal operation plus 0.06ns guardband, leaving Block A an explicit 0.52ns interface budget rather than the prior 0.46ns. The SDC was updated so the block boundary budget reflected that derivation, and both blocks were rechecked against the same top-level timing assumptions.",
+"post_state": {
+"interface_period_ns": 2.0,
+"source_block_internal_setup_budget_ns": 1.28,
+"interface_budget_ns": 0.52,
+"clock_uncertainty_ns": 0.08,
+"wns_ns": -0.028,
+"tns_ns": -0.9,
+"utilization_percent": 72.4
+},
+"expert_assessment": "The better practice is to derive interface budgets from end-to-end requirements and measured receiving-side consumption, then document the assumptions in the SDC rather than choosing an arbitrary symmetric split. This would not transfer unchanged when the downstream block is still highly volatile, when top-level mode coverage is incomplete, or when asynchronous behavior genuinely changes the timing relationship.",
+"confidence": 0.78,
+"failure_class": "SDC_BUDGET",
+"source_basis": "constructed-example",
+"weakest_point": "The specific 0.52ns budget derivation is a plausible bookkeeping example, but the exact allocation formula and guardband methodology vary substantially across organizations and signoff flows."
+}
+]

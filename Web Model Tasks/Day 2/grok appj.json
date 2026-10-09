@@ -1,0 +1,83 @@
+[
+  {
+    "case_name": "Regular monthly payments (regular first period)",
+    "appendix_basis": "Appendix J (c)(1) Example (i)",
+    "inputs": {
+      "amount_financed": 5000,
+      "payment": 230,
+      "number_of_payments": 24,
+      "advance_date": "1-10-78",
+      "first_payment_date": "2-10-78"
+    },
+    "unit_period_analysis": "Unit-period = 1 month (most frequent common period). w = 12 unit-periods per year. From advance 1-10-78 to first payment 2-10-78 = exactly 1 full unit-period, so t = 1 and f = 0 (no fractional unit-period).",
+    "computation": "Special form of general equation for single-advance, otherwise regular: A = P * [1/(1+i)^t * (1 - (1+i)^(-n))/(i) ] with f=0. Substituting: 5000 = 230 * sum_{k=1 to 24} 1/(1+i)^k. Solve iteratively for unit-period rate i. Iteration yields i ≈ 0.0080714. Then APR = w * i = 12 * 0.0080714 = 0.0969.",
+    "result_apr": "9.69%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Exact intermediate iteration values for i (Appendix J states result from 10-digit calculator iteration)."
+  },
+  {
+    "case_name": "Monthly payments with long (odd) first period",
+    "appendix_basis": "Appendix J (c)(1) Example (ii)",
+    "inputs": {
+      "amount_financed": 6000,
+      "payment": 200,
+      "number_of_payments": 36,
+      "advance_date": "2-10-78",
+      "first_payment_date": "4-1-78"
+    },
+    "unit_period_analysis": "Unit-period = 1 month; w = 12. Measure full unit-periods backward from later date: from 3-1-78 to 4-1-78 = 1 full unit-period (t = 1). Remaining fraction measured forward from earlier date: 2-10-78 to 3-1-78 = 19 days; f = 19/30.",
+    "computation": "Equation: 6000 = 200 * [1/(1+i)^{t+f} * (1 - (1+i)^(-n))/i ]. With t=1, f=19/30: 6000 = 200 * sum of discounted payments starting after fractional period. Iterate for i. Resulting i ≈ 0.00985. APR = w * i = 12 * i = 0.1182.",
+    "result_apr": "11.82%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Precise value of i before multiplication by w (stated APR is the published outcome)."
+  },
+  {
+    "case_name": "Single-advance single-payment (term < 1 year, measured in days)",
+    "appendix_basis": "Appendix J (c)(5) Example (i)",
+    "inputs": {
+      "amount_financed": 1000,
+      "single_payment": 1080,
+      "advance_date": "1-3-78",
+      "payment_date": "9-15-78"
+    },
+    "unit_period_analysis": "Single-advance, single-payment rule: unit-period = term of transaction (but ≤ 1 year). Term = 255 days, so unit-period = 255 days; w = 365/255. t = 1, f = 0 (entire term is one unit-period).",
+    "computation": "Form 1 or general: A = P / (1 + i)^1. 1000 = 1080 / (1 + i). Solve: 1 + i = 1080/1000 = 1.08 → i = 0.08. APR = w * i = (365/255) * 0.08 ≈ 0.11451 → rounds to 0.1145.",
+    "result_apr": "11.45%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Exact day count 255 is as published; minor calendar variation possible but matches Appendix J."
+  },
+  {
+    "case_name": "Monthly payments with irregular first payment (regular first period)",
+    "appendix_basis": "Appendix J (c)(2) Example (i)",
+    "inputs": {
+      "amount_financed": 5000,
+      "first_payment": 250,
+      "regular_payment": 230,
+      "number_of_payments": 24,
+      "advance_date": "1-10-78",
+      "first_payment_date": "2-10-78"
+    },
+    "unit_period_analysis": "Unit-period = 1 month; w = 12. From 1-10-78 to 2-10-78 = exactly 1 unit-period → t = 1, f = 0. First payment is irregular (odd); remaining 23 payments regular.",
+    "computation": "Special form: A = P1/(1+i)^{t+f} + P * [1/(1+i)^{t+f+1} * (1 - (1+i)^(-(n-1)))/i ]. Substituting: 5000 = 250/(1+i)^1 + 230 * sum_{k=2 to 24} 1/(1+i)^k. Iterate for i ≈ 0.0084. APR = 12 * i = 0.1008.",
+    "result_apr": "10.08%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Exact intermediate i from iteration (APR is the published rounded result)."
+  },
+  {
+    "case_name": "Monthly payments with irregular final payment (regular first period)",
+    "appendix_basis": "Appendix J (c)(3) Example (i)",
+    "inputs": {
+      "amount_financed": 5000,
+      "regular_payment": 230,
+      "final_payment": 280,
+      "number_of_payments": 24,
+      "advance_date": "1-10-78",
+      "first_payment_date": "2-10-78"
+    },
+    "unit_period_analysis": "Unit-period = 1 month; w = 12. From advance to first payment = 1 full unit-period → t = 1, f = 0. Payments 1–23 regular; final (24th) payment irregular.",
+    "computation": "Special form: A = P * [1/(1+i)^t * (1 - (1+i)^(-(n-1)))/i ] + Pn/(1+i)^{t+(n-1)}. Substituting: 5000 = 230 * sum_{k=1 to 23} 1/(1+i)^k + 280/(1+i)^24. Iterate for i ≈ 0.00875. APR = 12 * i = 0.1050.",
+    "result_apr": "10.50%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Precise i value prior to rounding to two decimal places for APR."
+  }
+]

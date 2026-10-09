@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Copper interconnect process selection for POWER4",
+    "where_in_paper": "Process technology / fabrication overview",
+    "decision": "Use IBM CMOS 8S SOI copper-interconnect process (0.18μm) for the POWER4 chip",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Copper interconnect provided lower resistance wiring critical for a chip of this size and complexity, enabling better performance and power characteristics compared to aluminum",
+    "outcome": "POWER4 successfully fabricated as one of the first high-end server processors on copper SOI process, with reported die area of roughly 400mm² and approximately 170-175 million transistors",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Specific process designation (CMOS 8S) and exact transistor count may be slightly misremembered; the die area figure could be off by 10-15%",
+    "confidence": 0.7
+  },
+  {
+    "title": "Hierarchical clock distribution using a global clock grid",
+    "where_in_paper": "Clock distribution section",
+    "decision": "Implement a hierarchical clock distribution with a global copper clock grid feeding regional and local clock buffers, rather than a purely tree-based or H-tree approach",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A global grid approach reduces clock skew across the large die while providing a uniform, well-controlled clock arrival time at all latches, which is essential for a chip of this physical scale",
+    "outcome": "The clock distribution achieved acceptable skew and jitter performance across the full chip, enabling the target clock frequencies",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The paper almost certainly discusses clock distribution in detail but I may be conflating specific implementation details (e.g., whether 'copper grid' is the exact term used versus 'clock grid' or 'clock mesh')",
+    "confidence": 0.65
+  },
+  {
+    "title": "Power distribution and decoupling strategy for a large-die processor",
+    "where_in_paper": "Power distribution / chip integration section",
+    "decision": "Design an extensive on-chip power distribution grid with significant decoupling capacitance to manage voltage drop (IR drop) across the large die",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The high power density and large physical extent of the chip required careful power grid design to keep IR drop within tolerance and maintain signal integrity",
+    "outcome": "Adequate voltage integrity was maintained across the chip under worst-case switching conditions",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 38,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "This entry is the most likely to be general knowledge projected onto the paper rather than recalled from it. The paper may discuss power distribution but I am not confident of the specific framing or details I've attributed here.",
+    "confidence": 0.45
+  },
+  {
+    "title": "Timing methodology and physical design closure approach",
+    "where_in_paper": "Timing methodology / physical design section",
+    "decision": "Use a structured timing-closure methodology leveraging IBM internal EDA tools (likely Einstimer for timing) to close timing on the full chip, with hierarchical block-level design feeding into top-level integration",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A hierarchical physical design methodology was necessary given chip complexity; blocks were designed and timed independently before top-level integration and final timing closure",
+    "outcome": "Timing was closed on the full design, enabling the target frequency. The hierarchical approach managed the complexity of integrating hundreds of millions of transistors",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Specific EDA tool names (Einstimer etc.) may not be mentioned in this paper, and I may be attributing details from other IBM chip papers. The hierarchical approach is almost certainly described but the precise flow details may differ from my reconstruction.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Integration of multiple cores and L2 cache on a single die",
+    "where_in_paper": "Chip integration / floorplanning section",
+    "decision": "Integrate two processor cores plus a large unified L2 cache and associated bus/control logic all on a single die rather than using a multi-chip module approach",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Single-die integration reduced interconnect latency between cores and shared L2 cache, which was critical for the on-chip SMP fabric and memory hierarchy performance. The paper likely discusses the floorplanning challenges this entails.",
+    "outcome": "The single-die design enabled the tightly-coupled dual-core architecture with very low-latency L2 access that characterized POWER4's performance advantage",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The single-die integration fact is well-established but I am not certain whether this paper explicitly discusses the MCM alternative or frames the decision in those terms. The microarchitectural motivation may belong more to the companion paper (pp. 5-25) than to this physical-design paper.",
+    "confidence": 0.55
+  }
+]
+```

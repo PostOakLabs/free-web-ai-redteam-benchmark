@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clock frequency philosophy and pipeline depth",
+    "where_in_paper": "Guiding principles / early architectural objectives",
+    "decision": "Pursued a balanced design optimizing both IPC and clock frequency rather than maximizing clock frequency through an ultra-deep pipeline",
+    "alternatives_or_rejected": "A deeper pipeline to achieve higher clock frequency, with correspondingly greater branch misprediction penalties and latch-power overhead",
+    "rationale": "Higher frequency alone does not yield proportional performance gains once pipeline depth penalties (branch misprediction recovery, latch power, diminishing per-stage work) are accounted for; a balanced approach yields better overall throughput",
+    "outcome": "POWER4 achieved competitive frequencies for its era while maintaining high IPC, delivering strong single-thread and multi-thread performance for server workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain the paper explicitly names an ultra-deep pipeline as a rejected alternative versus presenting the philosophy as a positive design principle only",
+    "confidence": 0.65
+  },
+  {
+    "title": "Dual-core on a single die",
+    "where_in_paper": "Chip organization / system microarchitecture overview",
+    "decision": "Integrate two complete processor cores on a single chip die to improve throughput for commercial multi-threaded workloads",
+    "alternatives_or_rejected": "A single-core design devoting all transistor budget to one wider or deeper core, or using a multi-chip module for multi-processor configurations",
+    "rationale": "Commercial server workloads exhibit significant thread-level parallelism; two cores on-die share the memory subsystem efficiently and avoid inter-chip latency",
+    "outcome": "POWER4 became one of the first commercial dual-core server processors, significantly improving throughput on enterprise workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 9,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not certain the paper frames the dual-core choice as a decision with explicitly discussed rejected alternatives; it may simply present it as an architectural given",
+    "confidence": 0.6
+  },
+  {
+    "title": "RAS (Reliability, Availability, Serviceability) design approach",
+    "where_in_paper": "RAS section",
+    "decision": "Embed extensive hardware-level RAS features throughout the design: ECC on caches and buses, instruction retry, error containment, and sparing mechanisms",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Enterprise/server customers require extremely high availability; hardware-level error detection and recovery mechanisms minimize silent data corruption and unplanned downtime",
+    "outcome": "POWER4-based systems achieved very high availability metrics suitable for mission-critical enterprise and commercial deployments",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 19,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I cannot verify whether the paper names a specific rejected alternative for RAS or simply describes the chosen approach; I have marked alternatives as not-stated-in-paper to be safe",
+    "confidence": 0.65
+  },
+  {
+    "title": "Scalable interconnect for multi-chip SMP configurations",
+    "where_in_paper": "Interconnect / fabric discussion",
+    "decision": "Use a scalable point-to-point interconnect fabric to link multiple POWER4 modules into larger SMP configurations rather than a conventional shared bus",
+    "alternatives_or_rejected": "A shared-bus interconnect topology",
+    "rationale": "Point-to-point interconnects scale with increasing chip count without the bandwidth saturation and arbitration delays that degrade shared buses at high processor counts",
+    "outcome": "POWER4-based systems scaled to configurations supporting up to 32 processors in a single system image",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The specific framing of the interconnect decision (shared bus as rejected alternative) may come from general POWER4 knowledge rather than this paper's exact text; the paper may describe the fabric without contrasting it against a shared-bus alternative",
+    "confidence": 0.5
+  },
+  {
+    "title": "Cache hierarchy with shared on-chip L2 and off-chip L3",
+    "where_in_paper": "Cache hierarchy discussion",
+    "decision": "Implement a large shared on-chip L2 cache accessible by both cores, backed by a large off-chip L3 cache on the multi-chip module",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A shared L2 facilitates inter-core data sharing and coherence efficiency; a large off-chip L3 provides capacity for server workloads with large memory footprints that would not fit on-die",
+    "outcome": "The hierarchical cache structure reduced average memory latency for enterprise workloads and supported efficient inter-core data sharing",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 14,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am not fully certain whether the L2 was shared between cores or partitioned per core in the paper's description; I believe it was shared but may be conflating with general knowledge. Also, specific rejected alternatives for the cache hierarchy are likely not discussed in the paper.",
+    "confidence": 0.55
+  }
+]
+```

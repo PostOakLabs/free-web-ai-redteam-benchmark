@@ -1,0 +1,67 @@
+```json
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "Object keys sorted by UTF-16 code unit value of each character in sequence (not locale collation): 'C'=U+0043 < 'a'=U+0061 < 'b'=U+0062",
+      "No insignificant whitespace anywhere",
+      "Integers already in canonical minimal form, unchanged"
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"x\":2,\"y\":1},{\"k\":null}],\"z\":true}}",
+    "rules_applied": [
+      "Key sorting applied recursively at every object nesting level, independently per object",
+      "Array element order preserved exactly (JCS never reorders array contents)",
+      "Within outer's value object: 'a'=U+0061 < 'z'=U+007A",
+      "Within first array-element object: 'x'=U+0078 < 'y'=U+0079",
+      "No whitespace"
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1e+21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":100000000000000000000,\"n5\":0,\"n6\":333333333.3333333}",
+    "rules_applied": [
+      "Keys already in ascending code-unit order (n1..n6); no reordering needed",
+      "Numbers serialized via the ECMAScript Number::toString algorithm applied to the value's nearest IEEE-754 double (per RFC 8785 §3.2.2.3), producing the shortest decimal string that round-trips",
+      "n1: 1e21 has decimal exponent 21 >= 21 threshold -> exponential form with explicit '+' sign: 1e+21",
+      "n2: 1e-7 has exponent -7, below the -6 decimal-notation floor -> exponential form, negative exponent has no explicit sign beyond '-': 1e-7",
+      "n3: 1e-6 has exponent -6, at the decimal-notation floor -> plain decimal: 0.000001",
+      "n4: 1e20 has exponent 20 < 21 -> plain decimal, all zeros written out: 100000000000000000000",
+      "n5: negative zero -> ECMAScript Number::toString(-0) yields '0' (JCS explicitly collapses -0 to 0)",
+      "n6: 333333333.33333329 rounds to the nearest representable double, whose shortest round-trip decimal is 333333333.3333333 (loses the trailing '29')"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"ü\":\"umlaut\",\"€\":\"euro\"}",
+    "rules_applied": [
+      "Keys sorted by comparing UTF-16 code units (surrogate-pair-aware) of the key strings, character by character",
+      "$ = U+0024 < 'aa' (first unit 'a' = U+0061) < ü = U+00FC < € = U+20AC",
+      "Non-ASCII characters in both keys and string values emitted as literal UTF-8 bytes, not \\u-escaped, since JCS mandates escaping only for U+0000–U+001F control characters, quotation mark, and backslash"
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "rules_applied": [
+      "Keys s1..s5 already in ascending code-unit order; compact and JCS forms coincide (only a single-level flat object with no numbers)",
+      "U+000A (newline) uses the mandated short escape \\n, not \\u000a",
+      "U+0009 (tab) uses the mandated short escape \\t, not \\u0009",
+      "Double-quote character escaped as \\\" (mandatory regardless of JCS vs generic JSON)",
+      "é = U+00E9 is not a control character, quote, or backslash, so it is emitted as a literal UTF-8 byte sequence, unescaped",
+      "s5 taken literally as given (two U+0020 space characters) — spaces are not control characters and require no escaping"
+    ]
+  }
+]
+```
+```json
+{"weakest_point": "Case 5, field s5: the literal input \"control  \" (two spaces, no visible character between them) is ambiguous — the key name 'control' strongly suggests an actual control character (e.g. U+0000–U+001F) was originally present between the words 'control' and the closing quote but was lost/stripped in transmission to me. If a real control character was intended, JCS requires either one of the fixed short escapes (\\b, \\f, \\n, \\r, \\t) or, for any other control code point, a \\u00XX escape with lowercase hex digits — and I cannot determine which byte(s) that would be from the text as given, so this is the one output in this set I'd flag as not verified byte-exact against a reference canonicalizer."}
+```

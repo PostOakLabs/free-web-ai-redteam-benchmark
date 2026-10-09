@@ -1,0 +1,117 @@
+```json
+[
+  {
+    "case_name": "Simple Direct Ownership",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 60}
+    ],
+    "computation": {
+      "step_1": {"description": "Direct ownership of B by A.", "calculation": "A owns 60% of B → Aggregate ownership: 60%"},
+      "step_2": {"description": "Apply the 50% rule.", "calculation": "60% >= 50% → B is blocked due to A's ownership."}
+    },
+    "blocked_verdicts": ["B"],
+    "guidance_basis": "OFAC FAQ 398",
+    "weakest_point": "Assumed direct ownership is straightforward; no indirect ownership considered."
+  },
+  {
+    "case_name": "Convergent Graph with Multiple Paths",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false},
+      {"id": "D", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 30},
+      {"from": "A", "to": "C", "pct": 40},
+      {"from": "B", "to": "D", "pct": 30},
+      {"from": "C", "to": "D", "pct": 40}
+    ],
+    "computation": {
+      "step_1": {"description": "Path 1: A → B → D", "calculation": "A owns 30% of B, B owns 30% of D → A's indirect ownership: 30% * 30% = 9%"},
+      "step_2": {"description": "Path 2: A → C → D", "calculation": "A owns 40% of C, C owns 40% of D → A's indirect ownership: 40% * 40% = 16%"},
+      "step_3": {"description": "Sum contributions from all paths.", "calculation": "9% + 16% = 25%"},
+      "step_4": {"description": "Apply the 50% rule.", "calculation": "25% < 50% → D is not blocked."}
+    },
+    "blocked_verdicts": [],
+    "guidance_basis": "OFAC FAQ 401",
+    "weakest_point": "Assumed multiplicative treatment for indirect ownership; OFAC may prescribe full attribution."
+  },
+  {
+    "case_name": "Chain Through Majority-Owned Intermediary",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 60},
+      {"from": "B", "to": "C", "pct": 55}
+    ],
+    "computation": {
+      "step_1": {"description": "A owns 60% of B (majority).", "calculation": "A's ownership in B: 60%"},
+      "step_2": {"description": "B owns 55% of C (majority).", "calculation": "B's ownership in C: 55%"},
+      "step_3": {"description": "Apply full attribution for majority-owned intermediary (B).", "calculation": "A's ownership in C: 55% (full attribution through B)"},
+      "step_4": {"description": "Apply the 50% rule.", "calculation": "55% >= 50% → C is blocked due to A's indirect ownership."}
+    },
+    "blocked_verdicts": ["C"],
+    "guidance_basis": "OFAC FAQ 398",
+    "weakest_point": "Assumed full attribution through majority-owned intermediary; confirm OFAC's exact treatment."
+  },
+  {
+    "case_name": "Convergent Graph with Majority-Owned Intermediary",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false},
+      {"id": "D", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 55},
+      {"from": "A", "to": "C", "pct": 45},
+      {"from": "B", "to": "D", "pct": 60},
+      {"from": "C", "to": "D", "pct": 30}
+    ],
+    "computation": {
+      "step_1": {"description": "Path 1: A → B → D (B is majority-owned by A).", "calculation": "A owns 55% of B, B owns 60% of D → A's indirect ownership: 60% (full attribution through B)"},
+      "step_2": {"description": "Path 2: A → C → D (C is not majority-owned by A).", "calculation": "A owns 45% of C, C owns 30% of D → A's indirect ownership: 45% * 30% = 13.5%"},
+      "step_3": {"description": "Sum contributions from all paths.", "calculation": "60% + 13.5% = 73.5%"},
+      "step_4": {"description": "Apply the 50% rule.", "calculation": "73.5% >= 50% → D is blocked due to A's aggregate ownership."}
+    },
+    "blocked_verdicts": ["D"],
+    "guidance_basis": "OFAC FAQ 401",
+    "weakest_point": "Assumed full attribution for majority-owned intermediary (B) and multiplicative for non-majority (C)."
+  },
+  {
+    "case_name": "Complex Convergent Graph",
+    "entities": [
+      {"id": "A", "blocked": true},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false},
+      {"id": "D", "blocked": false},
+      {"id": "E", "blocked": false}
+    ],
+    "edges": [
+      {"from": "A", "to": "B", "pct": 50},
+      {"from": "A", "to": "C", "pct": 50},
+      {"from": "B", "to": "D", "pct": 50},
+      {"from": "C", "to": "D", "pct": 50},
+      {"from": "D", "to": "E", "pct": 100}
+    ],
+    "computation": {
+      "step_1": {"description": "Path 1: A → B → D", "calculation": "A owns 50% of B, B owns 50% of D → A's indirect ownership: 50% (full attribution through B)"},
+      "step_2": {"description": "Path 2: A → C → D", "calculation": "A owns 50% of C, C owns 50% of D → A's indirect ownership: 50% (full attribution through C)"},
+      "step_3": {"description": "Sum contributions from all paths to D.", "calculation": "50% + 50% = 100%"},
+      "step_4": {"description": "D owns 100% of E.", "calculation": "A's ownership in E: 100% (full attribution through D)"},
+      "step_5": {"description": "Apply the 50% rule.", "calculation": "100% >= 50% → E is blocked due to A's aggregate ownership."}
+    },
+    "blocked_verdicts": ["D", "E"],
+    "guidance_basis": "OFAC FAQ 398/401",
+    "weakest_point": "Assumed full attribution for all majority-owned intermediaries (B, C, D)."
+  }
+]
+```

@@ -1,0 +1,154 @@
+[
+  {
+    "symptom": "(7) LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Confirm the LVS run compared the intended source-netlist revision against the current routed database (no stale netlist, no stale runset).",
+        "why_first": "cheapest; a stale source explains wholesale missing/extra nets and saves hours",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Read the LVS mismatch header: is it 'net missing in layout/source', 'short', or 'open (net split)', and are PG/well/global nets implicated?",
+        "why_first": "rules out the most severe class; PG/global shorts and opens are systematic, not random local defects",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether every instance of a repeated cell/library cell shows the same net problem, or only one instance.",
+        "why_first": "a repeated hit points to the cell view, fill, or DECAP, not random routing",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check if the suspect net has a real driver and load in the source, or is a floating/tie-off/unused net.",
+        "why_first": "cheapest way to see if a 'missing net' is harmless/unused rather than a defect",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run LVS with a different partitioning seed and with one specific parallel extraction partition excluded from the merge (or run flat/non-partitioned).",
+        "rules_in": "short/open vanishes when that partition is dropped or with a different seed: merge/partition artifact, not a real defect",
+        "rules_out": "discrepancy persists in every seed/partition and in a flat run: merge artifact excluded; the net is genuinely shorted or open in the layout"
+      },
+      {
+        "experiment": "Trace the suspect net's extracted connectivity while ignoring net names/labels: check whether the metal is physically continuous versus whether the two pieces simply carry different or missing text labels.",
+        "rules_in": "metal is continuous but the pieces have different/missing labels: the 'open' is a net-naming/label-omission artifact, not a real disconnection",
+        "rules_out": "metal is physically disjoint (no connecting via/overlap): labeling artifact excluded; it is a real open (missing via or broken route)"
+      },
+      {
+        "experiment": "Re-run extraction/LVS with dummy metal fill, DECAP, and filler cells excluded or black-boxed from the comparison.",
+        "rules_in": "short disappears when fill/filler is ignored: the bridge is caused by dummy/fill geometry or an extraction rule merging fill into the net (phantom short)",
+        "rules_out": "short persists with fill/filler excluded: fill-induced phantom short excluded; it is a real route bridge or device/contact short in intentional wiring"
+      },
+      {
+        "experiment": "Cross-probe the missing net in the source: identify its driver and loads and whether the layout has the corresponding devices/placement.",
+        "rules_in": "net has no real driver/load in layout (tie-off, unconnected input, or instance never placed/ECO'd): source/intent mismatch or ECO omission, not an extraction defect",
+        "rules_out": "the net drives real loads present in layout but is absent from extraction: intent mismatch excluded; it is a missing route/label or extraction problem in the layout"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Real open: missing via/contact or a route that failed to connect (e.g., ECO re-route broke an existing net).",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Real short: unintended bridge in routing or metal sliver/dummy-fill bridging two nets.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Missing or misplaced net label (text) causing LVS to split one net into unnamed pieces (reported as open/missing).",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Stale/mismatched source netlist or un-back-annotated ECO (net exists in one, not the other).",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Distributed-LVS partition/merge artifact (phantom short or open at a partition boundary) or bad via recognition in the runset.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.4
+      }
+    ],
+    "classic_trap": "Assuming a reported 'open' or 'short' is a physical route defect and re-routing/patching the layout, when it is actually a missing net label or a partition-merge artifact — or the mirror: quieting the error by adding a label/tie-off instead of fixing the real missing via or bridge.",
+    "node_era_note": "At 7nm-and-below, multi-patterning coloring errors, cut-mask/via-pillar extraction, and fill/dummy-induced or partition-merge phantom nets dominate, whereas at 28nm most opens/shorts are straightforward missing-via or route-bridge defects."
+  },
+  {
+    "symptom": "(8) LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Read the device-mismatch summary: is it 'extra device in layout', 'missing device in layout', or a property mismatch (W/L/M/fingers) on a matched device?",
+        "why_first": "cheapest; separates count mismatch from size/parameter mismatch, which have disjoint cause sets",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether the implicated devices are physical-only cells (tap, endcap, filler, DECAP, antenna diode) and whether the runset black-boxes/ignores them.",
+        "why_first": "rules out the most common systematic cause of extra devices; prevents debugging filler as logic",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare the magnitude of the size delta: tiny sub-1%/rounding difference versus an integer or ratio mismatch (2x W, different finger count, M-factor).",
+        "why_first": "rounding deltas are measurement convention; ratio mismatches are real parameter/Pcell errors",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Confirm the source netlist is the post-route/back-annotated version (not pre-place/pre-optimization) and check for ECO/P&R insertions (buffer, gate sizing).",
+        "why_first": "stale netlist explains wholesale wrong sizes/extra devices and is cheap to verify",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run LVS with physical-only cells (filler, decap, tap, endcap, antenna diode) explicitly black-boxed/ignored.",
+        "rules_in": "extra-device count drops to zero and remaining devices match: the extras were unmarked physical-only cells (runset/ignore-setup issue), not real logic",
+        "rules_out": "extras persist as named logic instances: physical-only-cell artifact excluded; there is a genuine extra instance in layout (or a device missing from the source)"
+      },
+      {
+        "experiment": "Toggle LVS parallel-transistor/finger merging (or compare extracted multiplicity) and re-run.",
+        "rules_in": "size/count mismatch disappears when fingers are merged (or not merged): it is a fingering/multiplicity counting convention between netlist and layout, not a drawn-size error",
+        "rules_out": "mismatch is invariant to the merge setting: fingering convention excluded; the W/L/M or device count really differs"
+      },
+      {
+        "experiment": "Measure the drawn geometry (poly width / number of fins) of the suspect device in the layout and compare it to the netlist parameter (times any bias/quantization).",
+        "rules_in": "drawn geometry matches the netlist parameter within rounding/quantization, yet LVS reports a different value: it is a drawn-vs-effective measurement or rounding/unit convention, not a real sizing error",
+        "rules_out": "drawn geometry is grossly different from the netlist parameter: rounding/measurement artifact excluded; the device is really drawn at the wrong size (Pcell parameter or manual edit)"
+      },
+      {
+        "experiment": "For an extra device with no source counterpart, inspect its connectivity: are all terminals tied to the same net/floating, or is it a scan/DFT/leftover ECO instance?",
+        "rules_in": "terminals are shorted/floating or it is a DFT/scan physical leftover: it is an unused/leftover instance that can be black-boxed, or the netlist is missing a physical-only view",
+        "rules_out": "the device is properly connected and drives logic: leftover/physical-only excluded; the source netlist is genuinely missing a device (incomplete netlist or failed ECO back-annotation)"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Physical-only cells (filler, decap, tap, endcap, antenna diode) in layout but not in netlist / not black-boxed in runset, reported as extra devices.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "Stale source netlist or P&R optimization (gate sizing, buffer insertion, Vt swap) not back-annotated, giving wrong W/L/M or extra/missing devices.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Fingering / multiplicity convention mismatch: netlist says one device with N fingers or M=N, layout extracted as N parallel (or one wide) device.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.4
+      },
+      {
+        "cause": "Drawn-vs-effective parameter rounding or unit/measurement convention (sub-nm width rounding, gate-length bias, diffusion-shared W) giving tiny 'wrong size' deltas.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Leftover, duplicate, or DFT/scan-inserted instance in layout (ECO not removed, or partition-merge duplicate) creating a real extra device.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.4
+      }
+    ],
+    "classic_trap": "The classic trap is editing the netlist (or waiving) to make an 'extra device' go away when the extras are physical-only cells the runset forgot to black-box; and for 'wrong size', changing the drawn W/L to match the netlist when the delta is just drawn-vs-effective rounding or finger counting — or conversely, waiving a gross 2x ratio as 'rounding'.",
+    "node_era_note": "At 7nm-and-below, 'size' is quantized fin count (no continuous W) so size/extra mismatches are mostly fin-count/fin-cut Pcell quantization and standard-cell dummy/filler, whereas at 28nm planar, size mismatches are continuous drawn-W/effective-W rounding and gate-length bias."
+  }
+]

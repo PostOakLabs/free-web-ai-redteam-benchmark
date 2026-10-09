@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Latch-based timing methodology with cycle stealing",
+    "where_in_paper": "Likely timing methodology / circuit style discussion, but I cannot recall the exact section",
+    "decision": "Use transparent-latch timing and allow local time borrowing / cycle stealing rather than treating every path as a strict edge-triggered pipeline stage.",
+    "alternatives_or_rejected": "A purely edge-triggered style would simplify hold and static-timing analysis, but it would remove the ability to borrow time across adjacent pipeline stages.",
+    "rationale": "Latch-based cycle stealing can absorb path imbalance and local variation, helping a high-frequency design close timing without paying the full penalty on every locally slow path.",
+    "outcome": "This would make timing closure more flexible but would require careful latch-aware timing analysis and hold control. I am not confident the paper gives a specific quantitative outcome.",
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "confidence": 0.35
+  },
+  {
+    "title": "On-chip power-grid and decap planning for supply noise",
+    "where_in_paper": "Likely power distribution / physical design section, but exact section recall is weak",
+    "decision": "Provide substantial on-chip power distribution and local decoupling capacitance rather than relying primarily on package and board decoupling.",
+    "alternatives_or_rejected": "Using less on-chip decap or a lighter power mesh would preserve routing resources and area, but would increase IR drop and transient supply droop.",
+    "rationale": "A high-current, high-frequency microprocessor needs low-resistance distribution and local charge storage to keep supply noise within timing and reliability limits.",
+    "outcome": "Supply noise is treated as a first-order physical-design constraint. I do not confidently recall the paper stating exact numerical results.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  },
+  {
+    "title": "Hierarchical partitioning between custom and automated blocks",
+    "where_in_paper": "Likely physical design organization / floorplan discussion, but exact section recall is weak",
+    "decision": "Partition the large chip hierarchically, applying custom or semi-custom effort to performance-critical macros while using more automated implementation elsewhere.",
+    "alternatives_or_rejected": "A uniform standard-cell approach would improve productivity but might miss critical performance targets; a fully custom approach would be too expensive in design effort and schedule.",
+    "rationale": "The chip was too large and performance-sensitive to close with a single homogeneous methodology; hierarchy localizes critical work and timing convergence.",
+    "outcome": "The design obtained a compromise between custom performance and productivity. I am not confident the paper quantifies the exact partition or effort split.",
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "confidence": 0.3
+  }
+]

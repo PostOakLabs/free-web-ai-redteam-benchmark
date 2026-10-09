@@ -1,0 +1,1796 @@
+{
+ "chatgpt": {
+  "1": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase requires penalties that can exceed 2 percent, so exactly 2.00% does not trigger while 2.01% does. ([Consumer Financial Protection Bureau][1])"
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase requires penalties that can exceed 2 percent, so exactly 2.00% does not trigger while 2.01% does. ([Consumer Financial Protection Bureau][1])"
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase requires penalties that can exceed 2 percent, so exactly 2.00% does not trigger while 2.01% does. ([Consumer Financial Protection Bureau][1])"
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase is 'more than 36 months,' making 36 months non-triggering and 37 months triggering. ([Consumer Financial Protection Bureau][1])"
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase is 'more than 36 months,' making 36 months non-triggering and 37 months triggering. ([Consumer Financial Protection Bureau][1])"
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase is 'more than 36 months,' making 36 months non-triggering and 37 months triggering. ([Consumer Financial Protection Bureau][1])"
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase '1.5 or more percentage points' expressly includes the 1.50% boundary. ([Legal Information Institute][2])"
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase '1.5 or more percentage points' expressly includes the 1.50% boundary. ([Legal Information Institute][2])"
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase '1.5 or more percentage points' expressly includes the 1.50% boundary. ([Legal Information Institute][2])"
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition says APR 'does not exceed' APOR by 2.25 or more percentage points, so the 2.25% boundary remains permissible and only a spread above it fails. ([Legal Information Institute][2])"
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition says APR 'does not exceed' APOR by 2.25 or more percentage points, so the 2.25% boundary remains permissible and only a spread above it fails. ([Legal Information Institute][2])"
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "The pass condition says APR 'does not exceed' APOR by 2.25 or more percentage points, so the 2.25% boundary remains permissible and only a spread above it fails. ([Legal Information Institute][2])"
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions are strict 'less than' tests, so (10.0M, 0.9M) fails on revenue, (9.9M, 1.0M) fails on income, and only (9.9M, 0.9M) satisfies both."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions are strict 'less than' tests, so (10.0M, 0.9M) fails on revenue, (9.9M, 1.0M) fails on income, and only (9.9M, 0.9M) satisfies both."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "Both conditions are strict 'less than' tests, so (10.0M, 0.9M) fails on revenue, (9.9M, 1.0M) fails on income, and only (9.9M, 0.9M) satisfies both."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The stated phrase 'equal to or greater than' makes the stated 16.00% boundary inclusive, although the current OECD text identifies 17% rather than 16% as the transition rate for fiscal years beginning in 2026. ([OECD][3])"
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The stated phrase 'equal to or greater than' makes the stated 16.00% boundary inclusive, although the current OECD text identifies 17% rather than 16% as the transition rate for fiscal years beginning in 2026. ([OECD][3])"
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The stated phrase 'equal to or greater than' makes the stated 16.00% boundary inclusive, although the current OECD text identifies 17% rather than 16% as the transition rate for fiscal years beginning in 2026. ([OECD][3])"
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'at least equal to' includes exactly 50% of SCR, so the floor is satisfied at and above the boundary."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The operative phrase 'at least equal to' includes exactly 50% of SCR, so the floor is satisfied at and above the boundary."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The operative phrase 'at least equal to' includes exactly 50% of SCR, so the floor is satisfied at and above the boundary."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "An affected-users condition framed as 'equal to or greater than' the minimum fires at the threshold and above it, but not below it."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "An affected-users condition framed as 'equal to or greater than' the minimum fires at the threshold and above it, but not below it."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "An affected-users condition framed as 'equal to or greater than' the minimum fires at the threshold and above it, but not below it."
+   }
+  }
+ },
+ "deepseek": {
+  "1": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Trigger requires penalty >2%, so exactly 2% does not exceed and below does not exceed."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Trigger requires penalty >2%, so exactly 2% does not exceed and below does not exceed."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Trigger requires penalty >2%, so exactly 2% does not exceed and below does not exceed."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Trigger requires duration >36 months, so exactly 36 months does not fire."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Trigger requires duration >36 months, so exactly 36 months does not fire."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Trigger requires duration >36 months, so exactly 36 months does not fire."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Trigger fires when spread >=1.5 because 'or more' includes the boundary."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Trigger fires when spread >=1.5 because 'or more' includes the boundary."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Trigger fires when spread >=1.5 because 'or more' includes the boundary."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Pass condition fails when spread reaches 2.25 because '2.25 or more' includes the boundary."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Pass condition fails when spread reaches 2.25 because '2.25 or more' includes the boundary."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Pass condition fails when spread reaches 2.25 because '2.25 or more' includes the boundary."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "De-minimis requires both revenue <10M and income <1M; equality on either fails the trigger; below=(9.9,0.9) fires, at=(10.0,0.9) and above=(9.9,1.0) pass."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "De-minimis requires both revenue <10M and income <1M; equality on either fails the trigger; below=(9.9,0.9) fires, at=(10.0,0.9) and above=(9.9,1.0) pass."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "De-minimis requires both revenue <10M and income <1M; equality on either fails the trigger; below=(9.9,0.9) fires, at=(10.0,0.9) and above=(9.9,1.0) pass."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Safe harbour condition is ETR >=16%, so exactly 16% qualifies."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Safe harbour condition is ETR >=16%, so exactly 16% qualifies."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Safe harbour condition is ETR >=16%, so exactly 16% qualifies."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Tier 1 floor requires ratio >=50%, so exactly 50% meets the threshold."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Tier 1 floor requires ratio >=50%, so exactly 50% meets the threshold."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Tier 1 floor requires ratio >=50%, so exactly 50% meets the threshold."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Significant incident triggers when users >= threshold, so boundary is inclusive."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Significant incident triggers when users >= threshold, so boundary is inclusive."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "Significant incident triggers when users >= threshold, so boundary is inclusive."
+   }
+  }
+ },
+ "gemini": {
+  "1": {
+   "below": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The operative trigger language 'exceed … more than 2 percent' uses a strict inequality (> 2.00%), so a penalty of exactly 2.00% does not breach the threshold."
+   },
+   "at": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The operative trigger language 'exceed … more than 2 percent' uses a strict inequality (> 2.00%), so a penalty of exactly 2.00% does not breach the threshold."
+   },
+   "above": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The operative trigger language 'exceed … more than 2 percent' uses a strict inequality (> 2.00%), so a penalty of exactly 2.00% does not breach the threshold."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' establishes a strict greater-than threshold (> 36), meaning a 36-month duration does not trigger the restriction."
+   },
+   "at": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' establishes a strict greater-than threshold (> 36), meaning a 36-month duration does not trigger the restriction."
+   },
+   "above": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' establishes a strict greater-than threshold (> 36), meaning a 36-month duration does not trigger the restriction."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The statutory test 'by 1.5 or more percentage points' includes the boundary value (>= 1.50), causing the HPCT classification to trigger at exactly 1.50."
+   },
+   "at": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The statutory test 'by 1.5 or more percentage points' includes the boundary value (>= 1.50), causing the HPCT classification to trigger at exactly 1.50."
+   },
+   "above": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The statutory test 'by 1.5 or more percentage points' includes the boundary value (>= 1.50), causing the HPCT classification to trigger at exactly 1.50."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "passes",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition 'does not exceed … by 2.25 or more' negates an inclusive trigger (<= 2.25), meaning a spread of exactly 2.25 percentage points passes."
+   },
+   "at": {
+    "raw": "passes",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition 'does not exceed … by 2.25 or more' negates an inclusive trigger (<= 2.25), meaning a spread of exactly 2.25 percentage points passes."
+   },
+   "above": {
+    "raw": "fails",
+    "polarity": "fires",
+    "basis": "The pass condition 'does not exceed … by 2.25 or more' negates an inclusive trigger (<= 2.25), meaning a spread of exactly 2.25 percentage points passes."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "fails",
+    "polarity": "does-not-fire",
+    "basis": "Both underlying tests use strict less-than conditions ('less than 10M' and 'less than 1M'), requiring revenue < 10.0M and income < 1.0M simultaneously."
+   },
+   "at": {
+    "raw": "fails",
+    "polarity": "does-not-fire",
+    "basis": "Both underlying tests use strict less-than conditions ('less than 10M' and 'less than 1M'), requiring revenue < 10.0M and income < 1.0M simultaneously."
+   },
+   "above": {
+    "raw": "passes",
+    "polarity": "fires",
+    "basis": "Both underlying tests use strict less-than conditions ('less than 10M' and 'less than 1M'), requiring revenue < 10.0M and income < 1.0M simultaneously."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "fails",
+    "polarity": "does-not-fire",
+    "basis": "The safe harbour rule explicit phrase 'equal to or greater than' makes the 16.00% threshold inclusive (>= 16.00%)."
+   },
+   "at": {
+    "raw": "passes",
+    "polarity": "fires",
+    "basis": "The safe harbour rule explicit phrase 'equal to or greater than' makes the 16.00% threshold inclusive (>= 16.00%)."
+   },
+   "above": {
+    "raw": "passes",
+    "polarity": "fires",
+    "basis": "The safe harbour rule explicit phrase 'equal to or greater than' makes the 16.00% threshold inclusive (>= 16.00%)."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "fails",
+    "polarity": "does-not-fire",
+    "basis": "The eligibility floor phrase 'at least equal to' creates an inclusive boundary (>= 50.00%), satisfying the requirement at exactly 50.00%."
+   },
+   "at": {
+    "raw": "passes",
+    "polarity": "fires",
+    "basis": "The eligibility floor phrase 'at least equal to' creates an inclusive boundary (>= 50.00%), satisfying the requirement at exactly 50.00%."
+   },
+   "above": {
+    "raw": "passes",
+    "polarity": "fires",
+    "basis": "The eligibility floor phrase 'at least equal to' creates an inclusive boundary (>= 50.00%), satisfying the requirement at exactly 50.00%."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "does not fire",
+    "polarity": "does-not-fire",
+    "basis": "The framing 'equal to or greater than' sets an inclusive lower bound (>= threshold), triggering the incident reporting obligation at exactly the threshold value."
+   },
+   "at": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The framing 'equal to or greater than' sets an inclusive lower bound (>= threshold), triggering the incident reporting obligation at exactly the threshold value."
+   },
+   "above": {
+    "raw": "fires",
+    "polarity": "fires",
+    "basis": "The framing 'equal to or greater than' sets an inclusive lower bound (>= threshold), triggering the incident reporting obligation at exactly the threshold value."
+   }
+  }
+ },
+ "glm 5.3 flash": {
+  "1": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'can exceed, in total, more than 2 percent of the amount prepaid' uses strict 'more than,' so exactly 2.00% sits outside the trigger and only 2.01% fires."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'can exceed, in total, more than 2 percent of the amount prepaid' uses strict 'more than,' so exactly 2.00% sits outside the trigger and only 2.01% fires."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase 'can exceed, in total, more than 2 percent of the amount prepaid' uses strict 'more than,' so exactly 2.00% sits outside the trigger and only 2.01% fires."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "'More than 36 months after consummation' is strict, so 36 months exactly is outside the trigger and only 37 months fires."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "'More than 36 months after consummation' is strict, so 36 months exactly is outside the trigger and only 37 months fires."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "'More than 36 months after consummation' is strict, so 36 months exactly is outside the trigger and only 37 months fires."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "'Exceeds the average prime offer rate ... by 1.5 or more percentage points' is inclusive via 'or more,' so a spread of exactly 1.50 itself fires."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "'Exceeds the average prime offer rate ... by 1.5 or more percentage points' is inclusive via 'or more,' so a spread of exactly 1.50 itself fires."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "'Exceeds the average prime offer rate ... by 1.5 or more percentage points' is inclusive via 'or more,' so a spread of exactly 1.50 itself fires."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The fail-side comparator '2.25 or more percentage points' is inclusive, so the pass condition holds strictly below 2.25 and a spread of exactly 2.25 fails to pass."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "The fail-side comparator '2.25 or more percentage points' is inclusive, so the pass condition holds strictly below 2.25 and a spread of exactly 2.25 fails to pass."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "The fail-side comparator '2.25 or more percentage points' is inclusive, so the pass condition holds strictly below 2.25 and a spread of exactly 2.25 fails to pass."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "(9.9M, 0.9M): FIRE",
+    "polarity": "fires",
+    "basis": "Both legs use strict 'less than,' so a pair qualifies only when strictly below both caps — 10.0M revenue is not less than 10M and 1.0M income is not less than 1M, so both boundary pairs fail while (9.9M, 0.9M) fires."
+   },
+   "at": {
+    "raw": "(10.0M, 0.9M): NO FIRE on the revenue leg; (9.9M, 1.0M): NO FIRE on the income leg",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use strict 'less than,' so a pair qualifies only when strictly below both caps — 10.0M revenue is not less than 10M and 1.0M income is not less than 1M, so both boundary pairs fail while (9.9M, 0.9M) fires."
+   },
+   "above": {
+    "raw": "n/a — no listed pair exceeds a cap, and any pair with a leg at or above its cap yields NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use strict 'less than,' so a pair qualifies only when strictly below both caps — 10.0M revenue is not less than 10M and 1.0M income is not less than 1M, so both boundary pairs fail while (9.9M, 0.9M) fires."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "'Equal to or greater than' the transition rate is inclusive, so a simplified ETR of exactly 16.00% clears the test."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "'Equal to or greater than' the transition rate is inclusive, so a simplified ETR of exactly 16.00% clears the test."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "'Equal to or greater than' the transition rate is inclusive, so a simplified ETR of exactly 16.00% clears the test."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "'At least equal to' 50% of SCR is inclusive, so a ratio of exactly 50.00% satisfies the Tier 1 floor."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "'At least equal to' 50% of SCR is inclusive, so a ratio of exactly 50.00% satisfies the Tier 1 floor."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "'At least equal to' 50% of SCR is inclusive, so a ratio of exactly 50.00% satisfies the Tier 1 floor."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The 'equal to or greater than' framing of the affected-users minimum is inclusive, so the threshold value itself fires."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The 'equal to or greater than' framing of the affected-users minimum is inclusive, so the threshold value itself fires."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The 'equal to or greater than' framing of the affected-users minimum is inclusive, so the threshold value itself fires."
+   }
+  }
+ },
+ "grok": {
+  "1": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is a strict greater-than test, so the trigger fires only when the total exceeds 2%."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is a strict greater-than test, so the trigger fires only when the total exceeds 2%."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 2 percent' is a strict greater-than test, so the trigger fires only when the total exceeds 2%."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 36 months' is a strict greater-than test, so the trigger fires only after month 36."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 36 months' is a strict greater-than test, so the trigger fires only after month 36."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 36 months' is a strict greater-than test, so the trigger fires only after month 36."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'exceeds ... by 1.5 or more percentage points' treats the 1.5 spread as inclusive, so the test fires at and above 1.5."
+   },
+   "at": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'exceeds ... by 1.5 or more percentage points' treats the 1.5 spread as inclusive, so the test fires at and above 1.5."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'exceeds ... by 1.5 or more percentage points' treats the 1.5 spread as inclusive, so the test fires at and above 1.5."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more' fails (no pass) once the spread reaches the inclusive 2.25 threshold."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "fires",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more' fails (no pass) once the spread reaches the inclusive 2.25 threshold."
+   },
+   "above": {
+    "raw": "NO",
+    "polarity": "fires",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more' fails (no pass) once the spread reaches the inclusive 2.25 threshold."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use the strict phrase 'less than', so the de-minimis rule applies only when revenue is under 10 M and income is under 1 M; the listed pairs therefore yield NO / NO / YES."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use the strict phrase 'less than', so the de-minimis rule applies only when revenue is under 10 M and income is under 1 M; the listed pairs therefore yield NO / NO / YES."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "Both legs use the strict phrase 'less than', so the de-minimis rule applies only when revenue is under 10 M and income is under 1 M; the listed pairs therefore yield NO / NO / YES."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'equal to or greater than' the 16% rate is inclusive, so the safe-harbour test passes at and above 16%."
+   },
+   "at": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'equal to or greater than' the 16% rate is inclusive, so the safe-harbour test passes at and above 16%."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'equal to or greater than' the 16% rate is inclusive, so the safe-harbour test passes at and above 16%."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'at least equal to' 50% of SCR is inclusive, so the floor is met at and above 50%."
+   },
+   "at": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'at least equal to' 50% of SCR is inclusive, so the floor is met at and above 50%."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'at least equal to' 50% of SCR is inclusive, so the floor is met at and above 50%."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'equal to or greater than' the minimum user count is inclusive, so the significant-incident leg fires at and above the threshold."
+   },
+   "at": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'equal to or greater than' the minimum user count is inclusive, so the significant-incident leg fires at and above the threshold."
+   },
+   "above": {
+    "raw": "YES",
+    "polarity": "fires",
+    "basis": "The operative phrase 'equal to or greater than' the minimum user count is inclusive, so the significant-incident leg fires at and above the threshold."
+   }
+  }
+ },
+ "kimi": {
+  "1": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict floor, so a penalty capped at exactly 2.00 percent cannot trigger the HOEPA prepayment-penalty threshold."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict floor, so a penalty capped at exactly 2.00 percent cannot trigger the HOEPA prepayment-penalty threshold."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict floor, so a penalty capped at exactly 2.00 percent cannot trigger the HOEPA prepayment-penalty threshold."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' requires strict inequality, meaning the 36th month itself is inside the safe zone and only month 37 triggers coverage."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' requires strict inequality, meaning the 36th month itself is inside the safe zone and only month 37 triggers coverage."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' requires strict inequality, meaning the 36th month itself is inside the safe zone and only month 37 triggers coverage."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The phrase '1.5 or more' treats the boundary inclusively, so a spread of exactly 1.50 percentage points is sufficient to classify the loan as higher-priced."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more' treats the boundary inclusively, so a spread of exactly 1.50 percentage points is sufficient to classify the loan as higher-priced."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more' treats the boundary inclusively, so a spread of exactly 1.50 percentage points is sufficient to classify the loan as higher-priced."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "Because the pass condition is 'does not exceed ... by 2.25 or more,' a spread of exactly 2.25 falls into the prohibited zone and the test fails."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "Because the pass condition is 'does not exceed ... by 2.25 or more,' a spread of exactly 2.25 falls into the prohibited zone and the test fails."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "Because the pass condition is 'does not exceed ... by 2.25 or more,' a spread of exactly 2.25 falls into the prohibited zone and the test fails."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "Both 'less than' conditions are strict, so touching either threshold—revenue at EUR 10 million or income at EUR 1 million—causes the de-minimis exception to fail."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "Both 'less than' conditions are strict, so touching either threshold—revenue at EUR 10 million or income at EUR 1 million—causes the de-minimis exception to fail."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "Both 'less than' conditions are strict, so touching either threshold—revenue at EUR 10 million or income at EUR 1 million—causes the de-minimis exception to fail."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so a simplified ETR of exactly 16.00 percent satisfies the transitional CbCR safe-harbour test."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so a simplified ETR of exactly 16.00 percent satisfies the transitional CbCR safe-harbour test."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so a simplified ETR of exactly 16.00 percent satisfies the transitional CbCR safe-harbour test."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'at least equal to' is inclusive, so Tier 1 capital of exactly 50.00 percent of the SCR meets the Solvency II floor."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive, so Tier 1 capital of exactly 50.00 percent of the SCR meets the Solvency II floor."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive, so Tier 1 capital of exactly 50.00 percent of the SCR meets the Solvency II floor."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so an affected-user count exactly at the minimum threshold triggers the NIS2 significant-incident reporting obligation."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so an affected-user count exactly at the minimum threshold triggers the NIS2 significant-incident reporting obligation."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so an affected-user count exactly at the minimum threshold triggers the NIS2 significant-incident reporting obligation."
+   }
+  }
+ },
+ "meta": {
+  "1": {
+   "below": {
+    "raw": "NO_FIRE at 1.99%",
+    "polarity": "does-not-fire",
+    "basis": "Operative phrase 'more than 2 percent' means >2%, so equality does not satisfy the trigger."
+   },
+   "at": {
+    "raw": "NO_FIRE at 2.00%",
+    "polarity": "does-not-fire",
+    "basis": "Operative phrase 'more than 2 percent' means >2%, so equality does not satisfy the trigger."
+   },
+   "above": {
+    "raw": "FIRE at 2.01%",
+    "polarity": "fires",
+    "basis": "Operative phrase 'more than 2 percent' means >2%, so equality does not satisfy the trigger."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO_FIRE at 35 months",
+    "polarity": "does-not-fire",
+    "basis": "Operative phrase 'more than 36 months' means >36, so 36 is not included."
+   },
+   "at": {
+    "raw": "NO_FIRE at 36 months",
+    "polarity": "does-not-fire",
+    "basis": "Operative phrase 'more than 36 months' means >36, so 36 is not included."
+   },
+   "above": {
+    "raw": "FIRE at 37 months",
+    "polarity": "fires",
+    "basis": "Operative phrase 'more than 36 months' means >36, so 36 is not included."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO_FIRE at 1.49",
+    "polarity": "does-not-fire",
+    "basis": "Operative phrase 'by 1.5 or more' means >=1.5, so equality triggers."
+   },
+   "at": {
+    "raw": "FIRE at 1.50",
+    "polarity": "fires",
+    "basis": "Operative phrase 'by 1.5 or more' means >=1.5, so equality triggers."
+   },
+   "above": {
+    "raw": "FIRE at 1.51",
+    "polarity": "fires",
+    "basis": "Operative phrase 'by 1.5 or more' means >=1.5, so equality triggers."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS at 2.24",
+    "polarity": "does-not-fire",
+    "basis": "Pass requires NOT (>=2.25), i.e. <2.25, so '2.25 or more' inclusive threshold causes fail at and above."
+   },
+   "at": {
+    "raw": "FAIL at 2.25",
+    "polarity": "fires",
+    "basis": "Pass requires NOT (>=2.25), i.e. <2.25, so '2.25 or more' inclusive threshold causes fail at and above."
+   },
+   "above": {
+    "raw": "FAIL at 2.26",
+    "polarity": "fires",
+    "basis": "Pass requires NOT (>=2.25), i.e. <2.25, so '2.25 or more' inclusive threshold causes fail at and above."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "PASS at (9.9M, 0.9M) - both < thresholds",
+    "polarity": "fires",
+    "basis": "Both legs use strict 'less than' (<), so equality on either leg fails the AND test."
+   },
+   "at": {
+    "raw": "FAIL at (10.0M, 0.9M) and FAIL at (9.9M, 1.0M) - strict < fails on equality",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use strict 'less than' (<), so equality on either leg fails the AND test."
+   },
+   "above": {
+    "raw": "FAIL - any dimension >= threshold fails due to strict < and AND",
+    "polarity": "does-not-fire",
+    "basis": "Both legs use strict 'less than' (<), so equality on either leg fails the AND test."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL at 15.99%",
+    "polarity": "does-not-fire",
+    "basis": "Phrase 'equal to or greater than' means >=16%, so equality passes."
+   },
+   "at": {
+    "raw": "PASS at 16.00%",
+    "polarity": "fires",
+    "basis": "Phrase 'equal to or greater than' means >=16%, so equality passes."
+   },
+   "above": {
+    "raw": "PASS at 16.01%",
+    "polarity": "fires",
+    "basis": "Phrase 'equal to or greater than' means >=16%, so equality passes."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL at 49.99%",
+    "polarity": "does-not-fire",
+    "basis": "Phrase 'at least equal to' means >=50%, so equality satisfies the floor."
+   },
+   "at": {
+    "raw": "PASS at 50.00%",
+    "polarity": "fires",
+    "basis": "Phrase 'at least equal to' means >=50%, so equality satisfies the floor."
+   },
+   "above": {
+    "raw": "PASS at 50.01%",
+    "polarity": "fires",
+    "basis": "Phrase 'at least equal to' means >=50%, so equality satisfies the floor."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "NO_FIRE at threshold-1",
+    "polarity": "does-not-fire",
+    "basis": "Phrase 'equal to or greater than' means >= threshold, so equality triggers significant incident."
+   },
+   "at": {
+    "raw": "FIRE at threshold",
+    "polarity": "fires",
+    "basis": "Phrase 'equal to or greater than' means >= threshold, so equality triggers significant incident."
+   },
+   "above": {
+    "raw": "FIRE at threshold+1",
+    "polarity": "fires",
+    "basis": "Phrase 'equal to or greater than' means >= threshold, so equality triggers significant incident."
+   }
+  }
+ },
+ "mimo": {
+  "1": {
+   "below": {
+    "raw": "PASS — 1.99% is not 'more than' 2%; trigger does not fire.",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict inequality, so exactly 2.00% does not trigger the prepayment-penalty provision."
+   },
+   "at": {
+    "raw": "PASS — 2.00% equals but does not exceed 2%; 'more than' excludes the boundary.",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict inequality, so exactly 2.00% does not trigger the prepayment-penalty provision."
+   },
+   "above": {
+    "raw": "FIRE — 2.01% is 'more than' 2 percent of the amount prepaid.",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 2 percent' imposes a strict inequality, so exactly 2.00% does not trigger the prepayment-penalty provision."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "PASS — 35 months is not 'more than' 36 months.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' is a strict inequality, so a term of exactly 36 months falls outside the HOEPA duration trigger."
+   },
+   "at": {
+    "raw": "PASS — 36 months equals but does not exceed 36; 'more than' excludes the boundary.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' is a strict inequality, so a term of exactly 36 months falls outside the HOEPA duration trigger."
+   },
+   "above": {
+    "raw": "FIRE — 37 months is 'more than 36 months after consummation.'",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' is a strict inequality, so a term of exactly 36 months falls outside the HOEPA duration trigger."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "PASS — 1.49 pp spread does not reach the '1.5 or more' threshold.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of the boundary, so a spread of exactly 1.50 pp triggers the higher-priced covered transaction classification."
+   },
+   "at": {
+    "raw": "FIRE — 1.50 pp satisfies '1.5 or more percentage points'; the boundary is included.",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of the boundary, so a spread of exactly 1.50 pp triggers the higher-priced covered transaction classification."
+   },
+   "above": {
+    "raw": "FIRE — 1.51 pp exceeds the threshold.",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of the boundary, so a spread of exactly 1.50 pp triggers the higher-priced covered transaction classification."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS — 2.24 pp spread is below '2.25 or more'; loan qualifies as General QM.",
+    "polarity": "does-not-fire",
+    "basis": "The fail-side phrasing 'exceeds by 2.25 or more' is inclusive of 2.25, so the boundary value causes QM failure."
+   },
+   "at": {
+    "raw": "FIRE — 2.25 pp spread satisfies '2.25 or more percentage points'; loan fails the QM price limit.",
+    "polarity": "fires",
+    "basis": "The fail-side phrasing 'exceeds by 2.25 or more' is inclusive of 2.25, so the boundary value causes QM failure."
+   },
+   "above": {
+    "raw": "FIRE — 2.26 pp spread exceeds the threshold; loan fails QM.",
+    "polarity": "fires",
+    "basis": "The fail-side phrasing 'exceeds by 2.25 or more' is inclusive of 2.25, so the boundary value causes QM failure."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "FAIL — (10.0M rev, 0.9M inc): revenue of exactly EUR 10M is not 'less than' EUR 10M; de minimis unavailable despite income passing.",
+    "polarity": "does-not-fire",
+    "basis": "Both conjuncts use 'less than,' a strict inequality that excludes the boundary values of exactly EUR 10M revenue and exactly EUR 1M income."
+   },
+   "at": {
+    "raw": "FAIL — (9.9M rev, 1.0M inc): income of exactly EUR 1M is not 'less than' EUR 1M; de minimis unavailable despite revenue passing.",
+    "polarity": "does-not-fire",
+    "basis": "Both conjuncts use 'less than,' a strict inequality that excludes the boundary values of exactly EUR 10M revenue and exactly EUR 1M income."
+   },
+   "above": {
+    "raw": "PASS — (9.9M rev, 0.9M inc): both revenue < EUR 10M and income < EUR 1M; de minimis exclusion applies.",
+    "polarity": "fires",
+    "basis": "Both conjuncts use 'less than,' a strict inequality that excludes the boundary values of exactly EUR 10M revenue and exactly EUR 1M income."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL — 15.99% is below the 16% transition rate; safe harbour not available.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is explicitly inclusive, so exactly 16.00% qualifies for the transitional CbCR safe harbour."
+   },
+   "at": {
+    "raw": "PASS — 16.00% satisfies 'equal to or greater than' 16%; the boundary is included.",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is explicitly inclusive, so exactly 16.00% qualifies for the transitional CbCR safe harbour."
+   },
+   "above": {
+    "raw": "PASS — 16.01% exceeds the transition rate.",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is explicitly inclusive, so exactly 16.00% qualifies for the transitional CbCR safe harbour."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL — 49.99% of SCR falls short of the 'at least equal to' 50% Tier 1 floor.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'at least equal to' is inclusive of the boundary, so exactly 50.00% of SCR meets the Tier 1 eligibility floor."
+   },
+   "at": {
+    "raw": "PASS — 50.00% satisfies 'at least equal to' 50% of SCR; the boundary is included.",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive of the boundary, so exactly 50.00% of SCR meets the Tier 1 eligibility floor."
+   },
+   "above": {
+    "raw": "PASS — 50.01% exceeds the floor.",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive of the boundary, so exactly 50.00% of SCR meets the Tier 1 eligibility floor."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "PASS — threshold−1 does not satisfy 'equal to or greater than' the minimum; incident not significant on the users leg.",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so exactly at the threshold triggers the significant-incident reporting obligation."
+   },
+   "at": {
+    "raw": "FIRE — threshold satisfies 'equal to or greater than'; the incident is significant.",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so exactly at the threshold triggers the significant-incident reporting obligation."
+   },
+   "above": {
+    "raw": "FIRE — threshold+1 exceeds the minimum; incident is significant.",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive, so exactly at the threshold triggers the significant-incident reporting obligation."
+   }
+  }
+ },
+ "minimax 2.7": {
+  "1": {
+   "below": {
+    "raw": "NO FIRE (1.99% ≤ 2.00%, not more than)",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is a strict inequality requiring values strictly greater than 2.00%."
+   },
+   "at": {
+    "raw": "NO FIRE (2.00% = 2.00%, equal is not more than)",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is a strict inequality requiring values strictly greater than 2.00%."
+   },
+   "above": {
+    "raw": "FIRE (2.01% > 2.00%, exceeds the threshold)",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 2 percent' is a strict inequality requiring values strictly greater than 2.00%."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO FIRE (35 months ≤ 36 months, not more than)",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' excludes 36 itself; only values strictly greater trigger."
+   },
+   "at": {
+    "raw": "NO FIRE (36 months = 36 months, not more than)",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' excludes 36 itself; only values strictly greater trigger."
+   },
+   "above": {
+    "raw": "FIRE (37 months > 36 months, exceeds)",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' excludes 36 itself; only values strictly greater trigger."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO (1.49 pp < 1.50 pp, below the threshold)",
+    "polarity": "does-not-fire",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of 1.5 exactly."
+   },
+   "at": {
+    "raw": "PASS (1.50 pp = 1.50 pp, exactly at the inclusive threshold)",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of 1.5 exactly."
+   },
+   "above": {
+    "raw": "PASS (1.51 pp > 1.50 pp, exceeds)",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' is inclusive of 1.5 exactly."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS (2.24 pp < 2.25 pp, does not exceed by 2.25 or more)",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition requires the spread to be less than 2.25 pp; 2.25 pp itself fails because it 'exceeds by 2.25 or more.'"
+   },
+   "at": {
+    "raw": "FAIL (2.25 pp = 2.25 pp, does exceed by 2.25 or more — not a passing spread)",
+    "polarity": "fires",
+    "basis": "The pass condition requires the spread to be less than 2.25 pp; 2.25 pp itself fails because it 'exceeds by 2.25 or more.'"
+   },
+   "above": {
+    "raw": "FAIL (2.26 pp > 2.25 pp, exceeds the pass ceiling)",
+    "polarity": "fires",
+    "basis": "The pass condition requires the spread to be less than 2.25 pp; 2.25 pp itself fails because it 'exceeds by 2.25 or more.'"
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "NO DE-MINIMIS (10.0M ≥ 10M, revenue not less than; 0.9M < 1M, income satisfied but both required)",
+    "polarity": "does-not-fire",
+    "basis": "Both 'less than' thresholds use strict inequalities; both must be satisfied simultaneously for the safe harbour to apply."
+   },
+   "at": {
+    "raw": "NO DE-MINIMIS (9.9M < 10M, revenue satisfied; 1.0M ≥ 1M, income not less than — both required)",
+    "polarity": "does-not-fire",
+    "basis": "Both 'less than' thresholds use strict inequalities; both must be satisfied simultaneously for the safe harbour to apply."
+   },
+   "above": {
+    "raw": "DE-MINIMIS (9.9M < 10M AND 0.9M < 1M, both strict conditions met)",
+    "polarity": "fires",
+    "basis": "Both 'less than' thresholds use strict inequalities; both must be satisfied simultaneously for the safe harbour to apply."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL (15.99% < 16.00%, not equal to or greater than)",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' includes the boundary value of exactly 16%."
+   },
+   "at": {
+    "raw": "PASS (16.00% = 16.00%, equal to the transition rate)",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' includes the boundary value of exactly 16%."
+   },
+   "above": {
+    "raw": "PASS (16.01% > 16.00%, greater than the transition rate)",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' includes the boundary value of exactly 16%."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL (49.99% < 50.00%, not at least equal to the 50% floor)",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'at least equal to' is inclusive of the 50% boundary."
+   },
+   "at": {
+    "raw": "PASS (50.00% = 50.00%, at least equal to the required floor)",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive of the 50% boundary."
+   },
+   "above": {
+    "raw": "PASS (50.01% > 50.00%, exceeds the minimum requirement)",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive of the 50% boundary."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "NO SIGNIFICANT INCIDENT (threshold−1 < threshold, below the minimum)",
+    "polarity": "does-not-fire",
+    "basis": "The 'equal to or greater than' framing includes the threshold itself as a triggering value."
+   },
+   "at": {
+    "raw": "SIGNIFICANT INCIDENT (threshold = threshold, exactly at the inclusive minimum)",
+    "polarity": "fires",
+    "basis": "The 'equal to or greater than' framing includes the threshold itself as a triggering value."
+   },
+   "above": {
+    "raw": "SIGNIFICANT INCIDENT (threshold+1 > threshold, exceeds the minimum)",
+    "polarity": "fires",
+    "basis": "The 'equal to or greater than' framing includes the threshold itself as a triggering value."
+   }
+  }
+ },
+ "minimax m3": {
+  "1": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is strict (> 1.99% and 2.00% do not exceed it, while 2.01% does."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The operative phrase 'more than 2 percent' is strict (> 1.99% and 2.00% do not exceed it, while 2.01% does."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The operative phrase 'more than 2 percent' is strict (> 1.99% and 2.00% do not exceed it, while 2.01% does."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months after consummation' is strict (>36); 35 and 36 months do not exceed it, while 37 months does."
+   },
+   "at": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months after consummation' is strict (>36); 35 and 36 months do not exceed it, while 37 months does."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months after consummation' is strict (>36); 35 and 36 months do not exceed it, while 37 months does."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": null,
+    "polarity": "absent",
+    "basis": "seam at char 671 destroyed the below value ('\"below\": \"at\": \"FIRE\"'); unattributable. reasoning: The phrase 'by 1.5 or more percentage points' is inclusive (>=1.5); 1.49 does not meet it, while 1.50 and 1.51 do."
+   },
+   "at": {
+    "raw": null,
+    "polarity": "absent",
+    "basis": "genuinely missing cell per gate (minimax m3 rule 3 verdicts.at); The phrase 'by 1.5 or more percentage points' is inclusive (>=1.5); 1.49 does not meet it, while 1.50 and 1.51 do."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'by 1.5 or more percentage points' is inclusive (>=1.5); 1.49 does not meet it, while 1.50 and 1.51 do."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more percentage points' is inclusive at the upper bound (<=2.25); 2.24 and 2.25 pass, while 2.26 fails."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more percentage points' is inclusive at the upper bound (<=2.25); 2.24 and 2.25 pass, while 2.26 fails."
+   },
+   "above": {
+    "raw": "NO PASS",
+    "polarity": "fires",
+    "basis": "The pass condition 'does not exceed ... by 2.25 or more percentage points' is inclusive at the upper bound (<=2.25); 2.24 and 2.25 pass, while 2.26 fails."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "NO DE-MINIMIS",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions use 'less than' (strict): (10.0M, 0.9M) fails the revenue prong, (9.9M, 1.0M) fails the income prong, and (9.9M, 0.9M) meets both prongs."
+   },
+   "at": {
+    "raw": "NO DE-MINIMIS",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions use 'less than' (strict): (10.0M, 0.9M) fails the revenue prong, (9.9M, 1.0M) fails the income prong, and (9.9M, 0.9M) meets both prongs."
+   },
+   "above": {
+    "raw": "DE-MINIMIS",
+    "polarity": "fires",
+    "basis": "Both conditions use 'less than' (strict): (10.0M, 0.9M) fails the revenue prong, (9.9M, 1.0M) fails the income prong, and (9.9M, 0.9M) meets both prongs."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "NO SAFE HARBOUR",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than 16%' is inclusive (>=16%); 15.99% fails, while 16.00% and 16.01% satisfy the simplified ETR test."
+   },
+   "at": {
+    "raw": "SAFE HARBOUR",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than 16%' is inclusive (>=16%); 15.99% fails, while 16.00% and 16.01% satisfy the simplified ETR test."
+   },
+   "above": {
+    "raw": "SAFE HARBOUR",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than 16%' is inclusive (>=16%); 15.99% fails, while 16.00% and 16.01% satisfy the simplified ETR test."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "NO COMPLIANCE",
+    "polarity": "does-not-fire",
+    "basis": "The Tier 1 floor 'at least equal to 50% of SCR' is inclusive (>=50%); 49.99% breaches the floor, while 50.00% and 50.01% satisfy it."
+   },
+   "at": {
+    "raw": "COMPLIANCE",
+    "polarity": "fires",
+    "basis": "The Tier 1 floor 'at least equal to 50% of SCR' is inclusive (>=50%); 49.99% breaches the floor, while 50.00% and 50.01% satisfy it."
+   },
+   "above": {
+    "raw": "COMPLIANCE",
+    "polarity": "fires",
+    "basis": "The Tier 1 floor 'at least equal to 50% of SCR' is inclusive (>=50%); 49.99% breaches the floor, while 50.00% and 50.01% satisfy it."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "NO FIRE",
+    "polarity": "does-not-fire",
+    "basis": "The threshold 'equal to or greater than the minimum' is inclusive (>=threshold); threshold-1 does not meet it, while threshold and threshold+1 do."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The threshold 'equal to or greater than the minimum' is inclusive (>=threshold); threshold-1 does not meet it, while threshold and threshold+1 do."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The threshold 'equal to or greater than the minimum' is inclusive (>=threshold); threshold-1 does not meet it, while threshold and threshold+1 do."
+   }
+  }
+ },
+ "mistral": {
+  "1": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 2 percent' is strict; 2.00% is not 'more than 2%'."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 2 percent' is strict; 2.00% is not 'more than 2%'."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 2 percent' is strict; 2.00% is not 'more than 2%'."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' is strict; 36 months is not 'more than 36 months'."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' is strict; 36 months is not 'more than 36 months'."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' is strict; 36 months is not 'more than 36 months'."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'by 1.5 or more percentage points' is inclusive; 1.50% meets the threshold."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'by 1.5 or more percentage points' is inclusive; 1.50% meets the threshold."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'by 1.5 or more percentage points' is inclusive; 1.50% meets the threshold."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition is 'does not exceed ... by 2.25 or more'; 2.25% is not 'more than 2.25%'."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The pass condition is 'does not exceed ... by 2.25 or more'; 2.25% is not 'more than 2.25%'."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The pass condition is 'does not exceed ... by 2.25 or more'; 2.25% is not 'more than 2.25%'."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "Both conditions ('less than EUR 10M' and 'less than EUR 1M') are strict; (10.0M, 0.9M) fails the first condition."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions ('less than EUR 10M' and 'less than EUR 1M') are strict; (10.0M, 0.9M) fails the first condition."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "does-not-fire",
+    "basis": "Both conditions ('less than EUR 10M' and 'less than EUR 1M') are strict; (10.0M, 0.9M) fails the first condition."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is inclusive; 16.00% meets the threshold."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive; 16.00% meets the threshold."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive; 16.00% meets the threshold."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'at least equal to' is inclusive; 50.00% meets the threshold."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive; 50.00% meets the threshold."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' is inclusive; 50.00% meets the threshold."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' is inclusive; threshold meets the condition."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive; threshold meets the condition."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' is inclusive; threshold meets the condition."
+   }
+  }
+ },
+ "qwen": {
+  "1": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 2 percent' establishes a strict inequality (>), so the trigger fires only above 2.00%."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 2 percent' establishes a strict inequality (>), so the trigger fires only above 2.00%."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 2 percent' establishes a strict inequality (>), so the trigger fires only above 2.00%."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' establishes a strict inequality (>), meaning the trigger fires only at 37 months and above."
+   },
+   "at": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'more than 36 months' establishes a strict inequality (>), meaning the trigger fires only at 37 months and above."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase 'more than 36 months' establishes a strict inequality (>), meaning the trigger fires only at 37 months and above."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "NO",
+    "polarity": "does-not-fire",
+    "basis": "The phrase '1.5 or more percentage points' establishes an inclusive inequality (>=), so the trigger fires at 1.50 and above."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' establishes an inclusive inequality (>=), so the trigger fires at 1.50 and above."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "The phrase '1.5 or more percentage points' establishes an inclusive inequality (>=), so the trigger fires at 1.50 and above."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'does not exceed ... by 2.25 or more' uses an inclusive threshold for the exceedance, meaning exactly 2.25 fails the pass condition."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "The phrase 'does not exceed ... by 2.25 or more' uses an inclusive threshold for the exceedance, meaning exactly 2.25 fails the pass condition."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "The phrase 'does not exceed ... by 2.25 or more' uses an inclusive threshold for the exceedance, meaning exactly 2.25 fails the pass condition."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'less than' establishes strict inequalities (<) for both revenue and income, so the test passes only when both are strictly below their respective thresholds."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'less than' establishes strict inequalities (<) for both revenue and income, so the test passes only when both are strictly below their respective thresholds."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'less than' establishes strict inequalities (<) for both revenue and income, so the test passes only when both are strictly below their respective thresholds."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the safe harbour passes at exactly 16.00% and above."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the safe harbour passes at exactly 16.00% and above."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the safe harbour passes at exactly 16.00% and above."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'at least equal to' establishes an inclusive inequality (>=), so the floor requirement passes at exactly 50.00% and above."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' establishes an inclusive inequality (>=), so the floor requirement passes at exactly 50.00% and above."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'at least equal to' establishes an inclusive inequality (>=), so the floor requirement passes at exactly 50.00% and above."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the incident threshold is met at the exact minimum and above."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the incident threshold is met at the exact minimum and above."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the incident threshold is met at the exact minimum and above."
+   }
+  }
+ },
+ "yuanbao": {
+  "1": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"more than 2 percent\" is strict inequality (>2%), so only values strictly greater than 2% trigger."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"more than 2 percent\" is strict inequality (>2%), so only values strictly greater than 2% trigger."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "\"more than 2 percent\" is strict inequality (>2%), so only values strictly greater than 2% trigger."
+   }
+  },
+  "2": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"more than 36 months\" is strict (>36), so only durations strictly exceeding 36 months trigger."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"more than 36 months\" is strict (>36), so only durations strictly exceeding 36 months trigger."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "\"more than 36 months\" is strict (>36), so only durations strictly exceeding 36 months trigger."
+   }
+  },
+  "3": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"1.5 or more percentage points\" is inclusive (>=1.5), so spreads at or above 1.5 trigger."
+   },
+   "at": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "\"1.5 or more percentage points\" is inclusive (>=1.5), so spreads at or above 1.5 trigger."
+   },
+   "above": {
+    "raw": "FIRE",
+    "polarity": "fires",
+    "basis": "\"1.5 or more percentage points\" is inclusive (>=1.5), so spreads at or above 1.5 trigger."
+   }
+  },
+  "4": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "does-not-fire",
+    "basis": "\"does not exceed ... by 2.25 or more\" negates an inclusive condition, making the effective pass boundary strict (<2.25)."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "\"does not exceed ... by 2.25 or more\" negates an inclusive condition, making the effective pass boundary strict (<2.25)."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "fires",
+    "basis": "\"does not exceed ... by 2.25 or more\" negates an inclusive condition, making the effective pass boundary strict (<2.25)."
+   }
+  },
+  "5": {
+   "below": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"less than\" is strict (<), so both revenue and income must be strictly below thresholds to pass; only the pair with both below passes."
+   },
+   "at": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"less than\" is strict (<), so both revenue and income must be strictly below thresholds to pass; only the pair with both below passes."
+   },
+   "above": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"less than\" is strict (<), so both revenue and income must be strictly below thresholds to pass; only the pair with both below passes."
+   }
+  },
+  "6": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"equal to or greater than 16%\" is inclusive (>=16%), so ETRs at or above 16% pass."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"equal to or greater than 16%\" is inclusive (>=16%), so ETRs at or above 16% pass."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"equal to or greater than 16%\" is inclusive (>=16%), so ETRs at or above 16% pass."
+   }
+  },
+  "7": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"at least equal to 50%\" is inclusive (>=50%), so ratios at or above 50% pass."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"at least equal to 50%\" is inclusive (>=50%), so ratios at or above 50% pass."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"at least equal to 50%\" is inclusive (>=50%), so ratios at or above 50% pass."
+   }
+  },
+  "8": {
+   "below": {
+    "raw": "FAIL",
+    "polarity": "does-not-fire",
+    "basis": "\"equal to or greater than\" the minimum is inclusive (>=), so values at or above threshold pass."
+   },
+   "at": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"equal to or greater than\" the minimum is inclusive (>=), so values at or above threshold pass."
+   },
+   "above": {
+    "raw": "PASS",
+    "polarity": "fires",
+    "basis": "\"equal to or greater than\" the minimum is inclusive (>=), so values at or above threshold pass."
+   }
+  }
+ }
+}

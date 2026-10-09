@@ -1,0 +1,99 @@
+{
+  "receipt_kinds": [
+    {
+      "kind": "Segment",
+      "when_produced": "Produced when the zkVM execution is split into multiple segments and a STARK proof is generated for a single segment."
+    },
+    {
+      "kind": "Succinct",
+      "when_produced": "Produced when all Segment receipts are recursively compressed into a single STARK proof representing the entire execution."
+    },
+    {
+      "kind": "Groth16",
+      "when_produced": "Produced when the Succinct STARK proof is further compressed into a Groth16 proof over the BN254 curve, suitable for on-chain verification."
+    },
+    {
+      "kind": "Fake",
+      "when_produced": "Produced in development/testing environments when the `RISC0_DEV_MODE` flag is set, bypassing actual proving."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "[u8; 256] (or Vec<u8> depending on serialization)",
+      "meaning": "The serialized Groth16 proof containing the elliptic curve points A (G1), B (G2), and C (G1) on the BN254 curve.",
+      "verifier_must_check": "Deserialize the points, ensure they are on the curve and in the correct subgroup, and use them in the pairing equation e(A, B) = e(alpha, beta) * e(vk_x, gamma) * e(C, delta).",
+      "failure_if_skipped": "Total forgery: an attacker can supply any bytes as the seal and bypass the cryptographic proof verification entirely."
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim struct",
+      "meaning": "The public execution claim containing sys_exit, user_exit, input digest, output digest, and pre/post system states.",
+      "verifier_must_check": "Compute the digest of the claim and derive the Groth16 public inputs. Verify that the journal bytes provided by the application hash to the `output` digest in the claim.",
+      "failure_if_skipped": "Claim substitution: an attacker can present a valid proof for a different execution (different journal or exit codes) by swapping the `claim` object while keeping the original `seal`."
+    },
+    {
+      "field": "control_id",
+      "type_shape": "Digest (32 bytes)",
+      "meaning": "Identifier for the specific zkVM circuit version and recursion parameters used to generate the proof.",
+      "verifier_must_check": "Compare against the expected `control_id` for the specific guest program and zkVM version.",
+      "failure_if_skipped": "Version rollback/swap: an attacker can use a proof from an older, potentially vulnerable zkVM version or a different guest program that shares the same image ID."
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "sys_exit": "u32 representing the system exit code (e.g., 0 for Halted, 1 for Paused, 2 for SystemSplit).",
+      "user_exit": "u32 representing the user-defined exit code.",
+      "input": "Digest (32 bytes) of the input data provided to the guest.",
+      "output": "Digest (32 bytes) of the journal (output data) committed by the guest.",
+      "pre": "SystemState digest representing the initial memory and PC state.",
+      "post": "SystemState digest representing the final memory and PC state."
+    },
+    "claim_digest_computation": "The ReceiptClaim is serialized in a canonical binary format (typically little-endian for integers, concatenated digests) and hashed using SHA-256 to produce a 32-byte claim digest."
+  },
+  "binding_chain": [
+    "1. Journal Binding: The raw journal bytes are hashed using SHA-256 to produce the `output` digest, which is embedded in the ReceiptClaim.",
+    "2. Claim Digest: The entire ReceiptClaim (including the `output` digest) is serialized and hashed via SHA-256 to produce the 256-bit `claim_digest`.",
+    "3. Public Input Derivation: The 256-bit `claim_digest` is split into two 128-bit big-endian integers to fit within the BN254 scalar field, forming the public inputs to the Groth16 circuit.",
+    "4. vk_x Computation: The verifier computes the linear combination of the Groth16 verifying key's `ic` (input coefficients) points with these public inputs to produce the `vk_x` G1 point.",
+    "5. Pairing Check: The Groth16 pairing equation e(A, B) = e(alpha, beta) * e(vk_x, gamma) * e(C, delta) cryptographically binds the `seal` to the `vk_x` point, ensuring the proof is valid only for this specific `claim_digest`.",
+    "6. Control Root Binding: The Groth16 circuit itself is a recursion verifier. Its hardcoded verifying key (or a public input `control_id`) binds the proof to a specific STARK verification logic, preventing proofs from unauthorized or modified zkVM versions."
+  ],
+  "version_coupling": {
+    "circuit_version_dependent_parts": [
+      "Groth16 Verifying Key (VK): The alpha, beta, gamma, delta points and ic array are specific to the exact Groth16 circuit compiled for a given zkVM version.",
+      "Control ID / Control Root: Identifies the specific STARK recursion parameters and instruction set semantics validated by the Groth16 circuit."
+    ],
+    "what_breaks_with_wrong_version": "If a verifier uses a Groth16 VK from a different zkVM version, the pairing check will fail because the `vk_x` computation will not match the proof's public inputs. If the verifier ignores the `control_id` mismatch, it may accept a proof generated by an older zkVM version that might have known vulnerabilities or different semantic behaviors."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Missing Control ID Check",
+      "description": "The verifier checks the Groth16 pairing but fails to verify that the receipt's `control_id` matches the expected value for the guest program.",
+      "check_that_catches_it": "Explicitly assert `receipt.control_id() == EXPECTED_CONTROL_ID` before accepting the proof."
+    },
+    {
+      "bug": "Incorrect Public Input Endianness/Splitting",
+      "description": "The verifier incorrectly splits the 256-bit claim digest into BN254 field elements (e.g., using little-endian instead of big-endian, or splitting at the wrong bit boundary).",
+      "check_that_catches_it": "Use the official risc0-zkvm library's `claim.digest().into()` or equivalent canonical method to derive public inputs, rather than manual bit-shifting."
+    },
+    {
+      "bug": "Journal Hash Mismatch Ignored",
+      "description": "The verifier trusts the `claim.output` digest without verifying that the provided journal bytes actually hash to it.",
+      "check_that_catches_it": "Compute `sha256(journal_bytes)` and assert it equals `receipt.claim.output`."
+    },
+    {
+      "bug": "Accepting Non-Groth16 Receipts On-Chain",
+      "description": "The verifier accepts a `Succinct` (STARK) or `Fake` receipt in an environment that only supports Groth16 (like an EVM smart contract), or fails to distinguish them.",
+      "check_that_catches_it": "Match on the `Receipt` enum variant and explicitly require `Receipt::Groth16` for on-chain contexts."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High certainty. The Receipt enum variants (Segment, Succinct, Groth16, Fake) are standard in risc0-zkvm v1.x.",
+    "groth16_receipt_fields": "High certainty on the conceptual fields (seal, claim, control_id). The exact byte size of the seal (256 bytes for uncompressed BN254) is standard for Groth16, though serialization formats may add minor overhead.",
+    "claim_structure": "High certainty on the core fields (sys_exit, user_exit, input, output, pre, post) and the use of SHA-256 for the claim digest in the host environment.",
+    "binding_chain": "High certainty on the SHA-256 hashing chain and the standard Groth16 public input derivation (splitting the 256-bit digest into two field elements).",
+    "version_coupling": "High certainty that the control_id and VK are version-coupled. The exact naming (control_id vs control_root) has evolved slightly across v1.x releases, but the concept remains identical.",
+    "common_verifier_bugs": "High certainty. These are standard zk-verification pitfalls and specifically documented issues in early zkVM integrations."
+  }
+}

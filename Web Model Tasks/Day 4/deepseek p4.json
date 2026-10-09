@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Trace Cache over Conventional Instruction Cache",
+    "where_in_paper": "Front-end section",
+    "decision": "Adopted an Execution Trace Cache that stores decoded micro-ops (uops) in the dynamic execution path, rather than a conventional L1 instruction cache storing x86 instructions.",
+    "alternatives_or_rejected": "The paper contrasts this with a traditional instruction cache that would require decoding each time. The trace cache stores already-decoded uops, effectively replacing the L1 I-cache.",
+    "rationale": "The Pentium 4 can execute instructions faster than it can decode them; the trace cache bypasses the decoder on cache hits, increasing front-end bandwidth.",
+    "outcome": "A 12K uop trace cache that delivers up to 6 uops per cycle to the execution engine.",
+    "quote_as_recalled": "The decoder can decode only one IA32 instruction per cycle. However, the decoded instructions are cached in the trace cache.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact microarchitecture details (e.g., 12K uop size) are from secondary sources, not directly verified from the paper text.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Deep Pipelining / Hyper Pipelined Technology",
+    "where_in_paper": "Introduction or overview section",
+    "decision": "Implemented a very deep pipeline (20 stages) to achieve high clock frequencies, significantly deeper than the P6 family.",
+    "alternatives_or_rejected": "The paper implies a trade-off against the shorter pipeline of the P6 architecture, choosing frequency over instructions-per-clock (IPC) for the initial NetBurst implementation.",
+    "rationale": "To achieve industry-leading clock rates (starting at 1.5 GHz) and deliver a substantial performance gain for key applications.",
+    "outcome": "The Pentium 4 achieved a 1.5 GHz clock frequency at introduction, with a 20-stage pipeline.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-P4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The exact pipeline stage count (20) is a well-known fact but may not be explicitly emphasized as a 'decision' with trade-offs in the paper.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Double-Pumped (2x Core Frequency) ALU",
+    "where_in_paper": "Out-of-order execution engine section",
+    "decision": "Designed a double-pumped Arithmetic Logic Unit (ALU) that operates at twice the core processor frequency.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To execute simple integer instructions at extremely low latency, effectively allowing them to run at 2x the core clock speed.",
+    "outcome": "An ALU running at 3 GHz (on a 1.5 GHz core) that handles simple integer operations, forming the Rapid Execution Engine.",
+    "quote_as_recalled": "the extremely low latency double-pumped Arithmetic Logic Unit (ALU) that runs at 3GHz.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The specific frequency (3 GHz) is from the abstract; the paper likely mentions it, but the exact phrasing might differ.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Low-Latency Level 1 Data Cache (2-cycle access)",
+    "where_in_paper": "Memory subsystem section",
+    "decision": "Implemented a very low latency Level 1 data cache that can be accessed in just two clock cycles.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To feed the high-speed execution engine with data quickly and maintain performance despite the deep pipeline.",
+    "outcome": "A low-latency L1 data cache that supports the Rapid Execution Engine's high throughput.",
+    "quote_as_recalled": "the very low latency Level 1 data cache that is accessed in just two clock cycles.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The cache size (8KB) is not mentioned in the abstract; this detail is from general knowledge and may not be in the paper.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Rapid Execution Engine with ALUs at 2x Core Frequency",
+    "where_in_paper": "Out-of-order execution engine / Rapid Execution Engine section",
+    "decision": "Created the Rapid Execution Engine where the Arithmetic Logic Units (ALUs) run at twice the core frequency.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To allow frequently used integer instructions to execute at double the core clock, improving performance.",
+    "outcome": "Two ALUs running at double the processor frequency, enabling high-speed integer execution.",
+    "quote_as_recalled": "Arithmetic Logic Units (ALUs) run at twice the processor frequency.",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "This is closely related to the 'Double-Pumped ALU' decision; the paper might present them as the same feature.",
+    "confidence": 0.85
+  }
+]

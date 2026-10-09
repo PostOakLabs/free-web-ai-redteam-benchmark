@@ -1,0 +1,38 @@
+[
+  {
+    "example_id": null,
+    "article": "Article 5.2 (Substance-Based Income Exclusion)",
+    "fact_pattern": "A Constituent Entity has GloBE Income of 100m EUR. It has Eligible Payroll Costs of 50m EUR and Eligible Tangible Assets of 100m EUR. The financial year begins in 2023, the first year of the transition period.",
+    "computation": "1. Payroll carve-out = Eligible Payroll Costs * transitional rate = 50m EUR * 10% = 5m EUR.\n2. Tangible asset carve-out = Eligible Tangible Assets * transitional rate = 100m EUR * 8% = 8m EUR.\n3. Total SBIE = Payroll carve-out + Tangible asset carve-out = 5m EUR + 8m EUR = 13m EUR.\n4. Excess Profit = GloBE Income - Total SBIE = 100m EUR - 13m EUR = 87m EUR.",
+    "result": "Total SBIE is 13m EUR, and Excess Profit is 87m EUR.",
+    "doc_vs_general": "probably-in-the-document",
+    "weakest_point": "The exact example numbers or fact patterns in the published document might use different base numbers or specific currency units."
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.5 (De Minimis Exclusion)",
+    "fact_pattern": "A jurisdiction has Average GloBE Revenue of 8 million EUR and Average GloBE Income of 0.8 million EUR over the current and two prior fiscal years. The computed Top-Up Tax for the jurisdiction is initially 5 million EUR.",
+    "computation": "1. Check De Minimis thresholds: Average GloBE Revenue < 10 million EUR (8m EUR < 10m EUR) is TRUE.\n2. Average GloBE Income < 1 million EUR (0.8m EUR < 1m EUR) is TRUE.\n3. Because both conditions are met, the De Minimis Exclusion applies.\n4. The Top-Up Tax for the jurisdiction is deemed to be zero.",
+    "result": "The Top-Up Tax for the jurisdiction is 0 EUR.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The exact article number for the De Minimis Exclusion might be cross-referenced under the Jurisdictional Top-up Tax allocation section (Article 5) rather than 5.5 specifically."
+  },
+  {
+    "example_id": null,
+    "article": "Article 4.1 and 4.2 (Effective Tax Rate and Top-Up Tax Percentage)",
+    "fact_pattern": "A Constituent Entity in Jurisdiction A has GloBE Income of 10,000,000 EUR. Covered Taxes are 1,000,000 EUR. The Minimum Rate is 15%.",
+    "computation": "1. Effective Tax Rate (ETR) = Covered Taxes / GloBE Income = 1,000,000 EUR / 10,000,000 EUR = 10%.\n2. Top-Up Tax Percentage = Minimum Rate - ETR = 15% - 10% = 5%.\n3. Jurisdictional Top-Up Tax (before SBIE and QDMTT) = GloBE Income * Top-Up Tax Percentage = 10,000,000 EUR * 5% = 500,000 EUR.",
+    "result": "The Top-Up Tax Percentage is 5% and the Top-Up Tax is 500,000 EUR.",
+    "doc_vs_general": "probably-in-the-document",
+    "weakest_point": "The document may bundle this into a larger example that includes SBIE and QDMTT offsets rather than isolating it as a standalone computation."
+  },
+  {
+    "example_id": null,
+    "article": "Article 4.4 (Deferred Tax Adjustments)",
+    "fact_pattern": "An entity has a temporary difference that creates a Deferred Tax Expense of 100 EUR in the financial accounts. The applicable tax rate used to measure the deferred tax is 15%, which is equal to the Minimum Rate.",
+    "computation": "1. Under Article 4.4, a deferred tax expense accrued in the financial accounts is added to Covered Taxes if it is measured at a rate equal to or above the minimum rate (15%).\n2. The 100 EUR deferred tax expense is added to the current year's Covered Taxes without discounting or reduction.",
+    "result": "The deferred tax expense of 100 EUR is included in Covered Taxes for the year.",
+    "doc_vs_general": "confident-this-example-is-in-the-document",
+    "weakest_point": "The exact sub-article reference (e.g., Article 4.4.1 vs 4.4.2) and whether the example explicitly includes a net deferred tax liability cap adjustment."
+  }
+]

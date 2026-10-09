@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Throughput-oriented design over single-thread performance",
+    "where_in_paper": "Introduction / design philosophy / commercial workload characteristics",
+    "decision": "Optimize the entire microarchitecture for aggregate throughput (performance/Watt) on commercial server workloads rather than single-thread ILP or high frequency.",
+    "alternatives_or_rejected": "Conventional high-ILP, deeply pipelined, high-frequency cores designed first for single-thread performance and later extended with limited multithreading (the approach attributed to contemporary desktop-oriented designs).",
+    "rationale": "Commercial server applications exhibit high thread-level parallelism, low ILP, high cache-miss rates, and many unpredictable branches; data-center power, cooling, and space constraints make performance/Watt the primary metric.",
+    "outcome": "A 32-thread design that hides memory and pipeline stalls via thread overlap, delivering high throughput at modest frequency and power (~70 W class).",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Simple single-issue cores rather than complex ILP cores",
+    "where_in_paper": "Core microarchitecture / Niagara approach",
+    "decision": "Use simple, single-issue, six-stage in-order pipelines (UltraSPARC-II style) with minimal speculation, maximizing the number of cores and threads that fit on the die.",
+    "alternatives_or_rejected": "Out-of-order, superscalar, or heavily speculative cores that would consume far more area and power per thread.",
+    "rationale": "Simple pipelines allow many cores to be integrated; resource sharing across threads re-uses execution units and caches, improving area and power efficiency while still exploiting the abundant TLP of server workloads.",
+    "outcome": "Eight cores on a single die, each supporting four threads, for 32 hardware threads total; high pipeline utilization (reported IPC near 6 out of a maximum of 8 on SpecJBB-class work).",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.92
+  },
+  {
+    "title": "Four threads per core with fine-grain interleaving",
+    "where_in_paper": "Threading implementation / core pipeline",
+    "decision": "Support four hardware threads per core with zero-cost fine-grain interleaving (instructions from ready threads selected each cycle); unique per-thread state (registers, instruction/store buffers) but shared pipeline, caches, and TLBs.",
+    "alternatives_or_rejected": "Fewer threads per core (or single-threaded cores) that would leave the pipeline idle on stalls, or coarser-grain switching.",
+    "rationale": "Multiple threads hide both memory latency and pipeline stalls; when one thread misses or stalls, others continue, keeping the simple pipeline busy and maximizing outstanding memory references.",
+    "outcome": "Effective latency hiding and high pipeline efficiency without complex speculation; area overhead of four threads reported as modest (~20 % on an already small core).",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Shared, highly associative, banked L2 and high-bandwidth memory system",
+    "where_in_paper": "Memory subsystem / L2 and DRAM interface",
+    "decision": "Provide a single shared 3 MB L2 (4-way banked, 12-way associative) connected by a high-bandwidth crossbar, plus multiple DDR2 channels delivering >20 GB/s, rather than large private L2s per core.",
+    "alternatives_or_rejected": "Large private per-core caches that would reduce sharing efficiency and consume more area for the same total capacity.",
+    "rationale": "Server workloads have large working sets and benefit from data sharing; a shared L2 with high associativity mitigates conflict misses from 32 threads, while banking and the crossbar supply the bandwidth needed to keep many outstanding misses in flight.",
+    "outcome": "Sufficient bandwidth and low-enough latency to sustain high aggregate IPC; measured L2 and memory latencies that still allow ~70 % pipeline efficiency under commercial load.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.88
+  },
+  {
+    "title": "Single shared FPU across all cores",
+    "where_in_paper": "Chip-level resources / floating-point",
+    "decision": "Implement only one floating-point unit shared by all eight cores rather than a private FPU per core.",
+    "alternatives_or_rejected": "Per-core FPUs that would increase die area and power for workloads that are integer-dominated.",
+    "rationale": "Commercial server applications (databases, web, Java) are overwhelmingly integer; a single shared FPU is sufficient and saves substantial area and power.",
+    "outcome": "Area and power efficiency prioritized for the target throughput workloads; floating-point performance intentionally de-emphasized.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  }
+]

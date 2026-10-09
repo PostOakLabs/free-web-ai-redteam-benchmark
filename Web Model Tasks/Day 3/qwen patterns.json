@@ -1,0 +1,90 @@
+[
+  {
+    "pattern_name": "Block-boundary input/output delay budget",
+    "situation": "A block has synchronous inputs/outputs to an external device or another block, and the SDC must say how much delay lives outside the block boundary.",
+    "derivation": "1. Identify interface period P and capture clock relationship. 2. For an input, set_input_delay -max = external driver tco_max + interconnect_max + clock-offset_max + margin M; set_input_delay -min = external driver tco_min + interconnect_min + clock-offset_min - hold guard H. M is often 5% of P in early specs (confidence 0.4); H is often 0 unless min external delay is uncertain (confidence 0.5). 3. Verify feasibility: input_delay_max + worst internal input-to-flop delay + setup + clock uncertainty <= P. 4. For an output, set_output_delay -max = interconnect_max + downstream receiver input delay_max + clock-offset_max + M; the internal launch-to-port budget is then P - receiver_setup - output_delay_max - clock uncertainty. 5. For hold, check output_delay_min + min internal launch-to-port delay >= receiver hold.",
+    "wrong_way": "Picking input/output delay as an arbitrary fraction of the period, or zero, without external timing data. This silently moves the impossible delay into the neighboring block or hides it entirely, so the block may pass standalone but fail at system integration.",
+    "defense": "External device datasheet tco/setup/hold values, board trace length or package delay estimate, clock relationship diagram, and a margin register showing the negotiated M.",
+    "signoff_risk": "Too tight: the block fails internally on unrealistic port budgets and wastes area/power fixing paths that are not the system problem. Too loose: the block signoff is clean but the interface fails on board or at integration.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.72,
+    "node_era_note": "at 7nm-and-below, clock uncertainty and derate consume a larger fraction of the period, leaving less room for arbitrary IO margin than at 28nm"
+  },
+  {
+    "pattern_name": "False path versus multicycle path by architectural qualification",
+    "situation": "A path is slow or crosses control logic, and the team wants a timing exception: reset paths, config paths, slow enables, pipelined buses, mode logic.",
+    "derivation": "1. Enumerate functional modes and prove whether launch and capture can ever occur with a same-cycle timing requirement. If no functional relationship exists, use a false path. 2. If the architecture intentionally allows N destination cycles, use a multicycle path: setup multicycle N. 3. Add the corresponding hold exception, usually N-1, to avoid making hold one cycle too strict; for N=2, set_multicycle_path 2 -setup and set_multicycle_path 1 -hold (confidence in the N-1 idiom 0.8). 4. Qualify the exception with mode pins, through points, or case conditions, then verify no bypass path defeats the qualification.",
+    "wrong_way": "Declaring a false path because the path fails timing, or declaring a multicycle path without proving the enable/protocol actually spans N cycles. The silent break is loss of coverage: real functional paths are no longer checked, or hold becomes impossible because the hold exception was omitted.",
+    "defense": "RTL waveforms showing the N-cycle enable, reset sequence, register write protocol, mode-pin truth table, and a search showing all alternate paths are qualified or excluded.",
+    "signoff_risk": "Too broad: real timing relationships are unchecked and can cause functional corruption. Too narrow or missing: unnecessary timing failures and wasted fixing on architecturally relaxed paths.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.7,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Asynchronous clock-domain boundary with controlled exceptions",
+    "situation": "Two clock domains are unrelated in frequency or phase, and signals cross between them through synchronizers or handshakes.",
+    "derivation": "1. Prove the clocks are truly asynchronous: independent sources, unlocked PLLs, or no fixed divider/phase relationship. 2. At the domain boundary, remove meaningless setup/hold checks with set_clock_groups -asynchronous or equivalent false paths, but only after listing all crossing points. 3. Where a control path into a synchronizer needs bounded latency for protocol reasons, do not false-path that segment; constrain it with set_max_delay -datapath_only. A common budget is max_delay = N_resolve * T_dest - setup_dest - uncertainty_dest - margin M, where N_resolve is often 1 or 2 destination cycles (confidence 0.5) and M is often 5% to 10% of T_dest (confidence 0.4). 4. Keep destination-domain synchronizer flop-to-flop paths timed normally, and constrain asynchronous resets separately.",
+    "wrong_way": "Blanket set_clock_groups between all clocks, including derived or phase-related clocks, or false-pathing CDC paths without checking that a synchronizer and handshake actually bound the transfer. This silently removes timing on paths that are synchronous or need a latency bound.",
+    "defense": "Clock tree topology, PLL/divider analysis, CDC lint results, synchronizer schematic, and waveform or protocol proof that the crossing is asynchronous and resolved.",
+    "signoff_risk": "Too loose: real synchronous paths or insufficient CDC latency are unchecked, causing metastability or protocol failure. Too tight: false failures on asynchronous paths and wasted fixing.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.66,
+    "node_era_note": "7nm-and-below jitter and variation make synchronizer setup and resolution margins less forgiving than at 28nm"
+  },
+  {
+    "pattern_name": "Pre-implementation interface budget allocation",
+    "situation": "Two blocks have not yet been implemented, but floorplan and integration need boundary timing budgets to prevent later surprises.",
+    "derivation": "1. Start with period P, receiver setup S, and expected clock uncertainty U. 2. Estimate interconnect delay W from floorplan distance: W = length_est * wire_delay_per_mm, using historical order-of wire delay (confidence 0.4). 3. Reserve integration margin M, often 10% of P before floorplan matures (confidence 0.4). 4. Compute remaining slack R = P - S - U - W - M. 5. Split R between sender internal logic and receiver input logic; a common unknown split is 50/50 (confidence 0.3), or skew toward the more complex receiver. 6. Translate to SDC: at the sender output, set_output_delay max = W + receiver_budget + M, which leaves the sender internal budget as P - S - U - W - receiver_budget - M.",
+    "wrong_way": "Using a fixed 50% period split with zero interconnect delay, or double-counting the same wire delay in both blocks. The silent break appears at integration: one block is blamed for a path that was impossible from the first budget.",
+    "defense": "Floorplan distance, historical wire delay per mm, repeater plan, protocol latency, prior implementation data, and a written margin register that shows what was reserved and why.",
+    "signoff_risk": "Too tight: blocks chase impossible boundary timing, causing schedule slip and over-optimization. Too loose: interface timing fails late, forcing expensive cross-block ECOs.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.58,
+    "node_era_note": "advanced nodes make wire and repeater estimates more uncertain, so early budgets need more frequent re-correlation than at 28nm"
+  },
+  {
+    "pattern_name": "Stage margin and planned relaxation",
+    "situation": "Early implementation has poor parasitics, no final clock tree, and unknown skew, but timing-driven implementation still needs targets.",
+    "derivation": "1. Estimate stage uncertainty: pre-route wire load, missing clock skew, extraction approximation. 2. Add setup margin M_stage, often 5% to 15% of period or order of 100ps for GHz-class clocks (confidence 0.4), via clock uncertainty, derate, or additional path margin. 3. Track timing correlation after each stage: post-CTS, post-route, extracted parasitics. 4. Relax the margin in steps matched to measured correlation, for example removing part after CTS when skew becomes real and more after final extraction (confidence in stepwise relaxation 0.35). 5. Stop relaxing only when signoff parasitics, corners, and clock models are frozen.",
+    "wrong_way": "Leaving the early overconstraint in place at signoff, or relaxing it before real parasitics and clock skew exist. The first causes false failures and wasted fixing; the second allows implementation to converge to a design that later fails.",
+    "defense": "Historical stage-to-signoff correlation data, slack trend reports, a named margin register, and explicit approval for each relaxation step.",
+    "signoff_risk": "Too tight at signoff: false timing failures, unnecessary ECO, higher power/area. Too loose early: false convergence and late signoff timing escape.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.62,
+    "node_era_note": "7nm-and-below extraction and variation uncertainty usually require more staged margin discipline than 28nm"
+  },
+  {
+    "pattern_name": "Virtual clock for external or missing IO clock",
+    "situation": "IO timing must be constrained against an external clock that does not exist as a net inside the block, or the board clock is not routed to the constrained boundary.",
+    "derivation": "1. Create a virtual clock with the external interface period P_ext. If duty cycle is unknown, assume 50% initially (confidence 0.5), then check edge-sensitive protocols for other waveform assumptions. 2. Derive phase offset from the protocol if specified; otherwise use conservative zero phase and verify both edge relationships if possible. 3. Apply set_input_delay or set_output_delay relative to the virtual clock using external timing specs: max = tco_max or equivalent + board/package delay_max + margin M; min = tco_min + board/package delay_min. M is often 5% of P_ext early (confidence 0.4). 4. If the internal sampling clock is different, explicitly constrain the relationship between the virtual clock and internal clock as asynchronous, source-synchronous, or max/min bounded.",
+    "wrong_way": "Using an internal clock as if it were the external clock when phase, frequency, or jitter are not the same. This creates false synchronous timing relationships and can make signoff pass while the board interface fails.",
+    "defense": "Protocol specification, external device datasheet, eye-diagram or timing-budget spreadsheet, board delay estimate, and explicit statement of why the virtual clock model matches the interface.",
+    "signoff_risk": "Too tight: internal IO logic is over-optimized against a fictitious clock relationship. Too loose: real external timing problems are not checked and escape to board bring-up.",
+    "provenance": "textbook-standard",
+    "recall_confidence": 0.7,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Generated/divided clock edge and latency derivation",
+    "situation": "A clock is produced inside the design by a divider, mux, PLL output, or gated clock and must be constrained as a generated clock.",
+    "derivation": "1. Identify the master clock, division ratio or edge sequence, and the exact pin/net where the generated clock is defined. 2. For divide-by-N, the generated period is N * master_period; if duty cycle is not simple, specify explicit edges rather than only a divide factor (N from RTL is usually high confidence 0.8). 3. Include divider propagation latency in the generated clock path, either through the generated clock definition or by ensuring the divider cell delay is in the timing graph. 4. Decide master-to-generated relationship: if fixed phase, let timing checks relate edges; if the generated clock can be async or glitchy due to mux/reset, constrain the mux or add false/group exceptions only after proving no functional path.",
+    "wrong_way": "Creating a generated clock with the wrong divide value or default waveform, or false-pathing master-to-divided clock paths because they look separate. The silent break is incorrect setup/hold relationships: paths may be checked against the wrong capture edge or not checked at all.",
+    "defense": "RTL divider waveform, edge count, reset/mux behavior, clock topology diagram, and a check that the generated clock edges match simulation or static clock graph reports.",
+    "signoff_risk": "Wrong period/phase too tight: false failures and useless fixing. Wrong period/phase too loose: real timing across divided or muxed clocks escapes to silicon.",
+    "provenance": "tool-default-idiom",
+    "recall_confidence": 0.65,
+    "node_era_note": "no-era-difference-recalled"
+  },
+  {
+    "pattern_name": "Asynchronous handshake latency budget",
+    "situation": "A request/acknowledge, valid/ready, or FIFO interface crosses unrelated clock domains and timing cannot be checked as a normal synchronous path.",
+    "derivation": "1. Identify the handshake protocol and the minimum required pulse or acknowledge window in the destination domain. For a pulse crossing a two-flop synchronizer, the minimum width is often 2 destination cycles (confidence 0.5). 2. Bound the combinational delay into the first synchronizer flop: set_max_delay -datapath_only = min_window - setup_sync - uncertainty_dest - margin M, with M often 5% of destination period (confidence 0.4). 3. False-path or group the asynchronous relationship only for segments that are truly protocol-bounded; keep destination-domain synchronizer and logic paths timed normally. 4. For multibit handshakes, constrain relative bit skew or use Gray-coded pointers; the skew budget should be less than one destination cycle minus setup and margin (confidence 0.4).",
+    "wrong_way": "False-pathing the entire handshake because it is asynchronous, without proving pulse width, synchronizer depth, or bit-skew behavior. The silent break is missed pulses, FIFO overflow/underflow, or sampling an invalid multibit value.",
+    "defense": "Handshake protocol spec, FIFO/synchronizer design details, waveforms showing minimum pulse width, CDC lint structure checks, and proof that multibit transfers are Gray-coded or mux-synchronized.",
+    "signoff_risk": "Too loose: asynchronous protocol failures that are invisible to ordinary timing signoff. Too tight: false timing failures on paths that are architecturally resolved by the handshake.",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.55,
+    "node_era_note": "7nm-and-below metastability and jitter make handshake pulse-width margins more important than at 28nm"
+  }
+]

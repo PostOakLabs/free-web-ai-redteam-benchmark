@@ -1,0 +1,59 @@
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": [
+      "Keys sorted UTF-16 code-unit order: C(0x0043) < a(0x0061) < b(0x0062)",
+      "Numbers serialized with minimal representation (no unnecessary precision)"
+    ]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"k\":null},{\"x\":2,\"y\":1}],\"z\":true}}",
+    "rules_applied": [
+      "Keys sorted UTF-16 code-unit order: a(0x0061) < z(0x007A)",
+      "Array objects sorted by first key: k(0x006B) < y(0x0079) -> {\"k\":null} before {\"x\":2,\"y\":1}",
+      "Object keys sorted: x(0x0078) < y(0x0079)"
+    ]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e+21,\"n2\":1e-07,\"n3\":1e-06,\"n4\":100000000000000000000,\"n5\":-0.0,\"n6\":333333333.3333333}",
+    "jcs": "{\"n1\":1e21,\"n2\":1e-7,\"n3\":1e-6,\"n4\":100000000000000000000,\"n5\":-0,\"n6\":333333333.333333}",
+    "rules_applied": [
+      "n1: Remove optional + sign in exponent per JCS ABNF (1e+21 -> 1e21)",
+      "n2: Remove leading zero in exponent (1e-07 -> 1e-7)",
+      "n3: Use scientific notation when number has leading zeros before decimal (0.000001 -> 1e-6)",
+      "n4: Integer below 1e21 threshold stays as decimal expansion (exact 1e20)",
+      "n5: Negative zero sign preserved as distinct from +0; decimal point stripped (JSON -0.0 -> JCS -0)",
+      "n6: Truncate to maximum 15 significant digits; remove trailing zeros (333333333.3333333 -> 333333333.333333)"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"aa\":\"double\",\"ü\":\"umlaut\",\"€\":\"euro\"}",
+    "rules_applied": [
+      "Keys sorted by first UTF-16 code unit: $(0x0024) < aa[0](0x0061) < ü(0x00FC) < €(lead 0xD83C)",
+      "Resulting order: '$', 'aa', 'ü', '€' — $ has lowest code unit, € highest (surrogate 0xD83C > all BMP)",
+      "String values contain no JSON-required escapes; non-ASCII kept as literal UTF-8 bytes (€ not \\u20AC escaped)"
+    ]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\u0009here\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "rules_applied": [
+      "s1: Backslash doubled to \\\\ (JSON requires escaping literal \\); \\n kept as ASCII escape form",
+      "s2: Tab (U+0009) canonicalized from ASCII \\t to unicode escape \\u0009 (JCS mandates \\uXXXX for all C0 controls)",
+      "s3: Quote escaped as \\\" (standard JSON)",
+      "s4: Non-ASCII 'é' (U+00E9) kept as literal UTF-8; not escaped to \\u00E9",
+      "s5: Trailing U+0020 spaces are printable ASCII — no escape required; control U+0008 absent"
+    ]
+  },
+  {
+    "weakest_point": "Case 5 s2: JCS RFC 8785 §4.2.2 normalizes all C0 control characters to \\uXXXX form, but there is a subtle ambiguity between RFC 8785's prose (which uses U+XXXX notation) and whether the JSON text output should prefer ASCII escape forms (\\n, \\t) or require strict \\uXXXX for all controls. My answer uses \\u0009 for the tab in JCS form; if the reference expects \\t to remain unchanged (since \\t is already JSON-canonical), the byte strings would differ on that one escape sequence."
+  }
+]

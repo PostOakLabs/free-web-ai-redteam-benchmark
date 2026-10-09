@@ -1,0 +1,92 @@
+[
+  {
+    "delta_name": "wire delay dominance over cell delay",
+    "at_28nm": "Cell delay and wire delay were comparable; gate sizing and logic-depth reduction were the primary timing-closure levers.",
+    "at_7nm_5nm": "Wire RC delay dominates for nets longer than ~150–250 µm; cell delay is a shrinking fraction of path delay.",
+    "why_it_changed": "Wire resistance scales inversely with cross-sectional area while gate delay scales more slowly; at 7nm/5nm copper wires are tall and narrow with high aspect ratios, making the RC product large relative to gate switching delay.",
+    "what_breaks": "A 28nm-trained engineer upsizes drivers aggressively to fix timing, but at 7nm the wire RC is the bottleneck—larger drivers add gate capacitance without reducing wire delay, worsening power and congestion while barely improving slack.",
+    "workflow_impact": "Placement must be wire-length-driven and congestion-aware; buffer insertion for long wires becomes a primary timing-closure step rather than gate sizing.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "congestion character shifts from global utilization to pin access",
+    "at_28nm": "Congestion was primarily macro-channel or global-utilization driven; if macros were adequately spaced and utilization was under ~85%, routing usually closed.",
+    "at_7nm_5nm": "Pin access on standard cells and macros dominates congestion; the router fails because it cannot legally reach individual pins, not because tracks are globally exhausted.",
+    "why_it_changed": "Pins shrink to minimum dimensions, access requires specific track alignment, and multi-patterning cut rules restrict via placement around pins; the available access points per pin drop sharply.",
+    "what_breaks": "A 28nm engineer spaces macros adequately and targets 75% utilization, then is surprised when detailed route aborts with 200,000+ shorts because the router cannot access cell pins on dense rows despite clean global-route overflow.",
+    "workflow_impact": "Detailed-route feasibility must be checked after placement legalization and before CTS; pin-access analysis becomes a standard placement-quality metric.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "multi-patterning track alignment enters placement constraints",
+    "at_28nm": "Double patterning (LELE) affected the lowest one or two metal layers but rarely constrained cell placement or row alignment.",
+    "at_7nm_5nm": "SADP/SAQP and coloring constraints require standard cells to sit on specific track grids; off-grid placement creates uncolorable or unroutable configurations.",
+    "why_it_changed": "Self-aligned double/quadruple patterning creates fixed track grids with strict color alternation; a cell shifted by half a track can block access to adjacent pins or create spacing violations that no router can resolve.",
+    "what_breaks": "A 28nm engineer manually shifts a cell by half a track to fix a local timing violation, creating a coloring conflict that propagates across the row and produces thousands of unresolvable detailed-route DRCs.",
+    "workflow_impact": "Placement legalization must be track- and color-aware; floorplanning tools include coloring compatibility checks before placement freeze.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "via and pin-access rules dominate DRC counts",
+    "at_28nm": "DRC closure was dominated by width, spacing, and short violations; via rules were relatively simple and global-route overflow was a reliable predictor of detailed-route health.",
+    "at_7nm_5nm": "Via enclosure, minimum metal area, end-of-line spacing, and pin-access rules dominate DRC counts; a 'clean' global route often masks thousands of detailed-route violations.",
+    "why_it_changed": "Minimum dimensions approach lithographic limits, forcing complex construct rules (cut spacing, via-bar restrictions, tip-to-tip spacing) that the global router abstracts away.",
+    "what_breaks": "A 28nm engineer trusts 0% global-route overflow as a signoff proxy and is shocked when detailed route produces 50,000+ DRCs despite the optimistic global report.",
+    "workflow_impact": "Detailed route must be run much earlier in the flow—post-placement, pre-CTS—to catch pin-access and via-rule violations before they become entrenched.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "power grid density consumes routing resources",
+    "at_28nm": "Power grids used relatively wide straps (order of microns) with moderate density; IR drop was manageable and straps were added or widened post-route without major disruption.",
+    "at_7nm_5nm": "Power grids require dense arrays of narrow straps to control IR drop, consuming 15–25% of available routing tracks and creating pervasive blockages.",
+    "why_it_changed": "Higher current density per unit width and lower supply voltages make IR drop severe; thin wires have high resistance, requiring a denser mesh to keep drop within ~10% of Vdd.",
+    "what_breaks": "A 28nm engineer plans a sparse power grid and adds straps late in the flow, only to discover that the added straps block critical routes and create new congestion hotspots that require floorplan rework.",
+    "workflow_impact": "Power grid design moves to the floorplan stage and is co-optimized with routing resource planning; IR analysis is run before placement starts.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Vt-mixing granularity explodes",
+    "at_28nm": "Two to three threshold voltages (HVT, SVT, LVT) were sufficient; leakage was secondary to timing and power targets were met with coarse Vt selection.",
+    "at_7nm_5nm": "Five to seven Vt options plus extended-Vt variants are available; aggressive per-path Vt mixing is required to meet power targets without sacrificing speed.",
+    "why_it_changed": "Short-channel effects and gate leakage in FinFETs cause static power to approach or exceed dynamic power; using LVT everywhere creates thermal and battery-life failures.",
+    "what_breaks": "A 28nm engineer uses LVT cells liberally to close timing easily, then faces a 30–50% static-power overshoot that requires full netlist re-synthesis and placement restart.",
+    "workflow_impact": "Power optimization and Vt mixing move upstream into synthesis and placement; power signoff becomes as critical as timing signoff.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "clock skew budget compression forces useful-skew methodology",
+    "at_28nm": "Clock skew budgets were generous (order of 5–10% of clock period); simple H-trees or spine clocks with standard CTS optimization were sufficient.",
+    "at_7nm_5nm": "Skew budgets compress to <3% of the clock period; useful skew, clock-aware placement, and sometimes clock mesh are required to close timing.",
+    "why_it_changed": "Clock periods shrink to ~500 ps while process variation in clock buffers and wires increases; 50 ps of skew was tolerable at 1 ns but consumes the entire margin at 500 ps.",
+    "what_breaks": "A 28nm engineer builds a standard clock tree and accepts 60 ps skew, then finds setup violations on hundreds of paths that cannot be closed without re-architecting the clock distribution from scratch.",
+    "workflow_impact": "Clock tree synthesis becomes a multi-objective optimization stage integrated with placement; useful skew is applied systematically rather than as a last-resort ECO.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "signoff corner explosion",
+    "at_28nm": "Four to eight PVT corners covered most process variation; overnight signoff was standard practice.",
+    "at_7nm_5nm": "Twenty to forty corners including aging, voltage droop, temperature inversion, and back-bias corners; signoff runs take days.",
+    "why_it_changed": "Process variation increases relative to feature size; temperature inversion effects appear where delay decreases with temperature; aging (NBTI/HCI) must be signed off at both time-zero and end-of-life.",
+    "what_breaks": "A 28nm engineer signs off at typical, best, and worst cases, then sees silicon failures at a corner where temperature inversion makes the fast-fast corner slower than typical, violating assumptions built into the timing budget.",
+    "workflow_impact": "Signoff becomes a dedicated compute-farm operation; corner reduction, statistical timing analysis, and aging-aware optimization become essential skills.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "hold closure difficulty increases dramatically",
+    "at_28nm": "Hold closure was straightforward; a few buffer insertions or cell upsizes after setup closure usually fixed it within a day.",
+    "at_7nm_5nm": "Hold closure is a major challenge due to OCV, large clock skew relative to data delay, and pessimistic minimum-delay constraints from cell libraries.",
+    "why_it_changed": "Clock paths see as much variation as data paths; at short clock periods the hold margin is tiny; minimum cell delays are large relative to the hold budget.",
+    "what_breaks": "A 28nm engineer closes setup first and treats hold as a one-day ECO, but at 7nm hold violations number in the thousands and require buffer insertion that conflicts with already-tight area and routing resources.",
+    "workflow_impact": "Hold analysis runs in parallel with setup from early placement stages; hold-aware CTS and data-path padding become standard practice, not afterthoughts.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "utilization targets drop despite smaller nodes",
+    "at_28nm": "80–85% placement utilization was standard and achievable for most blocks without congestion collapse.",
+    "at_7nm_5nm": "65–75% is typical; higher utilization causes pin-access and congestion collapse that no amount of routing optimization can resolve.",
+    "why_it_changed": "Pin access, power grid, and coloring constraints consume effective routing resource; the router needs whitespace to resolve complex DRC rules and via configurations.",
+    "what_breaks": "A 28nm engineer targets 82% utilization by area-scaling a previous design, then finds that detailed route cannot close even after multiple optimization iterations, forcing a costly floorplan reopen.",
+    "workflow_impact": "Floorplanning must allocate 10–15% more die area than a naive node-scaling would suggest; utilization targets are set per region (macro channels vs core) rather than as a single global number.",
+    "confidence": 0.85
+  }
+]

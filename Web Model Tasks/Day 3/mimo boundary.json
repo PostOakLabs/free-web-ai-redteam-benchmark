@@ -1,0 +1,87 @@
+```json
+[
+  {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "PASS — 1.99% is not 'more than' 2%; trigger does not fire.",
+      "at": "PASS — 2.00% equals but does not exceed 2%; 'more than' excludes the boundary.",
+      "above": "FIRE — 2.01% is 'more than' 2 percent of the amount prepaid."
+    },
+    "reasoning": "The operative phrase 'more than 2 percent' imposes a strict inequality, so exactly 2.00% does not trigger the prepayment-penalty provision."
+  },
+  {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "PASS — 35 months is not 'more than' 36 months.",
+      "at": "PASS — 36 months equals but does not exceed 36; 'more than' excludes the boundary.",
+      "above": "FIRE — 37 months is 'more than 36 months after consummation.'"
+    },
+    "reasoning": "The phrase 'more than 36 months' is a strict inequality, so a term of exactly 36 months falls outside the HOEPA duration trigger."
+  },
+  {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "PASS — 1.49 pp spread does not reach the '1.5 or more' threshold.",
+      "at": "FIRE — 1.50 pp satisfies '1.5 or more percentage points'; the boundary is included.",
+      "above": "FIRE — 1.51 pp exceeds the threshold."
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' is inclusive of the boundary, so a spread of exactly 1.50 pp triggers the higher-priced covered transaction classification."
+  },
+  {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "PASS — 2.24 pp spread is below '2.25 or more'; loan qualifies as General QM.",
+      "at": "FIRE — 2.25 pp spread satisfies '2.25 or more percentage points'; loan fails the QM price limit.",
+      "above": "FIRE — 2.26 pp spread exceeds the threshold; loan fails QM."
+    },
+    "reasoning": "The fail-side phrasing 'exceeds by 2.25 or more' is inclusive of 2.25, so the boundary value causes QM failure."
+  },
+  {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "FAIL — (10.0M rev, 0.9M inc): revenue of exactly EUR 10M is not 'less than' EUR 10M; de minimis unavailable despite income passing.",
+      "at": "FAIL — (9.9M rev, 1.0M inc): income of exactly EUR 1M is not 'less than' EUR 1M; de minimis unavailable despite revenue passing.",
+      "above": "PASS — (9.9M rev, 0.9M inc): both revenue < EUR 10M and income < EUR 1M; de minimis exclusion applies."
+    },
+    "reasoning": "Both conjuncts use 'less than,' a strict inequality that excludes the boundary values of exactly EUR 10M revenue and exactly EUR 1M income."
+  },
+  {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL — 15.99% is below the 16% transition rate; safe harbour not available.",
+      "at": "PASS — 16.00% satisfies 'equal to or greater than' 16%; the boundary is included.",
+      "above": "PASS — 16.01% exceeds the transition rate."
+    },
+    "reasoning": "The phrase 'equal to or greater than' is explicitly inclusive, so exactly 16.00% qualifies for the transitional CbCR safe harbour."
+  },
+  {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL — 49.99% of SCR falls short of the 'at least equal to' 50% Tier 1 floor.",
+      "at": "PASS — 50.00% satisfies 'at least equal to' 50% of SCR; the boundary is included.",
+      "above": "PASS — 50.01% exceeds the floor."
+    },
+    "reasoning": "The phrase 'at least equal to' is inclusive of the boundary, so exactly 50.00% of SCR meets the Tier 1 eligibility floor."
+  },
+  {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "PASS — threshold−1 does not satisfy 'equal to or greater than' the minimum; incident not significant on the users leg.",
+      "at": "FIRE — threshold satisfies 'equal to or greater than'; the incident is significant.",
+      "above": "FIRE — threshold+1 exceeds the minimum; incident is significant."
+    },
+    "reasoning": "The phrase 'equal to or greater than' is inclusive, so exactly at the threshold triggers the significant-incident reporting obligation."
+  },
+  {
+    "weakest_point": "Rule 4 (General QM price limit): Regulation Z §1026.43(e)(2)(vi) likely reads 'by more than 2.25 percentage points' (strict — excluding the boundary) rather than 'by 2.25 or more percentage points' (inclusive — as stated in the prompt). If the verbatim regulatory text is 'more than,' the verdict at exactly 2.25 pp flips from FIRE to PASS, making this the rule whose operative phrasing I am least confident the prompt has reproduced verbatim."
+  }
+]
+```

@@ -1,0 +1,29 @@
+[
+  {
+    "example_id": null,
+    "article": "Article 5.2 - ETR and Top-up Tax",
+    "fact_pattern": "Jurisdiction X: GloBE Income = EUR 10,000,000, Adjusted Covered Taxes = EUR 1,000,000, SBIE = EUR 500,000, Additional Current Top-up Tax = EUR 0",
+    "computation": "Step1 ETR = Adjusted Covered Taxes / GloBE Income = 1,000,000 / 10,000,000 = 0.10 = 10%. Step2 Top-up Percentage = 15% - ETR = 15% - 10% = 5% (floored at 0%). Step3 Excess Profit = GloBE Income - SBIE = 10,000,000 - 500,000 = 9,500,000. Step4 Jurisdictional Top-up Tax = Excess Profit * Top-up % + Additional = 9,500,000 * 0.05 + 0 = 475,000.",
+    "result": "ETR 10%, Top-up Percentage 5%, Jurisdictional Top-up Tax EUR 475,000 before allocation to CEs",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "SBIE amount assumed as EUR 500k for illustration; real SBIE would depend on payroll/tangible asset percentages for that year"
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.3 - Substance-Based Income Exclusion",
+    "fact_pattern": "Fiscal year beginning in 2023: Eligible payroll costs = EUR 20,000,000, Eligible tangible assets carrying value = EUR 100,000,000, Transitional rates FY2023: payroll 10%, tangible 8%",
+    "computation": "Step1 Payroll carve-out = 20,000,000 * 10% = 20,000,000 * 0.10 = 2,000,000. Step2 Tangible carve-out = 100,000,000 * 8% = 100,000,000 * 0.08 = 8,000,000. Step3 SBIE = 2,000,000 + 8,000,000 = 10,000,000.",
+    "result": "SBIE for FY2023 = EUR 10,000,000 to be subtracted from Net GloBE Income to get Excess Profit",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Transitional schedule after 2023 declines annually to 5% each by FY2033; exact yearly 0.2pp steps may vary per Administrative Guidance version"
+  },
+  {
+    "example_id": null,
+    "article": "Article 5.5 - De Minimis Exclusion",
+    "fact_pattern": "Three-year averages: FY2022 Revenue EUR 8,000,000 Income EUR 800,000, FY2023 Revenue EUR 9,000,000 Income EUR 900,000, FY2024 Revenue EUR 8,500,000 Income EUR 700,000",
+    "computation": "Step1 Average Revenue = (8,000,000 + 9,000,000 + 8,500,000) / 3 = 25,500,000 / 3 = 8,500,000. Step2 Average Income = (800,000 + 900,000 + 700,000) / 3 = 2,400,000 / 3 = 800,000. Step3 Test1: 8,500,000 < 10,000,000 = true. Step4 Test2: 800,000 < 1,000,000 = true. Step5 Both true => de minimis exclusion applies.",
+    "result": "De minimis exclusion applies; Top-up Tax for jurisdiction deemed zero for FY2024 (annual election)",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Uses EUR thresholds directly; official test uses Average GloBE Revenue and GloBE Income computed under GloBE rules which may include adjustments not shown here"
+  }
+]

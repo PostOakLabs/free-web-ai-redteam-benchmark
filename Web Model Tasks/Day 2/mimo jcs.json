@@ -1,0 +1,100 @@
+```json
+[
+  {
+    "vector_name": "basic_key_order",
+    "input_json": "{\"b\":1,\"a\":2}",
+    "canonical_output": "{\"a\":2,\"b\":1}",
+    "rule": "Section 2.2 — object member keys sorted ascending by UTF-16 code-unit comparison",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "negative_zero",
+    "input_json": "{\"a\":-0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "Section 2.4 — IEEE 754 double serialized per ES6 Number.prototype.toString; (-0).toString() yields \"0\"",
+    "divergence_trap": "Preserving literal \"-0\" in output",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "exponential_1e21_boundary",
+    "input_json": "{\"a\":1e21}",
+    "canonical_output": "{\"a\":1e+21}",
+    "rule": "Section 2.4 — ES6 toString switches to exponential at 1e21; positive exponent carries mandatory \"+\"",
+    "divergence_trap": "Producing \"1000000000000000000000\" (decimal form) or \"1e21\" (missing \"+\" sign in exponent)",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal_exponential",
+    "input_json": "{\"a\":1e-7}",
+    "canonical_output": "{\"a\":1e-7}",
+    "rule": "Section 2.4 — ES6 toString uses exponential notation for values < 1e-6",
+    "divergence_trap": "Producing \"0.0000001\" (decimal expansion instead of exponential)",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "solidus_not_escaped",
+    "input_json": "{\"a\":\"b/c\"}",
+    "canonical_output": "{\"a\":\"b/c\"}",
+    "rule": "Section 2.3.1 — solidus U+002F is NOT in the mandatory-escape set; only \", \\, and U+0000-U+001F must be escaped",
+    "divergence_trap": "Escaping \"/\" as \"\\/\" producing {\"a\":\"b\\/c\"} — common in JSON.stringify outputs from many languages",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "control_char_lowercase_hex",
+    "input_json": "{\"a\":\"\\u001F\"}",
+    "canonical_output": "{\"a\":\"\\u001f\"}",
+    "rule": "Section 2.3 — all hexadecimal digits in \\uHHHH escapes MUST be lower case; Section 2.3.1 — U+001F must be escaped",
+    "divergence_trap": "Using uppercase hex: \"\\u001F\" instead of \"\\u001f\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "no_unicode_normalization",
+    "input_json": "{\"a\":\"e\\u0301\"}",
+    "canonical_output": "{\"a\":\"e\\u0301\"}",
+    "rule": "Section 2.3 — JCS performs NO Unicode normalization; the decomposed form e + combining acute accent U+0301 must remain distinct from precomposed U+00E9",
+    "divergence_trap": "Applying NFC normalization would produce {\"a\":\"\\u00e9\"}, a different canonical form for a semantically equivalent string",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "utf16_code_unit_key_order_supplementary_plane",
+    "input_json": "{\"\\uE000\":\"b\",\"\\uD800\\uDC00\":\"a\"}",
+    "canonical_output": "{\"\\uD800\\uDC00\":\"a\",\"\\uE000\":\"b\"}",
+    "rule": "Section 2.2 — keys sorted by UTF-16 code units, not Unicode code points; U+10000 encodes as surrogate pair D800 DC00; first code unit 0xD800 (55296) < 0xE000 (57344), so U+10000 key sorts BEFORE U+E000 key",
+    "divergence_trap": "Sorting by Unicode code point order would place U+E000 (57344) before U+10000 (65536), reversing the order to {\"\\uE000\":\"b\",\"\\uD800\\uDC00\":\"a\"} — this is the critical UTF-16-vs-codepoint divergence",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "nested_recursive_key_sort",
+    "input_json": "{\"b\":{\"z\":1,\"a\":2},\"a\":3}",
+    "canonical_output": "{\"a\":3,\"b\":{\"a\":2,\"z\":1}}",
+    "rule": "Section 2.2 — key sorting applies recursively at every nesting level",
+    "divergence_trap": "Sorting only top-level keys while leaving inner object keys in original order: {\"a\":3,\"b\":{\"z\":1,\"a\":2}}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_containers",
+    "input_json": "{\"b\":{},\"a\":[]}",
+    "canonical_output": "{\"a\":[],\"b\":{}}",
+    "rule": "Section 2.2 — key sorting; empty object {} and empty array [] are structural primitives with no internal content to canonicalize",
+    "divergence_trap": null,
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "integer_beyond_53bit_precision_loss",
+    "input_json": "{\"a\":9007199254740993}",
+    "canonical_output": "{\"a\":9007199254740992}",
+    "rule": "Section 2.4 — JSON number parsed as IEEE 754 double; 2^53+1 is not representable and rounds to 2^53 via round-to-even; ES6 toString produces \"9007199254740992\"",
+    "divergence_trap": "Preserving the original digit string \"9007199254740993\" without round-tripping through double — string-based JSON processors commonly make this error",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_keys_rejected",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": null,
+    "rule": "RFC 8259 Section 1 — member names SHOULD be unique; RFC 8785 inherits this; duplicate keys make canonicalization ambiguous (which value is canonical?)",
+    "divergence_trap": "Silently accepting duplicates and canonicalizing using last-value-wins ({\"a\":2}) or first-value-wins ({\"a\":1}); neither is correct — the input must be rejected",
+    "certainty": "rfc-exact"
+  }
+]
+```

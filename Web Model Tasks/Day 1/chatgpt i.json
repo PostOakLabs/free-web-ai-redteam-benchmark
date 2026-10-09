@@ -1,0 +1,248 @@
+[
+{
+"review_gate": "floorplan review",
+"purpose": "Catch architectural and physical-partition decisions that become expensive or impossible to repair after placement: macro placement, power-grid topology, routing resources, pin accessibility, utilization, blockages, clock-entry assumptions, and major interface geometry.",
+"checks": [
+{
+"question": "Do the macro placements create usable routing channels and pin-access corridors, or are we knowingly creating narrow choke points?",
+"evidence_demanded": "Macro placement plot with halos/blockages, pin-density view, preliminary global-route congestion estimate, and an annotated channel-width/interface review.",
+"red_flag": "A macro edge or channel already shows concentrated overflow or pin-access pressure before standard-cell placement has begun.",
+"why_it_matters": "A bad macro topology can force congestion, detours, timing loss, and routing DRCs that cannot be cheaply repaired after placement."
+},
+{
+"question": "Show me the utilization distribution, not just the average. Where are the local density peaks and how much whitespace is actually available around macros and critical interfaces?",
+"evidence_demanded": "Placement-density histogram/map, local utilization statistics, macro halos, placement blockages, and whitespace accounting.",
+"red_flag": "The average utilization looks acceptable but localized bins are already near saturation or critical regions have no recovery whitespace.",
+"why_it_matters": "Local density, not the chip-wide average, determines whether placement and subsequent routing have room to converge."
+},
+{
+"question": "Where does power enter each domain, and can the proposed grid deliver the required current without creating obvious long or narrow supply paths?",
+"evidence_demanded": "Preliminary PG topology, domain map, strap/via plan, power-entry locations, current estimates, and early IR/EM screening where available.",
+"red_flag": "A high-demand region is separated from robust supply paths by sparse or narrow grid resources, or a macro/domain has inadequate planned connectivity.",
+"why_it_matters": "Changing PG topology after placement and routing can force widespread physical movement and can invalidate later IR/EM closure."
+},
+{
+"question": "Do block boundaries have enough physical room for the expected interface pins and routing, rather than merely fitting logically?",
+"evidence_demanded": "Block interface pin map, pin-density estimate, boundary routing-resource analysis, macro/block dimensions, and preliminary interface DRC where applicable.",
+"red_flag": "Multiple high-connectivity interfaces are funneled through the same narrow boundary or pin locations are incompatible with the available routing layers.",
+"why_it_matters": "Interface congestion can propagate into the neighboring blocks and become a system-level closure problem."
+},
+{
+"question": "What is the timing budget at every major block boundary, and what assumptions produced each input/output delay?",
+"evidence_demanded": "Boundary timing-budget table showing clock period, launch/capture budgets, interconnect allowance, setup/hold margin, uncertainty, and ownership of each term.",
+"red_flag": "Two neighboring blocks are each budgeted as though they own the full cycle, or a budget is simply an arbitrary percentage with no physical or interface evidence.",
+"why_it_matters": "An inconsistent contract can produce locally clean blocks that cannot meet timing when integrated."
+},
+{
+"question": "Are the clock roots, clock-entry points, generated-clock sources, and major clock-domain boundaries physically sensible?",
+"evidence_demanded": "Clock topology sketch over the floorplan, clock-source locations, domain map, macro clock pins, and preliminary latency/skew assumptions.",
+"red_flag": "A clock source must cross an obvious congestion wall, traverse an extreme physical distance, or serve sink populations that are badly separated without a deliberate topology.",
+"why_it_matters": "CTS can compensate for moderate physical imbalance but cannot cheaply erase a fundamentally bad clocking floorplan."
+},
+{
+"question": "What is the plan for routing-layer resources, including special nets, clocks, power, and any restricted macro channels?",
+"evidence_demanded": "Layer-allocation plan, routing blockages, PG/clock resource assumptions, macro obstructions, and preliminary capacity-versus-demand analysis.",
+"red_flag": "The proposed floorplan consumes or blocks the layers required by clocks, power, or high-connectivity signal corridors without demonstrated spare capacity.",
+"why_it_matters": "A floorplan can look geometrically clean while being unroutable because usable routing capacity is directional and layer-specific."
+},
+{
+"question": "What evidence says this floorplan is appropriate for the process node rather than merely familiar from an older node?",
+"evidence_demanded": "Node-specific floorplanning rules, macro/channel requirements, pin-access assumptions, routing-layer restrictions, and relevant foundry/PDK guidance.",
+"red_flag": "A 28nm-style generous-spacing or routing assumption is being carried into a 7nm-class design without evidence that the relevant advanced-node rules permit it.",
+"why_it_matters": "Advanced nodes have substantially more restrictive routing, via, pattern, and pin-access constraints; assumptions that were safe at mature nodes can become closure blockers."
+}
+],
+"kill_questions": [
+"Show me the congestion and pin-access forecast around every macro interface. Where is the worst choke point, and what is the concrete recovery mechanism if it saturates?",
+"Show me the timing and power budgets at the major block boundaries. Who owns every nanosecond and every high-current path?"
+],
+"waiver_culture": "Teams commonly waive small early congestion, interface-DRC, or margin concerns when the floorplan is still moving, but a waived structural choke point usually returns later as a placement/routing or timing crisis when the geometry is much more expensive to change.",
+"confidence": 0.96
+},
+{
+"review_gate": "pre-CTS review",
+"purpose": "Confirm that placement is a viable foundation for clock-tree construction and post-CTS timing before committing to a clock topology that can expose hidden congestion, density, timing, and power problems.",
+"checks": [
+{
+"question": "Show me the placement-density histogram and congestion map. Are there localized walls even if the global utilization number looks healthy?",
+"evidence_demanded": "Placed-cell density histogram/map, global-route congestion by layer and direction, overflow statistics, and worst-region screenshots or coordinates.",
+"red_flag": "A healthy average hides a concentrated region with sustained overflow or no whitespace around a critical clock/data corridor.",
+"why_it_matters": "CTS adds buffers and clock wiring; starting CTS in a congested region can turn a recoverable placement problem into a coupled clock/routing failure."
+},
+{
+"question": "What does the setup-slack distribution look like before CTS, and where is the wall at zero?",
+"evidence_demanded": "Setup-slack histogram by clock group/mode/corner plus worst-path and percentile summaries.",
+"red_flag": "A substantial negative-slack tail already exists, especially if it is broad rather than confined to a few identifiable paths.",
+"why_it_matters": "Pre-CTS setup problems indicate insufficient data-path margin before clock skew and latency are introduced; CTS is not a substitute for fixing a fundamentally weak placement."
+},
+{
+"question": "Are hold violations structurally localized to genuinely short paths, or is there a broad constraint/data-path problem before CTS?",
+"evidence_demanded": "Hold-slack histogram, path-depth and data-delay distributions, clock-group breakdown, and representative minimum-delay paths.",
+"red_flag": "Large populations of unrelated paths are already deeply negative, or violations cannot be explained by short minimum-delay paths and the expected pre-CTS clock assumptions.",
+"why_it_matters": "A broad hold problem can explode after CTS and become extremely expensive if the root cause is misunderstood."
+},
+{
+"question": "Do the placed clock sinks have a physically reasonable distribution for CTS?",
+"evidence_demanded": "Clock-sink map by clock/domain, sink-count distribution, macro clock-pin locations, and preliminary CTS clustering/topology information.",
+"red_flag": "One branch would need to span a large physical distance, cross major blockages, or serve geographically separated sink clusters without an explicit topology strategy.",
+"why_it_matters": "CTS quality is constrained by sink geometry; poor clustering produces latency, skew, buffering, and routing problems."
+},
+{
+"question": "How much whitespace and routing capacity is reserved for clock-tree growth?",
+"evidence_demanded": "Clock-buffer insertion estimate, reserved/available placement whitespace, clock-routing layer plan, congestion map, and trial CTS if available.",
+"red_flag": "Clock buffers would have to occupy already saturated regions or clock routes would compete directly with known signal-routing choke points.",
+"why_it_matters": "CTS changes the physical design; a placement that is merely routable before CTS may not be routable after clock insertion."
+},
+{
+"question": "Are the major timing constraints and exceptions proven before we let CTS optimize against them?",
+"evidence_demanded": "Constraint coverage/report, clock definitions, generated-clock report, clock groups, false/multicycle paths, unconstrained-path report, and representative path audits.",
+"red_flag": "Important clocks are missing, generated clocks are modeled incorrectly, or broad exceptions have not been tied to functional evidence.",
+"why_it_matters": "CTS can optimize aggressively toward a wrong timing model and make a bad constraint set harder to detect later."
+},
+{
+"question": "What happens to IR/power if CTS adds the expected clock-buffer population?",
+"evidence_demanded": "Clock power estimate, anticipated buffer count/area, preliminary dynamic-power or IR analysis, and power-domain capacity assessment.",
+"red_flag": "Clock power is already a dominant or localized hotspot and there is no demonstrated PG/IR margin for the expected CTS load.",
+"why_it_matters": "Clock-tree insertion is a substantial physical and power event, not merely a timing operation."
+},
+{
+"question": "Have we demonstrated that the placement is robust to the actual signoff corners rather than just one nominal optimization corner?",
+"evidence_demanded": "Multi-mode/multi-corner timing summary, worst setup/hold distributions, variation assumptions, and placement sensitivity analysis.",
+"red_flag": "A placement is excellent in one corner but has a broad negative tail or severe localized sensitivity in another required signoff scenario.",
+"why_it_matters": "CTS can amplify corner-specific weaknesses and leave insufficient schedule for multi-corner recovery."
+}
+],
+"kill_questions": [
+"Show me the pre-CTS setup and hold distributions by clock group and corner. Is there a small explainable tail, or are we starting CTS with a systemic timing problem?",
+"Show me where the clock tree is physically going to live. Which regions have the whitespace and routing capacity to absorb it?"
+],
+"waiver_culture": "Small numbers of understandable pre-CTS timing or congestion violations are routinely carried forward with explicit owners, but teams that waive broad negative tails or obvious clock-routing choke points usually pay for that optimism through CTS iterations and late-stage ECO congestion.",
+"confidence": 0.97
+},
+{
+"review_gate": "pre-tapeout timing signoff review",
+"purpose": "Determine whether timing is genuinely signoff-clean across the required modes, corners, clocks, variation assumptions, and extracted parasitics, and catch constraint or analysis gaps before physical changes become tapeout-blocking ECOs.",
+"checks": [
+{
+"question": "Show me the setup-slack histogram by mode, clock group, and signoff corner. Is the entire required population at or above zero with credible margin?",
+"evidence_demanded": "Full signoff STA summary, slack histograms, worst and percentile slack by scenario, and path-group breakdown.",
+"red_flag": "Any unexplained negative tail, especially a broad tail affecting many paths or one entire clock group rather than a small number of understood exceptions.",
+"why_it_matters": "A worst-path number can hide a large population of marginal paths that will be vulnerable to final extraction, ECO, or model changes."
+},
+{
+"question": "Show me the hold-slack distribution at every required minimum-delay corner, not just the single worst path.",
+"evidence_demanded": "Hold histogram by clock group/scenario, worst paths, minimum data-delay distribution, and clock-skew decomposition.",
+"red_flag": "A broad negative population or a cluster tied to one clock branch indicates systemic hold risk rather than a handful of easy buffer fixes.",
+"why_it_matters": "Late hold repair can consume routing resources and can create new setup, congestion, and power failures."
+},
+{
+"question": "For the worst setup and hold paths, can you decompose the slack loss into data delay, clock arrival/skew, uncertainty, variation, and SI?",
+"evidence_demanded": "Detailed signoff timing reports with arrival/required-time decomposition, clock latency/skew, derates/variation, extracted RC, and SI contributions.",
+"red_flag": "The team cannot explain why the worst paths fail or pass, or the result depends on a term that has not been independently validated.",
+"why_it_matters": "A signoff number without causal decomposition makes ECO selection guesswork and can lead to fixes that move the violation instead of removing it."
+},
+{
+"question": "Are all clocks and exceptions actually constrained, and what evidence proves that no broad exception is hiding a real path?",
+"evidence_demanded": "Unconstrained-path report, clock-definition report, generated-clock report, clock-group/exclusivity report, exception coverage, and sampled path audits.",
+"red_flag": "Unconstrained endpoints remain, generated clocks are incomplete, or false/multicycle exceptions have no functional evidence.",
+"why_it_matters": "A timing report can be numerically perfect while the design is under-constrained."
+},
+{
+"question": "Do the final timing results use the extracted parasitics and the actual intended signoff analysis assumptions?",
+"evidence_demanded": "Signoff extraction configuration/version, SPEF or equivalent parasitic evidence, corner mapping, RC assumptions, SI settings, and comparison to implementation-stage timing.",
+"red_flag": "The reported timing is based on stale, estimated, incomplete, or non-signoff parasitics or a different analysis configuration from the one intended for tapeout.",
+"why_it_matters": "Late parasitic changes can materially move both setup and hold, particularly on advanced-node designs."
+},
+{
+"question": "Where did timing move between the last clean implementation database and the tapeout candidate, and can every material regression be explained?",
+"evidence_demanded": "Before/after timing diff, ECO log, netlist/layout change list, extraction diff, and changed-path correlation.",
+"red_flag": "There are unexplained regressions, especially across many unrelated paths or an entire clock group.",
+"why_it_matters": "Unexplained movement is a sign that the signoff baseline is not reproducible or that a late physical change has hidden consequences."
+},
+{
+"question": "Are the critical paths physically stable, or are they sitting in congestion/IR/clock hotspots with no remaining recovery margin?",
+"evidence_demanded": "Critical-path physical overlay against congestion, IR-drop, clock-tree, and routing-resource maps.",
+"red_flag": "A large fraction of timing-critical paths occupy the same physical bottleneck and there is no whitespace or routing capacity for another ECO.",
+"why_it_matters": "A nominal timing pass can be fragile when the critical paths have no physical recovery room."
+},
+{
+"question": "What is the ECO closure margin after accounting for required signoff uncertainty rather than treating zero slack as success?",
+"evidence_demanded": "Slack margin policy, variation/SI assumptions, ECO sensitivity, and historical movement across recent signoff iterations.",
+"red_flag": "The design is technically at zero but has no margin against ordinary extraction, SI, ECO, or analysis variation.",
+"why_it_matters": "A zero-margin signoff candidate can regress before tapeout even when no functional requirement changed."
+}
+],
+"kill_questions": [
+"Show me every unconstrained path and every broad timing exception, and prove why each one is intentionally absent from timing signoff.",
+"Show me the setup/hold histograms for every required scenario. Where is the unexplained negative or near-zero population?"
+],
+"waiver_culture": "Tiny residual violations may be waived when there is documented, signoff-approved evidence that the path is functionally irrelevant or covered by a justified margin, but a numerical timing waiver normally becomes an explicit tapeout liability because the waived margin is no longer available to absorb later ECO or extraction movement.",
+"confidence": 0.98
+},
+{
+"review_gate": "physical verification signoff review (DRC/LVS/antenna/ERC)",
+"purpose": "Prove that the final physical database is manufacturable, electrically/connectivity-consistent with the intended design, and clean under the foundry-qualified signoff checks before the exact tapeout database is released.",
+"checks": [
+{
+"question": "Is the final golden DRC run clean, and are all remaining markers either resolved or backed by an approved, rule-specific waiver?",
+"evidence_demanded": "Final signoff DRC report/database, rule-deck version, error counts by rule and layer, waiver database, and exact tapeout layout checksum/version.",
+"red_flag": "Any unexplained DRC, a waiver that is not tied to the current database/rule deck, or a result produced from a different layout than the tapeout candidate.",
+"why_it_matters": "DRC verifies compliance with manufacturing rules, and late changes to rule decks or layout can invalidate an apparently clean result."
+},
+{
+"question": "Does LVS match the intended source/netlist, including ports, devices, nets, and relevant properties?",
+"evidence_demanded": "Final LVS result, extracted-versus-source comparison, net/device mismatch report, black-box definitions, source netlist identifier, and layout identifier.",
+"red_flag": "Any unmatched net/device, missing or extra terminal, unexpected short/open, or unexplained property mismatch.",
+"why_it_matters": "LVS is the final connectivity sanity check; a geometrically legal layout can still implement the wrong circuit."
+},
+{
+"question": "Show me the antenna result by rule and layer. Are remaining violations genuinely waived, or did the latest routing/fill change recreate them?",
+"evidence_demanded": "Antenna report, rule/layer histogram, affected-net list, repair history, and final rerun after the last routing/fill changes.",
+"red_flag": "Any unexplained antenna violation or a stale antenna database that predates the final physical modifications.",
+"why_it_matters": "Antenna risk is tied to manufacturing process behavior and can be introduced by late metal changes even when ordinary DRC is clean."
+},
+{
+"question": "Are ERC/PERC-style electrical checks clean for power domains, wells, floating structures, connectivity, and other technology-specific reliability rules?",
+"evidence_demanded": "Final ERC/electrical-rule report, power-domain/connectivity checks, well/substrate checks, and technology-specific reliability-rule results.",
+"red_flag": "Any unexplained floating power structure, illegal domain connection, well/substrate problem, or reliability violation without an approved disposition.",
+"why_it_matters": "Traditional DRC/LVS do not by themselves establish that every electrical construction is safe or functionally appropriate."
+},
+{
+"question": "Was the final run performed with the foundry-qualified rule deck and the exact PDK/IPDK data intended for tapeout?",
+"evidence_demanded": "Rule-deck version/hash, PDK/IPDK version, run configuration, layout database identifier, and reproducible signoff command/package.",
+"red_flag": "The run used an older rule deck, mismatched PDK data, locally modified rules without qualification, or an input database different from the release candidate.",
+"why_it_matters": "A clean result is meaningful only relative to the rules and physical data that will actually be submitted; foundry-qualified runsets are a core part of physical signoff."
+},
+{
+"question": "Have the latest metal fill, ECO, seal-ring, pad, bump, and top-level integration changes been included in the final DRC/LVS/antenna/ERC rerun?",
+"evidence_demanded": "Change log against the last clean run, final GDS/OASIS identifier, fill/ECO status, and post-change full-chip PV results.",
+"red_flag": "The team is presenting a clean result from a predecessor database rather than the exact final tapeout data.",
+"why_it_matters": "Physical verification must apply to the submitted geometry; late physical modifications can create new DRC, connectivity, antenna, or electrical errors."
+},
+{
+"question": "Are density, fill, and other context-dependent checks clean at full-chip scope rather than only at block scope?",
+"evidence_demanded": "Full-chip density/fill/DFM reports, block-to-chip comparison, and final signoff results after assembly.",
+"red_flag": "Blocks are clean independently but full-chip context introduces new density, spacing, antenna, or interaction violations.",
+"why_it_matters": "Some checks depend on neighboring geometry and cannot be proven from isolated block results."
+},
+{
+"question": "Can an independent reviewer reproduce the final signoff result from the released data package?",
+"evidence_demanded": "Immutable tapeout package containing final layout, source/extracted netlist as required, rule deck/configuration, waiver data, black-box definitions, logs, and result databases.",
+"red_flag": "The result depends on undocumented local files, mutable project state, missing waivers/black boxes, or a run that cannot be reproduced from the release package.",
+"why_it_matters": "Reproducibility prevents a clean engineering run from becoming an unverifiable tapeout claim and catches version/data mismatches before release."
+},
+{
+"question": "Where is the node-specific physical-verification risk highest, and what evidence says those advanced rules are actually clean?",
+"evidence_demanded": "Node-specific DRC/ERC/LVS rule summaries, critical-rule histograms, pattern/context checks, via/cut results, and foundry-qualified signoff reports.",
+"red_flag": "At 7nm-class and newer nodes, the review relies primarily on mature-node width/spacing intuition and does not explicitly show the advanced rule families; at 28nm, by contrast, the dominant checklist can be materially simpler.",
+"why_it_matters": "As nodes shrink, DRC rule count and complexity increase, so a generic 'DRC clean' statement gives progressively less evidence about the actual manufacturing-risk surface."
+}
+],
+"kill_questions": [
+"Show me the exact final tapeout database, the qualified rule-deck version, and the clean DRC/LVS/antenna/ERC results generated from that exact combination. What changed after the last clean run?",
+"Show me every remaining waiver and tell me why it is safe under the current foundry rules rather than merely why the marker has historically been ignored."
+],
+"waiver_culture": "Real projects routinely carry narrowly understood DRC, LVS, antenna, or ERC waivers when the foundry/process owner has explicitly approved them, but undocumented or stale waivers are dangerous because a late rule-deck or layout change can invalidate the original justification.",
+"confidence": 0.98
+}
+]

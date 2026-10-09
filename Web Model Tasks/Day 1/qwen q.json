@@ -1,0 +1,105 @@
+{
+  "opening": [
+    "Think of a physical-design incident where a block looked acceptable at one milestone, then a report revealed a problem that threatened schedule or signoff. Which one still stands out?",
+    "Tell me about a time when the obvious fix was too risky, too late, or too expensive. What did you do instead?",
+    "Which closure problem did you initially misdiagnose, and what evidence forced you to change your interpretation?"
+  ],
+  "decompression": [
+    {
+      "question": "Before the issue appeared, what did the block's key metrics look like — for example WNS/TNS, overflow, utilization, DRC count, or clock skew — as far as you can remember?",
+      "extracts": "prior_state",
+      "follow_up_if_vague": "If exact numbers are gone, what range or order of magnitude would you defend?",
+      "leading_risk": "Naming example metrics can anchor the interviewee to those metrics even if they remember others. Neutral phrasing: What numbers do you remember from that stage?"
+    },
+    {
+      "question": "What was the first report, graph, or message that made you suspect the run was off track, and what pattern did you see?",
+      "extracts": "observation",
+      "follow_up_if_vague": "What was different from the previous run's shape?",
+      "leading_risk": "The phrase off track presumes failure and may make the interviewee agree with a failure framing. Neutral phrasing: What first looked different from what you expected?"
+    },
+    {
+      "question": "When you saw that pattern, what did you believe was causing it?",
+      "extracts": "hypothesis",
+      "follow_up_if_vague": "Which detail in the report pointed you there?",
+      "leading_risk": "If the interviewer mentions common causes, the witness may adopt them. Neutral phrasing: What did you think at the time?"
+    },
+    {
+      "question": "What other explanations did you seriously consider before settling on that cause?",
+      "extracts": "candidates_considered",
+      "follow_up_if_vague": "What evidence ruled each one out?",
+      "leading_risk": "The word seriously can imply some explanations were not worth considering. Neutral phrasing: What else was on the list?"
+    },
+    {
+      "question": "What fix options were on the table, including the ones you did not choose?",
+      "extracts": "candidates_considered",
+      "follow_up_if_vague": "For each option, what cost, risk, or constraint made it less attractive?",
+      "leading_risk": "Asking about options not chosen can trigger post-hoc defense of the final choice. Neutral phrasing: What were the options, and what were their downsides at the time?"
+    },
+    {
+      "question": "What constraints were fixed when you started working the problem — for example floorplan, pinout, clock targets, schedule, or signoff corners?",
+      "extracts": "prior_state",
+      "follow_up_if_vague": "Which constraint was hardest to work around, and why?",
+      "leading_risk": "Listing constraints can make the witness accept the interviewer's list as the important one. Neutral phrasing: What was not allowed to change?"
+    },
+    {
+      "question": "Which option did you implement, and what were the concrete steps or settings?",
+      "extracts": "chosen_intervention",
+      "follow_up_if_vague": "If a colleague had to repeat it, what would they need to know?",
+      "leading_risk": "Asking for exact settings may induce confabulated detail. Neutral phrasing: What do you remember well enough to reproduce?"
+    },
+    {
+      "question": "After the intervention, what changed in the metrics, and what stayed the same?",
+      "extracts": "outcome",
+      "follow_up_if_vague": "Which metric moved most, and roughly by how much?",
+      "leading_risk": "Before-and-after framing can encourage a neat success story. Neutral phrasing: What did the next run show?"
+    },
+    {
+      "question": "What lesson from that incident would you give to another engineer, and in what kind of block would that lesson not transfer?",
+      "extracts": "lessons",
+      "follow_up_if_vague": "What condition would make the advice wrong?",
+      "leading_risk": "Asking for a lesson can produce generic folklore. Neutral phrasing: What would you check first next time, and when would that check mislead?"
+    }
+  ],
+  "rejected_paths": [
+    "What was the strongest alternative fix that you did not implement, and what would it have cost?",
+    "Using the Critical Decision Method: Think of the moment the decision became hard to reverse. What options were still open then, and which one was eliminated first?",
+    "Using cognitive interviewing context reinstatement: Picture the review or chat where the decision was made. Who objected to which option, and what evidence or constraint settled it?",
+    "Which option was rejected almost immediately, and what single estimate, risk, or past experience killed it?"
+  ],
+  "numbers": [
+    "I do not need exact values: was the slack problem in the single picoseconds, tens of picoseconds, hundreds of picoseconds, or nanoseconds range?",
+    "Did the main metric change slightly, by about 2x, by about 10x, or was it basically unchanged after the fix?",
+    "If we looked at the run log later, which number would you trust most, and how wide should I make the error bar?"
+  ],
+  "verification": [
+    "You said utilization stayed similar while overflow dropped sharply. What physical mechanism allowed that?",
+    "If WNS improved by that amount, what happened to TNS or the count of failing endpoints?",
+    "Was that comparison on the same corner, extraction, and constraint set, or did anything else change between runs?"
+  ],
+  "closing": [
+    "Who else worked a harder or messier version of this problem, and what incident should I ask them about?",
+    "What other closure fire from the same project should we cover next?"
+  ],
+  "anti_patterns": [
+    {
+      "mistake": "Asking leading cause questions such as 'Was it congestion?'",
+      "observable_symptom": "The episode adopts the interviewer's cause label but lacks report evidence distinguishing it from alternatives."
+    },
+    {
+      "mistake": "Pressing for exact numbers when the engineer only remembers ranges",
+      "observable_symptom": "Over-precise metrics with no uncertainty, often inconsistent with the described mechanism."
+    },
+    {
+      "mistake": "Accepting a clean success story with no rejected options",
+      "observable_symptom": "candidates_considered is empty or contains only the chosen fix, hiding the real trade-off."
+    },
+    {
+      "mistake": "Letting the interviewee stay at textbook level",
+      "observable_symptom": "Lessons read like generic advice and contain no project-specific metrics, constraints, or failure signature."
+    },
+    {
+      "mistake": "Skipping fixed constraints and schedule pressure",
+      "observable_symptom": "The chosen intervention appears arbitrary, and the rejected paths lack concrete costs."
+    }
+  ]
+}

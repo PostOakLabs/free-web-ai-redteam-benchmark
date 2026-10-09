@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Dual-core chip-multiprocessor (two cores on one die)",
+    "where_in_paper": "Introduction / System overview",
+    "decision": "Implement two full processor cores on a single die sharing a centralized on-chip L2 cache, presenting as a symmetric multiprocessor (SMP).",
+    "alternatives_or_rejected": "Single-core scaling to a wider/larger core; separate L2 caches per core.",
+    "rationale": "To deliver SMP capability on a single chip, improve aggregate throughput, and simplify multi-chip SMP system design while managing wire delay and complexity at 0.18-micron technology.",
+    "outcome": "POWER4 shipped as a dual-core processor; two cores shared the on-chip L2 and competed for L3 and memory bandwidth through a shared memory controller.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames separate-L2 as a rejected alternative versus simply describing the chosen shared-L2 design.",
+    "confidence": 0.65
+  },
+  {
+    "title": "Off-chip L3 cache as a backing store rather than larger on-chip L2",
+    "where_in_paper": "Memory hierarchy / Cache subsystem",
+    "decision": "Use a moderate-sized on-chip shared L2 cache backed by a large off-chip L3 cache rather than integrating a very large L2 on-chip.",
+    "alternatives_or_rejected": "Integrating a much larger L2 on-chip; relying solely on off-chip memory without L3.",
+    "rationale": "On-chip area and wire-delay constraints limited practical L2 size; an off-chip L3 provided high-bandwidth, high-capacity backing store without consuming die area needed for dual cores and logic.",
+    "outcome": "POWER4 system included an on-chip L2 and an off-chip L3 controlled by on-chip L3 controllers, improving effective memory latency.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 12,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The paper may present this as a natural hierarchy rather than an explicit weighed decision with named alternatives.",
+    "confidence": 0.6
+  },
+  {
+    "title": "System interconnect: shared-bus fabric for multi-chip SMP",
+    "where_in_paper": "System interconnect / Bus architecture",
+    "decision": "Use a high-frequency shared-bus interconnect (the processor bus) to link multiple POWER4 chips and the memory controller rather than a switch-based interconnect.",
+    "alternatives_or_rejected": "Crossbar or packet-switched interconnect between chips.",
+    "rationale": "A shared bus with snooping provided a proven, lower-complexity coherence mechanism for the target 1–4 socket systems; switch complexity was not justified for the targeted system scale.",
+    "outcome": "Multi-chip POWER4 systems used the shared processor bus with snooping; the design met bandwidth goals for commercial workloads.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 16,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "The paper may describe the bus without explicitly weighing it against a crossbar alternative; this may be general knowledge dressed as paper content.",
+    "confidence": 0.45
+  },
+  {
+    "title": "RAS: checkstop and recovery philosophy",
+    "where_in_paper": "Reliability, Availability, Serviceability (RAS)",
+    "decision": "Implement extensive error detection with checkstop on unrecoverable errors and selective recovery/retry for correctable errors, including ECC on caches and buffers.",
+    "alternatives_or_rejected": "Lockstep redundant cores or full fault-tolerance (rejected as too costly for commercial microprocessor).",
+    "rationale": "Mainframe-class RAS was a design objective for enterprise systems, but full redundancy was area- and power-prohibitive; detection-plus-checkstop provided a practical middle ground.",
+    "outcome": "POWER4 included pervasive ECC, parity, and checkstop logic; the paper reports this met enterprise RAS expectations.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 20,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether lockstep redundancy is explicitly named as a rejected alternative in the paper or is general background knowledge.",
+    "confidence": 0.55
+  }
+]

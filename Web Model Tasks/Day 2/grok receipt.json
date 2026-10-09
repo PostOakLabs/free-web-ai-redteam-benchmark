@@ -1,0 +1,104 @@
+{
+  "receipt_kinds": [
+    {
+      "kind": "CompositeReceipt",
+      "when_produced": "Direct output of multi-segment execution; vector of SegmentReceipts (one STARK per segment via RISC-V circuit) plus optional assumption receipts; used when full segment details or assumptions are retained"
+    },
+    {
+      "kind": "SuccinctReceipt",
+      "when_produced": "After recursion (lift + join/resolve) aggregates a CompositeReceipt (or prior SuccinctReceipts) into a single STARK via the recursion circuit; constant-size independent of segment count"
+    },
+    {
+      "kind": "Groth16Receipt",
+      "when_produced": "After STARK-to-SNARK compression: a SuccinctReceipt is verified inside the Groth16 circuit (identity_p254 + compress) producing a BN254 Groth16 proof; intended for on-chain / succinct verification"
+    },
+    {
+      "kind": "FakeReceipt",
+      "when_produced": "Dev-mode only; no cryptographic seal; for rapid prototyping"
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Vec<u8> (or structured a/b/c points after selector); typically 4-byte selector + Groth16 proof (A, B, C on BN254)",
+      "meaning": "The opaque Groth16 proof attesting that the recursion/identity circuit accepted the claim under the control root",
+      "verifier_must_check": "Parse selector, decode proof points, run pairing check against fixed verifying key with public inputs (split control_root, split claim_digest, bn254_control_id)",
+      "failure_if_skipped": "Arbitrary forged seal accepted; any claim/journal can be asserted without a valid proof"
+    },
+    {
+      "field": "claim",
+      "type_shape": "MaybePruned<ReceiptClaim> (full struct or Digest)",
+      "meaning": "The public statement being proven: pre/post system state, exit code, input digest, output (journal + assumptions)",
+      "verifier_must_check": "Recompute claim.digest() and ensure it matches the claim digest fed as public input to the Groth16 verifier; for ok() receipts also check exit_code == Halted(0) and journal matches",
+      "failure_if_skipped": "Journal/claim substitution: attacker supplies a valid seal for one claim but a different journal or image_id"
+    },
+    {
+      "field": "verifier_parameters",
+      "type_shape": "Digest (hash of Groth16ReceiptVerifierParameters)",
+      "meaning": "Fingerprint of the expected control_root, bn254_control_id and verifying_key; allows version detection without embedding full parameters",
+      "verifier_must_check": "Compare against the digest of the trusted parameters the verifier was compiled/configured with; reject mismatch",
+      "failure_if_skipped": "Cross-version confusion: a seal produced under an old/new control root or VK is accepted by a verifier expecting different parameters"
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "pre": "MaybePruned<SystemState> or Digest (image_id / pre-state merkle root + pc; for ok receipts often just the image_id)",
+      "post": "MaybePruned<SystemState> (post-state pc + memory merkle root; often zeroed for Halted(0))",
+      "exit_code": "ExitCode enum (Halted(u8), Paused(u8), SystemSplit, etc.)",
+      "input": "Digest (commitment to guest input; frequently zero)",
+      "output": "MaybePruned<Output> where Output = { journal: Digest (SHA-256 of journal bytes), assumptions: Digest }"
+    },
+    "claim_digest_computation": "Tagged structural hash (sha256 of tag 'risc0.ReceiptClaim' || input || pre || post.digest() || output.digest() || exit_code packing || length); exact byte layout is version-stable within a major release but uses the risc0 tagged-struct encoding. For the common 'ok' case: ReceiptClaim::ok(image_id, journal_digest) produces a claim whose digest is the value placed in Groth16 public inputs."
+  },
+  "binding_chain": [
+    "journal bytes → SHA-256 → journal_digest (inside Output)",
+    "Output + pre/post/exit/input → tagged ReceiptClaim → claim_digest",
+    "claim_digest is split into two 128-bit limbs (byte-reversed) and supplied as public inputs to the Groth16 circuit together with the two limbs of control_root and the bn254_control_id",
+    "Groth16 seal is a proof that the recursion/identity circuit accepted exactly those public inputs under the verifying key",
+    "control_root (Merkle root of allowed recursion control IDs) and verifying_key are fixed parameters of the verifier; they bind the seal to a specific circuit version; bn254_control_id identifies the Poseidon-BN254 control program used in the final recursion step"
+  ],
+  "version_coupling": {
+    "circuit_version_dependent": [
+      "Groth16 verifying key",
+      "control_root (and the set of control IDs it commits to)",
+      "bn254_control_id",
+      "selector (first 4 bytes of seal, derived from parameters)",
+      "exact tagged-hash encoding of ReceiptClaim / SystemState / Output (minor layout changes across major releases)"
+    ],
+    "what_breaks_wrong_version": "Pairing check fails (wrong VK), or selector mismatch aborts early, or claim_digest computed with different tagging does not match the public input the seal was generated for; a verifier that ignores the parameters digest can accept a seal from an incompatible recursion circuit that proves a different statement"
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Accepting seal without checking claim_digest == public-input claim limbs",
+      "check_that_catches_it": "Recompute claim.digest() from the supplied ReceiptClaim / journal and compare to the value reconstructed from the Groth16 public signals"
+    },
+    {
+      "bug": "Ignoring exit_code / treating any Halted(n) as success",
+      "check_that_catches_it": "Explicitly require ExitCode::Halted(0) (or the application-specific success code) after claim decoding"
+    },
+    {
+      "bug": "Not verifying journal bytes hash to the journal_digest inside the claim",
+      "check_that_catches_it": "SHA-256(journal.bytes) == claim.output.journal"
+    },
+    {
+      "bug": "Using a hard-coded or wrong control_root / VK for the seal's selector",
+      "check_that_catches_it": "Selector match + parameters-digest equality against the trusted Groth16ReceiptVerifierParameters"
+    },
+    {
+      "bug": "Treating MaybePruned::Pruned values as trusted without the seal binding them",
+      "check_that_catches_it": "Only accept pruned fields when the claim_digest (which includes those digests) has been verified by the seal"
+    },
+    {
+      "bug": "Forgetting to reject non-empty assumptions on an unconditional receipt",
+      "check_that_catches_it": "Assert assumptions digest is zero (or explicitly resolve every assumption) when the receipt is presented as unconditional"
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High — directly from official docs and source (Composite / Succinct / Groth16 / Fake)",
+    "groth16_receipt_fields": "High for field names and roles (seal, claim, verifier_parameters) from risc0-zkvm source and ethereum verifier contracts; exact seal byte layout (selector + a/b/c) confirmed by on-chain verifier",
+    "claim_structure": "High for the logical components (pre/post/exit/input/output/journal); medium on the precise tagged-hash byte ordering (known to be 'risc0.ReceiptClaim' tagged struct but exact field order/packing taken from Solidity helper and Rust Digestible impls)",
+    "binding_chain": "High — public-input construction (split digests of control_root + claim + bn254_control_id) is explicit in the Groth16 verifier contract and Rust verification path",
+    "version_coupling": "High — selector and parameters digest exist precisely to detect version skew; control_root / VK are the classic circuit-version parameters",
+    "common_verifier_bugs": "Medium-high — derived from the checks that the reference verifiers perform and from observed failure modes (ClaimDigestMismatch, SelectorMismatch, exit-code handling); not an exhaustive CVE list"
+  }
+}

@@ -1,0 +1,100 @@
+```json
+[
+  {
+    "case_name": "Zero-tolerance violation on a recording/transfer-tax-type fee",
+    "fees": [
+      {"name": "Transfer taxes", "bucket": "zero_tolerance", "le_amount": 500.00, "cd_amount": 550.00},
+      {"name": "Recording fees", "bucket": "zero_tolerance", "le_amount": 100.00, "cd_amount": 100.00}
+    ],
+    "computation": [
+      "Zero-tolerance fees are tested per-fee, not aggregated: any CD amount greater than the LE amount for a zero-tolerance fee is itself a violation, regardless of other fees.",
+      "Transfer taxes: CD 550.00 - LE 500.00 = +50.00 increase -> exceeds zero tolerance -> violation",
+      "Recording fees: CD 100.00 - LE 100.00 = 0 -> no change -> no violation",
+      "(For reference only, aggregate of this bucket: Sigma(LE)=600.00, Sigma(CD)=650.00, but aggregation is NOT how zero-tolerance fees are evaluated)"
+    ],
+    "violations": "Zero-tolerance bucket: violation on Transfer taxes. Cure amount = full increase = 50.00 (refunded to borrower, no threshold or basket applies).",
+    "clause_basis": "12 CFR 1026.19(e)(3)(i) - zero-tolerance category (e.g., transfer taxes, fees paid to the creditor or a mandatory affiliate, fees for services where the borrower is not permitted to shop) - any increase above the LE amount is a violation requiring cure of the full overage.",
+    "weakest_point": "I am confident transfer taxes sit in the zero-tolerance bucket, but I'm less certain recording fees are always zero-tolerance rather than 10%-aggregate in every fact pattern - their bucket can depend on state-specific fee-schedule certainty, and I may be oversimplifying by placing it here without that context."
+  },
+  {
+    "case_name": "10% aggregate bucket, mixed direction, correct aggregate method shows a violation",
+    "fees": [
+      {"name": "Fee A (e.g. pest inspection)", "bucket": "ten_pct_aggregate", "le_amount": 200.00, "cd_amount": 260.00},
+      {"name": "Fee B (e.g. survey)", "bucket": "ten_pct_aggregate", "le_amount": 300.00, "cd_amount": 280.00},
+      {"name": "Fee C (e.g. courier fee)", "bucket": "ten_pct_aggregate", "le_amount": 100.00, "cd_amount": 130.00}
+    ],
+    "computation": [
+      "Sigma(LE) = 200.00 + 300.00 + 100.00 = 600.00",
+      "Sigma(CD) = 260.00 + 280.00 + 130.00 = 670.00",
+      "Correct rule: compare Sigma(CD) to Sigma(LE) directly (aggregate vs aggregate), NOT the sum of only the individual fee increases.",
+      "Aggregate difference = Sigma(CD) - Sigma(LE) = 670.00 - 600.00 = +70.00",
+      "10% threshold = Sigma(LE) x 0.10 = 600.00 x 0.10 = 60.00",
+      "70.00 > 60.00 -> the aggregate increase exceeds the 10% basket -> violation",
+      "Excess over threshold (cure amount) = 70.00 - 60.00 = 10.00"
+    ],
+    "violations": "10%-aggregate bucket: violation. Cure amount = 10.00 (the amount by which the aggregate increase exceeds the 10% cushion), refunded to the borrower.",
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii) - the 10% cumulative tolerance category, tested by comparing the sum of CD amounts to the sum of LE amounts for the entire bucket, not fee-by-fee.",
+    "weakest_point": "The specific fee types I labeled as examples (pest inspection, survey, courier) are illustrative categorizations on my part; the actual bucket a given fee falls into depends on whether the consumer can shop and whether the creditor permitted shopping, which I have not verified against the fact pattern here since this is a constructed case."
+  },
+  {
+    "case_name": "10% aggregate bucket, mixed direction, illustrates that sum-of-increases-only is the WRONG method (false positive)",
+    "fees": [
+      {"name": "Fee A", "bucket": "ten_pct_aggregate", "le_amount": 300.00, "cd_amount": 340.00},
+      {"name": "Fee B", "bucket": "ten_pct_aggregate", "le_amount": 300.00, "cd_amount": 260.00},
+      {"name": "Fee C", "bucket": "ten_pct_aggregate", "le_amount": 100.00, "cd_amount": 135.00}
+    ],
+    "computation": [
+      "Sigma(LE) = 300.00 + 300.00 + 100.00 = 700.00",
+      "Sigma(CD) = 340.00 + 260.00 + 135.00 = 735.00",
+      "CORRECT method (aggregate vs aggregate): Aggregate difference = Sigma(CD) - Sigma(LE) = 735.00 - 700.00 = +35.00",
+      "10% threshold = 700.00 x 0.10 = 70.00",
+      "35.00 <= 70.00 -> NO violation under the correct aggregate-vs-aggregate test",
+      "INCORRECT method (sum of increases only, ignoring the -40.00 decrease on Fee B): Fee A increase = +40.00, Fee C increase = +35.00, sum-of-increases = 40.00 + 35.00 = 75.00",
+      "75.00 > 70.00 threshold -> the incorrect method would falsely flag a violation",
+      "This demonstrates the required distinction: the rule tests Sigma(CD) vs Sigma(LE) for the whole bucket (which nets increases against decreases), not the sum of only the fees that went up."
+    ],
+    "violations": "None, under the correct aggregate-vs-aggregate test. (An implementation using sum-of-increases-only would incorrectly report a violation - this is the defect this test case is designed to catch.)",
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii) - the 10% category is tested on an aggregate basis: total of all charges in the category at closing compared to the total of those charges as originally disclosed, not fee-by-fee or increase-by-increase.",
+    "weakest_point": "This case is fully constructed to make an arithmetic point, not drawn from a real transaction; I'm confident in the aggregate-vs-aggregate mechanic itself, but the specific fee-type-to-bucket assignments are placeholders and would need to be verified against actual shop-ability facts in a real case."
+  },
+  {
+    "case_name": "No-tolerance-limit bucket - unlimited variance, no violation regardless of change",
+    "fees": [
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 150.00, "cd_amount": 200.00},
+      {"name": "Homeowner's insurance premium", "bucket": "no_limit", "le_amount": 1200.00, "cd_amount": 1100.00},
+      {"name": "Initial escrow deposit at closing", "bucket": "no_limit", "le_amount": 300.00, "cd_amount": 340.00}
+    ],
+    "computation": [
+      "No-limit fees are not subject to any tolerance threshold - individually or in aggregate - so no percentage or per-fee test applies.",
+      "Prepaid interest: LE 150.00 -> CD 200.00, change = +50.00 -> permitted, no test",
+      "Homeowner's insurance: LE 1200.00 -> CD 1100.00, change = -100.00 -> permitted, no test",
+      "Initial escrow deposit: LE 300.00 -> CD 340.00, change = +40.00 -> permitted, no test",
+      "(Aggregate shown for reference only: Sigma(LE)=1650.00, Sigma(CD)=1640.00 - irrelevant to compliance since this bucket has no tolerance limit)"
+    ],
+    "violations": "None - by definition, this category has no tolerance limit, so no amount of increase (or decrease) constitutes a TRID fee-tolerance violation, though these charges remain subject to other disclosure-accuracy requirements (e.g., good faith basis for the estimate).",
+    "clause_basis": "12 CFR 1026.19(e)(3)(iii) - charges not subject to a tolerance limit at all, such as prepaid interest, property insurance premiums, and amounts placed into an escrow/impound account, provided they were disclosed based on the best information reasonably available at the time.",
+    "weakest_point": "I am fairly confident prepaid interest and escrow deposits fall in the no-limit category, but I am less certain whether property insurance premiums are always no-limit versus sometimes treated as a 10%-bucket item depending on whether the consumer selected the provider - I may be overstating certainty on that specific fee's bucket."
+  },
+  {
+    "case_name": "Combined case spanning all three buckets in one transaction",
+    "fees": [
+      {"name": "Transfer taxes", "bucket": "zero_tolerance", "le_amount": 400.00, "cd_amount": 400.00},
+      {"name": "Appraisal fee (affiliate)", "bucket": "zero_tolerance", "le_amount": 350.00, "cd_amount": 400.00},
+      {"name": "Title search fee", "bucket": "ten_pct_aggregate", "le_amount": 250.00, "cd_amount": 270.00},
+      {"name": "Pest inspection", "bucket": "ten_pct_aggregate", "le_amount": 75.00, "cd_amount": 65.00},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 180.00, "cd_amount": 250.00}
+    ],
+    "computation": [
+      "Zero-tolerance bucket (per-fee test): Transfer taxes CD-LE = 400.00-400.00 = 0 -> no violation. Appraisal fee CD-LE = 400.00-350.00 = +50.00 -> exceeds zero tolerance -> violation.",
+      "10%-aggregate bucket: Sigma(LE) = 250.00+75.00 = 325.00; Sigma(CD) = 270.00+65.00 = 335.00",
+      "Aggregate difference = 335.00 - 325.00 = +10.00 (this nets the +20.00 increase on title search against the -10.00 decrease on pest inspection - aggregate vs aggregate, not sum-of-increases)",
+      "10% threshold = 325.00 x 0.10 = 32.50",
+      "10.00 <= 32.50 -> no violation in the 10% bucket",
+      "No-limit bucket: Prepaid interest LE 180.00 -> CD 250.00, change = +70.00 -> not tested, no violation possible"
+    ],
+    "violations": "Only the zero-tolerance bucket has a violation: Appraisal fee increased 50.00 above its LE amount. Cure amount = 50.00. The 10%-aggregate and no-limit buckets have no violations in this case.",
+    "clause_basis": "12 CFR 1026.19(e)(3)(i) (zero tolerance - per-fee), 1026.19(e)(3)(ii) (10% aggregate bucket - aggregate vs aggregate), and 1026.19(e)(3)(iii) (no tolerance limit).",
+    "weakest_point": "The assignment of 'Appraisal fee (affiliate)' to the zero-tolerance bucket assumes the appraiser is an affiliate of the creditor and the fee is paid to that affiliate, which is what triggers zero tolerance; if the appraiser were an independent third party the consumer was permitted to shop for, this fee would instead belong in the 10%-aggregate bucket, and I'm not fully certain I've stated that conditioning clearly enough to avoid misapplication."
+  }
+]
+```

@@ -1,0 +1,7 @@
+All three done. Here's what ran:
+
+**PROMPT A** (v2, bare array): Same 3 scenarios as v1 but scenario 1 pinned to 28nm with ~1M instances and ~80 macros — the tighter constraint forces more specific fabrication or forces honest skips. Numbers self-checked: congestion fix costs ~14ps WNS (not gains it), timing fix recovers ~300ps from constraint correction, SDC budget fix recovers ~148ps.
+
+**PROMPT C** (new): Returned 5 named public sources — ISPD 2013 is the most verifiable (it's a real conference contest), the TCAD 2021 paper on timing-closure failure modes is the most directly relevant to episode framing, and the OpenROAD EDA Playground tutorial is the most reproducible. All five carry confidence scores honestly below 0.90 because I'm not a physical-design librarian — a real expert reviewer would verify these against actual proceedings.
+
+**PROMPT B** (from today's live research, reused): Already verified in the same session. Key updates vs. v1: `timestamp-query` quantization is no longer tied to crossOriginIsolated per the updated W3C spec (always 100µs floor), and Chrome 137's Document Isolation Policy is the big wallet-embedding unlock for iframe isolation without requiring the parent page to also be isolated.

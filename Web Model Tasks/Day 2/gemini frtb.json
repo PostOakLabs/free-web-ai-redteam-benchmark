@@ -1,0 +1,117 @@
+```json
+[
+  {
+    "case_name": "Parametric ES at 97.5% under Standard Normality",
+    "inputs": {
+      "confidence_level": 0.975,
+      "alpha": 0.025,
+      "mean_pnl": 0.0,
+      "std_dev_pnl": 1.0,
+      "units": "standard deviations"
+    },
+    "computation": {
+      "z_quantile": 1.959964,
+      "z_quantile_4dec": 1.9600,
+      "phi_density": "exp(-1.959964^2 / 2) / sqrt(2 * pi) = 0.058441",
+      "phi_density_4dec": 0.0584,
+      "var_multiplier": 1.9600,
+      "es_multiplier": "phi(z_0.975) / alpha = 0.058441 / 0.025 = 2.337638",
+      "es_multiplier_4dec": 2.3376,
+      "es_vs_var_ratio": "2.337638 / 1.959964 = 1.192695",
+      "es_value": "0.0 + 1.0 * 2.337638 = 2.337638"
+    },
+    "result": {
+      "var_97_5": "1.9600 std dev",
+      "es_97_5": "2.3376 std dev"
+    },
+    "formula_basis": "MAR33 / Parametric Normal ES: VaR_alpha(X) = mu + sigma * z_{1-alpha}; ES_alpha(X) = mu + sigma * [phi(z_{1-alpha}) / alpha], where alpha = 1 - 0.975 = 0.025.",
+    "weakest_point": "Assumption of exact normality for trading P&L distributions, which typically exhibit fat tails in real market regimes."
+  },
+  {
+    "case_name": "Parametric ES at 99.0% under Standard Normality",
+    "inputs": {
+      "confidence_level": 0.990,
+      "alpha": 0.010,
+      "mean_pnl": 0.0,
+      "std_dev_pnl": 1.0,
+      "units": "standard deviations"
+    },
+    "computation": {
+      "z_quantile": 2.326348,
+      "z_quantile_4dec": 2.3263,
+      "phi_density": "exp(-2.326348^2 / 2) / sqrt(2 * pi) = 0.026652",
+      "phi_density_4dec": 0.0267,
+      "var_multiplier": 2.3263,
+      "es_multiplier": "phi(z_0.99) / alpha = 0.026652 / 0.010 = 2.665214",
+      "es_multiplier_4dec": 2.6652,
+      "es_vs_var_ratio": "2.665214 / 2.326348 = 1.145664",
+      "es_value": "0.0 + 1.0 * 2.665214 = 2.665214"
+    },
+    "result": {
+      "var_99_0": "2.3263 std dev",
+      "es_99_0": "2.6652 std dev"
+    },
+    "formula_basis": "Parametric Normal ES comparison: VaR_alpha(X) = mu + sigma * z_{1-alpha}; ES_alpha(X) = mu + sigma * [phi(z_{1-alpha}) / alpha], where alpha = 1 - 0.99 = 0.01.",
+    "weakest_point": "Linearity assumption when comparing relative capital metrics across varying tail risk confidence levels."
+  },
+  {
+    "case_name": "MAR33 Liquidity-Horizon Scaled Expected Shortfall",
+    "inputs": {
+      "base_es_10d": 1000000.0,
+      "risk_factor_category": "Large cap equity price / FX major",
+      "base_horizon_LH0": 10,
+      "liquidity_horizon_LH1": 20,
+      "units": "USD"
+    },
+    "computation": {
+      "base_horizon_days": 10,
+      "target_horizon_days": 20,
+      "scaling_ratio": "LH1 / LH0 = 20 / 10 = 2.0",
+      "sqrt_scaling_factor": "sqrt(2.0) = 1.414214",
+      "scaled_es_value": "base_es_10d * sqrt(LH1 / LH0) = 1000000.0 * 1.414214 = 1414213.56"
+    },
+    "result": {
+      "scaled_es": "1414213.56 USD"
+    },
+    "formula_basis": "MAR33.31 / MAR33.32: ES = sqrt(sum_{j} (ES_j(T_j) * sqrt((LH_j - LH_{j-1}) / 10))^2); for a single risk factor category with LH = 20 days, ES(20) = ES(10) * sqrt(20 / 10).",
+    "weakest_point": "Square-root-of-time scaling assumes independent and identically distributed (i.i.d.) returns across extended holding periods."
+  },
+  {
+    "case_name": "Historical Simulation ES at 97.5% (N=20 sample)",
+    "inputs": {
+      "sample_size_N": 20,
+      "confidence_level": 0.975,
+      "alpha": 0.025,
+      "sample_losses_usd": [
+        150.0, 120.0, 95.0, 80.0, 70.0,
+        60.0, 50.0, 45.0, 40.0, 35.0,
+        30.0, 25.0, 20.0, 15.0, 10.0,
+        8.0, 5.0, 3.0, 2.0, 1.0
+      ],
+      "units": "USD (Losses)"
+    },
+    "computation": {
+      "sorted_losses_descending": [
+        150.0, 120.0, 95.0, 80.0, 70.0,
+        60.0, 50.0, 45.0, 40.0, 35.0,
+        30.0, 25.0, 20.0, 15.0, 10.0,
+        8.0, 5.0, 3.0, 2.0, 1.0
+      ],
+      "tail_observation_count_exact": "N * alpha = 20 * 0.025 = 0.5 observations",
+      "tail_selection_rule_applied": "Fractional observation tail convention: Top observation (k=1, Loss=150.0) weighted at 0.5 fraction relative to total alpha mass (0.5 / 0.5 = 1.0 weight). Alternative standard convention: ceiling(N * alpha) = 1 observation (Loss=150.0). Both conventions evaluate to the worst single observation for N=20.",
+      "selected_tail_observations": [
+        {"rank": 1, "loss": 150.0, "effective_weight": 1.0}
+      ],
+      "var_97_5_interpolation": "Linear interpolation between rank 1 (150.0) and rank 2 (120.0) for 97.5th percentile (0.5th rank): 150.0",
+      "es_tail_average": "sum(selected_tail_losses * weight) / sum(weight) = 150.0 / 1.0 = 150.0"
+    },
+    "result": {
+      "var_97_5_usd": "150.00 USD",
+      "es_97_5_usd": "150.00 USD"
+    },
+    "formula_basis": "MAR33.3: ES_alpha = (1 / alpha) * integral_0^alpha VaR_u(X) du. Empirical discrete form: ES_alpha = (1 / (N * alpha)) * sum_{i=1}^floor(N*alpha) X_(i) + fractional remainder weighted accordingly.",
+    "weakest_point": "Small sample discretization error: for N=20, 2.5% tail represents only 0.5 observations, causing ES to degenerate to the single worst sample loss."
+  }
+]
+
+```

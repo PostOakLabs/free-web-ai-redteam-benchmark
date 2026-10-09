@@ -1,0 +1,90 @@
+ ```json
+[
+  {
+    "case_name": "Direct Majority — Baseline",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 60}
+    ],
+    "computation": "Step 1 — Identify blocked persons: X is an SDN (blocked by designation). Step 2 — Evaluate Entity A: direct ownership from X is 60%; there are no indirect paths through intermediaries. Step 3 — Aggregate blocked ownership of A = 60% (direct only). Step 4 — 60% >= 50%, therefore Entity A is blocked under the 50 Percent Rule. Rule applied: direct ownership aggregates at face value; no intermediary attribution question arises. Treatment of indirect ownership: not applicable here. Certainty: high — this is the core rule stated in FAQ 401.",
+    "blocked_verdicts": ["X", "A"],
+    "guidance_basis": "OFAC FAQ 401 (direct ownership threshold); OFAC Revised Guidance on Entities Owned by Blocked Persons (August 13, 2014)",
+    "weakest_point": "None for this simple structure; the only common error is treating control below 50% as sufficient, which FAQ 398 explicitly rejects."
+  },
+  {
+    "case_name": "Convergent Two-Branch Diamond",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 50},
+      {"from": "A", "to": "C", "pct": 25},
+      {"from": "B", "to": "C", "pct": 25}
+    ],
+    "computation": "Step 1 — Identify blocked persons: X is an SDN (blocked by designation). Step 2 — Evaluate Entity A: X owns 50% of A directly; 50% >= 50%, so A is blocked. Step 3 — Evaluate Entity B: X owns 50% of B directly; 50% >= 50%, so B is blocked. Step 4 — Evaluate Entity C. Paths from blocked persons to C: (a) Path X->A->C: A is blocked (>=50% owned by X). A owns 25% of C. Because A is itself a blocked entity, A's full 25% stake in C counts toward C's aggregate blocked ownership. Contribution = 25%. (b) Path X->B->C: B is blocked (>=50% owned by X). B owns 25% of C. Because B is itself a blocked entity, B's full 25% stake in C counts toward C's aggregate blocked ownership. Contribution = 25%. (c) No direct ownership of C by X. Step 5 — Aggregate blocked ownership of C = 25% + 25% = 50%. Step 6 — 50% >= 50%, therefore Entity C is blocked. Rule applied: full attribution through >=50%-owned intermediaries. OFAC's guidance (FAQ 401, Example 2) prescribes that when an intermediary is itself >=50% blocked-owned, the intermediary becomes a blocked person and its entire downstream ownership stake counts toward the target's aggregate blocked ownership. This is NOT a multiplicative treatment (which would compute 50%*25% = 12.5% per path, total 25%, and wrongly conclude C is not blocked). Certainty: high — this follows OFAC's published Example 2 exactly.",
+    "blocked_verdicts": ["X", "A", "B", "C"],
+    "guidance_basis": "OFAC FAQ 401, Example 2; OFAC Revised Guidance on Entities Owned by Blocked Persons (August 13, 2014)",
+    "weakest_point": "The treatment of indirect ownership is the load-bearing rule. Implementations frequently err by applying multiplicative attribution (50% * 25% = 12.5% per path) rather than full attribution through the blocked intermediary, which would incorrectly yield 25% aggregate and a non-blocked verdict for C."
+  },
+  {
+    "case_name": "Chain Through Majority-Owned Intermediary",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 60},
+      {"from": "A", "to": "B", "pct": 70}
+    ],
+    "computation": "Step 1 — Identify blocked persons: X is an SDN (blocked by designation). Step 2 — Evaluate Entity A: X owns 60% of A directly; 60% >= 50%, so A is blocked. Step 3 — Evaluate Entity B. Paths from blocked persons to B: (a) Path X->A->B: A is blocked (>=50% owned by X). A owns 70% of B. Because A is itself a blocked entity, A's full 70% stake in B counts toward B's aggregate blocked ownership. Contribution = 70%. (b) No direct ownership of B by X. Step 4 — Aggregate blocked ownership of B = 70%. Step 5 — 70% >= 50%, therefore Entity B is blocked. Rule applied: full attribution through >=50%-owned intermediaries (cascading / chain blocking). OFAC's guidance (FAQ 401, Example 1) prescribes that an entity owned >=50% by a blocked entity is itself blocked. The intermediary's entire stake passes through; the blocked person's proportionate share is not multiplied (60%*70% = 42% would be the multiplicative approach, which is NOT what OFAC applies). Certainty: high — this follows OFAC's published Example 1 exactly.",
+    "blocked_verdicts": ["X", "A", "B"],
+    "guidance_basis": "OFAC FAQ 401, Example 1; OFAC Revised Guidance on Entities Owned by Blocked Persons (August 13, 2014)",
+    "weakest_point": "Implementations often multiply through the chain (60% * 70% = 42%) and conclude B is not blocked. OFAC's actual rule is entity-level: A becomes a blocked person because it is >=50% blocked-owned, and then A's full 70% stake in B counts as blocked ownership."
+  },
+  {
+    "case_name": "Convergent Direct Plus Indirect",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 10},
+      {"from": "A", "to": "B", "pct": 40}
+    ],
+    "computation": "Step 1 — Identify blocked persons: X is an SDN (blocked by designation). Step 2 — Evaluate Entity A: X owns 50% of A directly; 50% >= 50%, so A is blocked. Step 3 — Evaluate Entity B. Paths from blocked persons to B: (a) Direct path X->B: X owns 10% of B directly. Contribution = 10%. (b) Indirect path X->A->B: A is blocked (>=50% owned by X). A owns 40% of B. Because A is itself a blocked entity, A's full 40% stake in B counts toward B's aggregate blocked ownership. Contribution = 40%. Step 4 — Aggregate blocked ownership of B = 10% + 40% = 50%. Step 5 — 50% >= 50%, therefore Entity B is blocked. Rule applied: full attribution through >=50%-owned intermediaries, with direct and indirect ownership summed. OFAC's guidance (FAQ 401, Example 3) prescribes that a blocked person's direct ownership and indirect ownership (through a >=50%-blocked intermediary) are aggregated. The multiplicative approach would yield 50%*40% = 20% indirect + 10% direct = 30%, which is NOT what OFAC applies. Certainty: high — this follows OFAC's published Example 3 exactly.",
+    "blocked_verdicts": ["X", "A", "B"],
+    "guidance_basis": "OFAC FAQ 401, Example 3; OFAC Revised Guidance on Entities Owned by Blocked Persons (August 13, 2014)",
+    "weakest_point": "Some implementations fail to sum the direct and indirect contributions from the same blocked person, or apply multiplicative attribution to the indirect path. Both errors would produce a sub-50% result and an incorrect non-blocked verdict."
+  },
+  {
+    "case_name": "Broken Chain with Partial Convergence",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 30},
+      {"from": "A", "to": "C", "pct": 30},
+      {"from": "B", "to": "C", "pct": 30},
+      {"from": "X", "to": "C", "pct": 10}
+    ],
+    "computation": "Step 1 — Identify blocked persons: X is an SDN (blocked by designation). Step 2 — Evaluate Entity A: X owns 50% of A directly; 50% >= 50%, so A is blocked. Step 3 — Evaluate Entity B: X owns 30% of B directly; 30% < 50%, and no other blocked persons own B. Therefore B is NOT blocked. Step 4 — Evaluate Entity C. Paths from blocked persons to C: (a) Path X->A->C: A is blocked (>=50% owned by X). A owns 30% of C. Because A is itself a blocked entity, A's full 30% stake in C counts toward C's aggregate blocked ownership. Contribution = 30%. (b) Path X->B->C: B is NOT blocked (30% < 50%). Because B is not >=50% blocked-owned, the chain breaks; B's ownership of C does NOT count as blocked ownership. Contribution = 0%. (c) Direct path X->C: X owns 10% of C directly. Contribution = 10%. Step 5 — Aggregate blocked ownership of C = 30% + 0% + 10% = 40%. Step 6 — 40% < 50%, therefore Entity C is NOT blocked. Rule applied: full attribution through >=50%-owned intermediaries only; chains break at non-blocked intermediaries. OFAC's guidance (FAQ 401, Examples 4 and 5) prescribes that if an intermediary is not >=50% blocked-owned, the blocked person is not considered to indirectly own any of the target through that intermediary. The multiplicative approach would yield 30%*30% = 9% through B, which is NOT what OFAC applies. Certainty: high — this follows the logic of OFAC's published Examples 4 and 5.",
+    "blocked_verdicts": ["X", "A"],
+    "guidance_basis": "OFAC FAQ 401, Examples 4 and 5; OFAC Revised Guidance on Entities Owned by Blocked Persons (August 13, 2014)",
+    "weakest_point": "The most common error is counting B's 30% stake in C because X (a blocked person) owns 30% of B. Under OFAC's rule, B must itself be >=50% blocked-owned before its downstream ownership counts. Because B is only 30% blocked-owned, the chain breaks and B's 30% stake in C is excluded."
+  }
+]
+```

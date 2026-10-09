@@ -1,0 +1,79 @@
+[
+  {
+    "calculation": "Single-Point Fault Metric (SPFM)",
+    "formula_or_test": "SPFM = 1 - (lambda_SPF + lambda_RF) / lambda_SR_HW where lambda_SR_HW = lambda_SPF + lambda_RF + lambda_MPF + lambda_S; expressed as percentage: SPFM% = SPFM × 100",
+    "inputs": ["lambda_SPF: failure rate of single-point faults", "lambda_RF: failure rate of residual faults", "lambda_MPF: failure rate of multi-point faults", "lambda_S: failure rate of safe faults"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4.5, Table 4; Annex C Equation C.7",
+    "publicly_retrievable": "Purchase required (ISO); partial PDF mirrors may exist",
+    "volatility": "Low — ISO 26262 amendments are multi-year cycles",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Latent-Fault Metric (LFM)",
+    "formula_or_test": "LFM = 1 - (lambda_MPF_L) / (lambda_SR_HW - lambda_SPF - lambda_RF); expressed as percentage: LFM% = LFM × 100 where lambda_MPF_L is the failure rate of latent multi-point faults",
+    "inputs": ["lambda_MPF_L: failure rate of latent multi-point faults", "lambda_SR_HW: total safety-related hardware failure rate", "lambda_SPF: single-point fault rate", "lambda_RF: residual fault rate"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4.6, Table 5; Annex C",
+    "publicly_retrievable": "Purchase required (ISO); partial PDF mirrors may exist",
+    "volatility": "Low",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Probabilistic Metric for random Hardware Failures (PMHF)",
+    "formula_or_test": "PMHF = lambda_SPF + lambda_RF + lambda_DPF_det × lambda_DPF_latent × T_lifetime; simplified approximation: PMHF ≈ EEC_sum / (2 × T_lifetime) + sum of all single-point contributions",
+    "inputs": ["lambda_SPF: single-point fault rate", "lambda_RF: residual fault rate", "lambda_DPF_det: detected dual-point fault rate", "lambda_DPF_latent: latent dual-point fault rate", "T_lifetime: operational lifetime in hours"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 9.4.2; Annex F; ISO 26262-10 for detailed calculation guidance",
+    "publicly_retrievable": "Purchase required (ISO); partial PDF mirrors may exist",
+    "volatility": "Low",
+    "confidence": 0.90
+  },
+  {
+    "calculation": "US EAR Total Processing Performance (TPP) for ECCN 3A090/4A090 classification",
+    "formula_or_test": "TPP = 2 × MacTOPS × bit_length_of_operation, aggregated over all processing units on the IC; Performance_density = TPP / applicable_die_area_mm2",
+    "inputs": ["MacTOPS: MAC operations per second per processing unit", "bit_length_of_operation: operand bit width", "applicable_die_area_mm2: die area in mm2 using non-planar transistor architecture dies"],
+    "authority": "Export Administration Regulations (EAR), 15 CFR Parts 730-774; Advanced Computing and Supercomputing Rule (AC/S IFR, October 2023)",
+    "clause_locator": "ECCN 3A090 Technical Notes; 15 CFR Part 774 Supplement 1",
+    "publicly_retrievable": "Freely available — published in Federal Register and BIS website",
+    "volatility": "High — thresholds updated October 2022, October 2023; subject to further rulemaking",
+    "confidence": 0.92
+  },
+  {
+    "calculation": "US EAR ECCN 3A090 control parameter thresholds (post-AC/S October 2023)",
+    "formula_or_test": "3A090.a: TPP >= 4800, OR (TPP >= 1600 AND performance_density >= 5.92); 3A090.b: (TPP >= 2400 AND <4800 AND performance_density >= 1.6 AND <5.92) OR (TPP >= 1600 AND performance_density >= 3.2 AND <5.92); Note 2 carve-out: IC not designed/marketed for datacenters AND TPP < 4800 => not 3A090",
+    "inputs": ["TPP: Total Processing Performance value", "performance_density: TPP divided by applicable die area"],
+    "authority": "Export Administration Regulations (EAR), 15 CFR Parts 730-774; Advanced Computing and Supercomputing IFR (October 2023)",
+    "clause_locator": "ECCN 3A090.a, 3A090.b, Note 2",
+    "publicly_retrievable": "Freely available",
+    "volatility": "High — threshold values changed between October 2022 and October 2023 rules",
+    "confidence": 0.92
+  },
+  {
+    "calculation": "JEDEC FIT rate calculation from HTOL test data",
+    "formula_or_test": "lambda = chi2(CL, 2f+2) / (2 × SS × t_stress × AF); FIT = lambda × 10^9; where chi2 is chi-squared distribution, f = number of failures, SS = sample size, t_stress = stress hours, AF = acceleration factor; typical parameters: CL = 60%, f = 0",
+    "inputs": ["chi2: chi-squared quantile at confidence level CL", "f: number of observed failures", "SS: sample size", "t_stress: stress test duration in hours", "AF: acceleration factor from use to stress condition"],
+    "authority": "JEDEC JESD85 Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": "JESD85 Annex; Equation 1 / method varies by data completeness level",
+    "publicly_retrievable": "Purchase required (JEDEC); some manufacturer summaries freely available",
+    "volatility": "Low — JESD85 stable; JESD85A is current version",
+    "confidence": 0.93
+  },
+  {
+    "calculation": "Arrhenius temperature acceleration factor for semiconductor reliability",
+    "formula_or_test": "AF = exp[(Ea/k) × (1/T_use - 1/T_stress)]; where Ea = activation energy (typically 0.7 eV for semiconductor failures, 0.5-0.8 eV used depending on mechanism), k = Boltzmann constant (8.617×10^-5 eV/K), T in Kelvin",
+    "inputs": ["Ea: activation energy in eV", "k: Boltzmann constant (8.617×10^-5 eV/K)", "T_use: use temperature in Kelvin", "T_stress: stress test temperature in Kelvin"],
+    "authority": "JEDEC JESD85 Methods for Calculating Failure Rates in Units of FITs; also referenced in JEDEC JESD22-A108",
+    "clause_locator": "JESD85 Equation 1; also JESD22-A108 Temperature Acceleration section",
+    "publicly_retrievable": "Purchase required (JEDEC); widely summarized in manufacturer reliability documents",
+    "volatility": "Low",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "CHIPS Act advanced manufacturing investment credit (AMIC)",
+    "formula_or_test": "AMIC = 25% × qualified_investment; qualified_investment = value of buildings and depreciable tangible property for advanced semiconductor manufacturing facilities; construction must begin 2023-01-01 through 2026-12-31",
+    "inputs": ["qualified_investment: eligible capital expenditures for semiconductor manufacturing facilities", "construction_start_date: must be between 2023-01-01 and 2026-12-31"],
+    "authority": "CHIPS Act of 2022 (Public Law 117-167), Section 107; Internal Revenue Code Section 48D",
+    "clause_locator": "P.L. 117-167 Section 107",
+    "publicly_retrievable": "Freely available — public law, Federal Register, IRS guidance",
+    "volatility": "Low — statutory credit rate and window are fixed; IRS rulemaking may refine definition",

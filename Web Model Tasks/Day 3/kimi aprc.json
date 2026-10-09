@@ -1,0 +1,56 @@
+  
+  
+  
+     
+ ```json
+[
+  {
+    "case": 1,
+    "assumptions_invoked": [
+      "Article 19(3) — agreement remains valid and obligations fulfilled",
+      "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+      "Assumption (g) Annex I Part II — single-sum costs payable at the date of conclusion when timing is known"
+    ],
+    "equation": "10000 = 100 + Σ_{k=1}^{24} 450 / (1+X)^(k/12)",
+    "iterations": "Bisection on [0.05, 0.10]: iter 1 c=0.075000 f(c)=−125.00; iter 2 c=0.087500 f(c)=−7.97; iter 3 c=0.093750 f(c)=+49.37; converged in 36 iterations to |f(c)|<1e−12, root X=0.0883642231",
+    "aprc_pct": 8.8
+  },
+  {
+    "case": 2,
+    "assumptions_invoked": [
+      "Article 19(3) — agreement remains valid and obligations fulfilled",
+      "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+      "Assumption (d) Annex I Part II — overdraft: amount remains drawn for full duration; duration assumed 3 months where not determinable",
+      "Assumption (g) Annex I Part II — interest charges payable together with capital repayments; recurrent charges (monthly fee) payable at regular intervals"
+    ],
+    "equation": "3000 = 55/(1+X)^(1/12) + 55/(1+X)^(2/12) + 3055/(1+X)^(3/12)  [monthly interest 3000×0.01=30 plus fee 25=55; final month adds principal 3000]",
+    "iterations": "Bisection on [0.20, 0.30]: iter 1 c=0.250000 f(c)=+3.78; iter 2 c=0.225000 f(c)=−11.12; iter 3 c=0.237500 f(c)=−3.62; converged in 37 iterations to |f(c)|<1e−12, root X=0.2435965779",
+    "aprc_pct": 24.4
+  },
+  {
+    "case": 3,
+    "assumptions_invoked": [
+      "Article 19(3) — agreement remains valid and obligations fulfilled",
+      "Assumption (a) Annex I Part II — total credit deemed drawn down immediately and in full",
+      "Assumption (e)(i) Annex I Part II — open-end credit other than overdraft: duration assumed 1 year",
+      "Assumption (e)(ii) Annex I Part II — capital repaid in equal monthly instalments (125/month) with interest on declining balance at 1.5%/month"
+    ],
+    "equation": "1500 = 147.50/(1+X)^(1/12) + 145.625/(1+X)^(2/12) + 143.75/(1+X)^(3/12) + 141.875/(1+X)^(4/12) + 140.00/(1+X)^(5/12) + 138.125/(1+X)^(6/12) + 136.25/(1+X)^(7/12) + 134.375/(1+X)^(8/12) + 132.50/(1+X)^(9/12) + 130.625/(1+X)^(10/12) + 128.75/(1+X)^(11/12) + 126.875/(1+X)^(12/12)",
+    "iterations": "Bisection on [0.15, 0.20]: iter 1 c=0.175000 f(c)=−13.47; iter 2 c=0.187500 f(c)=−5.26; iter 3 c=0.193750 f(c)=−1.20; converged in 36 iterations to |f(c)|<1e−12, root X=0.1956181715",
+    "aprc_pct": 19.6
+  },
+  {
+    "case": 4,
+    "assumptions_invoked": [
+      "Article 19(3) — agreement remains valid and obligations fulfilled",
+      "Assumption (a) Annex I Part II — freedom of drawdown implies full immediate drawdown of the limit"
+    ],
+    "equation": "5000 = 5616 / (1+X)^1  [financed fee: balance 5200 = 5000 + 200; repayment 5200×1.08 = 5616 at 12 months]",
+    "iterations": "Closed-form: X = 5616/5000 − 1 = 0.1232; bisection verify on [0.10, 0.15]: iter 1 c=0.125000 f(c)=+8.00; iter 2 c=0.112500 f(c)=−48.09; iter 3 c=0.118750 f(c)=−19.89; converged to X=0.1232000000. Financed fee enters by enlarging the balance that bears interest (5200 vs 5000), whereas a cash fee at t=0 would appear as an immediate charge reducing net credit: 5000 = 200 + 5400/(1+X) → X=12.5%.",
+    "aprc_pct": 12.3
+  },
+  {
+    "weakest_point": "Case 2 (overdraft) — the treatment of monthly interest and fee timing is the most assumption-sensitive step. National implementations diverge on whether assumption (d)'s 'amount remains drawn for the duration' permits interest capitalization into a single end-of-term repayment, or requires monthly interest payments in arrears as done here. The fee timing (in arrears vs in advance) and whether the final month double-counts interest+fee also vary across software, making this the highest-divergence case."
+  }
+]
+```

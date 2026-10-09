@@ -1,0 +1,1249 @@
+{
+ "b8": {
+  "chatgpt": {
+   "anchors": {
+    "b1": {
+     "note": "More precisely, SharedArrayBuffer construction and shared-memory transfer require a cross-origin-iso",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Chrome added timestamp-query in 121, but applications must test adapter.features.has('timestamp-quer",
+     "verdict": "disagree: Chrome supports timestamp-query, but it is an optional adapter feature rather than something guaranteed to be exposed to every ordinary web page/device by default."
+    },
+    "b3": {
+     "grade": "PARTIAL",
+     "note": "A threads-enabled Wasm binary can validate independently; the browser security restriction is on shared memory/threading use without cross-o",
+     "setA": 1,
+     "setB": 0,
+     "verdict": "disagree: WebAssembly thread/atomic module validation is not the cross-origin-isolation gate; cross-origin isolation gates creation/use of shared WebAssembly memory and the SharedArrayBuffer machinery needed for browser threading."
+    }
+   },
+   "claims": {
+    "A cross-origin iframe cannot bootstrap COI-gated capabilities independently of its embedding context. The parent must provide the required isolation context and permission delegation; WebGPU access is separately governed by browser support and Permissions Policy.": 1,
+    "A cross-origin iframe cannot independently bootstrap the COI-gated SharedArrayBuffer environment; the embedding context must satisfy the isolation model and policy delegation. WebGPU itself is separate from COI and is controlled by the browser's WebGPU/Permissions Policy implementation.": 1,
+    "A cross-origin iframe cannot independently obtain cross-origin isolation merely by setting its own headers. For COI-gated APIs such as SharedArrayBuffer, the embedding top-level context must itself be cross-origin isolated and delegate the cross-origin-isolated capability; WebGPU is separately subject to Permissions Policy and can be delegated with the iframe policy.": 1,
+    "No universal guarantee: Chrome/Edge implement timestamp-query, but it is an optional GPUAdapter feature and must be feature-detected; current compatibility data classifies support as partial rather than universal.": 1,
+    "Not supported in stable Safari; current browser-support data lists Safari as unsupported.": 1,
+    "Not supported in stable Safari; current compatibility data lists Safari as unsupported, although Safari Technology Preview has experimental support.": 1,
+    "Not supported in stable Safari; current compatibility data lists Safari stable as unsupported, with support only in Safari Technology Preview.": 1,
+    "Safari 26 and later expose timestamp-query in stable Safari; current compatibility data lists Safari 26+ as supported.": 1,
+    "Safari supports SharedArrayBuffer and Wasm threading when the page opts into cross-origin isolation with COOP and COEP; WebKit documents COOP/COEP as the mechanism that re-enables SharedArrayBuffer/Wasm threading.": 1,
+    "SharedArrayBuffer is available to web content when the document is cross-origin isolated; deploy COOP: same-origin together with COEP: require-corp or credentialless, and ensure Permissions Policy does not block cross-origin-isolated.": 1,
+    "SharedArrayBuffer is available when the document is cross-origin isolated using COOP plus COEP; without cross-origin isolation the shared-memory capability is restricted.": 1,
+    "Supported by default in current stable Firefox 153+; Firefox 153 shipped July 21, 2026.": 1,
+    "Supported by default in current stable Firefox; Firefox 146 added stable support.": 1,
+    "Supported by default in stable Chrome/Edge; Chrome shipped JSPI in version 137 and Edge follows Chromium's implementation.": 1,
+    "Supported by default. Chrome 133 and Edge 133 added WebAssembly Memory64.": 1,
+    "Supported by default. Chrome and Edge support WebAssembly relaxed SIMD from version 114 onward.": 1,
+    "Supported by default. Firefox 134 added WebAssembly Memory64.": 1,
+    "Supported by default. Firefox supports WebAssembly SIMD from Firefox 89 onward.": 1,
+    "Supported by default. Safari supports WebAssembly SIMD from Safari 16.4 onward.": 1,
+    "Supported by default. WebAssembly 128-bit SIMD is supported in Chrome 91+ and Chromium Edge 91+.": 1,
+    "Supported. Firefox supports WebAssembly threads/atomics; use of shared memory in browser content remains subject to cross-origin isolation.": 1,
+    "Supported. Safari supports WebAssembly threads/atomics; SharedArrayBuffer/Wasm threading requires cross-origin isolation.": 1,
+    "Supported. WebAssembly threads/atomics are enabled in Chrome and Chromium-based Edge; browser use of shared Wasm memory still requires cross-origin isolation.": 1,
+    "WebGPU compute is available in Firefox stable on supported platforms; Windows support is enabled broadly, while macOS support is enabled for Apple Silicon, with other platform coverage still more limited.": 1,
+    "WebGPU compute is available in Safari stable; Safari 26 added WebGPU support, subject to the underlying platform/GPU.": 1,
+    "WebGPU is available for ordinary secure web content and supports compute pipelines/shaders; availability remains platform/adapter dependent.": 1,
+    "timestamp-query is not exposed by default in Firefox stable; current compatibility data lists Firefox as unsupported.": 1
+   },
+   "declared": "GPT-5.6 Luna",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "clean"
+  },
+  "deepseek": {
+   "anchors": {
+    "b1": {
+     "note": "For top-level documents, the standard headers are COOP: same-origin and COEP: require-corp (or crede",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Enabled by default in Chrome 121+ per chromestatus.com. Timestamp query values are quantized to 100 ",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "This is a common misconception. The WASM spec itself does not require cross-origin isolation; the browser security policy around SharedArray",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "disagree: WASM threads module validation does not fail without cross-origin isolation in current Chrome. The module validates and compiles fine; it is the runtime creation of a SharedArrayBuffer and the transfer of SharedArrayBuffer objects via postMessage() that are gated on cross-origin isolation. A WASM threads module can be instantiated and run in single-threaded mode without COOP/COEP headers; it simply cannot use shared memory for actual parallelism."
+    }
+   },
+   "claims": {
+    "Available in Nightly builds behind a preference (javascript.options.wasm_js_promise_integration). Not enabled by default in stable Firefox as of 2026. Default-on is planned for Firefox 153.": 1,
+    "Available in Safari 27 beta. Not available in stable Safari as of September 2026. Safari Technology Preview 238 ships JSPI.": 1,
+    "Experimental. Not yet in stable Safari as of 2026. Available in Safari Technology Preview behind a flag.": 1,
+    "Fully supported from Chrome 133+ (no flag required). Memory64 lifts WASM memory limit from 4GB to 16GB in browsers.": 1,
+    "No, timestamp-query is not exposed by default to ordinary web content in Firefox. It is available experimentally behind the dom.webgpu.enabled flag or in Nightly builds.": 1,
+    "No, timestamp-query is not exposed by default to ordinary web content in Safari. It is available experimentally in Safari Technology Preview (macOS only).": 1,
+    "Not yet supported. WebKit bug 300538 tracks Memory64 support. As of 2026, Memory64 is the only remaining Phase 5 WASM feature missing from WebKit.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp (or credentialless). Chrome 93+ supports credentialless COEP. The Permissions-Policy: cross-origin-isolated directive is required for iframes.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp. Does not support credentialless COEP (per WebKit source). The Permissions-Policy: cross-origin-isolated directive is not implemented.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp. Does not support credentialless COEP. The Permissions-Policy: cross-origin-isolated directive is not implemented.": 1,
+    "Shipped stable since Chrome 137 (May 2025). JavaScript Promise Integration allows synchronous WASM code to await async web APIs.": 1,
+    "Supported (Chrome 114+). Relaxed SIMD adds hardware-specific instructions for faster ML/image kernels.": 1,
+    "Supported (Chrome 74+, Edge 79+), but shared memory requires cross-origin isolation (COOP/COEP). Without it, only single-threaded WASM runs.": 1,
+    "Supported (Firefox 122+). Relaxed SIMD is available by default.": 1,
+    "Supported (Firefox 79+), but shared memory requires cross-origin isolation (COOP/COEP). Firefox was the first to require COOP/COEP.": 1,
+    "Supported (Safari 14.1+ on macOS, 14.5+ on iOS), but shared memory requires cross-origin isolation (COOP/COEP). Does not support credentialless COEP.": 1,
+    "Supported by default since Chrome 91+ and Edge 91+.": 1,
+    "Supported by default since Firefox 89+.": 1,
+    "Supported since Safari 16.4+ (macOS and iOS). Earlier versions do not support SIMD128.": 1,
+    "Supported. Firefox has shipped Memory64 support as part of WebAssembly 3.0.": 1,
+    "WebGPU compute shaders are available by default in Safari 26 (macOS Tahoe) and Safari 26 on iOS. Earlier Safari versions do not support WebGPU.": 1,
+    "WebGPU compute shaders are available by default on Chrome 113+ (Windows, macOS, ChromeOS) and Edge 113+. Linux and Android support is partial/experimental as of 2026.": 1,
+    "WebGPU compute shaders are available in Firefox 147+ on Apple Silicon macOS. Broader platform support (Windows, Linux, Intel Mac) is not yet available by default. Can be enabled via dom.webgpu.enabled flag.": 1,
+    "Yes, timestamp-query is exposed by default to ordinary web content in Chrome 121+. Timestamp values are quantized to 100 microsecond resolution and are only available in cross-origin isolated contexts.": 1,
+    "Yes, with caveats. A cross-origin iframe can obtain cross-origin isolation only if the embedding document sets the Permissions-Policy: cross-origin-isolated directive for the iframe. Without this directive, the iframe cannot become cross-origin isolated even with COOP/COEP headers.": 1,
+    "Yes, with caveats. Firefox does not implement the Permissions-Policy: cross-origin-isolated directive, so a cross-origin iframe can become cross-origin isolated if it receives COOP/COEP headers directly from its own server response.": 1,
+    "Yes, with caveats. Safari does not implement the Permissions-Policy: cross-origin-isolated directive. A cross-origin iframe can become cross-origin isolated if it receives COOP/COEP headers directly. Safari does not support credentialless COEP.": 1
+   },
+   "declared": "DeepSeek",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "fence"
+  },
+  "gemini": {
+   "anchors": {
+    "b1": {
+     "note": "SharedArrayBuffer requires COOP (same-origin) and COEP (require-corp or credentialless) headers, or ",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Requires enabling specific flag or origin trial (or running in developer/un-quantized timing modes) ",
+     "verdict": "disagree: WebGPU timestamp-query is disabled by default for unprivileged web content due to timing attack/side-channel mitigation."
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "The binary validation step itself does not fail on thread instructions, but creating the required shared WebAssembly.Memory throws without C",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "disagree: WebAssembly threads validation/compilation succeeds, but instantiation fails at runtime when allocating/passing SharedArrayBuffer without cross-origin isolation."
+    }
+   },
+   "claims": {
+    "Cross-origin iframe can obtain cross-origin isolation and WebGPU access if allowed by parent container policies and appropriate COEP/credentialless/Permissions-Policy headers.": 1,
+    "Cross-origin iframe can obtain cross-origin isolation if permitted by outer document headers and iframe allow attribute.": 1,
+    "Cross-origin iframe can obtain cross-origin isolation under strict permission policies.": 1,
+    "Enabled by default or via Origin Trial (JavaScript Promise Integration).": 1,
+    "In development / WebKit experimental feature.": 1,
+    "In development / behind feature flags.": 1,
+    "In development or behind experimental flags.": 1,
+    "SharedArrayBuffer requires cross-origin isolation (COOP and COEP headers) by default.": 1,
+    "SharedArrayBuffer requires cross-origin isolation (COOP and COEP headers).": 2,
+    "Supported by default or under flag.": 1,
+    "Supported by default without cross-origin isolation requirements.": 1,
+    "Supported by default.": 5,
+    "Supported in current WebKit.": 1,
+    "Supported; requires cross-origin isolation for SharedArrayBuffer execution.": 1,
+    "Supported; requires cross-origin isolation.": 2,
+    "WebGPU compute shaders are available and enabled by default on supported desktop OS (Windows, macOS, ChromeOS, Linux).": 1,
+    "WebGPU compute shaders are available by default on macOS Sonoma/Sequoia and iOS 18+ (Safari 18+).": 1,
+    "WebGPU compute shaders are enabled by default on Nightly/Beta and rolling out across platforms on Stable.": 1,
+    "timestamp-query is not exposed by default.": 2,
+    "timestamp-query is not exposed to ordinary web content by default (requires flag or privileged context).": 1
+   },
+   "declared": "Gemini",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "training-recall": 27
+   },
+   "parse": "fence"
+  },
+  "glm 5.3 flash": {
+   "anchors": {
+    "b1": {
+     "note": "Mechanism is the 'cross-origin isolated' state; COOP(same-origin)+COEP(require-corp) is the standard",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Chrome has discussed permission/policy-based exposure for content, but as of my knowledge (early 202",
+     "verdict": "disagree: timestamp-query is not exposed to ordinary content by default in Chrome; it is gated behind chrome://flags/#enable-webgpu-developer-features (WebGPU Developer Features), and the app must additionally request the 'timestamp-query' feature on GPUDevice creation or the request fails."
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "Mechanism: in a non-COI document, new WebAssembly.Memory({shared:true}) throws, and compiling/instantiating a module that declares or import",
+     "setA": 0,
+     "setB": 0,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "Behind a pref (javascript.options.wasm_memory64) as of my knowledge; not default in release Firefox.": 1,
+    "COI is per-document and not inherited: a cross-origin iframe must set its own COOP/COEP headers (and all its subresources need CORP/CORS) to become COI; WebGPU itself does not require COI, so an embedded cross-origin iframe can use WebGPU regardless of isolation state.": 1,
+    "Enabled by default around Chrome 133 (Feb 2025) per V8 release notes; earlier available behind --experimental-wasm-memory64. Edge mirrors.": 1,
+    "No — Safari's WebGPU does not implement timestamp-query as of my knowledge.": 1,
+    "No — the timestamp-query feature is not implemented/exposed in shipped Firefox WebGPU (Windows) as of my knowledge.": 1,
+    "No — timestamp-query is not exposed to ordinary content by default; requires the WebGPU Developer Features flag plus requesting the 'timestamp-query' feature at device creation.": 1,
+    "Not enabled by default as of my knowledge; available behind --experimental-webassembly-jspi and origin trials (Chrome 123+ era).": 1,
+    "Not shipped in JSC as of my knowledge (through Safari 18.x); Safari typically trails on WASM post-MVP features.": 1,
+    "Not shipped in JSC as of my knowledge.": 1,
+    "Not supported in Firefox as of my knowledge.": 1,
+    "Not supported in Safari as of my knowledge.": 1,
+    "Same per-document COI model; an iframe needs its own COOP/COEP to be isolated (Safari 16.4+ improved frame-level COOP/COEP handling); WebGPU (Safari 18+) does not require COI, so iframes can use it.": 1,
+    "Same per-document model: an embedded cross-origin iframe does not inherit COI and must carry its own COOP/COEP; SAB/threads are gated per frame. WebGPU (Windows, Firefox 137+) does not require COI, so an iframe can use it.": 1,
+    "SharedArrayBuffer is exposed only to cross-origin-isolated documents (COOP same-origin + COEP require-corp, or COEP:credentialless in Chromium); a legacy desktop-Chrome origin allowlist permitted SAB without COI but was deprecated.": 1,
+    "SharedArrayBuffer requires cross-origin isolation (COOP+COEP); exposed only in COI documents since Firefox 79 (July 2020).": 1,
+    "SharedArrayBuffer requires cross-origin isolation since Safari 15.2 (Dec 2021), where it shipped alongside WebAssembly threads.": 1,
+    "Shipped around Firefox 120 (late 2023) per my recall; moderately confident on the version.": 1,
+    "Shipped since Chrome 114 (June 2023); Edge mirrors.": 1,
+    "Shipped since Chrome 91 (June 2021); no document-level requirements; Edge mirrors.": 1,
+    "Shipped since Chrome 91 (June 2021); usable only in cross-origin-isolated documents — shared WebAssembly.Memory throws without COI. Edge mirrors.": 1,
+    "Shipped since Firefox 79 (July 2020); requires cross-origin isolation.": 1,
+    "Shipped since Firefox 89 (June 2021).": 1,
+    "Shipped since Safari 15.2 (Dec 2021); requires cross-origin isolation.": 1,
+    "Shipped since Safari 16.4 (March 2023).": 1,
+    "WebGPU enabled by default on Windows starting Firefox 137 (April 2025), compute supported; macOS/Linux remained behind dom.webgpu.enabled on Nightly as of my knowledge.": 1,
+    "WebGPU including compute shaders is enabled by default since Chrome 113 (May 2023) on Windows/macOS and Chrome 121 (Jan 2024) on Android; Linux remained behind flags; Edge mirrors Chrome releases.": 1,
+    "WebGPU shipped by default in Safari 18 (Sept 2024) on macOS/iOS/visionOS with compute shader support; reduced feature set vs Chromium (e.g., no timestamp-query, tighter limits).": 1
+   },
+   "declared": "GLM",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "training-recall": 27
+   },
+   "parse": "clean"
+  },
+  "grok": {
+   "anchors": {
+    "b1": {
+     "note": "SAB constructor is gated behind crossOriginIsolated (COOP: same-origin + COEP: require-corp or crede",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "timestamp-query is requestable by ordinary content in current Chrome (with 100 µs quantization by de",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "Shared-memory Wasm modules (threads) require cross-origin isolation because they depend on SharedArrayBuffer; without it the SharedArrayBuff",
+     "setA": 1,
+     "setB": 0,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "Cross-origin iframe can achieve isolation for SAB if headers and permissions are correctly set; WebGPU access follows same origin/isolation rules as the embedding context.": 1,
+    "Cross-origin iframe can obtain cross-origin isolation (and thus SAB/WebGPU where gated) if the iframe itself is served with appropriate COOP/COEP (or Document-Isolation-Policy) and the embedder allows via allow=\"cross-origin-isolated\"; full top-level isolation is stricter.": 1,
+    "Cross-origin iframe isolation for SAB/WebGPU follows COOP/COEP rules; practical support exists but embedding constraints are strict.": 1,
+    "JSPI (JavaScript Promise Integration) available in Chrome (phase 4, new API since M126).": 1,
+    "JSPI not yet shipped in Safari; Apple previously objected but later assigned implementation work.": 1,
+    "JSPI still behind a flag or incomplete in Firefox.": 1,
+    "Memory64 support present or in progress in Firefox.": 1,
+    "Memory64 support status in Safari less clear; not confirmed as default.": 1,
+    "Memory64 supported in Chrome (proposal advanced; available for large linear memories).": 1,
+    "Relaxed SIMD still behind a flag or limited in Safari as of late 2025 reports.": 1,
+    "Relaxed SIMD supported (out from behind flag in 2025).": 1,
+    "Relaxed SIMD supported (standardized 2024; shipped in Chrome).": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp (or credentialless). Available only when self.crossOriginIsolated is true.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp. Available only when self.crossOriginIsolated is true (since Firefox 79).": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP: same-origin and COEP: require-corp. Available only when self.crossOriginIsolated is true (since Safari 15.2).": 1,
+    "Wasm SIMD128 supported and enabled by default (Safari 16.4+).": 1,
+    "Wasm SIMD128 supported and enabled by default.": 2,
+    "Wasm threads supported (Safari 14.1+ macOS / 14.5+ iOS); requires cross-origin isolation (SAB).": 1,
+    "Wasm threads supported; requires cross-origin isolation (SAB) for shared memory.": 2,
+    "WebGPU compute available by default in Safari 26+ on macOS Tahoe 26 / iOS 26 / iPadOS 26 / visionOS 26.": 1,
+    "WebGPU compute available by default on Windows (141+) and macOS Apple Silicon (145+); Linux/Android still Nightly/flag or limited.": 1,
+    "WebGPU compute shaders available by default on Windows, macOS, ChromeOS, Android (qualified GPUs); Linux still often behind flag or limited.": 1,
+    "timestamp-query availability in Safari 26+ WebGPU is implementation-dependent; not confirmed as unrestricted default exposure for ordinary content.": 1,
+    "timestamp-query is exposed to ordinary web content by default (with 100 µs quantization); full ns precision requires WebGPU Developer Features flag.": 1,
+    "timestamp-query support is present in WebGPU-capable builds but availability and default exposure follow wgpu implementation; not confirmed as unrestricted default for ordinary content.": 1
+   },
+   "declared": "Grok 4.5",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 15,
+    "training-recall": 12
+   },
+   "parse": "clean"
+  },
+  "kimi": {
+   "anchors": {
+    "b1": {
+     "note": "Also requires a secure context (HTTPS). COEP may be require-corp or credentialless (credentialless i",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Exposed to ordinary web content (secure context) since Chrome 121 (Jan 2024), but values are quantiz",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "Mechanism is the SharedArrayBuffer gate (Chrome 92+, 2021), not the wasm validator. A threads module validates fine; it fails at instantiati",
+     "setA": 1,
+     "setB": 2,
+     "verdict": "disagree: WebAssembly module validation succeeds; instantiation fails, because wasm threads require a shared WebAssembly.Memory backed by SharedArrayBuffer, and constructing SharedArrayBuffer requires cross-origin isolation in Chrome (so instantiation/execution fails without COOP/COEP, not module validation)"
+    }
+   },
+   "claims": {
+    "Cross-origin isolation: an embedded page can obtain crossOriginIsolated inside an iframe only if the ENTIRE frame chain is isolated — the iframe document itself must send COOP: same-origin + COEP: require-corp (or credentialless), all ancestors must be cross-origin isolated, and the embedder must delegate via the iframe allow attribute (Permissions-Policy: cross-origin-isolated). A cross-origin iframe inside a non-isolated parent CANNOT obtain cross-origin isolation. WebGPU itself does not require cross-origin isolation and is usable in cross-origin iframes subject to the webgpu Permissions-Policy.": 1,
+    "Implemented but long restricted to Nightly behind a pref; Mozilla's Intent to Ship (June 2026) targeted enabling JSPI by default in Firefox 153 (early 2026), so stable Firefox should have it by September 2026 — treat as newly default-on and verify per-release.": 1,
+    "Not enabled by default — still behind a flag / experimental in Safari as of early 2026 (was behind a flag in Safari 18.4-era builds per 2025 reporting, and described as 'experimental on Safari' in Feb 2026).": 1,
+    "Not shipped in stable Safari as of the latest verified reporting; available in Safari 27 beta (per Aug 2026 source). WebKit removed its standards objection in late 2025 and has implementation work underway.": 1,
+    "Not supported in shipped Safari (absent through Safari 26.x); WebKit implementation work exists but had not landed in stock Safari or Safari Technology Preview as of mid-2026.": 1,
+    "Same chain rule per the cross-origin isolation spec: a cross-origin iframe only becomes crossOriginIsolated if the iframe document itself sends COOP: same-origin + COEP: require-corp AND every ancestor in the frame chain is also cross-origin isolated, with Permissions-Policy delegation (allow=\"cross-origin-isolated\") — a non-isolated parent cannot embed an isolated child. Credentialless is not available in Firefox. WebGPU does not require cross-origin isolation; iframe access follows the webgpu permissions policy.": 1,
+    "Same chain rule: cross-origin isolation requires the whole frame chain to be isolated — the iframe document must send COOP: same-origin + COEP: require-corp, all ancestors must be isolated, and Permissions-Policy delegation applies; a cross-origin iframe under a non-isolated parent cannot get crossOriginIsolated. Credentialless is not supported in Safari. WebGPU does not require cross-origin isolation; iframe access follows the webgpu permissions policy.": 1,
+    "Same requirement: secure context plus COOP: same-origin and COEP: require-corp on the document, and not blocked by Permissions-Policy: cross-origin-isolated. Credentialless COEP is not supported in Firefox. In effect since Firefox 88 (2021).": 1,
+    "Same requirement: secure context plus COOP: same-origin and COEP: require-corp, not blocked by Permissions-Policy: cross-origin-isolated. Credentialless COEP is not supported in Safari. In effect since Safari 15.2 (Dec 2021).": 1,
+    "SharedArrayBuffer requires a secure context (HTTPS) AND cross-origin isolation: Cross-Origin-Opener-Policy: same-origin plus Cross-Origin-Embedder-Policy: require-corp (or credentialless, Chromium-only) on the document, and the feature must not be blocked by Permissions-Policy: cross-origin-isolated. In effect since Chrome 92 (2021).": 1,
+    "Shipped (Chrome 74, 2019) and enabled by default, BUT instantiation of modules using shared memory requires cross-origin isolation, because constructing the shared WebAssembly.Memory requires SharedArrayBuffer, which is gated on COOP/COEP since Chrome 92.": 1,
+    "Shipped and enabled by default (Firefox 79, 2020); instantiation of modules with shared memory requires cross-origin isolation (COOP/COEP), same SharedArrayBuffer gate as other browsers.": 1,
+    "Shipped and enabled by default since Chrome 114 (May 2023).": 1,
+    "Shipped and enabled by default since Chrome 133 (January 2025); browsers cap memory at ~16GB.": 1,
+    "Shipped and enabled by default since Chrome 137 (May 2025); detect via 'Suspending' in WebAssembly.": 1,
+    "Shipped and enabled by default since Chrome 91 (May 2021); no isolation requirement.": 1,
+    "Shipped and enabled by default since Firefox 134 (January 2025).": 1,
+    "Shipped and enabled by default since Firefox 89 (June 2021); no isolation requirement.": 1,
+    "Shipped and enabled by default since Safari 15.2 (December 2021), completing cross-browser wasm threads support; instantiation with shared memory requires cross-origin isolation (COOP/COEP), same SharedArrayBuffer gate.": 1,
+    "Shipped and enabled by default since Safari 16.4 (March 2023); no isolation requirement.": 1,
+    "UNVERIFIED": 2,
+    "Was behind a flag at the start of 2025 and was enabled by default in Firefox during 2025; live in stable Firefox by end of 2025.": 1,
+    "WebGPU compute shaders are available by default; WebGPU (including compute pipelines) shipped in Chrome/Edge 113 (May 2023), on Android since Chrome 121, with Linux support still rolling out (Intel Gen12+ in Chrome 144, NVIDIA in Chrome 147-148).": 1,
+    "WebGPU compute shaders shipped by default in Firefox 141 (July 2025) on Windows; macOS support (Apple Silicon, macOS Tahoe 26) followed in Firefox 145. Linux and Android still in progress as of late 2025.": 1,
+    "WebGPU compute shaders shipped by default in Safari 26.0 (September 2025) on macOS, iOS, iPadOS and visionOS; compute shaders are a headline feature of that release.": 1,
+    "Yes: the timestamp-query feature is exposed to ordinary web content (secure contexts) by default since Chrome 121 (Jan 2024); timestamps are quantized to 100 microseconds by default, with unquantized values gated behind the chrome://flags 'WebGPU Developer Features' flag.": 1
+   },
+   "declared": "Kimi Chat (Moonshot AI)",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "fence"
+  },
+  "longcat": {
+   "anchors": {
+    "b1": {
+     "note": "SharedArrayBuffer available only under cross-origin isolation (COOP: same-origin + COEP: require-cor",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Chrome exposes timestamp-query feature but requires apps to request it at device creation; default q",
+     "verdict": "disagree: timestamp-query is available from Chrome 144+ but must be explicitly requested as a device feature and is quantized by default; not fully 'on by default' without opt-in"
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "WebAssembly threads require SharedArrayBuffer which requires cross-origin isolation (COOP/COEP).",
+     "setA": 1,
+     "setB": 0,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "Cross-origin iframe can obtain isolation only by setting its own COOP/COEP headers; WebGPU in cross-origin iframe is restricted (not allowed without specific permissions/fenced frame context)": 1,
+    "Cross-origin iframe isolation requires its own COOP/COEP; WebGPU access in cross-origin iframe likely restricted": 1,
+    "Cross-origin iframe isolation requires its own COOP/COEP; WebGPU access in cross-origin iframe restricted due to fingerprinting": 1,
+    "JSPI (JavaScript Promise Integration) supported (Chrome 137+)": 1,
+    "JSPI support in development/planned (Firefox 153+ per HN; not yet in stable as of Sept 2026)": 1,
+    "JSPI support planned/coming (Safari 27 per HN; not yet shipped in stable as Sept 2026)": 1,
+    "Memory64 supported (Chrome 133+); part of WebAssembly 3.0": 1,
+    "Memory64 supported (Safari Technology Preview; WebAssembly 3.0 alignment)": 1,
+    "Relaxed SIMD supported (Safari 18.4+)": 1,
+    "Relaxed SIMD supported by default (Chrome 114+)": 1,
+    "Relaxed SIMD supported by default (Firefox 120+)": 1,
+    "SIMD128 supported by default": 2,
+    "SIMD128 supported by default (Safari 16+)": 1,
+    "SharedArrayBuffer available only when cross-origin isolated (COOP: same-origin + COEP: require-corp or credentialless)": 3,
+    "UNVERIFIED": 2,
+    "WebAssembly threads available; requires cross-origin isolation": 1,
+    "WebAssembly threads available; requires cross-origin isolation (SharedArrayBuffer)": 1,
+    "WebAssembly threads available; requires cross-origin isolation; stricter about COEP variants": 1,
+    "WebGPU compute shaders available (Firefox 141+ on Windows, 145+ on macOS, 147+ broadly)": 1,
+    "WebGPU compute shaders available (Safari 26+ on macOS Tahoe, iOS 26, iPadOS 26, visionOS 26)": 1,
+    "WebGPU compute shaders available by default (Chrome 113+, Edge 113+)": 1,
+    "timestamp-query not exposed by default; must request via requiredFeatures; value quantized to 100µs by default": 1,
+    "timestamp-query not supported (No per MDN)": 1
+   },
+   "declared": "LongCat",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "clean"
+  },
+  "meta": {
+   "gradable": false,
+   "model": "meta",
+   "parse": "NOT-GRADABLE"
+  },
+  "mimo": {
+   "anchors": {
+    "b1": {
+     "note": "The search results confirm SharedArrayBuffer availability requires cross-origin isolation (COOP+COEP",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "The search results explicitly state this feature is deprecated, non-standard, and of limited availab",
+     "verdict": "disagree: timestamp-query is NOT exposed to ordinary web content by default in current Chrome. It requires explicitly enabling the 'timestamp-query' GPU feature, is limited availability, deprecated, and non-standard (citation:6)."
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "The distinction matters for caching workflows: a compiled module can be validated and stored, but cannot be instantiated with threads until ",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "disagree: the module binary itself validates successfully (WebAssembly.validate() returns true) regardless of cross-origin isolation. What fails is RUNTIME INSTANTIATION of a module that imports shared memory, because SharedArrayBuffer (needed for shared memory) is unavailable without cross-origin isolation (citation:1). The search results confirm shared memory requires cross-origin isolation headers (citation:3)."
+    }
+   },
+   "claims": {
+    "Available behind flag (--enable-unsafe-webassembly-memory64 or origin trial) in Chrome 111+. NOT shipped by default to stable as of my knowledge cutoff.": 1,
+    "Cross-origin isolation is achievable for a cross-origin iframe (COOP/COEP). WebGPU access in cross-origin iframes is uncertain due to Safari's stricter permission model. Safari WebGPU (Safari 26+) additionally requires user activation and cross-origin isolation on the page itself.": 1,
+    "Not shipped by default to stable channel. Was in origin trial; proposal is Stage 3+ in WebAssembly CG. Not available as a stable feature in any channel as of my knowledge cutoff.": 1,
+    "Not shipped by default. Likely not implemented in Safari.": 1,
+    "Not shipped by default. Proposal status in Firefox is unclear; likely not implemented.": 1,
+    "Partial or experimental support. Likely behind a flag or not fully implemented.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP+COEP headers. Required since Chrome 92 (July 2021). With isolation, the global SharedArrayBuffer constructor is available; without it, the constructor is hidden but WebAssembly.Memory can still obtain shared buffers.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP+COEP headers. Required since Firefox 79 (July 2020). Same mechanism as Chrome: without isolation, the constructor is hidden.": 1,
+    "SharedArrayBuffer requires cross-origin isolation via COOP+COEP headers. Required since Safari 15.2 (December 2021). Same mechanism as Chrome and Firefox.": 1,
+    "Shipped and stable. Available by default since Chrome 114 (May 2023).": 1,
+    "Shipped and stable. Available by default since Firefox 129 (August 2024).": 1,
+    "Shipped and stable. Available by default without cross-origin isolation. Available since Chrome 91 (May 2021).": 1,
+    "Shipped and stable. Available by default. Available since Firefox 89 (June 2021).": 1,
+    "Shipped and stable. Available by default. Available since Safari 16.4 (March 2023).": 1,
+    "Shipped and stable. Requires cross-origin isolation (COOP+COEP). Available since Chrome 74 (April 2019). Shared memory creation fails without cross-origin isolation even if the module binary is valid.": 1,
+    "Shipped and stable. Requires cross-origin isolation. Available since Firefox 79 (July 2020).": 1,
+    "Shipped and stable. Requires cross-origin isolation. Available since Safari 15.2 (December 2021).": 1,
+    "Shipped in Safari 17.x timeframe (exact version uncertain). Available by default.": 1,
+    "Status unclear. Likely not shipped by default.": 1,
+    "WebGPU compute shaders are available by default to ordinary web content. Available since Chrome 113 (May 2023). No flags, origin trials, or special headers required beyond secure context.": 1,
+    "WebGPU compute shaders available by default since Firefox 141 (Windows) and Firefox 145 (macOS). WebGPU was still rolling out at time of search results; compute shader availability at those specific versions is inferred from the general WebGPU ship timeline.": 1,
+    "WebGPU compute shaders available since Safari 26 (September 2025). Requires secure context and cross-origin isolation on macOS, iOS, iPadOS, visionOS.": 1,
+    "WebGPU timestamp-query is NOT exposed by default. It requires explicitly enabling the 'timestamp-query' GPU feature via requestAdapter/requestDevice. It is deprecated, non-standard, and of limited availability.": 1,
+    "WebGPU timestamp-query is NOT exposed by default. Requires explicit opt-in via the 'timestamp-query' feature name when requesting a device. Limited availability, deprecated.": 1,
+    "WebGPU timestamp-query is NOT exposed by default. Requires explicit opt-in. Limited availability, deprecated.": 1,
+    "Yes in principle: a cross-origin iframe can obtain cross-origin isolation with COOP/COEP headers. WebGPU in iframes requires Permissions-Policy granting. WebGPU iframe access availability depends on Firefox's WebGPU rollout timeline.": 1,
+    "Yes: a cross-origin iframe CAN obtain cross-origin isolation (if it sets COOP+COEP on its own response and the embedder is also isolated or uses credentialless COEP). WebGPU access in a cross-origin iframe requires Permissions-Policy: webgpu=(self \"origin\") from the embedder. Supported since Chrome 119 (November 2023) for WebGPU in iframes.": 1
+   },
+   "declared": "MiMo",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 3,
+    "training-recall": 24
+   },
+   "parse": "fence"
+  },
+  "minara": {
+   "anchors": {
+    "b1": {
+     "note": "For web content, usable SharedArrayBuffer requires a secure, cross-origin-isolated context; COOP: sa",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Chrome exposes timestamp-query as an optional adapter feature to ordinary secure web content on supp",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "PARTIAL",
+     "note": "Source: https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/JavaScript_interface/Memory/Memory and https://developer.mozilla.org/",
+     "setA": 1,
+     "setB": 0,
+     "verdict": "disagree: WebAssembly module validation is a format/type-validation operation and is not itself conditioned on cross-origin isolation. However, instantiating or creating shared WebAssembly.Memory requires usable SharedArrayBuffer, which requires cross-origin isolation in web content."
+    }
+   },
+   "claims": {
+    "A cross-origin embedded page cannot unilaterally obtain cross-origin isolation: the top-level document and embedding policy must cooperate, and the iframe must satisfy applicable COEP/Permissions Policy. WebGPU itself is available to a secure embedded document when the embedding Permissions Policy permits it; it does not inherently require cross-origin isolation.": 3,
+    "Not supported by default in current Firefox.": 1,
+    "Not supported by default in current Safari.": 3,
+    "SharedArrayBuffer is available to ordinary pages only in a secure cross-origin-isolated context; deploy COOP and COEP, subject to embedded-context policy.": 3,
+    "Supported by default in current Chrome/Edge.": 2,
+    "Supported by default in current Firefox.": 2,
+    "Supported by default.": 4,
+    "Supported. Shared-memory/threaded Wasm deployment requires cross-origin isolation because it depends on SharedArrayBuffer.": 3,
+    "WebGPU compute shaders are available in current Safari on supported Apple platforms and hardware; runtime feature detection remains required.": 1,
+    "WebGPU compute-shader availability is present in current Firefox on supported platforms, but platform and GPU/driver coverage is less uniform than Chromium; runtime feature detection is required.": 1,
+    "WebGPU, including compute shaders, is available by default in current Chrome and Edge on supported operating systems, GPUs, and drivers.": 1,
+    "Yes, timestamp-query is exposed as an optional WebGPU adapter feature to ordinary secure web content by default on supported Chrome/Edge platform and GPU configurations.": 1,
+    "timestamp-query is available as an optional WebGPU adapter feature on supported current Firefox configurations, not as a universal guarantee across all Firefox platforms and adapters.": 1,
+    "timestamp-query is available as an optional WebGPU adapter feature on supported current Safari configurations, not as a universal guarantee across all Apple devices and adapters.": 1
+   },
+   "declared": "Minara (Dmind)",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "clean"
+  },
+  "minimax": {
+   "anchors": {
+    "b1": {
+     "note": "SharedArrayBuffer requires both Cross-Origin-Opener-Policy: same-origin AND Cross-Origin-Embedder-Po",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "The feature itself is implemented and available, but (a) it must be explicitly requested via require",
+     "verdict": "disagree: timestamp-query is an OPTIONAL feature in Chrome — it is NOT exposed by default in the sense that the developer must (a) request 'timestamp-query' when calling requestDevice() and (b) the WebGPU Developer Features flag (chrome://flags/#enable-webgpu-developer-features) is required to disable 100μs quantization. The feature does NOT work at full precision for ordinary web content without enabling this flag. Note: the feature is available to non-isolated contexts (the earlier plan to restrict it was revised)."
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "The failure occurs when the Wasm module tries to instantiate a WebAssembly.Memory with shared:true or spawn a Worker that uses SharedArrayBu",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "An embedded cross-origin iframe CANNOT obtain cross-origin isolation unless the parent page is also cross-origin isolated. Safari enforces the same frame-chain isolation requirement per the HTML standard.": 1,
+    "An embedded cross-origin iframe CANNOT obtain cross-origin isolation unless the parent page is also cross-origin isolated. Same mechanism as Chrome; Firefox enforces the same frame-chain isolation requirement.": 1,
+    "An embedded cross-origin iframe CANNOT obtain cross-origin isolation unless the parent page is also cross-origin isolated. The entire frame chain must be isolated — if the top-level page is not isolated, the iframe cannot independently achieve the isolated state.": 1,
+    "Available: Chrome 114+ (Relaxed SIMD spec shipped in Chrome 119 with Wasm 3.0). Stable.": 1,
+    "Available: Chrome 133+ (Chrome 119 shipped Wasm 3.0 which includes Memory64; WasmHub confirms Chrome 133 is the minimum stable version with the feature).": 1,
+    "Available: Chrome 137+ (stable, Phase 4 W3C standardized). No cross-origin isolation required for JSPI alone.": 1,
+    "Available: Chrome 74+ with cross-origin isolation required. Without COOP+COEP, SharedArrayBuffer is undefined and WebAssembly.Memory({shared:true}) throws — threaded Wasm module instantiation fails.": 1,
+    "Available: Chrome 91+ (stable since 2021). Part of Wasm 3.0 baseline (Chrome 119+). No cross-origin isolation required for SIMD alone.": 1,
+    "Available: Firefox 134+ (Firefox 120 shipped Wasm 3.0 which includes Memory64; caniuse shows Fx 134 as the minimum stable version).": 1,
+    "Available: Firefox 145+ (enabled by default in Firefox 145, February 2026 — after March 1 2026 cutoff). Earlier Firefox versions do not support it.": 1,
+    "Available: Firefox 79+ with cross-origin isolation required. Without COOP+COEP, SharedArrayBuffer is undefined and WebAssembly.Memory({shared:true}) throws — threaded Wasm module instantiation fails.": 1,
+    "Available: Firefox 89+ (stable since 2021). Part of Wasm 3.0 baseline (Firefox 120+). No cross-origin isolation required for SIMD alone.": 1,
+    "Available: Safari 14.1+ (macOS) / 14.5+ (iOS) with cross-origin isolation required. Without COOP+COEP, SharedArrayBuffer is undefined — threaded Wasm module instantiation fails.": 1,
+    "Available: Safari 16.4+ (macOS and iOS). Part of Wasm 3.0 baseline (Safari 18.2+). No cross-origin isolation required for SIMD alone.": 1,
+    "Available: Safari 27+ (stable; Safari 27 beta ships JSPI, WWDC June 2026). Note: if using Safari 26 or earlier, JSPI is NOT available.": 1,
+    "Behind a flag: Firefox Nightly only (behind pref since Fx 139+); Mozilla Intent to Ship targets stable Fx 153. Not available in stable Firefox as of September 2026.": 1,
+    "NOT available: Safari does not support WebAssembly Memory64 in any stable version as of September 2026.": 1,
+    "NOT available: Safari does not support WebAssembly Relaxed SIMD in any stable version as of September 2026.": 1,
+    "SharedArrayBuffer requires cross-origin isolation (COOP+COEP headers) — without them the API is unavailable": 3,
+    "WebGPU compute shaders are available by default — stable since Chrome 113 (May 2023)": 1,
+    "WebGPU compute shaders are available by default — stable since Firefox 141 (July 2025); earlier versions required a flag": 1,
+    "WebGPU compute shaders are available by default — stable since Safari 26.0 (September 2025); Safari 17.4 shipped an early/preview version": 1,
+    "timestamp-query is NOT exposed to ordinary web content by default — Firefox WebGPU does not implement timestamp-query in stable Firefox": 1,
+    "timestamp-query is NOT exposed to ordinary web content by default — requires requesting 'timestamp-query' in requestDevice() AND the WebGPU Developer Features flag (chrome://flags/#enable-webgpu-developer-features) to disable 100μs quantization": 1,
+    "timestamp-query is NOT exposed to ordinary web content — Safari WebKit WebGPU does not implement timestamp-query in stable Safari": 1
+   },
+   "declared": "mini-max-ai-ai-2",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "clean"
+  },
+  "mistral": {
+   "anchors": {
+    "b1": {
+     "note": "SharedArrayBuffer is only available under cross-origin isolation (COOP/COEP) in all major browsers a",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Timestamp queries are not exposed in non-isolated contexts in Chrome as of 2026.",
+     "verdict": "disagree: timestamp-query is NOT exposed to ordinary web content by default in current Chrome."
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "WebAssembly threads module validation fails without cross-origin isolation in current Chrome, Firefox, and Safari.",
+     "setA": 0,
+     "setB": 0,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "A cross-origin iframe CANNOT obtain cross-origin isolation or WebGPU access unless explicitly granted via COOP/COEP and CORP headers.": 3,
+    "SharedArrayBuffer is available only under cross-origin isolation (COOP/COEP).": 3,
+    "WebAssembly JSPI is NOT supported by default as of 2026.": 1,
+    "WebAssembly JSPI is supported by default (Chrome 137+).": 1,
+    "WebAssembly JSPI is supported by default (Firefox 139+).": 1,
+    "WebAssembly Memory64 is supported by default (Chrome 119+).": 1,
+    "WebAssembly Memory64 is supported by default (Firefox 120+).": 1,
+    "WebAssembly Memory64 is supported by default (Safari 18.2+).": 1,
+    "WebAssembly SIMD128 is supported by default (Safari 16.4+).": 1,
+    "WebAssembly SIMD128 is supported by default.": 2,
+    "WebAssembly relaxed-SIMD is supported by default (Safari 18.2+).": 1,
+    "WebAssembly relaxed-SIMD is supported by default.": 2,
+    "WebAssembly threads require cross-origin isolation (COOP/COEP).": 3,
+    "WebGPU compute-shader is available by default on Windows (Firefox 141+) and macOS (Firefox 145+).": 1,
+    "WebGPU compute-shader is available by default on macOS Tahoe 26+ and iOS 26+.": 1,
+    "WebGPU compute-shader is available by default.": 1,
+    "timestamp-query is NOT exposed to ordinary web content by default.": 3
+   },
+   "declared": "Vibe, an AI assistant created by Mistral AI and powered by the Mistral Medium 3.5 model",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "fence"
+  },
+  "qwen": {
+   "anchors": {
+    "b1": {
+     "note": "Since Chrome 92, Safari 15.2, and Firefox 79, SAB requires cross-origin isolation (COOP/COEP) for or",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "Chrome restricts high-resolution timers and GPU timestamps to cross-origin isolated contexts.",
+     "verdict": "disagree: timestamp-query is NOT exposed by default to ordinary web content in current Chrome. It requires explicitly requesting the 'timestamp-query' extension and typically requires cross-origin isolation to prevent timing side-channels."
+    },
+    "b3": {
+     "grade": "falsified",
+     "note": "WASM threads module validation/instantiation fails if SharedArrayBuffer is disabled, which happens without COOP/COEP.",
+     "setA": 1,
+     "setB": 0,
+     "verdict": "agree"
+    }
+   },
+   "claims": {
+    "Enabled by default.": 6,
+    "Not exposed by default. GPU timing queries are restricted to prevent side-channel attacks.": 1,
+    "Not exposed by default. Requires Cross-Origin-Isolation and explicit extension requests.": 1,
+    "Not exposed by default. Requires explicitly requesting the 'timestamp-query' extension and Cross-Origin-Isolation.": 1,
+    "Not fully supported / behind experimental flags.": 1,
+    "Requires parent document to be cross-origin isolated, and iframe must be granted 'cross-origin-isolated' and 'webgpu' via Permissions-Policy.": 2,
+    "Requires parent document to be cross-origin isolated, granted 'cross-origin-isolated' permission, and ITP exceptions for WebGPU.": 1,
+    "SharedArrayBuffer requires Cross-Origin-Isolation (COOP/COEP) headers.": 3,
+    "Supported (enabled by default or via origin trial in recent versions).": 1,
+    "Supported behind experimental flags.": 1,
+    "Supported behind flag (javascript.options.wasm_memory64).": 1,
+    "Supported behind flag or enabled in Nightly.": 1,
+    "Supported behind flag or origin trial.": 1,
+    "Supported, but instantiation requires Cross-Origin-Isolation (COOP/COEP) due to SharedArrayBuffer dependency.": 3,
+    "WebGPU compute-shaders are available by default on Windows and Linux, and progressively on macOS.": 1,
+    "WebGPU compute-shaders are available by default on all major desktop platforms.": 1,
+    "WebGPU compute-shaders are available by default.": 1
+   },
+   "declared": "Qwen3.8",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "training-recall": 27
+   },
+   "parse": "clean"
+  },
+  "solar": {
+   "gradable": false,
+   "model": "solar",
+   "parse": "NOT-GRADABLE"
+  },
+  "sonnet": {
+   "anchors": {
+    "b1": {
+     "note": "Confirmed current on MDN and web.dev: a document must send COOP: same-origin plus COEP: require-corp",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "timestamp-query is a standard optional GPUFeature requestable via requestDevice({requiredFeatures:['",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "The gating mechanism is postMessage()/construction of SharedArrayBuffer throwing outside a cross-origin-isolated context, not module validat",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "disagree: module-level validation/compilation of a Wasm module that declares shared memory does not itself require cross-origin isolation — WebAssembly.validate()/compile() succeed regardless. What actually fails without cross-origin isolation is runtime use: you cannot construct/receive a SharedArrayBuffer, so the module can't actually be instantiated with real multi-agent shared memory/threads."
+    }
+   },
+   "claims": {
+    "As of the most recent snapshot found, JSPI is not yet in Firefox stable (web-features-explorer marks it ❌); however, a Mozilla bugzilla tracking bug ('let JSPI ride the trains to release') shows work to ship it landing on mozilla-central, undated in the retrieved snippet, so a release may be imminent or already out.": 1,
+    "Fixed-width 128-bit SIMD supported since Chrome 91.": 1,
+    "Fixed-width 128-bit SIMD supported since Firefox 89.": 1,
+    "Fixed-width 128-bit SIMD supported since Safari 16.4.": 1,
+    "JSPI not yet supported in Safari; Safari dropped its formal objection to the proposal in late 2025 and has since assigned someone to a ticket, but has not shipped or committed to a timeline.": 1,
+    "JavaScript Promise Integration shipped in Chrome 137 and Edge 137 (~2025-05-27).": 1,
+    "Memory64 not supported in Safari; confirmed unsupported as recently as Safari 26.5 (per Unity docs, dated 2026).": 1,
+    "Memory64 supported since Chrome/Edge 133 (~2025-02), no flag required; browsers cap addressable memory at 16GB despite the theoretical 16EB range.": 1,
+    "Memory64 supported since Firefox 134 (~2025-01); one secondary source (SciChart blog) instead cites Firefox ≥143 as the safe baseline, so exact minimum version has some source disagreement.": 1,
+    "Relaxed SIMD is not supported in Safari (Safari vendor position: neutral); this is the current baseline-availability blocker.": 1,
+    "Relaxed SIMD shipped in Firefox 146, released 2025-12-09.": 1,
+    "Relaxed SIMD supported since Chrome/Edge 114 (2023-05/06).": 1,
+    "Same COOP/COEP cross-origin-isolation requirement as Chrome/Firefox for SharedArrayBuffer in Safari.": 1,
+    "Same COOP/COEP cross-origin-isolation requirement as Chrome; Firefox has required this since Firefox 79.": 1,
+    "SharedArrayBuffer requires COOP: same-origin + COEP: require-corp (or credentialless), i.e. crossOriginIsolated===true; Chrome enforced this starting M92.": 1,
+    "Status of timestamp-query availability to ordinary content in shipping Firefox could not be confirmed from sources retrieved this turn.": 1,
+    "Status of timestamp-query availability to ordinary content in shipping Safari could not be confirmed from sources retrieved this turn.": 1,
+    "The standard iframe allow=\"cross-origin-isolated\" + iframe's-own-headers path should work per spec, but COEP: credentialless / iframe-credentialless appear to be Chromium-only per one source, meaning Safari likely lacks the easier opt-in path and would need full CORP cooperation from the embedded origin.": 1,
+    "WASM threads/Atomics supported since Chrome 74 (actual multi-agent shared memory still gated by SharedArrayBuffer's COOP/COEP requirement).": 1,
+    "WASM threads/Atomics supported since Firefox 79.": 1,
+    "WASM threads/Atomics supported since Safari 14.1.": 1,
+    "WebGPU (compute shaders included) ships by default from Safari 26.0 (Sept 2025) on macOS Tahoe 26, iOS 26, iPadOS 26, and visionOS 26.": 1,
+    "WebGPU (compute shaders included) ships by default: Firefox 141 on Windows (July 2025), Firefox 145 on macOS Apple Silicon (~Nov/Dec 2025); Linux and Android still in progress.": 1,
+    "WebGPU (including compute shaders) ships by default since Chrome/Edge 113.": 1,
+    "Yes via the standard mechanism (iframe allow=\"cross-origin-isolated\" plus the iframe's own COOP/COEP/CORP headers); COEP: credentialless is also supported in Firefox, easing third-party embedding, but Firefox has no Document-Isolation-Policy equivalent.": 1,
+    "Yes: a cross-origin iframe can obtain cross-origin isolation if the parent adds allow=\"cross-origin-isolated\" and either the iframe sends its own COOP+COEP(require-corp)/CORP headers, or the parent uses COEP: credentialless (Chrome ≥96) to avoid needing subresource cooperation; Chrome 137+ additionally offers Document-Isolation-Policy for simpler per-frame isolation without a full-page COEP rollout.": 1,
+    "timestamp-query is available by default (as an optional GPUFeature you request explicitly, no unsafe/dev flag needed); reported timestamps are quantized to ~100µs unless the WebGPU Developer Features flag is enabled.": 1
+   },
+   "declared": "Claude Sonnet 5",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "live-web": 27
+   },
+   "parse": "clean"
+  },
+  "yuanbao": {
+   "anchors": {
+    "b1": {
+     "note": "True as worded, but the mechanism is more specific: the page must be a secure context and serve Cros",
+     "verdict": "agree"
+    },
+    "b2": {
+     "note": "timestamp-query shipped enabled-by-default on desktop Chromium (Chrome 121 timeframe) after a long p",
+     "verdict": "agree"
+    },
+    "b3": {
+     "grade": "pass-mech",
+     "note": "WebAssembly.validate is a purely syntactic/type check and has no COI dependency. The COI dependency lives in SharedArrayBuffer/WebAssembly.M",
+     "setA": 1,
+     "setB": 1,
+     "verdict": "disagree: WASM module validation succeeds without cross-origin isolation; the failure happens later, at instantiation (constructing/compiling a shared WebAssembly.Memory, { shared:true }), which throws a RuntimeError/LinkError when the document is not cross-origin isolated"
+    }
+   },
+   "claims": {
+    "A cross-origin iframe can be cross-origin isolated, but only if (a) it serves its own COOP: same-origin + COEP: require-corp/credentialless, (b) its ancestor chain is also cross-origin isolated, and (c) the embedder grants the 'cross-origin-isolated' permissions policy on the iframe element (allow=\"cross-origin-isolated\"), since that feature's default allowlist is 'self'. WebGPU itself is not COI-gated (secure context + GPU availability only), so a non-COI iframe can still get a GPUDevice, but without SharedArrayBuffer/wasm threads and with reduced timestamp precision.": 1,
+    "Best recall: JSPI exists in SpiderMonkey but is behind the javascript.options.wasm_js_promise_integration pref rather than default-on as of my knowledge cutoff.": 1,
+    "Best recall: memory64 is not available to ordinary web content in Safari (not shipped by default).": 1,
+    "Best recall: wasm64/memory64 is implemented but not shipped by default in Firefox (behind a pref / not available to ordinary web content).": 1,
+    "JavaScript Promise Integration had an origin trial and I believe shipped on by default in Chrome (mid-2025 timeframe), but I cannot state the shipping version reliably.": 1,
+    "Likely shipped on by default in Firefox (I believe in the 2024 era, ~Firefox 124), but version recall is weak.": 1,
+    "Partial/unconfirmed: Firefox's WebGPU exposes a timestamp-query feature, but I cannot confirm it is on by default for ordinary content versus behind a pref, nor its precision behaviour.": 1,
+    "Relaxed SIMD is shipped and on by default in Chromium (V8 shipped it around Chrome 114, 2023).": 1,
+    "Same spec behaviour expected: cross-origin isolation in an iframe requires the iframe's own COOP/COEP, an isolated ancestor chain, and the embedder's 'cross-origin-isolated' permissions-policy grant; WebGPU is separately available in a secure context if the build/OS supports it.": 1,
+    "SharedArrayBuffer is available only under cross-origin isolation (COOP: same-origin + COEP: require-corp/credentialless); Firefox re-enabled SAB gated behind COI in Firefox 79 after the 2019 Spectre mitigation.": 1,
+    "SharedArrayBuffer is exposed only in a secure context whose document is cross-origin isolated: COOP: same-origin AND COEP: require-corp (or COEP: credentialless) on the document itself, giving crossOriginIsolated === true; Chrome 92+ enforced this after the non-COI deprecation/reverse-origin trial ended (~Chrome 106). Edge (Chromium) behaves identically.": 1,
+    "SharedArrayBuffer requires cross-origin isolation (COOP/COEP) in current Safari/WebKit; WebKit shipped SAB alongside COOP/COEP support (Safari 15.2 timeframe).": 1,
+    "The 'timestamp-query' GPU feature is (as of my knowledge) exposed to ordinary web content by default in Chromium, with reduced/quantized timestamp precision (~100 us) as the security mitigation; not gated behind enable-unsafe-webgpu on current builds.": 1,
+    "Uncertain whether relaxed SIMD is exposed by default in Safari; my recall suggests later-than-Chromium support, possibly 2024-2025.": 1,
+    "Uncertain: WebKit has implemented timestamp queries, but I cannot confirm they are exposed by default to ordinary web content in current Safari.": 1,
+    "Uncertain: WebKit has worked on JSPI, and I believe it may be enabled in recent Safari (18.x/26 era), but I cannot confirm default-on status.": 1,
+    "Uncertain: expect the same general model (iframe must send its own COOP/COEP and rely on an isolated ancestor chain and the embedder's cross-origin-isolated grant), but I cannot confirm WebKit's implementation completeness.": 1,
+    "WebAssembly SIMD (fixed-width 128-bit) is shipped and on by default (Chrome 91+).": 1,
+    "WebAssembly SIMD is shipped and on by default (Firefox 89+).": 1,
+    "WebAssembly SIMD is shipped and on by default in Safari (Safari 16.4+).": 1,
+    "WebAssembly threads (shared memory + atomics/wait/notify) are shipped and on by default; thread use requires a cross-origin isolated document because shared WebAssembly.Memory is gated the same way as SharedArrayBuffer.": 1,
+    "WebAssembly threads are shipped and on by default, gated on cross-origin isolation for shared memory (Firefox 79+).": 1,
+    "WebAssembly threads with shared memory are supported in current Safari/WebKit (under the same cross-origin-isolation requirement), though WebKit lagged Chromium/Firefox on this for a long time.": 1,
+    "WebGPU (including compute shaders) is enabled by default in current Safari/WebKit; it was in Safari Technology Preview for years and shipped on-by-default with Safari 26 (2025).": 1,
+    "WebGPU including compute shaders is available to ordinary web content by default on Chrome 113+ (desktop Windows/macOS/ChromeOS) and Chrome 121+ on Android; no flag required, secure context required. Edge (Chromium) matches.": 1,
+    "WebGPU with compute shaders is on by default in Firefox; it first shipped in Firefox 141 on Windows (mid-2025), with other platforms rolled out after.": 1,
+    "memory64 exists in V8 and ran behind the --experimental-wasm-memory64 / WebAssemblyMemory64 feature flag; whether it is default-on in current Chrome is uncertain to me (possibly shipped ~Chrome 133).": 1
+   },
+   "declared": "Yuanbao (Hunyuan)",
+   "grid": {
+    "dupes": [],
+    "expected": 27,
+    "extra": [],
+    "grid_ok": true,
+    "missing": [],
+    "rows": 27
+   },
+   "kb": {
+    "training-recall": 27
+   },
+   "parse": "clean"
+  }
+ },
+ "c5": {
+  "chatgpt": {
+   "gradable": false,
+   "model": null,
+   "parse": "NOT-GRADABLE"
+  },
+  "deepseek": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "DeepSeek",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 4,
+    "kb": {
+     "training-recall": 4
+    },
+    "novel_reviewed": 4,
+    "total": 4
+   }
+  },
+  "gemini": {
+   "gradable": false,
+   "model": null,
+   "parse": "NOT-GRADABLE"
+  },
+  "glm 5.3 flash": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "GLM",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 4,
+    "kb": {
+     "recalled-citation": 2,
+     "training-recall": 2
+    },
+    "novel_reviewed": 4,
+    "total": 4
+   }
+  },
+  "grok": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Grok 4.5",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 6,
+    "kb": {
+     "recalled-citation": 3,
+     "training-recall": 3
+    },
+    "novel_reviewed": 4,
+    "total": 6
+   }
+  },
+  "kimi": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Kimi Chat",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 6,
+    "kb": {
+     "recalled-citation": 1,
+     "training-recall": 5
+    },
+    "novel_reviewed": 6,
+    "total": 6
+   }
+  },
+  "longcat": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "LongCat",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 8,
+    "kb": {
+     "search-recall": 2,
+     "training-recall": 6
+    },
+    "novel_reviewed": 8,
+    "total": 8
+   }
+  },
+  "meta": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Muse Spark 1.1",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 5,
+    "kb": {
+     "training-recall": 5
+    },
+    "novel_reviewed": 5,
+    "total": 5
+   }
+  },
+  "mimo": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "MiMo",
+   "parse": "fence",
+   "sources": {
+    "hint_present": 3,
+    "kb": {
+     "training-recall": 3
+    },
+    "novel_reviewed": 2,
+    "total": 3
+   }
+  },
+  "minara": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Minara (Dmind)",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 6,
+    "kb": {
+     "recalled-citation": 6
+    },
+    "novel_reviewed": 6,
+    "total": 6
+   }
+  },
+  "minimax": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "mini-max-ai-ai-2",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 6,
+    "kb": {
+     "recalled-citation": 4,
+     "training-recall": 2
+    },
+    "novel_reviewed": 6,
+    "total": 6
+   }
+  },
+  "mistral": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Vibe, an AI assistant created by Mistral AI and powered by the Mistral Medium 3.5 model",
+   "parse": "fence",
+   "sources": {
+    "hint_present": 8,
+    "kb": {
+     "recalled-citation": 8
+    },
+    "novel_reviewed": 8,
+    "total": 8
+   }
+  },
+  "qwen": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "WRONG-CORRECTION",
+     "detail": "exists-but-citation-wrong: The correct citation is IEEE Micro, vol. 21, no. 1, pp. 24-36, January-February 2001 (not 200"
+    }
+   },
+   "declared": "Qwen3.8",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 6,
+    "kb": {
+     "recalled-citation": 1,
+     "training-recall": 5
+    },
+    "novel_reviewed": 6,
+    "total": 6
+   }
+  },
+  "solar": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "WRONG-CORRECTION",
+     "detail": "exists-but-citation-wrong: IEEE Micro vol. 21, no. 6, pp. 34-43, Nov-Dec 2001 (not vol. 21, 2007)"
+    }
+   },
+   "declared": "Solar, Upstage AI",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 8,
+    "kb": {
+     "guess": 1,
+     "recalled-citation": 7
+    },
+    "novel_reviewed": 3,
+    "total": 8
+   }
+  },
+  "sonnet": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Claude Sonnet 5",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 4,
+    "kb": {
+     "recalled-citation": 1,
+     "training-recall": 3
+    },
+    "novel_reviewed": 3,
+    "total": 4
+   }
+  },
+  "yuanbao": {
+   "anchors": {
+    "a1": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a2": {
+     "code": "exists-exactly",
+     "correction": "none",
+     "detail": ""
+    },
+    "a3": {
+     "code": "exists-but-citation-wrong",
+     "correction": "PASS",
+     "detail": ""
+    }
+   },
+   "declared": "Yuanbao (Hunyuan)",
+   "parse": "clean",
+   "sources": {
+    "hint_present": 7,
+    "kb": {
+     "guess": 1,
+     "recalled-citation": 4,
+     "training-recall": 2
+    },
+    "novel_reviewed": 6,
+    "total": 7
+   }
+  }
+ }
+}

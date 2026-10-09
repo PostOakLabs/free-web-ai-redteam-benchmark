@@ -1,0 +1,58 @@
+[
+  {
+    "case_name": "Regular Monthly Payments",
+    "appendix_basis": "Appendix J (c)(1) Example (i)",
+    "inputs": {
+      "amount_financed": "$10,000",
+      "payment_schedule": "48 monthly payments starting 1 month after advance",
+      "payment_amounts": "$263.34"
+    },
+    "unit_period_analysis": "Unit-period is a month (w=12). The advance date and the start of the first regular unit-period are exactly 30 days apart (e.g., advance on 1st, first payment on 1st of next month), so the fraction f=30/30=1. The first payment occurs at the end of the first full unit period, so t_1 = 1.",
+    "computation": "General equation: A = sum(P_k / ((1+fi)(1+i)^t_k)). For regular payments, this simplifies to A = P * a_overline_n|i.\n10000 = 263.34 * ((1 - (1+i)^-48) / i).\nIterating for i yields i = 0.01000028.\nAPR = 12 * i * 100 = 12.00%.",
+    "result_apr": "12.00%",
+    "doc_vs_general": "probably",
+    "weakest_point": "The exact payment amount in published examples might differ slightly (e.g., $263.34 vs $263.33) due to rounding of the finance charge before solving."
+  },
+  {
+    "case_name": "Irregular First Period (Odd Days)",
+    "appendix_basis": "Appendix J (c)(1) Example (ii)",
+    "inputs": {
+      "amount_financed": "$5,000",
+      "payment_schedule": "Advance on Jan 15. 12 monthly payments starting Feb 1.",
+      "payment_amounts": "$438.01"
+    },
+    "unit_period_analysis": "Unit-period is a month (w=12). First regular unit-period starts Feb 1. Advance date is Jan 15. Days from Jan 15 to Feb 1 is 17 days. Fraction f = 17/30. The first payment is on Feb 1, which is the beginning of the first full unit period, so t_1 = 0.",
+    "computation": "General equation: A = sum(P_k / ((1+fi)(1+i)^t_k)).\n5000 = (438.01 / (1 + (17/30)i)) * sum_{k=0}^{11} (1+i)^-k.\n5000 = (438.01 / (1 + 0.56667i)) * (1 + 1/(1+i) + ... + 1/(1+i)^11).\nIterating for i yields i = 0.008335...\nAPR = 12 * i * 100 = 10.00%.",
+    "result_apr": "10.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Appendix J defines the exact starting date for the 'first full unit period' which can sometimes be interpreted as the first payment date vs the first regular interval boundary; here f=17/30 assumes the unit period boundaries align with the payment days of the month."
+  },
+  {
+    "case_name": "Single-Advance Single-Payment (Term < 1 Year)",
+    "appendix_basis": "Appendix J (c)(5) Example (ii) and Form 1",
+    "inputs": {
+      "amount_financed": "$1,000",
+      "payment_schedule": "Single payment of $1,050 due exactly 6 months after advance.",
+      "payment_amounts": "$1,050"
+    },
+    "unit_period_analysis": "For single-advance, single-payment, the unit-period is the term of the transaction (6 months). Number of unit-periods per year w = 12/6 = 2. Since the term is exactly 1 unit period, the payment occurs at the end of the first unit period, so t = 1 and f = 0.",
+    "computation": "Form 1 equation: I = 100 * w * (P/A - 1).\nI = 100 * 2 * (1050 / 1000 - 1) = 200 * 0.05 = 10.00%.\nAlternatively, Form 4 (iteration): A = P / ((1+fi)(1+i)^t).\n1000 = 1050 / ((1+0*i)(1+i)^1) = 1050 / (1+i).\n1+i = 1.05 => i = 0.05.\nAPR = 100 * w * i = 100 * 2 * 0.05 = 10.00%.",
+    "result_apr": "10.00%",
+    "doc_vs_general": "confident-in-appendix-j",
+    "weakest_point": "Form 1 is restricted to terms < 1 year with no odd days; if the term was 6 months and 5 days, Form 4 would be required with f > 0."
+  },
+  {
+    "case_name": "Irregular First Payment (Otherwise Regular)",
+    "appendix_basis": "Appendix J (c)(2) Example (i)",
+    "inputs": {
+      "amount_financed": "$8,000",
+      "payment_schedule": "First payment of $504.29 due in 1 month, followed by 35 monthly payments of $250.00.",
+      "payment_amounts": "P1 = $504.29, P = $250.00"
+    },
+    "unit_period_analysis": "Unit-period is a month (w=12). Advance is on the 1st, first payment on the 1st of next month (1 unit period), so t_1 = 1 and f = 0. Subsequent regular payments occur at t_2 = 2 through t_36 = 36.",
+    "computation": "General equation: A = P_1 / ((1+fi)(1+i)^t_1) + sum_{k=2}^{36} P / ((1+fi)(1+i)^k).\n8000 = 504.29 / (1+i) + sum_{k=2}^{36} 250 / (1+i)^k.\n8000 = 504.29 / (1+i) + (250 / (1+i)) * ((1 - (1+i)^-35) / i).\nIterating for i yields i = 0.0083333...\nAPR = 12 * i * 100 = 10.00%.",
+    "result_apr": "10.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "The exact payment stream in published examples usually derives from a stated contract interest rate and odd-days interest calculation rather than backing out an exact 10.00% APR with these precise dollar amounts."
+  }
+]

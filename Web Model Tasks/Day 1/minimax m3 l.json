@@ -1,0 +1,49 @@
+[
+  {
+    "title": "Register-renaming scheme: physical register file vs. future-file/ROB-only retirement",
+    "where_in_paper": "Section on register renaming (microarchitecture / integer execution)",
+    "decision": "Use a separate physical register file for register renaming, with in-order retirement through the reorder buffer (ROB), rather than a future-file or register-file update unit that retires out of order into the architectural file.",
+    "alternatives_or_rejected": "A future-file (separate speculative file written at dispatch/issue, with the architectural register file updated only at retirement a register update unit (RUU) that combines renaming and scheduling in one structure. The paper notes these were considered and rejected in favor of a clean split between a large physical register file and the ROB.",
+    "rationale": "Separating the physical register file from the ROB simplifies recovery on misprediction and exception, avoids an extra write on the architectural file, and lets the ROB handle precise state for in-order retirement without speculative state leaking into the committed file.",
+    "outcome": "The 21264 shipped with 80 integer + 72 floating-point physical registers supporting-of-order execution with in-order retirement, and the ROB (called the 'retire queue' in the paper) handled recovery.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Clustered execution with selective issue queues",
+    "where_in_paper": "Section on integer cluster / issue organization",
+    "decision": "Partition execution resources into two asymmetric clusters (cluster 0 and cluster 1) with per-cluster issue queues, and have instructions choose which cluster to issue from at dispatch time.",
+    "alternatives_or_rejected": "A single, monolithic issue queue (a unified scheduler), and a fully symmetric dual cluster with identical functional units. The paper argues that a single monolithic queue would not scale to the target issue width in the available cycle time, and that true symmetry would not pay for itself.",
+    "rationale": "Splitting the issue queues cuts the critical path through the scheduler and lets each cluster run at a higher frequency; selective dispatch keeps the common case (both clusters fed) while tolerating clustering-induced stalls.",
+    "outcome": "Two clusters with asymmetric integer issue queues and one FP issue unit, with explicit inter-cluster wakeup delay (the paper reports a 1-cycle penalty when an instruction on one cluster depends on a result from the other).",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.55
+  },
+  {
+    "title": "Branch prediction: local vs. global vs. hybrid, and the choice of a tournament predictor",
+    "where_in_paper": "Section on branch prediction",
+    "decision": "Combine a local-history predictor (per-branch history tables) and a global-history predictor with a chooser into a hybrid tournament predictor, and fetch up to 4 instructions per cycle from a predicted-taken path.",
+    "alternatives_or_rejected": "A pure local predictor (insufficient for branches whose behavior depends on surrounding pattern) predictor (suffers from destructive aliasing in the global history table). The paper frames the hybrid as picking the better of the two on a per.",
+    "rationale": "No single scheme dominates across workloads; the tournament predictor captures branches that each individual predictor would mispredict, at the cost of extra storage and a small chooser overhead.",
+    "outcome": "The  misprediction rates lower than either component predictor alone on the workloads shown, at the cost extra history tables and chooser counters.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.55
+  },
+  {
+    "title": "Cache organization: on-die vs-die L2 and L2 inclusion",
+    "where_in_paper": " hierarchy",
+    "decision": "Keep the L1 I-cache and D-cache on die and place the L2 cache off die, with the L2 sized and controlled to of the L1s.",
+    "alternatives_or_rejected": "An on-die L2 discussed but rejected for this implementation due to die area and yield constraints; the paper also a non-inclusive L2 and rejects it because inclusion simplifies coherency filtering (a snoop-hit L2 line the L1 does not need to be probed for some cases, and flushed L1 lines can be tracked in2).",
+    "rationale": "On-die L2 was not yet affordable in the target process; inclusion buys a simpler coherency protocol at the cost of some redundant capacity, which the paper judges right trade.",
+    "outcome": "L1 caches ( I + 64 KB D) on die, L2 off die up to several MB with inclusion enforced; the paper reports this as the shipped configuration.",
+    "paper_vs_general": "probably-in-theconfidence": 0.4
+  },
+  {
+    "title": "Cache-line for the L1 data cache and load/store queuewhere_in_paper": "Section on data cache / load-store unit",
+    "decision": "Use a 64-byte cache line for the L1 data cache (same as L2) and back the load/store unit with a load queue and store out-of-order issue while preserving memory ordering at retirement.",
+    "alternatives_or_rejected": "A 32-byte L1 line (would reduce conflict misses but increase miss handling cost relative to L2 and complicate coalescing) and a unified load-store queue (re separating loads and stores simplifies wakeup, port allocation, and forwarding paths at the target issue).",
+    "rationale": "Matching the L2 line size keeps fill/dirty-tracking simple, and splitting the queues lets each be sized and ported for its own pattern while still enforcing precise memory ordering at.",
+    "outcome": "A 64-byte L1 line, separate load and store queues sized for the target issue width, and an issue path with checks resolved before retirement_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+ 0.3
+  }
+]

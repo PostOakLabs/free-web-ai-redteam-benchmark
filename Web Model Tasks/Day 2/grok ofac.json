@@ -1,0 +1,94 @@
+[
+  {
+    "case_name": "Simple majority chain (full attribution through ≥50% intermediary)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "A", "to": "B", "pct": 50}
+    ],
+    "computation": "1. X owns 50% of A → A is blocked (≥50%). 2. Because A is ≥50% owned by blocked person X, OFAC attributes A's entire 50% stake in B to X (full look-through, not multiplied to 25%). 3. X therefore indirectly owns 50% of B. Aggregate ownership of B by blocked persons = 50%.",
+    "blocked_verdicts": ["X (designated)", "A (50% by X)", "B (50% indirect by X)"],
+    "guidance_basis": "OFAC FAQ 401 Example 1: 'Blocked Person X owns 50 percent of Entity A, and Entity A owns 50 percent of Entity B. Entity B is considered to be blocked. This is so because Blocked Person X owns, indirectly, 50% of Entity B.'",
+    "weakest_point": "Certainty high; matches published example exactly."
+  },
+  {
+    "case_name": "Convergent paths through two majority-owned intermediaries",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 50},
+      {"from": "A", "to": "C", "pct": 50},
+      {"from": "B", "to": "C", "pct": 50}
+    ],
+    "computation": "1. X owns 50% A → A blocked. X owns 50% B → B blocked. 2. Through A: because A is ≥50% owned by X, X is attributed A's full 50% of C → 50% path contribution becomes 50%? Wait per FAQ: actually FAQ states 25%+25%. Correction per exact FAQ text: 'through its 50 percent ownership of Entity A, Blocked Person X is considered to indirectly own 25 percent of Entity C' (i.e., multiplicative 50%×50%=25%). 3. Likewise through B: another 25%. 4. Aggregate = 25% + 25% = 50%. C blocked. (OFAC applies multiplication of the ownership percentages along each path, then sums the path contributions; the ≥50% status of the intermediary makes the path count, but the % is still the product.)",
+    "blocked_verdicts": ["X", "A", "B", "C (aggregate 50% via two paths)"],
+    "guidance_basis": "OFAC FAQ 401 Example 2: path contributions of 25% + 25% = 50%.",
+    "weakest_point": "The precise arithmetic (product vs full attribution) — FAQ 401 Example 1 appears to use full 50% while Example 2 uses products; applying consistent multiplication yields the published 25+25."
+  },
+  {
+    "case_name": "Convergent mixed direct + indirect (majority intermediary)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 10},
+      {"from": "A", "to": "B", "pct": 40}
+    ],
+    "computation": "1. X owns 50% of A → A is blocked. 2. Direct ownership of B by X = 10%. 3. Indirect via A: because A ≥50% owned by X, X is attributed A's 40% stake in B (FAQ Example 3 language: 'indirectly own 40 percent'). 4. Aggregate = 10% (direct) + 40% (indirect) = 50%. B blocked.",
+    "blocked_verdicts": ["X", "A (50%)", "B (10%+40%=50%)"],
+    "guidance_basis": "OFAC FAQ 401 Example 3: 'Blocked Person X owns 50 percent of Entity A and 10 percent of Entity B. Entity A also owns 40 percent of Entity B. Entity B is considered to be blocked... indirectly own 40 percent of Entity B... total of 50 percent.'",
+    "weakest_point": "None; matches FAQ 401 Example 3 verbatim."
+  },
+  {
+    "case_name": "Non-convergent minority chain (no blocking of downstream)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 40},
+      {"from": "A", "to": "B", "pct": 60}
+    ],
+    "computation": "1. X owns only 40% of A → A is not blocked (<50%). 2. Because the intermediary A is not itself ≥50% owned by blocked persons, there is no 'indirect' ownership attribution of A's stake in B to X under the 50% Rule. 3. X's aggregate ownership of B = 0% for purposes of the rule (no qualifying path). B not blocked by the 50% Rule.",
+    "blocked_verdicts": ["X only"],
+    "guidance_basis": "OFAC FAQ 401 definition of 'indirectly': ownership through another entity or entities that are 50 percent or more owned in the aggregate by the blocked person(s). Here the intermediary fails the ≥50% test.",
+    "weakest_point": "Whether any residual multiplicative claim (40%×60%=24%) could be argued; guidance requires the intermediary itself to be ≥50% owned."
+  },
+  {
+    "case_name": "Convergent three-path aggregate exactly 50%",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "Y", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false},
+      {"id": "T", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "Y", "to": "B", "pct": 50},
+      {"from": "X", "to": "C", "pct": 50},
+      {"from": "A", "to": "T", "pct": 20},
+      {"from": "B", "to": "T", "pct": 20},
+      {"from": "C", "to": "T", "pct": 20},
+      {"from": "X", "to": "T", "pct": 10}
+    ],
+    "computation": "1. X owns 50% A → A blocked; Y owns 50% B → B blocked; X owns 50% C → C blocked. 2. Path X-A-T: intermediary A ≥50% by X → attribute 20% (per Example 3 style). 3. Path Y-B-T: intermediary B ≥50% by Y → attribute 20%. 4. Path X-C-T: intermediary C ≥50% by X → attribute 20%. 5. Direct X-T = 10%. 6. Aggregate blocked ownership of T = 20+20+20+10 = 70% ≥50%. (Even if multiplication were applied consistently 50%×20%=10% per path, total would still be 10+10+10+10=40% <50%; but following FAQ Examples 1/3 attribution of the intermediary's full % yields 70%.)",
+    "blocked_verdicts": ["X", "Y", "A", "B", "C", "T (aggregate ≥50%)"],
+    "guidance_basis": "OFAC FAQ 401 (aggregation of all blocked persons; indirect via ≥50% intermediaries; Examples 1 and 3 full-stake attribution).",
+    "weakest_point": "Slight tension between Example 1/3 (full % of intermediary) and Example 2 (product); used full-attribution for majority intermediaries as in Examples 1 and 3."
+  }
+]

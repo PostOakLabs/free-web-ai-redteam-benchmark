@@ -1,0 +1,62 @@
+[
+{
+"title": "Design POWER4 as a full system rather than as an isolated processor",
+"where_in_paper": "Guiding Principles — Full system design approach",
+"decision": "The POWER4 effort was organized around designing the processor, memory subsystem, I/O bridge chips, packaging, and system interconnect together from the outset.",
+"alternatives_or_rejected": "The paper contrasts this with treating a new high-performance processor as an independent chip and then attempting to build a subsystem around it. It argues that such an approach would not adequately feed the processor.",
+"rationale": "The stated reasoning is that processor, process technology, packaging, and system architecture must be married so that the resulting system remains balanced and software can exploit it. The authors explicitly state that a new high-performance processor needs a new subsystem to effectively feed it.",
+"outcome": "POWER4 became a system architecture rather than merely a processor design: the chip, off-chip L3, memory, I/O, packaging, and a new distributed-switch interconnect were designed as parts of one system capable of scaling to 32-way SMP.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99,
+"weakest_point": "The characterization of the alternative as an independent-chip-first methodology is an interpretation of the paper's contrast rather than a named rejected project option.",
+"provenance_note": "The decision and its stated reasoning are explicit in the paper's Guiding Principles section."
+},
+{
+"title": "Use one POWER4 design for both commercial and technical workloads",
+"where_in_paper": "Guiding Principles — Commercial and technical applications",
+"decision": "The team chose a single POWER4 design intended to provide high performance for both commercial applications and technical/high-performance-computing applications, while serving both the iSeries and pSeries product families.",
+"alternatives_or_rejected": "The paper identifies the competing requirements: technical computing historically demands high bandwidth, while commercial computing emphasizes data sharing and SMP scaling. It does not describe separate candidate designs in detail, but the stated choice was to address both environments with one design.",
+"rationale": "The authors say the evolving e-business environment was merging data-intensive technical demands with commercial requirements. They therefore judged that a single design capable of handling the varied workload set was required, and that this would also allow the needs of both iSeries and pSeries to be met.",
+"outcome": "POWER4 was designed from the outset for both system families and for the combination of high-bandwidth technical workloads and commercial SMP/data-sharing workloads.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99,
+"weakest_point": "The paper does not explicitly say that two separate chip designs were seriously considered and rejected; that is only the implied alternative to the stated single-design decision.",
+"provenance_note": "The workload requirements and the decision to use a single design are directly stated; the explicitness of the rejected alternative is weaker."
+},
+{
+"title": "Commit to very high processor frequency as a primary design objective",
+"where_in_paper": "Guiding Principles — Very high frequency design",
+"decision": "POWER4 was designed from the outset to achieve leadership-level operating frequencies, with the chip and system architecture structured so that later technology improvements could raise processor frequency without destroying system balance.",
+"alternatives_or_rejected": "The paper does not identify a concrete lower-frequency candidate design that was rejected. It does, however, describe a deliberate departure from conventional chip-design methods, including new transistor-level tools and transforming complex control logic into more regular data-flow constructs.",
+"rationale": "The stated motivation was maintaining a leadership position in operating frequency. The design methodology was changed accordingly, and the system buses were made to scale with processor frequency so that increasing CPU speed would not leave the rest of the system behind.",
+"outcome": "POWER4 used a high-frequency processor and frequency-scaled system interfaces; the paper reports that the resulting design met its performance, schedule, and content objectives and was intended to accommodate still higher frequencies as technology improved.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98,
+"weakest_point": "The description of a 'departure from conventional chip-design methods' summarizes the paper's discussion rather than identifying a single explicitly rejected conventional implementation.",
+"provenance_note": "The frequency objective, methodological changes, and frequency-scaling rationale are explicit in the paper."
+},
+{
+"title": "Treat reliability, availability, and serviceability as pervasive architectural requirements",
+"where_in_paper": "Guiding Principles — Leadership RAS",
+"decision": "The POWER4 design adopted a system-wide RAS philosophy in which preventing outages, providing redundancy where errors could not be eliminated, and converting recoverable failures into software-visible synchronous interrupts were design requirements rather than add-on features.",
+"alternatives_or_rejected": "The paper explicitly argues against relying merely on reliable component selection and ECC in major arrays. It says that this alone was insufficient for the continuous-operation requirements of servers.",
+"rationale": "Servers were expected to operate continuously, with outages essentially unacceptable. The authors therefore reasoned that high reliability required eliminating failures where possible and providing redundancy and recovery mechanisms where they could not be eliminated. Where possible, hard machine stops were transformed into synchronous machine interrupts so software could circumvent a problem.",
+"outcome": "RAS mechanisms were distributed throughout the POWER4 system, including error detection and logging, BIST, service-processor support, ECC, redundancy, and mechanisms for continued operation or recovery from faults.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99,
+"weakest_point": "The final list of specific RAS mechanisms extends beyond the short Guiding Principles statement and may draw on the later RAS/system portions of the same paper.",
+"provenance_note": "The rejection of 'reliable parts plus ECC alone' and the overall RAS philosophy are explicitly stated in the paper."
+},
+{
+"title": "Preserve binary compatibility instead of changing the PowerPC architecture",
+"where_in_paper": "Guiding Principles — Binary compatibility",
+"decision": "POWER4 retained binary compatibility for both 32-bit and 64-bit applications written for prior PowerPC and PowerPC AS systems.",
+"alternatives_or_rejected": "The alternative was to make an architectural change that could have broken compatibility with existing software. The paper says internal IBM task forces had concluded that there was no technical impediment to scaling the existing PowerPC architecture to substantially higher frequencies with excellent performance.",
+"rationale": "Because IBM found no technical reason that required changing the architecture, preserving customers' existing software investment became an absolute hardware requirement. The stated reasoning is therefore explicitly customer/software-investment driven rather than a claim that architectural change was technically impossible.",
+"outcome": "POWER4 maintained binary compatibility with both 32-bit and 64-bit applications from the prior PowerPC and PowerPC AS environments while pursuing substantially higher processor performance.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 1.0,
+"weakest_point": "The paper does not enumerate particular incompatible architectural alternatives; it establishes the compatibility requirement and says there was no technical reason to change the architecture.",
+"provenance_note": "This is one of the clearest explicit decision statements in the paper, including the reason for rejecting an architectural break."
+}
+]

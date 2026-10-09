@@ -1,0 +1,52 @@
+[
+{
+"title": "Split the integer register file into two clusters",
+"where_in_paper": "Execution engine",
+"decision": "The 21264 uses two clusters, each with a duplicated 80-entry integer register file; the four integer execution pipes are divided between the clusters.",
+"alternatives_or_rejected": "The paper explicitly contrasts this with an idealized unclustered implementation. It accepts the extra inter-cluster result-broadcast latency rather than using the more complex unclustered organization.",
+"rationale": "The clustering makes the design simpler and faster, at the cost of an extra cycle when results must be broadcast from one cluster to the other. The paper says the performance cost is only a few percent or less in most applications because many operations are constrained to particular pipes and critical-path computations tend to stay on the same cluster. ",
+"outcome": "The implemented clustered organization provided four-way integer execution while simplifying and speeding the design, with only a small measured/simulated performance penalty relative to an idealized unclustered design. ",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Use a tournament branch predictor",
+"where_in_paper": "Branch prediction",
+"decision": "The 21264 uses a tournament branch predictor that combines local-history and global-history predictors and dynamically chooses between them for each prediction.",
+"alternatives_or_rejected": "The paper contrasts the combined scheme with using either individual method alone, noting that the tournament predictor gives better prediction accuracy than larger tables of either individual method.",
+"rationale": "The paper argues that branches exhibit both local and global correlation, so no single predictor is best for every branch. A chooser dynamically selects the local or global prediction, adapting to which method is more accurate. ",
+"outcome": "The resulting predictor is reported to achieve 90% to 100% success rates on most simulated applications/benchmarks and to minimize mispredicts while exploiting speculative execution. ",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98
+},
+{
+"title": "Use a minirestart rather than restarting the whole pipeline on load misses",
+"where_in_paper": "Dynamic execution examples — Load hit/miss prediction",
+"decision": "When consumers of an integer load have issued speculatively and the load subsequently misses, the 21264 uses a two-cycle minirestart that squashes and reissues the affected integer issue-window instructions rather than restarting the entire instruction pipeline.",
+"alternatives_or_rejected": "The paper explicitly says the processor could use the general speculative-execution machinery to abort the consumers, but that would require restarting the entire pipeline; it rejects that approach as too expensive because load misses can be frequent.",
+"rationale": "The minirestart is less costly than a full pipeline restart. Even that two-cycle penalty can be expensive for workloads with many misses, which leads to the additional decision to predict load hits versus misses and suppress speculative consumer issue when a miss is predicted. ",
+"outcome": "The implemented mechanism limits recovery to the affected integer issue cycles, and the load hit/miss predictor further avoids unnecessary speculation on workloads that frequently miss while retaining minimum latency behavior for workloads that usually hit. ",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Skew cache-fill writes by a cycle",
+"where_in_paper": "Internal memory system — cache pipeline",
+"decision": "The data cache fill path writes incoming fill data on a later cycle rather than immediately writing it in the first possible cycle.",
+"alternatives_or_rejected": "The paper explicitly says the fill data could have been written in cycle 1 instead of cycle 2, but that choice would create pipeline conflicts and allow fewer load and store issues.",
+"rationale": "The one-cycle skew is for performance reasons: delaying the write avoids conflicts in the cache pipeline and preserves more opportunities for load and store issue bandwidth. ",
+"outcome": "The implemented skew lets the memory pipeline support more load/store activity than the earlier write timing would have allowed. ",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98
+},
+{
+"title": "Use line-and-way prediction with a two-way instruction cache",
+"where_in_paper": "Instruction pipeline — Fetch / Line and way prediction",
+"decision": "The 21264 uses a 64-Kbyte two-way set-associative instruction cache while using line-and-way prediction to keep the fetch path nearly as fast as a direct-mapped cache.",
+"alternatives_or_rejected": "The paper presents the technique as combining the advantages of set-associative behavior and elimination of fetch bubbles with the fast access time of a direct-mapped cache. It also contrasts the 64-Kbyte two-way cache with the 8-Kbyte direct-mapped instruction cache of the 21164.",
+"rationale": "The prediction identifies the next cache line and way before the full validity/tag checks complete, allowing the processor to read the next four instructions in parallel. Because predictions are usually correct and mispredictions generally cost only one cycle, the design obtains the lower miss rates of associativity without putting the full tag/decode work on the critical fetch loop. ",
+"outcome": "The paper reports 85% to 100% line/way prediction accuracy for most applications, infrequent retraining, and a fast instruction-fetch path with low-cost mispredictions. ",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.96
+}
+]

@@ -1,0 +1,36 @@
+```json
+[
+  {
+    "title": "Choosing a simple global clock distribution with a single central PLL over a more complex distributed clocking scheme",
+    "where_in_paper": "Clock distribution section",
+    "decision": "The paper describes using a simple global clock distribution architecture built around a single central PLL, rather than a more complex multi-domain or distributed clock generation scheme.",
+    "alternatives_or_rejected": "The specific rejected alternative (e.g., multiple regional PLLs, a fully distributed clock grid with local regeneration) is not something I can confidently attribute to the paper's own text from what I found — the source I searched confirms the chosen approach and its results but does not spell out the alternative considered.",
+    "rationale": "The stated framing (from the summary I found) is that this simpler single-PLL global distribution was judged sufficient to hit the target skew/jitter numbers while avoiding the added design complexity of a more elaborate distributed scheme, but I cannot confirm this rationale wording is the paper's own versus a paraphrase in the secondary source.",
+    "outcome": "The paper reports this approach achieved clock jitter of about 35 ps and skew of about 20 ps, described as unprecedented for a design of this class at the time.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Four-level hierarchical, concurrent design methodology to manage a 1,000-macro, multi-site design",
+    "where_in_paper": "Design methodology section",
+    "decision": "The team structured the physical design process as a hierarchical methodology with four levels, enabling concurrent (simultaneous) work across roughly 1,000 macros by multiple design sites at once, rather than a flatter or more sequential design flow.",
+    "alternatives_or_rejected": "I don't have confirmed detail on what specific alternative flow (e.g., a fully flat, non-hierarchical methodology, or a strictly sequential single-site flow) the paper explicitly argues against; I can only confirm the chosen structure and its stated purpose.",
+    "rationale": "The methodology was adopted to manage the risk and coordination burden of a 174-million-transistor, multisite design team, letting different levels of the hierarchy proceed in parallel rather than waiting on each other.",
+    "outcome": "The paper reports this allowed the design to meet project goals and complete on schedule despite the design's size and the high target operating frequency (>1.3 GHz).",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Power-grid design targeting a specific IR-drop budget under high power density",
+    "where_in_paper": "Power distribution / power grid design section",
+    "decision": "The power distribution design was engineered to a specific voltage-drop target — limiting IR drop to under roughly 30 mV even at power densities up to about 1 W/mm².",
+    "alternatives_or_rejected": "I cannot confirm from what I found what alternative, less-constrained power-grid target the team explicitly weighed and rejected — the source confirms the chosen budget and the achieved result, not a stated alternative.",
+    "rationale": "Not confirmed in detail from what I found beyond the implication that this tight IR-drop target was necessary to keep circuits functioning reliably at the chip's high power density and operating frequency.",
+    "outcome": "The paper reports this voltage-drop target was met (IR drop kept under ~30 mV at power densities up to ~1 W/mm²).",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  }
+]
+```
+
+I searched fresh and found a source that summarizes several concrete, specific claims from this paper (jitter/skew numbers, the four-level hierarchical methodology across ~1,000 macros, and the IR-drop budget) — enough to build the episodes above with those facts anchored. But I want to be honest about a limit: that source is a secondary summary/abstract page, not the paper's full text, so I could confirm the *decisions and outcomes* but not the *rejected alternatives* the prompt also wants — those fields I've marked as unconfirmed rather than inventing them. That's why confidence sits around 0.4–0.45 rather than higher, and why I kept `paper_vs_general` at "probably-in-the-paper" rather than "confident" — I'd want the actual paper text in front of me (as Prompt D's Task 2 anticipates) to responsibly push these higher or fill in the rejected-alternative fields.

@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Departure from the 21164: out-of-order execution combined with high clock frequency",
+    "where_in_paper": "Introduction / design philosophy (early microarchitecture overview)",
+    "decision": "The 21264 was designed as an out-of-order, speculative processor with a large instruction window, deliberately departing from its predecessor the 21164, which issued in-order.",
+    "alternatives_or_rejected": "The implicit alternative rejected was the 21164's in-order, statically scheduled, frequency-first approach; my recollection is the paper argues for out-of-order rather than formally tabulating rejected options.",
+    "rationale": "The paper's stated position is that an in-order machine could not extract enough instruction-level parallelism from real code to reach the performance targets, and that out-of-order execution could be reconciled with, rather than traded against, very high clock frequency.",
+    "outcome": "The paper presents the aggressive out-of-order design as the central reason for the 21264's large performance gains over the 21164 on both integer and floating-point code.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Combined local + global branch predictor with a chooser",
+    "where_in_paper": "Instruction fetch / branch prediction section",
+    "decision": "The 21264 uses a hybrid branch predictor combining a local history component (local history table indexed into a local predictor), a global-history component, and a chooser table that selects between them; fetch is also redirected only on taken branches.",
+    "alternatives_or_rejected": "Simpler single-component predictors (e.g., bimodal-only as in earlier designs) are the implicit alternative; I do not recall the paper detailing an explicit list of rejected predictor designs.",
+    "rationale": "Combining local and global history captures both branch-specific and correlated behavior, giving higher accuracy, which matters because the cost of mispredictions is high in the deep out-of-order pipeline. Specific table sizes (on the order of 1024-entry local histories, 4096-entry global and chooser tables) are recalled with moderate certainty.",
+    "outcome": "The paper reports low misprediction rates on its benchmark set, supporting the aggressive fetch/window design.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Memory dependence speculation: loads execute before older stores' addresses are known",
+    "where_in_paper": "Memory system / load-store execution discussion (memory reorder buffer)",
+    "decision": "Loads are allowed to execute speculatively ahead of older stores whose addresses are not yet resolved; a memory reorder buffer (32 entries, as I recall) tracks outstanding memory operations, and a dependence misprediction triggers a replay of the affected instructions.",
+    "alternatives_or_rejected": "The conservative alternative is to stall loads until all older store addresses are known; I do not recall the paper presenting a formal rejection of this, but the speculation-with-replay scheme is presented as deliberate.",
+    "rationale": "Conservatively ordering every load against every unresolved store would forfeit much of the parallelism the large out-of-order window is meant to expose; speculation plus replay only pays the penalty on the (rare) mispredictions.",
+    "outcome": "The paper reports that this enables high memory-level parallelism while preserving correct memory ordering, with replays occurring rarely enough not to undermine performance.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "No on-chip secondary cache: large on-chip L1s plus a large off-chip L2",
+    "where_in_paper": "Memory hierarchy / cache organization discussion",
+    "decision": "Unlike the 21164 (which had an on-chip secondary cache), the 21264 uses relatively large on-chip first-level caches (64 KB each, as I recall) and a multi-megabyte secondary cache located off-chip.",
+    "alternatives_or_rejected": "The 21164-style on-chip L2 was the alternative; the trade-off is spending die area on the second-level cache versus on the L1 capacity and the out-of-order machinery. I recall the paper discussing this trade-off but am less certain how explicitly it frames the on-chip-L2 option as considered and rejected.",
+    "rationale": "On the target process, area was judged better spent on the large L1s and the big instruction window than on an on-chip L2, with the large external L2 preserving cache capacity.",
+    "outcome": "The paper reports the resulting hierarchy sustains the bandwidth/latency behavior the out-of-order core needs, at the cost of a multi-cycle off-chip L2 access.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Register renaming into physical register files (80 integer / 72 FP), with a replicated integer register file across clusters",
+    "where_in_paper": "Register renaming / integer issue and execution-cluster discussion",
+    "decision": "Speculative results are held in enlarged physical register files (80 integer and 72 floating-point physical registers, numbers I recall from the paper) rather than in a reorder buffer; the integer physical register file is replicated across the two integer execution clusters, and integer issue is handled by separate per-cluster queues with oldest-ready-first arbitration.",
+    "alternatives_or_rejected": "ROB-based buffering of speculative results and a single centralized, highly multi-ported integer register file/queue are the implicit alternatives; the port-count and cycle-time argument for replication and split queues is my recollection, and I am not certain the paper explicitly names the monolithic design as a rejected option.",
+    "rationale": "Providing enough register read ports for multiple integer instructions per cycle from one monolithic file would be slow and complex; replicating the file per cluster keeps each cluster's read local and the cycle time short. A large pool of physical registers supports the big out-of-order window.",
+    "outcome": "The paper reports the clustered organization sustains wide integer issue and the intended clock frequency, with the register map checkpoint/rename mechanism handling misprediction recovery.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  }
+]

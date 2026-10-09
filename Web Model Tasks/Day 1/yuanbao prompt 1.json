@@ -1,0 +1,145 @@
+{
+  "prompt_a": [
+    {
+      "title": "Macro-channel congestion resolved via pin-swap and selective promotion at 7nm, avoiding floorplan re-work",
+      "design_context": "7nm finFET, 1.2M placeable instances, 84 macros, 3 clock domains (main 2GHz, peripheral 500MHz, test 100MHz), commercial P&R + synthesis",
+      "prior_state": "Utilization 81%, congestion overflow 14.2% (top 3 metal layers), 23 GRC overflow hotspots, post-CTS WNS -45ps, TNS -1200ps",
+      "observation": "Post-CTS global route shows persistent 14.2% overflow in M5-M7 layers concentrated around 4 large macros (2MB SRAM x2, PCIe PHY, USB PHY). Channel width between macros is 5.2um, insufficient for M5-M7 escape routing.",
+      "severity": "HIGH",
+      "hypothesis": "Macro placement creates narrow channels where M5-M7 vertical routing cannot escape; standard cell fill in channels exacerbates overflow. Floorplan re-work would solve it but violates schedule.",
+      "candidates_considered": [
+        {
+          "action": "Re-floorplan: move 4 macros to create wider routing channels",
+          "rejected_because": "Would invalidate CTS (8 days to rebuild) and re-place 1.2M cells (5 days); tapeout in 11 days; aggregate re-spin risk >60%"
+        },
+        {
+          "action": "Add M8-M9 routing layers via metal option",
+          "rejected_because": "Requires metal stack change: new mask set (+$120K, 2-week foundry lead time); misses tapeout window by 3 days"
+        },
+        {
+          "action": "Partial pin-swap on macros + targeted cell padding in hotspots + selective net promotion to upper layers",
+          "rejected_because": "NOT rejected - chosen as best schedule-risk tradeoff"
+        },
+        {
+          "action": "Reduce cell util target from 81% to 72% via placement blockages",
+          "rejected_because": "Requires re-placing entire block (4 days) + re-CTS (2 days); similar schedule risk to re-floorplan with lower efficacy for macro-channel congestion"
+        }
+      ],
+      "chosen_intervention": "Pin-swap 312 pins across 4 macros to align with routing tracks using macro pin-swap automation; promote 47 high-fanout nets crossing macro channels to M6-M7 with 2x width; add 8 local placement blockages (5um x 5um) in worst GRCs and incrementally re-place 45K local cells (12-hour incremental); set routing congestion-driven optimization at 15% effort multiplier.",
+      "post_state": "Congestion overflow 1.1% (from 14.2%), utilization 80.3% (from 81%), DRC 0, WNS -52ps (from -45ps, 7ps degradation from pin-swap parasitics, within -60ps margin), TNS -1450ps (from -1200ps), incremental ECO turnaround 18 hours",
+      "expert_assessment": "Correct call given the 11-day tapeout window. Pin-swap + selective promotion + local re-place avoided the 13-day full re-floorplan cycle. Macro-channel congestion at 7nm often yields to pin-level interventions before floorplan changes. Would NOT transfer if overflow were >25% or distributed die-wide (indicates fundamental floorplan issue requiring macro repositioning).",
+      "confidence": 0.78,
+      "failure_class": "FAIL_CONGESTION",
+      "source_basis": "constructed-example",
+      "weakest_point": "Exact pin-swap count (312) and resulting overflow reduction (14.2% → 1.1%) are constructed precision; the directional trend is sound but specific magnitudes are illustrative."
+    },
+    {
+      "title": "Signature-based diagnosis: 1415 correlated timing failures traced to incorrect SDC constraint, not physical problem",
+      "design_context": "28nm, 850K placeable instances, 32 macros, 2 clock domains (CPU 1.5GHz, bus 750MHz), commercial synthesis + P&R",
+      "prior_state": "WNS -180ps, TNS -9500ps, 1420 failing setup paths, 0 hold violations, utilization 68%",
+      "observation": "After routing: 1,415 of 1,420 failing setup paths share a common endpoint (64-bit register file write port), all fail by 150-190ps, all launch from CPU 1.5GHz domain, all intra-clock. Remaining 5 paths are unrelated small violations.",
+      "severity": "HIGH",
+      "hypothesis": "The signature (massive correlation: same endpoint, same violation magnitude, same clock) indicates a CONSTRAINT problem, not physical/logic. The register file write port is constrained at full clock rate (667ps setup) but is actually a half-rate structure (writes every 2 cycles, allowing 1333ps).",
+      "candidates_considered": [
+        {
+          "action": "Full timing-driven P&R optimization (useful skew, layer opt, cell sizing) on 1,415 paths",
+          "rejected_because": "Would consume 3+ days of ECO iterations to recover 150-190ps across 1,415 paths; low probability of full closure; massive downstream DRC churn; likely to degrade other paths"
+        },
+        {
+          "action": "Insert multicycle 2 constraint on register-file write paths",
+          "rejected_because": "NOT rejected - chosen after RTL verification"
+        },
+        {
+          "action": "Reduce CPU clock from 1.5GHz to 1.0GHz",
+          "rejected_because": "Unacceptable performance regression (-33%); product spec mandates 1.5GHz minimum; would lose customer commitment"
+        },
+        {
+          "action": "Pipeline register file interface (add 1 stage)",
+          "rejected_because": "Requires RTL change: 2-week re-verification cycle; misses tapeout by 10 days"
+        }
+      ],
+      "chosen_intervention": "Verified with RTL team that register file writes are half-rate (arbitration alternates cycles); added multicycle 2 constraint: set_multicycle_path 2 -setup -from [get_clocks cpu_clk] -through [get_pins regfile/write_en]; re-ran STA: 1,415 paths now pass with +480ps slack. Remaining 5 unrelated paths: targeted buffer insertion + 1 cell upsize, recovered in 1 ECO round.",
+      "post_state": "WNS +120ps (from -180ps), TNS -850ps (from -9500ps), 0 failing setup paths, turnaround 10 hours total (6hrs constraint fix + 4hrs ECO)",
+      "expert_assessment": "Textbook signature-based triage. Clustering of failures (same endpoint, same magnitude, same clock) is diagnostic of constraint error. Junior engineer would have spent 3 days on ECO optimization; correct action was 1-line SDC change. Always histogram failing paths by endpoint, clock, and violation magnitude before touching netlist. Would NOT transfer if failure signature were diverse (different endpoints, varying magnitudes) - that indicates genuine physical/logic problems requiring optimization.",
+      "confidence": 0.85,
+      "failure_class": "FAIL_TIMING",
+      "source_basis": "constructed-example",
+      "weakest_point": "Precise distribution (1,415 of 1,420) and exact slack values are constructed; the diagnostic pattern is valid but these specific numbers are illustrative."
+    },
+    {
+      "title": "Asymmetric inter-block timing budget derived bottom-up from internal WNS margins at 16nm",
+      "design_context": "16nm, Block A: 600K instances, Block B: 900K instances, 320 critical boundary signals at 2GHz (500ps period), commercial hierarchical STA",
+      "prior_state": "Block A internal WNS -35ps (comfortable), Block B internal WNS -280ps (tight), boundary paths unconstrained (no SDC), top-level requirement 500ps end-to-end",
+      "observation": "At top-level integration, 320 signals cross from Block A to Block B. Without budget, STA treats as ideal (optimistic) or flags unconstrained (hides problems). Block B is 1.5x larger and significantly more timing-critical than Block A.",
+      "severity": "MODERATE",
+      "hypothesis": "Block B's internal WNS (-280ps) is 8x worse than Block A's (-35ps). Equal budget split would strangle B while giving A excess margin. Asymmetric budget favoring A is required.",
+      "candidates_considered": [
+        {
+          "action": "Equal split: 250ps A-side, 250ps B-side",
+          "rejected_because": "Block B at -280ps internal WNS leaves only -30ps margin for 250ps boundary budget; insufficient given B's existing struggle; would force massive B-side ECOs with schedule risk"
+        },
+        {
+          "action": "Asymmetric: 350ps A-side, 150ps B-side",
+          "rejected_because": "NOT rejected - chosen as optimal balance"
+        },
+        {
+          "action": "Asymmetric: 400ps A-side, 100ps B-side",
+          "rejected_because": "Too aggressive against A; A needs significant optimization for 320 signals in 350ps when A's internal paths already consume ~200ps of phase; risk of creating A-side violations"
+        },
+        {
+          "action": "No budget - flat top-level implementation",
+          "rejected_because": "Top-level is 3.2M instances; flat STA takes 40+ hours per run; hierarchical budgeting mandatory for schedule"
+        }
+      ],
+      "chosen_intervention": "Measured Block A typical clock-to-output for registered signals: 180ps (200ps phase remaining from 500ps). Allocated A-side budget = 320ps (180ps C2O + 140ps for interconnect + uncertainty). B-side budget = 180ps (B's internal -280ps leaves 220ps from 500ps; 180ps is tight but feasible). Added to SDC: set_output_delay 320 -clock top_clk [get_ports block_A_outputs], set_input_delay 180 -clock top_clk [get_ports block_B_inputs]. Validated: A meets 320ps output delay with WNS +45ps; B meets 180ps input delay with WNS -15ps (within -20ps threshold).",
+      "post_state": "Block A: WNS +45ps (from -35ps; 320ps output delay forced minor optimization, net improvement). Block B: WNS -15ps (from -280ps; 180ps budget gave relief). All 320 boundary signals pass with 5-50ps slack. Top-level after integration: WNS +8ps.",
+      "expert_assessment": "Asymmetric budget correctly recognized Block B as bottleneck. Equal split would have triggered B-side crisis. Key insight: derive budgets bottom-up from measured internal WNS margins, not top-down by division. General lesson applies to any hierarchical timing budget. Would NOT transfer if blocks had similar internal timing profiles (equal split optimal) or if boundary protocol had inherent asymmetry (source-synchronous interfaces need different treatment).",
+      "confidence": 0.75,
+      "failure_class": "SDC_BUDGET",
+      "source_basis": "constructed-example",
+      "weakest_point": "Exact internal WNS values for A and B, and the precise 320/180ps budget split are constructed; the methodology is sound but these specific numbers are illustrative."
+    }
+  ],
+  "prompt_b": [
+    {
+      "cell": "1. Chrome/Edge/Firefox/Safari current stable: SharedArrayBuffer + cross-origin isolation (COOP/COEP) requirements",
+      "claim": "All four browsers' current stable versions expose SharedArrayBuffer only when the document is cross-origin isolated: requires HTTP response headers Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp (or credentialless), served over HTTPS. No new changes specific to 2026 beyond this established requirement. Permissions-Policy: cross-origin-isolated can additionally gate access for child frames.",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy ; https://www.lambdatest.com/web-technologies/sharedarraybuffer",
+      "retrieved": "2026-08-31",
+      "confidence": "high",
+      "notes": "Verified from MDN (2026) and LambdaTest (2026). The requirement has been stable; no 2026-specific change found."
+    },
+    {
+      "cell": "2. Same four browsers: WebGPU compute-shader availability, and whether timestamp-query is exposed to web content by default",
+      "claim": "WebGPU compute shaders: Chrome & Edge stable (since Chrome 113) support WebGPU; Firefox 141+ on Windows, Firefox 145+ on macOS Tahoe 26 (ARM64); Safari on macOS Tahoe 26, iOS 26, iPadOS 26, visionOS 26. timestamp-query: Chrome/Edge enabled by default since Chrome 121, quantized to 100µs resolution unless explicitly disabled; Safari 26 exposes timestamp queries; Firefox 141 has partial support — the 'timestamp' query type is NOT supported in Firefox as of the current compatibility data (only the 'type' attribute shows partial). Thus timestamp-query is NOT uniformly exposed by default across all four; Firefox is the gap.",
+      "url": "https://chromestatuslite.com/feature/5136606877188096 ; https://developer.mozilla.org/en-US/docs/Web/API/GPUQuerySet/type ; https://wpriders.com/spatial-web-2026-webgpu-ar",
+      "retrieved": "2026-08-31",
+      "confidence": "high",
+      "notes": "Chrome/Edge/Safari: available. Firefox: timestamp-query value not supported per MDN compatibility table (Firefox shows 'No' for timestamp value). Quantization to 100µs is Chrome's default mitigation for timing attacks."
+    },
+    {
+      "cell": "3. WASM feature status per browser: threads, SIMD128, relaxed-SIMD, JSPI, memory64",
+      "claim": "Threads (requires SharedArrayBuffer + COOP/COEP): stable in Chrome, Edge, Firefox, Safari. SIMD128: stable in all four. Relaxed SIMD: stable in Chrome & Firefox; behind flag in Safari. JSPI (JavaScript Promise Integration): Phase 4, enabled in Chrome; behind flag in Firefox; Safari has not publicly committed (removed objection late 2025 but not yet shipping). Memory64: stable in Chrome 133+, Firefox 134+; partial/behind flag in Safari. WebAssembly 3.0 specification officially landed June 13, 2026, standardizing these features.",
+      "url": "https://platform.uno/blog/the-state-of-webassembly-2025-2026/ ; https://www.hivebook.wiki/wiki/webassembly-wasi-component-model-runtimes-and-production-deployment ; https://byteiota.com/webassembly-3-0-is-official",
+      "retrieved": "2026-08-31",
+      "confidence": "high",
+      "notes": "Primary source: platform.uno State of WebAssembly 2025-2026 (Jan 2026). JSPI: Chrome live, Firefox flag, Safari uncommitted. Memory64: Chrome 133+, Firefox 134+, Safari partial. Relaxed SIMD: Safari still behind flag."
+    },
+    {
+      "cell": "4. Behavior INSIDE a cross-origin iframe: can an embedded page get cross-origin isolation / WebGPU?",
+      "claim": "A cross-origin iframe embedded in a cross-origin isolated parent inherits the COI browsing context group (COI mode), BUT does NOT gain the 'cross-origin isolated capability' (window.crossOriginIsolated remains false) unless the embedding document explicitly delegates the 'cross-origin-isolated' Permissions-Policy feature to the iframe. Additionally, with COEP: require-corp, the iframe's resources must themselves satisfy CORP or the iframe will be blocked. Therefore, WebGPU (which requires cross-origin isolation) is NOT available in a cross-origin iframe by default; it requires both the parent's delegation of the cross-origin-isolated policy feature AND the iframe's own compliant headers. The 'iframe credentialless' mechanism (default in Chrome 110+) allows embedding third-party iframes that do not deploy COEP, but those iframes remain non-isolated.",
+      "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/security/cross-origin-isolation.md ; https://developer.chrome.com/blog/anonymous-iframe-origin-trial",
+      "retrieved": "2026-08-31",
+      "confidence": "high",
+      "notes": "Critical nuance for wallet embedding: cross-origin isolation does not automatically propagate to child frames; explicit Permissions-Policy delegation is required. This is the gating factor for WebGPU in embedded wallets."
+    },
+    {
+      "cell": "5. Any published 2026 measurements of in-browser proving with a reproducible harness",
+      "claim": "zkSecurity published (Jan 2026) integration of WebGPU compute shaders with StarkWare's Stwo prover, reporting a 5x speedup for constraint polynomial evaluation and 2x for the overall proving pipeline. However, the article does not provide a reproducible harness repository URL or detailed hardware specifications. No fully reproducible benchmark harness (with named repo, exact hardware, and raw numbers) was identified in the current search. The kimchi-webgpu GitHub repository exists as a project for accelerating Kimchi provers via WebGPU but does not present published measurement numbers.",
+      "url": "https://www.webgpu.com/news/zk-proofs-webgpu-boost ; https://github.com/jk89/kimchi-webgpu",
+      "retrieved": "2026-08-31",
+      "confidence": "medium",
+      "notes": "The zkSecurity article reports real speedups but lacks a reproducible harness URL. For the matrix's 'reproducible harness' requirement, this cell is partially verified: measurements exist but are not fully reproducible from the retrieved sources. Mark as UNVERIFIED for strict reproducibility."
+    }
+  ]
+}

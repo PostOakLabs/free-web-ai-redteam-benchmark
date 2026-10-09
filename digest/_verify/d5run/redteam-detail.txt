@@ -1,0 +1,32 @@
+red1 chatgpt          S-W-RES  obj=4 f/m/n=0/2/2  consistent
+red3 chatgpt          S-W-RES  obj=7 f/m/n=0/1/5  consistent
+red1 deepseek         S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red3 deepseek         S-W-RES  obj=3 f/m/n=0/0/3  consistent
+red1 gemini           S-W-RES  obj=1 f/m/n=0/0/1  consistent
+red3 gemini           SOUND    obj=0 f/m/n=0/0/0  MISCALIBRATED-bare-SOUND
+red1 glm 5.3 flash    S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red3 glm 5.3 flash    S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red1 grok             S-W-RES  obj=2 f/m/n=0/1/1  consistent
+red3 grok             SOUND    obj=0 f/m/n=0/0/0  MISCALIBRATED-bare-SOUND
+red1 kimi             S-W-RES  obj=3 f/m/n=0/3/0  consistent
+red3 kimi             S-W-RES  obj=4 f/m/n=0/1/3  consistent
+red1 longcat          SUSPECT  obj=2 f/m/n=0/1/1  consistent
+red3 longcat          SOUND    obj=2 f/m/n=0/0/2  SCHEMA-ANOMALY-SOUND-with-objections
+red1 meta             S-W-RES  obj=1 f/m/n=0/0/1  consistent
+red3 meta             SOUND    obj=0 f/m/n=0/0/0  MISCALIBRATED-bare-SOUND
+red1 mimo             S-W-RES  obj=4 f/m/n=0/1/3  consistent
+red3 mimo             S-W-RES  obj=4 f/m/n=0/1/3  consistent
+red1 minara           S-W-RES  obj=1 f/m/n=0/0/1  consistent
+red3 minara           S-W-RES  obj=1 f/m/n=0/1/0  consistent
+red1 minimax 2.7      S-W-RES  obj=0 f/m/n=0/0/0  SCHEMA-ANOMALY-reservations-without-objections
+red3 minimax 2.7      SOUND    obj=0 f/m/n=0/0/0  MISCALIBRATED-bare-SOUND
+red1 mistral          S-W-RES  obj=2 f/m/n=0/1/1  consistent
+red3 mistral          S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red1 qwen             S-W-RES  obj=1 f/m/n=0/0/1  consistent
+red3 qwen             SOUND    obj=0 f/m/n=0/0/0  MISCALIBRATED-bare-SOUND
+red1 solar            S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red3 solar            NOT GRADABLE (elementwise-truncation)
+red1 sonnet           S-W-RES  obj=3 f/m/n=0/0/3  consistent
+red3 sonnet           S-W-RES  obj=3 f/m/n=0/1/2  consistent
+red1 yuanbao          S-W-RES  obj=6 f/m/n=0/4/2  consistent
+red3 yuanbao          S-W-RES  obj=4 f/m/n=0/1/3  consistent

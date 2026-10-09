@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Clustered integer execution",
+    "where_in_paper": "Integer execution pipeline",
+    "decision": "The integer execution units were split into two clusters, each with its own register file and two execution units, to support four-way integer issue.",
+    "alternatives_or_rejected": "A single centralized register file and issue queue for all four integer units.",
+    "rationale": "To reduce the complexity, delay, and power associated with a single multi-ported register file and centralized issue logic, which would become a critical path bottleneck at high clock frequencies.",
+    "outcome": "The design maintained four-way integer issue capability while achieving higher clock speeds, with minimal performance loss from inter-cluster communication due to static instruction scheduling and locality of dependent instructions.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact performance loss percentage cited.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Instruction cache replication",
+    "where_in_paper": "Instruction fetch and cache structure",
+    "decision": "The instruction cache was likely replicated or banked to support fetching four instructions per cycle.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To provide sufficient instruction fetch bandwidth to feed the wide issue width and maintain high instruction throughput.",
+    "outcome": "Enabled the fetch stage to supply enough instructions to utilize the six-issue peak execution rate.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly describes replication vs. banking.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Out-of-order window size vs. clock frequency",
+    "where_in_paper": "Instruction issue and reorder buffer",
+    "decision": "An 80-entry reorder buffer (ROB) was implemented to support a large out-of-order window.",
+    "alternatives_or_rejected": "A smaller ROB for reduced complexity and potentially higher clock speed.",
+    "rationale": "A larger window allows the processor to find more instruction-level parallelism and hide memory latency, which is crucial for performance despite the added complexity.",
+    "outcome": "The 80-entry ROB contributed to high instruction throughput but required careful design to manage timing and power.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact trade-off discussion details regarding clock frequency impact.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Wire-delay-driven floorplanning",
+    "where_in_paper": "Physical design and floorplanning",
+    "decision": "The chip floorplan was optimized with wire delay as a primary concern, placing frequently communicating blocks close together.",
+    "alternatives_or_rejected": "A more traditional area-driven or single-bus-based floorplan.",
+    "rationale": "In deep submicron processes, interconnect delay dominates over gate delay. Minimizing wire length between critical units (e.g., cache, execution units) was essential to meet timing targets.",
+    "outcome": "The floorplanning strategy helped achieve the target high clock frequency by mitigating wire delay penalties.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Specific examples of block placements mentioned.",
+    "confidence": 0.75
+  },
+  {
+    "title": "Data cache double-pumped structure",
+    "where_in_paper": "Memory system and data cache",
+    "decision": "The data cache was designed to operate at double the core clock frequency (double-pumped) to provide two reads or writes per cycle.",
+    "alternatives_or_rejected": "A truly multi-ported cache or a single-ported cache with lower bandwidth.",
+    "rationale": "To support the two load/store execution units' bandwidth requirement without the area and power penalty of a true multi-ported cache, while maintaining high clock speed.",
+    "outcome": "This design allowed the cache to service two memory operations per core cycle, matching the execution units' capabilities.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly calls this 'double-pumped' or uses another term.",
+    "confidence": 0.85
+  }
+]
+```

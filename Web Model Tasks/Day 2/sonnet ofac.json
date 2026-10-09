@@ -1,0 +1,118 @@
+```json
+[
+  {
+    "case_name": "Simple convergent graph - two direct blocked owners summed",
+    "entities": [
+      {"id": "Blocked_A", "blocked": true},
+      {"id": "Blocked_B", "blocked": true},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "Blocked_A", "to": "Target_Co", "pct": 30},
+      {"from": "Blocked_B", "to": "Target_Co", "pct": 25}
+    ],
+    "computation": [
+      "Treatment applied: OFAC's 50 Percent Rule aggregates the ownership interests of ALL blocked persons in a target, summing direct and indirect holdings across all paths - this is an additive/attribution approach, not a per-path multiplicative discount.",
+      "Path 1: Blocked_A -> Target_Co direct = 30%",
+      "Path 2: Blocked_B -> Target_Co direct = 25%",
+      "Aggregate blocked ownership of Target_Co = 30% + 25% = 55%"
+    ],
+    "blocked_verdicts": "Target_Co is blocked: aggregate blocked ownership (55%) meets/exceeds the 50% threshold.",
+    "guidance_basis": "OFAC 'Revised Guidance on Entities Owned by Persons Whose Property and Interests in Property Are Blocked' (Aug. 13, 2014) and the associated FAQ 398/401 family - aggregate ownership by one or more blocked persons of 50% or more.",
+    "weakest_point": "I am confident in the additive treatment across multiple direct blocked owners itself; less certain of the exact FAQ number(s) I'm citing versus the correct current numbering, since OFAC has renumbered/consolidated FAQs over time."
+  },
+  {
+    "case_name": "Convergent graph through two separate indirect chains, both via majority-owned intermediaries",
+    "entities": [
+      {"id": "Blocked_A", "blocked": true},
+      {"id": "Intermediary_1", "blocked": false},
+      {"id": "Intermediary_2", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "Blocked_A", "to": "Intermediary_1", "pct": 70},
+      {"from": "Intermediary_1", "to": "Target_Co", "pct": 20},
+      {"from": "Blocked_A", "to": "Intermediary_2", "pct": 60},
+      {"from": "Intermediary_2", "to": "Target_Co", "pct": 15}
+    ],
+    "computation": [
+      "Treatment applied: full attribution, not multiplication. Because Blocked_A owns >=50% of Intermediary_1 (70%) and >=50% of Intermediary_2 (60%), OFAC's guidance treats Blocked_A as owning 100% of each intermediary's interest for aggregation purposes at the target - the intermediary's stake in Target_Co is attributed in full, NOT multiplied by Blocked_A's percentage stake in the intermediary.",
+      "Path 1: Blocked_A owns 70% of Intermediary_1 (>=50%) -> Intermediary_1's entire 20% stake in Target_Co is attributed to Blocked_A -> contributes 20% (not 70%x20%=14%)",
+      "Path 2: Blocked_A owns 60% of Intermediary_2 (>=50%) -> Intermediary_2's entire 15% stake in Target_Co is attributed to Blocked_A -> contributes 15% (not 60%x15%=9%)",
+      "Aggregate blocked ownership of Target_Co = 20% + 15% = 35%"
+    ],
+    "blocked_verdicts": "Target_Co is NOT blocked under the 50% aggregate test: 35% < 50% threshold.",
+    "guidance_basis": "OFAC 50 Percent Rule guidance - ownership interests of a blocked person in an entity that itself owns 50% or more of a downstream entity are attributed in full (100% pass-through) to the downstream entity, rather than being proportionally diluted through multiplication.",
+    "weakest_point": "The core point I'm confident about is 'attribution not multiplication' once the >=50% threshold is met at each intermediary step; I am less certain whether OFAC's guidance requires re-testing the aggregate at Target_Co using only the attributed (pass-through) percentages as I did here, versus some other combination rule when two separate qualifying intermediary chains converge on the same target - this specific combination scenario is constructed, not drawn from a published OFAC example."
+  },
+  {
+    "case_name": "Chain through a majority-owned intermediary combined with a direct holding, crossing 50% only when combined",
+    "entities": [
+      {"id": "Blocked_A", "blocked": true},
+      {"id": "Intermediary_1", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "Blocked_A", "to": "Intermediary_1", "pct": 55},
+      {"from": "Intermediary_1", "to": "Target_Co", "pct": 40},
+      {"from": "Blocked_A", "to": "Target_Co", "pct": 15}
+    ],
+    "computation": [
+      "Treatment applied: attribution (not multiplicative). Blocked_A owns 55% of Intermediary_1, which is >=50%, so Intermediary_1's full 40% stake in Target_Co is attributed to Blocked_A in full.",
+      "Path 1 (indirect, via majority-owned intermediary): Intermediary_1's 40% stake in Target_Co attributed in full to Blocked_A = 40% (not 55%x40%=22%)",
+      "Path 2 (direct): Blocked_A -> Target_Co = 15%",
+      "Aggregate blocked ownership of Target_Co = 40% + 15% = 55%"
+    ],
+    "blocked_verdicts": "Target_Co is blocked: aggregate blocked ownership (55%) meets/exceeds the 50% threshold, combining the fully-attributed indirect chain with the direct holding.",
+    "guidance_basis": "OFAC 50 Percent Rule guidance - once a person is confirmed blocked and owns 50%+ of an intermediary, that intermediary's ownership interests are attributed in full to the blocked person for purposes of aggregating with any other direct or indirect interests in the same target entity.",
+    "weakest_point": "I am confident this correctly demonstrates edge-order independence and the attribution mechanic combined with a direct stake; I am less certain this exact convergence pattern (indirect majority chain + direct stake summing to exactly cross 50%) appears in any published OFAC illustrative material, since I believe OFAC's own guidance examples are simpler than this constructed combination."
+  },
+  {
+    "case_name": "Sub-50% intermediary chain - illustrating that an intermediary owned LESS than 50% by the blocked person does NOT get full attribution",
+    "entities": [
+      {"id": "Blocked_A", "blocked": true},
+      {"id": "Intermediary_1", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "Blocked_A", "to": "Intermediary_1", "pct": 40},
+      {"from": "Intermediary_1", "to": "Target_Co", "pct": 80}
+    ],
+    "computation": [
+      "Treatment applied: because Blocked_A's stake in Intermediary_1 is only 40% (below the 50% threshold), the 50 Percent Rule's automatic full-attribution mechanism does NOT apply to Intermediary_1's downstream holdings - Intermediary_1 is not itself presumptively blocked, and its 80% stake in Target_Co is not automatically aggregated to Blocked_A under the bright-line rule.",
+      "Path evaluated: Blocked_A -> Intermediary_1 (40%, below threshold) -> Target_Co (80%)",
+      "Because the intermediate ownership link (40%) does not meet or exceed 50%, this path contributes 0% to Blocked_A's aggregate ownership of Target_Co under the automatic 50 Percent Rule (a case-by-case OFAC determination could still be relevant, but that is outside the bright-line aggregation rule)",
+      "Aggregate automatically-attributed blocked ownership of Target_Co via this path = 0%"
+    ],
+    "blocked_verdicts": "Target_Co is NOT automatically blocked via this chain under the 50 Percent Rule's bright-line aggregation test (0% attributed through this path); a case-by-case OFAC facts-and-circumstances review could theoretically still be relevant but is outside the scope of the automatic rule.",
+    "guidance_basis": "OFAC 50 Percent Rule guidance - the automatic aggregation/blocking treatment applies specifically to entities owned 50% or more (in the aggregate, directly or indirectly) by one or more blocked persons; an intermediary owned below that threshold by the blocked person does not trigger automatic full attribution of its downstream interests.",
+    "weakest_point": "I am confident in the core threshold mechanic (below 50% at an intermediary breaks the automatic attribution chain), but I am not fully certain how precisely OFAC's guidance frames what happens below the threshold (i.e., whether it is simply silent/non-applicable as I stated, versus explicitly addressing partial/sub-threshold scenarios), so my characterization of the 'case-by-case' fallback may be imprecise."
+  },
+  {
+    "case_name": "Three-way convergent graph: two intermediary chains plus a direct stake, edge-order-independence check",
+    "entities": [
+      {"id": "Blocked_A", "blocked": true},
+      {"id": "Intermediary_1", "blocked": false},
+      {"id": "Intermediary_2", "blocked": false},
+      {"id": "Target_Co", "blocked": false}
+    ],
+    "edges": [
+      {"from": "Intermediary_2", "to": "Target_Co", "pct": 10},
+      {"from": "Blocked_A", "to": "Target_Co", "pct": 12},
+      {"from": "Blocked_A", "to": "Intermediary_2", "pct": 50},
+      {"from": "Blocked_A", "to": "Intermediary_1", "pct": 65},
+      {"from": "Intermediary_1", "to": "Target_Co", "pct": 25}
+    ],
+    "computation": [
+      "Treatment applied: attribution, not multiplication, at every intermediary link meeting or exceeding 50%. The result must be identical regardless of the order in which edges are listed, since aggregate ownership is a property of the graph structure, not the input sequence.",
+      "Intermediary_1: Blocked_A owns 65% (>=50%) -> Intermediary_1's full 25% stake in Target_Co attributed = 25%",
+      "Intermediary_2: Blocked_A owns exactly 50% (meets the >=50% threshold) -> Intermediary_2's full 10% stake in Target_Co attributed = 10%",
+      "Direct path: Blocked_A -> Target_Co = 12%",
+      "Aggregate blocked ownership of Target_Co = 25% + 10% + 12% = 47%"
+    ],
+    "blocked_verdicts": "Target_Co is NOT blocked under the 50% aggregate test: 47% < 50% threshold (falls just short despite three converging contributions).",
+    "guidance_basis": "OFAC 50 Percent Rule guidance - aggregation of all direct and indirect (via >=50%-owned intermediaries, attributed in full) interests of blocked persons in a target entity; the threshold is stated as 'equal to or greater than 50 percent,' so an exact 50% stake in an intermediary is treated as meeting (not falling short of) the attribution trigger.",
+    "weakest_point": "I am reasonably confident that OFAC's guidance uses '50 percent or more' (i.e., exactly 50% qualifies) for the intermediary attribution trigger, which is why I treated the exact-50% Intermediary_2 link as fully attributing; but I am not fully certain this exact-threshold inclusion is stated unambiguously in the guidance text itself rather than being my inference from the general '50% or more' phrasing used for the target-level test, so this edge case (exactly 50%, not more) is the weakest point in this case."
+  }
+]
+```

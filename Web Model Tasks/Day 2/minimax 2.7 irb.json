@@ -1,0 +1,86 @@
+[
+  {
+    "case_name": "PD_0.5pct",
+    "inputs": {"pd": 0.005, "lgd": 0.45, "m": 2.5, "ead": 100},
+    "computation": {
+      "R": 0.213456,
+      "sqrt_R": 0.462013,
+      "sqrt_1mR": 0.886873,
+      "phi_inv_PD": -2.3263,
+      "phi_inv_0999": 3.0902,
+      "d1_inner_arg": -0.63542,
+      "Phi_d1": 0.262577,
+      "b_PD": -1.419273,
+      "maturity_factor_1_over_M_to_1/6": 0.858374,
+      "K_before_maturity_adj": 0.11816,
+      "K_after_maturity_adj": 0.043995
+    },
+    "result": {"k_pct": 4.3995, "risk_weight_pct": 54.9933},
+    "formula_basis": "CRE31: K = LGD * [N(sqrt(1-R)*Phi^{-1}(PD) + sqrt(R)*Phi^{-1}(0.999)) / ((1 - 1.5*b(PD)) * (1/M)^{1/6})], R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))), b(PD) = 0.11852 - 0.05478*ln(PD)^2",
+    "known_benchmark": "Published: ~45%, Computed: 54.99%, COMPUTED DOES NOT MATCH KNOWN BENCHMARK",
+    "weakest_point": "Computed RW exceeds published estimate; inverse of typical pattern observed at other PDs."
+  },
+  {
+    "case_name": "PD_1pct",
+    "inputs": {"pd": 0.01, "lgd": 0.45, "m": 2.5, "ead": 100},
+    "computation": {
+      "R": 0.192784,
+      "sqrt_R": 0.439071,
+      "sqrt_1mR": 0.898452,
+      "phi_inv_PD": -2.3263,
+      "phi_inv_0999": 3.0902,
+      "d1_inner_arg": -0.733251,
+      "Phi_d1": 0.231703,
+      "b_PD": -1.043232,
+      "maturity_factor_1_over_M_to_1/6": 0.858374,
+      "K_before_maturity_adj": 0.104266,
+      "K_after_maturity_adj": 0.047359
+    },
+    "result": {"k_pct": 4.7359, "risk_weight_pct": 59.1991},
+    "formula_basis": "CRE31: K = LGD * [N(sqrt(1-R)*Phi^{-1}(PD) + sqrt(R)*Phi^{-1}(0.999)) / ((1 - 1.5*b(PD)) * (1/M)^{1/6})], R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))), b(PD) = 0.11852 - 0.05478*ln(PD)^2",
+    "known_benchmark": "Published: ~92%, Computed: 59.20%, COMPUTED DOES NOT MATCH KNOWN BENCHMARK",
+    "weakest_point": "The computed risk weight (59.20%) is significantly below the Basel III calibration benchmark (~92%) for PD=1%, LGD=45%, M=2.5. This ~33pp discrepancy is the primary concern — it suggests either: (1) formula grouping placement of sqrt terms differs from CRE31 reference implementation, (2) different correlation formula variant in use, or (3) benchmark references specific to Basel II vs Basel III parameter sets."
+  },
+  {
+    "case_name": "PD_3pct",
+    "inputs": {"pd": 0.03, "lgd": 0.45, "m": 2.5, "ead": 100},
+    "computation": {
+      "R": 0.146776,
+      "sqrt_R": 0.383113,
+      "sqrt_1mR": 0.923701,
+      "phi_inv_PD": -2.3263,
+      "phi_inv_0999": 3.0902,
+      "d1_inner_arg": -0.964911,
+      "Phi_d1": 0.167295,
+      "b_PD": -0.555052,
+      "maturity_factor_1_over_M_to_1/6": 0.858374,
+      "K_before_maturity_adj": 0.075283,
+      "K_after_maturity_adj": 0.047858
+    },
+    "result": {"k_pct": 4.7858, "risk_weight_pct": 59.8227},
+    "formula_basis": "CRE31: K = LGD * [N(sqrt(1-R)*Phi^{-1}(PD) + sqrt(R)*Phi^{-1}(0.999)) / ((1 - 1.5*b(PD)) * (1/M)^{1/6})], R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))), b(PD) = 0.11852 - 0.05478*ln(PD)^2",
+    "known_benchmark": "Published: ~168%, Computed: 59.82%, COMPUTED DOES NOT MATCH KNOWN BENCHMARK",
+    "weakest_point": "Computed RW (59.82%) is ~108pp below published Basel III calibration range (160-175%) for PD=3%."
+  },
+  {
+    "case_name": "PD_10pct",
+    "inputs": {"pd": 0.1, "lgd": 0.45, "m": 2.5, "ead": 100},
+    "computation": {
+      "R": 0.120809,
+      "sqrt_R": 0.347575,
+      "sqrt_1mR": 0.937652,
+      "phi_inv_PD": -2.3263,
+      "phi_inv_0999": 3.0902,
+      "d1_inner_arg": -1.107183,
+      "Phi_d1": 0.134107,
+      "b_PD": -0.171918,
+      "maturity_factor_1_over_M_to_1/6": 0.858374,
+      "K_before_maturity_adj": 0.060348,
+      "K_after_maturity_adj": 0.055892
+    },
+    "result": {"k_pct": 5.5892, "risk_weight_pct": 69.8651},
+    "formula_basis": "CRE31: K = LGD * [N(sqrt(1-R)*Phi^{-1}(PD) + sqrt(R)*Phi^{-1}(0.999)) / ((1 - 1.5*b(PD)) * (1/M)^{1/6})], R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1-(1-exp(-50*PD))/(1-exp(-50))), b(PD) = 0.11852 - 0.05478*ln(PD)^2",
+    "known_benchmark": "Published: ~250%, Computed: 69.87%, COMPUTED DOES NOT MATCH KNOWN BENCHMARK",
+    "weakest_point": "Computed RW (69.87%) is ~180pp below published Basel III calibration range (245-260%) for PD=10%. The monotonic increase in computed RW with PD aligns qualitatively with Basel, but absolute magnitudes are systematically too low."
+  }
+]

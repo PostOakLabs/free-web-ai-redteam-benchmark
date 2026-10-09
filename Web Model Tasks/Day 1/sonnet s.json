@@ -1,0 +1,169 @@
+```json
+[
+  {
+    "family": "ISO 26262-5 hardware architectural metrics (SPFM, LFM, PMHF)",
+    "formulas": [
+      {
+        "name": "Single-Point Fault Metric (SPFM)",
+        "expression": "SPFM = 1 - (Σλ_SPF + Σλ_RF) / Σλ_total",
+        "variables": [
+          {"symbol": "λ_SPF", "meaning": "failure rate of single-point faults (faults that directly violate the safety goal with no safety mechanism covering them)", "units": "FIT (failures per 10^9 hours) or 1/h"},
+          {"symbol": "λ_RF", "meaning": "failure rate of residual faults (the uncovered fraction of faults that are otherwise covered by a safety mechanism)", "units": "FIT or 1/h"},
+          {"symbol": "λ_total", "meaning": "total failure rate of the item/element under analysis, including safe faults", "units": "FIT or 1/h"}
+        ],
+        "worked_example": "Assume an element with λ_total = 1000 FIT, of which λ_SPF = 50 FIT and λ_RF = 20 FIT. SPFM = 1 - (50 + 20)/1000 = 1 - 70/1000 = 1 - 0.07 = 0.93, i.e. SPFM = 93%.",
+        "authority": "ISO 26262-5:2018 (or ISO 26262-5:2011 for the earlier edition)",
+        "clause_locator": null,
+        "known_uncertainty": "I'm confident in the formula's structure and variable definitions (this is a standard, widely-taught result), but I do not know the exact clause/annex number in the current 2018 edition with certainty, so I've left it null rather than guess."
+      },
+      {
+        "name": "Latent Fault Metric (LFM)",
+        "expression": "LFM = 1 - Σλ_LF / (Σλ_total - Σλ_SPF - Σλ_RF)",
+        "variables": [
+          {"symbol": "λ_LF", "meaning": "failure rate of latent multiple-point faults (faults not covered by any safety mechanism and not perceived by the driver, that could combine with a second fault to violate the safety goal)", "units": "FIT or 1/h"},
+          {"symbol": "λ_total, λ_SPF, λ_RF", "meaning": "as defined above", "units": "FIT or 1/h"}
+        ],
+        "worked_example": "Using the same element (λ_total = 1000 FIT, λ_SPF = 50 FIT, λ_RF = 20 FIT) and λ_LF = 40 FIT: denominator = 1000 - 50 - 20 = 930 FIT. LFM = 1 - 40/930 = 1 - 0.043 = 0.957, i.e. LFM ≈ 95.7%.",
+        "authority": "ISO 26262-5:2018",
+        "clause_locator": null,
+        "known_uncertainty": "Same confidence level as SPFM — formula structure is well-established, exact clause number not confidently known."
+      },
+      {
+        "name": "Probabilistic Metric for random Hardware Failures (PMHF) — simplified dual-channel approximation",
+        "expression": "PMHF ≈ λ_SPF + λ_RF + (λ_MPF,latent × λ_MPF,dual × T_lifetime)  [simplified two-channel/1002-style approximation; the general case requires fault-tree or Markov analysis and has no single universal closed form]",
+        "variables": [
+          {"symbol": "λ_SPF, λ_RF", "meaning": "as defined above — these contribute directly since no redundancy protects against them", "units": "FIT or 1/h"},
+          {"symbol": "λ_MPF,latent", "meaning": "failure rate of a latent multiple-point fault in one channel", "units": "FIT or 1/h"},
+          {"symbol": "λ_MPF,dual", "meaning": "failure rate of a second, independent multiple-point fault in the redundant channel that combines with the first to cause the violation", "units": "FIT or 1/h"},
+          {"symbol": "T_lifetime", "meaning": "exposure/mission time over which the latent fault could remain undetected before combining with the second fault", "units": "hours"}
+        ],
+        "worked_example": "Illustrative only, given the low confidence noted below: λ_SPF = 5 FIT, λ_RF = 2 FIT, λ_MPF,latent = 10 FIT = 1×10^-8/h, λ_MPF,dual = 10 FIT = 1×10^-8/h, T_lifetime = 8760 h (1 year). Multiple-point contribution ≈ 1×10^-8 × 1×10^-8 × 8760 ≈ 8.76×10^-13/h ≈ 0.000876 FIT (negligible). PMHF ≈ 5 + 2 + 0.000876 ≈ 7.0 FIT ≈ 7×10^-9/h.",
+        "authority": "ISO 26262-5:2018, Annex C (informative)",
+        "clause_locator": null,
+        "known_uncertainty": "This is the field I'm least confident in. PMHF in the standard is not a single fixed closed-form formula the way SPFM/LFM are — it depends on the item's specific safety-mechanism architecture (dual point, 1oo2, voting, etc.) and is properly derived via fault-tree or Markov-model analysis per Annex C/D. The expression above is a commonly-cited simplified approximation for a basic dual-channel case, not a guaranteed match to the standard's exact notation — treat this whole entry as directional, not authoritative, until checked against the actual text."
+      }
+    ],
+    "asil_targets": {
+      "SPFM": {"ASIL_B": "≥ 90%", "ASIL_C": "≥ 97%", "ASIL_D": "≥ 99%"},
+      "LFM": {"ASIL_B": "≥ 60%", "ASIL_C": "≥ 80%", "ASIL_D": "≥ 90%"},
+      "PMHF": {"ASIL_B": "< 10^-7 /h (< 100 FIT)", "ASIL_C": "< 10^-7 /h (< 100 FIT)", "ASIL_D": "< 10^-8 /h (< 10 FIT)"},
+      "known_uncertainty": "These target values are widely cited and I'm reasonably confident in them, but I have NOT re-verified them against the current published standard text in this session — they should be checked against the authoritative ISO 26262-5 table before use in any calculator, since target tables have been known to be restated slightly differently across the 2011 and 2018 editions."
+    },
+    "edge_cases": [
+      "λ_total = 0 (no failure data / zero-failure-rate element) makes SPFM and LFM formulas divide by zero or be undefined — a calculator must special-case this as 'undefined, insufficient data' rather than returning 100% or an error value silently.",
+      "λ_total - λ_SPF - λ_RF = 0 in the LFM denominator (all failures classified as single-point or residual, none latent-eligible) — must be handled as a defined edge case (LFM undefined, or by convention treated as 100% since there are no latent faults possible), not a raw division error.",
+      "PMHF at exactly the ASIL threshold boundary (e.g. exactly 10 FIT for ASIL D) — the standard's pass/fail semantics for an exact boundary value need to be confirmed (typically '<' not '≤', meaning exactly-equal-to-threshold FAILS to meet target) rather than assumed."
+    ]
+  },
+  {
+    "family": "JEDEC FIT-rate math (JESD85-class accelerated-test FIT and Arrhenius acceleration)",
+    "formulas": [
+      {
+        "name": "Chi-square based FIT point/upper-bound estimate from accelerated life-test data",
+        "expression": "λ = χ²(CL, 2r+2) / (2 × TDH) ;  FIT = λ × 10^9",
+        "variables": [
+          {"symbol": "χ²(CL, 2r+2)", "meaning": "chi-square distribution critical value at confidence level CL with (2r+2) degrees of freedom", "units": "dimensionless (chi-square statistic)"},
+          {"symbol": "CL", "meaning": "confidence level for the estimate (commonly 60% for JEDEC industry-standard reporting, though 90%/95% are also used)", "units": "fraction or %"},
+          {"symbol": "r", "meaning": "number of failures observed during the test", "units": "count"},
+          {"symbol": "TDH", "meaning": "total device-hours of test exposure, ALREADY converted to use-condition equivalent hours via the acceleration factor (TDH = device-hours-at-stress × AF)", "units": "device-hours"},
+          {"symbol": "λ", "meaning": "failure rate", "units": "failures per device-hour"},
+          {"symbol": "FIT", "meaning": "failure rate expressed in failures per 10^9 device-hours", "units": "FIT"}
+        ],
+        "worked_example": "Assume r = 2 failures observed, CL = 60%, and TDH = 5,000,000 equivalent device-hours (already AF-adjusted). Using χ²(0.60, 2×2+2=6 degrees of freedom) — this critical value must be read from a chi-square table/function, e.g. approximately 6.21 for CL=60%, df=6 (this specific number should be confirmed against an actual chi-square table rather than trusted from memory). λ = 6.21 / (2 × 5,000,000) = 6.21 / 10,000,000 = 6.21×10^-7 per device-hour. FIT = 6.21×10^-7 × 10^9 = 621 FIT.",
+        "authority": "JEDEC JESD85 (Methods for Calculating Failure Rates in Units of FITs)",
+        "clause_locator": null,
+        "known_uncertainty": "The formula shape (χ²/(2×TDH)) and the r→(2r+2) degrees-of-freedom convention are things I'm fairly confident about as standard reliability-engineering practice reflected in JESD85, but I do NOT have the actual chi-square critical value (6.21 above) memorized with confidence — it's illustrative and must be pulled from a real chi-square table/function, not trusted as stated. I also can't confirm the exact clause number in JESD85 without the document in front of me."
+      },
+      {
+        "name": "Arrhenius acceleration factor",
+        "expression": "AF = exp[ (Ea/k) × (1/T_use - 1/T_stress) ]",
+        "variables": [
+          {"symbol": "Ea", "meaning": "activation energy of the dominant failure mechanism", "units": "eV"},
+          {"symbol": "k", "meaning": "Boltzmann constant", "units": "eV/K, k = 8.617×10^-5 eV/K"},
+          {"symbol": "T_use", "meaning": "use/field temperature", "units": "Kelvin"},
+          {"symbol": "T_stress", "meaning": "accelerated test temperature", "units": "Kelvin"},
+          {"symbol": "AF", "meaning": "acceleration factor (test-hours-to-equivalent-use-hours multiplier)", "units": "dimensionless"}
+        ],
+        "worked_example": "Ea = 0.7 eV, T_use = 55°C = 328.15 K, T_stress = 125°C = 398.15 K. 1/T_use = 1/328.15 = 0.0030474 /K. 1/T_stress = 1/398.15 = 0.0025116 /K. Difference = 0.0030474 - 0.0025116 = 0.0005358 /K. (Ea/k) = 0.7/8.617×10^-5 = 8123.0 K. Exponent = 8123.0 × 0.0005358 = 4.352. AF = exp(4.352) ≈ 77.6. So 1 hour at 125°C stress ≈ 77.6 hours of equivalent 55°C field use.",
+        "authority": "JEDEC (general Arrhenius model as applied in JESD-series reliability qualification documents, e.g. JESD91/JESD85 family)",
+        "clause_locator": null,
+        "known_uncertainty": "The Arrhenius formula itself and the Boltzmann constant value are solid. Ea = 0.7 eV is a commonly-cited generic default for silicon IC failure mechanisms in informal engineering use, but the ACTUAL applicable Ea is mechanism-specific (e.g., electromigration, TDDB, hot-carrier injection each have different typical Ea ranges, roughly 0.3–1.0+ eV depending on mechanism and even foundry data) — using a single generic 0.7 eV without confirming the dominant failure mechanism is a real methodological risk, and I don't have a authoritative single 'the' JEDEC-mandated Ea value to state as universally correct."
+      }
+    ],
+    "edge_cases": [
+      "r = 0 (zero failures observed) — the (2r+2) degrees-of-freedom formula still works mathematically (df=2) but represents a one-sided upper-bound-only estimate with no point estimate in the ordinary sense; a calculator should label this explicitly as an upper-confidence-bound-only result.",
+      "T_use = T_stress (no actual acceleration, e.g. a burn-in test run at the nominal use temperature) — the exponent evaluates to 0 and AF = 1 exactly; this is a valid but degenerate case, not an error.",
+      "TDH = 0 (no test data at all) — division by zero in the λ formula; must be handled as 'insufficient data,' not silently returning an infinite or undefined FIT value."
+    ]
+  },
+  {
+    "family": "EAR advanced-computing parameters (ECCN 3A090 — TPP and performance density)",
+    "formulas": [
+      {
+        "name": "Total Processing Performance (TPP)",
+        "expression": "TPP = Σ [ 2 × MacTOPS_i × bit_length_i ], summed over all i processing units on the integrated circuit",
+        "variables": [
+          {"symbol": "MacTOPS_i", "meaning": "theoretical peak number of Tera (10^12) operations per second for multiply-accumulate computation (D = A×B+C) for processing unit i", "units": "TOPS (10^12 ops/sec)"},
+          {"symbol": "bit_length_i", "meaning": "bit length of the multiply-accumulate operation for processing unit i", "units": "bits"},
+          {"symbol": "2", "meaning": "fixed constant reflecting the industry convention of counting one multiply-accumulate (D=A×B+C) as 2 operations for datasheet purposes", "units": "dimensionless"},
+          {"symbol": "TPP", "meaning": "Total Processing Performance, the EAR-defined composite performance figure used for ECCN 3A090 threshold determination", "units": "as defined by the regulation (a unitless composite figure, not TOPS itself, since bit_length is multiplied in)"}
+        ],
+        "worked_example": "Single-processing-unit chip: MacTOPS = 1000 (i.e., 1 PetaOP/s peak MAC throughput), bit_length = 8 bits (INT8). TPP = 2 × 1000 × 8 = 16,000. This value (16,000) would exceed the 3A090.a threshold of TPP ≥ 4800 on the TPP test alone.",
+        "authority": "15 CFR Part 774, Supplement No. 1 (Commerce Control List), ECCN 3A090 Technical Note; Export Administration Regulations (EAR)",
+        "clause_locator": "15 CFR 774, Supp. 1, ECCN 3A090, Technical Note (TPP definition)",
+        "known_uncertainty": "The formula itself (TPP = 2 × MacTOPS × bit_length, summed over processing units) is verified via current search against multiple 2025/2026 legal-analysis sources citing the EAR text directly, so confidence is high. I have not personally read the raw CFR text in this session, only secondary summaries that quote it, so there's residual risk of a transcription error in those summaries."
+      },
+      {
+        "name": "Performance Density (PD)",
+        "expression": "PD = TPP / Die_Area",
+        "variables": [
+          {"symbol": "TPP", "meaning": "as defined above", "units": "as defined above"},
+          {"symbol": "Die_Area", "meaning": "the applicable die area of the integrated circuit as defined in the EAR technical note", "units": "mm²"},
+          {"symbol": "PD", "meaning": "Performance Density", "units": "TPP per mm²"}
+        ],
+        "worked_example": "Using the TPP = 16,000 example above with a die area of 800 mm²: PD = 16,000 / 800 = 20.0. This would exceed the 3A090.a performance-density-based threshold (TPP ≥ 1600 AND PD ≥ 5.92) as well.",
+        "authority": "15 CFR Part 774, Supplement No. 1, ECCN 3A090 Technical Note",
+        "clause_locator": "15 CFR 774, Supp. 1, ECCN 3A090, Technical Note (performance density definition)",
+        "known_uncertainty": "Formula structure confirmed via current search (multiple 2023–2026 sources agree PD = TPP / applicable die area), but the precise regulatory definition of 'applicable die area' (e.g., whether it includes only compute die, or package/interposer area in multi-die packages) is a real nuance I have not verified in detail."
+      }
+    ],
+    "threshold_values": {
+      "3A090.a": "TPP ≥ 4800, OR (TPP ≥ 1600 AND PD ≥ 5.92)",
+      "3A090.b": "(TPP ≥ 2400 and < 4800 AND PD ≥ 1.6 and < 5.92), OR (TPP ≥ 1600 AND PD ≥ 3.2 and < 5.92)",
+      "3A090.c": "HBM (high-bandwidth memory) with memory bandwidth density greater than 2 GB/s per mm²",
+      "as_of": "Verified via fresh web search in this session (October 2023 rule as amended); sources dated as recently as mid-2026 still cite these same numeric thresholds. However, BIS has signaled thresholds are reviewed periodically as new chip generations emerge, and there was a January 2026 policy change noted in search results affecting DIRECT EXPORT case-by-case review (TPP under 21,000 and DRAM bandwidth under 6,500 GB/s) — that is a separate export-license-policy threshold, not a change to the ECCN 3A090 classification thresholds themselves, but flagging it since both are 'threshold numbers' in this space and could be conflated."
+    },
+    "edge_cases": [
+      "TPP or PD exactly equal to a threshold boundary (e.g. TPP = 4800 exactly) — the regulatory language uses '≥' ('or more'), so exactly-equal-to-threshold IS controlled; a calculator must not treat threshold-equal as 'just under.'",
+      "A chip with zero or unknown die area for the PD calculation (e.g., chiplet/multi-die packages with ambiguous 'applicable die area') — PD is undefined/incalculable and the chip should fall back to evaluation under the pure-TPP test (TPP ≥ 4800) only, not silently default to PD = 0 or an error.",
+      "Multi-processing-unit chips where TPP must be aggregated across ALL processing units on the die — a calculator omitting any on-die processing unit (e.g. only counting the primary matrix engine and not auxiliary vector units) would understate TPP and risk a false-negative classification."
+    ]
+  },
+  {
+    "family": "CHIPS Act incentives math (Section 48D advanced manufacturing investment credit)",
+    "formulas": [
+      {
+        "name": "Section 48D Advanced Manufacturing Investment Credit (current law)",
+        "expression": "Credit = 0.35 × Qualified_Investment  (for qualified property placed in service after December 31, 2025); Credit = 0.25 × Qualified_Investment (for qualified property placed in service on or before December 31, 2025, i.e. Jan 1, 2023 – Dec 31, 2025)",
+        "variables": [
+          {"symbol": "Qualified_Investment", "meaning": "the basis of qualified property placed in service during the taxable year that is part of an advanced manufacturing facility (a facility whose primary purpose is manufacturing semiconductors or semiconductor manufacturing equipment)", "units": "USD (tax basis)"},
+          {"symbol": "0.35 / 0.25", "meaning": "statutory credit rate — 25% as originally enacted by the CHIPS and Science Act of 2022, increased to 35% by the One Big Beautiful Bill Act (Pub. L. 119-21, §70308) for property placed in service after Dec 31, 2025", "units": "percentage"}
+        ],
+        "worked_example": "A fab places $500,000,000 of qualified property in service in calendar year 2026 (i.e., after the Dec 31, 2025 cutoff, so the 35% rate applies). Credit = 0.35 × $500,000,000 = $175,000,000. If the same $500,000,000 of property had instead been placed in service in 2024 (before the cutoff), Credit = 0.25 × $500,000,000 = $125,000,000.",
+        "authority": "26 U.S.C. § 48D, as amended by Pub. L. 119-21 (One Big Beautiful Bill Act), Title VII, §70308(b), enacted July 4, 2025",
+        "clause_locator": "26 U.S.C. § 48D(a); rate-increase amendment at Pub. L. 119-21, §70308(b), 139 Stat. 201",
+        "known_uncertainty": "Verified via fresh search of the current U.S. Code text (uscode.house.gov and Cornell LII, both showing '35 percent' as of the current in-force text) and multiple tax-advisory sources confirming the effective date (property placed in service after Dec. 31, 2025). Confidence is high for the headline rate and effective date. One nuance flagged by a source I found: taxpayers electing to claim the credit on qualified progress expenditures (rather than at the placed-in-service date) may still be limited to the 25% rate even for property ultimately placed in service after 2025 — I have not independently verified this progress-expenditure carve-out against the statute itself, only against a secondary tax-advisory source, so treat that specific sub-rule as lower confidence than the headline rate."
+      }
+    ],
+    "eligibility_thresholds_pure_calculations": {
+      "construction_begin_deadline": "No section 48D credit is allowed if construction of the qualified property begins after December 31, 2026 (26 U.S.C. § 48D(e)) — this is a date threshold, not a formula, but it's a hard eligibility cutoff a calculator must enforce.",
+      "placed_in_service_window": "Qualified property must be placed in service after December 31, 2022 (with a special basis-attribution rule for property whose construction began before Jan. 1, 2023, limited to the portion of basis attributable to construction after Aug. 9, 2022, the CHIPS Act's enactment date)."
+    },
+    "edge_cases": [
+      "Property placed in service exactly on December 31, 2025 — the statutory language uses 'placed in service after December 31, 2025' for the 35% rate, so December 31, 2025 itself falls under the PRIOR 25% rate, not the new 35% rate; a calculator using a naive '>= 2026-01-01' date check would get this right, but a naive 'year == 2025 → old rate, year == 2026 → new rate' check without checking the exact date could mishandle edge-of-year placed-in-service timing disputes.",
+      "Construction begins exactly on December 31, 2026 — statute disallows the credit if construction 'begins after' that date, so construction beginning ON December 31, 2026 itself is still within the eligibility window (last possible day), not excluded.",
+      "Qualified progress expenditures elected instead of placed-in-service-date accounting — per the known_uncertainty note above, this may cap the taxpayer at the 25% rate even for post-2025 property; a calculator that only checks placed-in-service date without checking whether a progress-expenditure election was made risks overstating the credit."
+    ]
+  }
+]
+```

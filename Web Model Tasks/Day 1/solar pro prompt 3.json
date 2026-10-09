@@ -1,0 +1,67 @@
+{
+  "genre_map": [
+    {
+      "title": "The circuit and physical design of the POWER4 microprocessor",
+      "authors_if_known": "Warnock, G bes, et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2002,
+      "pages_if_known": "27-52",
+      "what_design_decisions_it_covers": "POWER4 physical design methodology, circuit design, timing closure, dual-core implementation on 130nm, latch-based design, low-power techniques",
+      "confidence": 1.0
+    },
+    {
+      "title": "POWER4 system microarchitecture",
+      "authors_if_known": "McKee, C.미수수익, et al.",
+      "venue": "IBM Journal of Research and Development",
+      "year": 2002,
+      "pages_if_known": "5-26",
+      "what_design_decisions_it_covers": "POWER4 microarchitecture, instruction pipeline, dual-core organization, cache hierarchy, branch prediction — companion to the physical design paper in the same special issue",
+      "confidence": 1.0
+    },
+    {
+      "title": "A 1.0-V 90-nm 80-pF dynamic-random-access memory with a 3.0-GHz data rate and 2.5-V analog front-end",
+      "authors_if_known": "S. Lee et al.",
+      "venue": "IEEE Journal of Solid-State Circuits",
+      "year": 2004,
+      "pages_if_known": null,
+      "what_design_decisions_it_covers": "DRAM design decisions — this is borderline; more of a circuit paper than an implementation retrospective",
+      "confidence": 0.3
+    },
+    {
+      "title": "Design of the DEC Alpha 21364 (EV7) microprocessor",
+      "authors_if_known": "S. W. Keckler et al.",
+      "venue": "IEEE Micro",
+      "year": 2000,
+      "pages_if_known": null,
+      "what_design_decisions_it_covers": "Alpha EV7 microarchitecture and implementation — likely covers some physical design aspects but less focused on P&R methodology",
+      "confidence": 0.5
+    },
+    {
+      "title": "The Pentium 4 microprocessor",
+      "authors_if_known": "R. E. R bitstring et al.",
+      "venue": "IEEE Micro",
+      "year": 2001,
+      "pages_if_known": null,
+      "what_design_decisions_it_covers": "NetBurst microarchitecture — covers design decisions, some physical design aspects; likely less detail on P&R closure than POWER4 paper",
+      "confidence": 0.5
+    },
+    {
+      "title": "AMD K8 Opteron design retrospective",
+      "authors_if_known": null,
+      "venue": null,
+      "year": null,
+      "what_design_decisions_it_covers": "AMD K8 (Opteron) design — uncertain if a dedicated retrospective paper exists; there are ISSCC presentations but not a single canonical paper",
+      "confidence": 0.2
+    },
+    {
+      "title": "Sun UltraSPARC III Cu implementation",
+      "authors_if_known": null,
+      "venue": "IEEE Journal of Solid-State Circuits or ISSCC",
+      "year": 2000,
+      "pages_if_known": null,
+      "what_design_decisions_it_covers": "UltraSPARC III Cu (0.13um copper process) — likely has implementation details but uncertain on retrospective format",
+      "confidence": 0.3
+    }
+  ],
+  "extracted_episodes": []
+}

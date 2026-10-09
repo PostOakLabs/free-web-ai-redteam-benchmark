@@ -1,0 +1,25 @@
+
+[alpha] models=15 {'entries': 70, 'assertable_quotes': 20, 'verbatim': 17, 'paraphrase': 3, 'contradicts_candidate': 0, 'not_found': 0, 'declined': 50}
+   not_in_paper: {'False': 70}
+   paper_vs_general: {'confident-this-is-in-the-paper': 38, 'probably-in-the-paper': 24, 'from-general-Alpha-knowledge-not-n': 8}
+   confidence n=70 range=0.25-0.99 mean=0.729
+
+[niagara] models=14 {'entries': 69, 'assertable_quotes': 19, 'verbatim': 10, 'paraphrase': 4, 'contradicts_candidate': 0, 'not_found': 5, 'declined': 50}
+   not_in_paper: {'False': 69}
+   paper_vs_general: {'confident-this-is-in-the-paper': 44, 'probably-in-the-paper': 20, 'from-general-Niagara-knowledge-not': 5}
+   confidence n=69 range=0.25-0.98 mean=0.748
+
+[p4] models=14 {'entries': 67, 'assertable_quotes': 29, 'verbatim': 20, 'paraphrase': 3, 'contradicts_candidate': 0, 'not_found': 6, 'declined': 38}
+   not_in_paper: {'False': 67}
+   paper_vs_general: {'confident-this-is-in-the-paper': 43, 'from-general-P4-knowledge-not-nece': 2, 'probably-in-the-paper': 22}
+   confidence n=67 range=0.30-0.98 mean=0.770
+
+[pphysical] models=14 {'entries': 66, 'assertable_quotes': 14, 'verbatim': 7, 'paraphrase': 1, 'contradicts_candidate': 1, 'not_found': 5, 'declined': 51}
+   not_in_paper: {'False': 65, 'True': 1}
+   paper_vs_general: {'confident-this-is-in-the-paper': 22, 'probably-in-the-paper': 38, 'from-general-POWER4-knowledge-not-': 6}
+   confidence n=66 range=0.20-0.95 mean=0.643
+
+[lvs] schema/convergence only, no paper
+   items per model: [('chatgpt', 2), ('deepseek', 2), ('gemini', 2), ('glm 5.3 flash', 2), ('grok', 2), ('kimi', 2), ('longcat', 2), ('meta', 2), ('mimo', 2), ('minimax 2.7', 2), ('mistral', 2), ('qwen', 2), ('solar', 2), ('sonnet', 2), ('yuanbao', 2)]
+   total entries: 30
+   F-key presence: {'symptom': 30, 'first_checks': 30, 'discriminating_experiments': 30, 'common_root_causes': 30, 'classic_trap': 30, 'node_era_note': 30}

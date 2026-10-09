@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Trace cache instead of conventional L1 instruction cache",
+    "where_in_paper": "Trace Cache section",
+    "decision": "The paper describes using an Execution Trace Cache that stores decoded micro-ops in the order of program execution, rather than a conventional L1 instruction cache storing raw x86 instruction bytes.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper argues that decoding x86 instructions is complex and by caching decoded micro-ops instead of raw instructions, the processor avoids redecoding the same instructions repeatedly, improving front-end bandwidth and efficiency, especially since micro-ops are stored in execution order rather than program (memory layout) order, helping with branches.",
+    "outcome": "The trace cache became a defining front-end feature of the Pentium 4, delivering decoded micro-ops directly to the execution engine.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall the general concept well but cannot confirm precise phrasing or exact placement of comparative reasoning against conventional L1I in this specific paper vs. it being general NetBurst knowledge.",
+    "confidence": 0.4
+  },
+  {
+    "title": "Deep pipeline for high clock frequency",
+    "where_in_paper": "Pipeline overview / introduction",
+    "decision": "The paper describes a very deep pipeline (20 stages, as commonly cited) chosen to enable very high clock frequencies.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper's stated reasoning is that a deeper pipeline with fewer logic gates per stage allows each stage to complete faster, enabling higher clock speed, which the design team viewed as important to overall performance.",
+    "outcome": "The Pentium 4 achieved much higher clock frequencies than its predecessor (P6-based) processors as a direct result of this deep-pipeline design choice.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact number of pipeline stages (20) and whether this specific number is stated in this particular paper (vs. other Intel P4 papers/marketing) is uncertain to me.",
+    "confidence": 0.35
+  },
+  {
+    "title": "Double-pumped (double-speed) ALUs for integer execution",
+    "where_in_paper": "Rapid Execution Engine section",
+    "decision": "The paper describes staffed integer ALUs that run at twice the core clock frequency, allowing simple integer operations to execute and forward results faster than a single-cycle-per-clock design would allow.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper's reasoning is that running the ALUs at double pump speed allows back-to-back dependent simple integer instructions to be executed with very low effective latency, improving throughput for common integer operations.",
+    "outcome": "This became known as the 'Rapid Execution Engine,' allowing very fast execution of basic integer ALU operations.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am fairly confident of the general 'double-pumped ALU' fact but less sure exactly how the paper frames the trade-off/rationale versus just describing the mechanism.",
+    "confidence": 0.4
+  },
+  {
+    "title": "Prioritizing frequency headroom over IPC (instructions per clock) in overall design philosophy",
+    "where_in_paper": "Introduction / microarchitecture overview",
+    "decision": "The paper frames the overall NetBurst microarchitecture design goal as targeting substantially higher clock frequencies over multiple future process generations, even if this meant lower per-clock instruction throughput compared to previous designs.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The stated rationale is that the design was intended to scale to much higher frequencies across several silicon process generations, with the expectation that raw frequency scaling would deliver strong overall performance over the processor's multi-year lifetime.",
+    "outcome": "The paper presents this as the guiding philosophy behind NetBurst's architecture choices, including the deep pipeline and trace cache.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-P4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "This framing (frequency over IPC) is well known as NetBurst philosophy generally, but I am not confident this specific paper states it in these terms as an explicit trade-off versus simply describing the architecture; risk of blending in hindsight/general knowledge.",
+    "confidence": 0.3
+  }
+]

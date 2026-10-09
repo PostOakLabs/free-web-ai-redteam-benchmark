@@ -1,0 +1,98 @@
+[
+  {
+    "case_name": "Reserve-Coverage Test (ART)",
+    "inputs": {
+      "token_supply": "1,000,000 tokens",
+      "reference_value": "1,000,000 EUR",
+      "reserve_assets_cash": "400,000 EUR",
+      "reserve_assets_bonds": "650,000 EUR",
+      "total_reserve_value": "1,050,000 EUR"
+    },
+    "computation": {
+      "step_1_total_reserve": "400,000 EUR + 650,000 EUR = 1,050,000 EUR",
+      "step_2_coverage_ratio": "1,050,000 EUR / 1,000,000 EUR = 1.05 (or 105%)",
+      "step_3_full_backing_test": "1.05 >= 1.00"
+    },
+    "result": {
+      "coverage_ratio_pct": 105.0,
+      "verdict": "Adequate",
+      "test_against": "Full-backing requirement (Coverage >= 100%)"
+    },
+    "article_basis": "Article 36 of Regulation (EU) 2023/1114 (Requirement to have a reserve of assets for Asset-Referenced Tokens)",
+    "tail_convention": "Coverage is a higher-is-better metric. The LOW tail (values approaching or falling below 100%) is adverse. This test examines the point estimate, which serves as the baseline before examining the adverse LOW tail in stress scenarios.",
+    "weakest_point": "Point-in-time valuation of reserve assets can fluctuate intraday, meaning a passing point estimate might mask intraday shortfalls if bond prices drop momentarily."
+  },
+  {
+    "case_name": "Own-Funds Computation (ART)",
+    "inputs": {
+      "total_reserve_value": "1,050,000 EUR",
+      "OWN_FUNDS_PCT_THRESHOLD": "UNKNOWN_CURRENT_VALUE",
+      "FIXED_MINIMUM_EUR": "UNKNOWN_CURRENT_VALUE",
+      "actual_own_funds_held": "50,000 EUR"
+    },
+    "computation": {
+      "step_1_pct_test": "1,050,000 EUR * OWN_FUNDS_PCT_THRESHOLD",
+      "step_2_fixed_test": "FIXED_MINIMUM_EUR",
+      "step_3_required_own_funds": "max(1,050,000 * OWN_FUNDS_PCT_THRESHOLD, FIXED_MINIMUM_EUR)",
+      "step_4_adequacy_check": "50,000 EUR >= required_own_funds"
+    },
+    "result": {
+      "required_own_funds_formula": "max(1,050,000 * OWN_FUNDS_PCT_THRESHOLD, FIXED_MINIMUM_EUR)",
+      "verdict": "Cannot be definitively evaluated without the UNKNOWN_CURRENT_VALUE parameters, but mechanically structured to test against the greater of the percentage or fixed minimum.",
+      "test_against": "Own funds requirement"
+    },
+    "article_basis": "Article 35 of Regulation (EU) 2023/1114 (Own funds requirement for Asset-Referenced Tokens)",
+    "tail_convention": "Own funds capital adequacy is a higher-is-better metric. The LOW tail (capital depletion falling below the threshold) is adverse. The test examines whether the actual capital falls into the adverse LOW tail below the regulatory requirement.",
+    "weakest_point": "Using UNKNOWN_CURRENT_VALUE parameters prevents a definitive pass/fail verdict, highlighting that regulatory thresholds subject to change or specific EBA RTS must be hardcoded dynamically rather than guessed."
+  },
+  {
+    "case_name": "Stressed-Coverage Case (ART)",
+    "inputs": {
+      "token_supply": "1,000,000 tokens",
+      "reference_value": "1,000,000 EUR",
+      "reserve_assets_gov_bonds": "600,000 EUR",
+      "reserve_assets_cash": "450,000 EUR",
+      "stress_haircut_bonds": "10% decline",
+      "stress_haircut_cash": "0% decline"
+    },
+    "computation": {
+      "step_1_stressed_bonds": "600,000 EUR * (1 - 0.10) = 540,000 EUR",
+      "step_2_stressed_cash": "450,000 EUR * (1 - 0.00) = 450,000 EUR",
+      "step_3_total_stressed_reserve": "540,000 EUR + 450,000 EUR = 990,000 EUR",
+      "step_4_stressed_coverage_ratio": "990,000 EUR / 1,000,000 EUR = 0.99 (or 99%)"
+    },
+    "result": {
+      "stressed_coverage_ratio_pct": 99.0,
+      "verdict": "Inadequate",
+      "test_against": "Stressed full-backing requirement (Coverage >= 100%)"
+    },
+    "article_basis": "Article 36 of Regulation (EU) 2023/1114 (Reserve of assets composition and stress testing requirements)",
+    "tail_convention": "Coverage is a higher-is-better metric. The LOW tail (asset value decline) is adverse. This stress test explicitly examines the adverse LOW tail of the reserve asset distribution by applying negative haircuts to simulate a market downturn.",
+    "weakest_point": "Assumes static liabilities (token supply remains exactly 1,000,000 EUR) during the stress event, ignoring potential simultaneous redemption runs that would exacerbate the shortfall."
+  },
+  {
+    "case_name": "Redemptions-at-Par Case (ART)",
+    "inputs": {
+      "initial_token_supply": "1,000,000 tokens",
+      "initial_reserve_value": "1,050,000 EUR",
+      "redemption_request": "100,000 tokens",
+      "par_value_per_token": "1 EUR"
+    },
+    "computation": {
+      "step_1_payout_obligation": "100,000 tokens * 1 EUR/token = 100,000 EUR",
+      "step_2_new_reserve_value": "1,050,000 EUR - 100,000 EUR = 950,000 EUR",
+      "step_3_new_token_supply": "1,000,000 tokens - 100,000 tokens = 900,000 tokens",
+      "step_4_new_reference_value": "900,000 tokens * 1 EUR/token = 900,000 EUR",
+      "step_5_post_redemption_coverage": "950,000 EUR / 900,000 EUR = 1.0555... (or ~105.56%)"
+    },
+    "result": {
+      "payout_obligation_eur": 100000,
+      "post_redemption_coverage_pct": 105.56,
+      "verdict": "Adequate (Coverage remains >= 100% post-redemption)",
+      "test_against": "Redemption at par obligation and post-redemption full-backing"
+    },
+    "article_basis": "Article 39 of Regulation (EU) 2023/1114 (Rights of holders of asset-referenced tokens to redeem at par)",
+    "tail_convention": "Liquidity and coverage are higher-is-better metrics. The LOW tail (cash depletion exceeding liquid reserves) is adverse. This test examines whether the cash outflow pushes the reserve into the adverse LOW tail below 100% coverage.",
+    "weakest_point": "Assumes the 100,000 EUR payout is sourced entirely from cash equivalents without forcing the sale of illiquid bonds at a loss, which would occur in a real liquidity stress scenario."
+  }
+]

@@ -1,0 +1,27 @@
+[
+{
+"task": 1,
+"steps": "Tier A: 130461 / 124331 = 1.049303874... ≈ 1.049304. Tier B fixed: 3914 / 3730 = 1.049329758... ≈ 1.049330. Tier C floor: 26092 / 24866 = 1.049304271... ≈ 1.049304. Tier D fixed: 1305 / 1243 = 1.049879324... ≈ 1.049879. The four factors are mutually consistent with an underlying base multiplier of 1.049 (corresponding to the stated 4.9 percent CPI-U increase), with small variation in effective ratios caused by rounding each resulting threshold value to the nearest whole dollar.",
+"answer": "Tier A: 1.049304; Tier B: 1.049330; Tier C: 1.049304; Tier D: 1.049879. The factors are consistent with a single uniform 4.9% multiplier (1.049) applied prior to whole-dollar rounding.",
+"evidence_level": "computed"
+},
+{
+"task": 2,
+"steps": "Inferred rounding rule: Standard round-to-nearest-integer (half-up) applied after applying the CPI percentage change factor. Applying 3.4% CPI-U increase (multiplier 1.034) to 2024 values: Tier A: 130,461 * 1.034 = 134,896.674 → rounds to $134,897. Tier B fixed: 3,914 * 1.034 = 4,047.076 → rounds to $4,047. Tier C floor: 26,092 * 1.034 = 26,979.128 → rounds to $26,979. Tier D fixed: 1,305 * 1.034 = 1,349.37 → rounds to $1,349.",
+"answer": "Tier A: $134,897; Tier B fixed: $4,047; Tier C floor: $26,979; Tier D fixed: $1,349 (Inferred rule: round to nearest whole dollar after multiplying by 1 + CPI_change).",
+"evidence_level": "computed"
+},
+{
+"task": 3,
+"steps": "Actual official 2025 Tier A value = $134,841. Projected Tier A value = $134,897. Difference = $134,841 - $134,897 = -$56. Exact adjustment factor required to reach $134,841 from $130,461: 134,841 / 130,461 = 1.033573252... (a 3.357325% increase). Difference relative to assumed 1.034 factor: 1.033573252 - 1.034000000 = -0.000426748, which equals a discrepancy of -4.27 basis points (or -0.0427%).",
+"answer": "The projection ($134,897) exceeds the official value ($134,841) by $56. The exact factor producing $134,841 from $130,461 is 1.033573 (an increase of ~3.3573%), yielding a discrepancy of -4.27 basis points from the nominal 3.4% factor.",
+"evidence_level": "computed"
+},
+{
+"task": 4,
+"steps": "Analyzed indexing mechanics under CFPB Regulation Z (12 CFR Part 1026, Official Interpretations).",
+"answer": "The official annual adjustment is calculated by applying the CPI-U index change to the unrounded original base threshold established in the baseline regulation (or using the exact unrounded historical index ratio of the CPI-U for June-to-June periods), rather than compounding the rounded nominal percentage rate (3.4%) directly onto the prior year's already-rounded threshold dollar figure.",
+"evidence_level": "computed"
+}
+]
+{"weakest_point": "CFPB Regulation Z thresholds are computed from unrounded base-year figures or precise CPI-U index numbers (e.g., June-to-June CPI-U levels) rather than multiplying the previous year's rounded dollar threshold by a rounded percentage rate (3.4%). Compounding rounded annual percentages directly causes multi-dollar rounding drift relative to the official published values."}

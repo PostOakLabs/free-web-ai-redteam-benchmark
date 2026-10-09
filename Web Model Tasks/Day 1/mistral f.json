@@ -1,0 +1,298 @@
+```json
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      "Routing utilization >90% in 10x10µm tiles on M1-M3 with no alternative tracks, while M4+ remain <60%",
+      "DRC shorts cluster where detour length for top 10% nets exceeds 3× Manhattan distance, visible as 'maze overflow' in router logs",
+      "Global router reports 500+ nets with estimated detour >500µm, concentrated in 3-5 hierarchical blocks",
+      "Final DRC shows >1000 spacing violations on M2 with identical coordinates, indicating systematic track depletion"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Macro placement creates channel bottleneck",
+        "distinguishing_check": "Run congestion map at placement stage; if >80% utilization appears in a 50µm-wide vertical strip between two macros with <5µm gap, it's macro placement",
+        "check_cost": "minutes",
+        "typical_fix": "Spread macros by 10-20µm or rotate one by 90° to open horizontal channels",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Power grid straps block horizontal routing on M2/M3",
+        "distinguishing_check": "Overlay power grid on congestion map; if M2/M3 congestion shadows VDD/VSS straps with 1:1 alignment, it's power grid blocking",
+        "check_cost": "minutes",
+        "typical_fix": "Add double straps on M4 or move power grid to M5+, then re-route",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Repeated logic (e.g., 32-bit adder) with identical pin patterns",
+        "distinguishing_check": "Count unique net names in congested region; if >70% of nets belong to 5-10 hierarchical instances of the same module, it's repeated logic",
+        "check_cost": "minutes",
+        "typical_fix": "Re-architect repeated logic to use different pin orientations or add buffer islands",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Pin access violations from macro pin density >80% on one side",
+        "distinguishing_check": "Check macro pin report; if one macro side has >150 pins within 10µm vertical span, it's pin access congestion",
+        "check_cost": "minutes",
+        "typical_fix": "Add pin access patterns or split macro into smaller instances",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient routing resources at advanced nodes (7nm: M1/M2 pitch too tight for analog blocks)",
+        "distinguishing_check": "At 7nm, if congestion appears only around analog macros with M1/M2 minimum pitch requirements, it's node-specific resource limitation",
+        "check_cost": "minutes",
+        "typical_fix": "Use wider metal layers or add custom routing rules for analog blocks",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: placement and power grid checks are minutes, while architecture changes are days",
+    "classic_trap": "Blame router settings and tweak for days instead of checking macro placement first",
+    "confidence": 0.95
+  },
+  {
+    "failure_class": "FAIL_TIMING (setup)",
+    "symptoms": [
+      "Negative slack on >1000 paths with WNS -500ps, but TNS is -50ns (many paths slightly failing)",
+      "Slack histogram shows bimodal distribution: one peak at -200ps (clock domain A) and another at -800ps (clock domain B)",
+      "All failing paths share a common sink register bank (e.g., all write pointers in a FIFO)",
+      "Wirelength of failing paths averages 2× the wirelength of passing paths in the same clock domain"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock period too aggressive for the design",
+        "distinguishing_check": "Run timing with clock period +10%; if >90% of paths now pass, it's clock period issue",
+        "check_cost": "minutes",
+        "typical_fix": "Increase clock period by 5-10% or relax constraints on non-critical paths",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Logic placement too spread out (high wire capacitance)",
+        "distinguishing_check": "Check placement; if failing paths have wirelength >500µm while passing paths average <200µm, it's placement issue",
+        "check_cost": "minutes",
+        "typical_fix": "Run placement with higher congestion-driven spreading weight",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient buffering on long nets",
+        "distinguishing_check": "If all failing paths have >5 buffer stages and fanout >20, it's buffering issue",
+        "check_cost": "minutes",
+        "typical_fix": "Add repeaters on long nets or increase buffer drive strength",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Library characterization mismatch (28nm: NLDM tables too optimistic for high-Vt cells)",
+        "distinguishing_check": "At 28nm, re-run timing with high-Vt cell derating; if slack degrades by >20%, it's library characterization",
+        "check_cost": "hours",
+        "typical_fix": "Use vendor-recommended derating factors or switch to more conservative library",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Clock network latency exceeds 30% of clock period",
+        "distinguishing_check": "Check clock tree report; if root-to-leaf latency >300ps on a 1ns clock, it's clock network issue",
+        "check_cost": "minutes",
+        "typical_fix": "Optimize clock tree with higher drive strength or more levels",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Highest-probability-first: clock period and placement issues are most common, library issues are rare but expensive to fix",
+    "classic_trap": "Add hundreds of buffers without checking if the clock period itself is unrealistic",
+    "confidence": 0.92
+  },
+  {
+    "failure_class": "FAIL_TIMING (hold)",
+    "symptoms": [
+      "Hold violations on 50-200 paths with slack between -20ps and -150ps, all on short paths (<5 FO4 delays)",
+      "Violations cluster within 50µm radius of a single clock-gating cell, affecting only its fanout",
+      "All failing paths are from the same launch flip-flop to multiple capture flops within 20µm",
+      "Hold slack improves by >50ps when clock latency is reduced by 10ps in static analysis"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Clock skew between launch and capture flops",
+        "distinguishing_check": "Run clock skew report; if skew between specific launch-capture pairs >30ps, it's clock skew",
+        "check_cost": "minutes",
+        "typical_fix": "Balance clock tree or add delay buffers on early clock paths",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Over-buffering creating short path (7nm: too many inverters on local nets)",
+        "distinguishing_check": "At 7nm, if failing hold paths have >3 buffer stages within 20µm distance, it's over-buffering",
+        "check_cost": "minutes",
+        "typical_fix": "Remove unnecessary buffers or replace with smaller drive strength",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock gating cell with unbalanced enable timing",
+        "distinguishing_check": "If all hold violations disappear when clock gating is disabled for a specific cell, it's gating cell issue",
+        "check_cost": "minutes",
+        "typical_fix": "Add synchronizer stages or balance enable signal arrival",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Logic replication creating short paths (e.g., duplicated registers in different clock domains)",
+        "distinguishing_check": "If failing paths are between registers with identical names but different hierarchies, it's replication issue",
+        "check_cost": "minutes",
+        "typical_fix": "Remove redundant registers or add delay elements",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Hold margin too tight (<10ps) for process variation at 28nm",
+        "distinguishing_check": "At 28nm, if hold violations appear only on paths with <5ps margin in best-case corner, it's margin issue",
+        "check_cost": "minutes",
+        "typical_fix": "Increase hold margin requirement to 20-30ps",
+        "fix_cost": "minutes"
+      }
+    ],
+    "ordering_rationale": "Highest-impact-first: clock skew and gating issues affect many paths, over-buffering affects fewer",
+    "classic_trap": "Add hold buffers on every failing path instead of fixing the root clock skew",
+    "confidence": 0.94
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      "Static IR drop >100mV in a 50x50µm region on VDD, while neighboring regions show <20mV drop",
+      "Dynamic IR drop >50mV during peak switching (measured at 1ns interval) correlates with timing failures",
+      "Electromigration violations on VDD straps in the same region where IR drop exceeds 80mV",
+      "Functional failures at 0.95V but not at 1.0V, with no timing path failing at either voltage"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient power grid straps (28nm: <1 strap per 100µm)",
+        "distinguishing_check": "Count VDD straps; if density <1 strap/100µm in failing region while >1.5/100µm in passing regions, it's strap density",
+        "check_cost": "minutes",
+        "typical_fix": "Add double straps on M4/M5 in the failing region",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "High current density from switching logic (e.g., 1000+ flops toggling simultaneously)",
+        "distinguishing_check": "Run switching activity analysis; if toggle rate >0.8 in failing region vs <0.3 in passing regions, it's switching current",
+        "check_cost": "hours",
+        "typical_fix": "Spread high-toggle logic or add decap cells",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Poor decap placement (7nm: decap cells >50µm from high-current blocks)",
+        "distinguishing_check": "At 7nm, check decap distribution; if >80% of decap is >50µm from logic blocks with >1mW power, it's decap placement",
+        "check_cost": "minutes",
+        "typical_fix": "Add decap cells within 20µm of high-power blocks",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Power gating cell leakage causing local IR drop when disabled",
+        "distinguishing_check": "Run IR drop with power gating enabled vs disabled; if drop reduces by >50% when gating disabled, it's gating cell issue",
+        "check_cost": "hours",
+        "typical_fix": "Increase power gating cell size or add more gating cells",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Insufficient VDD/VSS rail width (28nm: <5µm width for blocks >100µm²)",
+        "distinguishing_check": "Measure rail width; if VDD/VSS <5µm in failing region while >8µm in passing regions, it's rail width",
+        "check_cost": "minutes",
+        "typical_fix": "Widen VDD/VSS rails to 10µm in failing region",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: strap density and rail width are quick to verify and fix, switching current analysis is more expensive",
+    "classic_trap": "Add decap everywhere instead of targeting the specific high-current region",
+    "confidence": 0.90
+  },
+  {
+    "failure_class": "FAIL_CTS",
+    "symptoms": [
+      "Clock skew >50ps between any two flip-flops in the same domain, with latency imbalance >30ps",
+      "Clock transition violations on >100 flops, all fed by the same clock buffer with fanout >100",
+      "Clock gating cell with >200ps enable-to-clock delay, causing hold failures on gated paths",
+      "Clock tree power >30% of total chip power, with leaf latency >400ps on a 1ns clock"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Unbalanced clock tree topology (e.g., H-tree vs mesh mismatch)",
+        "distinguishing_check": "Run clock tree report; if max skew >100ps and tree depth varies by >3 levels between branches, it's topology issue",
+        "check_cost": "minutes",
+        "typical_fix": "Rebuild clock tree with balanced topology (e.g., switch to mesh or X-tree)",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock gating cell placement too far from clock spine",
+        "distinguishing_check": "If all clock gating cells with >50ps insertion delay are >200µm from nearest clock spine, it's placement issue",
+        "check_cost": "minutes",
+        "typical_fix": "Move clock gating cells within 50µm of clock spine",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient clock buffer drive strength for fanout >200",
+        "distinguishing_check": "If clock buffers with fanout >200 show >100ps transition time while those with fanout <100 show <50ps, it's drive strength issue",
+        "check_cost": "minutes",
+        "typical_fix": "Upsize clock buffers or add more levels to reduce fanout",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock domain crossing without synchronizers",
+        "distinguishing_check": "If clock skew report shows >100ps skew between flops in different domains with direct data paths, it's CDC issue",
+        "check_cost": "minutes",
+        "typical_fix": "Add synchronizer stages or use asynchronous FIFO",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Clock tree shielding insufficient (7nm: <2 shield wires on M3/M4 for clock nets)",
+        "distinguishing_check": "At 7nm, if clock nets have <2 shield wires and crosstalk noise >10mV, it's shielding issue",
+        "check_cost": "minutes",
+        "typical_fix": "Add shield wires on both sides of clock nets",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Highest-prior-probability-first: unbalanced topology and gating placement are most common, CDC issues are less frequent but critical",
+    "classic_trap": "Keep increasing clock buffer size without checking for unbalanced topology",
+    "confidence": 0.93
+  },
+  {
+    "failure_class": "FAIL_DRC (routing DRCs)",
+    "symptoms": [
+      "100+ shorts on M2 within a 200x200µm region, all with identical spacing violation code (e.g., MET2.SPACING 0.04µm)",
+      "Antenna violations on 50+ nets, all connected to the same macro pin with high aspect ratio",
+      "Metal fill violations (density <5%) in large empty regions >100x100µm",
+      "Via enclosure violations on M1-M2 vias, all occurring at macro boundary with 0.1µm under-enclosure"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Minimum spacing violation due to aggressive metal fill removal",
+        "distinguishing_check": "If all shorts are on M2 with spacing <0.05µm and occur only in regions where metal fill was removed, it's fill removal issue",
+        "check_cost": "minutes",
+        "typical_fix": "Re-add metal fill with safe spacing or adjust fill removal rules",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Macro pin access DRC (28nm: pin enclosure <0.05µm on M1)",
+        "distinguishing_check": "At 28nm, if all violations are M1 enclosure errors at macro pins with enclosure <0.05µm, it's pin access issue",
+        "check_cost": "minutes",
+        "typical_fix": "Extend macro pins or add pin access patterns",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient via enclosure from router (7nm: via enclosure <0.02µm)",
+        "distinguishing_check": "At 7nm, if all via violations show enclosure <0.02µm on M1-M2 vias in congested regions, it's router via issue",
+        "check_cost": "minutes",
+        "typical_fix": "Increase via enclosure rule or add via doubling in router settings",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Antenna effect on long nets without diode protection",
+        "distinguishing_check": "If all antenna violations are on nets >500µm long with no antenna diodes, it's antenna effect",
+        "check_cost": "minutes",
+        "typical_fix": "Add antenna diodes on long nets or break nets into shorter segments",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Design rule mismatch between IP block and top-level (e.g., 28nm IP in 40nm design)",
+        "distinguishing_check": "If all violations occur at IP block boundaries with rule names specific to 28nm (e.g., MET1.WIDTH 0.04µm), it's IP-top mismatch",
+        "check_cost": "minutes",
+        "typical_fix": "Create rule exceptions for IP blocks or re-implement IP with compatible rules",
+        "fix_cost": "days"
+      }
+    ],
+    "ordering_rationale": "Cheapest-first: spacing and enclosure violations are quick to verify and fix, IP-top mismatches require vendor involvement",
+    "classic_trap": "Manually edit every violation in the layout instead of fixing the root rule or router setting",
+    "confidence": 0.96
+  }
+]
+```

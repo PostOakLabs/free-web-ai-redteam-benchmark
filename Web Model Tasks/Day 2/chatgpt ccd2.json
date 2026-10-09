@@ -1,0 +1,289 @@
+[
+{
+"case_name": "Basic single-drawdown case",
+"annex_basis": {
+"directive": "Directive (EU) 2023/2225",
+"annex": "Annex III, Part I",
+"example_number": null
+},
+"inputs": {
+"credit_amount_eur": 10000,
+"drawdowns": [
+{
+"amount_eur": 10000,
+"interval_years": 0
+}
+],
+"payments": [
+{
+"amount_eur": 900,
+"interval_years": 0.0833333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.1666666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.25
+},
+{
+"amount_eur": 900,
+"interval_years": 0.3333333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.4166666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.5
+},
+{
+"amount_eur": 900,
+"interval_years": 0.5833333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.6666666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.75
+},
+{
+"amount_eur": 900,
+"interval_years": 0.8333333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.9166666667
+},
+{
+"amount_eur": 900,
+"interval_years": 1
+}
+],
+"charges_eur": 0
+},
+"equation_setup": "10000(1+X)^0 = 900(1+X)^(-1/12) + 900(1+X)^(-2/12) + 900(1+X)^(-3/12) + 900(1+X)^(-4/12) + 900(1+X)^(-5/12) + 900(1+X)^(-6/12) + 900(1+X)^(-7/12) + 900(1+X)^(-8/12) + 900(1+X)^(-9/12) + 900(1+X)^(-10/12) + 900(1+X)^(-11/12) + 900(1+X)^(-12/12)",
+"computation": {
+"starting_date": "The date of the first drawdown, so t1=0.",
+"interval_convention": "Monthly intervals are represented as 1/12 of a year.",
+"iteration": "Numerically solve f(X)=10000-sum_{j=1}^{12}[900(1+X)^(-j/12)] = 0.",
+"solution_before_rounding": 0.15448936399925361,
+"solution_percent_before_rounding": 15.448936399925362,
+"equation_check": "At X=0.15448936399925361, present value of repayments = EUR 10000.0000000000."
+},
+"result_aprc": "15.4%",
+"assumptions_applied": [
+"The credit is fully drawn at the first drawdown date.",
+"The first drawdown is the starting date.",
+"Payments occur at equal monthly intervals.",
+"A month is treated as 1/12 of a year.",
+"The result is rounded to at least one decimal place as required by Annex III Part I(d)."
+],
+"doc_vs_general": "constructed-from-formula-knowledge",
+"weakest_point": "The directive's Annex III contains the formula and calculation assumptions, not numbered worked numerical examples. This numerical case is therefore not an official annex example. The monthly timing here is a constructed application of the annex conventions. "
+},
+{
+"case_name": "Single drawdown with charge paid at conclusion",
+"annex_basis": {
+"directive": "Directive (EU) 2023/2225",
+"annex": "Annex III, Part I and Part II(g)(ii)",
+"example_number": null
+},
+"inputs": {
+"credit_amount_eur": 10000,
+"drawdowns": [
+{
+"amount_eur": 10000,
+"interval_years": 0
+}
+],
+"payments": [
+{
+"amount_eur": 900,
+"interval_years": 0.0833333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.1666666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.25
+},
+{
+"amount_eur": 900,
+"interval_years": 0.3333333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.4166666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.5
+},
+{
+"amount_eur": 900,
+"interval_years": 0.5833333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.6666666667
+},
+{
+"amount_eur": 900,
+"interval_years": 0.75
+},
+{
+"amount_eur": 900,
+"interval_years": 0.8333333333
+},
+{
+"amount_eur": 900,
+"interval_years": 0.9166666667
+},
+{
+"amount_eur": 900,
+"interval_years": 1
+}
+],
+"charges_eur": 200,
+"charge_payment_interval_years": 0
+},
+"equation_setup": "10000(1+X)^0 = 200(1+X)^0 + 900(1+X)^(-1/12) + 900(1+X)^(-2/12) + 900(1+X)^(-3/12) + 900(1+X)^(-4/12) + 900(1+X)^(-5/12) + 900(1+X)^(-6/12) + 900(1+X)^(-7/12) + 900(1+X)^(-8/12) + 900(1+X)^(-9/12) + 900(1+X)^(-10/12) + 900(1+X)^(-11/12) + 900(1+X)^(-12/12)",
+"computation": {
+"charge_at_conclusion": "EUR 200 is a non-interest charge paid at the conclusion, hence s=0.",
+"total_nominal_repayments_and_charge": "EUR 200 + 12*EUR 900 = EUR 11000.",
+"iteration": "Numerically solve f(X)=10000-200-sum_{j=1}^{12}[900(1+X)^(-j/12)] = 0.",
+"solution_before_rounding": 0.19950170557200775,
+"solution_percent_before_rounding": 19.950170557200774,
+"equation_check": "At X=0.19950170557200775, present value of the charge plus repayments = EUR 10000.0000000000."
+},
+"result_aprc": "20.0%",
+"assumptions_applied": [
+"The first drawdown is the starting date.",
+"The EUR 200 non-interest charge is paid at the date of conclusion.",
+"The payment schedule is fixed and monthly.",
+"A month is treated as 1/12 of a year.",
+"The APR is rounded to one decimal place."
+],
+"doc_vs_general": "constructed-from-formula-knowledge",
+"weakest_point": "Part II(g)(ii) specifies payment at conclusion for a non-interest charge expressed as a single sum when the payment date cannot otherwise be ascertained; here that timing is deliberately specified directly. The numerical amounts are not an official annex example. "
+},
+{
+"case_name": "Irregular repayment intervals",
+"annex_basis": {
+"directive": "Directive (EU) 2023/2225",
+"annex": "Annex III, Part I",
+"example_number": null
+},
+"inputs": {
+"credit_amount_eur": 10000,
+"drawdowns": [
+{
+"amount_eur": 10000,
+"interval_years": 0
+}
+],
+"payments": [
+{
+"amount_eur": 2000,
+"interval_years": 0.25
+},
+{
+"amount_eur": 2500,
+"interval_years": 0.5
+},
+{
+"amount_eur": 3000,
+"interval_years": 0.75
+},
+{
+"amount_eur": 3500,
+"interval_years": 1
+}
+],
+"charges_eur": 0
+},
+"equation_setup": "10000(1+X)^0 = 2000(1+X)^(-0.25) + 2500(1+X)^(-0.5) + 3000(1+X)^(-0.75) + 3500(1+X)^(-1)",
+"computation": {
+"intervals_years": [
+0.25,
+0.5,
+0.75,
+1
+],
+"nominal_repayments_total_eur": 11000,
+"iteration": "Numerically solve f(X)=10000-[2000(1+X)^(-0.25)+2500(1+X)^(-0.5)+3000(1+X)^(-0.75)+3500(1+X)^(-1)] = 0.",
+"solution_before_rounding": 0.1512888946545038,
+"solution_percent_before_rounding": 15.12888946545038,
+"equation_check": "At X=0.1512888946545038, present value of the four repayments = EUR 10000.0000000000."
+},
+"result_aprc": "15.1%",
+"assumptions_applied": [
+"The first drawdown is the starting date.",
+"Payments need not be equal or occur at equal intervals.",
+"The four intervals are exactly 3, 6, 9 and 12 months, represented as 0.25, 0.5, 0.75 and 1 year.",
+"The result is rounded to one decimal place."
+],
+"doc_vs_general": "constructed-from-formula-knowledge",
+"weakest_point": "The irregular schedule is constructed rather than an official numerical example. For actual calendar dates that do not correspond to whole months or years, Annex III specifies a particular day-count procedure; that procedure is not needed for these quarter-year intervals. "
+},
+{
+"case_name": "Multiple drawdowns with later repayments",
+"annex_basis": {
+"directive": "Directive 2008/48/EC",
+"annex": "Annex I, Part I",
+"example_number": null
+},
+"inputs": {
+"drawdowns": [
+{
+"amount_eur": 5000,
+"interval_years": 0
+},
+{
+"amount_eur": 5000,
+"interval_years": 0.5
+}
+],
+"payments": [
+{
+"amount_eur": 6000,
+"interval_years": 1
+},
+{
+"amount_eur": 6000,
+"interval_years": 1.5
+}
+],
+"total_drawn_eur": 10000,
+"total_repaid_eur": 12000,
+"charges_eur": 0
+},
+"equation_setup": "5000(1+X)^0 + 5000(1+X)^(-0.5) = 6000(1+X)^(-1) + 6000(1+X)^(-1.5)",
+"computation": {
+"drawdown_present_value_at_solution_eur": "5000 + 5000/sqrt(1+X)",
+"repayment_present_value_at_solution_eur": "6000/(1+X) + 6000/(1+X)^1.5",
+"iteration": "Numerically solve 5000 + 5000(1+X)^(-0.5) - 6000(1+X)^(-1) - 6000(1+X)^(-1.5) = 0.",
+"solution_before_rounding": 0.19999999999999984,
+"solution_percent_before_rounding": 19.999999999999986,
+"equation_check": "At X=0.20, both sides equal approximately EUR 9472.1359549996.",
+"closed_form_check": "Let y=sqrt(1+X). Multiplication by y^3 gives 5000y^3+5000y^2-6000y-6000=0; y=1.095445115, giving X=y^2-1=0.20."
+},
+"result_aprc": "20.0%",
+"assumptions_applied": [
+"The first drawdown establishes the starting date.",
+"The second drawdown occurs six months later.",
+"The two repayments occur one and one-and-a-half years after the first drawdown.",
+"Unequal drawdowns and unequal intervals are permitted by the annex equation.",
+"The result is rounded to one decimal place."
+],
+"doc_vs_general": "constructed-from-formula-knowledge",
+"weakest_point": "This is not an identified official numerical annex example. It is a direct numerical application of the annex's multiple-drawdown formula. The directive states that amounts and intervals need not be equal. "
+}
+]

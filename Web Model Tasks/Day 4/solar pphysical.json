@@ -1,0 +1,62 @@
+I do not have the full text of this paper memorized, and several of my high-level POWER4 facts may belong to general knowledge rather than this specific paper. I will output fewer entries and flag uncertainty aggressively so the later tool-verification step is cheap.
+
+```json
+[
+  {
+    "title": "Single-die dual-core integration",
+    "where_in_paper": "Integrated single-chip dual-core introduction / overview (early sections, ~pp. 28–30)",
+    "decision": "Two full POWER4 processor cores plus a shared L2 cache were integrated onto a single die, rather than using two separate chips or a core-plus-external-cache configuration.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Reducing off-chip communication latency and wiring complexity, improving performance scaling within the packaging and interconnect budget available at the time, and avoiding the pin-power and memory-interface cost of separate-chip multiprocessor configurations.",
+    "outcome": "The paper reports a single-chip dual-core POWER4 with on-chip shared L2, implemented in 0.18-μm CMOS at high clock frequency.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Single-die dual-core is the defining feature of POWER4 and almost certainly appears in this paper, but whether the paper frames it as an explicit 'rejected alternative = two-chip' design discussion is not certain; the rationale wording above is my paraphrase, not a recalled quotation.",
+    "confidence": 0.75
+  },
+  {
+    "title": "Clock distribution network architecture",
+    "where_in_paper": "Clock distribution section (topic area ~pp. 36–41)",
+    "decision": "A hierarchical (tree-like) clock distribution scheme was used to distribute the chip's high-frequency clock across a large die with two active cores.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A single global distribution scheme had to manage skew, jitter, wire load, and power delivery for two high-frequency clock domains on one large die; a hierarchical approach was selected to bound skew and provide scalable buffering across the die.",
+    "outcome": "The paper reports the resulting clock network met the target frequency with acceptable skew and power for the chip.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 38,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I cannot recall the exact hierarchy depth, buffering strategy, or specific skew targets the paper states; 'hierarchical tree' may over-simplify. If the paper actually describes a grid or a hybrid scheme rather than a pure tree, this entry mischaracterizes the architecture.",
+    "confidence": 0.65
+  },
+  {
+    "title": "Power delivery and electrical design strategy",
+    "where_in_paper": "Power distribution / electrical design section (topic area ~pp. 41–45)",
+    "decision": "Power delivery and distribution were designed to support high current density across a dense dual-core die, with attention to IR drop, power grid design, and package/pin allocation.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A dual-core high-frequency die in the 0.18-μm generation demanded careful power distribution to avoid voltage drop and noise problems; the paper treats power grid, packaging, and pad design as integrated elements of the physical design problem.",
+    "outcome": "The paper reports that the chosen power-delivery approach successfully supported the target frequency and core density within the package constraints.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 43,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "My description of the specific power-grid topology, decap strategy, or pin/current numbers is generic POWER4-era physical-design knowledge, not a specific claim I can attribute to a sentence in this paper. If the paper emphasizes a feature I have omitted (e.g. a particular package, voltage, or decoupling method), this entry is incomplete.",
+    "confidence": 0.55
+  },
+  {
+    "title": "SRAM array / cache macro design approach",
+    "where_in_paper": "Memory array / cache macro design discussion (topic area ~pp. 45–50)",
+    "decision": "SRAM macros for the on-chip L2 (and any on-chip caches) were designed as dense, high-performance memories with specific cell and periphery choices to meet timing and density targets.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The chip's dual-core plus shared L2 architecture required large on-chip memory arrays; the paper's physical-design narrative considers array sizing, cell design, and integration with the core as part of the overall physical and timing-closure problem.",
+    "outcome": "The paper reports the SRAM arrays as integrated elements of the chip that met the target capacity and performance.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 47,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "I am most uncertain whether this paper devotes a distinct, substantive section to SRAM macro design decisions, or whether memory-array treatment is brief and merged into the overall integration discussion. The 256-bit or wider cache-line detail, specific cell count, or any explicit cell-design alternative discussion are from general POWER4 knowledge and may NOT be in this paper at all.",
+    "confidence": 0.4
+  }
+]
+```

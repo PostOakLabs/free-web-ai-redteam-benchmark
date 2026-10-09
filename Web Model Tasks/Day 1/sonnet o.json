@@ -1,0 +1,56 @@
+I found the actual paper PDF — let me fetch it directly for grounded content.```json
+[
+  {
+    "title": "Choosing throughput-via-many-threads over continued single-thread ILP scaling",
+    "where_in_paper": "Introduction / motivation",
+    "decision": "Sun designed Niagara to optimize for aggregate multithreaded throughput on commercial server workloads rather than continuing to push single- or dual-thread performance via instruction-level parallelism (ILP) techniques.",
+    "alternatives_or_rejected": "The paper explicitly contrasts this against the prior industry approach of increasing frequency and exploiting ILP (multiple instruction issue, out-of-order execution, aggressive branch prediction) to improve single-thread performance.",
+    "rationale": "The paper states that emphasis on single-thread performance showed diminishing returns due to main-memory latency limits and the inherently low ILP of commercial-server applications (large working sets, high cache-miss rates, hard-to-predict data-dependent branches, load-load dependencies), while also driving up design complexity and power dissipation.",
+    "outcome": "The paper reports that the performance advantage of a complex ILP processor over a single-issue processor is not significant for these workloads, while the ILP processor incurs higher power and complexity costs — justifying the throughput-first design direction.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Simple single-issue six-stage pipeline shared via fine-grained multithreading instead of a complex superscalar/OoO core",
+    "where_in_paper": "Sparc pipeline section",
+    "decision": "Each Sparc pipe was implemented as a simple single-issue, six-stage pipeline (fetch, thread select, decode, execute, memory, write back) shared by four hardware threads via fine-grained (cycle-by-cycle) thread switching, rather than a wider-issue, out-of-order pipeline per thread.",
+    "alternatives_or_rejected": "The paper frames this against building an SMP of ILP-oriented processors (complex, multi-issue, out-of-order cores), which it characterizes elsewhere as neither power-efficient nor cost-efficient for this workload class.",
+    "rationale": "The paper states that exploiting thread-level parallelism lets the design improve performance without pushing CPU clock frequency, and that sharing CPU pipelines among multiple threads enables an area- and power-efficient design, aligned with the stated performance/watt goal.",
+    "outcome": "The paper reports an expected power dissipation of about 60 W for the whole chip, described as attractive for high-compute-density data center environments.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Keeping L1 caches small rather than growing them to cut miss rate",
+    "where_in_paper": "Memory subsystem section",
+    "decision": "Niagara used a small L1 instruction cache (16KB, 4-way) and small L1 data cache (8KB, 4-way), rather than larger L1 caches sized to substantially reduce the ~10% miss rate the paper reports.",
+    "alternatives_or_rejected": "The paper explicitly considers making L1 caches much larger to achieve significantly lower miss rates (since commercial server applications have large working sets) and explicitly rejects that path.",
+    "rationale": "The paper states directly that because commercial workloads have large working sets, achieving significantly lower miss rates would require much larger caches, and that 'this sort of trade-off is not favorable for area' — instead relying on the four threads in a thread group to hide L1/L2 miss latency.",
+    "outcome": "The paper reports the small caches, despite ~10% miss rates, still significantly reduce average per-thread memory access time, and states the cache sizes are 'a good trade-off between miss rates, area, and the ability of other threads in the group to hide latency.'",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Split working-set/architectural-set register file design instead of a single large multiported SRAM register file",
+    "where_in_paper": "Integer register file section",
+    "decision": "The windowed SPARC register file was implemented as two physically distinct sets — a small 'working set' built from fast register-file cells, and a larger 'architectural set' built from compact six-transistor SRAM cells — linked by a transfer port, rather than implementing the full architectural register set directly in fast multiported RF cells.",
+    "alternatives_or_rejected": "The paper frames the challenge as supporting many multiported registers being 'a major challenge from both area and access time considerations,' implying (though not stating as a rejected literal design) that a straightforward fully-multiported implementation of the entire architectural register set was the alternative this split design avoided.",
+    "rationale": "The paper states this 'innovative implementation' was chosen to maintain a compact footprint and single-cycle access time, exploiting the fact that only the currently visible register window (the working set) needs fast multiported access at any time, while the full architectural set can use denser SRAM cells.",
+    "outcome": "The paper reports a total register file of 640 64-bit registers implemented as a 5.7-Kbyte structure, with window-changing events (call/return) triggering a one- or two-cycle data transfer between the working and architectural sets, independent of other threads' register operations.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Random L1 instruction-cache replacement instead of LRU, for area savings",
+    "where_in_paper": "Memory subsystem section",
+    "decision": "The L1 instruction cache uses a random replacement policy rather than a true least-recently-used (LRU) replacement scheme.",
+    "alternatives_or_rejected": "The paper implicitly rejects LRU (or other more precise replacement tracking), which would require additional per-line state and logic to track recency.",
+    "rationale": "The paper states this choice was made 'for area savings, without incurring significant performance cost,' i.e., the accuracy loss of random replacement versus LRU was judged small enough not to be worth the extra area for recency-tracking hardware.",
+    "outcome": "The paper does not report a specific quantified performance delta for this choice beyond the general claim of no significant performance cost.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  }
+]
+```
+
+I fetched the actual paper PDF this time (not just a secondary summary), so these five are grounded in its real text — each rationale and outcome above is paraphrased from passages I directly read, not recalled or inferred. I stopped at 5 well-supported episodes rather than stretching into areas (like the crossbar arbitration scheme or thread-select logic) where the paper describes mechanism but doesn't frame an explicit alternative-considered/rejected the way this schema wants.

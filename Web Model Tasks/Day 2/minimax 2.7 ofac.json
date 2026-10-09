@@ -1,0 +1,138 @@
+[
+  {
+    "case_name": "Simple direct ownership — single blocked owner above 50%",
+    "entities": [
+      { "id": "A", "blocked": true },
+      { "id": "X", "blocked": null }
+    ],
+    "edges": [
+      { "from": "A", "to": "X", "pct": 60 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Identify blocked owners", "calculation": "A is blocked" },
+      { "step": 2, "description": "Sum all ownership by blocked persons in X", "calculation": "A → X = 60%" },
+      { "step": 3, "description": "Aggregate blocked ownership of X", "calculation": "60% ≥ 50% threshold" },
+      { "step": 4, "description": "Apply 50% rule", "result": "X is blocked" }
+    ],
+    "blocked_verdicts": [
+      { "entity": "A", "verdict": "blocked — listed person" },
+      { "entity": "X", "verdict": "blocked — aggregate ownership by blocked persons = 60% ≥ 50%" }
+    ],
+    "guidance_basis": "OFAC FAQ 398: entities owned 50% or more in the aggregate by blocked persons are blocked; direct ownership test",
+    "weakest_point": "The 60% threshold is chosen as a clean above-threshold case; exact published example numbers may differ."
+  },
+  {
+    "case_name": "Two blocked owners — convergent paths from distinct blocked persons",
+    "entities": [
+      { "id": "A", "blocked": true },
+      { "id": "B", "blocked": true },
+      { "id": "X", "blocked": null }
+    ],
+    "edges": [
+      { "from": "A", "to": "X", "pct": 30 },
+      { "from": "B", "to": "X", "pct": 40 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Identify blocked owners", "calculation": "A is blocked; B is blocked" },
+      { "step": 2, "description": "Sum all ownership by blocked persons in X (aggregate, not per-person threshold)", "calculation": "A→X 30% + B→X 40%" },
+      { "step": 3, "description": "Aggregate blocked ownership of X", "calculation": "30 + 40 = 70%" },
+      { "step": 4, "description": "Apply 50% rule: aggregate vs. aggregate, not per-person", "result": "70% ≥ 50% → X is blocked. Each individual owner's share (30% or 40%) does NOT meet the 50% test alone; the aggregate does." }
+    ],
+    "blocked_verdicts": [
+      { "entity": "A", "verdict": "blocked — listed person" },
+      { "entity": "B", "verdict": "blocked — listed person" },
+      { "entity": "X", "verdict": "blocked — aggregate blocked ownership = 70% ≥ 50%" }
+    ],
+    "guidance_basis": "OFAC FAQ 398/401: the 50% rule is an aggregate test; the contributions of multiple blocked persons are summed; neither A nor B individually exceeds 50%, yet X is still blocked",
+    "weakest_point": "The key nuance — that neither A nor B individually reaches 50% yet X is still blocked — is the most commonly misunderstood aspect of this case."
+  },
+  {
+    "case_name": "Chain through majority-owned intermediary — indirect ownership via full attribution",
+    "entities": [
+      { "id": "A", "blocked": true },
+      { "id": "Y", "blocked": null },
+      { "id": "X", "blocked": null }
+    ],
+    "edges": [
+      { "from": "A", "to": "Y", "pct": 60 },
+      { "from": "Y", "to": "X", "pct": 50 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Identify blocked owners and test direct ownership of X", "calculation": "A is blocked; A does not own X directly" },
+      { "step": 2, "description": "Test: does any blocked person own ≥50% of Y?", "calculation": "A → Y = 60% ≥ 50%" },
+      { "step": 3, "description": "Full attribution through ≥50%-owned intermediary: A is blocked, A owns ≥50% of Y → Y is a blocked entity", "calculation": "Y is treated as blocked" },
+      { "step": 4, "description": "Attribute Y's ownership of X to A (full attribution, NOT multiplicative)", "calculation": "Y→X = 50% attributed to A as A's indirect ownership of X" },
+      { "step": 5, "description": "A's aggregate ownership of X", "calculation": "0% direct + 50% indirect (from Y) = 50% ≥ 50%" },
+      { "step": 6, "description": "Apply 50% rule through intermediary chain", "result": "X is blocked" },
+      { "step": 7, "description": "Verify: multiplicative alternative (60% × 50% = 30%) would give 30% < 50%, which is WRONG under OFAC guidance", "calculation": "Multiplicative: 0.60 × 0.50 = 0.30 → 30% < 50% → NOT the correct test", "result": "OFAC uses full attribution, not multiplicative calculation — this is the critical distinction" }
+    ],
+    "blocked_verdicts": [
+      { "entity": "A", "verdict": "blocked — listed person" },
+      { "entity": "Y", "verdict": "blocked — owned ≥50% by blocked person A" },
+      { "entity": "X", "verdict": "blocked — A's aggregate ownership = 50% via full attribution through Y; A also indirectly holds 50% of X through Y (Y itself is 60% owned by A)" }
+    ],
+    "guidance_basis": "OFAC FAQ 399/401: if a blocked person owns 50% or more of an entity, that entity's entire holdings in other entities are attributed to the blocked person (full attribution). NOT multiplicative. A owning 60% of Y → Y is blocked → Y's 50% of X is attributed 100% to A.",
+    "weakest_point": "The distinction between full attribution (correct) and multiplicative (wrong) is the load-bearing rule here. My certainty that OFAC uses full attribution is high based on FAQ 399/401, but the exact wording distinguishing this from a purely multiplicative approach should be verified against the most current FAQ version."
+  },
+  {
+    "case_name": "Convergent paths — same blocked owner through two intermediaries; contributions summed",
+    "entities": [
+      { "id": "A", "blocked": true },
+      { "id": "Y1", "blocked": null },
+      { "id": "Y2", "blocked": null },
+      { "id": "X", "blocked": null }
+    ],
+    "edges": [
+      { "from": "A", "to": "Y1", "pct": 60 },
+      { "from": "A", "to": "Y2", "pct": 70 },
+      { "from": "Y1", "to": "X", "pct": 30 },
+      { "from": "Y2", "to": "X", "pct": 25 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Test: does A own ≥50% of Y1?", "calculation": "A→Y1 = 60% ≥ 50% → Y1 is blocked" },
+      { "step": 2, "description": "Test: does A own ≥50% of Y2?", "calculation": "A→Y2 = 70% ≥ 50% → Y2 is blocked" },
+      { "step": 3, "description": "Attribute Y1's ownership of X to A (full attribution)", "calculation": "Y1→X = 30% → A gets 30% indirect of X" },
+      { "step": 4, "description": "Attribute Y2's ownership of X to A (full attribution)", "calculation": "Y2→X = 25% → A gets 25% indirect of X" },
+      { "step": 5, "description": "A's aggregate ownership of X — convergent paths are SUMMED", "calculation": "A direct of X = 0% + 30% (via Y1) + 25% (via Y2) = 55%" },
+      { "step": 6, "description": "Apply 50% rule to aggregate", "calculation": "55% ≥ 50% → X is blocked" },
+      { "step": 7, "description": "Edge order independence check", "calculation": "Y1→X contribution + Y2→X contribution = 55% regardless of evaluation order", "result": "Graph is commutative — serialization does not affect result" }
+    ],
+    "blocked_verdicts": [
+      { "entity": "A", "verdict": "blocked — listed person" },
+      { "entity": "Y1", "verdict": "blocked — owned ≥50% by A" },
+      { "entity": "Y2", "verdict": "blocked — owned ≥50% by A" },
+      { "entity": "X", "verdict": "blocked — A's aggregate ownership = 55% (30%+25%) ≥ 50% via convergent paths through two majority-owned intermediaries" }
+    ],
+    "guidance_basis": "OFAC FAQ 398/401: convergent paths through separate majority-owned intermediaries are summed to compute the blocked owner's aggregate ownership of the target. Both Y1 and Y2 are blocked (≥50% owned by A), so both of their stakes in X are attributed to A and summed.",
+    "weakest_point": "In this graph, Y1 and Y2 do not directly overlap in ownership of X (30%+25%=55%), which is unambiguous. In a more complex graph where two blocked intermediaries each own ≥50% of a third entity, the aggregation is still additive (not multiplicative) per OFAC guidance."
+  },
+  {
+    "case_name": "Mixed ownership — blocked and non-blocked owners; convergent paths with a non-controlling stake",
+    "entities": [
+      { "id": "A", "blocked": true },
+      { "id": "B", "blocked": true },
+      { "id": "C", "blocked": false },
+      { "id": "X", "blocked": null }
+    ],
+    "edges": [
+      { "from": "A", "to": "X", "pct": 40 },
+      { "from": "B", "to": "X", "pct": 25 },
+      { "from": "C", "to": "X", "pct": 35 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Identify blocked owners", "calculation": "A blocked; B blocked; C NOT blocked" },
+      { "step": 2, "description": "Include only blocked persons in the aggregate", "calculation": "A→X = 40%; B→X = 25%; C→X = 35% (excluded from aggregate)" },
+      { "step": 3, "description": "Aggregate blocked ownership of X", "calculation": "40 + 25 = 65% (C's 35% is not counted)" },
+      { "step": 4, "description": "Apply 50% rule to blocked aggregate only", "calculation": "65% ≥ 50% → X is blocked" },
+      { "step": 5, "description": "Common error: including non-blocked ownership in denominator or treating it as diluting the blocked aggregate", "calculation": "Wrong method: blocked 65 + non-blocked 35 = 100 total; blocked/total = 65% — same numerically here but conceptually wrong; the rule is not 50% of total shares, it is 50% of aggregate blocked ownership regardless of who holds the rest" }
+    ],
+    "blocked_verdicts": [
+      { "entity": "A", "verdict": "blocked — listed person" },
+      { "entity": "B", "verdict": "blocked — listed person" },
+      { "entity": "C", "verdict": "not blocked" },
+      { "entity": "X", "verdict": "blocked — aggregate blocked ownership = 65% ≥ 50%; C's 35% stake does not insulate X" }
+    ],
+    "guidance_basis": "OFAC FAQ 398: the 50% rule does not require that blocked persons own a majority of the entity outright; if the aggregate of all blocked ownership meets 50%, the entity is blocked. Non-blocked ownership (C's 35%) does not offset or reduce blocked aggregate for purposes of the test.",
+    "weakest_point": "The non-blocked person's stake (35%) is included in the total ownership of X, but does not affect whether X is blocked under the 50% rule. If X had other non-blocked owners whose stakes were large enough to make the blocked aggregate fall below 50%, X would escape the block. Some implementations erroneously include non-blocked ownership as a 'dilution' factor — it does not."
+  }
+]

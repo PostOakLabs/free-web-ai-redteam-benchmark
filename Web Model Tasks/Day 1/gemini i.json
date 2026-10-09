@@ -1,0 +1,194 @@
+[
+{
+"review_gate": "floorplan review",
+"purpose": "Catches macro layout, power grid capacity, and boundary pin placement bottlenecks before cell placement and CTS locked-in constraints make floorplan changes cost weeks of rework.",
+"checks": [
+{
+"question": "Are macro channel widths compliant with minimum track requirements for global signals plus boundary power ring rules?",
+"evidence_demanded": "Floorplan channel width map overlay with track count and routing blockage verification report.",
+"red_flag": "Macro channels narrower than 12um (or less than 1.5x minimum spacing required for power rings + signal track routing).",
+"why_it_matters": "Causes catastrophic post-CTS global route congestion overflow and track starvation that requires full floorplan re-spins late in the flow."
+},
+{
+"question": "Does the static power grid (VDD/VSS straps) satisfy target IR drop requirements with max metal layer utilization under 20% on signal layers?",
+"evidence_demanded": "Static IR drop calculation report and top-metal layer resource allocation map.",
+"red_flag": "Static IR drop prediction exceeding 2% VDD or power grid straps blocking more than 30% of routing tracks on intermediate signal layers.",
+"why_it_matters": "Forces severe routing congestion on signal layers or unresolvable static/dynamic IR drop failures at signoff."
+},
+{
+"question": "Are macro orientation and pin alignments facing open core logic rather than dead-end chip corners or adjacent macro walls?",
+"evidence_demanded": "Visual floorplan pin access map and port flightline density report.",
+"red_flag": "Macro pins facing narrow dead-end channels or directly abutting an opposing macro's pin boundary.",
+"why_it_matters": "Creates high pin-density hotspots that cause un-routable local DRC explosions during detailed routing."
+},
+{
+"question": "Is total block core utilization below node-specific threshold bounds considering pin-density limits?",
+"evidence_demanded": "Floorplan utilization summary and local area cell density histogram.",
+"red_flag": "Core utilization exceeding 70% on 7nm/5nm FinFET (or >80% on 28nm planar) prior to placement.",
+"why_it_matters": "Leaves zero capacity for CTS buffer insertion, hold fixing, and timing optimization, leading to late-stage placement failure."
+},
+{
+"question": "Are halo boundaries and placement blockages correctly specified around all hard macro perimeters?",
+"evidence_demanded": "Keepout blockage definition file and visual floorplan overlay.",
+"red_flag": "Missing macro placement halos or keepout zones under 5um on macro edges containing active pins.",
+"why_it_matters": "Allows standard cells to place directly against macro boundaries, blocking routing tracks needed for macro pin access."
+},
+{
+"question": "Are block boundary port locations aligned with top-level floorplan constraints and multi-partition flightlines?",
+"evidence_demanded": "Top-level pin assignment guide and boundary port distance delta report.",
+"red_flag": "Block boundary ports placed in floorplan corners or misaligned with top-level interconnect corridors.",
+"why_it_matters": "Forces long interconnect wiring detours, causing un-closable top-level setup timing failures."
+}
+],
+"kill_questions": [
+"Are macro channels wide enough for clock tree buffers and power rails without exceeding 75% local cell density?",
+"Is the static power grid sufficient to keep static IR drop under 2% without starving M3-M5 routing tracks?"
+],
+"waiver_culture": "Narrow macro channels are frequently waived under schedule pressure to save core area, resulting in weeks of detailed-routing DRC cleanup and timing closure churn later.",
+"confidence": 0.96
+},
+{
+"review_gate": "pre-CTS review",
+"purpose": "Validates standard cell placement stability, setup timing slack profile, and global routing congestion before clock tree synthesis commits heavy buffer networks and locks down registers.",
+"checks": [
+{
+"question": "What is the shape of the setup slack histogram, and is there a long tail of failing paths below zero?",
+"evidence_demanded": "Setup slack histogram plot by clock domain and top 100 failing path report.",
+"red_flag": "Setup WNS worse than -300ps or a broad multi-hundred-path tail below zero rather than a steep wall at zero.",
+"why_it_matters": "CTS will add clock skew and latency that expands a negative setup tail into thousands of un-closable post-CTS timing failures."
+},
+{
+"question": "Is global routing congestion overflow (GRC) well below 0.5% with no concentrated 2D hotspots?",
+"evidence_demanded": "Global route congestion map and max GRC overflow report.",
+"red_flag": "Max local GRC overflow exceeding 1.5% in any 5x5 tile region.",
+"why_it_matters": "Clock tree synthesis will add thousands of clock buffers, turning minor pre-CTS congestion into severe detailed routing DRC storms."
+},
+{
+"question": "Are high-fanout nets (HFNs) and reset/enable trees properly identified and limited prior to clock insertion?",
+"evidence_demanded": "High-fanout net report sorted by fanout count and net drive capacitance.",
+"red_flag": "Un-buffered signal nets with fanout exceeding 500 loads operating without explicit placement tree constraints.",
+"why_it_matters": "Unconstrained HFNs cause severe local routing bottlenecks and massive post-CTS setup timing degradation."
+},
+{
+"question": "Are high-density placement clusters or local cell density spikes above 85% present in the core?",
+"evidence_demanded": "Local placement density map (20um x 20um grid resolution).",
+"red_flag": "Local density hotspots exceeding 90% utilization within standard cell rows.",
+"why_it_matters": "CTS engines cannot insert clock buffers or latency-matching cells near dense register banks, forcing long buffer detours and high skew."
+},
+{
+"question": "Has SDC constraint sanity checking passed with zero unconstrained endpoints or invalid clock transfers?",
+"evidence_demanded": "SDC check_timing / check_design audit report.",
+"red_flag": "Presence of unconstrained register input/output pins, un-handled generated clocks, or missing clock group definitions.",
+"why_it_matters": "Physical synthesis will optimize against garbage constraints, distorting placement and masking real timing failures."
+},
+{
+"question": "Are scan chain re-ordering and boundary chain assignments verified legal against floorplan placement?",
+"evidence_demanded": "Scan chain trace report and wirelength delta report.",
+"red_flag": "Scan path wirelength exceeding 15% of total signal routing length or crossing floorplan boundaries back and forth.",
+"why_it_matters": "Criss-crossing scan chains waste routing tracks and cause hold timing violations post-CTS."
+}
+],
+"kill_questions": [
+"Does the setup timing slack histogram show a sharp wall at zero, or is there a long failing tail below -300ps?",
+"Is the max global routing overflow below 0.5% before clock buffers are added to the layout?"
+],
+"waiver_culture": "Pre-CTS setup timing tails are often waived assuming clock tree useful skew will fix them, which invariably leads to CTS power bloat and hold timing disasters.",
+"confidence": 0.95
+},
+{
+"review_gate": "pre-tapeout timing signoff review",
+"purpose": "Ensures full-chip timing closure across all PVT corners, extraction modes, and operating modes with zero setup/hold violations and clean signal integrity.",
+"checks": [
+{
+"question": "Is WNS/TNS exactly zero (or positive) across all signoff PVT corners and extraction corners for setup and hold?",
+"evidence_demanded": "Multi-corner multi-mode (MCMM) timing signoff summary matrix report.",
+"red_flag": "Any setup WNS < 0ps or hold WNS < 0ps on non-waived paths in any signoff corner.",
+"why_it_matters": "Non-zero negative slack in signoff STA directly translates to functional silicon timing failure or reduced operating frequency."
+},
+{
+"question": "Are all crosstalk delta-delay and SI noise (glitch) violations within library threshold limits across all nets?",
+"evidence_demanded": "Signal integrity (SI) noise calculation report and crosstalk delay impact summary.",
+"red_flag": "Peak glitch voltage exceeding 20% VDD on low-noise inputs or crosstalk delay adding >150ps to critical paths.",
+"why_it_matters": "Unresolved crosstalk glitches cause functional state corruption or intermittent silicon failures that elude static timing analysis."
+},
+{
+"question": "Are all SDC waivers formally reviewed, documented, and backed by hardware/RTL verification?",
+"evidence_demanded": "Formal SDC waiver log with signed justification for every set_false_path, set_multicycle_path, and set_clock_groups.",
+"red_flag": "Undocumented or blanket wildcard false paths (e.g. set_false_path -to [get_pins *]) lacking individual CDC synchronizer proofs.",
+"why_it_matters": "Blanket waivers mask real timing paths, guaranteeing functional silicon failure due to un-synthesized cross-domain transfers."
+},
+{
+"question": "Have clock transition times, max capacitance, and max fanout constraints passed clean with zero violations?",
+"evidence_demanded": "DRC timing constraint report (max_transition, max_capacitance, max_fanout).",
+"red_flag": "Clock pin max_transition violations exceeding 100ps in fast corners or signal transition violations >250ps.",
+"why_it_matters": "Slew rate degradation causes severe dynamic power bloat, excessive noise sensitivity, and unpredictable cell delay variation."
+},
+{
+"question": "Is clock latency and skew variation across PVT corners matching extracted SPEF timing predictions?",
+"evidence_demanded": "Clock tree latency/skew report per corner comparing pre-route predictions vs SPEF post-route STA.",
+"red_flag": "Clock skew exceeding 10% of clock period or latency variation >25% between min and max operating corners.",
+"why_it_matters": "Excessive clock skew eats timing margin and causes catastrophic hold timing races across fast-corner operation."
+},
+{
+"question": "Were SPEF parasitics extracted using 3D field-solver accuracy on all critical paths and clock trunks?",
+"evidence_demanded": "Parasitic extraction (PEX) audit log showing 3D/selective-3D extraction status for critical nets.",
+"red_flag": "Critical setup paths with <10ps slack extracted using fast 2D approximation modes.",
+"why_it_matters": "2D extraction underestimates coupling capacitance in advanced node metal stacks, hiding real signoff timing violations."
+}
+],
+"kill_questions": [
+"Are there any un-justified negative slack paths or wildcard false path waivers anywhere in the MCMM signoff matrix?",
+"Has 3D parasitic extraction been run on all critical timing paths and clock networks?"
+],
+"waiver_culture": "Small hold violations in fast corners are sometimes waived under tapeout deadline pressure, leading to dead-on-arrival silicon if post-silicon clock tree skew exceeds expectations.",
+"confidence": 0.97
+},
+{
+"review_gate": "physical verification signoff review",
+"purpose": "Guarantees absolute manufacturability, electrical connectivity, and rule compliance (DRC/LVS/ERC/Antenna) using golden external signoff engines prior to mask generation.",
+"checks": [
+{
+"question": "Is the full-chip signoff DRC report 100% clean with zero un-waived design rule violations?",
+"evidence_demanded": "Golden external signoff DRC summary log and waiver database file.",
+"red_flag": "Any remaining un-waived routing short, spacing, or minimum area violation in the signoff deck.",
+"why_it_matters": "Physical DRC errors cause short circuits or open wires during lithography, resulting in 0% silicon yield."
+},
+{
+"question": "Is Layout Versus Schematic (LVS) 100% clean with exact matching of nets, instances, ports, and device properties?",
+"evidence_demanded": "Golden external LVS comparison report and netlist extraction comparison log.",
+"red_flag": "LVS status reporting unmatched nets, device parameter mismatches, or floating substrate taps.",
+"why_it_matters": "LVS mismatches mean the physical layout does not match the logical netlist, causing total chip non-functionality."
+},
+{
+"question": "Are all antenna ratio violations resolved via diode insertion or top-layer metal hopping?",
+"evidence_demanded": "Antenna rule check summary report.",
+"red_flag": "Un-protected gate pins attached to long metal tracks exceeding maximum process antenna ratio limits.",
+"why_it_matters": "Charge accumulation during plasma etching destroys thin gate oxide layers, causing permanent gate breakdown in silicon."
+},
+{
+"question": "Have Electrical Rule Checks (ERC) passed clean for floating gates, power-domain shorts, and substrate tap density?",
+"evidence_demanded": "ERC summary report and well-tap spacing verification log.",
+"red_flag": "Floating input gates, substrate well-tap distance exceeding process limits, or cross-power-domain leakage paths.",
+"why_it_matters": "Causes CMOS latch-up conditions or un-controlled leakage currents that permanently damage the chip."
+},
+{
+"question": "Is dummy metal fill density fully compliant with process window density rules (min/max density per layer tile)?",
+"evidence_demanded": "Density check report across all metal/via layers in 50um x 50um window tiles.",
+"red_flag": "Tile windows failing minimum density requirements on lower thin metal layers or density gradients >20% across adjacent tiles.",
+"why_it_matters": "Causes Chemical Mechanical Planarization (CMP) thickness variations, leading to metal over-etching or under-etching shorts."
+},
+{
+"question": "Are ESD protection structures and guard rings fully verified around all I/O pads and power domain boundaries?",
+"evidence_demanded": "ESD rule check log and pad ring connectivity report.",
+"red_flag": "Missing ESD clamp cells or broken guard rings on primary input/output pad cells.",
+"why_it_matters": "Destroys silicon on first handling during packaging and testing due to electrostatic discharge."
+}
+],
+"kill_questions": [
+"Is the golden signoff DRC and LVS report 100% clean with zero un-waived routing shorts or net mismatches?",
+"Are all process antenna violations fully resolved or protected with verified ESD/antenna diodes?"
+],
+"waiver_culture": "Density rule violations in dummy fill layers are commonly waived to meet tapeout slots, occasionally causing CMP planarization defects that destroy yield on specific wafer zones.",
+"confidence": 0.98
+}
+]

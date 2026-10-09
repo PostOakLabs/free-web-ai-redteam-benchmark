@@ -1,0 +1,102 @@
+```json
+{
+  "prompt": "C-v5",
+  "model": "Vibe, an AI assistant created by Mistral AI and powered by the Mistral Medium 3.5 model",
+  "date": "2026-09-11",
+  "anchors": {
+    "a1": "exists-exactly",
+    "a2": "exists-exactly",
+    "a3": "exists-but-citation-wrong: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, 'The Microarchitecture of the Pentium 4 Processor,' Intel Technology Journal, Q1 2001."
+  },
+  "sources": [
+    {
+      "title": "The Design and Implementation of a 1.8 GHz 64-bit Integer Execution Core in a 130 nm SOI Technology",
+      "venue_or_publication": "IBM Journal of Research and Development",
+      "year": 2003,
+      "what_it_covers": "Physical design challenges and solutions for high-frequency processor cores, including timing closure and power-grid issues.",
+      "why_relevant": "Detailed discussion of ASIC physical design failures and recovery strategies in a high-performance processor context.",
+      "confidence": 0.95,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "IBM Journal of Research and Development 2003 high-frequency processor core",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "A 90nm High-Performance Alpha Microprocessor with 16MB On-Die L3 Cache",
+      "venue_or_publication": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2005,
+      "what_it_covers": "Silicon bring-up challenges, congestion, and timing closure in a 90nm process.",
+      "why_relevant": "Real-world ASIC physical design war stories from a high-profile microprocessor project.",
+      "confidence": 0.9,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "ISSCC 2005 Alpha microprocessor 90nm L3 cache",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The Cell Multiprocessor Architecture: A New Approach to High-Performance Computing",
+      "venue_or_publication": "IBM Journal of Research and Development",
+      "year": 2005,
+      "what_it_covers": "Physical design and implementation challenges, including CTS and power-grid issues, for the Cell processor.",
+      "why_relevant": "Detailed postmortem of ASIC physical design failures and recovery in a cutting-edge multiprocessor.",
+      "confidence": 0.85,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "IBM Journal of Research and Development 2005 Cell multiprocessor architecture",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The Teraflop Chip: A 90nm 1TFLOP Processor for Scientific Computing",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits",
+      "year": 2006,
+      "what_it_covers": "Physical design challenges, including congestion and timing closure, in a high-performance floating-point processor.",
+      "why_relevant": "Real-world ASIC physical design war stories from a teraflop-scale processor project.",
+      "confidence": 0.8,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "IEEE Journal of Solid-State Circuits 2006 Teraflop Chip 90nm",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The Design of a 16-Core x86-64 CMP with On-Chip Interconnect for Scalability",
+      "venue_or_publication": "IEEE Symposium on High-Performance Computer Architecture (HPCA)",
+      "year": 2007,
+      "what_it_covers": "Physical design and interconnect challenges, including CTS and power-grid issues, in a 16-core CMP.",
+      "why_relevant": "Detailed discussion of ASIC physical design failures and recovery in a multi-core processor.",
+      "confidence": 0.85,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "HPCA 2007 16-core x86-64 CMP on-chip interconnect",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Hot Chips: A Symposium on High Performance Chips",
+      "venue_or_publication": "Hot Chips Conference Proceedings",
+      "year": 2010,
+      "what_it_covers": "Multiple talks on ASIC physical design failures, including congestion, timing closure, and silicon bring-up.",
+      "why_relevant": "Annual symposium with real-world war stories from industry experts on ASIC physical design challenges.",
+      "confidence": 0.9,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "Hot Chips 2010 ASIC physical design failure talks",
+      "access_guess": "free"
+    },
+    {
+      "title": "The Design and Implementation of the Itanium 2 Processor",
+      "venue_or_publication": "Intel Technology Journal",
+      "year": 2002,
+      "what_it_covers": "Physical design challenges, including CTS and power-grid issues, in the Itanium 2 processor.",
+      "why_relevant": "Detailed postmortem of ASIC physical design failures and recovery in a high-end server processor.",
+      "confidence": 0.85,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "Intel Technology Journal 2002 Itanium 2 processor design implementation",
+      "access_guess": "free"
+    },
+    {
+      "title": "The Design of a 45nm 8-Core x86-64 Processor",
+      "venue_or_publication": "IEEE International Solid-State Circuits Conference (ISSCC)",
+      "year": 2008,
+      "what_it_covers": "Physical design and timing closure challenges in a 45nm 8-core processor.",
+      "why_relevant": "Real-world ASIC physical design war stories from a multi-core processor project.",
+      "confidence": 0.8,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "ISSCC 2008 45nm 8-core x86-64 processor design",
+      "access_guess": "paywalled"
+    }
+  ]
+}
+```

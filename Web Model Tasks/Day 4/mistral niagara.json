@@ -1,0 +1,76 @@
+[
+  {
+    "title": "Throughput-first design philosophy",
+    "where_in_paper": "Introduction",
+    "decision": "Prioritized throughput over single-thread performance",
+    "alternatives_or_rejected": "Focus on maximizing single-thread performance",
+    "rationale": "Future workloads are increasingly parallel and power-constrained",
+    "outcome": "Designed for high throughput on multi-threaded workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "exact nature of alternatives considered",
+    "confidence": 0.85
+  },
+
+  {
+    "title": "32-way multithreading via 8 cores with 4-way SMT",
+    "where_in_paper": "Threading Architecture",
+    "decision": "Implemented 8 cores each with 4-way simultaneous multithreading",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Hide memory latency and maximize thread-level parallelism",
+    "outcome": "Achieved 32-way multithreading capability",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "whether alternatives were explicitly discussed",
+    "confidence": 0.9
+  },
+
+  {
+    "title": "Shared L2 cache among all cores",
+    "where_in_paper": "Memory System Design",
+    "decision": "Used a shared L2 cache architecture",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Improve cache utilization efficiency for multi-threaded workloads",
+    "outcome": "Reduced overall cache area and power overhead",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "exact cache size and organization details",
+    "confidence": 0.8
+  },
+
+  {
+    "title": "Small per-core L1 caches",
+    "where_in_paper": "Cache Hierarchy",
+    "decision": "Used small L1 instruction and data caches per core",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Balance latency, area, and power consumption for targeted throughput workloads",
+    "outcome": "Met latency requirements while staying within area and power budgets",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "exact cache sizes and whether they were explicitly justified",
+    "confidence": 0.7
+  },
+
+  {
+    "title": "Power-aware design for server workloads",
+    "where_in_paper": "Power Management",
+    "decision": "Designed for power efficiency to maximize throughput per watt",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Power is a first-order design constraint for server processors",
+    "outcome": "Achieved high throughput per watt for target workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "specific power metrics and comparisons to alternatives",
+    "confidence": 0.85
+  }
+]

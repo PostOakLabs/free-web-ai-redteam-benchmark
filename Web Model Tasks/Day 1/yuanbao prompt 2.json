@@ -1,0 +1,101 @@
+[
+  {
+    "title": "Macro-channel congestion resolved via pin-swap and selective layer promotion at 28nm, avoiding floorplan re-work",
+    "design_context": "28nm, ~1M placeable instances, ~80 hard macros (SRAMs), 2 clock domains (main 500MHz, peripheral 100MHz), commercial P&R + synthesis",
+    "prior_state": "Utilization 75%, post-CTS WNS -20ps, TNS -500ps, global route overflow 0%, DRC 0",
+    "observation": "First detailed-route attempt shows overflow 15.3% concentrated in M4-M6 layers within macro channels between 12 SRAM macros. Channel width 4.8um, insufficient for escape routing. Post-CTS metrics were clean.",
+    "severity": "HIGH",
+    "hypothesis": "Macro placement creates narrow channels where M4-M6 vertical routing cannot escape; standard cell fill in channels exacerbates overflow. Re-floorplan would solve but violates schedule.",
+    "candidates_considered": [
+      {
+        "action": "Re-floorplan: move 12 SRAM macros to create wider routing channels",
+        "rejected_because": "Would invalidate CTS (5 days to rebuild) and re-place 1M cells (3 days); tapeout in 9 days; aggregate re-spin risk >50%"
+      },
+      {
+        "action": "Add M7-M8 routing layers via metal option",
+        "rejected_because": "28nm process does not offer additional layers; would require migrate to 16nm, impossible within schedule"
+      },
+      {
+        "action": "Partial pin-swap on macros + targeted cell padding in hotspots + selective net promotion to upper layers",
+        "rejected_because": "NOT rejected - chosen as best schedule-risk tradeoff"
+      },
+      {
+        "action": "Reduce cell util target from 75% to 65% via placement blockages",
+        "rejected_because": "Requires re-placing entire block (3 days) + re-CTS (2 days); similar schedule risk to re-floorplan with lower efficacy for macro-channel congestion"
+      }
+    ],
+    "chosen_intervention": "Pin-swap 280 pins across 12 macros to align with routing tracks using macro pin-swap automation; promote 35 high-fanout nets crossing macro channels to M6 with 2x width; add 6 local placement blockages (4um x 4um) in worst GRCs and incrementally re-place 30K local cells (10-hour incremental); set routing congestion-driven optimization at 15% effort multiplier.",
+    "post_state": "Congestion overflow 0.9% (from 15.3%), utilization 74.2% (from 75%), DRC 0, WNS -28ps (from -20ps, 8ps degradation from pin-swap parasitics, within -40ps margin), TNS -620ps (from -500ps), incremental ECO turnaround 14 hours",
+    "expert_assessment": "Correct call given the 9-day tapeout window. Pin-swap + selective promotion + local re-place avoided the 8-day full re-floorplan cycle. Macro-channel congestion at 28nm often yields to pin-level interventions before floorplan changes. Would NOT transfer if overflow were >25% or distributed die-wide (indicates fundamental floorplan issue requiring macro repositioning).",
+    "confidence": 0.78,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "constructed-example",
+    "weakest_point": "Exact pin-swap count (280) and resulting overflow reduction (15.3% → 0.9%) are constructed precision; the directional trend is sound but specific magnitudes are illustrative."
+  },
+  {
+    "title": "Signature-based diagnosis: 980 correlated timing failures traced to incorrect SDC constraint, not physical problem",
+    "design_context": "16nm, 500K placeable instances, 20 macros, 3 clock domains (CPU 1.2GHz, bus 600MHz, test 50MHz), commercial synthesis + P&R",
+    "prior_state": "WNS -150ps, TNS -5000ps, 985 failing setup paths, 0 hold violations, utilization 70%",
+    "observation": "After routing: 980 of 985 failing setup paths share a common endpoint (32-bit ALU output register), all fail by 140-160ps, all launch from CPU 1.2GHz domain, all intra-clock. Remaining 5 paths are unrelated small violations.",
+    "severity": "HIGH",
+    "hypothesis": "The signature (massive correlation: same endpoint, same violation magnitude, same clock) indicates a CONSTRAINT problem, not physical/logic. The ALU output is constrained at full clock rate (833ps setup) but is actually a multicycle path (allows 1666ps).",
+    "candidates_considered": [
+      {
+        "action": "Full timing-driven P&R optimization (useful skew, layer opt, cell sizing) on 980 paths",
+        "rejected_because": "Would consume 3+ days of ECO iterations to recover 140-160ps across 980 paths; low probability of full closure; massive downstream DRC churn; likely to degrade other paths"
+      },
+      {
+        "action": "Insert multicycle 2 constraint on ALU output paths",
+        "rejected_because": "NOT rejected - chosen after RTL verification"
+      },
+      {
+        "action": "Reduce CPU clock from 1.2GHz to 800MHz",
+        "rejected_because": "Unacceptable performance regression (-33%); product spec mandates 1.2GHz minimum; would lose customer commitment"
+      },
+      {
+        "action": "Pipeline ALU interface (add 1 stage)",
+        "rejected_because": "Requires RTL change: 2-week re-verification cycle; misses tapeout by 12 days"
+      }
+    ],
+    "chosen_intervention": "Verified with RTL team that ALU output is multicycle (computation takes 2 cycles); added multicycle 2 constraint: set_multicycle_path 2 -setup -from [get_clocks cpu_clk] -through [get_pins alu/out_reg]; re-ran STA: 980 paths now pass with +350ps slack. Remaining 5 unrelated paths: targeted buffer insertion + 1 cell upsize, recovered in 1 ECO round.",
+    "post_state": "WNS +50ps (from -150ps), TNS -200ps (from -5000ps), 0 failing setup paths, turnaround 8 hours total (4hrs constraint fix + 4hrs ECO)",
+    "expert_assessment": "Textbook signature-based triage. Clustering of failures (same endpoint, same magnitude, same clock) is diagnostic of constraint error. Junior engineer would have spent 3 days on ECO optimization; correct action was 1-line SDC change. Always histogram failing paths by endpoint, clock, and violation magnitude before touching netlist. Would NOT transfer if failure signature were diverse (different endpoints, varying magnitudes) - that indicates genuine physical/logic problems requiring optimization.",
+    "confidence": 0.85,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "constructed-example",
+    "weakest_point": "Precise distribution (980 of 985) and exact slack values are constructed; the diagnostic pattern is valid but these specific numbers are illustrative."
+  },
+  {
+    "title": "Asymmetric inter-block timing budget derived bottom-up from internal WNS margins at 7nm",
+    "design_context": "7nm, Block A: 300K instances, Block B: 400K instances, 100 critical boundary signals at 1GHz (1000ps period), commercial hierarchical STA",
+    "prior_state": "Block A internal WNS -10ps (comfortable), Block B internal WNS -100ps (tight), boundary paths unconstrained (no SDC), top-level requirement 1000ps end-to-end",
+    "observation": "At top-level integration, 100 signals cross from Block A to Block B. Without budget, STA treats as ideal (optimistic) or flags unconstrained (hides problems). Block B is 1.33x larger and significantly more timing-critical than Block A.",
+    "severity": "MODERATE",
+    "hypothesis": "Block B's internal WNS (-100ps) is 10x worse than Block A's (-10ps). Equal budget split would strangle B while giving A excess margin. Asymmetric budget favoring A is required.",
+    "candidates_considered": [
+      {
+        "action": "Equal split: 500ps A-side, 500ps B-side",
+        "rejected_because": "Block B at -100ps internal WNS leaves only -400ps margin for 500ps boundary budget; insufficient given B's existing struggle; would force massive B-side ECOs with schedule risk"
+      },
+      {
+        "action": "Asymmetric: 700ps A-side, 300ps B-side",
+        "rejected_because": "NOT rejected - chosen as optimal balance"
+      },
+      {
+        "action": "Asymmetric: 800ps A-side, 200ps B-side",
+        "rejected_because": "Too aggressive against A; A needs significant optimization for 100 signals in 700ps when A's internal paths already consume ~200ps of phase; risk of creating A-side violations"
+      },
+      {
+        "action": "No budget - flat top-level implementation",
+        "rejected_because": "Top-level is 1.5M instances; flat STA takes 20+ hours per run; hierarchical budgeting mandatory for schedule"
+      }
+    ],
+    "chosen_intervention": "Measured Block A typical clock-to-output for registered signals: 150ps (350ps phase remaining from 1000ps). Allocated A-side budget = 700ps (150ps C2O + 550ps for interconnect + uncertainty). B-side budget = 300ps (B's internal -100ps leaves 900ps from 1000ps; 300ps is tight but feasible). Added to SDC: set_output_delay 700 -clock top_clk [get_ports block_A_outputs], set_input_delay 300 -clock top_clk [get_ports block_B_inputs]. Validated: A meets 700ps output delay with WNS +30ps; B meets 300ps input delay with WNS -20ps (within -25ps threshold).",
+    "post_state": "Block A: WNS +30ps (from -10ps; 700ps output delay forced minor optimization, net improvement). Block B: WNS -20ps (from -100ps; 300ps budget gave relief). All 100 boundary signals pass with 10-80ps slack. Top-level after integration: WNS +15ps.",
+    "expert_assessment": "Asymmetric budget correctly recognized Block B as bottleneck. Equal split would have triggered B-side crisis. Key insight: derive budgets bottom-up from measured internal WNS margins, not top-down by division. General lesson applies to any hierarchical timing budget. Would NOT transfer if blocks had similar internal timing profiles (equal split optimal) or if boundary protocol had inherent asymmetry (source-synchronous interfaces need different treatment).",
+    "confidence": 0.75,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "Exact internal WNS values for A and B, and the precise 700/300ps budget split are constructed; the methodology is sound but these specific numbers are illustrative."
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "vector_name": "negative_zero",
+    "input_json": "-0",
+    "canonical_output": "0",
+    "rule": "RFC 8785 §3.2.2.3 / ECMAScript NumberToString: +0 and -0 both become \"0\"",
+    "divergence_trap": "Some serializers emit \"-0\"; plain JSON.stringify(-0) may preserve sign in non-compliant engines",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "integer_within_2_53",
+    "input_json": "9007199254740991",
+    "canonical_output": "9007199254740991",
+    "rule": "RFC 8785 §3.2.2.3: integers in [-2^53+1, 2^53-1] serialize as decimal without exponent or decimal point",
+    "divergence_trap": "None for compliant ES6; some libs force scientific notation",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "beyond_2_53_max_safe",
+    "input_json": "9007199254740992",
+    "canonical_output": "9007199254740992",
+    "rule": "RFC 8785 Appendix B table: IEEE 4340000000000000 serializes as 9007199254740992",
+    "divergence_trap": "Naive big-int path may emit 9007199254740993 or scientific form",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "1e21_boundary",
+    "input_json": "1e21",
+    "canonical_output": "1e+21",
+    "rule": "RFC 8785 §3.2.2.3 / ES6: magnitude >= 1e21 uses scientific notation with + sign on exponent",
+    "divergence_trap": "JSON.stringify may omit + (\"1e21\") or use uppercase E",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal_1e-7",
+    "input_json": "0.0000001",
+    "canonical_output": "1e-7",
+    "rule": "RFC 8785 §3.2.2.3 / ES6: magnitude < 1e-6 uses scientific notation",
+    "divergence_trap": "Some serializers keep fixed-point \"0.0000001\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "solidus_no_escape",
+    "input_json": "\"\\/\"",
+    "canonical_output": "\"/\"",
+    "rule": "RFC 8785 §3.2.2.2: solidus U+002F MUST NOT be escaped (only \" and \\ and controls)",
+    "divergence_trap": "Many JSON.stringify implementations emit \"\\/\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "control_and_quote_escape",
+    "input_json": "\"\\u0000\\\"\\\\\\n\"",
+    "canonical_output": "\"\\u0000\\\"\\\\\\n\"",
+    "rule": "RFC 8785 §3.2.2.2: U+0000..U+001F must use \\u00XX; \" and \\ must be escaped",
+    "divergence_trap": "Some libs use \\0 or omit leading zeros in \\u",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "no_unicode_normalization",
+    "input_json": "\"\\u00E9\"",
+    "canonical_output": "\"é\"",
+    "rule": "RFC 8785 §3.1: no Unicode normalization; preserve code points as-is (composed é stays composed)",
+    "divergence_trap": "NFC/NFD normalizing implementations rewrite to \"e\\u0301\" or vice-versa",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "utf16_key_order_vs_codepoint",
+    "input_json": "{\"\\uFFFD\":1,\"\\uD83D\\uDE00\":2}",
+    "canonical_output": "{\"\\uD83D\\uDE00\":2,\"\\uFFFD\":1}",
+    "rule": "RFC 8785 §3.2.3: keys sorted by UTF-16 code-unit sequences; U+1F600 (D83D DE00) precedes U+FFFD because 0xD83D < 0xFFFD",
+    "divergence_trap": "Code-point sort (Python sorted, many non-JS) yields {\"\\uFFFD\":1,\"\\uD83D\\uDE00\":2}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_object_array",
+    "input_json": "{\"a\":{},\"b\":[]}",
+    "canonical_output": "{\"a\":{},\"b\":[]}",
+    "rule": "RFC 8785 §3.2.1 / §3.2.3: empty structures emit {} and []; keys sorted (only one key each here)",
+    "divergence_trap": "Whitespace-inserting pretty-printers; some emit null for empty",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "nested_and_literals",
+    "input_json": "{\"arr\":[null,true,false],\"obj\":{\"x\":1}}",
+    "canonical_output": "{\"arr\":[null,true,false],\"obj\":{\"x\":1}}",
+    "rule": "RFC 8785 §3.2.1 whitespace-free; §3.2.2.1 literals; §3.2.3 key order",
+    "divergence_trap": "Space-after-colon or trailing commas from non-strict serializers",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_key_illegal",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": null,
+    "rule": "RFC 8785 §3.1 / I-JSON: objects MUST NOT have duplicate property names; input rejected before canonicalization",
+    "divergence_trap": "Last-wins parsers silently produce {\"a\":2}; first-wins produce {\"a\":1}",
+    "certainty": "rfc-exact"
+  }
+]

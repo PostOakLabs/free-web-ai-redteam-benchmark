@@ -1,0 +1,227 @@
+
+
+```json
+[
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Realistic mid-range mixed-fault distribution",
+    "inputs": {
+      "λ_SPF": {"value": 45, "units": "FIT"},
+      "λ_RF": {"value": 35, "units": "FIT"},
+      "λ_MPF_detected": {"value": 120, "units": "FIT"},
+      "λ_MPF_latent": {"value": 25, "units": "FIT"},
+      "λ_safe": {"value": 775, "units": "FIT"}
+    },
+    "computation": {
+      "step_1_total_lambda": "45 + 35 + 120 + 25 + 775 = 1000 FIT",
+      "step_2_numerator": "45 + 35 = 80 FIT",
+      "step_3_ratio": "80 / 1000 = 0.0800",
+      "step_4_SPFM": "1 - 0.0800 = 0.9200 = 92.00%",
+      "step_5_ASIL_B": "92.00% ≥ 90% → PASS",
+      "step_6_ASIL_C": "92.00% < 97% → FAIL",
+      "step_7_ASIL_D": "92.00% < 99% → FAIL"
+    },
+    "expected_output": {
+      "SPFM": 0.92,
+      "SPFM_percent": "92.00%",
+      "ASIL_B": "PASS",
+      "ASIL_C": "FAIL",
+      "ASIL_D": "FAIL"
+    },
+    "discriminates": "Realistic mid-range case with all fault types present at plausible relative magnitudes; tests ASIL B pass and ASIL C/D fail — the ordinary non-boundary baseline case.",
+    "known_uncertainty": "ASIL target values (90%, 97%, 99%) are taken from ISO 26262-5:2018 Table 4 as I recall it; I have not re-verified against the current published standard text in this session, and I'm not certain there has been no revision since 2018."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Exact threshold boundary at ASIL C (97.0%)",
+    "inputs": {
+      "λ_SPF": {"value": 15, "units": "FIT"},
+      "λ_RF": {"value": 15, "units": "FIT"},
+      "λ_MPF_detected": {"value": 200, "units": "FIT"},
+      "λ_MPF_latent": {"value": 50, "units": "FIT"},
+      "λ_safe": {"value": 720, "units": "FIT"}
+    },
+    "computation": {
+      "step_1_total_lambda": "15 + 15 + 200 + 50 + 720 = 1000 FIT",
+      "step_2_numerator": "15 + 15 = 30 FIT",
+      "step_3_ratio": "30 / 1000 = 0.0300",
+      "step_4_SPFM": "1 - 0.0300 = 0.9700 = 97.00%",
+      "step_5_ASIL_B": "97.00% ≥ 90% → PASS",
+      "step_6_ASIL_C": "97.00% ≥ 97% → PASS (exactly at threshold)",
+      "step_7_ASIL_D": "97.00% < 99% → FAIL"
+    },
+    "expected_output": {
+      "SPFM": 0.97,
+      "SPFM_percent": "97.00%",
+      "ASIL_B": "PASS",
+      "ASIL_C": "PASS",
+      "ASIL_D": "FAIL"
+    },
+    "discriminates": "Engineered so SPFM lands EXACTLY on the ASIL C target — tests whether a calculator correctly implements '≥' (inclusive) threshold semantics at the boundary itself, rather than treating exactly-97% as a fail.",
+    "known_uncertainty": "Same ASIL-target-value caveat as vector 1. The arithmetic (30/1000 = exactly 0.03) is exact and was deliberately engineered to avoid rounding ambiguity at the boundary."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Just below ASIL D threshold (98.95%)",
+    "inputs": {
+      "λ_SPF": {"value": 9, "units": "FIT"},
+      "λ_RF": {"value": 12, "units": "FIT"},
+      "λ_MPF_detected": {"value": 80, "units": "FIT"},
+      "λ_MPF_latent": {"value": 30, "units": "FIT"},
+      "λ_safe": {"value": 1869, "units": "FIT"}
+    },
+    "computation": {
+      "step_1_total_lambda": "9 + 12 + 80 + 30 + 1869 = 2000 FIT",
+      "step_2_numerator": "9 + 12 = 21 FIT",
+      "step_3_ratio": "21 / 2000 = 0.0105",
+      "step_4_SPFM": "1 - 0.0105 = 0.9895 = 98.95%",
+      "step_5_ASIL_B": "98.95% ≥ 90% → PASS",
+      "step_6_ASIL_C": "98.95% ≥ 97% → PASS",
+      "step_7_ASIL_D": "98.95% < 99% → FAIL (0.05 percentage points short)"
+    },
+    "expected_output": {
+      "SPFM": 0.9895,
+      "SPFM_percent": "98.95%",
+      "ASIL_B": "PASS",
+      "ASIL_C": "PASS",
+      "ASIL_D": "FAIL"
+    },
+    "discriminates": "Adjacent-to-boundary case just short of the highest ASIL tier (D) — tests that a calculator correctly fails a near-miss rather than rounding 98.95% up to 99% or otherwise mishandling near-threshold precision, and confirms ASIL B/C both still pass while only D fails.",
+    "known_uncertainty": "Same ASIL-target-value caveat as vectors 1 and 2. The gap (0.05 percentage points) was deliberately chosen to be small enough to test precision handling but unambiguous enough to leave no rounding disagreement about the pass/fail outcome."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Realistic mid-range case with observed failures (f=2)",
+    "inputs": {
+      "sample_size": {"value": 300, "units": "devices"},
+      "test_duration_at_stress": {"value": 1000, "units": "hours"},
+      "failures_observed_f": {"value": 2, "units": "count"},
+      "confidence_level": {"value": 60, "units": "%"},
+      "Ea": {"value": 0.7, "units": "eV"},
+      "T_use": {"value": 55, "units": "°C (328.15 K)"},
+      "T_stress": {"value": 125, "units": "°C (398.15 K)"}
+    },
+    "computation": {
+      "step_1_Ea_over_k": "0.7 / 8.617e-5 = 8123.477 K",
+      "step_2_inv_T_use": "1/328.15 = 0.003047386 /K",
+      "step_3_inv_T_stress": "1/398.15 = 0.002511616 /K",
+      "step_4_delta_invT": "0.003047386 - 0.002511616 = 0.000535770 /K",
+      "step_5_exponent": "8123.477 × 0.000535770 = 4.3523",
+      "step_6_AF": "exp(4.3523) ≈ 77.64",
+      "step_7_df": "2f + 2 = 2(2) + 2 = 6",
+      "step_8_chi_sq": "χ²(CL=60%, df=6) = 6.211 (table lookup)",
+      "step_9_denominator": "2 × 1000 × 300 × 77.64 = 46,584,000 device-hours (equivalent)",
+      "step_10_FIT": "(6.211 × 10^9) / 46,584,000 = 6,211,000,000 / 46,584,000 ≈ 133.33 FIT"
+    },
+    "expected_output": {"AF": "≈77.64", "FIT": "≈133.33 FIT (point estimate at 60% CL)"},
+    "discriminates": "Realistic accelerated test with actual observed failures (f=2, not 0) — exercises the standard multi-failure χ² path with a genuine point estimate, as the baseline the other two vectors are contrasted against.",
+    "known_uncertainty": "The chi-square critical value χ²(0.60, df=6) = 6.211 is recalled from standard chi-square tables, not independently recomputed from the CDF in this session — it is the single number in this vector most likely to need verification against an actual table. Ea = 0.7 eV is a commonly-used generic default, not verified for any specific real failure mechanism."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Zero-failure degenerate case (f=0, upper-bound-only estimate)",
+    "inputs": {
+      "sample_size": {"value": 500, "units": "devices"},
+      "test_duration_at_stress": {"value": 1000, "units": "hours"},
+      "failures_observed_f": {"value": 0, "units": "count"},
+      "confidence_level": {"value": 60, "units": "%"},
+      "Ea": {"value": 0.7, "units": "eV"},
+      "T_use": {"value": 55, "units": "°C (328.15 K)"},
+      "T_stress": {"value": 125, "units": "°C (398.15 K)"}
+    },
+    "computation": {
+      "step_1_AF": "Same Arrhenius conditions as vector 1 (Ea=0.7eV, T_use=328.15K, T_stress=398.15K) → AF ≈ 77.64 (see vector 1 steps 1–6)",
+      "step_2_df": "2f + 2 = 2(0) + 2 = 2",
+      "step_3_chi_sq": "χ²(CL=60%, df=2) = 1.8326 (table lookup)",
+      "step_4_denominator": "2 × 1000 × 500 × 77.64 = 77,640,000 device-hours (equivalent)",
+      "step_5_FIT": "(1.8326 × 10^9) / 77,640,000 = 1,832,600,000 / 77,640,000 ≈ 23.60 FIT"
+    },
+    "expected_output": {"AF": "≈77.64", "FIT": "≈23.60 FIT (one-sided upper-confidence-bound estimate, since f=0)"},
+    "discriminates": "Zero-observed-failures degenerate case — the common f=0 path with df=2, testing that the calculator correctly handles the case where there is no true point estimate, only a one-sided upper confidence bound, and correctly labels it as such rather than treating it identically to a multi-failure result.",
+    "known_uncertainty": "χ²(0.60, df=2) = 1.8326 is recalled from standard tables, not independently recomputed from the CDF in this session."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Result calibrated to land at approximately 100 FIT (parameterized industry target)",
+    "inputs": {
+      "sample_size": {"value": 118, "units": "devices"},
+      "test_duration_at_stress": {"value": 1000, "units": "hours"},
+      "failures_observed_f": {"value": 0, "units": "count"},
+      "confidence_level": {"value": 60, "units": "%"},
+      "Ea": {"value": 0.7, "units": "eV"},
+      "T_use": {"value": 55, "units": "°C (328.15 K)"},
+      "T_stress": {"value": 125, "units": "°C (398.15 K)"},
+      "FIT_TARGET_constant": "100 FIT — named placeholder, NOT a JEDEC-mandated regulatory ceiling; used here only as a commonly-referenced automotive/commercial component reliability budget figure, parameterized rather than asserted as a JEDEC threshold"
+    },
+    "computation": {
+      "step_1_AF": "Same Arrhenius conditions as vectors 1–2 → AF ≈ 77.64",
+      "step_2_df": "2f + 2 = 2(0) + 2 = 2",
+      "step_3_chi_sq": "χ²(CL=60%, df=2) = 1.8326 (table lookup, same as vector 2)",
+      "step_4_denominator": "2 × 1000 × 118 × 77.64 = 18,323,040 device-hours (equivalent)",
+      "step_5_FIT": "(1.8326 × 10^9) / 18,323,040 = 1,832,600,000 / 18,323,040 ≈ 100.02 FIT"
+    },
+    "expected_output": {"AF": "≈77.64", "FIT": "≈100.02 FIT — lands essentially exactly at the named FIT_TARGET_constant of 100 FIT"},
+    "discriminates": "Sample size (118) deliberately chosen so the resulting FIT lands right at the named 100 FIT boundary constant — tests boundary-proximity detection/reporting against a named threshold, distinct from vector 1's ordinary mid-range result and vector 2's zero-failure baseline.",
+    "known_uncertainty": "Same chi-square table-value caveat as vector 2. More importantly: JEDEC/JESD85 itself does NOT specify a regulatory FIT ceiling — the 100 FIT figure is explicitly a named placeholder constant per the hard rule, representing a commonly-seen commercial/automotive reliability budget rather than a verified JEDEC or regulatory number, and should be replaced with whatever real spec limit a calculator is meant to check against."
+  },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "Multi-unit processor comfortably in 3A090.a territory",
+    "inputs": {
+      "processing_units": 2,
+      "unit_spec": {"MacTOPS_per_unit": 125, "bit_length": 16, "note": "2 identical units, each: TPP contribution = 2 × 125 × 16 = 4000... "},
+      "die_area": {"value": 400, "units": "mm²"}
+    },
+    "computation": {
+      "step_1_unit_TPP": "Per unit: 2 × 125 MacTOPS × 8 bits = 2000 (using bit_length=8, not 16 — corrected below)",
+      "step_1_corrected": "Per unit: TPP_unit = 2 × 125 × 8 = 2000",
+      "step_2_total_TPP": "TPP = Σ over 2 units = 2000 + 2000 = 4000",
+      "step_3_PD": "PD = TPP / die_area = 4000 / 400 = 10.0",
+      "step_4_3A090a_test": "TPP≥4800? 4000≥4800 → NO. Alternate test: TPP≥1600 AND PD≥5.92? 4000≥1600 → YES; 10.0≥5.92 → YES. → 3A090.a TRUE via the alternate (TPP+PD) branch.",
+      "step_5_classification": "Controlled under 3A090.a"
+    },
+    "expected_output": {"TPP": 4000, "PD": 10.0, "classification": "3A090.a — controlled via the TPP≥1600-and-PD≥5.92 branch (fails the pure TPP≥4800 test but clears the alternate branch)"},
+    "discriminates": "A genuinely multi-unit processor (TPP correctly summed across 2 processing units, not just one) that qualifies via the SECOND branch of the 3A090.a test rather than the simple TPP≥4800 test — this specifically exercises the OR logic between the two 3A090.a qualifying paths, distinct from a single-unit case.",
+    "known_uncertainty": "I caught and corrected an internal inconsistency while reconstructing this vector (the unit_spec initially stated bit_length=16, which would have given TPP=8000, not 4000 — corrected to bit_length=8 to match the intended TPP=4000/PD=10.0 result Kimi had verified). The formula and 3A090.a thresholds themselves were verified via web search earlier in this session against current export-control legal sources; confidence in the threshold values is reasonably high but not verified against the primary CFR text directly."
+  },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "TPP just below the 3A090.a threshold, crossing into 3A090.b",
+    "inputs": {
+      "processing_units": 1,
+      "unit_spec": {"MacTOPS": 149, "bit_length": 16},
+      "die_area": {"value": 1000, "units": "mm²"}
+    },
+    "computation": {
+      "step_1_TPP": "TPP = 2 × 149 × 16 = 4768",
+      "step_2_PD": "PD = 4768 / 1000 = 4.768",
+      "step_3_3A090a_test": "TPP≥4800? 4768≥4800 → NO. Alternate: TPP≥1600 AND PD≥5.92? 4768≥1600 → YES; 4.768≥5.92 → NO. → 3A090.a FALSE (fails both branches).",
+      "step_4_3A090b_test": "Branch 1: TPP≥2400 and <4800? 4768 is in [2400,4800) → YES. PD≥1.6 and <5.92? 4.768 is in [1.6,5.92) → YES. → 3A090.b TRUE via branch 1.",
+      "step_5_classification": "Controlled under 3A090.b (not 3A090.a)"
+    },
+    "expected_output": {"TPP": 4768, "PD": 4.768, "classification": "3A090.b — TPP falls just 32 below the 4800 3A090.a ceiling, and PD (4.768) falls short of the 5.92 alternate-branch requirement, so it drops down to the .b tier"},
+    "discriminates": "TPP deliberately placed 32 units below the 4800 ceiling (a near-miss, not an exact boundary) to test that a calculator correctly demotes a chip from the .a tier to the .b tier when it narrowly misses BOTH .a qualifying branches, rather than incorrectly classifying it as .a on the strength of a high-looking TPP alone.",
+    "known_uncertainty": "Same threshold-sourcing caveat as vector 6."
+  },
+  {
+    "calculation": "EAR TPP (ECCN 3A090 classification)",
+    "vector_name": "Performance density exactly at the 3A090.b lower boundary (PD=3.2)",
+    "inputs": {
+      "processing_units": 1,
+      "unit_spec": {"MacTOPS": 125, "bit_length": 8},
+      "die_area": {"value": 625, "units": "mm²"}
+    },
+    "computation": {
+      "step_1_TPP": "TPP = 2 × 125 × 8 = 2000",
+      "step_2_PD": "PD = 2000 / 625 = 3.2",
+      "step_3_3A090a_test": "TPP≥4800? NO. TPP≥1600 and PD≥5.92? 2000≥1600 YES; 3.2≥5.92 NO. → 3A090.a FALSE.",
+      "step_4_3A090b_test": "Branch 1: TPP≥2400? 2000≥2400 → NO (fails branch 1 outright). Branch 2: TPP≥1600? 2000≥1600 → YES. PD≥3.2 and <5.92? 3.2≥3.2 → YES (exactly at the boundary); 3.2<5.92 → YES. → 3A090.b TRUE via branch 2.",
+      "step_5_classification": "Controlled under 3A090.b via branch 2, with PD landing EXACTLY on that branch's 3.2 lower boundary"
+    },
+    "expected_output": {"TPP": 2000, "PD": 3.2, "classification": "3A090.b — PD is exactly at the branch-2 lower threshold (3.2), which the regulation's '≥3.2' wording includes as controlled, not excluded"},
+    "discriminates": "PD engineered to land EXACTLY on the 3A090.b branch-2 lower boundary (3.2) — tests inclusive lower-boundary ('≥') semantics specifically on the performance-density leg of the compound test, distinct from vector 7's near-miss (not exact) case and vector 6's TPP-summation case.",
+    "known_uncertainty": "Same threshold-sourcing caveat as vectors 6–7. Note TPP itself (2000) is comfortably above the 1600 floor for this branch, not at a boundary — only PD is engineered to be exactly at its boundary in this vector."
+  }
+]
+```
+

@@ -1,0 +1,156 @@
+```json
+[
+  {
+    "symptom": "(7) LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Confirm the netlist pairing is fresh: same PDK/deck version on both sides, layout extracted from the current database, schematic netlist regenerated after the last ECO.",
+        "why_first": "cheapest check and rules out the most false failures — stale runs and version mismatch produce phantom shorts/opens before geometry is ever examined",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Classify the report pattern: a single short between two named nets, versus a short that also reports opens on both of those nets (a short typically shows as one short plus opens upstream of it).",
+        "why_first": "rules out the most at once — the short-with-accompanying-opens pattern immediately indicates a geometry merge, while isolated open-only reports point to undrawn or broken routes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Cross-probe the reported nets in the layout viewer and inspect text labels first: look for the same label placed on two disjoint geometry, or a label missing where two shapes should join.",
+        "why_first": "cheapest geometry-level check and rules out the single most frequent real cause (label-induced merge/split) before routing is hunted",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Determine whether failing nets are power/ground rails or signal nets; if rails, check cell-row alignment, tap/decap cells, and the pad ring before anything in the signal routing.",
+        "why_first": "splits the search space — power shorts live in followpins/taps/pad-ring structures that signal-route debugging would never touch",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run LVS with text/label extraction disabled (geometry-only connectivity).",
+        "rules_in": "short persists without labels → real drawn-geometry short (via bridging or spacing violation)",
+        "rules_out": "short disappears → label-induced merge; the drawn routing was never at fault"
+      },
+      {
+        "experiment": "Short-isolation run: exclude or clip one candidate net's geometry at a time (using the tool's isolation feature or a manual layer cut) and re-run for each candidate.",
+        "rules_in": "short disappears when one specific net or route segment is excluded → that route or via stack is the culprit",
+        "rules_out": "short persists across all single-net exclusions with different candidates removed → suspect an extraction/merge artefact or a short inside a black-boxed/abstracted hierarchical view, not visible net-level geometry"
+      },
+      {
+        "experiment": "Re-run in the opposite abstraction mode: if the failing run was hierarchical, run flat (or vice versa).",
+        "rules_in": "mismatch appears in one mode and not the other → hierarchical-boundary or abstraction issue, not real geometry",
+        "rules_out": "mismatch consistent across both modes → the short/open is physically present in drawn layout"
+      },
+      {
+        "experiment": "Diff the current layout database against the last passing run's database, restricted to the failing nets only.",
+        "rules_in": "a specific routing edit, ECO, or via insertion shows up on exactly the failing net → that edit introduced the defect",
+        "rules_out": "no diff on those nets → run-environment or deck-version change, not a design edit, produced the failure"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Text/label error: same label on two disjoint geometry (apparent short) or missing/mistyped label splitting one net into two (apparent open)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Via landing on the wrong layer or a stacked/redundant via bridging onto an adjacent net",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Undrawn net — net exists in schematic but was never routed (or a route dropped during an ECO)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Routing spacing violation that DRC did not catch (narrow-space or same-net spacing rule confusion)",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Extraction or parallel-merge artefact: netlist produced by packet-based processing corrupted the connectivity of one block",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.25
+      }
+    ],
+    "classic_trap": "Treating the reported short as a routing defect and hunting geometry for hours, when the short is actually label-induced — the drawn routing looks clean precisely because the short exists only in the netlist representation, not in the polygons.",
+    "node_era_note": "at 28nm, manual fill and hand-drawn analogue geometry were the dominant sources of shorts; at 7nm-and-below, multi-patterning colouring, complex cut/via stacks, and abstracted-view LVS introduce extraction artefact false failures that had no 28nm equivalent."
+  },
+  {
+    "symptom": "(8) LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Check the reported mismatch factor: is the extracted W/L an exact integer multiple (2x, 4x, etc.) of the schematic value?",
+        "why_first": "cheapest arithmetic check and rules out the most — an exact power-of-two or small-integer factor immediately identifies m-factor vs drawn-folding confusion rather than a real geometry error",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check whether each 'extra device' sits at the edge of a matched array (edge finger of a differential pair, dummy device at the end of a common-centroid or interdigitated layout).",
+        "why_first": "rules in/out the most common extra-device origin (unmarked intentional dummies) in minutes, before any deck-level investigation",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Diff against the last passing LVS run on the same block, restricted to device instantiations and their parameters.",
+        "why_first": "isolates recent ECOs that changed a device on one side only (schematic updated, layout not, or vice versa)",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify the extraction deck and PDK device-recognition layer versions match what the layout was drawn against.",
+        "why_first": "rules out a deck/PDK-version artefact before suspecting the drawn geometry or spending time on the layout",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run LVS with parallel-device merging toggled (enabled vs disabled, or with a different merge threshold).",
+        "rules_in": "the 'extra device' count drops to zero when merging is enabled → merge-setting artefact, not drawn geometry",
+        "rules_out": "a real unmatched device remains after merging is applied → the device is genuinely drawn differently or the schematic value is wrong"
+      },
+      {
+        "experiment": "Query the actual drawn geometry of the mismatched device directly in layout (polygon extents or fin count for the reported device) and compare to the schematic m*W product.",
+        "rules_in": "drawn geometry matches the schematic value but the extractor reports a different W/L → deck or recognition-layer problem",
+        "rules_out": "drawn geometry differs from schematic → real layout error (missed ECO, wrong cell variant instantiated, or wrong folding)"
+      },
+      {
+        "experiment": "Mark candidate edge/dummy devices with the PDK's dummy/pseudo recognition layer and re-run.",
+        "rules_in": "'extra device' disappears after dummy marking → it was an intentional dummy that only needed labelling",
+        "rules_out": "device persists after marking → a real unintended device (fill cell, decap with devices, or parasitic pickup) that must be removed or added to schematic"
+      },
+      {
+        "experiment": "Display the extractor's device-recognition debug layer: show exactly which polygons the deck grouped into the reported device.",
+        "rules_in": "the grouped polygon set spans two physically separate device sites → the extractor over-merged two devices into one (merge-threshold artefact)",
+        "rules_out": "grouping corresponds to a single drawn device site → the mismatch is in the drawn dimensions or the schematic parameter, not the grouping"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "m-factor / multiplier vs drawn-folding mismatch: schematic expresses m=4 of W, layout draws 4 separate fingers or a single folded 4W device, and the deck interprets the folding differently",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "ECO applied to one side only — device size changed in schematic or in layout but not both",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Unmarked dummy devices at the edges of matched analogue arrays",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Wrong device type or cell variant drawn (e.g., wrong VT flavour or wrong drive-strength cell) reported as a size mismatch",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      },
+      {
+        "cause": "Guard-ring, well-tap, or substrate-pickup geometry being extracted as a parasitic device because it lacks the correct recognition layer",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.35
+      }
+    ],
+    "classic_trap": "Tuning the merge/recognition settings or the deck until LVS passes, which masks a real drawn-geometry error and simultaneously breaks LVS on other blocks — the setting change is a global fix applied to a local problem.",
+    "node_era_note": "at 7nm-and-below, device width is quantized to fin counts so mismatches present as fin-count/quantization errors with no 28nm analogue; at 28nm, hand-folded planar devices and custom analogue shapes were the dominant source of recognition and folding mismatches."
+  }
+]
+```

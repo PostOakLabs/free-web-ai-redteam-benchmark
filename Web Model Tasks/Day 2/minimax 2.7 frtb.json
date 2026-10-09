@@ -1,0 +1,80 @@
+[
+  {
+    "case_name": "Parametric_ES_97.5pct_normal",
+    "inputs": {"alpha": 0.975, "z_quantile": 1.96, "phi_z": 0.05844, "sigma": 1.0, "units": "σ units"},
+    "computation": {
+      "z_alpha": 1.96,
+      "phi_z_alpha": 0.05844,
+      "one_minus_alpha": 0.025,
+      "VaR_computation": "z_alpha × σ = 1.96 × 1.0",
+      "VaR": 1.96,
+      "ES_numerator": "φ(z_α) = 0.05844 (normal density at quantile)",
+      "ES_denominator": "(1 - α) = 0.025 (tail probability)",
+      "ES_computation": "σ × φ(z_α) / (1 - α) = 1.0 × 0.05844 / 0.025",
+      "VaR_multiplier": 1.96,
+      "ES_multiplier": 2.3376,
+      "ES_vs_VaR_distinction": "VaR = quantile at α (loss equaled/exceeded 2.5% of time). ES = average loss GIVEN that loss exceeds VaR (tail mean beyond threshold). ES > VaR for continuous distributions because it weights the extreme tail."
+    },
+    "result": {"VaR": 1.96, "ES": 2.3376, "ES_VaR_ratio": 1.1927, "units": "σ units"},
+    "formula_basis": "MAR33 parametric ES under normality: ES_α = σ × φ(z_α) / (1 - α), where φ(z) = (1/√2π)e^(-z²/2), z_α = Φ⁻¹(α)",
+    "weakest_point": "Parametric ES assumes normal distribution. FRTB mandates historical simulation or GARCH-filtered historical simulation. The φ(z)/α formula is exact only under normality; real P&L is fat-tailed, making parametric ES underestimate true tail risk."
+  },
+  {
+    "case_name": "Parametric_ES_99pct_normal",
+    "inputs": {"alpha": 0.99, "z_quantile": 2.3263, "phi_z": 0.02665, "sigma": 1.0, "units": "σ units"},
+    "computation": {
+      "z_alpha": 2.3263,
+      "phi_z_alpha": 0.02665,
+      "one_minus_alpha": 0.01,
+      "VaR_computation": "z_alpha × σ = 2.3263 × 1.0",
+      "VaR": 2.3263,
+      "ES_numerator": "φ(z_α) = 0.02665 (normal density at quantile)",
+      "ES_denominator": "(1 - α) = 0.01 (tail probability)",
+      "ES_computation": "σ × φ(z_α) / (1 - α) = 1.0 × 0.02665 / 0.01",
+      "VaR_multiplier": 2.3263,
+      "ES_multiplier": 2.665,
+      "ES_vs_VaR_distinction": "ES_99% = 2.665 vs VaR_99% = 2.3263, ratio = 1.1456. ES is only 14.6% above VaR at 99%. At 97.5%, ES/VaR = 1.1927. The ratio grows as α decreases because tail density relative to tail probability increases."
+    },
+    "result": {"VaR": 2.3263, "ES": 2.665, "ES_VaR_ratio": 1.1456, "units": "σ units"},
+    "formula_basis": "MAR33 parametric ES under normality: ES_α = σ × φ(z_α) / (1 - α)",
+    "weakest_point": "At 99%, ES/VaR ≈ 1.15 under normality. FRTB's 97.5% ES produces ES/VaR ≈ 1.19 — a tighter tail definition but higher multiplier relative to VaR. This asymmetry is key to FRTB's more conservative treatment of tail risk."
+  },
+  {
+    "case_name": "LH_scaled_ES_20day",
+    "inputs": {"base_ES_10day": 2.3376, "LH_days": 20, "risk_factor_example": "IR_G10_10y_or_CorpBondSpread", "units": "σ units"},
+    "computation": {
+      "base_ES_10day": 2.3376,
+      "LH_days": 20,
+      "scaling_formula": "√(LH/10) per MAR33",
+      "scaling_factor_computation": "√(20/10) = √2 = 1.4142",
+      "scaling_factor": 1.4142,
+      "ES_20day_computation": "2.3376 × 1.4142",
+      "ES_20day": 3.3059
+    },
+    "result": {"ES_20day": 3.3059, "units": "σ units"},
+    "formula_basis": "MAR33 FRTB: ES_LH = ES_10 × √(LH/10), where LH varies by risk factor (MAR33 Table: 10d for major FX, large-cap EQ; 20d for G10 IR; 40d for emerging FX, IG credit; 120d for certain commodities). Scaling assumes i.i.d. daily returns.",
+    "weakest_point": "√(LH/10) scaling is a conservative approximation. It implicitly assumes returns are independent and identically distributed across the horizon. For discontinuous or path-dependent payoffs (e.g., structured products, exotic options), this scaling underestimates risk because it ignores jump risk and liquidity effects that scale nonlinearly with horizon."
+  },
+  {
+    "case_name": "Historical_ES_97.5pct_20obs",
+    "inputs": {"n_observations": 20, "confidence_level": 0.975, "sample_PnL": [-45, -38, -32, -28, -22, -18, -15, -12, -10, -8, -5, -3, 0, 2, 5, 8, 12, 18, 25, 40], "units": "P&L units"},
+    "computation": {
+      "tail_fraction": 0.025,
+      "expected_tail_count": "(1-α) × n = 0.025 × 20 = 0.5 observations",
+      "fractional_tail_problem": "With 20 obs at 97.5%, the expected number of tail observations is exactly 0.5 — a fractional count with no natural integer interpretation",
+      "convention_used": "CEILING: ceil(0.5) = 1 observation",
+      "convention_rationale": "Banks typically round UP to ensure conservative VaR/ES. Alternative conventions include LINEAR INTERPOLATION (rank-based) or ROUND-TO-NEAREST, but these are less conservative.",
+      "VaR_rank": "Observation #1 from worst (1-indexed)",
+      "VaR_observation_value": -45,
+      "tail_included_observations": "Observations 1 through 1",
+      "tail_observation_values": [-45],
+      "n_tail_obs": 1,
+      "ES_computation": "Sum([-45]) / 1",
+      "ES": -45,
+      "note_on_small_sample": "20 observations is far too small for reliable ES estimation. Basel/FTC guidelines recommend 250+ observations minimum (1 year) or 500+ (multi-year). With 20 obs, statistical error dominates."
+    },
+    "result": {"VaR_97.5pct": -45, "ES_97.5pct": -45.0, "n_tail_obs": 1, "units": "P&L units"},
+    "formula_basis": "MAR33 historical simulation ES: ES_α = (1/|T|) × Σ_{t∈T} |P&L_t|, where T = {t: P&L_t ≤ VaR_α}. The set T contains all observations whose loss equals or exceeds the α-quantile.",
+    "weakest_point": "With only 20 observations, the 97.5% quantile falls at the fractional position 19.5/20. Using ceiling convention (1 observation) gives ES = -45. Using interpolation or floor would give different results. This discrete approximation error is severe with small samples — the difference between floor(0) and ceiling(1) observations doubles the ES from 0 to 45. Banks must use sufficient historical depth (≥250 days) per MAR33."
+  }
+]

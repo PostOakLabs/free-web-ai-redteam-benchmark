@@ -1,0 +1,95 @@
+```json
+[
+  {
+    "example_id": "Example 5.3-1",
+    "article": "Article 5.3",
+    "fact_pattern": {
+      "jurisdiction": "Country A",
+      "constituent_entity_income": {"value": 1000000, "unit": "USD"},
+      "covered_taxes": {"value": 150000, "unit": "USD"},
+      "effective_tax_rate": {"value": 15, "unit": "%"},
+      "minimum_rate": {"value": 15, "unit": "%"},
+      "substance_based_income_exclusion": {"value": 0, "unit": "USD"}
+    },
+    "computation": {
+      "step_1": {"description": "Calculate the effective tax rate (ETR).", "calculation": "(150000 / 1000000) * 100 = 15%"},
+      "step_2": {"description": "Compare ETR to the minimum rate (15%).", "calculation": "15% >= 15% → No top-up tax required."}
+    },
+    "result": "No top-up tax required.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Assumed minimum rate and ETR match exactly; actual examples may vary."
+  },
+  {
+    "example_id": "Example 7.4-1",
+    "article": "Article 7.4",
+    "fact_pattern": {
+      "jurisdiction": "Country B",
+      "net_income": {"value": 5000000, "unit": "USD"},
+      "payroll_carve_out": {"value": 200000, "unit": "USD"},
+      "tangible_asset_carve_out": {"value": 300000, "unit": "USD"},
+      "transitional_rate": {"value": 5, "unit": "%"}
+    },
+    "computation": {
+      "step_1": {"description": "Calculate the total carve-out amount.", "calculation": "200000 (payroll) + 300000 (tangible assets) = 500000 USD"},
+      "step_2": {"description": "Apply the transitional rate to the carve-out amount.", "calculation": "500000 * 0.05 = 25000 USD"},
+      "step_3": {"description": "Subtract the carve-out from net income for taxable base.", "calculation": "5000000 - 500000 = 4500000 USD"}
+    },
+    "result": "Taxable income after carve-out: 4,500,000 USD; Exclusion amount: 25,000 USD.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Transitional rate assumption may not align with all jurisdictions."
+  },
+  {
+    "example_id": "Example 9.1-1",
+    "article": "Article 9.1",
+    "fact_pattern": {
+      "jurisdiction": "Country C",
+      "deferred_tax_liability": {"value": 400000, "unit": "USD"},
+      "transition_period": {"value": 5, "unit": "years"},
+      "annual_installment": {"value": 80000, "unit": "USD"}
+    },
+    "computation": {
+      "step_1": {"description": "Divide the deferred tax liability by the transition period.", "calculation": "400000 / 5 = 80000 USD/year"}
+    },
+    "result": "Annual deferred tax installment: 80,000 USD.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Transition period length may vary by jurisdiction."
+  },
+  {
+    "example_id": "Example 8.1-1",
+    "article": "Article 8.1",
+    "fact_pattern": {
+      "jurisdiction": "Country D",
+      "total_revenue": {"value": 10000000, "unit": "USD"},
+      "excluded_revenue": {"value": 50000, "unit": "USD"},
+      "de_minimis_threshold": {"value": 0.5, "unit": "%"}
+    },
+    "computation": {
+      "step_1": {"description": "Calculate the de minimis threshold in absolute terms.", "calculation": "10000000 * 0.005 = 50000 USD"},
+      "step_2": {"description": "Compare excluded revenue to the threshold.", "calculation": "50000 USD == 50000 USD → Exclusion applies."}
+    },
+    "result": "De minimis exclusion applies.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Threshold percentage may vary by jurisdiction."
+  },
+  {
+    "example_id": "Example 5.3-2",
+    "article": "Article 5.3",
+    "fact_pattern": {
+      "jurisdiction": "Country E",
+      "constituent_entity_income": {"value": 2000000, "unit": "USD"},
+      "covered_taxes": {"value": 200000, "unit": "USD"},
+      "effective_tax_rate": {"value": 10, "unit": "%"},
+      "minimum_rate": {"value": 15, "unit": "%"},
+      "substance_based_income_exclusion": {"value": 100000, "unit": "USD"}
+    },
+    "computation": {
+      "step_1": {"description": "Calculate the effective tax rate (ETR).", "calculation": "(200000 / 2000000) * 100 = 10%"},
+      "step_2": {"description": "Compare ETR to the minimum rate (15%).", "calculation": "10% < 15% → Top-up tax required."},
+      "step_3": {"description": "Calculate the top-up tax amount.", "calculation": "(2000000 - 100000) * (0.15 - 0.10) = 1900000 * 0.05 = 95000 USD"}
+    },
+    "result": "Top-up tax required: 95,000 USD.",
+    "doc_vs_general": "constructed-from-rule-knowledge-not-a-published-example",
+    "weakest_point": "Assumed substance-based exclusion amount may not be accurate."
+  }
+]
+```

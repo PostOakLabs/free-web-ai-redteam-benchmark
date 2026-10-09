@@ -1,0 +1,173 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is a genuinely useful topic I can discuss substantively. Here are the key pitfalls I know about:
+
+---
+
+**1. SharedArrayBuffer Requires Cross-Origin Isolation**
+
+**What happens:** `SharedArrayBuffer` is undefined in the browser console; WASM threads silently fail or fall back to single-threaded execution.
+
+**Why:** Since Spectre mitigations (Chrome 92+, Firefox 79+), `SharedArrayBuffer` requires the page to be cross-origin isolated: the server must send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. Without both headers, the API is simply unavailable.
+
+**How discovered:** Typically the first thing practitioners hit — threads don't work, or the runtime throws on `new SharedArrayBuffer()`. Can waste hours if the developer doesn't know about the header requirement.
+
+**Mitigation:** Ensure both COOP and COEP headers are set on every page that needs threads. For third-party resources, use `credentialless` or `Cross-Origin-Resource-Policy` headers.
+
+**Affects:** Deployment
+
+---
+
+**2. Timer Resolution Clamping Distorts Benchmarks**
+
+**What happens:** `performance.now()` returns values clamped to 100μs (or coarsened further in some contexts), making short operations appear to take 0ms or have huge relative variance.
+
+**Why:** Browsers reduce timer resolution as a Spectre mitigation. In cross-origin isolated pages, resolution may be restored to 5μs. In non-isolated contexts or certain browsers, it's clamped to 100μs or worse. Firefox has additional clamping for background tabs.
+
+**How discovered:** Benchmark results for fast operations (e.g., a single field multiplication in WASM) show 0ms or wildly inconsistent times. Developer wastes time optimizing code that's already fast, or draws wrong conclusions about relative performance.
+
+**Mitigation:** Run benchmarks in cross-origin-isolated context. For micro-benchmarks, run enough iterations that the total time exceeds the timer resolution by 100x+. Use `performance.now()` not `Date.now()`.
+
+**Affects:** Measurement-validity
+
+---
+
+**3. JIT Tiering Mid-Run Corrupts Benchmarks**
+
+**What happens:** The first N iterations of a WASM function run in the baseline compiler (slow), then the optimizing compiler kicks in and subsequent iterations run 3-10x faster. Averaging across the boundary gives meaningless numbers.
+
+**Why:** V8 (Chrome/Edge) and SpiderMonkey (Firefox) use tiered compilation for WASM: Liftoff (baseline) compiles fast but runs slow; TurboFan/Optimizing compiles slow but runs fast. The tier-up threshold varies by function size and call frequency.
+
+**How discovered:** Benchmark shows a clear "hockey stick" in per-iteration time. Developer either gets pessimistic numbers (not enough iterations) or doesn't notice the transition and reports a blended average.
+
+**Mitigation:** Warm up the function with enough iterations to trigger tier-up before starting measurement. Typically 1000+ calls for V8. Verify tier-up by checking if times stabilize.
+
+**Affects:** Measurement-validity
+
+---
+
+**4. WebGPU Buffer Readback Is Asynchronous and Synchronizes**
+
+**What happens:** Reading results back from GPU to CPU via `buffer.mapAsync()` stalls the GPU pipeline, and the stall time gets counted as "compute time" if the developer isn't careful.
+
+**Why:** `mapAsync` requires the GPU to finish all pending work on that buffer before mapping. If you dispatch a compute shader and immediately map the output buffer, the CPU waits for the GPU to finish. The wait time is not GPU compute time — it's synchronization latency.
+
+**How discovered:** GPU compute appears to take 50ms when the actual shader runs in 2ms. Developer optimizes the shader when the bottleneck is readback synchronization.
+
+**Mitigation:** Use double-buffering or frame pipelining: dispatch work on buffer A, read back buffer B from the previous frame. Measure GPU time with `timestamp-query` if available, not wall-clock around `mapAsync`.
+
+**Affects:** Measurement-validity
+
+---
+
+**5. GPU Timestamp-Query Availability Varies**
+
+**What happens:** `GPUComputePassEncoder.writeTimestamp()` throws or returns 0, or timestamps are quantized to microseconds instead of nanoseconds.
+
+**Why:** `timestamp-query` is an optional WebGPU feature. Chrome exposes it by default on most desktop GPUs; Safari and Firefox may not expose it, or may require specific flags. Even when exposed, the timestamp period (nanoseconds per tick) varies by GPU and may be coarse.
+
+**How discovered:** Developer tries to measure GPU kernel time precisely and gets either an error or suspiciously coarse numbers.
+
+**Mitigation:** Check `adapter.features.has('timestamp-query')` before using. Fall back to CPU-side timing with synchronization if unavailable. Be aware that even available timestamps may have resolution limits.
+
+**Affects:** Measurement-validity
+
+---
+
+**6. WASM Memory Growth Triggers OOM on 32-bit Address Space**
+
+**What happens:** WASM memory allocation fails at ~2GB (or ~4GB with memory64) even though the device has plenty of RAM.
+
+**Why:** WASM memory is a contiguous `ArrayBuffer` in the browser's address space. On 32-bit systems (or 32-bit WASM without memory64), the hard limit is ~4GB. In practice, fragmentation and browser overhead reduce this to ~2GB. On mobile browsers, the limit can be much lower (512MB-1GB on some devices).
+
+**How discovered:** Large proving workloads (e.g., allocating a large witness or constraint matrix) crash with a RangeError on `memory.grow()`. Developer wastes time assuming it's a logic error.
+
+**Mitigation:** Use memory64 (WASM feature) if available. Stream or chunk data rather than loading everything into WASM memory. Test on target devices early — mobile limits are much lower than desktop.
+
+**Affects:** Deployment
+
+---
+
+**7. JS↔WASM Data Marshalling Overhead**
+
+**What happens:** Moving large arrays between JavaScript and WASM is slow due to copying, and the copy time dominates the actual computation.
+
+**Why:** When JS passes a `Float64Array` to a WASM function, the data must be copied into WASM linear memory (unless using shared memory or typed views directly on the WASM buffer). For large proving workloads (megabytes of field elements), this copy can take tens of milliseconds.
+
+**How discovered:** Total wall-clock time is much larger than the WASM computation alone. Developer profiles and finds `memcpy` or the JS↔WASM boundary is the bottleneck.
+
+**Mitigation:** Allocate buffers in WASM memory and pass pointers (i32 offsets) rather than copying. Use `HEAP` views directly on the WASM memory buffer. Minimize round trips.
+
+**Affects:** Performance
+
+---
+
+**8. Cross-Origin Iframe Cannot Get Cross-Origin Isolation**
+
+**What happens:** A proving workload embedded in a third-party iframe cannot use `SharedArrayBuffer` or WebGPU, even if the top-level page is cross-origin isolated.
+
+**Why:** An iframe needs its own COOP/COEP headers AND the embedding page must allow it via `credentialless` or `anonymous` credential mode. Many third-party embeds (analytics, ads, widgets) break under COEP, making it hard to enable isolation site-wide.
+
+**How discovered:** The workload works standalone but fails when embedded. Developer spends hours debugging header configurations.
+
+**Mitigation:** Use `credentialless` COEP where supported. Consider a dedicated subdomain for the proving workload with full isolation. Test embedding scenarios early.
+
+**Affects:** Deployment
+
+---
+
+**9. Safari-Specific WASM/WebGPU Divergences**
+
+**What happens:** Code that works in Chrome and Firefox fails or performs very differently in Safari.
+
+**Why:** Safari's JavaScriptCore has different WASM compilation tiers (BBQ and OMG instead of Liftoff and TurboFan), different tier-up behavior, and different memory limits. Safari's WebGPU implementation (behind a flag or recently enabled) may lack features or have different performance characteristics. Safari also has different timer behavior and stricter memory pressure handling.
+
+**How discovered:** Benchmarks show Safari 2-5x slower than Chrome for the same WASM code, or specific WebGPU features are missing. Mobile Safari may kill the tab under memory pressure more aggressively.
+
+**Mitigation:** Test on Safari early. Don't assume Chrome performance numbers transfer. Use feature detection, not browser detection.
+
+**Affects:** Performance / Deployment
+
+---
+
+**10. GC Pauses Attributed to the Workload**
+
+**What happens:** Periodic latency spikes appear in benchmark results, seemingly from the WASM computation, but are actually JavaScript garbage collection pauses.
+
+**Why:** Even though WASM memory is not GC-managed, the JS objects around it (typed arrays, promises, event handlers) are. If the JS side creates many short-lived objects during the proving loop, GC can trigger and pause the main thread. The pause time gets included in the measured computation time.
+
+**How discovered:** Benchmark shows periodic spikes (e.g., every few seconds) that don't correlate with workload phases. Profiler shows GC events.
+
+**Mitigation:** Minimize JS-side allocations during the hot loop. Pre-allocate all buffers. Use `--trace-gc` or the Performance tab to identify GC events. Consider running WASM in a dedicated worker to isolate from UI-related GC.
+
+**Affects:** Measurement-validity
+
+---
+
+**11. WASM Thread Pool Startup Overhead**
+
+**What happens:** First invocation of a multi-threaded proving workload is 2-10x slower than subsequent runs, misleading early benchmarks.
+
+**Why:** Spawning Web Workers has significant overhead (each worker must compile/instantiate the WASM module independently). The first run pays this cost; subsequent runs may reuse warmed workers depending on the runtime.
+
+**How discovered:** First benchmark run is much slower; developer either reports the pessimistic number or doesn't notice the warmup effect and gets inconsistent results.
+
+**Mitigation:** Warm up the thread pool before benchmarking. Pre-spawn workers and keep them alive. Measure steady-state performance separately from cold-start.
+
+**Affects:** Measurement-validity
+
+---
+
+**12. SIMD Codegen Not Actually Vectorizing**
+
+**What happens:** WASM SIMD128 instructions are available but the compiler doesn't generate them for field arithmetic, resulting in scalar code with no speedup.
+
+**Why:** WASM SIMD operates on fixed 128-bit vectors. Field arithmetic (e.g., 256-bit or 384-bit modular operations) doesn't map naturally to 128-bit lanes without explicit manual vectorization. The compiler won't auto-vectorize WASM — SIMD must be explicitly written in the source (or generated by a compiler like Rust's `wasm32` target with explicit `core::arch::wasm32` intrinsics).
+
+**How discovered:** Developer compiles with SIMD enabled but sees no performance improvement. Disassembly shows scalar operations.
+
+**Mitigation:** Use explicit SIMD intrinsics or a library that has been manually vectorized for WASM SIMD. Don't rely on auto-vectorization.
+
+**Affects:** Performance
+
+---
+
+These reflect practical browser/WASM/WebGPU behaviors I'm aware of. My knowledge of specific browser versions and their current behavior may not reflect changes after mid-2025, so I'd recommend verifying deployment-critical claims against current browser documentation.

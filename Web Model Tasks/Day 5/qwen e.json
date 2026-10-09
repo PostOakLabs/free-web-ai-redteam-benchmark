@@ -1,0 +1,134 @@
+[
+  {
+    "calculation": "ISO 26262-5 single-point fault metric (SPFM) coverage",
+    "formula_or_test": "SPFM = 1 - (lambda_F_SPF_residual / lambda_F_SPF), where lambda_F_SPF is the total random-hardware failure rate due to single-point faults and lambda_F_SPF_residual is the residual dangerous single-point fault rate not prevented or detected by safety mechanisms.",
+    "inputs": [
+      "lambda_F_SPF (1/h)",
+      "lambda_F_SPF_residual (1/h)"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; changes only with new ISO 26262 editions",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "ISO 26262-5 latent fault metric (LFM) coverage",
+    "formula_or_test": "LFM = 1 - (lambda_F_MPF_lat_residual / lambda_F_MPF_lat), where lambda_F_MPF_lat is the failure rate due to latent multiple-point faults and lambda_F_MPF_lat_residual is the portion of those latent faults not detected by safety mechanisms.",
+    "inputs": [
+      "lambda_F_MPF_lat (1/h)",
+      "lambda_F_MPF_lat_residual (1/h)"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; changes only with new ISO 26262 editions",
+    "confidence": 0.72
+  },
+  {
+    "calculation": "ISO 26262-5 probabilistic metric for random hardware failures (PMHF)",
+    "formula_or_test": "PMHF = lambda_F_residual + lambda_F_MPF_lat, where lambda_F_residual = lambda_F_SPF_residual + lambda_F_MPF_residual. PMHF is an average probability per hour of dangerous random hardware failure; FIT = PMHF * 1e9.",
+    "inputs": [
+      "lambda_F_SPF_residual (1/h)",
+      "lambda_F_MPF_residual (1/h)",
+      "lambda_F_MPF_lat (1/h)"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; changes only with new ISO 26262 editions",
+    "confidence": 0.62
+  },
+  {
+    "calculation": "ISO 26262-5 ASIL B/C/D hardware metric target test",
+    "formula_or_test": "For ASIL B: SPFM >= 0.90, LFM >= 0.60, PMHF < 1e-7/h. For ASIL C: SPFM >= 0.97, LFM >= 0.80, PMHF < 1e-7/h. For ASIL D: SPFM >= 0.99, LFM >= 0.90, PMHF < 1e-8/h. Note: ASIL A values omitted here because edition-dependent treatment is less certain.",
+    "inputs": [
+      "ASIL",
+      "SPFM",
+      "LFM",
+      "PMHF (1/h)"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; changes only with new ISO 26262 editions",
+    "confidence": 0.75
+  },
+  {
+    "calculation": "DO-254 design-assurance-level assignment and objective-level mapping",
+    "formula_or_test": "Map failure-condition effect to design assurance level: catastrophic -> DAL A; hazardous/severe-major -> DAL B; major -> DAL C; minor -> DAL D; no safety effect -> DAL E. The assigned DAL selects the applicable DO-254 hardware design-assurance objectives, with DAL A most stringent and DAL E least stringent.",
+    "inputs": [
+      "failure_condition_effect"
+    ],
+    "authority": "RTCA DO-254, Design Assurance Guidance for Airborne Electronic Hardware",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; standard is stable across revisions",
+    "confidence": 0.70
+  },
+  {
+    "calculation": "CHIPS Act advanced manufacturing investment credit amount",
+    "formula_or_test": "credit_amount = 0.25 * qualified_investment, where qualified_investment is the investment in an advanced manufacturing facility as defined for the credit.",
+    "inputs": [
+      "qualified_investment (USD)"
+    ],
+    "authority": "Internal Revenue Code, 26 U.S.C. Section 48D, Advanced manufacturing investment credit, added by CHIPS and Science Act of 2022, Pub. L. 117-167",
+    "clause_locator": "26 U.S.C. Section 48D(a)",
+    "publicly_retrievable": true,
+    "volatility": "Low for the statutory 25 percent rate; interpretive regulations may change",
+    "confidence": 0.88
+  },
+  {
+    "calculation": "Export Administration Regulations Total Processing Performance (TPP) for ECCN 3A090-class integrated circuits",
+    "formula_or_test": "TPP = sum over all processing units i of (MacTOPS_i * effective_bit_length_i), where MacTOPS_i is the peak theoretical performance of processing unit i in millions of operations per second and effective_bit_length_i is the bit length of the operation used to establish that peak performance.",
+    "inputs": [
+      "MacTOPS_i for each processing unit",
+      "effective_bit_length_i for each processing unit"
+    ],
+    "authority": "U.S. Export Administration Regulations, 15 CFR part 774, Supplement No. 1, Category 3, ECCN 3A090",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "High; export-control thresholds and definitions are amended frequently",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "JEDEC FIT-rate point estimate and upper confidence bound from test data",
+    "formula_or_test": "FIT_point = (r * 1e9) / (sum_j n_j * t_j * AF_j), where r is number of failures, n_j is sample size for stress condition j, t_j is stress hours, and AF_j is acceleration factor to use conditions. Upper confidence bound at confidence level CL: FIT_UCL = (chi_square_quantile(CL, 2r + 2) * 1e9) / (2 * sum_j n_j * t_j * AF_j).",
+    "inputs": [
+      "r (failures)",
+      "n_j (units per stress condition)",
+      "t_j (stress hours per condition)",
+      "AF_j (acceleration factor per condition)",
+      "CL (confidence level)"
+    ],
+    "authority": "JEDEC JESD74A, Procedure for Calculating Reliability",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "Low to moderate; JEDEC standards are revised periodically",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "Human Body Model ESD withstand-voltage class",
+    "formula_or_test": "Given HBM withstand voltage V in volts: Class 0 if V < 250; Class 1A if 250 <= V < 500; Class 1B if 500 <= V < 1000; Class 1C if 1000 <= V < 2000; Class 2 if 2000 <= V < 4000; Class 3A if 4000 <= V < 8000; Class 3B if V >= 8000.",
+    "inputs": [
+      "V (HBM withstand voltage in volts)"
+    ],
+    "authority": "ANSI/ESDA/JEDEC JS-001, Human Body Model (HBM) Component Level",
+    "clause_locator": null,
+    "publicly_retrievable": true,
+    "volatility": "Low to moderate; classification table can change with new joint standard editions",
+    "confidence": 0.68
+  },
+  {
+    "calculation": "IEC 61508 safety integrity level target failure measure for continuous or high demand mode",
+    "formula_or_test": "For dangerous failure rate per hour PFH: SIL 4 if 1e-9 <= PFH < 1e-8; SIL 3 if 1e-8 <= PFH < 1e-7; SIL 2 if 1e-7 <= PFH < 1e-6; SIL 1 if 1e-6 <= PFH < 1e-5.",
+    "inputs": [
+      "PFH (dangerous failures per hour)"
+    ],
+    "authority": "IEC 61508-1:2010, Functional safety of electrical/electronic/programmable electronic safety-related systems — Part 1: General requirements",
+    "clause_locator": "Table 2",
+    "publicly_retrievable": false,
+    "volatility": "Low; IEC editions change infrequently",
+    "confidence": 0.78
+  }
+]

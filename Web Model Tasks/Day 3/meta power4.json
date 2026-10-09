@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Embrace speed-demon frequency design alongside braniac complexity",
+    "where_in_paper": "Introduction and Guiding principles – Very-high-frequency design",
+    "decision": "Revamp chip design with new transistor-level tools and regular dataflow constructs to deliver best-of-breed operating frequencies (1.1 and 1.3 GHz initial), embracing high clock rate in addition to traditional complex-IPC approach",
+    "alternatives_or_rejected": "Staying solely in braniac camp – more complex design but higher instructions-per-cycle rate without pursuing high clock rate – which IBM UNIX systems had traditionally followed",
+    "rationale": "To maintain leadership position, need leadership operating frequencies; balanced design can achieve high frequency without sacrificing IPC, and system was designed to preserve balance as technology allows even higher frequencies",
+    "outcome": "POWER4 introduced at 1.1 GHz and 1.3 GHz, surpassing other 64-bit microprocessors in key benchmarks, with path to increase frequency while preserving system balance",
+    "quote_as_recalled": "With the POWER4, IBM opted to also embrace the speeddemon approach.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact initial frequencies 1.1 and 1.3 GHz may be from intro not guiding principles; page number may be 5 not 6",
+    "confidence": 0.92
+  },
+  {
+    "title": "RAS beyond parts and ECC – transform checkstops to software interrupts",
+    "where_in_paper": "Guiding principles – Leadership in reliability, availability, and serviceability (RAS)",
+    "decision": "Require RAS approach that eliminates outages and provides redundancy where errors cannot be eliminated, and where possible transform hard machine stops (checkstops) into synchronous machine interrupts to software to allow circumvention",
+    "alternatives_or_rejected": "Achieving high levels of reliability only by choosing reliable parts and incorporating error-correction-code (ECC) logic into major arrays",
+    "rationale": "Servers evolved toward continuous operation, needing mainframe-like RAS attributes; choosing reliable parts and ECC alone does not achieve high levels of reliability",
+    "outcome": "POWER4 incorporates pervasive functions for first-failure data capture, BIST, performance monitoring, error detection/logging, and firmware/OS recovery that can restore and continue after errors such as L1 parity errors",
+    "quote_as_recalled": "one does not achieve high levels of reliability only by choosing reliable parts and incorporating errorcorrectioncode (ECC) logic into major arrays.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact wording may have line-break hyphenation differences from OCR; transform checkstops sentence is separate but related",
+    "confidence": 0.88
+  },
+  {
+    "title": "Full-system co-design of technology, packaging, and microarchitecture",
+    "where_in_paper": "Guiding principles – Full-system design approach and POWER4 chip overview",
+    "decision": "Design entire system together from processor to memory and I/O bridge chips as a synergistic architecture, not as isolated chip, leveraging process technology and packaging to optimize total system",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "One of IBM's major strengths is system expertise to design multiple parts consistently; a new high-performance processor needs a new subsystem to feed it effectively, and POWER4 as used refers not only to chip but structure to interconnect chips",
+    "outcome": "Resultant POWER4 chip family includes on-chip L2, L3 directory, fabric controller, GX controller, pervasive functions, and ability to build 8-way MCM and up to 32-way SMP systems with balanced buses",
+    "quote_as_recalled": "POWER4 cannot be considered only a chip, but rather an architecture within which a set of chips are designed together to realize a system.",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Attributing 8-way and 32-way outcome to this section may conflate chip overview section; directory vs data split belongs to later section",
+    "confidence": 0.85
+  },
+  {
+    "title": "Two cores on one chip sharing unified L2 via CIU crossbar with three autonomous controllers",
+    "where_in_paper": "POWER4 chip section – Chip logical view and L2 cache",
+    "decision": "Place two identical processor cores on one POWER4 die sharing a unified second-level cache on same chip through a core interface unit (CIU) crossbar switch, with L2 implemented as three separate autonomous controllers each feeding 32 bytes per cycle",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To optimize for SMP operation where large number of transistors can be used to improve total system performance for high-throughput multitasking, providing two-way SMP model to software on single chip and maintaining bandwidth to both cores",
+    "outcome": "CIU connects each L2 controller to either data or instruction cache in either processor, accepts 8-byte stores, and supports more than 200 instructions in flight with up to eight instructions issued per cycle",
+    "quote_as_recalled": "The two processors share a unified secondlevel cache, also on the same chip, through a core interface unit (CIU)",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "32 bytes per cycle per controller detail may belong to later detailed L2 section not chip overview; three controllers vs three slices distinction",
+    "confidence": 0.82
+  },
+  {
+    "title": "Distributed switch interconnect with frequency-scaled buses",
+    "where_in_paper": "Interconnecting chips to form larger SMPs and System balance",
+    "decision": "Use distributed switch interconnect topology new to industry where each chip writes to its own bus and snoops all buses, and make all chip-chip and fabric buses scale with processor frequency to preserve system balance as technology improves",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "To form systems up to 32-way SMP from 4-chip 8-way MCM building blocks while maintaining flat memory model with worst-case latency only slightly more than 10 percent over best-case, and to allow system balance to be maintained over time as frequencies increase",
+    "outcome": "Four POWER4 chips on MCM form 8-way SMP; up to four MCMs interconnect in ring via inter-module buses acting as repeaters; bus speeds scale proportionately, maintaining balance and enabling larger caches and parallelism in future systems",
+    "quote_as_recalled": "The interconnect topology, referred to as a distributed switch, is new to the industry.",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Half-processor-speed for all buses and 10 percent latency figure may be from later system balance paragraph; alternative bus design not explicitly stated as rejected",
+    "confidence": 0.72
+  }
+]

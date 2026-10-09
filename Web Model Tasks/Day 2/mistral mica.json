@@ -1,0 +1,79 @@
+```json
+[
+  {
+    "case_name": "Reserve_Coverage_Test",
+    "inputs": {
+      "token_supply": 1000000,
+      "reserve_asset_value": 1200000
+    },
+    "computation": {
+      "coverage_ratio": 1.2
+    },
+    "result": {
+      "coverage_ratio": 1.2,
+      "regulatory_verdict": "adequate",
+      "test": "full-backing"
+    },
+    "article_basis": null,
+    "tail_convention": "LOW tail is adverse for coverage",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Own_Funds_Computation",
+    "inputs": {
+      "reserve_assets": 1200000,
+      "own_funds_percentage": "UNKNOWN-CURRENT-VALUE"
+    },
+    "computation": {
+      "own_funds_requirement": 24000.0
+    },
+    "result": {
+      "own_funds_requirement": 24000.0,
+      "regulatory_verdict": "adequate",
+      "test": "percentage-of-reserve"
+    },
+    "article_basis": null,
+    "tail_convention": "Not applicable",
+    "weakest_point": "Percentage threshold unknown"
+  },
+  {
+    "case_name": "Stressed_Coverage_Case",
+    "inputs": {
+      "token_supply": 1000000,
+      "reserve_asset_value": 1200000,
+      "haircut": 0.1
+    },
+    "computation": {
+      "stressed_reserve_value": 1080000.0,
+      "stressed_coverage_ratio": 1.08
+    },
+    "result": {
+      "stressed_coverage_ratio": 1.08,
+      "regulatory_verdict": "adequate",
+      "test": "full-backing"
+    },
+    "article_basis": null,
+    "tail_convention": "LOW tail is adverse for coverage",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Redemptions_At_Par_Case",
+    "inputs": {
+      "token_supply": 1000000,
+      "reserve_asset_value": 1200000,
+      "redemption_amount": 500000
+    },
+    "computation": {
+      "remaining_reserve": 700000
+    },
+    "result": {
+      "remaining_reserve": 700000,
+      "regulatory_verdict": "adequate",
+      "test": "redemptions-at-par"
+    },
+    "article_basis": null,
+    "tail_convention": "Not applicable",
+    "weakest_point": "None"
+  }
+]
+```

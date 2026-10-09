@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Latch-based clock distribution architecture for POWER4",
+    "where_in_paper": "Clock distribution section (physical design chapter)",
+    "decision": "Adopted a latch-based (pulsed-latch) clock distribution network rather than a conventional flip-flop-based clock tree",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Latch-based clocking allowed more flexible timing through the pipeline, simplified clock tree synthesis, and reduced clock skew while accommodating the distributed nature of the large POWER4 die",
+    "outcome": "Achieved clock skew within target; enabled timing closure at 130nm on a large die",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly frames this as a latch-vs-flipflop choice or just describes the latch-based implementation without framing alternatives; the paper may describe the implementation without stating that flip-flop approaches were considered and rejected",
+    "confidence": 0.65
+  },
+  {
+    "title": "ASIC-style design methodology adoption for physical design",
+    "where_in_paper": "Design methodology / physical design methodology section",
+    "decision": "Moved toward an ASIC-like physical design flow (synthesis, place-and-route) for significant portions of POWER4 logic, supplemented by custom circuits for critical paths",
+    "alternatives_or_rejected": "Full custom design for all logic (prior IBM processor approach)",
+    "rationale": "Processor complexity and transistor count had grown beyond what full custom could manage efficiently; ASIC methodology provided better productivity and predictability for non-critical logic while retaining custom for critical paths (L1 cache, clocking, critical datapath)",
+    "outcome": "Successful timing closure; productivity gains over prior full-custom approach; good correlation between synthesis estimates and final silicon",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact stated boundary between what was ASIC-flow vs. custom; I believe the paper states this but may be reconstructing the boundary imprecisely",
+    "confidence": 0.7
+  },
+  {
+    "title": "Conservative wire load models for synthesis timing correlation",
+    "where_in_paper": "Timing methodology / physical design integration section",
+    "decision": "Used more conservative wire load models in synthesis than historical practice, to account for wire delay becoming significant at 130nm",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Wire delays dominated gate delays at 130nm for long nets; previous generation wire load models were insufficiently accurate, causing correlation problems between pre-layout synthesis and post-layout timing",
+    "outcome": "Improved correlation between synthesis timing estimates and final timing; better first-pass timing closure",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether wire load model conservatism was explicitly framed as a discrete design decision or was discussed more subtly; this may be my inference from reading about timing methodology rather than a stated decision point in the paper",
+    "confidence": 0.55
+  },
+  {
+    "title": "Structured power grid for power distribution at large die scale",
+    "where_in_paper": "Power distribution / physical design section",
+    "decision": "Implemented a structured (regular, grid-based) power distribution network rather than ad-hoc power routing",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Die size and current density required predictable IR drop; structured grid provided uniform power delivery, simplified analysis, and reduced EM risk compared to ad-hoc approaches",
+    "outcome": "Achieved target IR drop across the die; reliable power delivery at 130nm with acceptable margins",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 38,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "Whether this was a specific decision discussed in this paper or whether it's general IBM design methodology; the companion microarchitecture paper and other POWER4 documentation may contain this; the paper_vs_general flag reflects genuine uncertainty",
+    "confidence": 0.45
+  }
+]

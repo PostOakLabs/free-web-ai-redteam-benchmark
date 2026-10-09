@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Out-of-order window sized for clock frequency",
+    "where_in_paper": "Out-of-order engine / issue-window discussion",
+    "decision": "Keep the out-of-order issue window and dispatch queues limited in size rather than making them large to maximize instruction-level parallelism.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper ties window size to cycle-time and wire-delay constraints: larger structures would lengthen critical paths and make the clock target harder.",
+    "outcome": "The 21264 used a modest out-of-order window while preserving the high clock frequency that was central to its performance.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly discusses a rejected larger-window alternative or only states the chosen queue sizes.",
+    "confidence": 0.55
+  },
+  {
+    "title": "Clustered integer execution",
+    "where_in_paper": "Integer execution / register-file section",
+    "decision": "Implement integer execution in two separate clusters, each with local execution resources and register-file state, rather than a single unified integer cluster.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Clustering reduced wire lengths and register-file porting complexity, helping the machine meet its high clock frequency.",
+    "outcome": "The 21264's integer engine was organized as two cooperating clusters, with instruction steering/locality management across them.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly says a unified cluster was rejected or simply describes the clustered choice.",
+    "confidence": 0.7
+  },
+  {
+    "title": "Instruction-cache replication for fetch timing",
+    "where_in_paper": "Front end / physical-design or cache discussion",
+    "decision": "Use replication of instruction-cache structures rather than relying on a single centralized multiported instruction cache.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Replication shortened long global wires and avoided the timing/complexity cost of a heavily ported central cache at the target clock.",
+    "outcome": "The fetch/front-end path could be distributed locally, contributing to the wire-delay-driven floorplan and clock target.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 31,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper says the instruction cache itself was replicated or only smaller fetch/queue structures were duplicated.",
+    "confidence": 0.45
+  },
+  {
+    "title": "Wire-delay-driven floorplanning",
+    "where_in_paper": "Physical design / implementation",
+    "decision": "Drive the chip floorplan by wire-delay budgets, placing and duplicating major structures to control global interconnect delays.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "At the 21264's target clock frequency, interconnect delay was a dominant constraint, so logic partitioning and placement had to be timing-driven.",
+    "outcome": "The final microarchitecture/floorplan used local clusters and replicated structures to keep critical communication short.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper uses the exact phrase wire-delay-driven or describes the same practice without naming it.",
+    "confidence": 0.68
+  }
+]

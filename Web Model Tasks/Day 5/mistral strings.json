@@ -1,0 +1,39 @@
+[
+  {
+    "case": 1,
+    "compact": "{\"b\":1,\"a\":2,\"C\":3}",
+    "jcs": "{\"C\":3,\"a\":2,\"b\":1}",
+    "rules_applied": ["Key sort: UTF-16 code-unit order"]
+  },
+  {
+    "case": 2,
+    "compact": "{\"outer\":{\"z\":true,\"a\":[{\"y\":1,\"x\":2},{\"k\":null}]}}",
+    "jcs": "{\"outer\":{\"a\":[{\"k\":null,\"x\":2,\"y\":1}],\"z\":true}}",
+    "rules_applied": ["Key sort: UTF-16 code-unit order for all objects"]
+  },
+  {
+    "case": 3,
+    "compact": "{\"n1\":1e+21,\"n2\":1e-7,\"n3\":0.000001,\"n4\":1e+20,\"n5\":-0,\"n6\":333333333.33333329}",
+    "jcs": "{\"n1\":1E+21,\"n2\":1E-7,\"n3\":1E-6,\"n4\":1E+20,\"n5\":0,\"n6\":333333333.33333329}",
+    "rules_applied": [
+      "Number formatting: Uppercase E, no leading zeros, -0 → 0",
+      "Key sort: UTF-16 code-unit order"
+    ]
+  },
+  {
+    "case": 4,
+    "compact": "{\"€\":\"euro\",\"$\":\"dollar\",\"ü\":\"umlaut\",\"aa\":\"double\"}",
+    "jcs": "{\"$\":\"dollar\",\"€\":\"euro\",\"aa\":\"double\",\"ü\":\"umlaut\"}",
+    "rules_applied": ["Key sort: UTF-16 code-unit order"]
+  },
+  {
+    "case": 5,
+    "compact": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "jcs": "{\"s1\":\"line\\nbreak\",\"s2\":\"tab\\there\",\"s3\":\"quote\\\"inside\",\"s4\":\"unicode é\",\"s5\":\"control  \"}",
+    "rules_applied": [
+      "String escaping: JCS-mandated forms for control characters",
+      "Key sort: UTF-16 code-unit order"
+    ]
+  }
+]
+{"weakest_point": "Case 3: Number serialization for `1e21` and `1e-7` (uppercase E and scientific notation precision)"}

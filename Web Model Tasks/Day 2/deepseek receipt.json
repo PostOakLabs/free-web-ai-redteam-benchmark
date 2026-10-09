@@ -1,0 +1,141 @@
+```json
+{
+  "receipt_kinds": [
+    {
+      "kind": "Composite",
+      "description": "A receipt made up of one receipt for every segment in a zkVM execution, and every assumption. Size is linear with respect to execution length. Produced when `ReceiptKind::Composite` is requested. Useful for development and debugging, but not for production due to size.",
+      "produced_when": "Requested via `Prover::prove_with_opts` with `ReceiptKind::Composite`."
+    },
+    {
+      "kind": "Succinct",
+      "description": "A receipt where all segments have been compressed into a single STARK proof. Size is constant with respect to execution length. Produced when `ReceiptKind::Succinct` is requested. This is an intermediate step, often used before further compression to Groth16.",
+      "produced_when": "Requested via `Prover::prove_with_opts` with `ReceiptKind::Succinct`."
+    },
+    {
+      "kind": "Groth16",
+      "description": "A receipt composed of a Groth16 proof over the BN254 curve. It is the smallest and most compact receipt format, constant in size, and can be serialized to a few hundred bytes. Produced when `ReceiptKind::Groth16` is requested. This is the format intended for on-chain verification and production use.",
+      "produced_when": "Requested via `Prover::prove_with_opts` with `ReceiptKind::Groth16`. Also produced by compressing a `SuccinctReceipt` using a Groth16 prover."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Vec<u8>",
+      "meaning": "The raw Groth16 proof data, serialized as a byte vector. It contains the cryptographic proof that attests to the validity of the `ReceiptClaim`.",
+      "verifier_must_check": "The verifier must deserialize this seal, extract the Groth16 proof components (a, b, c), and verify it against the public inputs derived from the `ReceiptClaim` and the `VerifierContext` (which contains the verifying key and control root). The verification process is invoked via `verify_integrity()` or `verify_integrity_with_context()`.",
+      "failure_if_skipped": "If the verifier ignores the `seal`, the proof is not cryptographically checked. An attacker could trivially forge a receipt by constructing a fake `ReceiptClaim` with any desired journal and image ID, as there is no cryptographic binding."
+    },
+    {
+      "field": "claim",
+      "type_shape": "MaybePruned<Claim> where Claim: Digestible + Debug + Clone + Serialize",
+      "meaning": "The `ReceiptClaim` which contains the public outputs of the execution: the image ID (program identifier), the journal digest, the exit code, and any assumptions. It may be pruned to reduce size, but the digest of the claim is always available.",
+      "verifier_must_check": "The verifier must compute the digest of the `ReceiptClaim` (via `claim.digest()`) and use it as part of the public inputs to the Groth16 verifier. After cryptographic verification, the verifier should check that the claimed image ID matches the expected program, the exit code is successful (e.g. `Halted(0)`), and the journal digest matches the hash of the provided journal bytes.",
+      "failure_if_skipped": "If the verifier does not use the claim digest in the public inputs, the seal is not bound to the claim. An attacker could present a valid seal from one execution (e.g., with a benign image ID) and pair it with a different claim (e.g., with a malicious image ID), and the verification would pass."
+    },
+    {
+      "field": "verifier_parameters",
+      "type_shape": "Digest (a 32-byte hash)",
+      "meaning": "A digest (fingerprint) of the verifier parameters that must be used to verify this receipt. This includes the Groth16 verifying key and the control IDs that commit to the RISC Zero circuits. It acts as a version identifier for the proof system and circuits.",
+      "verifier_must_check": "The verifier must ensure that the `verifier_parameters` digest matches the digest of the `VerifierContext` (or the specific `Groth16ReceiptVerifierParameters`) it intends to use. If they do not match, verification must fail. This prevents using a receipt generated with one version of the zkVM or one set of circuits with a different verifier.",
+      "failure_if_skipped": "If the verifier ignores `verifier_parameters`, it might use the wrong verifying key. An attacker could generate a receipt using an older, vulnerable version of the zkVM (or a custom circuit) and present it to a verifier expecting a newer, secure version, potentially bypassing security fixes or exploiting known vulnerabilities in the older version."
+    }
+  ],
+  "claim_structure": {
+    "components": [
+      {
+        "name": "pre",
+        "description": "The image ID (a `Digest`) of the guest program that was executed. This is the hash of the program's ELF file and uniquely identifies the code."
+      },
+      {
+        "name": "output",
+        "description": "The public output of the execution, which includes the journal (public data written by the guest) and any assumptions (proof composition requirements)."
+      },
+      {
+        "name": "journal",
+        "description": "The public output bytes written by the guest program. The `ReceiptClaim` contains a `Digest` of these bytes (the `journalDigest`)."
+      },
+      {
+        "name": "assumptions",
+        "description": "A list of claims that were verified inside the guest using `env::verify()`. These are resolved during proof composition. The `ReceiptClaim` can contain unresolved assumptions, which are then proven by additional receipts."
+      },
+      {
+        "name": "exit_code",
+        "description": "The exit status of the guest program, e.g., `Halted(0)` for a successful execution."
+      }
+    ],
+    "claim_digest_computation": "The `ReceiptClaim` implements the `Digestible` trait. The digest is computed by hashing the serialized components of the claim (pre, journal_digest, exit_code, assumptions, etc.) using the Poseidon2 hash function (in newer versions) or Poseidon (in older versions). This digest is the `claim_digest` that is used as a public input to the Groth16 proof."
+  },
+  "binding_chain": {
+    "steps": [
+      {
+        "step": 1,
+        "description": "Journal bytes → Journal Digest. The verifier computes the SHA-256 digest of the provided journal bytes."
+      },
+      {
+        "step": 2,
+        "description": "Journal Digest + Image ID + Exit Code + Assumptions → ReceiptClaim Digest. The verifier reconstructs the `ReceiptClaim` from these components (or receives it directly) and computes its digest (using Poseidon2)."
+      },
+      {
+        "step": 3,
+        "description": "ReceiptClaim Digest → Groth16 Public Inputs. The claim digest is split into two field elements (`c0`, `c1`) and used as public inputs to the Groth16 verifier, along with the control root (`a0`, `a1`) from the `VerifierContext`."
+      },
+      {
+        "step": 4,
+        "description": "Groth16 Public Inputs + Seal → Verification. The Groth16 verifier checks the proof (`seal`) against the public inputs and the verifying key (from the `VerifierContext`). The `verifier_parameters` digest ensures the correct verifying key and control root are used."
+      }
+    ],
+    "where_control_root_and_vk_enter": "The `VerifierContext` (or `Groth16ReceiptVerifierParameters`) provides the Groth16 verifying key and the `control_root`. The `control_root` is split into two field elements (`a0`, `a1`) and is included in the public inputs. This binds the proof to the specific RISC Zero circuits (the control root is a commitment to the STARK-to-SNARK wrapper). The verifying key is used by the Groth16 verifier to check the proof's validity."
+  },
+  "version_coupling": {
+    "components": [
+      {
+        "component": "Verifying Key",
+        "description": "The Groth16 verifying key is specific to the RISC Zero zkVM version and the specific circuit (e.g., the recursion circuit). It is embedded in the `VerifierContext`.",
+        "breaks_when_wrong_version": "If the verifier uses a verifying key that does not match the one used to generate the proof, the Groth16 verification will fail. The `verifier_parameters` digest in the receipt is designed to catch this mismatch."
+      },
+      {
+        "component": "Control Root / Control IDs",
+        "description": "The control root is a commitment to the set of control IDs that define the RISC Zero zkVM circuits. It is part of the public inputs.",
+        "breaks_when_wrong_version": "If the verifier uses a different control root than the one the proof was generated against, the public inputs will not match, and the Groth16 verification will fail. This ensures that the proof corresponds to the correct set of zkVM circuits (e.g., no malicious modifications). The `verifier_parameters` digest includes the control root, so a mismatch is caught early."
+      },
+      {
+        "component": "Hash Function (Poseidon vs Poseidon2)",
+        "description": "Older versions of the zkVM used Poseidon, while newer versions (v0.21.0+) use Poseidon2 for recursive proofs.",
+        "breaks_when_wrong_version": "If a verifier expects one hash function but the receipt was generated with another, the digest computations (e.g., of the `ReceiptClaim`) will differ, causing the public inputs to mismatch and verification to fail. The `verifier_parameters` digest implicitly encodes this choice, preventing cross-version verification."
+      }
+    ],
+    "what_breaks": "Using the wrong version's parameters (verifying key, control root, or hash function) will cause the Groth16 verification to fail. The `verifier_parameters` digest acts as a fingerprint to prevent this. In smart contract routers, a version mismatch results in a failure to find a registered verifier."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Ignoring the verifier_parameters digest and using a hardcoded verifying key.",
+      "check_that_catches_it": "The verifier should compute the digest of its `VerifierContext` (or `Groth16ReceiptVerifierParameters`) and compare it to the `verifier_parameters` field in the receipt. If they do not match, verification must fail."
+    },
+    {
+      "bug": "Failing to verify that the exit code is `Halted(0)` (successful execution).",
+      "check_that_catches_it": "After cryptographic verification, the verifier must check the `exit_code` field of the `ReceiptClaim` to ensure the guest program completed successfully."
+    },
+    {
+      "bug": "Not checking that the provided journal bytes hash to the `journalDigest` in the `ReceiptClaim`.",
+      "check_that_catches_it": "The verifier must compute the SHA-256 digest of the provided journal bytes and compare it to the `journal_digest` in the `ReceiptClaim`."
+    },
+    {
+      "bug": "Using the wrong field element ordering or splitting when constructing public inputs from the claim digest.",
+      "check_that_catches_it": "The verifier must follow the exact specification for splitting the digest into field elements (e.g., `split_digest`). An incorrect split will cause the public inputs to be wrong, and the Groth16 verification will fail."
+    },
+    {
+      "bug": "Failing to verify assumptions (proof composition) or treating them incorrectly.",
+      "check_that_catches_it": "The verifier must ensure that all assumptions in the `ReceiptClaim` are resolved (i.e., there is a corresponding receipt for each assumption). This is typically handled by the `resolve` function, but a custom verifier must implement this logic."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High confidence. Based on the `ReceiptKind` enum documentation and developer docs.",
+    "groth16_receipt_fields": "High confidence. Based on the `Groth16Receipt` struct definition from the source code.",
+    "claim_structure": "High confidence. Based on developer docs on proof composition and the `ReceiptClaim` definition. The exact set of fields may vary slightly between versions, but `image_id`, `journal_digest`, `exit_code`, and `assumptions` are core.",
+    "binding_chain": "High confidence. Based on the `verify_integrity_with_context` implementation, which splits the claim digest and control root for public inputs, and the documentation on how the journal digest is used.",
+    "version_coupling": "High confidence. Based on the documentation for `verifier_parameters`, the `VerifierContext`, and the version router contracts. The Poseidon/Poseidon2 change is noted in the release notes.",
+    "common_verifier_bugs": "High confidence. These are common errors in implementing zero-knowledge proof verifiers, derived from general security principles and specific RISC Zero documentation (e.g., the need to check exit code and journal digest).",
+    "field_names": "High confidence for the main fields (`seal`, `claim`, `verifier_parameters`). The `ReceiptClaim` fields (`pre`, `output`, `journal`, `assumptions`, `exit_code`) are based on the documentation and general knowledge of the system. Minor variations in naming across versions are possible, but the concepts are stable."
+  }
+}
+```

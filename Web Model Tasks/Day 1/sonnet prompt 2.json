@@ -1,0 +1,122 @@
+## PROMPT A output
+
+```json
+[
+  {
+    "title": "Macro-channel congestion caught at first detailed-route, fixed by SRAM channel re-guiding instead of a floorplan redo",
+    "design_context": "28nm, ~1.0M placeable instances, ~80 hard macros (SRAMs), 3 clock domains, commercial P&R + commercial synthesis (generic)",
+    "prior_state": "Post-CTS optimization looked clean: WNS -30ps, TNS -1.2ns, utilization 74% chip-wide; at first detailed-route attempt, global-route overflow appeared concentrated in macro channels (narrow routing corridors between adjacent SRAM instances): horizontal overflow 12% in those channels vs <1% elsewhere, DRC-projected violations ~2100 (nearly all inside the channels)",
+    "observation": {
+      "text": "Overflow was almost entirely confined to a handful of macro-to-macro channels where SRAM pin density plus power-strap keepouts left very few usable tracks; the rest of the block routed cleanly, and the overflow pattern repeated identically across three structurally similar channels",
+      "severity": "HIGH"
+    },
+    "hypothesis": "The channel width between adjacent SRAMs was set too tight for the combination of signal routing plus mandatory power-strap keepouts in that region — this is a local macro-placement/channel-sizing problem, not a global density problem, since overall utilization (74%) had headroom and clean routing elsewhere confirmed the flow itself was fine.",
+    "candidates_considered": [
+      {"action": "Re-floorplan to widen all macro channels chip-wide", "rejected_because": "would require re-running placement and CTS from scratch, costing an estimated 3 weeks and reopening already-signed-off clock tree QoR, unacceptable this late in the schedule"},
+      {"action": "Globally lower target utilization to open up routing headroom everywhere", "rejected_because": "utilization was already fine outside the channels — a global relaxation would burn area budget chip-wide to fix a problem that was localized to <10% of the block"},
+      {"action": "Route through the power straps by relaxing keepout rules in the affected channels", "rejected_because": "IR-drop and electromigration sign-off had already been closed against the existing keepout spec; relaxing it risked a full power-integrity re-verification pass with uncertain outcome"},
+      {"action": "Locally widen only the three affected channels via targeted macro nudging (legal micro-placement move within existing floorplan bounds) plus manual routing guides", "rejected_because": null}
+    ],
+    "chosen_intervention": "Nudged the affected SRAM instances by small legal offsets (within existing floorplan halo/keepout bounds) to widen the three problem channels, added manual routing guides steering non-critical signal nets around the tightest points, then re-ran detailed route locally in the affected channels only.",
+    "post_state": "Channel horizontal overflow 12% -> 1%, chip-wide DRC-projected violations ~2100 -> ~180 (residual mostly outside the original channels, from downstream churn), WNS -30ps -> -55ps (small regression from added net detour length around the nudged macros), TNS -1.2ns -> -1.6ns, chip-wide utilization unchanged (74%)",
+    "expert_assessment": "Right call for the schedule constraint — a localized macro nudge plus routing guides is the correct first lever before a floorplan-level fix when the overflow is channel-specific rather than global. The small timing regression is the expected and acceptable cost of the fix, not a red flag. This would NOT transfer if overflow had been spread across many channels chip-wide, or if the macros were locked by an external floorplan agreement (e.g. package pin alignment) that forbade even small nudges.",
+    "confidence": 0.5,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claim that a small legal macro nudge alone dropped overflow from 12% to 1% across three channels simultaneously is somewhat optimistic — in practice at least one of the three channels usually needs a distinct secondary fix (e.g. a layer reassignment), and the expert reviewer should check whether one nudge-and-guide pass really closes all three or whether this is glossing over iteration."
+  },
+  {
+    "title": "Reading violation-report shape to tell constraint problem from logic-depth problem from physical/placement problem before touching anything",
+    "design_context": "28nm, ~1.0M placeable instances, ~80 hard macros, 3 clock domains, commercial P&R + commercial STA",
+    "prior_state": "Post-route STA (on-track corner): WNS -140ps, TNS -30ns, 640 failing paths, 0 DRC violations",
+    "observation": {
+      "text": "Of the 640 failing paths: ~380 shared one clock domain, failed in a narrow band (-15 to -35ps), and spanned many unrelated logic cones with no common physical location; ~180 failed in a wider band (-40 to -90ps) and all traced through the same small set of high-fanout combinational cells with 6+ logic stages between flops; the remaining ~80 failed at -100 to -140ps and were concentrated on nets crossing one specific macro channel",
+      "severity": "HIGH"
+    },
+    "hypothesis": "Three distinct causes are present and must be treated separately: the narrow-band, domain-wide group (~380) is a constraint/margin artifact (likely conservative clock uncertainty for that domain, since it's uniform across unrelated logic); the mid-band, stage-count-correlated group (~180) is a genuine logic-depth problem (too many stages between flops on that specific structure, a synthesis/pipelining issue, not a placement one); the widest-band, geographically clustered group (~80) is a physical/placement problem tied to the same macro channel — treating all 640 with one fix would misdiagnose at least two of the three groups.",
+    "candidates_considered": [
+      {"action": "Apply one global fix (e.g. across-the-board re-buffering) to all 640 failing paths", "rejected_because": "would burn power/area budget re-buffering the constraint-artifact group unnecessarily and still not fix the logic-depth group, which needs re-pipelining, not buffering"},
+      {"action": "Re-run synthesis with tighter global constraints to force the tool to close everything", "rejected_because": "risks over-constraining the majority group that was actually fine, and doesn't address the physical clustering in the smallest group at all — high risk of new violations elsewhere with no guarantee of fixing the real outliers"},
+      {"action": "Treat the whole failing set as a single congestion-driven issue and re-place the block", "rejected_because": "only ~80 of 640 failing paths were physically clustered; re-placing the whole block to fix 12% of the failures would be schedule-disproportionate and would perturb the other two groups' timing unpredictably"},
+      {"action": "Split fix by group: refine clock uncertainty for the affected domain; insert a pipeline register on the high-fanout structure; targeted route/ECO in the clustered macro channel", "rejected_because": null}
+    ],
+    "chosen_intervention": "Re-derived clock uncertainty for the single affected domain from updated post-route clock data (resolving the ~380-path group with no physical change); added one pipeline stage to the shared high-fanout combinational structure identified in RTL, re-synthesizing only that block (resolving the ~180-path group); ran targeted ECO placement/route in the one macro channel responsible for the remaining ~80 paths.",
+    "post_state": "WNS -140ps -> -25ps, TNS -30ns -> -3ns, failing paths 640 -> 45 (small residual in the pipelined structure's new boundary, expected and scheduled for a follow-up ECO)",
+    "expert_assessment": "Correct diagnostic discipline — reading the failing-path distribution by domain, physical clustering, and structural commonality before choosing a fix avoided treating three different problems as one. The general lesson: group failing paths by what they share (domain, structure, location) before intervening; a single global fix is almost never right when the report shows more than one pattern. This would NOT transfer if the design had only one dominant failure mechanism, where over-segmenting the failing set into groups would just add unnecessary analysis overhead.",
+    "confidence": 0.45,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "constructed-example",
+    "weakest_point": "The clean three-way split (uniform narrow-band constraint / structural mid-band logic-depth / clustered wide-band physical) is a simplified illustration — real designs often have overlapping causes (e.g. a logic-depth path that is ALSO in a congested region), and the expert should check whether such a clean partition is realistic or whether the boundaries between groups would actually be much fuzzier."
+  },
+  {
+    "title": "Deriving a cross-clock-domain boundary budget from CDC synchronizer latency instead of a flat guess",
+    "design_context": "28nm, two blocks (A: fast core-clock domain, B: slower slow-clock domain) communicating across a clock-domain-crossing (CDC) boundary via a 2-flop synchronizer, commercial synthesis + P&R budgeting flow",
+    "prior_state": "Boundary treated initially with a flat multicycle-path (MCP) exception of 2 cycles of the slower clock applied uniformly to all boundary-crossing paths, with no distinction between synchronized and unsynchronized signals",
+    "observation": {
+      "text": "STA sign-off review flagged that several boundary-crossing paths bypassed the CDC synchronizer entirely (direct combinational crossings on control signals assumed 'quasi-static' by the RTL author) and were getting the same 2-cycle MCP relief as the properly synchronized data paths",
+      "severity": "CRITICAL"
+    },
+    "hypothesis": "A single flat MCP exception across the whole boundary is unsafe: synchronized paths (through the 2-flop synchronizer) can legitimately use multicycle relief because the synchronizer absorbs metastability risk, but unsynchronized 'quasi-static' control paths need a true single-cycle budget (or an explicit false-path only if functionally verified never to toggle near a clock edge) — applying the same MCP to both classes hides a real timing/metastability risk on the unsynchronized paths.",
+    "candidates_considered": [
+      {"action": "Keep the flat 2-cycle MCP exception for the entire boundary (the original approach)", "rejected_because": "silently under-constrains the unsynchronized quasi-static control paths, which could then route/optimize with insufficient margin and risk real metastability or setup failure in silicon since those paths have no synchronizer to absorb it"},
+      {"action": "False-path the entire boundary and rely on functional/CDC verification alone", "rejected_because": "would mask real single-cycle timing risk on paths that ARE expected to close within one cycle (the synchronized data paths' first stage still has a real timing requirement into the synchronizer), and blanket false-pathing a CDC boundary was flagged as a sign-off risk by the CDC verification team"},
+      {"action": "Manually derive per-path budgets from RTL-level classification: MCP(2) only for paths verified to terminate in the synchronizer structure; single-cycle SDC budget for quasi-static control paths, backed by a functional-verification waiver for their true static behavior", "rejected_because": null}
+    ],
+    "chosen_intervention": "Cross-referenced the CDC verification tool's path classification (synchronized vs. unsynchronized) against the SDC boundary exceptions; kept the 2-cycle MCP only on paths confirmed to terminate at the synchronizer's first flop; removed the MCP from the quasi-static control paths and gave them a real single-cycle budget derived from the boundary's clock period minus interconnect/margin allocation, with the quasi-static assumption formally documented and waived by the CDC sign-off, not assumed by SDC.",
+    "post_state": "Boundary-adjacent WNS on the previously-mismodeled quasi-static paths went from an artificially-passing +900ps (under the incorrect 2-cycle relief) to a realistic -15ps under the correct single-cycle budget, surfacing a genuine near-miss that was then closed with a small buffer insertion (WNS -15ps -> +8ps); synchronized data paths were unaffected (still closing under the correct 2-cycle MCP)",
+    "expert_assessment": "Right call and arguably overdue — the original flat exception was masking a real risk rather than budgeting correctly, and this is exactly the kind of SDC error that STA sign-off review exists to catch. The general lesson: multicycle/false-path exceptions at a CDC boundary must be derived per-path-class from the actual synchronization structure, never applied as one blanket rule to 'the boundary.' This would NOT transfer to boundaries with no CDC at all (pure timing budget split within one clock domain), where the concern is logic-depth allocation rather than metastability-driven exception correctness.",
+    "confidence": 0.45,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The dramatic jump from an artificially-passing +900ps to a realistic -15ps under the corrected constraint is illustrative but the exact magnitude is invented for effect — the expert should check whether this specific numeric swing is a plausible order of magnitude for a real quasi-static-vs-synchronized SDC misclassification or whether it overstates how badly a flat MCP typically hides risk."
+  }
+]
+```
+
+## PROMPT C output
+
+```json
+[
+  {
+    "title": "Static Timing Analysis for Nanometer Designs",
+    "venue_or_publication": "Springer (book), authors J. Bhasker and Rakesh Chadha",
+    "year": 2009,
+    "what_it_covers": "Deep treatment of STA fundamentals, SDC constraint derivation, multicycle/false-path usage, and common real-world timing-closure pitfalls, though structured as a reference text rather than narrative case studies.",
+    "why_relevant": "Directly relevant to the SDC-budget and constraint-vs-physical diagnosis scenarios, but it is NOT a collection of narrative failure-and-recovery war stories — flagging that distinction rather than overstating the fit.",
+    "confidence": 0.6
+  },
+  {
+    "title": "SemiWiki (industry blog/forum, various authors including Daniel Nenni)",
+    "venue_or_publication": "semiwiki.com",
+    "year": null,
+    "what_it_covers": "Recurring articles and interviews from EDA/semiconductor practitioners discussing timing closure, physical design methodology, and real project retrospectives at commercial P&R and STA tool vendors and their customers.",
+    "why_relevant": "A genuinely real, nameable venue that has hosted practitioner-level design-closure discussion, but I cannot confidently name a specific article title or year with the detail this scenario needs.",
+    "confidence": 0.4
+  }
+]
+```
+
+I stopped at two entries rather than padding to ten — I don't have reliable, specific recall of named conference talks, papers, or postmortems (DAC/ICCAD/SNUG-style) with enough title-level confidence to list them honestly. An honest short list beats a longer fabricated one per the prompt's own rule.
+
+## PROMPT B output
+
+I have live web access, so I ran this too, reusing today's verified searches on this same topic.
+
+```json
+[
+  {"cell": "SharedArrayBuffer + COOP/COEP — Chrome/Edge", "claim": "SharedArrayBuffer requires cross-origin isolation (COOP: same-origin + COEP: require-corp) since Chrome/Edge 92; as of 2026, Chrome also ships Document-Isolation-Policy (Chrome 137, desktop only, Android planned) as a per-frame alternative that doesn't require child-frame COEP.", "url": "https://developer.chrome.com/blog/document-isolation-policy", "retrieved": "2026-08-31", "confidence": "verified from current authoritative page", "notes": "This is the main 2026-relevant change on top of the 2021 COOP/COEP baseline."},
+  {"cell": "SharedArrayBuffer + COOP/COEP — Firefox/Safari", "claim": "Firefox has supported SAB under COOP same-origin + COEP require-corp since Firefox 79; Safari supports SAB from 15.2+ under the same header requirement. No Document-Isolation-Policy equivalent was found for Firefox or Safari.", "url": "https://www.testmuai.com/learning-hub/sharedarraybuffer-browser-support/", "retrieved": "2026-08-31", "confidence": "moderate — secondary compatibility-table source, not a vendor changelog", "notes": "Should be cross-checked against MDN's browser-compat table for exact current version floors."},
+  {"cell": "WebGPU compute shaders — Chrome/Edge/Firefox/Safari", "claim": "WebGPU compute is stable/shipped in Chromium (Chrome 113+/Edge stable); Firefox support exists from 118+ but was described as behind a flag in one 2026 benchmarking source; Safari support is described as experimental relative to Chromium.", "url": "https://www.sitepoint.com/webgpu-vs-webasm-transformers-js/", "retrieved": "2026-08-31", "confidence": "moderate — inferred from a benchmarking article's stated test matrix, not a vendor status page", "notes": "UNVERIFIED whether Firefox's WebGPU flag requirement has since lifted in 2026 — needs a live check."},
+  {"cell": "timestamp-query exposed by default", "claim": "timestamp-query is NOT exposed by default in Chrome; it is quantized to 100-microsecond resolution and full precision requires the 'WebGPU Developer Features' flag (dev/test only) because the spec leaves it optional over timing-attack concerns.", "url": "https://developer.chrome.com/docs/web-platform/webgpu/developer-features", "retrieved": "2026-08-31", "confidence": "verified from current authoritative page", "notes": null},
+  {"cell": "WASM threads / SIMD128", "claim": "WASM threads (via SAB) and 128-bit SIMD are stable and shipped across Chrome, Firefox, and Safari as part of the WebAssembly 3.0 baseline as of 2026.", "url": "https://www.alldevtoolshub.com/blog/webassembly-browser-tools-2026-simd-threads-wasm-3/", "retrieved": "2026-08-31", "confidence": "moderate — aggregator/blog source, not a per-browser vendor compat table", "notes": null},
+  {"cell": "relaxed-SIMD", "claim": "Relaxed SIMD is part of the standardized WebAssembly 3.0 feature set (W3C standard, September 2025) and is described as shipping in current browser versions as of mid-2026.", "url": "https://byteiota.com/webassembly-30-spec-release/", "retrieved": "2026-08-31", "confidence": "moderate — secondary summary of the spec release, not a per-browser table", "notes": null},
+  {"cell": "JSPI", "claim": "JSPI reached Phase 4 of the WASM standards process in 2026 and is described in multiple 2026 sources as letting synchronous Wasm code interoperate with async Web APIs — but it is explicitly NOT part of the already-shipped WebAssembly 3.0 baseline.", "url": "https://byteiota.com/webassembly-30-spec-release/", "retrieved": "2026-08-31", "confidence": "moderate — Phase 4 confirmed by one source, cross-referenced against a second; exact per-browser availability not confirmed", "notes": "UNVERIFIED: per-browser (Chrome vs Firefox vs Safari) JSPI rollout not confirmed from a vendor status page."},
+  {"cell": "memory64", "claim": "Memory64 is standardized in WebAssembly 3.0 (practical ~16GB browser-imposed cap despite theoretical exabyte addressing); most mature in Chromium, present but possibly flag-gated in recent Firefox (>=143), least mature in Safari.", "url": "https://www.scichart.com/blog/memory64-unlocking-webassemblys-true-potential-with-16gb-of-in-browser-memory/", "retrieved": "2026-08-31", "confidence": "moderate — vendor blog with a cross-browser breakdown, not an official compat table", "notes": null},
+  {"cell": "Cross-origin iframe: cross-origin isolation / WebGPU access", "claim": "Historically an iframe could only be cross-origin isolated if every ancestor also set COEP/COOP appropriately (plus allow=\"cross-origin-isolated\" on the iframe tag). As of Chrome 137, Document-Isolation-Policy lets an individual frame — including an embedded cross-origin iframe such as a wallet widget — become cross-origin isolated on its own, without requiring the embedder or siblings to adopt COEP.", "url": "https://github.com/WICG/document-isolation-policy", "retrieved": "2026-08-31", "confidence": "verified from current authoritative page (WICG proposal repo, explicitly names embedded widgets as a target use case)", "notes": "Chrome/Chromium-only as of this check (desktop, Chrome 137+); Firefox/Safari adoption is UNVERIFIED."},
+  {"cell": "Firefox/Safari support for Document-Isolation-Policy", "claim": "UNVERIFIED", "url": null, "retrieved": "2026-08-31", "confidence": "no source found confirming or denying non-Chromium adoption", "notes": "Only Chrome documentation and the WICG proposal itself were found."},
+  {"cell": "Published 2026 in-browser proving measurement, reproducible setup", "claim": "A paper on trustless privacy-preserving data aggregation on Ethereum reports client-side (in-browser) ZK proof generation timing across 20 independent browser runs: mean ~88.3s, median ~87.4s, min ~87.1s, max ~95.8s (max flagged as a cold-start outlier), with full data in a supplementary table.", "url": "https://arxiv.org/pdf/2308.15267", "retrieved": "2026-08-31", "confidence": "verified from the paper's own stated methodology and numbers", "notes": "The arXiv ID pattern (2308.*) suggests this may be an older preprint rather than fresh 2026 work — flagging the ambiguity rather than asserting it's new."},
+  {"cell": "Named in-browser proving project, WebGPU/WASM status", "claim": "StarkWare's Stwo ('S-two') prover, in production on Starknet mainnet since November 2025, currently supports CPU/SIMD/CUDA-GPU backends; WebGPU and WASM are described as 'next on the roadmap,' not yet shipped, as of the source's publication.", "url": "https://www.webgpu.com/news/zk-proofs-webgpu-boost/", "retrieved": "2026-08-31", "confidence": "moderate — community/enthusiast site summarizing StarkWare's public claims, not StarkWare's own docs", "notes": "Directly relevant: a leading system's browser proving support is roadmapped, not live, as of this check."}
+]
+```
+
+**Feed back to zkprof as "measure, don't research"** (per the harvest doc's own rule): Firefox/Safari current WebGPU compute-shader flag status, per-browser JSPI rollout, and Firefox/Safari Document-Isolation-Policy support — all three had only secondary or zero sourcing and need a live browser-session check rather than another research pass.

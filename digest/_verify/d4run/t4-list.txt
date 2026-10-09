@@ -1,0 +1,30 @@
+   [1] T2-paraphrase-consistent   guess=23 found=3       Use of fine-grained multithreading per core
+   [2] T0-declined                guess=23               Rejection of out-of-order execution in favor of multithr
+   [3] T4-not-found               guess=25               Shared L2 cache organization with crossbar interconnect
+   [4] T4-not-found               guess=27               Power efficiency as a primary design constraint
+--
+   [2] T1-verbatim                guess=None found=1     Double-Pumped (2x Core Frequency) ALU
+   [3] T1-verbatim                guess=None found=1     Low-Latency Level 1 Data Cache (2-cycle access)
+   [4] T4-not-found               guess=None             Rapid Execution Engine with ALUs at 2x Core Frequency
+--
+### glm 5.3 flash | niagara  (glm 5.3 flash niagara.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=23 found=8       Adoption of Fine-Grained Multithreading
+   [1] T4-not-found               guess=22               Choice of Core Complexity and Count
+   [2] T4-not-found               guess=24               Shared L2 Cache Architecture
+   [3] T4-not-found               guess=26               Focus on Memory Bandwidth over Latency
+--
+
+### glm 5.3 flash | pphysical  (glm 5.3 flash pphysical.json, parse=clean)
+   [0] T4-not-found               guess=35               Hierarchical Clock Distribution Network
+   [1] T4-not-found               guess=38               Power Grid Design with Decoupling Capacitors
+   [2] T4-not-found               guess=42               Timing Closure via Static Timing Analysis (STA)
+   [3] T4-not-found               guess=32               Dominance of Static CMOS over Dynamic Logic
+   [4] T4-not-found               guess=45               Floorplanning with Pre-Placed Macro Blocks
+--
+
+### longcat | p4  (longcat p4.json, parse=clean)
+   [0] T4-not-found               guess=None             Trace Cache vs Conventional L1 Instruction Cache
+   [1] T4-not-found               guess=None             Double-Pumped ALUs (Rapid Execution Engine)
+   [2] T4-not-found               guess=None             Hyper-Pipelined Technology (Deep Pipeline)
+   [3] T4-not-found               guess=None             Advanced Dynamic Execution Engine (Large Out-of-Order Wi
+   [4] T4-not-found               guess=None             Quad-Pumped Bus (QDR) Front-Side Bus

@@ -1,0 +1,88 @@
+```json
+[
+    {
+        "rule": 1,
+        "phrase_inclusivity": "strict",
+        "verdicts": {
+            "below": "PASS",
+            "at": "PASS",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'more than 2 percent' is strict; 2.00% is not 'more than 2%'."
+    },
+    {
+        "rule": 2,
+        "phrase_inclusivity": "strict",
+        "verdicts": {
+            "below": "PASS",
+            "at": "PASS",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'more than 36 months' is strict; 36 months is not 'more than 36 months'."
+    },
+    {
+        "rule": 3,
+        "phrase_inclusivity": "inclusive",
+        "verdicts": {
+            "below": "PASS",
+            "at": "FIRE",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'by 1.5 or more percentage points' is inclusive; 1.50% meets the threshold."
+    },
+    {
+        "rule": 4,
+        "phrase_inclusivity": "strict",
+        "verdicts": {
+            "below": "PASS",
+            "at": "PASS",
+            "above": "FIRE"
+        },
+        "reasoning": "The pass condition is 'does not exceed ... by 2.25 or more'; 2.25% is not 'more than 2.25%'."
+    },
+    {
+        "rule": 5,
+        "phrase_inclusivity": "strict",
+        "verdicts": {
+            "below": "PASS",
+            "at": "FIRE",
+            "above": "FIRE"
+        },
+        "reasoning": "Both conditions ('less than EUR 10M' and 'less than EUR 1M') are strict; (10.0M, 0.9M) fails the first condition."
+    },
+    {
+        "rule": 6,
+        "phrase_inclusivity": "inclusive",
+        "verdicts": {
+            "below": "PASS",
+            "at": "FIRE",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'equal to or greater than' is inclusive; 16.00% meets the threshold."
+    },
+    {
+        "rule": 7,
+        "phrase_inclusivity": "inclusive",
+        "verdicts": {
+            "below": "PASS",
+            "at": "FIRE",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'at least equal to' is inclusive; 50.00% meets the threshold."
+    },
+    {
+        "rule": 8,
+        "phrase_inclusivity": "inclusive",
+        "verdicts": {
+            "below": "PASS",
+            "at": "FIRE",
+            "above": "FIRE"
+        },
+        "reasoning": "The phrase 'equal to or greater than' is inclusive; threshold meets the condition."
+    },
+    {
+        "weakest_point": "Rule 5 (GloBE de-minimis)",
+        "reason": "The phrasing of the dual conditions ('less than EUR 10M AND less than EUR 1M') may vary in interpretation based on jurisdiction or context, and the exact wording of the operative text is critical."
+    }
+]
+```

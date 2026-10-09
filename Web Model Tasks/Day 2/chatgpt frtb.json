@@ -1,0 +1,154 @@
+[
+{
+"case_name": "Parametric ES at 97.5% under normality",
+"inputs": {
+"distribution": "Normal",
+"mean_pnl": 0,
+"standard_deviation": 1,
+"units": "P&L units",
+"confidence_level": 0.975,
+"tail_probability": 0.025
+},
+"computation": {
+"z_0_975": 1.9600,
+"standard_normal_density_phi_z": "exp(-1.9600^2/2)/sqrt(2*pi) = 0.0584409443 = 0.0584",
+"VaR_multiplier": "z_0.975 = 1.9600",
+"VaR": "0 + 1*1.9600 = 1.9600 P&L units",
+"ES_multiplier": "phi(z_0.975)/(1-0.975) = 0.0584409443/0.025 = 2.3376377733 = 2.3376",
+"ES": "0 + 1*2.3376377733 = 2.3376 P&L units",
+"ES_minus_VaR": "2.3376377733 - 1.9600 = 0.3776377733 P&L units"
+},
+"result": {
+"VaR": 1.96,
+"ES": 2.3376377733,
+"units": "P&L units"
+},
+"formula_basis": "For a normal loss variable X~N(mu,sigma^2), one-tailed parametric ES at confidence alpha is ES_alpha = mu + sigma*phi(Phi^-1(alpha))/(1-alpha), while VaR_alpha = mu + sigma*Phi^-1(alpha). MAR33 requires a one-tailed 97.5% ES for FRTB.  ([Bank for International Settlements][1])",
+"weakest_point": "The normal parametric formula is an illustrative parametric construction; MAR33 specifies the regulatory confidence level and ES framework but does not require a normal-distribution implementation."
+},
+{
+"case_name": "Parametric ES at 99% under normality",
+"inputs": {
+"distribution": "Normal",
+"mean_pnl": 0,
+"standard_deviation": 1,
+"units": "P&L units",
+"confidence_level": 0.99,
+"tail_probability": 0.01
+},
+"computation": {
+"z_0_99": 2.3263,
+"standard_normal_density_phi_z": "exp(-2.3263^2/2)/sqrt(2*pi) = 0.0266551106 = 0.0267",
+"VaR_multiplier": "z_0.99 = 2.3263",
+"VaR": "0 + 1*2.3263 = 2.3263 P&L units",
+"ES_multiplier": "phi(z_0.99)/(1-0.99) = 0.0266551106/0.01 = 2.6655110632",
+"ES": "0 + 1*2.6655110632 = 2.6655 P&L units",
+"ES_minus_VaR": "2.6655110632 - 2.3263 = 0.3392110632 P&L units"
+},
+"result": {
+"VaR": 2.3263,
+"ES": 2.6655110632,
+"units": "P&L units"
+},
+"formula_basis": "For a normal loss variable X~N(mu,sigma^2), ES_alpha = mu + sigma*phi(Phi^-1(alpha))/(1-alpha), whereas VaR_alpha = mu + sigma*Phi^-1(alpha). The 99% calculation is an explicitly requested comparison case, not the MAR33 regulatory confidence level. ",
+"weakest_point": "The task specifies z=2.3263 and the normal parametric comparison, while MAR33 itself specifies 97.5%, not 99%, for regulatory ES."
+},
+{
+"case_name": "MAR33 liquidity-horizon scaling for one risk-factor category",
+"inputs": {
+"base_horizon_T": 10,
+"risk_factor_liquidity_horizon": 40,
+"base_ES": 100,
+"ES_T_P_j": 100,
+"units": "loss units",
+"risk_factor_category": "single category with 40-day liquidity horizon"
+},
+"computation": {
+"liquidity_horizons": "LH_1=10, LH_2=20, LH_3=40 days",
+"increment_10_to_20": "LH_2-LH_1 = 20-10 = 10 days",
+"increment_20_to_40": "LH_3-LH_2 = 40-20 = 20 days",
+"scale_factor_20": "sqrt((20-10)/10) = sqrt(1) = 1.0000",
+"scale_factor_40": "sqrt((40-20)/10) = sqrt(2) = 1.4142135624",
+"scaled_40_day_component": "100*1.4142135624 = 141.42135624 loss units",
+"liquidity_adjusted_ES": "sqrt(100^2 + (100*sqrt(1))^2 + (100*sqrt(2))^2) = sqrt(10000+10000+20000) = sqrt(40000) = 200.0000 loss units"
+},
+"result": {
+"liquidity_adjusted_ES": 200,
+"units": "loss units"
+},
+"formula_basis": "MAR33.4 uses ES = sqrt((ES_T(P))^2 + sum_{j>=2}[ES_T(P,j)*sqrt((LH_j-LH_{j-1})/T)]^2), with T=10 days and liquidity horizons 10, 20, 40, 60 and 120 days.  ([Bank for International Settlements][1])",
+"weakest_point": "This is a deliberately isolated one-category numerical illustration. Actual MAR33 ES_T(P,j) values are portfolio/risk-factor-subset ES measures and are not generally equal to the base ES."
+},
+{
+"case_name": "Historical-simulation ES at 97.5% from 20 supplied observations",
+"inputs": {
+"confidence_level": 0.975,
+"tail_probability": 0.025,
+"number_of_observations": 20,
+"pnl_units": "loss units",
+"pnl_observations": [
+-80,
+-35,
+12,
+-5,
+44,
+-22,
+7,
+-61,
+19,
+-3,
+28,
+-14,
+5,
+-47,
+31,
+-9,
+16,
+-26,
+2,
+-11
+]
+},
+"computation": {
+"sorted_worst_to_best": [
+-80,
+-61,
+-47,
+-35,
+-26,
+-22,
+-14,
+-11,
+-9,
+-5,
+-3,
+2,
+5,
+7,
+12,
+16,
+19,
+28,
+31,
+44
+],
+"tail_probability_count": "20*(1-0.975) = 20*0.025 = 0.5000 observations",
+"tail_selection_rule": "The worst 0.5 observation is required by the literal 97.5% tail probability. Because a discrete sample cannot contain half an observation, use the explicitly named convention of assigning 50% weight to the single worst observation and normalizing by the total tail weight.",
+"tail_observation": "-80",
+"weighted_tail_sum": "0.5*(-80) = -40",
+"normalizing_tail_weight": "0.5",
+"historical_ES": "-40/0.5 = -80 loss units",
+"historical_ES_as_loss_magnitude": "80 loss units",
+"historical_VaR_boundary": "With the same fractional-observation convention, the 97.5% boundary is the worst observation, -80; ES therefore equals the tail observation in this 20-point construction."
+},
+"result": {
+"historical_ES": -80,
+"loss_magnitude": 80,
+"units": "loss units"
+},
+"formula_basis": "Historical ES is the average of losses in the tail beyond the specified one-tailed confidence threshold; MAR33 requires a 97.5% one-tailed ES. The supplied source does not prescribe the discrete-sample fractional-observation convention, so the 50%-weight convention used here is explicitly an assumption rather than a MAR33 requirement.  ([Bank for International Settlements][1])",
+"weakest_point": "The supplied task requests a 'supplied small sample' but the attached document contains no numerical 20-observation sample. The 20 P&L observations above were therefore constructed for the worked example rather than supplied by the source; the fractional-observation treatment is likewise a stated convention because the source is silent on it."
+}
+]
+
+[1]: https://www.bis.org/committees/bcbs/basel-framework/standard/mar/33/inforce/2023-01-01/published/2020-06-05?utm_source=chatgpt.com "Internal models approach: capital requirements calculation | Bank for International Settlements"

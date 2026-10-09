@@ -1,0 +1,95 @@
+G1 CENSUS ASSERT: census=80 loaded=80 skipped=0 halted=0 models=16  -> PASS
+stray excluded from census, left untouched: ['_digest', 'draft 3 and 4 prompt.md']
+
+dual-spelling merge: 'minaria' -> 'minara' on 2 file(s): [('minaria', 'red3'), ('minaria', 'strings')]
+
+[e] 16 files  prompt=PROMPT-E-CALCULATIONS.md
+   chatgpt e.json                 items= 10 clean+trailing-content        [clean+trailing-content]
+   deepseek e.json                items=  8 clean                       
+   gemini e.json                  items= 12 clean                       
+   glm 5.3 flash e.json           items= 12 clean+fence-close+fenced      [clean+fence-close+fenced]
+   grok e.json                    items= 12 clean                       
+   kimi e.json                    items=  6 clean                       
+   longcat e.json                 items= 12 clean                       
+   meta e.json                    items= 10 clean                       
+   mimo e.json                    items= 11 clean                       
+   minara e.json                  items= 10 clean                       
+   minimax 2.7 e.json             items=  7 elementwise-truncation        [elementwise-truncation]
+   mistral e.json                 items= 12 clean+fence-close+fenced      [clean+fence-close+fenced]
+   qwen e.json                    items= 10 clean                       
+   solar e.json                   items= 12 clean                       
+   sonnet e.json                  items= 12 clean+fence-close+fenced      [clean+fence-close+fenced]
+   yuanbao e.json                 items= 12 clean                       
+
+[red1] 16 files  prompt=J-ISSUE-REDTEAM-V1.md
+   chatgpt red1.json              items=  1 structural-quote-repair       [structural-quote-repair]
+   deepseek red1.json             items=  1 clean                       
+   gemini red1.json               items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   glm 5.3 flash red1.json        items=  1 clean                       
+   grok red1.json                 items=  1 clean                       
+   kimi red1.json                 items=  1 clean                       
+   longcat red1.json              items=  1 clean                       
+   meta red1.json                 items=  1 clean                       
+   mimo red1.json                 items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   minara red1.json               items=  1 clean                       
+   minimax 2.7 red1.json          items=  1 clean                       
+   mistral red1.json              items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   qwen red1.json                 items=  1 clean                       
+   solar red1.json                items=  1 clean                       
+   sonnet red1.json               items=  1 clean                       
+   yuanbao red1.json              items=  1 clean                       
+
+[red3] 16 files  prompt=J-EPISODE-REDTEAM-V3.md
+   chatgpt red3.json              items=  1 structural-quote-repair       [structural-quote-repair]
+   deepseek red3.json             items=  1 clean                       
+   gemini red3.json               items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   glm 5.3 flash red3.json        items=  1 clean                       
+   grok red3.json                 items=  1 clean                       
+   kimi red3.json                 items=  1 clean                       
+   longcat red3.json              items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   meta red3.json                 items=  1 clean                       
+   mimo red3.json                 items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   minaria red3.json              items=  1 clean                         DUAL-SPELLED(as 'minaria')
+   minimax 2.7 red3.json          items=  1 clean                       
+   mistral red3.json              items=  1 clean+fence-close+fenced      [clean+fence-close+fenced]
+   qwen red3.json                 items=  1 clean                       
+   solar red3.json                items=  3 elementwise-truncation        [elementwise-truncation]
+   sonnet red3.json               items=  1 clean                       
+   yuanbao red3.json              items=  1 clean                       
+
+[regz] 16 files  prompt=C1-REGZ-FACTOR.md
+   chatgpt regz.json              items=  5 clean+trailing-content        [clean+trailing-content]
+   deepseek regz.json             items=  4 clean                       
+   gemini regz.json               items=  4 clean+trailing-content        [clean+trailing-content]
+   glm 5.3 flash regz.json        items=  5 clean+fence-close+fenced      [clean+fence-close+fenced]
+   grok regz.json                 items=  5 clean                       
+   kimi regz.json                 items=  5 clean                       
+   longcat regz.json              items=  5 clean                       
+   meta regz.json                 items=  5 clean                       
+   mimo regz.json                 items=  5 clean+fence-close+fenced      [clean+fence-close+fenced]
+   minara regz.json               items=  5 clean                       
+   minimax 2.7 regz.json          items=  4 clean+fence-close+fenced      [clean+fence-close+fenced]
+   mistral regz.json              items=  5 raw-newline-escape            [raw-newline-escape]
+   qwen regz.json                 items=  5 clean                       
+   solar regz.json                items=  0 FAILED                        ERROR: Expecting value at line 1 col 1 (char 0)
+   sonnet regz.json               items=  4 clean+fenced+trailing-content  [clean+fenced+trailing-content]
+   yuanbao regz.json              items=  5 raw-newline-escape            [raw-newline-escape]
+
+[strings] 16 files  prompt=C2-JCS-STRINGS.md
+   chatgpt strings.json           items= 11 harvest-skip-broken-element   [harvest-skip-broken-element]
+   deepseek strings.json          items=  1 clean                       
+   gemini strings.json            items=  6 clean+fence-close+fenced      [clean+fence-close+fenced]
+   glm 5.3 flash strings.json     items=  5 clean+trailing-content        [clean+trailing-content]
+   grok strings.json              items=  5 clean+trailing-content        [clean+trailing-content]
+   kimi strings.json              items=  5 clean+trailing-content        [clean+trailing-content]
+   longcat strings.json           items=  5 clean+fenced+trailing-content  [clean+fenced+trailing-content]
+   meta strings.json              items=  5 clean+trailing-content        [clean+trailing-content]
+   mimo strings.json              items=  6 clean+fence-close+fenced      [clean+fence-close+fenced]
+   minaria strings.json           items=  5 clean+trailing-content        [clean+trailing-content]  DUAL-SPELLED(as 'minaria')
+   minimax 2.7 strings.json       items=  6 clean                       
+   mistral strings.json           items=  5 clean+trailing-content        [clean+trailing-content]
+   qwen strings.json              items=  5 clean+trailing-content        [clean+trailing-content]
+   solar strings.json             items=  5 clean                       
+   sonnet strings.json            items=  5 clean+fenced+trailing-content  [clean+fenced+trailing-content]
+   yuanbao strings.json           items=  6 clean                       
+

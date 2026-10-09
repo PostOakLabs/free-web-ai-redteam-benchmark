@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Decoded-uop Execution Trace Cache as the L1 instruction cache",
+    "where_in_paper": "Front End — Trace Cache",
+    "decision": "Use an Execution Trace Cache as the primary L1 instruction cache, storing already decoded IA-32 instructions as uops and fetching new IA-32 bytes only on Trace Cache misses.",
+    "alternatives_or_rejected": "A conventional L1 instruction cache holding undecoded IA-32 bytes, supported by a high-bandwidth decoder capable of decoding several instructions per cycle.",
+    "rationale": "IA-32 decoding is cumbersome and a wide high-frequency decoder requires several pipeline stages. Caching decoded uops removes decoding from the usual execution loop, shortens misprediction recovery, permits a decoder limited to one IA-32 instruction per cycle, and avoids conventional taken-branch delivery and target-access delays.",
+    "outcome": "The 12K-uop Trace Cache delivered up to three uops per clock, achieved a hit rate similar to an 8K–16K-byte conventional instruction cache, and made Trace Cache misses about as frequent as prior processors' L1 instruction-cache misses.",
+    "quote_as_recalled": "bypasses the instruction decoder most of the time thereby reducing misprediction latency",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper contrasts conventional instruction caches rather than explicitly documenting a conventional-cache Pentium 4 design that was formally considered and rejected.",
+    "confidence": 0.96
+  },
+  {
+    "title": "About 2x P6 pipeline depth in pursuit of frequency",
+    "where_in_paper": "Clock Rates — Historical Trend of Processor Frequencies",
+    "decision": "Target greater than 1.6 times the P6 family's main-clock frequency on the same process technology by using about twice P6's pipeline depth and fewer gates of logic per stage.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Fewer gates per pipeline stage permit a much higher clock rate. The paper accepts lower efficiency and longer branch-miss and cache-miss penalties because the frequency gain generally more than compensates; it observes that a 50% frequency increase might yield only 30% more net performance but still be significant.",
+    "outcome": "The Pentium 4 had a 20-stage misprediction pipeline versus P6's 10-stage pipeline and introduced at 1.5GHz, 1.5 times the paper's cited 1GHz Pentium III frequency.",
+    "quote_as_recalled": "Higher clock rates need deeper pipelines so the efficiency at the same clock rate goes down.",
+    "page_guess": 3,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper presents shallower pipelines as a general trade-off, not as a specific rejected NetBurst configuration.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Double-pumped, staggered integer ALU only for frequent operations",
+    "where_in_paper": "Integer and Floating-Point Execution Units — Low Latency Integer ALU",
+    "decision": "Make fully dependent simple ALU operations execute at twice the main clock rate, implementing each operation across three fast-clock phases with a staggered 16-bit low-half add followed by the high half and flags; keep only essential hardware in this loop.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Approximately 60–70% of uops in typical integer programs use the ALU-bypass loop. Keeping the high-speed core small minimizes metal length and loading; restricting each fast cycle to a 16-bit adder and its input muxes makes the high-frequency loop feasible. Less frequent operations do not need this costly latency.",
+    "outcome": "Simple ALU operations obtained an effective half-main-clock latency. The paper cautions that this did not double program performance, but did improve most integer applications, while multiply, divide, shifts, flag logic, branch processing, and other less frequent functions remained in slower or separate hardware.",
+    "quote_as_recalled": "Only the essential hardware necessary to perform the frequent ALU operations is included in this high-speed ALU execution loop.",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper explains the selected staggered organization but does not explicitly identify a competing ALU implementation as having been evaluated.",
+    "confidence": 0.97
+  },
+  {
+    "title": "Small 8KB, two-clock L1 data cache with hit speculation and replay",
+    "where_in_paper": "Integer and Floating-Point Execution Units — Low Latency Level 1 (L1) Data Cache",
+    "decision": "Use an 8KB, four-way, write-through L1 data cache optimized for a two-clock integer load-use latency, backed by a larger L2 cache; dispatch dependent operations before the parent load finishes, speculating that it hits L1, and replay dependent operations if it misses.",
+    "alternatives_or_rejected": "A bigger, slower L1 data cache.",
+    "rationale": "IA-32 programs use many loads and stores because the architecture exposes few registers. At the Pentium 4's clock rate, the scheduler-to-execution pipeline distance exceeds load-execution latency, so waiting would waste cycles. The paper states that a small, very low-latency L1 backed by medium-latency L2 gives lower net load-access latency, while replay confines recovery to dependent operations after a miss.",
+    "outcome": "Integer loads achieved a two-clock load-use latency and floating-point/SSE loads a six-clock latency. A miss could leave dependent uops temporarily using incorrect data, after which replay re-executed only those dependents; up to four L1 load misses could be outstanding.",
+    "quote_as_recalled": "gives lower net load-access latency and therefore higher performance than a bigger, slower L1 cache.",
+    "page_guess": 9,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The cache-size alternative is explicit, but the paper does not explicitly describe waiting for load completion before dispatch as a separately evaluated rejected design.",
+    "confidence": 0.97
+  },
+  {
+    "title": "Simplified second FP/SSE port instead of two full units",
+    "where_in_paper": "FP/SSE Execution Units",
+    "decision": "Replace an early two-full-unit FP/SSE arrangement with one full 128-bit general execution port and a second, simple 128-bit port limited to register-to-register moves and FP/SSE store-data primitives.",
+    "alternatives_or_rejected": "Two full FP/SSE execution units.",
+    "rationale": "The two full units required substantial hardware but delivered little performance for most FP/SSE applications. A simple second port preserved most of the benefit at much lower die-size and power cost, exploiting the common pattern of interleaving adds and multiplies rather than fully pipelining all FP/SSE hardware.",
+    "outcome": "The final cluster had two ports capable of beginning operations every clock, with the second restricted as described; it could complete a full 128-bit load each clock and produce packed SP or DP add and multiply uops every two clocks, reaching peaks of 6 GFLOPS single-precision and 3 GFLOPS double-precision at 1.5GHz.",
+    "quote_as_recalled": "this cost a lot of hardware and did not buy very much performance for most FP/SSE applications.",
+    "page_guess": 10,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper does not specify how extensively the two-full-unit configuration had been implemented or benchmarked before the simplification.",
+    "confidence": 0.98
+  }
+]

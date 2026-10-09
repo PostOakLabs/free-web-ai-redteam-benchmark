@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Core Complexity vs. Core Count Trade-off",
+    "where_in_paper": "Introduction / Processor Core",
+    "decision": "Chose eight simple, single-issue, in-order cores rather than fewer complex, superscalar, out-of-order cores.",
+    "alternatives_or_rejected": "Complex superscalar out-of-order cores, which were traditional for high-end server processors.",
+    "rationale": "Out-of-order and superscalar designs consume disproportionate power and die area for diminishing single-thread returns, limiting the number of cores and overall thread-level throughput.",
+    "outcome": "Successfully integrated eight full cores within the power and area budget, maximizing throughput for highly parallel workloads.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly names 'superscalar out-of-order' as the rejected alternative or just implies it by contrasting with traditional high-performance designs.",
+    "confidence": 0.95
+  },
+  {
+    "title": "Number of Threads per Core and Multithreading Style",
+    "where_in_paper": "Processor Core / Multithreading",
+    "decision": "Implemented four hardware threads per core using fine-grained, cycle-by-cycle interleaved multithreading.",
+    "alternatives_or_rejected": "Simultaneous multithreading (SMT) or coarse-grained multithreading (switching only on long stalls).",
+    "rationale": "Four threads are sufficient to hide L1 cache miss latencies in a short in-order pipeline, and fine-grained interleaving avoids the complex, power-hungry issue logic required for SMT.",
+    "outcome": "Achieved high pipeline utilization and 32-way multithreading across the chip with a very simple, low-power core design.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly contrasts 4 threads with SMT (Simultaneous Multithreading) or just discusses fine-grained multithreading.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Floating Point Unit Sharing",
+    "where_in_paper": "Floating-Point Unit",
+    "decision": "Implemented a single shared Floating Point Unit for the entire 8-core chip, rather than dedicating an FPU to each core.",
+    "alternatives_or_rejected": "Dedicating one FPU to each of the eight cores.",
+    "rationale": "Commercial server workloads (the target for Niagara) exhibit very low floating-point utilization, so dedicating FPUs to every core would waste significant die area and power.",
+    "outcome": "Saved substantial area and power, which was reallocated to more cores and threads, while still providing FP capability when needed.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page number or whether they explicitly state 'wasted die area' versus just 'commercial workloads have low FP usage'.",
+    "confidence": 0.95
+  },
+  {
+    "title": "L2 Cache Interconnect and Bandwidth",
+    "where_in_paper": "Memory System / Caches",
+    "decision": "Connected the eight cores to a shared, banked L2 cache using a high-bandwidth crossbar switch.",
+    "alternatives_or_rejected": "A traditional shared bus for L2 cache access.",
+    "rationale": "A shared bus would become a severe bandwidth bottleneck and limit scalability with 8 cores and 32 threads; a crossbar provides non-blocking, high-bandwidth access to the L2 banks.",
+    "outcome": "Sustained the high memory bandwidth necessary to prevent starvation and feed 32 concurrent hardware threads.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly uses the word 'crossbar' for the L2 interconnect or describes it as a switch/network.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Target Workload and Power Optimization Philosophy",
+    "where_in_paper": "Introduction / System Architecture",
+    "decision": "Optimized the microarchitecture strictly for throughput of commercial, highly-multithreaded server workloads rather than single-thread performance.",
+    "alternatives_or_rejected": "Optimizing for single-thread performance or standard SPEC integer benchmarks.",
+    "rationale": "Server workloads exhibit high thread-level parallelism and are often memory-bound; optimizing for single-thread performance wastes power on features that do not improve overall system throughput.",
+    "outcome": "Created a highly power-efficient, throughput-oriented processor architecture that challenged the prevailing high-frequency, single-thread design paradigm.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact phrasing of the workload justification and whether SPEC benchmarks are explicitly dismissed in the text.",
+    "confidence": 0.9
+  }
+]

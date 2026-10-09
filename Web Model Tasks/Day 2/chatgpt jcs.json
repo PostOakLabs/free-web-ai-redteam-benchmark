@@ -1,0 +1,98 @@
+[
+{
+"vector_name": "minus-zero",
+"input_json": "{"n":-0}",
+"canonical_output": "{"n":0}",
+"rule": "RFC 8785 Section 3.2.2.3; number serialization follows ECMAScript JSON.stringify/Number serialization, for which negative zero serializes as 0.",
+"divergence_trap": "An implementation that preserves the lexical token may emit {"n":-0}, which is not canonical JCS.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "two-to-the-53",
+"input_json": "{"n":9007199254740992}",
+"canonical_output": "{"n":9007199254740992}",
+"rule": "RFC 8785 Section 3.2.2.3; numbers are serialized as ECMAScript IEEE-754 doubles. 2^53 is exactly representable.",
+"divergence_trap": "None for a conforming ECMAScript Number serializer; an arbitrary-precision JSON-number implementation may incorrectly preserve a different numeric model.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "just-beyond-two-to-the-53",
+"input_json": "{"n":9007199254740993}",
+"canonical_output": "{"n":9007199254740992}",
+"rule": "RFC 8785 Section 3.2.2.3; parsing into an IEEE-754 binary64 number and subsequent ECMAScript serialization rounds 9007199254740993 to the representable value 9007199254740992.",
+"divergence_trap": "Arbitrary-precision JSON parsers that retain the decimal integer exactly may incorrectly emit 9007199254740993 rather than the JCS/ECMAScript Number result.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "one-times-ten-to-the-20",
+"input_json": "{"n":100000000000000000000}",
+"canonical_output": "{"n":100000000000000000000}",
+"rule": "RFC 8785 Section 3.2.2.3; ECMAScript uses fixed-point notation in this magnitude range, including 10^20.",
+"divergence_trap": "A serializer that always prefers exponent notation may emit {"n":1e+20}, which is not the canonical ECMAScript/JCS representation.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "one-times-ten-to-the-21",
+"input_json": "{"n":1000000000000000000000}",
+"canonical_output": "{"n":1e+21}",
+"rule": "RFC 8785 Section 3.2.2.3; ECMAScript switches to exponential notation at 10^21.",
+"divergence_trap": "A fixed-decimal serializer may emit {"n":1000000000000000000000}; a non-ECMAScript exponent formatter may emit 1E21 instead of the required lowercase e and explicit plus sign.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "one-times-ten-to-the-minus-6",
+"input_json": "{"n":0.000001}",
+"canonical_output": "{"n":0.000001}",
+"rule": "RFC 8785 Section 3.2.2.3; ECMAScript uses fixed notation at 10^-6.",
+"divergence_trap": "A serializer that always uses scientific notation may emit {"n":1e-6}, which is not the canonical JCS representation.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "one-times-ten-to-the-minus-7",
+"input_json": "{"n":0.0000001}",
+"canonical_output": "{"n":1e-7}",
+"rule": "RFC 8785 Section 3.2.2.3; ECMAScript switches to exponential notation below 10^-6.",
+"divergence_trap": "A fixed-decimal serializer may emit {"n":0.0000001}; a naive scientific formatter may use 1E-7 rather than the required lowercase e and no unnecessary zero padding.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "string-escaping-and-no-solidus-escape",
+"input_json": "{"s":"\b\t\n\f\r\"\\/"}",
+"canonical_output": "{"s":"\b\t\n\f\r\"\\/"}",
+"rule": "RFC 8785 Section 3.2.2.2; only the required JSON escapes are used, and the solidus U+002F need not and does not get escaped. Reverse solidus and quotation mark are escaped; control characters use their short escapes where defined.",
+"divergence_trap": "A serializer that habitually escapes / may emit "\\/", producing different bytes. A serializer that uses non-canonical forms for control characters can also diverge.",
+"certainty": "rfc-exact"
+},
+{
+"vector_name": "unicode-not-normalized-and-surrogate-pair",
+"input_json":"{"a":"é","b":"e\u0301","c":"\uD834\uDD1E"}",
+"canonical_output":"{"a":"é","b":"e\u0301","c":"𝄞"}",
+"rule":"RFC 8785 Sections 3.2.2.2 and 3.2.3; JCS performs no Unicode normalization, while strings are serialized from Unicode values. A valid surrogate pair represents the corresponding non-BMP Unicode scalar value.",
+"divergence_trap":"A Unicode-normalizing implementation may incorrectly make the first two string values identical in representation. An implementation that preserves literal surrogate-pair escape spelling instead of serializing the Unicode character can diverge.",
+"certainty":"probable"
+},
+{
+"vector_name": "utf16-key-ordering",
+"input_json":"{"\uE000":1,"\uD800\uDC00":2}",
+"canonical_output":"{"𐀀":2,"":1}",
+"rule":"RFC 8785 Section 3.2.3; object property names are sorted by their UTF-16 code-unit sequences, not by Unicode code-point order. U+10000 is encoded as D800 DC00, so it sorts before U+E000.",
+"divergence_trap":"A naive implementation that sorts decoded Unicode strings by code point can order U+E000 before U+10000 and emit {"":1,"𐀀":2}.",
+"certainty":"rfc-exact"
+},
+{
+"vector_name": "empty-and-nested-structure",
+"input_json":"{"z":[],"a":{},"m":{"b":[],"a":1}}",
+"canonical_output":"{"a":{},"m":{"a":1,"b":[]},"z":[]}",
+"rule":"RFC 8785 Sections 3.2.1 and 3.2.3; empty arrays/objects serialize as [] and {}, while object member names are recursively sorted using UTF-16 ordering.",
+"divergence_trap":"An implementation that sorts only the outermost object can leave the nested members as {"b":[],"a":1}, producing non-canonical output.",
+"certainty":"rfc-exact"
+},
+{
+"vector_name": "duplicate-key-illegality",
+"input_json":"{"a":1,"a":2}",
+"canonical_output":"REJECTED — no JCS canonical serialization",
+"rule":"RFC 8785 Section 3.1 and the JCS uniqueness requirement: object property names must be unique. Duplicate member names make the input unsuitable for deterministic JCS canonicalization.",
+"divergence_trap":"A parser using last-wins semantics may silently reduce the input to {"a":2}; a first-wins parser may reduce it to {"a":1}. Both discard the fact that the original JSON had duplicate names.",
+"certainty":"rfc-exact"
+}
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "case_name": "parametric_ES_97.5pct_normal",
+    "inputs": {"distribution": "N(0,σ²)", "confidence": 0.975, "z_0.975": 1.9600, "alpha": 0.025, "sigma": 1.0, "units": "loss units"},
+    "computation": {
+      "z": 1.9600,
+      "phi_z": 0.05844,
+      "ES_multiplier": 0.05844 / 0.025,
+      "ES_multiplier_value": 2.3376,
+      "VaR_multiplier": 1.9600,
+      "ES_vs_VaR_ratio": 2.3376 / 1.9600
+    },
+    "result": {"ES": 2.3376, "VaR": 1.9600, "units": "σ"},
+    "formula_basis": "Under N(0,σ²), ES_α = σ · φ(z_α)/α  (tail mean); VaR_α = σ · z_α; MAR33 97.5% ES standard (parametric normal illustration)",
+    "weakest_point": "Exact φ(1.9600) rounding; continuum assumption vs discrete P&L"
+  },
+  {
+    "case_name": "parametric_ES_99pct_normal",
+    "inputs": {"distribution": "N(0,σ²)", "confidence": 0.99, "z_0.99": 2.3263, "alpha": 0.01, "sigma": 1.0, "units": "loss units"},
+    "computation": {
+      "z": 2.3263,
+      "phi_z": 0.02665,
+      "ES_multiplier": 0.02665 / 0.01,
+      "ES_multiplier_value": 2.6650,
+      "VaR_multiplier": 2.3263,
+      "ES_vs_VaR_ratio": 2.6650 / 2.3263
+    },
+    "result": {"ES": 2.6650, "VaR": 2.3263, "units": "σ"},
+    "formula_basis": "Under N(0,σ²), ES_α = σ · φ(z_α)/α; VaR_α = σ · z_α; comparison to 97.5% MAR33 level",
+    "weakest_point": "φ(2.3263) density precision at extreme quantile"
+  },
+  {
+    "case_name": "liquidity_horizon_scaled_ES_MAR33",
+    "inputs": {"base_ES_10day": 1.0, "LH": 20, "risk_factor_category": "equity", "units": "currency"},
+    "computation": {
+      "scale_factor": "sqrt(LH/10)",
+      "sqrt_LH_over_10": 1.41421356237,
+      "scaled_ES": 1.0 * 1.41421356237
+    },
+    "result": {"scaled_ES": 1.4142, "units": "currency"},
+    "formula_basis": "MAR33 liquidity-horizon adjustment: ES_LH = ES_10d · √(LH/10) for the relevant risk-factor category",
+    "weakest_point": "Assumption that the 10-day ES is already at the correct confidence and that the square-root-of-time rule holds for the chosen category"
+  },
+  {
+    "case_name": "historical_simulation_ES_97.5pct_n20",
+    "inputs": {
+      "sample_size": 20,
+      "P&L": [2.1, 1.8, 0.5, -0.3, -0.7, -1.2, -1.5, -1.9, -2.4, -2.8, -3.1, -3.5, -4.0, -4.6, -5.2, -5.9, -6.7, -7.5, -8.8, -10.2],
+      "confidence": 0.975,
+      "alpha": 0.025,
+      "units": "loss (positive = loss)"
+    },
+    "computation": {
+      "sorted_descending_loss": [10.2, 8.8, 7.5, 6.7, 5.9, 5.2, 4.6, 4.0, 3.5, 3.1, 2.8, 2.4, 1.9, 1.5, 1.2, 0.7, 0.3, -0.5, -1.8, -2.1],
+      "tail_count_nominal": 20 * 0.025,
+      "tail_count": 0.5,
+      "convention": "fractional observation: average of the single worst observation weighted by 0.5 (conservative ceiling to next integer not used)",
+      "observations_in_tail": [10.2],
+      "tail_average": 10.2 * 0.5 / 0.5
+    },
+    "result": {"ES_97.5pct": 10.2, "units": "loss units"},
+    "formula_basis": "Historical ES_α = average of losses exceeding the empirical (1-α)-quantile; for n=20, α=0.025 yields 0.5 observation — fractional weighting of the single worst loss; MAR33 historical-simulation ES definition",
+    "weakest_point": "n=20 is far below regulatory sample sizes; fractional-observation convention is an honest interpolation choice where the text is silent"
+  }
+]

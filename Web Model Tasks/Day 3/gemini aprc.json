@@ -1,0 +1,51 @@
+[
+{
+"case": 1,
+"assumptions_invoked": [
+"Interval of one month is 1/12 of a year",
+"Net amount drawn is €10,000 less €100 arrangement fee paid at t=0 (€9,900)"
+],
+"equation": "10000 - 100 = sum_{k=1}^{24} 450 * (1 + X)^(-k/12)",
+"iterations": "i_monthly = 0.006497 (monthly rate); Iteration 1: X=0.070 -> PV=9968; Iteration 2: X=0.080 -> PV=9869; Iteration 3: X=0.0768 -> PV=9900.5; Convergence: X = 0.0769 (7.69%)",
+"aprc_pct": 7.7
+},
+{
+"case": 2,
+"assumptions_invoked": [
+"Article 17 / Annex I assumption: overdraft with no fixed duration assumed drawn in full for 3 months",
+"Repayments occur in equal monthly instalments starting 1 month after drawdown",
+"Monthly borrowing interest: €3,000 * (12% / 12) = €30",
+"Monthly account fee: €25",
+"Total monthly payment for months 1 and 2: €55 (interest + fee)",
+"Total payment at month 3: €3,055 (principal + interest + fee)"
+],
+"equation": "3000 = 55*(1+X)^(-1/12) + 55*(1+X)^(-2/12) + 3055*(1+X)^(-3/12)",
+"iterations": "Iteration 1: X=0.20 -> PV=3018; Iteration 2: X=0.25 -> PV=2983; Iteration 3: X=0.225 -> PV=3001; Convergence: X = 0.2260 (22.60%)",
+"aprc_pct": 22.6
+},
+{
+"case": 3,
+"assumptions_invoked": [
+"Annex I open-end credit assumption: credit drawn immediately and in full, repaid in 12 equal monthly instalments",
+"Monthly interest rate r = 18% / 12 = 1.5%",
+"Monthly instalment A = 1500 * [0.015(1.015)^12] / [(1.015)^12 - 1] = €137.52"
+],
+"equation": "1500 = sum_{k=1}^{12} 137.52 * (1 + X)^(-k/12)",
+"iterations": "Iteration 1: X=0.18 -> PV=1504; Iteration 2: X=0.20 -> PV=1489; Iteration 3: X=0.195 -> PV=1493; Convergence: X = 0.1956 (19.56%)",
+"aprc_pct": 19.6
+},
+{
+"case": 4,
+"assumptions_invoked": [
+"Directive assumption for unascertainable drawdowns: total amount of credit drawn immediately in full (€5,000)",
+"Credit duration assumed to be 1 year with a single repayment at 12 months",
+"Financed fee distinction: the €200 fee is added to the principal balance at t=0 so borrower receives €5,000 cash out of total loan balance of €5,200. Interest accrues on €5,200 (8% of €5,200 = €416), making total repayment €5,616 at t=1 year. (A t=0 cash fee reduces net drawdown to €4,800 with interest calculated only on €5,000)."
+],
+"equation": "5000 = 5616 * (1 + X)^(-1)",
+"iterations": "Direct calculation: 1 + X = 5616 / 5000 = 1.1232; Iteration 1: X=0.120 -> PV=5014.29; Iteration 2: X=0.130 -> PV=4969.91; Iteration 3: X=0.1232 -> PV=5000.00; Convergence: X = 0.1232 (12.32%)",
+"aprc_pct": 12.3
+},
+{
+"weakest_point": "In Case 2, the exact treatment of fees and principal repayment schedule for overdrafts under Annex I assumptions vary across member state implementations (e.g., whether interest and fees are paid monthly with full principal repaid at month 3 vs. linear principal amortisation across 3 months)."
+}
+]

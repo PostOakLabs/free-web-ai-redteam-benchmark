@@ -1,0 +1,17 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But I can engage with the substance of your question as a knowledge discussion.
+
+Here's what I recall about the Tendler et al. paper, with honest attribution:
+
+**What I'm fairly confident is in this paper:**
+
+1. **Dual-core on a single die:** The paper describes POWER4's defining architectural choice of integrating two processor cores on one die, sharing an L2 cache. The alternative would have been separate chips (like POWER3). The rationale centered on reducing inter-core communication latency for SMP workloads and improving area efficiency.
+
+2. **Deep pipeline for high frequency:** The paper discusses the pipeline depth chosen to achieve 1.3+ GHz at 180nm SOI, and the tradeoff this creates with branch misprediction penalty. I'm fairly confident this is discussed but less certain about whether specific alternative pipeline depths are named.
+
+3. **RAS (Reliability, Availability, Serviceability) as a core design objective:** The paper discusses how RAS features were integral to the design, not bolted on — reflecting IBM's enterprise server market. This included error detection, recovery mechanisms, and instruction retry.
+
+4. **On-chip L2 cache and fabric interconnect:** The paper describes the shared L2 cache and the fabric connecting cores, designed for high-bandwidth SMP communication.
+
+**Honesty assessment:** I'm moderately confident items 1, 3, and 4 are in this paper. Item 2 may conflate with the companion physical-design paper. I cannot confidently recall specific alternatives rejected or exact numbers from this paper vs. general POWER4 knowledge. I have not read this paper recently enough to guarantee I'm not reversing any decision directions.
+
+Given my uncertainty, I'd rather discuss these topics conversationally where I can flag what I'm confident about vs. what I'm inferring. Would you like that?

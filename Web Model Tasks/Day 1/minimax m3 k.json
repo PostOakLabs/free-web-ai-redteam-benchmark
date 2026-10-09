@@ -1,0 +1,100 @@
+[
+  {
+    "delta_name": "Timing closure dominated by wire delay → cell + variation delay",
+    "at_28nm": "Long wires dominated path delay; buffer insertion, useful-skew, and gate sizing on long nets were the leverage points. Interconnect RC mattered more than transistor variation.",
+    "at_7nm_5nm": "Cell intrinsic delay and random device variation (per-fin Vt spread, LG/LER) dominate. Hold/margin budgets are set by σ-of-delay tails, not by wirelength. Useful-skew is mostly a recovery lever, not a primary one.",
+    "why_it_changed": "Resistance per unit length of BEOL scales sub-linearly with node, but logic-stage delay and transistor stochastic variation scale up with fin pitch, fin count variability, and thinner FOx. Path delay is sliced into more shorter stages, each carrying its own σ.",
+    "what_breaks": "A 28nm-trained engineer chases wirelength and adds more buffers/sizing on long nets, expecting ~80% of slacks there. Atnm the path is already buffer-saturated by the synthesis/place solution; residual slack is in σ, not in C*load. Symptom: tools report 'no setup' after exhaustive buffer sweeps, but Monte-Carlo or AOCV-style derates show paths with negative σ-margin that never appear in nominal STA.",
+    "workflow_impact": "Variation-aware timing (AOCV/SOCV/LVF) and statistical derate generation move upstream into placement and into signoff margin budgeting. Slack histograms (not single-corner WNS) become the closure metric.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Congestion: channel/route-supply limited → pin-access limited",
+    "at_28nm": "Congestion meant 'not enough routing tracks per gcell.' Fixes: spread cells, raise utilization slowly, change block aspect, partial blockage. Pin access was rarely the gating problem.",
+    "at_7nm_5nm": "Congestion is pin-access-driven: each cell has many fewer routing tracks per pin, higher pin density per cell, and the routing solution is limited by how many unique colors/vias can land on a pin shape, not by horizontal track supply.",
+    "why_it_changed": "Tighter contacted poly pitch (CPP) and minimum metal pitch shrink the per-pin track count faster than the cell library's pin pattern is redesigned; multi-patterning needs more unidirectional tracks and color-equalization that further reduce legal pin landing options.",
+    "what_breaks": "A 28nm engineer treats congestion as a placement-density / utilization problem and tightens the placement to 'use the routing resources better.' Symptom: pin-short and pin-access DRC errors explode in route, often invisible until detailed route, even though global route shows little overflow.",
+    "workflow_impact": "Pin-access analysis and pin-shape/legal-pin-shape checking become a placement-time constraint, and placer cost functions explicitly carry pin-access shortage. Cell swapping to multi-pin variants and pin-layer-aware placement are first-class passes, not post-route cleanups.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "DRC dominated by width/space → via/pin-access + multi-patterning DRC",
+    "at_28nm": "DRC was mostly width/space, enclosure, end-of-line. A handful of rules; fixable by ECO routing and minor layer swaps.",
+    "at_7nm_5nm": "Rule sets are dominated by multi-patterning (same-color spacing, color-balanced fill, double-via everywhere), cut-layer spacing, via-pillar/enclosure, and BEOL-end metal/fin-shaping checks. Number of rules and rule-checks rises by an order of magnitude.",
+    "why_it_changed": "193i immersion multi-patterning and SADP/SAQP fin patterning cannot reliably resolve arbitrary polygons; pitch and coloring must be enforced as geometry constraints, not just lithography-checked later. EOP and EUV relaxes some LELE rules but SADP-finned BEOL still needs color constraints in the stack.",
+    "what_breaks": "A 28nm engineer defers DRC cleanup to a post-route 'fixing' ECO and expects a clean chip within a few thousand short violations. Symptom: hundred-thousands of color/decoloration/equivalent-via violations that interact with each other and with timing; clean-up is no longer incremental.",
+    "workflow_impact": "Coloring, via-doubling, and pattern-aware DRC are moved into global/detailed route engines and into placement (legalization against color maps). DRC signoff shifts from 'check, then fix' to 'prevent during route.'",
+    "confidence": 0.8
+  },
+  {
+    "delta_name": "Power/ground a background resource → P/G vs routing-resource tension",
+    "at_28nm": "Power straps were a back-end finishing step; Mx stripe pitch was driven mostly by EM/IR budgets, not by competing for tracks with signal.",
+    "at_7nm_5nm": "Power-stripe pitch competes with signal tracks on every routing layer because the BEOL stack has fewer dedicated 'power-only' layers and thicker power bars consume routing capacity. IR-drop target and EM target fight each other and fight signal-routing.",
+    "why_it_changed": "BEOL stack thickness scaling and resistance per unit length not improving as fast as resistance-per-via; you need more, wider, denser straps closer to the standard cells to hold IR within a few percent of Vdd, but those same upper layers are now useful signal-routing resources.",
+    "what_breaks": "A 28nm engineer sets P/G pitch by 'typical' EM and lets signal routing use upper metals freely. Symptom: dynamic IR-drop hotspots late in the schedule once route is frozen, requiring wholesale P/G restructure that destroys route and timing.",
+    "workflow_impact": "Early P/G planning (often called powerplanning) becomes a stage that informs placement and blockage, not a back-end finishing task. Power-aware placement and IR-aware optimization are first-class timing/closure drivers.",
+    "confidence": 0.85
+  },
+  {
+    "Placement mostly uniform-density → multi-patterning/coloring aware placement",
+    "at_28nm": "Placement optimized for timing, area-congestion; poly/fin patterning was effectively transparent to the placer.",
+    "at_7nm_5nm": "Placement must respect poly/fin color, gate-color balance (for fin splitting, dummy-fin, fin depopulation), cut-layer coloring, and via pillar placement. Cells can be on disallowed colors; placement legalization remaps.",
+    "why_it_changed": "Fin/sheet patterning at 7nm and beyond is done with SADP/SAQP; fin direction and dummy-fin density are constrained by lithography and stress. Uniform poly density and fin continuity over a minimum length are required to avoid patterning failures and variability.",
+    "what_breaks": "A 28nm engineer hands the placer a single density map and expects uniform white space. Symptom: post-route pattern-density and fin-density DRC fail locally even with legal placement; recovery requires cell swaps, color-aware placement, and on some nodes explicit fin-decoration/fill synthesis.",
+    "workflow_impact": "Placer inputs include color maps, fincor/metal-decor layers, and disallowed-site maps. Legalizer does color remapping; placement feedback loops with the pattern/decor synthesis stage.",
+    "confidence": 0.75
+  },
+  {
+    "delta_name": "Library/multi-Vt strategy: 2–3 Vts, simple swap → fine Vt/fin-count granularity, swap-driven closure",
+    "at_28nm": "Typical library: HVT, SVT, LVT (sometimes ULVT). Swapping to LVT was a small, localized ECO step after timing was mostly closed.",
+    "at_7nm_5nm": "Library explosion: many Vt steps, multiple channel/fin options per cell, and Vt/fin swaps are an iterative closure lever used throughout timing closure, not just an ECO. Threshold-voltage granularity is finer than the cell swap slack resolution.",
+    "why_it_changed": "Vt spread per unit area is reduced to control leakage, and leakage is a much larger fraction of total power at 7nm/5nm Vdd. Designers need finer control of leakage vs delay trade-off per region, and dynamic power is low enough that a small per-cell leakage increase is acceptable.",
+    "what_breaks": "A 28nm engineer defers Vt/fin swaps to 'when we run out of slack.' Symptom: route and timing converge but block-level leakage is multiples above target; swapping many cells to fix leakage breaks timing; thermal/IR analysis fails late.",
+    "workflow_impact": "Vt/fin swapping is interleaved with placement, optimization, and clock-tree stages. Power-aware timing is run continuously, not as a final check.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Clock distribution: balanced H-tree + mesh-light → mesh-heavy + useful-skew + deskew loops",
+    "at_28nm": "Clock was largely a balanced H-tree/spine with a coarse mesh; useful skew was a small, manual lever. Skew target dominated by process, not OCV derate.",
+    "at_7nm_5nm": "Clock is a dense mesh with structured spines/leaves, large intentional useful skew, and OCV derate dominates skew budget. CTS is iterative with optimization and re-runs many times; clock becomes the largest single net and is built after coarse placement.",
+    "why_it_changed": "Per-device OCV and PVT variation scale with node; nominal skew is small compared to derate-adjusted skew, so the only way to recover timing is to use intentional skew and a robust low-skew distribution that is less sensitive to on-chip variation.",
+    "what_breaks": "A 28nm-trained engineer builds a 'skew-minimal' tree first and applies small useful skew to critical paths. Symptom: hold fails massively across the chip because OCV derate exceeds intentional skew; large-scale mesh restructuring late.",
+    "workflow_impact": "Clock planning starts early and is part of placement blockage / regional synthesis. CTS and useful-skew optimization are interleaved with placement and legalization; signoff runs AOCV/SOCV + reconvergence pessimism removal as part of closure.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Signoff corners: 4–6 PVT corners → corner explosion with AOCV/SOCV/LVF modes_28nm": "Signoff ran a handful of corners: typically SS/FF/SF/FS at hot/cold with two Vdd; flat derates.",
+    "at_7nm_5nm": "Corner count explodes (SS/FF, hot/cold, multiple Vdd for DVFS, aging corners, mixed-Vt corners, plus AOCV/SOCV/LVF) and is combined with statistical derate lookup tables per cell/path-depth/stage.",
+    "why_it_changed": "Variability increases fin count, channel length, and voltage; bias-temperature instability and HCI aging must be modeled as their own corners. Multi-railulti-Vt designs and DVFS multiply the corner space.",
+    "what_breaks": "A 28nm engineer scopes signoff to 'worst-case setup' and 'worst-case hold' corners. Symptom: paths pass in nominal and worst corners fail in mixed or aging corners; signoff reports vary wildly depending on which subset of corners is run, and tape risk shifts to late-found aging/V failures.",
+    "workflow_impact": "Corner reduction /, MMMC (multi-mode multi-corner) managementV/SOCV/LVF generation are first-class infrastructure steps with theiroff owners and tooling. Runtime budgeting shifts sign hierarchical and distributed compute.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "IR/EM: afterthought → first-class,-loop with closure",
+    "at_28nm": "Static were a back-end signoff step; if it widening and short ECOs fixed it.",
+    "at_7nm_5nm": " static IR-drop, EM, and thermal are in-loop during placement, CTS, and routing; they directly drive buffer/strap decisions and constraint generation.",
+    "why_it_changed": "Wire current density and resistance per unit length scale unfavorably; current per unit width of BEOL rises with drive strengths and frequency, so peak currents are close to EM limits. Dynamic IR is a non-trivial fraction of Vdd at activity hotspots.",
+    "what_breaks": "A 28nm engineer defers IR/EM signoff until after route. Symptom: last-mile IR-drop hotspots near clock-tree spines and high-activity regions force global restructure of the clock and P/G, blowing the schedule.",
+    "workflow_impact": "Power integrity (IR/EM) tools run in parallel with placement and optimization; P/G synthesis and strap pitch are tuned against activity-driven IR maps. Power-aware CTS and vectorless/vector-based dynamic IR become part of the closure flow.",
+    "confidence": 0.9
+  },
+  {
+    "delta_name": "Hold closure: localized, easy → global, OCV-dominated",
+    "at_28nm": "Hold was a local, post-CTS check; fixing meant dropping a small number of delay cells along the path. Skew/derate were modest.",
+    "at_7nm_5nm": "Hold closure is global and OCV-dominated; every long path needs many delay cells, and skew+OCV derate causes hold fails across the chip on paths previously considered safe.",
+    "why_it_changed": "Per-cell random and systematic variation scales up; OCV derate applied across long paths can exceed intended hold even with a perfectly balanced tree, especially with multi-cycle paths crossing voltage domains.",
+    "what_breaks": "A 28nm engineer assumes a 'small' hold buffer budget after CTS. Symptom: hold fails across unrelated regions after clock mesh is finalized; fixing-scale buffer addition, area inflation, and reroute.",
+    "workflow_impact": "Hold fixing is interleaved with CTS and optimization, not a one-shot post-CTS step. Hold-aware CTS, useful-skew tuning, and hold-driven placement/buffering all happen in; signoff runs many hold corners with AOCV/SOCV.",
+    "confidence": 0.85
+  },
+  {
+    "delta_name": "Utilization target: 70–80% routine → ~60–65% with hard for closure headroom",
+    "at_28nm": "Floorplan utilization of 70–80% was routine in many blocks; routing congestion was the dominant constraint and was solved by gentle spreading.",
+    "at_7nm_5nm": "Effective utilization targets trend lower (mid-60s and below for many high-performance blocks) not because of area but because of pin access, multi-patterning blockage, power strap needs, and clock mesh headroom.",
+    "why_it_changed": "Per pin count and pin density rise, BEOL pin-access windows shrink-strap density rises, and clock mesh consumes more area; the headroom consumed by closure infrastructure leaves less for random logic.",
+    "what_breaks": "A 28nm engineer presents a 78% utilization floorplan as 'lean' and pushes density. Symptom: closure stalls on pin-access DRC, IR hotspots, hold fails, and clock-mesh-routing blockage; schedule slips despite area 'savings.'",
+    "workflow_impact": "Floorplanning includes explicit closure headroom budget (pin-access, P/G, CTS blockage) and target utilization is set per region with margins; utilization is no longer the headline metric of a 'good' floorplan.",
+    "confidence": 0.85
+  }
+]

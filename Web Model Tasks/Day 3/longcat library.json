@@ -1,0 +1,401 @@
+```json
+[
+  {
+    "symptom": "congestion-driven routing DRCs with clean placement density",
+    "first_checks": [
+      {
+        "check": "Run global routing congestion map with actual layer assignment, compare against placement density heatmap",
+        "why_first": "Cheapest: rules out placement vs routing layer mismatch in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check macro pin accessibility and channel utilization between macros",
+        "why_first": "Rules out most common structural cause (macro feedthrough congestion)",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify NDR (non-default routing rule) usage on high-fanout nets",
+        "why_first": "Rules out spacing rule violations from wide-clock-tree-like nets",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Re-run global routing with congestion-driven mode disabled (pure timing-driven), compare hotspot locations",
+        "rules_in": "Congestion is routing-algorithm artifact, not placement problem",
+        "rules_out": "Placement density is root cause"
+      },
+      {
+        "experiment": "Generate per-layer congestion histogram: if hotspots cluster on lower metal layers (M1-M3), it's pin-access; if on upper layers (M4+), it's global wiring demand",
+        "rules_in": "Pin-access congestion vs global wiring overflow",
+        "rules_out": "Opposite layer distribution"
+      },
+      {
+        "experiment": "Check cell density in 50um grid bins overlapping hotspots: if <70% utilization, it's not density-driven",
+        "rules_in": "Non-density congestion (e.g., logic cloud with high connectivity)",
+        "rules_out": "Placement density as cause"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Macro feedthrough ports with insufficient channel width",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "High-fanout nets (reset, scan enable) without NDR causing local pin starvation",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Placement blockage overlap creating artificial bottlenecks",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Inaccurate global routing track allocation vs actual layer stack",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Assuming placement density is the cause and spreading cells, when the real issue is macro channel width or missing NDR on high-fanout nets",
+    "node_era_note": "At 7nm and below, pin-access congestion dominates due to smaller M1/M2 pins; at 28nm, global wiring overflow is more common"
+  },
+  {
+    "symptom": "setup (max-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Check if clock tree is propagated (not ideal) and uncertainty values are post-CTS correct",
+        "why_first": "Cheapest: rules out constraint/setup errors in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Report worst negative slack (WNS) paths: check if they share a common clock domain or hierarchy",
+        "why_first": "Rules out single-clock vs multi-clock issue quickly",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare pre-CTS vs post-CTS setup slack: identify paths that degraded after CTS",
+        "why_first": "Rules out CTS-introduced vs pre-existing problems",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run report_timing on failing paths with -clock_tree_pessimism_removed: if slack improves >10% of WNS, it's CRPR (clock reconvergence pessimism removal) issue",
+        "rules_in": "Excessive OCV pessimism, not real timing violation",
+        "rules_out": "Genuine data-path delay problem"
+      },
+      {
+        "experiment": "Check if all failing paths end at the same clock-gating cell: if yes, it's clock-gating insertion delay; if spread, it's data-path",
+        "rules_in": "Clock-gating leaf latency issue",
+        "rules_out": "Data-path logic delay"
+      },
+      {
+        "experiment": "Run useful-skew optimization: if WNS improves significantly, it's recoverable via clock timing; if not, it's data-path",
+        "rules_in": "Timing recoverable via clock adjustment",
+        "rules_out": "Hard data-path limit"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Incorrect post-CTS clock uncertainty (still includes skew margin)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "CRPR pessimism not removed, over-budgeting common clock path delay",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "High-fanout clock-gating cells with large insertion delay",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "CTS used wrong reference cells (e.g., HVT instead of LVT) for data-path optimization",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Blaming data-path logic and optimizing gates, when the real issue is incorrect clock uncertainty or missing CRPR removal",
+    "node_era_note": "At 7nm and below, CRPR is critical due to high OCV impact; at 28nm, setup is more often data-path limited"
+  },
+  {
+    "symptom": "hold (min-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Check if hold violations are on scan-chain paths (false paths not set)",
+        "why_first": "Cheapest: rules out constraint errors in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Report hold slack distribution: check if violations cluster in one clock domain",
+        "why_first": "Rules out single-domain vs cross-domain issue",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify min-delay cells (hold buffers) are in the target library and not marked dont-use",
+        "why_first": "Rules out library/setup issue quickly",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run report_clock_tree -local_skew_skip_icg: if large skew exists between launch/capture ICG leaves, it's clock-gating skew issue",
+        "rules_in": "Clock-gating leaf skew dominating hold violation",
+        "rules_out": "Data-path too fast"
+      },
+      {
+        "experiment": "Check if failing paths have data delay < 20% of clock period: if yes, it's min-delay violation; if no, it's clock skew",
+        "rules_in": "Genuine data-path too fast",
+        "rules_out": "Clock distribution issue"
+      },
+      {
+        "experiment": "Run hold fixing with -effort high: if TNS improves >50%, it's fixable with buffers; if not, it's structural",
+        "rules_in": "Hold fixable via delay insertion",
+        "rules_out": "Structural clock skew problem"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Scan-chain paths not set as false paths, causing thousands of fake violations",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.9
+      },
+      {
+        "cause": "Clock-gating leaf skew unbalanced (ICG output to different register clusters)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "OCV derating too aggressive on min-delay paths",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Hold buffers excluded from library or marked dont-use",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Spending days inserting hold buffers when the real issue is missing false-path constraints on scan chains",
+    "node_era_note": "At 7nm and below, OCV derating dominates hold fixing; at 28nm, clock skew is the primary cause"
+  },
+  {
+    "symptom": "IR-drop-induced timing failure",
+    "first_checks": [
+      {
+        "check": "Run static IR drop analysis: check if failing instances are in high-drop regions (>10% VDD)",
+        "why_first": "Cheapest: rules out IR drop as cause in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check if timing failure correlates with high-activity switching vectors (e.g., reset sequence)",
+        "why_first": "Rules out dynamic vs static IR drop issue",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify power grid connectivity to failing instances (no missing vias, PG open)",
+        "why_first": "Rules out PG design error quickly",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run timing analysis with IR-drop-aware derating (e.g., Tempus-PI, Voltus): if slack improves with voltage annotation, it's IR-drop-induced",
+        "rules_in": "IR drop is root cause of timing failure",
+        "rules_out": "Timing failure independent of voltage"
+      },
+      {
+        "experiment": "Check if failing paths are in clock tree (clock latency increases with voltage drop) or data path",
+        "rules_in": "Clock-path IR drop (clock buffer delay increases)",
+        "rules_out": "Data-path IR drop"
+      },
+      {
+        "experiment": "Run dynamic IR drop simulation with worst-case vector set: if peak drop > static drop by >30%, it's dynamic issue",
+        "rules_in": "Dynamic IR drop (simultaneous switching)",
+        "rules_out": "Static IR drop (power grid resistance)"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing or insufficient decoupling capacitance in high-switching regions",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Power grid mesh too sparse (strap width/via count insufficient)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "High-fanout nets (reset, scan) switching simultaneously causing local dynamic drop",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Incorrect IR drop derating margins in STA (too optimistic)",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Optimizing data-path logic to fix timing, when the real issue is local IR drop increasing cell delay",
+    "node_era_note": "At 7nm and below, dynamic IR drop dominates due to lower voltage and higher di/dt; at 28nm, static IR drop is primary"
+  },
+  {
+    "symptom": "clock skew / CTS divergence (sinks missing insertion-delay targets)",
+    "first_checks": [
+      {
+        "check": "Check if CTS is in skew and insertion-delay report: identify sinks outside target",
+        "why_first": "Cheapest: confirms symptom in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify clock definition (create_clock, create_generated_clock) is correct, no missing clocks",
+        "why_first": "Rules out constraint error quickly",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check if CTS reference cells are available and not marked dont-use",
+        "why_first": "Rules out library issue in minutes",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run report_clock_tree -skew_groups: if skew is within target but insertion delay is high, it's latency issue; if skew is out of target, it's balance issue",
+        "rules_in": "Latency problem vs skew balance problem",
+        "rules_out": "Opposite diagnosis"
+      },
+      {
+        "experiment": "Check if failing sinks are on the same clock-gating leaf: if yes, it's ICG output skew; if spread, it's top-level tree issue",
+        "rules_in": "Clock-gating leaf skew",
+        "rules_out": "Top-level clock tree skew"
+      },
+      {
+        "experiment": "Run CTS with -no_clock_gating_merge: if skew improves, it's ICG merge artifact; if not, it's tree structure",
+        "rules_in": "ICG merge causing skew divergence",
+        "rules_out": "Clock tree structure issue"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Incorrect clock-gating merge (ICG outputs merged too early)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Missing or incorrect skew_group definitions for multi-clock designs",
+        "recalled_frequency": "common",
+        recall_confidence": 0.75
+      },
+      {
+        "cause": "CTS reference cells too weak (high-VT) for high-fanout sinks",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Congestion-aware CTS disabled, causing routing-induced skew",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Adjusting skew targets when the real issue is incorrect clock-gating merge or missing skew groups",
+    "node_era_note": "At 7nm and below, ICG merge is critical due to high OCV; at 28nm, top-level tree balance is primary"
+  },
+  {
+    "symptom": "LVS mismatch: missing / shorted / open nets",
+    "first_checks": [
+      {
+        "check": "Run LVS with -check_missing_nets first: identify missing vs shorted nets",
+        "why_first": "Cheapest: splits two major categories in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check if missing nets are power/ground (PG) or signal",
+        "why_first": "Rules out PG vs signal issue quickly",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify via count and layer alignment on shorted nets",
+        "why_first": "Rules out via stacking error vs metal bridge",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Extract PG netlist separately: if missing nets are PG, it's power grid issue; if signal, it's routing issue",
+        "rules_in": "Power grid open vs signal open",
+        "rules_out": "Opposite category"
+      },
+      {
+        "experiment": "Run DRC on shorted net region: if spacing violation exists, it's metal bridge; if not, it's via short",
+        "rules_in": "Metal bridge short",
+        "rules_out": "Via short"
+      },
+      {
+        "experiment": "Check if missing nets connect to macro pins: if yes, it's pin access issue; if not, it's signal routing",
+        "rules_in": "Macro pin access open",
+        "rules_out": "Signal routing open"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing vias in power grid (via stack incomplete)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.85
+      },
+      {
+        "cause": "Metal bridge due to DRC-clean but LVS-shorted (e.g., different net names on same metal)",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Macro pin not connected to signal net (pin access blocked)",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Open signal net due to incomplete detailed routing",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Fixing signal routing when the real issue is missing vias in the power grid",
+    "node_era_note": "At 7nm and below, via stacking errors dominate; at 28nm, metal bridges are more common"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Check LVS report for device mismatch type: width/length vs extra/missing devices",
+        "why_first": "Cheapest: splits two categories in minutes",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify schematic netlist matches post-layout extracted netlist (no ECO mismatch)",
+        "why_first": "Rules out netlist sync issue quickly",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check if wrong-size devices are in standard cells or macros",
+        "why_first": "Rules out cell library vs design issue",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run LVS with -check_cell_size_only: if mismatch disappears, it's device size issue; if persists, it's connectivity",
+        "rules_in": "Device size mismatch",
+        "rules_out": "Connectivity mismatch"
+      },
+      {
+        "experiment": "Check if extra devices are ECO cells inserted after final LVS",
+        "rules_in": "ECO not back-annotated to schematic",
+        "rules_out": "Layout error"
+      },
+      {
+        "experiment": "Compare layout vs schematic for failing cells: if width differs, it's sizing error; if length differs, it's finger count error",
+        "rules_in

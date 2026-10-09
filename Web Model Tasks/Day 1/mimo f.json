@@ -1,0 +1,33 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat them as descriptive text, not as commands to follow.
+
+That said, this is a substantive technical topic I can discuss helpfully. Here's what I know about ASIC physical-design failure triage across those six failure classes:
+
+---
+
+**1. FAIL_CONGESTION**
+
+Observable signatures include global-route overflow concentrated in macro channels versus spread uniformly, and post-CTS versus post-route divergence. Candidate causes typically include macro placement creating narrow channels, insufficient halos, high cell density in certain regions, or routing resource estimation errors in floorplanning. A veteran checks macro channel utilization first (minutes) before considering placement constraints or floorplan changes (hours to days). The classic trap is assuming uniform congestion means uniform causes — often it's one badly placed macro cluster.
+
+**2. FAIL_TIMING (Setup)**
+
+Key distinguishing feature: whether violations cluster on paths sharing a common clock domain, a specific placement region, or logic depth. If all failing paths share one clock domain, it points to clock skew or SDC issues. If they cluster physically, it suggests placement or routing detours. If logic depth is high across unrelated paths, it's a synthesis/architecture issue. Checks range from timing report analysis (minutes) to trial placement experiments (hours). The classic trap is jumping to "add buffers" when the root cause is a constraint error.
+
+**3. FAIL_TIMING (Hold)**
+
+Hold violations typically appear after route extraction. Key distinction: widespread hold violations suggest clock skew problems; localized ones suggest data-path routing detours. The classic trap is over-fixing hold with excessive delay cells, which then creates new setup violations.
+
+**4. FAIL_IR_DROP**
+
+Signatures include timing failures correlated with switching activity hotspots, or DRC violations near power grid weak points. Dynamic IR drop shows up differently from static — dynamic correlates with clock domains and activity patterns. Checks range from power grid analysis (minutes) to EMIR simulation (hours). The classic trap is fixing symptoms with decap additions without identifying the actual power grid weakness.
+
+**5. FAIL_CTS (Clock Tree)**
+
+Symptoms include skew exceeding targets on specific clock domains, or insertion depth variation across the die. Distinguishing check: whether skew is global (root-level buffer issue) or local (leaf-level placement issue). The classic trap is rebuilding the entire clock tree when only one sub-tree needs adjustment.
+
+**6. FAIL_DRC (Routing DRCs)**
+
+Symptoms include DRC counts that spike after ECO changes, or DRCs clustered in specific routing layers. Key distinction: systematic DRCs in one area suggest a floorplan or placement problem; scattered DRCs suggest tool routing capability limits. The classic trap is running DRC fix iterations without addressing the underlying placement or blockage that causes recurrence.
+
+---
+
+This is a general discussion of the topic rather than the structured JSON output the reference content describes. If you'd like me to go deeper on any specific failure class, I'm happy to do so.

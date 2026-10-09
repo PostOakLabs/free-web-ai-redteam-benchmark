@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Late-stage routing congestion rescued by macro channel widening after cell spreading was rejected",
+    "design_context": "16nm, ~1.2M placeable instances, ~80 hard macros (mix of SRAM compilers and ~6 analog hard macros), 4 clock domains (2 primary, 2 generated), commercial P&R flow.",
+    "prior_state": "Post-CTS global route report: 30% overflow on M3/M4 layers concentrated in a ~120um-wide channel between two macro rows; overall block utilization 72%, local utilization in the channel 88%; WNS -85ps setup, TNS -1.2ns; DRC 0 post-route.",
+    "observation": "Detailed routing failed to close: 412 DRC shorts in the macro-channel region alone, all M3 track spills. Severity: HIGH (ECO schedule pressure, 1 week remaining).",
+    "hypothesis": "Congestion is not density-driven globally (72% util) but driven by pin-access fanout from the macros on the channel edges; spreading cells won't help because the demand is coming from macro pin escape, not random cell placement.",
+    "candidates_considered": [
+      {"action": "Global cell spreading + utilization target drop to 65%", "rejected_because": "Re-routing iteration: 4 days + risks hold degradation on near-critical paths already passing; does not address macro pin escape which is the actual source."},
+      {"action": "Switch M3/M4 layer assignment to double-patterning-friendly directions", "rejected_because": "Library/preferred direction constraints make this infeasible without re-placing macros; macro placement is frozen by upstream signoff dependency."},
+      {"action": "Widen the macro channel by 15um and shove macros outward symmetrically", "rejected_because": "Risks IR/SSN degradation on the 6 analog macros (layout-dependent effects); would require analog re-simulation, ~2 week slip."},
+      {"action": "Asymmetric channel widening: 10um into the non-analog row only + targeted pin-spreading on the bounding macros", "rejected_because": null}
+    ],
+    "chosen_intervention": "Applied asymmetric channel widening (10um into the non-analog macro row), added pin-spreading constraints on the 4 macros bordering the channel on that side, and reroute. Left analog macros untouched.",
+    "post_state": "Detailed route clean, 0 DRC; overall block utilization rose slightly to 74% (due to shifted macro placement) but channel utilization dropped from 88% to ~78%; WNS -78ps (small improvement due to less detouring), TNS -0.9ns; timing closed with existing margins.",
+    "expert_assessment": "The right call when analog macros are not the source of congestion but sit adjacent to the hot region. Asymmetric widening is a classic tool here but is often overlooked because most P&R flows bias toward symmetric edits. Does NOT transfer if the congestion source is the analog macros themselves, or if there is no 'cold side' to widen into.",
+    "confidence": 0.62,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The claim that asymmetric widening is safe specifically because analog LDE is layout-dependent is plausible but the magnitude of IR/SSN impact from a 10um shove should be re-verified with actual analog extraction — the episode underweights the analog risk to justify the fix."
+  },
+  {
+    "title": "Distinguishing constraint problem from physical problem by violation report shape on a 7nm block",
+    "design_context": "7nm, ~800K instances, ~40 macros, 3 clock domains, commercial P&R + commercial timing signoff.",
+    "prior_state": "Pre-CTS timing report: 312 failing paths on a single output port of one clock domain, all with WNS clustered between -180ps and -210ps; TNS -64ns; utilization 65%.",
+    "observation": "Failure pattern: all paths originate from ~40 source flops, all fan into one output port through similar logic depth. Distribution is tight (sigma ~10ps). Severity: HIGH.",
+    "hypothesis": "Tight clustering of slack across many paths sharing a single endpoint, originating from a small fanin cone, is the signature of an under-constrained output port or an over-constrained input arrival — i.e., a constraint problem, not a logic or placement problem. A physical problem usually produces wider slack spread because wire delays vary.",
+    "candidates_considered": [
+      {"action": "Run buffer/eco-placement on the failing cones", "rejected_because": "Would buy at most 30-50ps per hop; failing slacks are 180ps+, so 3-4 buffer hops needed per path = ~12K cells of churn, high risk of new hold/DRC, addresses symptom not cause."},
+      {"action": "Re-synthesize the fanin logic with different area/delay", "rejected_because": "Logic is locked by architecture team; downstream ECO only is the agreed scope."},
+      {"action": "Modify SDC: re-derive the output port's output delay to match realistic loading/capture, or correct the input arrival that was set conservatively upstream", "rejected_because": "Risks regressing other passes; requires signoff re-validation. But this addresses the reported cluster signature directly."},
+      {"action": "Reduce the clock skew pessimism on the failing clock domain by ~30ps via CTS-only adjustment", "rejected_because": "Skew was already within spec; only buys 30ps of the 210ps gap."}
+    ],
+    "chosen_intervention": "Audited the SDC for the failing port. Found an upstream-derived `set_output_delay` that had been propagated through a previous hierarchical boundary with an extra cycle of pessimism incorrectly accounted for. Corrected the -200ps offset (a single number in the block-level SDC), reran timing.",
+    "post_state": "WNS improved from -210ps to -22ps, TNS from -64ns to -0.8ns. All 312 paths cleared without any placement/CTS/ECO changes. Zero new DRC. No hold changes.",
+    "expert_assessment": "The lesson is correct: when many paths share an endpoint and have tight slack spread, suspect SDC before suspecting the netlist or placement. The diagnostic skill is reading the shape of the report, not the headline number. Does NOT transfer when the failing paths have wide slack spread (sigma > 30ps), which usually indicates real physical delay variation. Also does not transfer on cross-clock paths where SDC fixes are riskier.",
+    "confidence": 0.58,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The specific mechanism — a 200ps propagated output_delay offset — is plausible but I am uncertain whether a 200ps offset would actually produce a 312-path tight cluster as described; a real reviewer should check whether hierarchical SDC propagation errors of this magnitude are common at 7nm."
+  },
+  {
+    "title": "Block boundary timing budget: false-path vs multicycle derivation that avoided a 3-week schedule slip",
+    "design_context": "28nm, ~600K instances per block, 2 blocks in question (Block A sender, Block B receiver), single clock domain crossing via a CDC-safe handshake, commercial P&R + commercial timing.",
+    "prior_state": "Inter-block timing at the interface: 14 paths failing setup by 50-150ps, TNS -1.1ns. Initial budget split assumed by upstream: Block A output_delay = -1.2ns, Block B input_delay = -0.8ns (asymmetric, baseline-driven).",
+    "observation": "The interface protocol allows one full clock cycle of latency on the handshake acknowledgement, but the SDC treated the path as single-cycle. Severity: MODERATE (would cause wasted ECO work if not caught).",
+    "hypothesis": "The interface is functionally a 2-cycle handshake: launch in cycle N, capture in cycle N+1 (or N+2). A single-cycle constraint is wrong; correcting it to a multicycle-path constraint (MCP=2) will absorb the existing violation without changing logic.",
+    "candidates_considered": [
+      {"action": "Add buffers on the failing inter-block paths to close the 50-150ps setup", "rejected_because": "Buffers must be added in both blocks (interface spans both), requires coordination across two P&R teams; risks hold issues on the return path; schedule cost ~1 week, plus churn."},
+      {"action": "Reject the budget split and renegotiate 50/50 between blocks via formal margin", "rejected_because": "Would require both teams to re-time their; ~3 week slip, high risk of regressing closed paths elsewhere."},
+      {"action": "Declare the interface paths as false-path (functionally not timing-critical)", "rejected_because": "Interface IS timing-critical for the handshake acknowledgment within the protocol window; false-path would create a silicon bug. Wrong category."},
+      {"action": "Declare as multicycle-path with N=2, derive per-block budgets as output_delay=0.4ns on sender side, input_delay=0.4ns on receiver side (50/50)", "rejected_because": null}
+    ],
+    "chosen_intervention": "Re-derived the interface SDC as MCP=2 with a 50/50 budget split (0.4ns each side), documented the protocol justification (handshake latency) in the SD with cross-reference to the architecture spec section.",
+    "post_state": "All 14 paths cleared without any netlist or placement changes. WNS on inter-block interface improved from -150ps to +180ps. Both blocks' internal timing unchanged. Total schedule impact: 2 days for SDC + signoff re-validation.",
+    "expert_assessment": "The right call when a designer knows the protocol semantically and can justify the MCP. The key insight is that 50/50 renegotiation of budgets is often the cheapest path if MCP/multicycle doesn't apply. Does NOT transfer if the protocol is genuinely single-cycle, or if the receiving block has actual internal setup slack requirements that the new MCP budget would violate silently. Also a senior reviewer should verify the MCP justification is documented at the spec level, not just the SDC.",
+    "confidence": 0.65,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The magnitude of the original slack violations (50-150ps) being fully absorbed by an MCP=2 reclassification is plausible but the post-state WNS of +180ps suggests the MCP correction over-relaxed; a real reviewer should verify the new budget is not over-generous and would mask a real downstream setup issue."
+  }
+]

@@ -1,0 +1,42 @@
+[
+{
+"title": "Execution Trace Cache Replacing Traditional L1 Instruction Cache",
+"where_in_paper": "Front End / Trace Cache",
+"decision": "Implement an Execution Trace Cache (TC) that stores decoded micro-ops (uops) in execution flow order rather than storing raw x86 instruction bytes.",
+"alternatives_or_rejected": "A conventional L1 instruction cache holding raw x86 bytes, which requires instruction decoding on the critical fetch path during every cycle.",
+"rationale": "x86 instruction decoding is complex and variable-length. Removing the decoder from the main execution loop eliminates instruction decode bandwidth bottlenecks and reduces pipeline depth for branch target fetches, allowing higher clock frequency scaling.",
+"outcome": "Delivered up to 3 uops per cycle directly to the execution pipeline, bypassing instruction decode logic on trace cache hits.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.95
+},
+{
+"title": "Double-Pumped 2x Clock Rapid Execution Engine",
+"where_in_paper": "Execution Core / Rapid Execution Engine",
+"decision": "Operate the core simple integer ALUs at twice the main core clock frequency.",
+"alternatives_or_rejected": "Operating the ALUs at 1x core clock frequency and using wider parallel issue logic.",
+"rationale": "Running simple ALUs at 2x clock speed provides an effective 0.5 main-clock-cycle latency for basic arithmetic and logic operations, allowing dependent integer instruction chains to execute with minimal latency while keeping execution unit area small.",
+"outcome": "Achieved sub-cycle latency (0.5 clock cycles) for basic integer operations, significantly speeding up dependent scalar integer code loops.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.95
+},
+{
+"title": "20-Stage Hyper-Pipelined Core Design",
+"where_in_paper": "Core Architecture / Pipelining Overview",
+"decision": "Implement a 20-stage deep pipeline (Hyper-Pipelined Technology) for instruction execution.",
+"alternatives_or_rejected": "Maintaining a shallower ~10-stage pipeline similar to the Pentium III (P6 microarchitecture).",
+"rationale": "Reducing the logic depth and gate delays per pipeline stage allows the processor to scale to substantially higher clock frequencies on the same manufacturing process node.",
+"outcome": "Enabled frequency targets above 1.4 GHz at product launch, accepting a higher branch misprediction latency penalty that had to be offset by improved branch prediction.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.92
+},
+{
+"title": "Low-Latency 8KB L1 Data Cache with 2-Cycle Access",
+"where_in_paper": "Memory Subsystem",
+"decision": "Use a small 8KB L1 data cache optimized for a 2-clock-cycle load-to-use access latency.",
+"alternatives_or_rejected": "A larger 16KB or 32KB L1 data cache with 3 to 4 clock cycles of access latency.",
+"rationale": "At multi-gigahertz clock frequencies, minimizing load-to-use latency for dependent instructions is more critical for performance than increasing L1 capacity, provided the L2 cache has sufficient bandwidth.",
+"outcome": "Delivered 2-cycle load access latency to the execution engine, backed by a high-bandwidth 256-bit wide interface to the L2 cache.",
+"paper_vs_general": "probably-in-the-paper",
+"confidence": 0.88
+}
+]

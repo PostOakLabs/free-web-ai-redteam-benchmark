@@ -1,0 +1,48 @@
+{"verdict":"IMPLAUSIBLE",
+"objections":[
+  {"claim_attacked":"Local density screen (max 65%) applied while overall utilization stayed 71.5% unchanged",
+   "objection":"If the six congested macro channels were at >65% density (otherwise why screen?), enforcing a 65% cap in those regions would force cells to move elsewhere. Since total utilization remained 71.5%, that means other regions must absorb the displaced cells, increasing their density. The draft does not discuss whether those other regions had spare capacity; if they did, the overall placement distribution would change, altering global route congestion and timing. The flat 71.5% is an oversimplification – utilization is not uniform, and a local cap would create a redistribution that cannot be invisible.",
+   "severity":"major",
+   "corrected_version":"The report would state that the density screen lowered local density from, say, 78% to 65% in those channels, while average utilization rose slightly (e.g., to 72.5%) due to spreading, and the new congestion map would show reduced overflow in the channels but possibly new hot spots elsewhere.",
+   "confidence":0.95
+  },
+  {"claim_attacked":"Non-default routing rules relaxed for two mid‑layer metals reduced DRCs from 214k to 340",
+   "objection":"Relaxing routing rules (e.g., allowing smaller spacing) is rarely a free lever – it must stay within foundry DRC limits. If the original DRC violations were shorts/spacings, relaxing rules would only change the violation count if the new rules are less restrictive, but that would violate the foundry’s design rules unless specifically approved as a ‘non‑default’ rule that is still DRC‑clean. Even if allowed, such rule changes typically affect only a few percent of violations, not four orders of magnitude (214k → 340). The improvement is vastly too large for a rule tweak in two layers, especially when the congestion is geometric (macro channels).",
+   "severity":"fatal",
+   "corrected_version":"A realistic result would be a reduction from 214k to perhaps 150k–180k after rule relaxation, with the majority of violations remaining due to insufficient routing tracks; the real fix would require macro shifting or layer reassignment.",
+   "confidence":0.98
+  },
+  {"claim_attacked":"Pin-swap on two macro instances to move high‑fanout pins away from the most congested channel",
+   "objection":"A pin‑swap on two macros affects only the nets directly connected to those swapped pins. With 100 hard macros and 214k violations spread across six channels, two pin swaps cannot significantly reduce global congestion. The improvement claimed is disproportionately large for such a local action.",
+   "severity":"major",
+   "corrected_version":"At best, such a pin‑swap might reduce the overflow in a small region by <0.5%, and would not be the primary contributor. The draft should mention that many more pins were swapped or that the pin‑swap was part of a larger effort.",
+   "confidence":0.9
+  },
+  {"claim_attacked":"Global‑route overflow dropped from 3.8% to 0.6% with unchanged utilization and only local fixes",
+   "objection":"Global‑route overflow is a measure of track demand vs. capacity in gcells. The capacity of the macro channels is fixed by floorplan geometry; without widening the channels, you cannot increase capacity. Local density screens and rule relaxation do not add new tracks; they only reduce demand slightly. A drop from 3.8% to 0.6% implies a reduction in demand by roughly 84% relative to capacity – that would require either moving significant logic out of those channels or using multiple additional metal layers, neither of which is described.",
+   "severity":"fatal",
+   "corrected_version":"A more realistic reduction would be from 3.8% to maybe 3.0% after these tweaks; to get to 0.6% you would need to widen the channels by at least 30–50 µm or reassign many signals to different layers.",
+   "confidence":0.97
+  },
+  {"claim_attacked":"WNS degradation only −12 ps after massive routing changes",
+   "objection":"After reducing congestion by moving cells and relaxing rules, many wires would be re‑routed, often with longer paths or more vias, which typically degrades timing by tens of picoseconds at least. A mere 12 ps is unrealistically small, especially since the design is 28nm at high frequency (likely >1 GHz). Such a small degradation suggests either the timing was very loose or the changes were negligible – contradicting the dramatic congestion improvement.",
+   "severity":"major",
+   "corrected_version":"A realistic WNS degradation would be in the range of 50–150 ps, which would then require additional optimization (e.g., buffer insertion) to recover, and the final closure might take several iterations.",
+   "confidence":0.92
+  },
+  {"claim_attacked":"Detailed‑route violations dropped to 340 and closed to 0 after two repair iterations",
+   "objection":"Reducing from 214k to 340 is a >99.8% reduction. In practice, each repair iteration (e.g., re‑routing and fixing shorts) can resolve many violations, but typically each iteration reduces the count by a factor of 2–5, not 600. Achieving this in two iterations suggests that the initial violations were mostly systematic (e.g., antenna or rule mis‑application) rather than congestion‑based, which contradicts the stated congestion hypothesis. Congestion‑based violations are persistent and require multiple iterations and often manual intervention.",
+   "severity":"fatal",
+   "corrected_version":"After the first re‑route, the count might drop to ~50k, then to ~10k after a second iteration, and would still require manual fixes or a third iteration. A clean closure in two iterations from 214k is implausible.",
+   "confidence":0.96
+  }
+],
+"missing_from_story":[
+  "Details of how the density screen was implemented (e.g., placement blockages or cell spreading) and its impact on other regions' density and congestion.",
+  "The exact nature of the non‑default routing rules – what was relaxed, and how it remained DRC‑clean – and whether the foundry approved it.",
+  "The timeline and effort for the pin‑swap – swapping two macros' pins would require re‑synthesis or ECOs, not just a quick change.",
+  "The impact on power or signal integrity from the changed routing and density.",
+  "A description of the iterative repair process – how many manual fixes were needed, and what types of violations remained after each iteration."
+],
+"most_defensible_part":"The use of local density screens to manage congestion hot spots is a standard technique; the draft correctly identifies that as a plausible first action.",
+"overall_note":"The draft presents a heroic recovery that is quantitatively implausible. The improvements claimed are far too large for the described interventions, and the numbers are internally inconsistent (e.g., density cap vs. unchanged utilization). A realistic case would show a much more modest improvement and require multiple iterations or a more drastic change (e.g., macro shifting or layer reassignment). I recommend rejecting this draft as implausible and asking the author to provide actual project data or revise the numbers to reflect typical effect sizes."}

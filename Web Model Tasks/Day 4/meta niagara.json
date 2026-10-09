@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Throughput-oriented 8 simple in-order cores instead of few aggressive out-of-order cores",
+    "where_in_paper": "Introduction / Throughput Computing philosophy / Processor core selection",
+    "decision": "Use 8 simple single-issue 6-stage in-order SPARC cores rather than 2-4 aggressive out-of-order superscalar cores",
+    "alternatives_or_rejected": "High-frequency deeply pipelined out-of-order cores with extensive speculation, branch prediction and large caches optimized for single-thread ILP",
+    "rationale": "Commercial server workloads (web, application, database) have low ILP and high TLP with many cache misses; die area and power better spent on thread count than on single-thread performance, improving throughput per watt",
+    "outcome": "Enabled 32 threads in same die area as conventional large cores, delivered higher throughput on target workloads at ~72W power envelope",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether paper explicitly quantifies alternative as 2-4 OOO cores or just says general aggressive OOO approach",
+    "confidence": 0.82
+  },
+  {
+    "title": "Four-way fine-grained multithreading per core to hide stalls",
+    "where_in_paper": "SPARC core pipeline / Thread selection",
+    "decision": "Implement 4 threads per core with fine-grained interleaving, switching each cycle to a ready thread, for total 32 threads",
+    "alternatives_or_rejected": "Single-threaded core or 2 threads, or simultaneous multithreading that issues multiple threads per cycle",
+    "rationale": "With single-issue in-order core, long-latency loads and pipeline stalls would otherwise idle core; 4 threads hides memory latency, pipeline hazards and branch stalls with minimal hardware",
+    "outcome": "Keeps simple pipeline utilized without complex OOO or large caches, hides memory latency exposed by small L1s",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact cycle policy (round-robin vs ready-only) and whether 2-thread alternative is explicitly discussed as rejected",
+    "confidence": 0.8
+  },
+  {
+    "title": "Single shared pipelined floating-point unit for all 8 cores",
+    "where_in_paper": "Core microarchitecture / FPU section",
+    "decision": "Provide one pipelined FPU shared among 8 cores via the crossbar, not private per-core FPU",
+    "alternatives_or_rejected": "Private FPU per core",
+    "rationale": "Target commercial workloads have very low floating-point usage; sharing saves significant area and power with negligible throughput impact",
+    "outcome": "Saved area for more threads/cache while maintaining SPARC compatibility, FP operations routed through crossbar to shared unit",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether paper says FPU is fully pipelined vs partially pipelined and exact sharing mechanism",
+    "confidence": 0.78
+  },
+  {
+    "title": "Small write-through private L1s with large shared banked L2 instead of large private L2s",
+    "where_in_paper": "Memory hierarchy / Cache design",
+    "decision": "Per core 16KB 4-way I-cache and 8KB 4-way write-through D-cache, no private L2, and 3MB 12-way shared L2 divided in 4 banks",
+    "alternatives_or_rejected": "Large write-back private L2 per core and larger private L1s",
+    "rationale": "Small L1s save area and power and reduce hit time for simple cores; write-through simplifies coherence with 4 threads; shared L2 reduces replication, better utilizes capacity across threads and supports high bandwidth from many threads",
+    "outcome": "Lower per-core cache area allowed 8 cores on die, shared L2 provides ~12GB/s bandwidth and reduces off-chip accesses for throughput workloads",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact L1 sizes and associativity and L2 size 3MB vs 3MB 12-way 4-banked may be slightly misremembered, and write-through vs write-through with no allocate policy",
+    "confidence": 0.65
+  },
+  {
+    "title": "On-chip crossbar, four integrated DRAM controllers and JBus interface",
+    "where_in_paper": "System interconnect / Memory subsystem",
+    "decision": "Integrate 8-port crossbar connecting 8 cores and FPU to 4 L2 banks, 4 independent on-chip memory controllers, and JBus for I/O",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "32 threads demand high memory bandwidth and low latency; on-chip controllers remove pin-limited off-chip controller bottleneck and crossbar provides scalable high bandwidth interconnect",
+    "outcome": "Provided aggregated memory bandwidth sufficient for 32 threads and simplified multiprocessor system design, contributing to throughput performance",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Number of memory controllers 4 is confident but whether paper frames off-chip controller as explicit rejected alternative vs just presenting integrated as choice",
+    "confidence": 0.7
+  }
+]

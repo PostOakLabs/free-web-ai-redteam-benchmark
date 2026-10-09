@@ -1,0 +1,127 @@
+[
+{
+"title": "Post-CTS Macro Channel Routing Congestion Resolution via Soft Placement Blockages and Clock Buffer Relocation",
+"design_context": "28nm HKMG, 1.05M placeable instances, 82 SRAM macros, 3 clock domains, commercial P&R suite",
+"prior_state": {
+"utilization_pct": 78.2,
+"peak_congestion_overflow_pct": 6.4,
+"drc_violations": 24150,
+"wns_ns": 0.012,
+"tns_ns": 0.0
+},
+"observation": "First detailed routing trial reported 24,150 DRC violations concentrated almost entirely (91%) in narrow 12um macro channels on the west floorplan boundary, with global route overflow hitting 6.4% locally despite clean post-CTS setup timing.",
+"severity": "CRITICAL",
+"hypothesis": "Clock tree synthesis placed high-drive buffer clusters inside narrow inter-macro channels to satisfy pin access latency, over-densitying local cell placement and starving signal routing tracks across Metal 3 through Metal 5.",
+"candidates_considered": [
+{
+"action": "Move SRAM clusters 25um apart to widen routing channels",
+"rejected_because": "Invalidates top-level power grid rail alignment, requiring full top-level floorplan ECO and adding 2 weeks to schedule."
+},
+{
+"action": "Apply 100% hard placement blockages in inter-macro channels",
+"rejected_because": "Pushes all channel logic to core periphery, increasing path lengths and degrading setup WNS by an estimated 280ps into failing territory."
+},
+{
+"action": "Lower global block target placement utilization from 78% to 70%",
+"rejected_because": "Expands overall block footprint beyond die boundary constraints, causing physical overlap with adjacent partition blocks."
+}
+],
+"chosen_intervention": "Applied 40% soft density keepout zones in inter-macro channels combined with clock tree solver buffer exclusion region rules to push CTS buffer allocation into adjacent open core space while preserving signal pin access.",
+"post_state": {
+"utilization_pct": 78.4,
+"peak_congestion_overflow_pct": 0.4,
+"drc_violations": 118,
+"wns_ns": -0.042,
+"tns_ns": -0.38
+},
+"expert_assessment": "Relocating clock buffers out of tight macro channels via soft keepouts is a classic strategy when floorplan boundaries are frozen. Accepting a minor timing hit (42ps WNS) is vastly preferable to a two-week floorplan ECO. This approach fails if distance to open core space violates max-latency or max-skew bounds on clock branches.",
+"confidence": 0.94,
+"failure_class": "FAIL_CONGESTION",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes the 28nm metal stack has sufficient upper-layer routing capacity that buffer relocation does not create secondary congestion on layer transitions."
+},
+{
+"title": "Diagnosis of Missing Asynchronous Clock Group Constraints from Uniform Violation Magnitude Signature",
+"design_context": "28nm planar CMOS, 920k placeable instances, 64 SRAM macros, 2 clock domains (1.0GHz core_clk, 400MHz bus_clk), commercial P&R suite",
+"prior_state": {
+"utilization_pct": 72.0,
+"wns_ns": -4.85,
+"tns_ns": -9700.0,
+"failing_endpoint_count": 2000,
+"drc_violations": 0
+},
+"observation": "Post-CTS setup timing report displayed 2,000 failing paths with identical violation magnitudes (-4.850ns +/- 5ps), all originating in the 400MHz bus clock domain and terminating in the 1.0GHz core clock domain.",
+"severity": "HIGH",
+"hypothesis": "The flat -4.85ns violation signature matching roughly half the slower clock cycle period across thousands of endpoints indicates an unconstrained or misconstrained asynchronous clock domain crossing, not a physical placement or cell delay failure.",
+"candidates_considered": [
+{
+"action": "Insert 3 pipeline register stages across all 2,000 cross-domain data paths",
+"rejected_because": "Consumes unnecessary area, alters pipeline latency, requires extensive RTL churn, and adds 10 days to schedule."
+},
+{
+"action": "Apply high-effort physical optimization and buffer upsizing during P&R post-CTS",
+"rejected_because": "Wastes tool runtime, inflates power and cell count, and cannot close timing because physical delay cannot cover an invalid single-cycle setup check."
+},
+{
+"action": "Set multicycle path constraint of 2 cycles across the boundary without RTL audit",
+"rejected_because": "Risks masking true single-cycle timing requirements if any path lacks dual-flop synchronization logic."
+}
+],
+"chosen_intervention": "Audited RTL to confirm all 2,000 signals passed through dedicated 2-stage synchronizer flops, then updated SDC to declare set_clock_groups -asynchronous between bus_clk and core_clk domains.",
+"post_state": {
+"utilization_pct": 72.0,
+"wns_ns": -0.018,
+"tns_ns": -0.095,
+"failing_endpoint_count": 4,
+"drc_violations": 0
+},
+"expert_assessment": "Recognizing a flat wall of massive setup violations as an SDC constraint issue prevents weeks of useless physical optimization churn. Always verify that physical hardware synchronizers exist in RTL prior to applying asynchronous clock group rules. If any un-synchronized control signal exists across that boundary, this fix would induce functional bugs in silicon.",
+"confidence": 0.96,
+"failure_class": "FAIL_TIMING",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes no real synchronous critical path between the two clock domains was masked underneath the massive false-path violation wall."
+},
+{
+"title": "Hierarchical Block-Boundary Budget Realignment Based on Asymmetric Logic Depth",
+"design_context": "28nm HKMG, 1.1M placeable instances, 76 SRAM macros, 1 primary clock domain (500MHz sdram_clk, 2.0ns period), commercial synthesis & P&R",
+"prior_state": {
+"block_a_output_delay_ns": 1.0,
+"block_b_input_delay_ns": 1.0,
+"interface_wns_ns": -0.32,
+"interface_tns_ns": -14.4,
+"utilization_pct": 75.1,
+"drc_violations": 0
+},
+"observation": "At block boundary closure between Memory Controller Block A and DMA Engine Block B, 45 interface nets exhibited setup violations up to -320ps at 500MHz (2.0ns period), despite both blocks passing standalone block-level STA.",
+"severity": "MODERATE",
+"hypothesis": "The legacy 50/50 budget allocation (1.0ns output delay / 1.0ns input delay) misallocated cycle time relative to actual logic depth (Block A contained 12 logic levels before port; Block B contained 3 logic levels after port).",
+"candidates_considered": [
+{
+"action": "Shift interface budget to 70/30 (1.4ns output delay for A, 0.6ns input delay for B)",
+"rejected_because": "Over-constrains Block B, forcing B's input registers directly against port boundaries and causing internal setup violations (-180ps WNS) inside Block B."
+},
+{
+"action": "Merge Block A and Block B into a single top-level P&R execution partition",
+"rejected_because": "Exceeds tool memory capacity, increases P&R turnaround time from 6 hours to 26 hours, and breaks parallel multi-engineer work streams."
+},
+{
+"action": "Relax top-level interface setup checks using set_max_delay 2.4ns across boundary",
+"rejected_because": "Violates 2.0ns top-level clock period requirement, triggering signoff STA failures during full-chip integration."
+}
+],
+"chosen_intervention": "Derived a revised budget based on post-synthesis logic depth analysis: re-budgeted to 1.25ns (62.5%) for Block A and 0.75ns (37.5%) for Block B, accompanied by matched boundary port location constraints in both block floorplans.",
+"post_state": {
+"block_a_output_delay_ns": 1.25,
+"block_b_input_delay_ns": 0.75,
+"interface_wns_ns": 0.015,
+"interface_tns_ns": 0.0,
+"utilization_pct": 75.3,
+"drc_violations": 0
+},
+"expert_assessment": "Default 50/50 boundary budgeting without regard to internal logic depth creates artificial timing closure roadblocks. Proportional budgeting based on logic depth combined with fixed port locations reliably closes interface paths. This method fails if top-level routing introduces unexpected wire detours that consume the allocated interconnect margin.",
+"confidence": 0.93,
+"failure_class": "SDC_BUDGET",
+"source_basis": "composite-of-common-practice",
+"weakest_point": "Assumes top-level pin placement constraints can be strictly honored across both block floorplans without creating localized pin-density congestion."
+}
+]

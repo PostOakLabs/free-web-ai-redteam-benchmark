@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Hybrid Custom and Synthesized Logic Methodology",
+    "where_in_paper": "Design Methodology / Circuit Design",
+    "decision": "Used a hybrid approach: custom circuit design for performance-critical macros (caches, FPUs, crosspoints) and automated logic synthesis for control and non-critical logic.",
+    "alternatives_or_rejected": "Full-custom design was rejected due to the massive transistor count and time-to-market constraints; full-synthesis was rejected as it could not meet the aggressive frequency targets.",
+    "rationale": "To balance the need for high clock frequency and performance with the practical limits of design manpower and schedule.",
+    "outcome": "Successfully achieved high-frequency operation while managing design complexity and schedule for the 174-million-transistor die.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact phrasing of the frequency target or the exact list of custom vs synthesized blocks.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Hierarchical Partitioning for Timing Closure",
+    "where_in_paper": "Physical Design / Timing Methodology",
+    "decision": "Partitioned the chip into a hierarchy of manageable physical blocks (macros) with strict interface timing budgets to enable parallel physical design and timing closure.",
+    "alternatives_or_rejected": "Flat physical design and timing analysis was rejected because the massive die size exceeded the capacity of flat EDA tools and would not allow parallel team execution.",
+    "rationale": "Necessary to handle the massive design size, enable parallel work by multiple design teams, and achieve timing closure within the project schedule.",
+    "outcome": "Enabled concurrent design of multiple processor cores and large shared caches on a single die, achieving timing closure.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 32,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly uses the term 'flat physical design' as the rejected alternative or just implies it by describing the hierarchical flow.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Global and Local Clock Distribution Grid",
+    "where_in_paper": "Clock Distribution",
+    "decision": "Implemented a global clock distribution network to distribute the clock to local macro grids, minimizing clock skew across the large multi-core die.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The large die size and high operating frequency made clock skew a dominant timing challenge; a grid structure provides robust, low-skew clock delivery despite process and load variations.",
+    "outcome": "Achieved tight clock skew control across the multi-core die, enabling correct synchronous operation at high frequencies.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 38,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The exact terminology (whether they call it a 'global grid', 'clock mesh', or 'H-tree to local grids') used in the paper for the top-level clock structure.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Dense Power Grid for di/dt Noise Mitigation",
+    "where_in_paper": "Power Distribution / Physical Design",
+    "decision": "Designed a dense, multi-layer power and ground grid (mesh) across the chip to minimize IR drop and inductive di/dt noise.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The simultaneous switching of multiple high-performance cores and large caches created massive transient current demands that could cause fatal voltage droop without a robust power grid.",
+    "outcome": "Maintained stable supply voltage margins across the die during worst-case switching scenarios, preventing timing failures due to power noise.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 41,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The specific metal layers or exact density metrics mentioned in the paper for the power grid.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Wire Delay Modeling and Repeater Insertion",
+    "where_in_paper": "Interconnect / Wire Delay Methodology",
+    "decision": "Utilized systematic methodologies and automated tools for inserting repeaters (buffers) into long global and semi-global copper interconnects to manage RC wire delays.",
+    "alternatives_or_rejected": "Manual repeater insertion was rejected as impractical due to the sheer volume of long wires and the iterative nature of physical placement and routing.",
+    "rationale": "In the copper technology node, wire RC delays became comparable to or exceeded gate delays, making systematic repeater insertion critical for timing closure on long routes.",
+    "outcome": "Successfully managed long-wire delays across the large die, allowing global communication between cores and cache interfaces to meet cycle time targets.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 35,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly highlights 'automated repeater insertion' as a specific methodological decision or just discusses wire delay modeling and buffering generally.",
+    "confidence": 0.75
+  }
+]

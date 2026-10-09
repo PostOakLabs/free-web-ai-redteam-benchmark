@@ -1,0 +1,155 @@
+[
+  {
+    "case_name": "Parametric ES 97.5% Normal P&L",
+    "inputs": {
+      "mu_PnL": {"value": 0, "unit": "USD"},
+      "sigma_PnL": {"value": 1000000, "unit": "USD"},
+      "confidence": 0.975,
+      "tail_prob_alpha": {"value": 0.025, "unit": "probability", "definition": "1-confidence"},
+      "distribution": "Normal",
+      "z_definition": "z_0.975 = Phi^-1(0.975)"
+    },
+    "computation": {
+      "quantile_z_0975_rounded": {"value": 1.96, "note": "rounded to 4 decimals as required"},
+      "quantile_z_0975_precise": {"value": 1.959963984540054, "source": "Phi^-1(0.975)"},
+      "density_phi_at_196": {"value": 0.05844094433345148, "rounded_4dec": 0.05844, "formula": "phi(z)=exp(-z^2/2)/sqrt(2*pi)", "check": "phi(1.96)=0.05844 matches hard rule"},
+      "density_phi_at_precise_z": {"value": 0.05844506980503538, "rounded_4dec": 0.05845},
+      "tail_prob": 0.025,
+      "VaR_multiplier": {"formula": "VaR_multiplier = z", "value_rounded": 1.96, "value_precise": 1.959963984540054, "distinction": "VaR is quantile, not tail mean"},
+      "ES_multiplier_formula": "ES_multiplier = phi(z) / tail_prob = phi(z)/(1-confidence)",
+      "ES_multiplier_rounded_z": {"value": 2.337637773338059, "calculation": "0.05844094433345148 / 0.025 = 2.337637773338059"},
+      "ES_multiplier_precise_z": {"value": 2.3378027922014153, "calculation": "0.05844506980503538 / 0.025"},
+      "VaR_loss_formula": "VaR_loss = -mu + sigma*z",
+      "VaR_loss_rounded": {"value": 1960000, "unit": "USD", "calculation": "1e6 * 1.96"},
+      "VaR_loss_precise": {"value": 1959963.984540054, "unit": "USD"},
+      "VaR_PnL_formula": "VaR_PnL_threshold = mu - sigma*z (negative = loss)",
+      "VaR_PnL_rounded": {"value": -1960000, "unit": "USD"},
+      "ES_loss_formula": "ES_loss = -mu + sigma*phi(z)/tail_prob, ES is tail mean E[L|L>VaR], strictly > VaR",
+      "ES_loss_rounded": {"value": 2337637.773338059, "unit": "USD", "calculation": "1e6 * 0.05844094433 / 0.025"},
+      "ES_loss_precise": {"value": 2337802.7922014155, "unit": "USD"},
+      "ES_PnL_rounded": {"value": -2337637.773338059, "unit": "USD"},
+      "ES_vs_VaR_distinction": "VaR_97.5% = quantile at 97.5%; ES_97.5% = mean of tail beyond VaR = sigma*phi(z)/0.025; ES_multiplier 2.3376 > VaR_multiplier 1.96, not equal"
+    },
+    "result": {
+      "VaR_97_5_loss": {"value": 1960000, "unit": "USD", "multiplier": 1.96},
+      "ES_97_5_loss": {"value": 2337637.77, "unit": "USD", "multiplier": 2.33763777, "rounded_phi_check": "phi=0.05844"},
+      "ES_97_5_PnL": {"value": -2337637.77, "unit": "USD"},
+      "ES_97_5_precise_using_z_1_95996": {"value": 2337802.79, "unit": "USD"}
+    },
+    "formula_basis": "For L ~ N(-mu, sigma^2): VaR_alpha = -mu + sigma*Phi^-1(alpha), ES_alpha = -mu + sigma*phi(Phi^-1(alpha))/(1-alpha), where phi is standard normal pdf, Phi^-1 is quantile. ES = E[L | L > VaR]. MAR33 anchor: MAR33.2 - FRTB uses 97.5% ES replacing 99% VaR, calibrated to stressed period; parametric normal illustration uses same z_0.975=1.96 basis.",
+    "weakest_point": "Assumes zero-mean normal P&L with known sigma; real P&L has fat tails, non-zero mean, heteroskedasticity; ES multiplier sensitive to phi(z) precision; using 1.96 vs 1.95996 changes ES by ~0.007%"
+  },
+  {
+    "case_name": "Parametric ES 99% Normal P&L",
+    "inputs": {
+      "mu_PnL": {"value": 0, "unit": "USD"},
+      "sigma_PnL": {"value": 1000000, "unit": "USD"},
+      "confidence": 0.99,
+      "tail_prob_alpha": {"value": 0.01, "unit": "probability"},
+      "distribution": "Normal",
+      "z_definition": "z_0.99 = Phi^-1(0.99)"
+    },
+    "computation": {
+      "quantile_z_099_rounded": {"value": 2.3263, "note": "rounded to 4 decimals as required"},
+      "quantile_z_099_precise": {"value": 2.3263478740408408, "source": "Phi^-1(0.99)"},
+      "density_phi_at_23263": {"value": 0.02665511063188013, "rounded_4dec": 0.02666, "rounded_4dec_target": 0.02665, "note": "phi(2.3263)=0.0266551 rounds to 0.02666, target 0.02665 within 1e-5 tolerance; using 2.326347874 value gives 0.02665214 = 0.02665 to 4 dec"},
+      "density_phi_at_precise_z": {"value": 0.026652142203458126, "rounded_4dec": 0.02665, "check": "matches hard rule phi(2.3263)=0.02665"},
+      "tail_prob": 0.01,
+      "VaR_multiplier": {"formula": "z", "value_rounded": 2.3263, "value_precise": 2.3263478740408408},
+      "ES_multiplier_formula": "phi(z)/0.01",
+      "ES_multiplier_rounded_z": {"value": 2.665511063188013, "calculation": "0.02665511063188013 / 0.01"},
+      "ES_multiplier_precise_z": {"value": 2.6652142203458125, "calculation": "0.026652142203458126 / 0.01"},
+      "VaR_loss_rounded": {"value": 2326300, "unit": "USD", "calculation": "1e6 * 2.3263"},
+      "VaR_loss_precise": {"value": 2326347.874040841, "unit": "USD"},
+      "ES_loss_rounded": {"value": 2665511.063188013, "unit": "USD"},
+      "ES_loss_precise": {"value": 2665214.2203458124, "unit": "USD"},
+      "ES_vs_VaR": "VaR = sigma*z = sigma*2.3263; ES = sigma*phi(z)/0.01 = sigma*2.6655; ES > VaR by factor phi(z)/(z*tail_prob) ~1.145"
+    },
+    "result": {
+      "VaR_99_loss": {"value": 2326300, "unit": "USD", "multiplier": 2.3263},
+      "ES_99_loss": {"value": 2665511.06, "unit": "USD", "multiplier": 2.66551106, "phi_check": "phi=0.02665"},
+      "ES_99_precise": {"value": 2665214.22, "unit": "USD"}
+    },
+    "formula_basis": "Same as case1 with alpha=0.99: VaR_0.99 = -mu + sigma*Phi^-1(0.99), ES_0.99 = -mu + sigma*phi(Phi^-1(0.99))/(0.01). MAR33 anchor: MAR33 notes 97.5% ES approximately equivalent to 99% VaR under normality; showing 99% case illustrates ES/VaR multiplier gap: VaR mult 2.3263 vs ES mult 2.6655.",
+    "weakest_point": "Rounding of z to 2.3263 vs 2.326347874 creates ~300 USD difference in 1M sigma scale; density phi sensitive; normality assumption understates real tail beyond VaR"
+  },
+  {
+    "case_name": "Liquidity-horizon scaled ES per MAR33 sqrt(LH/10) - Credit Spread Corporate BBB",
+    "inputs": {
+      "base_ES_10d": {"value": 2337802.79, "unit": "USD", "source": "Case1 precise ES 97.5% for sigma 1M, 10-day base horizon"},
+      "risk_factor_category": "Credit spread - investment grade BBB (per MAR33.12)",
+      "liquidity_horizon_LH": {"value": 40, "unit": "days"},
+      "base_horizon": {"value": 10, "unit": "days"},
+      "scaling_formula": "ES_LH = ES_10d * sqrt(LH / 10)"
+    },
+    "computation": {
+      "scale_factor_formula": "sqrt(LH / 10)",
+      "LH": 40,
+      "LH_div_10": 4,
+      "scale_factor": {"value": 2.0, "calculation": "sqrt(40/10)=sqrt(4)=2.0", "unit": "dimensionless"},
+      "alternative_example_LH20": {"scale_factor": 1.4142135623730951, "calculation": "sqrt(20/10)=sqrt(2)=1.41421356"},
+      "ES_40d": {"value": 4675605.584402831, "unit": "USD", "calculation": "2337802.7922014155 * 2.0"},
+      "ES_20d_example": {"value": 3306153.56, "unit": "USD", "calculation": "2337802.79 * 1.41421356"},
+      "ES_40d_using_rounded_base": {"value": 4675275.546676118, "unit": "USD", "calculation": "2337637.773338059 * 2.0"},
+      "MAR33_aggregation_note": "In full MAR33, total ES = sqrt( sum_j ES_j^2 ) across 5 LH categories with sqrt scaling per category; this case shows single category scaling"
+    },
+    "result": {
+      "ES_10d_base": {"value": 2337802.79, "unit": "USD"},
+      "scale_factor_LH40": 2.0,
+      "ES_40d_scaled": {"value": 4675605.58, "unit": "USD"},
+      "ES_20d_scaled_example": {"value": 3306153.56, "unit": "USD"}
+    },
+    "formula_basis": "MAR33.12-MAR33.16: Liquidity horizons LH = 10,20,40,60,120 days by risk factor category (e.g., IR large cap 10d, credit IG BBB 40d, equity small cap 20d, commodity 60d, vol 120d). Scaled ES: ES_j(LH) = ES_j(10d)*sqrt(LH/10). For LH=40, factor = sqrt(4)=2. Symbolic: ES_LH = ES_10 * (LH/10)^0.5",
+    "weakest_point": "Assumes independent increments and sqrt-time scaling holds; real liquidity horizons have overlap and correlation; using single ES_10 as base ignores stressed calibration and aggregation across categories; sqrt scaling is MAR33 simplification, not true market diffusion"
+  },
+  {
+    "case_name": "Historical Simulation ES 97.5% - 20 obs sample",
+    "inputs": {
+      "PnL_sample_20": {
+        "values": [-5.2, -3.8, -2.9, -2.1, -1.5, -1.2, -0.9, -0.6, -0.4, -0.1, 0.2, 0.5, 0.8, 1.1, 1.4, 1.8, 2.2, 2.7, 3.3, 4.1],
+        "unit": "million USD",
+        "note": "Unsorted as supplied; P&L negative = loss"
+      },
+      "N": 20,
+      "confidence": 0.975,
+      "tail_prob": 0.025
+    },
+    "computation": {
+      "sorted_PnL_ascending_worst_first": [-5.2, -3.8, -2.9, -2.1, -1.5, -1.2, -0.9, -0.6, -0.4, -0.1, 0.2, 0.5, 0.8, 1.1, 1.4, 1.8, 2.2, 2.7, 3.3, 4.1],
+      "sorted_loss_descending_L_equals_minus_PnL": [5.2, 3.8, 2.9, 2.1, 1.5, 1.2, 0.9, 0.6, 0.4, 0.1, -0.2, -0.5, -0.8, -1.1, -1.4, -1.8, -2.2, -2.7, -3.3, -4.1],
+      "expected_exceedances": {"formula": "(1-confidence)*N = 0.025*20", "value": 0.5, "unit": "observations"},
+      "VaR_HS_quantile_rank": {"formula": "rank = (1-confidence)*N = 0.5 from worst", "interpretation": "Fractional rank <1"},
+      "tail_selection_rule_explicit": "At 97.5% with N=20, tail contains 0.5 observations on average. MAR33 text does not prescribe fractional observation treatment for HS ES in small samples. Must choose convention honestly.",
+      "convention_chosen": "Conservative ceil convention: ES_HS = mean of worst ceil((1-alpha)*N) = mean of worst 1 observation. Alternative fractional-weighted convention: weight = 0.5 observation. Both named as conventions where regulatory text is silent.",
+      "which_observations_enter_tail_ceil1": {
+        "count": 1,
+        "indices":,
+        "values_PnL": [-5.2],
+        "unit": "million USD"
+      },
+      "which_observations_enter_tail_if_ceil2_example": {
+        "count": 2,
+        "indices":,
+        "values_PnL": [-5.2, -3.8],
+        "mean": -4.5
+      },
+      "fractional_weighted_method": {
+        "description": "Weighted ES = (0.5 * worst) / 0.5 = worst = -5.2M; if using linear interpolation between worst and second worst for VaR, VaR would be between -5.2 and -3.8",
+        "VaR_interpolated_example": {"VaR_PnL": -5.2, "method": "VaR as worst if ceil, or -4.5 if average of worst 2? Common HS VaR 97.5% with 20 obs uses 1st worst = -5.2"},
+        "ES_weighted": {"value": -5.2, "unit": "million USD", "calculation": "-5.2 * 0.5 / 0.5"}
+      },
+      "ES_HS_PnL_ceil1": {"value": -5.2, "unit": "million USD", "formula": "mean(worst 1)"},
+      "ES_HS_loss_ceil1": {"value": 5.2, "unit": "million USD", "formula": "-ES_PnL"},
+      "ES_HS_PnL_mean_worst2_illustrative": {"value": -4.5, "unit": "million USD", "calculation": "(-5.2 + -3.8)/2", "note": "If convention used ceil to 2 for conservatism"},
+      "VaR_vs_ES_distinction_HS": "VaR_HS_97.5% = quantile threshold (approx -5.2M P&L with ceil); ES_HS_97.5% = average of P&L <= VaR threshold = -5.2M in ceil1 convention; ES is tail mean, not just quantile"
+    },
+    "result": {
+      "HS_VaR_97_5_PnL_ceil": {"value": -5.2, "unit": "million USD", "observations_used": "worst 1"},
+      "HS_ES_97_5_PnL_ceil1": {"value": -5.2, "unit": "million USD", "tail_observations": [-5.2]},
+      "HS_ES_97_5_loss_ceil1": {"value": 5.2, "unit": "million USD"},
+      "HS_ES_97_5_PnL_if_mean_worst2": {"value": -4.5, "unit": "million USD", "tail_observations": [-5.2, -3.8], "note": "Alternative convention for illustration"}
+    },
+    "formula_basis": "Historical Simulation ES: Order P&L ascending: P&L_(1) <=... <= P&L_(N). For confidence alpha, k = (1-alpha)*N. VaR_HS = -quantile = -P&L_(floor(k)) or interpolated. ES_HS = (1/k')* sum_{i=1}^{k'} P&L_(i) for P&L_(i) <= VaR threshold, where k' = number of observations in tail. For N=20, alpha=0.975, k=0.5. MAR33 anchor: MAR33.12-MAR33.18 HS ES definition: ES = average of losses exceeding VaR; tail selection requires handling fractional observations. Symbolic: ES_alpha = (1/|Tail|)* sum_{L_i > VaR_alpha} L_i",
+    "weakest_point": "N=20 gives only 0.5 expected exceedances at 97.5%, so ES estimate has huge sampling error and depends critically on fractional treatment convention (ceil vs interpolation vs weighting) which MAR33 does not prescribe for tiny samples; with 1 observation, ES = VaR, losing ES vs VaR distinction benefit; real FRTB requires 250+ days and stressed period"
+  }
+][0][1]

@@ -1,0 +1,200 @@
+[
+  {
+    "review_gate": "Floorplan Review",
+    "purpose": "Catch problems that become exponentially more expensive after placement: macro channel width, clock spine placement, power-grid density, and chip-edge accessibility. This is the only gate where moving a macro by 10 µm costs an hour; later it costs a week.",
+    "checks": [
+      {
+        "question": "Show me your macro channel widths and the global-route track count through each. Are all the high-fanout cross-block buses guaranteed to fit in the metal layers available?",
+        "evidence_demanded": "A table of macro-to-macro spacing (µm) and estimated wiring demand per channel (number of signals × minimum spacing) overlaid on the floorplan, with a color-coded excess for each channel.",
+        "red_flag": "Any channel where demand exceeds available tracks by >5% (for 28nm) or >10% (for 7nm, because more metal layers but tighter pitches) without a planned reroute or layer assignment.",
+        "why_it_matters": "If this is waived, you will hit routing congestion at detail-route, forcing macro shifting late, which destroys timing and requires re-placement and re-CTS, often adding 2–3 weeks."
+      },
+      {
+        "question": "What is your worst-case IR drop from static analysis, and where are the largest dynamic current spikes predicted? Show me the IR map and the simultaneous-switching-activity contour.",
+        "evidence_demanded": "Static IR report with VDD drop contour map; dynamic IR report with a representative vector, highlighting regions with >5% drop.",
+        "red_flag": "Any region with static drop >5% VDD (or dynamic >10%) unless there is a clear mitigation plan (added decap or power-grid expansion).",
+        "why_it_matters": "IR drop cannot be fixed post-tapeout without adding decoupling caps, which often cannot fit after placement, leading to performance degradation or reliability issues."
+      },
+      {
+        "question": "Show me the clock plan: where are the clock pads, the spine routes, and the buffer placement regions? Are any macros blocking the proposed clock spine?",
+        "evidence_demanded": "Floorplan drawing with the clock spine and major buffer banks marked; an estimated insertion-delay histogram for the leaf-level sinks.",
+        "red_flag": "A predicted skew >100 ps between any two functional clock groups without a balancing strategy.",
+        "why_it_matters": "Clock skew is a first-order effect at GHz frequencies; if the spine is blocked by a macro, insertion delays can vary by hundreds of picoseconds, causing setup/hold failures that are expensive to fix later."
+      },
+      {
+        "question": "What is your global route overflow histogram for the first pass? Show me the hot spots relative to the macro channels.",
+        "evidence_demanded": "Global route overflow per gcell, with a heatmap and a list of top-10 congested gcells.",
+        "red_flag": "Overflow >2% in any gcell (for 28nm) or >1.5% (for 7nm, due to tighter pitch) that is not directly adjacent to a macro pin (which can be routed with micro-bumps).",
+        "why_it_matters": "High global overflow at floorplan stage suggests the floorplan is fundamentally unbalanced; fixing later with placement pushes is painful and often breaks timing."
+      },
+      {
+        "question": "What is the aspect ratio and the location of large hard macros (SRAMs/PHYs)? Are they aligned with the power-grid pitch?",
+        "evidence_demanded": "Floorplan drawing with macros dimensioned and power stripes overlaid; a report showing macro orientation and power-stitching vias.",
+        "red_flag": "A macro whose edges do not align with the power grid at least 50% of the way, requiring extra power straps to be routed around it.",
+        "why_it_matters": "Misalignment forces extra routing detours for power, consuming signal track resources and creating more IR drops at the edges."
+      },
+      {
+        "question": "What is your signal-pin placement strategy at the block boundary? Are you using a pin assignment that matches the top-level netlist ordering?",
+        "evidence_demanded": "A pin placement map for all top-level ports, cross‑referenced with the top-level RTL connectivity and a preliminary route estimate.",
+        "red_flag": "Adjacent pins that are logically connected in the top-level but placed at opposite ends of the block, or more than 50 pins in a dense cluster that exceed the pad pitch.",
+        "why_it_matters": "Poor pin placement leads to long intra-block routes to the boundary, eating into timing margin and often forcing a redesign of the top-level routing."
+      }
+    ],
+    "kill_questions": [
+      "What is your worst-case macro channel width? If it's less than 50 µm at 28nm (or 30 µm at 7nm) without a justification, I will reject – you cannot route a 64-bit bus through that.",
+      "Where is your IR drop map showing no red spots? I need to see a plan for any spot above 5% drop before I approve."
+    ],
+    "waiver_culture": "In real projects, IR drop hotspots are often waived with a promise to add on-chip decap later, but that decap invariably gets squeezed out and the chip faces voltage droop at final signoff, requiring respin.",
+    "confidence": 0.92
+  },
+  {
+    "review_gate": "Pre‑CTS Review",
+    "purpose": "Catch placement and congestion issues before the clock tree is synthesized; once CTS inserts thousands of buffers, placement becomes frozen, and moving cells is extremely costly. The goal is to ensure placement is timing-clean enough that CTS can close without major surprises.",
+    "checks": [
+      {
+        "question": "Show me the slack histogram by clock group, with a grouping of paths that have negative slack after placement (before CTS). Where does the worst path fail by, and how many paths are negative?",
+        "evidence_demanded": "Static timing report with histogram of setup slack bins (e.g., negative, 0–50ps, 50–100ps, …) for each clock, and a list of worst 50 paths with their critical path report.",
+        "red_flag": "Any clock group with more than 5% of paths having negative slack (or any path with negative slack > −200ps for 28nm, > −100ps for 7nm) without a clear explanation that CTS will fix it (e.g., known due to early clock skew).",
+        "why_it_matters": "If placement timing is severely negative, CTS cannot fix it; you will need to respread cells, which may require a new placement run and weeks of iteration."
+      },
+      {
+        "question": "What is the placement density by region, and where are the hot spots? Are there areas with >85% density (28nm) or >75% (7nm) that coincide with congestion?",
+        "evidence_demanded": "Cell density heatmap overlaid with the routed congestion forecast from the placement tool.",
+        "red_flag": "A density >90% in a region covering more than 5% of the area, especially if it overlaps with high-utilization logic.",
+        "why_it_matters": "High density leaves no room for clock buffers or for detours from routing, leading to post‑CTS congestion that can only be fixed by respreading cells."
+      },
+      {
+        "question": "What is your clock tree synthesis target skew, and have you run a preliminary clock-tree feasibility check? Show me the clock tree buffer count estimate and the insertion-delay spread.",
+        "evidence_demanded": "A CTS feasibility report showing the number of sinks, estimated buffer levels, and the predicted insertion delay distribution.",
+        "red_flag": "A predicted skew >80ps for 28nm (or >50ps for 7nm) without a plan to balance, or a buffer count that exceeds 10% of the total instance count.",
+        "why_it_matters": "If the clock tree is infeasible, the design will never meet frequency; early identification allows floorplan adjustment or pipeline restructuring."
+      },
+      {
+        "question": "Show me the hold margin histogram (setup‑timing check with a negative hold time) – are there any paths with zero or negative hold slack that will become problematic after CTS?",
+        "evidence_demanded": "Hold slack histogram and a list of paths with hold slack < 0 after accounting for derates.",
+        "red_flag": "Any hold path with negative slack at this stage, because CTS will only add skew and make hold worse unless specifically balanced.",
+        "why_it_matters": "Hold violations are hard to fix after CTS; they require adding delay buffers, which can be inserted but may affect setup on adjacent paths. Catching them early avoids a late‑stage crisis."
+      },
+      {
+        "question": "What is your worst-case signoff corner setup slack pre‑CTS? And have you run a cross‑corner analysis (e.g., worst‑case corner for setup, best‑case for hold)?",
+        "evidence_demanded": "A table of slack numbers at all relevant process corners, including worst-case and best-case for each.",
+        "red_flag": "A slack margin of less than 100ps in the worst‑case setup corner without a plan to add extra margin.",
+        "why_it_matters": "If pre‑CTS is already tight, post‑CTS will almost certainly fail, requiring major changes."
+      },
+      {
+        "question": "What is the current routing congestion estimate after placement? Show me the `route_overflow` or `congestion` map from the tool.",
+        "evidence_demanded": "Congestion map with overflow values per gcell, and a summary of the worst overflow percentage.",
+        "red_flag": "A worst‑cell overflow >2% for 28nm or >1.5% for 7nm, or a total overflow >0.5% of the total route capacity.",
+        "why_it_matters": "Congestion will increase after CTS, as clock buffers add more wires. If it's already marginal, later stages will be unroutable."
+      }
+    ],
+    "kill_questions": [
+      "How many paths have negative setup slack more than −200ps? If the number is >5, you need to go back to placement – I cannot approve.",
+      "Show me the hold slack distribution – if any hold violation exists at this stage, we must fix it now before CTS."
+    ],
+    "waiver_culture": "Pre‑CTS hold violations are often waived with a promise to add delay buffers during CTS, but those buffers then cause additional congestion and sometimes create new setup violations, leading to multiple iterations and schedule slips.",
+    "confidence": 0.9
+  },
+  {
+    "review_gate": "Pre‑Tapeout Timing Signoff Review",
+    "purpose": "Ensure that all timing corners are closed after CTS, with realistic OCV, clock uncertainty, and cross‑talk margin. This is the final gateway before tapeout; any violation here is a showstopper unless waived by a proven silicon correlation.",
+    "checks": [
+      {
+        "question": "Show me the setup slack histogram for the signoff corner (typically worst-case process, low voltage, high temperature) – where is the wall?",
+        "evidence_demanded": "A histogram of setup slack for each clock group in the signoff corner, with a cumulative count of paths falling below zero.",
+        "red_flag": "More than 0.1% of paths with negative slack, or any path with slack worse than −50ps for 28nm (or −30ps for 7nm) without a waiver.",
+        "why_it_matters": "Negative setup slack at signoff means the chip will not meet its operating frequency; if not caught, it's a tapeout respin."
+      },
+      {
+        "question": "What is your OCV derate table, and have you verified that it covers the on-chip variation across all process corners? Show me the derate values for the worst-case and best-case corners.",
+        "evidence_demanded": "The derate table used in STA (e.g., AOCV or POCV coefficients), with a note on how it was derived from silicon measurements.",
+        "red_flag": "A derate that is less than 10% for 28nm (or less than 8% for 7nm) without industry data to back it, or using a single global derate instead of path‑based.",
+        "why_it_matters": "Underestimating OCV leads to optimistic timing that fails in silicon; overestimating leads to unnecessary over‑design."
+      },
+      {
+        "question": "Have you accounted for clock uncertainty correctly – separating jitter, static skew, and dynamic skew? Show me the uncertainty values used for setup and hold.",
+        "evidence_demanded": "A table of clock uncertainty values for each clock, broken down by component (jitter, skew, margin).",
+        "red_flag": "Setup uncertainty less than the PLL peak‑to‑peak jitter plus the measured skew; hold uncertainty not set to a negative value to add margin.",
+        "why_it_matters": "Wrong uncertainty hides real failures; too high causes over‑design."
+      },
+      {
+        "question": "Show me the cross‑talk (signal integrity) analysis results – how many nets have crosstalk‑induced delay that exceeds 10% of the path delay?",
+        "evidence_demanded": "A report of nets with crosstalk delay increment (delta) and the worst‑case impact on slack.",
+        "red_flag": "Any path where crosstalk deltas reduce slack below zero, or a net with delta >50ps at 28nm (>30ps at 7nm) without shielding.",
+        "why_it_matters": "Crosstalk can cause intermittent failures; without mitigation, the chip may fail in the field under worst‑case noise."
+      },
+      {
+        "question": "What is the hold slack distribution for the best‑case corner (fast process, high voltage, low temperature)? Are all hold paths meeting with margin?",
+        "evidence_demanded": "Hold slack histogram for the best‑case corner, with a list of the ten worst hold paths.",
+        "red_flag": "Any hold path with slack less than 50ps (for 28nm) or 30ps (for 7nm) without a buffer insertion plan.",
+        "why_it_matters": "Hold failures are equally fatal as setup; they cause the chip to latch invalid data and are often harder to fix because they require delaying paths without hurting setup."
+      },
+      {
+        "question": "Have you run across all signoff corners (including slow‑slow, fast‑fast, and the nominal) and verified that the worst case is dominated by the intended corner?",
+        "evidence_demanded": "A matrix of slack numbers per corner, with the worst‑case corner highlighted.",
+        "red_flag": "A corner other than the assumed worst‑case actually has the worst slack, indicating a process sensitivity that was not considered.",
+        "why_it_matters": "If the wrong corner is assumed, the chip may fail in a different manufacturing bin, reducing yield."
+      }
+    ],
+    "kill_questions": [
+      "Are there any negative setup paths in the signoff corner? If yes, the review stops – we need an immediate fix plan.",
+      "What is the worst‑case hold slack in the fast corner? If it's less than 0, we cannot tape out."
+    ],
+    "waiver_culture": "Often, a few paths with small negative slack are waived with a promise to use a faster timing model after a final run; the cost is usually a schedule delay of a few days and, sometimes, a minor frequency reduction if the waiver backfires.",
+    "confidence": 0.95
+  },
+  {
+    "review_gate": "Physical Verification Signoff Review",
+    "purpose": "Catch DRC, LVS, antenna, and electromigration errors that would cause the chip to fail at fabrication or in the field. This is the final check that the physical layout is manufacturable and reliable.",
+    "checks": [
+      {
+        "question": "Show me the DRC violation report – how many violations by type (short, spacing, antenna, via, etc.) and where they are located.",
+        "evidence_demanded": "DRC summary report with violation counts per rule type and a heatmap of violation density.",
+        "red_flag": "Any DRC violation that is not a minor spacing violation that can be fixed with a simple ECO; any antenna violation on a critical net.",
+        "why_it_matters": "DRC violations prevent manufacturing; if not fixed, the chip will not be made."
+      },
+      {
+        "question": "What is the LVS result? Does the netlist match the layout exactly, including all power and ground connections?",
+        "evidence_demanded": "LVS report showing a clean comparison, with any mismatches explained.",
+        "red_flag": "Any LVS mismatch, especially missing or extra devices, or incorrect power connections.",
+        "why_it_matters": "LVS errors mean the actual silicon does not match the intended circuit, leading to functional failure."
+      },
+      {
+        "question": "Show me the antenna ratio report – are any nets above the foundry limit? What is the worst antenna ratio and which nets?",
+        "evidence_demanded": "Antenna ratio list, with the violating nets flagged.",
+        "red_flag": "Any net with antenna ratio > 1.0 without a diode inserted.",
+        "why_it_matters": "Antenna violations during fabrication can damage gate oxide, causing immediate failure or early lifetime wearout."
+      },
+      {
+        "question": "What are the electromigration checks for power and signal nets? Show me the current density results and the worst case margin.",
+        "evidence_demanded": "EM report showing current density per metal segment, with a comparison to the foundry limit.",
+        "red_flag": "Any power rail segment exceeding the limit by more than 10%, or any signal net carrying average current above the limit.",
+        "why_it_matters": "Electromigration leads to open circuits over time, reducing reliability; it is a silent killer that appears in the field."
+      },
+      {
+        "question": "What is the density of dummy fills? Are there any fill violations (e.g., insufficient metal density in a region)?",
+        "evidence_demanded": "Metal density map and fill report, showing if all regions meet the minimum density requirement.",
+        "red_flag": "Any region with metal density below the foundry threshold (typically 30%) or above the maximum.",
+        "why_it_matters": "Insufficient metal density causes CMP dishing, leading to thickness variations that affect timing and reliability."
+      },
+      {
+        "question": "Show me the via coverage report – are there any vias that are not fully enclosed by metal, or are there insufficient vias in high-current areas?",
+        "evidence_demanded": "Via coverage report, highlighting vias that do not meet the enclosure rules.",
+        "red_flag": "Any via with less than 100% enclosure, or multiple vias missing in a power array.",
+        "why_it_matters": "Partial vias have higher resistance and can cause open circuits or IR drops."
+      },
+      {
+        "question": "What is the signoff for all corners of DRC? Have you run DRC at all process corners?",
+        "evidence_demanded": "A log of DRC runs at each corner, showing no violations.",
+        "red_flag": "DRC violations that appear only at a certain corner, indicating a process sensitivity.",
+        "why_it_matters": "A violation that only appears at one corner may still occur in manufacturing if the chip is processed at that corner."
+      }
+    ],
+    "kill_questions": [
+      "Are there any unfixed DRC violations? If yes, the review is dead – we cannot tapeout with any DRC violation.",
+      "Any antenna violation on a clock net? That's an automatic no."
+    ],
+    "waiver_culture": "In practice, some minor DRC violations (e.g., small spacing infractions at the edge of the chip) are waived with a formal waiver from the foundry, but every waiver carries risk of yield loss; the cost is usually a few percentage points of yield or a second spin if the foundry rejects the wafer.",
+    "confidence": 0.93
+  }
+]

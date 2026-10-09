@@ -1,0 +1,161 @@
+PROMPT A — JSON output (3 episodes):
+
+
+[System: Your previous response was truncated by the output length limit. Continue exactly where you left off. Do not restart or repeat prior text. Finish the answer directly.]
+
+{ "episodes": [
+
+{
+  "title": "Late-CTS routing congestion resolved by macro halo enlargement, not router effort",
+  "design_context": "28nm, ~1.2M placeable instances, 87 macros, 3 clock domains (600 MHz, 300 MHz, 150 MHz), commercial P&R + synthesis, mobile SoC block.",
+  "prior_state": {
+    "routing_overflow_percent": 14.2,
+    "overflow_bins_near_macro": 23,
+    "unresolved_drc_count": 520,
+    "wns_ns": 0.21,
+    "tns_ns_ps": 0,
+    "utilization_percent": 79.0,
+    "congestion_location": "south edge of a 1.4mm x 0.9mm SRAM macro, 400um x 900um hotspot"
+  },
+  "observation": "After CTS and three full detailed-routing iterations at max effort, 14.2% overflow persists in a 400um x 900um region along the south edge of a large SRAM macro. 520 DRCs (antenna and min-spacing) unresolved in the same bin cluster. Router converges to 14% then bounces back each iteration. WNS +0.21ns, TNS zero. Severity: HIGH.",
+  "hypothesis": "Structural congestion from undersized macro halo combined with shared lower-metal routing channel carrying a high-fanout 600 MHz clock. Not a search-quality problem — the channel is physically full.",
+  "candidates_considered": [
+    {
+      "action": "Move the SRAM macro 50um south to open the channel",
+      "rejected_because": "Would require re-pinning 14 power straps and re-routing the power grid under the macro; estimated 3 engineer-days plus 5-day schedule slip on the integration milestone."
+    },
+    {
+      "action": "Run 3 more detailed-routing iterations at max effort with aggressive rip-up",
+      "rejected_because": "Two prior iterations had already dropped overflow from 19% to 14% — diminishing returns. Each iteration consumes ~4 hours on the shared 64-core run farm needed by two other blocks in the same integration window."
+    },
+    {
+      "action": "Force routing to M6-M7 in the congested region via layer directives",
+      "rejected_because": "Design already uses 6 of 7 available metal layers; foundry DRC forbids the required via-stack change within the 20um macro-adjacent zone (confirmed in PDK rule deck). Would create new DRC violations worse than the overflow."
+    },
+    {
+      "action": "Enlarge macro halo from 15um to 35um on the south edge, displacing affected standard cells into adjacent low-congestion region",
+      "rejected_because": null
+    }
+  ],
+  "chosen_intervention": "Enlarged the south-edge halo of the SRAM macro from 15um to 35um (20um increase on one edge only). Re-ran partial placement to absorb the displaced ~28K standard cells into neighboring bins with 62% current utilization. Re-routed the affected region with a focused route job (region-scoped, not full chip). Total engineering time ~6 hours; tool runtime ~1.5 hours on 16 cores.",
+  "post_state": {
+    "routing_overflow_percent": 2.8,
+    "overflow_bins_near_macro": 2,
+    "unresolved_drc_count": 31,
+    "wns_ns": 0.11,
+    "tns_ns_ps": 0,
+    "utilization_percent": 78.6,
+    "notes": "DRCs reduced to 31, all resolvable with standard antenna diode insertion. WNS dropped 100ps from cell displacement — within the 600 MHz setup budget headroom of 0.35ns."
+  },
+  "expert_assessment": "Right call. A structural fix addressed the root cause at lower cost than continued router thrashing or a macro move. The general lesson: late-stage congestion hugging a macro edge almost always traces to an undersized halo, and a one-sided halo bump is cheap if the adjacent region has spare capacity. Will not transfer when the adjacent region is also above 85% utilization (displaced cells have nowhere to go) or when the macro is pinned by its I/O boundary (no halo room without moving the macro).",
+  "confidence": 0.74,
+  "failure_class": "FAIL_CONGESTION",
+  "source_basis": "composite-of-common-practice",
+  "weakest_point": "The specific overflow percentages and DRC counts are representative composites, not from a single named project; the 100ps WNS degradation from displacing ~28K cells is plausible but instance-count-dependent and could be larger on a denser block."
+},
+
+{
+  "title": "Timing-violation signature distinguished a physical routing bottleneck from a constraint problem",
+  "design_context": "7nm, ~520K placeable instances, 28 macros, 5 clock domains (one at 800 MHz, two at 400 MHz, two at 200 MHz), commercial P&R + synthesis, CPU core complex.",
+  "prior_state": {
+    "wns_ns": -0.42,
+    "tns_ns": -12.8,
+    "violating_path_count": 1247,
+    "hold_wns_ns": 0.21,
+    "hold_tns_ns": 0.0,
+    "violation_distribution": "all 1247 paths in the 800 MHz domain, 98% of endpoints within 30um of the same 0.7mm x 0.5mm macro edge, shared routing channel visible in congestion heat map",
+    "extra_metadata": "paths share a common endpoint cluster and overlap heavily in one routing channel adjacent to the macro"
+  },
+  "observation": "1,247 setup-violating paths, all in the 800 MHz domain, all ending within 30um of the same macro edge, WNS -0.42ns, TNS -12.8ns. The violating paths overlap heavily in a single routing channel visible in the congestion histogram — the same channel that showed 22% overflow in the routing report. Hold timing clean at +0.21ns WNS. Severity: CRITICAL.",
+  "hypothesis": "Physical routing bottleneck, not a constraint or logic-depth problem. The signature — many paths failing by a similar small amount, concentrated in one physical region, coinciding with a visible routing channel overflow — indicates the router cannot find viable routes through that channel, not that constraints are wrong or logic is too deep. A constraint problem would show violations spread across the design or concentrated in logically-related but physically-dispersed paths.",
+  "candidates_considered": [
+    {
+      "action": "Run aggressive setup optimization passes (compile_ultra -fix_setup, 3 more iterations)",
+      "rejected_because": "Tool had already completed 3 setup-repair passes with no improvement on these specific paths. The bottleneck is routing resources, not logic depth — adding buffers to fix setup makes the routing problem worse by inserting more wire through the same congested channel."
+    },
+    {
+      "action": "Insert additional buffers on the 1247 critical paths to improve slack",
+      "rejected_because": "Would add net wirelength through the already-congested channel, worsening the overflow and likely creating new violations elsewhere. The problem is not logic depth — the paths are failing by 420ps total, not hundreds of nanoseconds."
+    },
+    {
+      "action": "Apply a false path on the 200 worst-violating paths",
+      "rejected_because": "These paths carry real functional data signals between two major logic blocks; false-pathging them would mask a real sign-off problem. Would require written justification to the client and potentially a respin if the paths are later found to be active. The paths are not test-mode or scan-only."
+    },
+    {
+      "action": "Apply a multicycle-path exception of 1 cycle to the entire endpoint cluster",
+      "rejected_because": "Would push the entire endpoint cluster to a 2-cycle requirement, degrading the interface throughput by 50% and potentially breaking the 2:1 CDC relationship with the 400 MHz domain that depends on single-cycle latency for the handshaking protocol. The interface specification allows multicycle on only 12 of the 1,247 paths, not the whole cluster."
+    },
+    {
+      "action": "Reposition the high-fanout buffer cluster driving the endpoint region ~40um away from the congested channel and apply localized routing guidance (region weight increase) to divert routing around the bottleneck",
+      "rejected_because": null
+    }
+  ],
+  "chosen_intervention": "Identified a cluster of 14 high-fanout buffers (tanh-type, driving the endpoint region's clock and data gating) whose placement sat in the congested channel. Repositioned them ~40um into the adjacent open area, then applied a region-level routing weight increase (factor 3x) on the congested channel and a weight decrease on the alternate route around the macro corner. Limited re-route of the affected region only (not full chip re-route). Engineering time ~2 hours; tool runtime ~1 hour on 16 cores.",
+  "
+
+[System: Your previous response was truncated by the output length limit. Continue exactly where you left off. Do not restart or repeat prior text. Finish the answer directly.]
+
+"post_state": { "wns_ns": -0.08, "tns_ns": -2.1, "violating_path_count": 187, "hold_wns_ns": 0.21, "notes": "187 remaining violating paths are in a structurally different region (north edge, different routing channel) and will be addressed in a subsequent iteration. The 1,060 paths that were failing due to the buffer cluster are now clean. WNS improved from -0.42ns to -0.08ns; remaining -80ps is within the next optimization pass budget." }, "expert_assessment": "Correct diagnostic: the violation signature (clustered, coincident with congestion, similar slack deficit) pointed to a physical routing bottleneck, not a constraint or logic problem. Repositioning the buffer cluster and applying localized routing weight was the lowest-cost fix. The lesson: when many paths fail by similar amounts and share a physical hotspot, look at the routing channel before touching constraints. Will not transfer when violating paths are logically clustered but physically dispersed — that signature indicates a logic or constraint problem, not a routing one.", "confidence": 0.71, "failure_class": "FAIL_TIMING", "source_basis": "composite-of-common-practice", "weakest_point": "The 14-buffer cluster detail is a constructed illustration; real cases may involve fewer or more buffers, or a different root cause (e.g., a clock-tree buffer, a high-fanout net that could not be moved without logic changes). The exact path count and slack numbers are representative, not from a named project." },
+
+{
+  "title": "Communication controller block budget: multicycle-path vs. tighter constraint",
+  "design_context": "16nm, ~340K placeable instances, 12 macros, 2 clock domains (200 MHz core domain, 400 MHz IO domain), commercial P&R + synthesis, a communication controller block interfacing a CPU core complex to a DDR memory controller. The block boundary is between the 200 MHz domain (CPU side) and the 400 MHz domain (IO side).",
+  "prior_state": {
+    "wns_ns": 0.0,
+    "tns_ns": 0.0,
+    "boundary_path_count": 312,
+    "boundary_wns_ns": -0.15,
+    "boundary_tns_ns": -2.3,
+    "domain_200mhz_wns_ns": 0.12,
+    "domain_400mhz_wns_ns": 0.08,
+    "interface_spec": "312 paths cross the block boundary; 180 are single-cycle data transfers, 132 are handshake/control signals",
+    "sanity": "The 200 MHz domain has slack; the 400 MHz domain has slack. The only failing region is the boundary crossing."
+  },
+  "observation": "After initial place-and-route, 312 boundary-crossing paths fail setup by a combined -2.3ns TNS, WNS -0.15ns. All 312 paths cross from the 200 MHz domain to the 400 MHz domain through a single synchronizer region. The 200 MHz domain has +0.12ns WNS and the 400 MHz domain has +0.08ns WNS — both domains are individually clean. Only the boundary paths fail. Severity: MODERATE.",
+  "hypothesis": "The boundary paths are failing because they are constrained to a single-cycle requirement while crossing from a slower domain to a faster domain through a physical region with limited routing resources (the synchronizer sits in a congested corner of the block). The failure is both a constraint choice (single-cycle without accounting for the physical difficulty) and a physical placement issue (the synchronizer region has limited routing).",
+  "candidates_considered": [
+    {
+      "action": "Apply a multicycle-path exception of 1 cycle to all 312 boundary paths (i.e., allow 2 cycles for the 200 MHz -> 400 MHz crossing)",
+      "rejected_because": "The interface specification for 180 of the 312 paths (the data-transfer paths) requires single-cycle latency to meet the end-to-end throughput requirement of the communication protocol. Multicycle on those paths would reduce throughput from 200 MT/s to 100 MT/s on the CPU side, breaking the protocol timing budget for the memory controller. The 132 handshake/control paths are candidates for multicycle but the 180 data paths are not."
+    },
+    {
+      "action": "Apply a tighter SDC on the 400 MHz domain's output paths to the synchronizer (reduce required arrival time by 200ps)",
+      "rejected_because": "The 400 MHz domain has only +80ps WNS; tightening by 200ps would push the entire 400 MHz domain to -120ps WNS, creating 4,200 new violating paths inside the 400 MHz domain. This would shift the problem from the boundary to the 400 MHz domain's own logic — not a solution."
+    },
+    {
+      "action": "Reposition the synchronizer region closer to the midpoint of the block boundary to equalize routing distance on both sides",
+      "rejected_because": "The synchronizer region is fixed by the I/O pad location on the block boundary — it cannot move without moving the pad, which is a floorplan-level change requiring re-approval from the package team and a 2-week schedule slip. Not viable this late in the project."
+    },
+    {
+      "action": "Apply a multicycle-path exception of 1 cycle to the 132 handshake/control paths only, and run an additional setup optimization pass on the remaining 180 data paths with the synchronizer region as a fixed obstruction (routing weight increase on the synchronizer region, routing guidance away from it)",
+      "rejected_because": null
+    }
+  ],
+  "chosen_intervention": "Applied a multicycle-path exception of 1 cycle to the 132 handshake/control paths (documented in the SDC with a rationale note citing the protocol spec's allowance for handshake multicycle). For the 180 data paths: applied a routing weight increase (factor 5x) on the synchronizer region to divert routing around it, and ran a focused setup optimization pass on those 180 paths using the commercial synthesis tool's setup repair with the synchronizer region as a fixed obstruction. The optimization pass added 8 buffer insertions and re-paths 6 critical nets to avoid the congested region. Engineering time ~3 hours; tool runtime ~2 hours on 32 cores.",
+  "post_state": {
+    "wns_ns": 0.04,
+    "tns_ns": 0.0,
+    "boundary_path_count": 312,
+    "boundary_wns_ns": 0.04,
+    "boundary_tns_ns": 0.0,
+    "handshake_paths": {
+      "count": 132,
+      "status": "multicycle 1-cycle applied, clean",
+      "protocol_note": "protocol spec allows handshake multicycle"
+    },
+    "data_paths": {
+      "count": 180,
+      "status": "single-cycle requirement met, 8 buffer insertions, 6 net re-paths",
+      "wns_ns": 0.04
+    },
+    "domain_200mhz_wns_ns": 0.11,
+    "domain_400mhz_wns_ns": 0.06,
+    "notes": "All boundary paths clean. 132 handshake paths now have a 2-cycle budget (acceptable per protocol). 180 data paths remain single-cycle and meet timing with +40ps WNS. 8 buffer insertions added ~15um total wirelength on data paths but avoided the synchronizer region. 6 net re-paths increased routing on alternate channels but those channels had spare capacity (28% utilization)."
+  },
+  "expert_assessment": "Right call for this scenario. The key insight was distinguishing the 132 handshake paths (which the protocol allows to be multicycle) from the 180 data paths (which the protocol requires to be single-cycle). A blanket multicycle on all 312 paths would have hidden the problem but broken the protocol. A blanket tightening of the 400 MHz domain would have made things worse. The differential approach — multicycle on handshake, targeted optimization on data — solved the boundary without breaking either domain or the protocol. The general lesson: when a block boundary fails, first check whether the SDC correctly encodes the protocol's latency requirements; a budget that assumes uniform single-cycle across all boundary paths is often wrong. Will not transfer when the protocol requires uniform single-cycle for all boundary paths (then multicycle is off the table and the fix must be physical — reposition the synchronizer or improve routing).",
+  "confidence": 0.68,
+  "failure_class": "SDC_BUDGET",
+  "source_basis": "composite-of-common-practice",
+  "weakest_point": "The protocol-specific distinction between handshake multicycle (allowed) and data single-cycle (required) is a constructed illustration; real protocols vary widely, and the exact counts (132 vs 180) are representative. The buffer insertion count and net re-path count are plausible but instance-specific."
+}
+] }

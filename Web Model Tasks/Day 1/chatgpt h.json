@@ -1,0 +1,110 @@
+[
+{
+"pitfall_name": "JS↔WASM boundary copying",
+"what_happens": "A prover benchmark that appears to operate on one large in-memory dataset actually spends substantial time copying inputs or outputs between JavaScript objects, TypedArrays, and WASM linear memory. The arithmetic kernel itself may be fast while end-to-end proving is dominated by marshaling.",
+"why": "JavaScript can create typed-array views directly over a WebAssembly linear-memory buffer, avoiding a copy, but ordinary JavaScript objects, strings, independently allocated ArrayBuffers, and many generated bindings require serialization or copying. Crossing the boundary repeatedly also adds call overhead even when the payload is small.",
+"how_discovered": "The WASM-only inner loop looks fast in a profiler, but total wall-clock time grows roughly with the amount of data transferred or with the number of JS↔WASM calls. A typical diagnosis takes hours because developers initially benchmark the kernel rather than the complete invocation path.",
+"mitigation": "Keep large proving inputs in WASM linear memory, expose typed-array views where possible, batch calls so that one boundary crossing processes substantial work, and benchmark both kernel-only and end-to-end paths separately.",
+"affects": "performance",
+"confidence": 0.98
+},
+{
+"pitfall_name": "SharedArrayBuffer requires a deployable cross-origin-isolated page",
+"what_happens": "A threaded WASM build works locally or in a suitably configured test page but fails in the actual application with SharedArrayBuffer unavailable, causing the threaded prover to fall back, fail initialization, or lose parallelism.",
+"why": "WebAssembly threads use shared WebAssembly memory backed by SharedArrayBuffer. Browsers restrict SharedArrayBuffer and related high-resolution capabilities to cross-origin-isolated contexts. Current web deployment generally requires COOP and COEP headers, and a Permissions-Policy setting can also prevent cross-origin isolation. Cross-origin resources that do not satisfy the embedding policy can therefore break an otherwise correct deployment.",
+"how_discovered": "The first visible symptom is often a missing SharedArrayBuffer or a false crossOriginIsolated value rather than a cryptographic error. Diagnosis commonly takes hours to a day because the WASM binary and worker code appear correct while the HTTP response headers or one third-party resource are responsible.",
+"mitigation": "Serve the top-level application with an appropriate COOP/COEP configuration, verify self.crossOriginIsolated in both window and workers, audit every embedded cross-origin resource, and test the exact production embedding environment rather than only localhost.",
+"affects": "deployment",
+"confidence": 0.99
+},
+{
+"pitfall_name": "Cross-origin iframe destroys the assumptions behind threaded proving",
+"what_happens": "A prover that requires cross-origin isolation works as a standalone page but stops being able to use its threaded/SAB path when embedded inside another site's iframe.",
+"why": "Cross-origin isolation is a property of the browsing context and its embedding/resource policy, not merely of the WASM module. An embedded document can be subject to the embedding page's policies and COEP/CORS/CORP requirements, and current platform rules also expose cross-origin-isolation permission through Permissions-Policy.",
+"how_discovered": "The same URL behaves differently when opened directly versus embedded in a wallet, dashboard, documentation site, or application shell. Engineers often spend many hours debugging WASM workers before testing the iframe context itself.",
+"mitigation": "Treat embedding as a first-class deployment mode. Test direct, same-origin iframe, and cross-origin iframe configurations; establish the required embedding and Permissions-Policy contract; and provide a single-threaded or non-SAB fallback when the host cannot satisfy the isolation requirements.",
+"affects": "deployment",
+"confidence": 0.96
+},
+{
+"pitfall_name": "WASM memory growth invalidates assumptions about existing views",
+"what_happens": "A prover grows its non-shared WebAssembly.Memory and previously created JavaScript typed-array views suddenly stop representing usable memory, producing detached buffers, invalid lengths, or apparently corrupted/empty host-side state. Large allocations can also fail even though the process appears to have substantial free memory.",
+"why": "For non-shared WebAssembly memory, memory.grow can replace/detach the underlying ArrayBuffer, so JavaScript views created before growth cannot safely be retained as though the buffer were unchanged. WebAssembly's address-space and allocation model also requires sufficiently large contiguous virtual address space; the theoretical wasm32 address space is 4 GiB, not a promise that a browser can allocate anything close to that amount.",
+"how_discovered": "Failures often appear only on large proving instances or after a particular allocation threshold, and the stack trace may point at an innocent TypedArray access. Diagnosis can take hours because small tests never trigger growth.",
+"mitigation": "Pre-size memory when the workload size is known, set an appropriate maximum, recreate host-side views after growth, avoid retaining stale views, and design large-instance tests explicitly around browser allocation limits rather than treating the wasm32 4 GiB address space as available RAM.",
+"affects": "correctness",
+"confidence": 0.98
+},
+{
+"pitfall_name": "Worker-pool oversubscription and synchronization overhead",
+"what_happens": "Adding more WASM workers makes a prover slower rather than faster, with CPU utilization oscillating, worker contention increasing, or small proving jobs becoming dominated by synchronization.",
+"why": "WebAssembly threads execute through browser workers and shared memory. A worker pool larger than the useful hardware parallelism can compete for CPU resources, while atomic coordination, barriers, cache contention, and shared-memory traffic can dominate fine-grained field operations. Blocking synchronization also has different implications on worker and main-thread contexts.",
+"how_discovered": "Throughput improves up to some worker count and then plateaus or regresses; profiling shows substantial worker synchronization or scheduling time rather than arithmetic. Finding the knee can take hours because the optimal count changes with device and workload.",
+"mitigation": "Benchmark worker counts per workload class, default to a conservative hardware-aware pool size, use coarse-grained work units, minimize shared mutable state and synchronization, and never assume that logical CPU count equals useful proving parallelism.",
+"affects": "performance",
+"confidence": 0.97
+},
+{
+"pitfall_name": "WASM SIMD exists but the field-arithmetic hot loop remains effectively scalar",
+"what_happens": "A build advertised as SIMD-enabled shows little or no speedup over scalar WASM, even though the generated module contains v128 instructions elsewhere.",
+"why": "WASM SIMD provides explicit vector instructions, but compiler vectorization is not guaranteed for arbitrary finite-field arithmetic. Carry propagation, reductions, conditional operations, data dependencies, aliasing, and lane-crossing operations can prevent useful vectorization or produce code whose overhead offsets the benefit. Merely enabling a SIMD target feature does not prove that the prover's dominant arithmetic was vectorized.",
+"how_discovered": "The module contains SIMD instructions, yet hardware counters, generated-code inspection, or a controlled scalar-versus-SIMD build shows little improvement in the actual field-multiplication/reduction kernel. Diagnosis commonly takes hours to days because 'SIMD enabled' is mistaken for 'hot loop vectorized.'",
+"mitigation": "Inspect the generated WASM or compiler output for the actual hot functions, benchmark isolated field operations, design data layouts for lane parallelism, and use explicit SIMD intrinsics where the compiler cannot reliably derive the desired structure.",
+"affects": "performance",
+"confidence": 0.96
+},
+{
+"pitfall_name": "WebGPU readback turns asynchronous compute into a synchronization benchmark",
+"what_happens": "A benchmark reports unexpectedly poor GPU proving throughput because every small dispatch is followed by buffer mapping or result inspection, making the measured time dominated by synchronization and transfer rather than GPU arithmetic.",
+"why": "WebGPU work is submitted asynchronously. Mapping a GPUBuffer for reading becomes possible only when its contents are ready, and a mapped buffer cannot simultaneously be used by the GPU. A common readback path therefore creates a dependency from GPU execution back to JavaScript, forcing the benchmark to observe completion and potentially serialize otherwise pipelineable work.",
+"how_discovered": "Removing per-dispatch readbacks or batching several dispatches suddenly produces a large throughput improvement. The diagnosis usually takes hours because JavaScript sees a Promise-based API and the synchronization cost is not visually obvious in application code.",
+"mitigation": "Keep intermediate proving state on the GPU, batch dispatches, use staging/readback buffers only at genuine synchronization boundaries, and report compute-only and end-to-end timings separately.",
+"affects": "measurement-validity",
+"confidence": 0.99
+},
+{
+"pitfall_name": "GPU timestamp-query availability and interpretation",
+"what_happens": "A GPU benchmark either cannot create timestamp queries on a target browser/device or reports apparently precise nanosecond timings that are not directly comparable across implementations.",
+"why": "WebGPU timestamp queries require the optional timestamp-query feature. The specification represents results in nanoseconds, but explicitly leaves aspects of how timestamp values are determined implementation-defined. Availability is therefore a capability to test, not a universal baseline, and the reported timestamp should not automatically be interpreted as a portable physical stopwatch.",
+"how_discovered": "A timestamp-query request fails on only some browser/device combinations, or cross-platform timings show suspiciously different resolution/behavior despite identical dispatches. Diagnosis can take hours when the benchmark assumes the feature exists everywhere.",
+"mitigation": "Feature-detect timestamp-query, provide a CPU-side fallback, record browser/device/adapter information with measurements, avoid comparing raw timestamp values across implementations as though they were identically calibrated, and use repeated measurements with appropriate aggregation.",
+"affects": "measurement-validity",
+"confidence": 0.98
+},
+{
+"pitfall_name": "Browser timer resolution makes tiny proving kernels lie",
+"what_happens": "Very small kernels appear to have identical runtimes, unusually quantized runtimes, or large run-to-run noise, causing a benchmark to report a misleading speedup or regression.",
+"why": "Browser performance timers are subject to reduced precision for security and privacy. MDN notes that Performance API timestamps can have reduced resolution, with higher precision available under appropriate cross-origin-isolation conditions. When the measured workload is near the timer's effective resolution, quantization and noise become a substantial fraction of the result.",
+"how_discovered": "Repeated identical runs produce a small set of recurring timestamp values, or multiplying the kernel workload by 10 makes the measured time much more stable. Diagnosis typically takes hours when developers average many tiny measurements without first checking timer granularity.",
+"mitigation": "Measure sufficiently long batches, amortize timing overhead, repeat many independent trials, inspect the distribution rather than only the mean, and record whether the page is cross-origin isolated. Do not infer sub-timer-resolution improvements from JavaScript wall-clock measurements.",
+"affects": "measurement-validity",
+"confidence": 0.99
+},
+{
+"pitfall_name": "WASM compilation and tiering contaminate the first benchmark runs",
+"what_happens": "The first proving operations are substantially slower than steady state, or throughput changes during a supposedly identical benchmark as the runtime compiles and optimizes hot WASM functions.",
+"why": "Browsers can compile WebAssembly in stages and optimize hot code after execution begins. Consequently, startup, compilation, baseline execution, and optimized steady-state execution can occupy different performance regimes. Measuring a handful of first-run proofs conflates proving with runtime initialization and optimization.",
+"how_discovered": "Runtime falls sharply across the first several iterations without any application-level change. Re-running the same benchmark in the same page produces different results from the first invocation, often leading to hours of confusion over alleged nondeterministic prover performance.",
+"mitigation": "Separate module download/compilation from proving, run explicit warmup iterations, establish a steady-state criterion before collecting samples, report cold-start and warm-start performance separately, and repeat benchmarks after a fresh browser/process start when cold-start behavior matters.",
+"affects": "measurement-validity",
+"confidence": 0.96
+},
+{
+"pitfall_name": "Mobile browser memory pressure kills the prover without an algorithmic failure",
+"what_happens": "A prover succeeds repeatedly on desktop but the mobile tab is terminated, the page reloads, WebGPU/WASM allocation fails, or the browser becomes unresponsive for large proof sizes.",
+"why": "Mobile browsers operate under tighter and more dynamic memory budgets than desktop browsers. A large WASM heap, multiple workers, GPU resources, intermediate proving buffers, JavaScript objects, and browser rendering state can combine into a peak footprint that triggers process or tab reclamation. The practical limit is therefore device- and workload-dependent rather than simply the nominal physical RAM.",
+"how_discovered": "The failure threshold varies between devices and sometimes between foreground/background conditions, with little useful application-level error. Establishing the relationship between proof size and peak resident/allocated memory can take a day or more.",
+"mitigation": "Measure peak memory at realistic proof sizes, process large jobs in bounded chunks where the algorithm permits it, release intermediate buffers aggressively, cap worker counts on mobile, avoid simultaneous JS/WASM/GPU copies, and provide an explicit fallback when the workload exceeds the device envelope.",
+"affects": "deployment",
+"confidence": 0.97
+},
+{
+"pitfall_name": "Safari-specific capability and performance divergence",
+"what_happens": "A prover benchmark or deployment path that works on Chromium/Firefox behaves differently on Safari, particularly around newer WebAssembly/WebGPU capabilities, isolation assumptions, compilation behavior, or GPU features.",
+"why": "Browser APIs are specified at different layers and do not imply identical implementation maturity, optimization, or optional-feature availability. WebGPU itself is still not a universal baseline API, and WebKit continues to add and refine WebAssembly functionality; Safari 26.6, for example, added a refinement to WebAssembly streaming compilation. Treating Chrome results as a proxy for Safari therefore conflates specification-level availability with engine-level behavior.",
+"how_discovered": "The same binary passes functional tests but has a large throughput regression, missing optional GPU capability, or different startup profile on Safari. Diagnosis often takes a day because the application initially assumes a browser-neutral performance model.",
+"mitigation": "Maintain a Safari-specific capability matrix, feature-detect rather than user-agent-detect where possible, benchmark Safari independently, keep a scalar/single-threaded fallback, and avoid making Chromium-specific WebGPU or WASM performance assumptions part of correctness.",
+"affects": "deployment",
+"confidence": 0.94
+}
+]

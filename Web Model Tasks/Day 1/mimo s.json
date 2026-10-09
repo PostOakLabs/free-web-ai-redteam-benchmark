@@ -1,0 +1,95 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But these are important technical/mathematical topics where precision matters, so let me share what I know with honest uncertainty flags.
+
+---
+
+**1. ISO 26262-5 Hardware Architectural Metrics**
+
+**SPFM (Single Point Fault Metric):**
+SPFM = 1 - (Σλ_SP + Σλ_RF) / Σλ_total
+
+Where λ_SP = single-point fault rate, λ_RF = residual fault rate, λ_total = total fault rate of all components.
+
+**LFM (Latent Fault Metric):**
+LFM = 1 - Σλ_MP,latent / (Σλ_total - Σλ_S - Σλ_SP - Σλ_RF)
+
+Where λ_MP,latent = latent multiple-point fault rate, λ_S = safe fault rate.
+
+**ASIL targets:**
+- ASIL B: SPFM ≥ 90%, LFM ≥ 60%
+- ASIL C: SPFM ≥ 97%, LFM ≥ 80%
+- ASIL D: SPFM ≥ 99%, LFM ≥ 90%
+
+**PMHF (Probabilistic Metric for Hardware Failure):**
+- ASIL B: < 10^-7 /hour
+- ASIL C: < 10^-7 /hour
+- ASIL D: < 10^-8 /hour
+
+**Uncertainty:** I'm moderately confident in the SPFM formula and ASIL targets. The LFM denominator I'm less certain about — the exact grouping of terms in the denominator may differ slightly from what I've stated. The PMHF targets I'm fairly confident about but the ASIL B/C distinction may be slightly different.
+
+---
+
+**2. JEDEC FIT-Rate Math**
+
+**FIT (Failures In Time):** Failures per 10^9 device-hours.
+
+**Point estimate from accelerated test data:**
+FIT = (χ²(α, 2(r+1)) / (2 × N × t × AF)) × 10^9
+
+Where:
+- χ²(α, 2(r+1)) = chi-squared value at confidence level α with 2(r+1) degrees of freedom
+- r = number of observed failures
+- N = sample size (number of devices tested)
+- t = test duration (hours)
+- AF = acceleration factor
+
+**Arrhenius acceleration factor:**
+AF = exp[(Ea/k) × (1/T_use - 1/T_test)]
+
+Where:
+- Ea = activation energy (eV)
+- k = Boltzmann constant (8.617 × 10^-5 eV/K)
+- T_use = use temperature (Kelvin)
+- T_test = test temperature (Kelvin)
+
+**Typical activation energies:**
+- ~0.7 eV for electromigration
+- ~1.0 eV for time-dependent dielectric breakdown (TDDB)
+- ~0.5 eV for some diffusion mechanisms
+
+**Uncertainty:** The chi-squared formula structure I'm fairly confident about, but the exact degrees-of-freedom expression (2(r+1) vs. 2r+2 — same thing, but the convention varies) and whether it's one-sided or two-sided I'm less certain about. The Arrhenius formula and typical Ea values I'm confident about.
+
+---
+
+**3. EAR Advanced-Computing Parameters (ECCN 3A090)**
+
+**Total Processing Performance (TPP):**
+TPP = 2 × TOPS (for non-saturated multiply-accumulate operations) or TPP = TOPS (for saturated MAC operations), aggregated across all chips on the integrated circuit.
+
+Actually, I need to be more careful. The TPP formula as defined in the EAR is:
+
+TPP = Adjusted Peak Performance (APP) — which is calculated as the aggregate theoretical peak number of operations per second for the chip.
+
+**Performance Density:**
+Performance Density = TPP / die area (in mm²)
+
+**Thresholds (as I recall, but these have been updated):**
+- ECCN 3A090 controls ICs with TPP > 4800 AND performance density > 5.92 (or similar thresholds)
+
+**Uncertainty:** I am NOT confident about the current threshold values. The EAR has been updated multiple times since the initial October 2022 rule, and the specific numbers may have changed. I would strongly recommend checking the current Bureau of Industry and Security (BIS) Federal Register notices for the latest thresholds. The formula structure I'm moderately confident about but the exact variable definitions may differ from what I've stated.
+
+---
+
+**4. CHIPS Act Incentives Math (Section 48D)**
+
+**Investment Tax Credit:**
+Section 48D of the Internal Revenue Code (added by the CHIPS and Science Act of 2022) provides a 25% investment tax credit for qualified semiconductor manufacturing facility investments.
+
+**Eligibility:**
+- Applies to investments in facilities that manufacture semiconductors or semiconductor manufacturing equipment
+- The facility must be placed in service after the enactment date
+
+**Uncertainty:** I'm fairly confident about the 25% credit rate. However, I'm NOT confident about the exact statutory locators (specific IRC section numbers, paragraph references) or the precise eligibility thresholds and phase-down conditions. The statutory text is complex and I don't want to cite specific clause numbers I'm not sure about.
+
+---
+
+**Honest assessment:** Of these four families, I'm most confident about the ISO 26262 metrics and the Arrhenius/FIT-rate formulas. I'm least confident about the EAR thresholds (which change with regulatory updates) and the CHIPS Act statutory details. For any calculator that will be verified against authoritative text, I'd recommend checking all formulas and thresholds against the primary sources before use.

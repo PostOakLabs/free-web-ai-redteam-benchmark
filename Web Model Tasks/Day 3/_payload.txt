@@ -1,0 +1,18 @@
+Execute the attached document exactly as written, following its output format and honesty rules to the letter, and reply with the bare JSON only.
+
+# Task: boundary-inclusivity verdict tables for regulatory comparators
+
+Every answer is a closed-form verdict graded mechanically against operative regulatory text we hold. Show reasoning per cell; honesty labels taken at face value.
+
+For each rule below, produce a verdict table for the inputs listed: does the trigger/test FIRE (or PASS) at exactly the boundary value, just below, and just above? State the operative phrase's inclusivity (strict vs inclusive) that drives each verdict.
+
+1. **HOEPA prepayment-penalty trigger** — regulation: penalties that "can exceed, in total, more than 2 percent of the amount prepaid." Inputs: 1.99%, 2.00%, 2.01%.
+2. **HOEPA duration trigger** — "more than 36 months after consummation." Inputs: 35, 36, 37 months.
+3. **Higher-priced covered transaction** — APR "exceeds the average prime offer rate … by 1.5 or more percentage points." Spreads: 1.49, 1.50, 1.51.
+4. **General QM price limit** — APR "does not exceed APOR … by 2.25 or more percentage points" (pass condition). Spreads: 2.24, 2.25, 2.26.
+5. **GloBE de-minimis (general rule)** — average revenue "less than EUR 10 million" AND average income "less than EUR 1 million." Pairs: (10.0M, 0.9M), (9.9M, 1.0M), (9.9M, 0.9M).
+6. **Transitional CbCR safe harbour simplified ETR** — simplified ETR "equal to or greater than" the 16% transition rate (2026 fiscal year). ETRs: 15.99%, 16.00%, 16.01%.
+7. **Solvency II Tier 1 floor** — eligible Tier 1 "at least equal to" 50% of SCR. Ratios: 49.99%, 50.00%, 50.01%.
+8. **NIS2 significant incident (users leg)** — affected users threshold framed as "equal to or greater than" the minimum. Values: threshold−1, threshold, threshold+1.
+
+**Output:** bare JSON only: one object per rule `{"rule": N, "phrase_inclusivity": "strict|inclusive", "verdicts": {"below": "...", "at": "...", "above": "..."}, "reasoning": "<one sentence>"}` plus `{"weakest_point": "..."}` — the rule whose phrasing you are least certain you have verbatim-right, and why.

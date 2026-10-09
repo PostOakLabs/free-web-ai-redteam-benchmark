@@ -1,0 +1,54 @@
+```json
+[
+  {
+    "title": "Clock distribution using an X-Y grid tree with global H-tree",
+    "where_in_paper": "Clock distribution section",
+    "decision": "Implement a hierarchical clock distribution network combining an X-Y grid tree tuning method with a global H-tree to deliver a single 1.5 GHz clock with 20 ps skew and 35 ps jitter to 15,200 pins.",
+    "alternatives_or_rejected": "The paper likely considered a simpler tree-only or mesh-only approach; the chosen hybrid method balances skew and jitter across a large die.",
+    "rationale": "To achieve the 1.3+ GHz operating frequency, extremely low clock skew and jitter were required across the entire 174‑million‑transistor chip.",
+    "outcome": "The clock distribution achieved 20 ps skew and 35 ps jitter across 15,200 clock pins, enabling the chip to function above 1 GHz.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Adoption of 0.18 µm CMOS SOI technology with 7‑layer copper",
+    "where_in_paper": "Technology and fabrication section",
+    "decision": "Fabricate the POWER4 chip using a 0.18 µm CMOS silicon-on-insulator (SOI) process with seven layers of copper metallization.",
+    "alternatives_or_rejected": "Bulk CMOS was the alternative; SOI was chosen for its superior performance and reduced parasitic capacitance.",
+    "rationale": "SOI technology provided higher performance and lower power for the high-frequency design, while copper metallization reduced resistance and improved signal integrity.",
+    "outcome": "The chip contained over 170M transistors and operated at >1.3 GHz in the laboratory.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Physical synthesis methodology for timing closure",
+    "where_in_paper": "Design methodology section",
+    "decision": "Adopt an integrated physical synthesis methodology that tightly couples logic synthesis, placement, and timing optimization to achieve timing closure.",
+    "alternatives_or_rejected": "A traditional disjointed flow (synthesis → placement → routing → timing fix) was rejected in favor of an integrated approach to reduce iterations.",
+    "rationale": "The complexity and size of POWER4, combined with its high frequency, required a methodology that could achieve timing closure early and consistently.",
+    "outcome": "The methodology enabled the multisite design team to meet project goals and complete the design on schedule.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Hierarchical physical design with macros, units, and cores",
+    "where_in_paper": "Physical design and integration section",
+    "decision": "Organize the chip physical design hierarchically: transistors → macros → units → microprocessor cores → chip.",
+    "alternatives_or_rejected": "A flat, full‑chip approach was infeasible due to the 174M transistor count and 1.3 GHz frequency; hierarchical design enabled team partitioning.",
+    "rationale": "Hierarchical design allowed multiple teams to work in parallel on different units, reducing integration risk and enabling reuse.",
+    "outcome": "The chip contained two independent processor cores, a shared L2 cache, an L3 directory, and all logic needed for SMP systems.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  },
+  {
+    "title": "Integration of power and thermal management in physical design",
+    "where_in_paper": "Power and integration section",
+    "decision": "Incorporate power distribution and thermal management as first‑class concerns in the physical design flow, not as afterthoughts.",
+    "alternatives_or_rejected": "The alternative would have been to focus purely on performance and timing, then address power/thermal later—rejected due to the high power density of SOI.",
+    "rationale": "The 174M‑transistor chip at 1.3 GHz dissipated significant power, requiring early planning of power grids and thermal mitigation.",
+    "outcome": "The paper emphasizes power and integration as key enablers for meeting project goals on schedule.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.65
+  }
+]
+```

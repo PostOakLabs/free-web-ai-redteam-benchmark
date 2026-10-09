@@ -1,0 +1,107 @@
+```json
+{
+  "opening": [
+    "Tell me about a time a design looked fine and then, late in the schedule, you found out it wasn't — what happened?",
+    "What's a project where the fix everyone expected to work didn't, and you had to find a different one?",
+    "Think of a closure problem where you were genuinely not sure at first whether it was a constraint issue, a logic issue, or a physical issue — walk me through that one."
+  ],
+  "decompression": [
+    {
+      "question": "Right before you found the problem, what did the reports say — what were WNS, TNS, overflow, or utilization sitting at?",
+      "extracts": "prior_state",
+      "follow_up_if_vague": "If you don't remember exact numbers, that's fine — was it a 'barely passing' number or a 'comfortably clean' number? Roughly what order of magnitude?",
+      "leading_risk": "Naming a specific number first (e.g. 'was WNS around -50ps?') anchors the expert to that figure even if it's wrong. Ask for the number open-ended before offering any range."
+    },
+    {
+      "question": "What was the very first thing that told you something was wrong — what did you actually see on the screen or in the report?",
+      "extracts": "observation",
+      "follow_up_if_vague": "Was that a small deviation from normal, or something that immediately looked serious? What made it stand out from routine noise?",
+      "leading_risk": "Asking 'was it a HIGH or CRITICAL severity issue?' presupposes the severity framing before the expert has described it. Let them describe the observation first, then ask them to characterize severity in their own terms."
+    },
+    {
+      "question": "At that moment, before you'd done anything, what did you think was actually causing it?",
+      "extracts": "hypothesis",
+      "follow_up_if_vague": "What made you lean that way rather than some other explanation? Was there a specific detail in the report that pointed you there?",
+      "leading_risk": "Asking 'did you suspect it was a congestion problem?' supplies the diagnosis. Ask what they suspected before suggesting any candidate cause."
+    },
+    {
+      "question": "Walk me through every option you seriously weighed — not just the one you picked. What else was on the table?",
+      "extracts": "candidates_considered (actions)",
+      "follow_up_if_vague": "Sometimes the fastest way to remember is: what would a less experienced engineer have tried first, that you didn't? Or: what's the 'obvious' fix here that you specifically decided against?",
+      "leading_risk": "Asking 'did you consider re-floorplanning?' plants a specific candidate rather than letting the expert generate their own list — use the neutral 'what else was on the table' phrasing and only offer generic prompts (schedule/area/risk) if they stall."
+    },
+    {
+      "question": "For each one you didn't pick, what specifically made you rule it out — was it schedule, risk, area, something else?",
+      "extracts": "candidates_considered (rejected_because)",
+      "follow_up_if_vague": "If you just said 'it wouldn't have worked' — worked how? What would have actually gone wrong if you'd done it anyway?",
+      "leading_risk": "Accepting 'it wouldn't have worked' as a final answer is the single biggest failure mode here — it produces a rejection with no real cost attached. Always push once more for the concrete mechanism or cost."
+    },
+    {
+      "question": "What did you actually do — specific enough that another engineer could repeat it exactly?",
+      "extracts": "chosen_intervention",
+      "follow_up_if_vague": "If you said something like 'we re-placed the block' — re-placed how? What changed in the settings, the constraints, or the region you touched?",
+      "leading_risk": "Asking 'did you use an ECO flow?' or naming a specific technique supplies the answer. Ask what was done first, then ask them to name the method only after they've described the mechanics."
+    },
+    {
+      "question": "After that, what did the numbers look like — same metrics as before, so we can compare?",
+      "extracts": "post_state",
+      "follow_up_if_vague": "Even roughly — did it fully close, mostly close, or partially close? Was there any cost elsewhere — did anything get slightly worse while this got better?",
+      "leading_risk": "Asking 'did it fully close?' as a yes/no invites a rounded-up 'yes.' Ask for the actual resulting numbers or state first, then let them characterize completeness."
+    },
+    {
+      "question": "Looking back, was that the right call? What's the general lesson you'd pull out of this for someone in a similar spot?",
+      "extracts": "expert_assessment",
+      "follow_up_if_vague": "Is there a situation where you'd have made a different call — what would need to be different about the design or the schedule?",
+      "leading_risk": "Asking 'so the lesson is X, right?' supplies the lesson. Let them state it unprompted, then optionally reflect it back for confirmation rather than proposing it first."
+    },
+    {
+      "question": "How confident are you that this really played out the way you're describing it — is there any part you're reconstructing rather than remembering clearly?",
+      "extracts": "confidence / weakest_point",
+      "follow_up_if_vague": "If you had to bet on one detail in this story being slightly off, which one would it be?",
+      "leading_risk": "Asking this only at the very end can feel like an accusation and get a defensive 'no, it's all accurate.' Frame it as routine, applied to every story, not specific to this one."
+    }
+  ],
+  "rejected_paths": [
+    "Before you tell me what you did — if you'd had unlimited schedule and unlimited risk tolerance, what's the fix you'd have reached for first?",
+    "Was there a version of this fix that a more junior engineer, or someone from a different team, actually proposed? What happened to that suggestion?",
+    "Think back to the meeting or conversation where the decision got made — who was in the room, and what did they push back on? (This is a memory-jogging technique from the Critical Decision Method: re-entering the decision point through the social/procedural context, not just the technical one, often surfaces options that pure technical recall misses.)",
+    "If this exact situation happened again next month, is there anything you now know that would make you seriously consider one of the paths you rejected last time?"
+  ],
+  "numbers": [
+    "Give me your best number for [metric] — and tell me straight away whether that's a number you're confident in, or a ballpark.",
+    "If you're not sure of the exact figure, is it closer to tens, hundreds, or thousands [of ps / violations / instances] — order of magnitude is genuinely useful even without precision.",
+    "Does that number match anything you could still pull up — a saved report, an email, a slide from a review — or is it purely from memory? (This distinction matters for how much weight the number can carry, and it's fine either way.)"
+  ],
+  "verification": [
+    "That improvement seems like a lot for that kind of fix — walk me through why it moved as much as it did.",
+    "You mentioned [metric A] and [metric B] — do those two numbers seem consistent with each other to you, on reflection?",
+    "Is there anything about this story that, now that you've said it out loud, sounds a little too clean? Sometimes the real version has a wrinkle that gets smoothed out in the retelling."
+  ],
+  "closing": [
+    "Is there another one like this — maybe one where the fix you tried first actually failed, and you had to go to a second one?",
+    "Before we stop — is there a story you almost told just now but didn't, because it felt like a smaller or less interesting case?"
+  ],
+  "anti_patterns": [
+    {
+      "mistake": "Offering a candidate cause or fix before the expert names their own (e.g. 'was it a congestion issue?').",
+      "symptom": "The resulting hypothesis or candidates_considered field mirrors the interviewer's exact phrasing rather than the expert's own diagnostic language — a tell is oddly generic, textbook-sounding causal claims."
+    },
+    {
+      "mistake": "Accepting 'it wouldn't have worked' as a complete rejection rationale without pushing further.",
+      "symptom": "candidates_considered entries with rejected_because values that state an outcome but no mechanism or cost — exactly the pattern that scores as worthless per the grading rubric."
+    },
+    {
+      "mistake": "Asking for numbers only once, early, and never returning to check them against the story's other numbers.",
+      "symptom": "post_state metrics that are numerically inconsistent with prior_state and the intervention's typical effect size — an internally contradictory episode that would be discarded on a numeric spot-check."
+    },
+    {
+      "mistake": "Letting the expert narrate straight through to the resolution without stopping to ask what was tried and abandoned along the way.",
+      "symptom": "A record with a rich chosen_intervention and post_state but a thin or empty candidates_considered array — the single most information-dense field of the whole record ends up hollow."
+    },
+    {
+      "mistake": "Treating the interview as a single pass with no time-boxed return to the rejected-paths and verification questions before moving to closing.",
+      "symptom": "A record that reads fluently but was never actually pressure-tested — internally plausible but never checked against the expert's own stated confidence or a second look at whether the numbers hang together."
+    }
+  ]
+}
+```

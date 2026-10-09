@@ -1,0 +1,85 @@
+[
+  {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "NO",
+      "at": "NO",
+      "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 2 percent' establishes a strict inequality (>), so the trigger fires only above 2.00%."
+  },
+  {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "NO",
+      "at": "NO",
+      "above": "FIRE"
+    },
+    "reasoning": "The phrase 'more than 36 months' establishes a strict inequality (>), meaning the trigger fires only at 37 months and above."
+  },
+  {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "NO",
+      "at": "FIRE",
+      "above": "FIRE"
+    },
+    "reasoning": "The phrase '1.5 or more percentage points' establishes an inclusive inequality (>=), so the trigger fires at 1.50 and above."
+  },
+  {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "PASS",
+      "at": "FAIL",
+      "above": "FAIL"
+    },
+    "reasoning": "The phrase 'does not exceed ... by 2.25 or more' uses an inclusive threshold for the exceedance, meaning exactly 2.25 fails the pass condition."
+  },
+  {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "PASS",
+      "at": "FAIL",
+      "above": "FAIL"
+    },
+    "reasoning": "The phrase 'less than' establishes strict inequalities (<) for both revenue and income, so the test passes only when both are strictly below their respective thresholds."
+  },
+  {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL",
+      "at": "PASS",
+      "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the safe harbour passes at exactly 16.00% and above."
+  },
+  {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL",
+      "at": "PASS",
+      "above": "PASS"
+    },
+    "reasoning": "The phrase 'at least equal to' establishes an inclusive inequality (>=), so the floor requirement passes at exactly 50.00% and above."
+  },
+  {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "FAIL",
+      "at": "PASS",
+      "above": "PASS"
+    },
+    "reasoning": "The phrase 'equal to or greater than' establishes an inclusive inequality (>=), so the incident threshold is met at the exact minimum and above."
+  },
+  {
+    "weakest_point": "Rule 4 (General QM price limit) because the phrasing 'does not exceed ... by 2.25 or more' combines a negative condition with an inclusive threshold, making the exact boundary pass/fail logic prone to misinterpretation without reading the full regulatory context of 12 CFR 1026.43(e)(2)."
+  }
+]

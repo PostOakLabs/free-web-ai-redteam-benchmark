@@ -1,0 +1,68 @@
+[
+{
+"pattern_name": "Symmetric 50/50 Block Boundary IO Budgeting",
+"situation": "Budgeting input and output delay constraints (`set_input_delay` / `set_output_delay`) for two top-level blocks being designed concurrently before either layout or routing exists.",
+"derivation": "Given clock period T_clk: deduct clock uncertainty T_unc and target setup timing margin M (e.g. 10%, confidence 0.8) to get net usable period T_net = T_clk - T_unc - M. Divide T_net evenly: 50% allocated to internal block logic/reg-to-out, 50% allocated to external block in-to-reg plus top-level wire RC flight time. Thus, set_input_delay -max = T_clk - (0.5 * T_net) and set_output_delay -max = T_clk - (0.5 * T_net). For hold, budget external minimum delay as 0ns initially with explicit top-level trace delay checks deferred to post-route.",
+"wrong_way": "Constraining IOs with 0ns or arbitrary 80% T_clk input delays without coordinating with the partner block owner. Downstream, one block optimizer bloats logic to meet impossible 20% residual margins while the partner block wastes area by under-optimizing.",
+"defense": "Budget spreadsheet signed off by both block leads showing explicit T_net breakdown, clock uncertainty allocation, and assumed top-level routing layer / length limits.",
+"signoff_risk": "If too tight: synthetic timing violations force unnecessary logic restructuring, area bloat, or gate sizing that exacerbates local congestion. If too loose: top-level integration timing fails after full chip routing, requiring expensive late-stage ECOs.",
+"provenance": "recalled-from-practice",
+"recall_confidence": 0.9,
+"node_era_note": "At 28nm, a simple 50/50 period split was sufficient; at 7nm and below, top-level wire RC delay dominates, requiring reserving up to 30% of T_clk purely for top-level interconnect (confidence 0.85) before splitting the rest."
+},
+{
+"pattern_name": "Virtual Clock Framing for System-Synchronous IO",
+"situation": "Constraining external off-chip input/output interfaces where the clock originates off-chip or board trace delays create a phase offset relative to the internal core clock.",
+"derivation": "Create an unattached virtual clock (`create_clock -name v_clk -period T_clk`). For input constraints: set_input_delay -clock v_clk -max (T_ext_launch_max + T_board_trace_max) -min (T_ext_launch_min + T_board_trace_min). For output constraints: set_output_delay -clock v_clk -max (T_ext_setup + T_board_trace_max) -min (-T_ext_hold + T_board_trace_min). This decouples internal clock tree synthesis (CTS) insertion delay adjustments from board-level absolute timing reference requirements.",
+"wrong_way": "Referencing the internal clock directly (`set_input_delay -clock clk_core`). When CTS builds the internal clock tree and adds 1.5ns insertion delay, the tool shifts the input setup target by 1.5ns, causing false timing violations or invalid optimizations.",
+"defense": "Board-level PCB layout trace length report and external device AC timing datasheet parameters explicitly mapped to `v_clk` parameters.",
+"signoff_risk": "If too tight: forces extreme I/O delay cell insertion or local pad logic sizing. If too loose: silicon fails AC timing specifications at the PCB boundary despite clean internal timing reports.",
+"provenance": "textbook-standard",
+"recall_confidence": 0.95,
+"node_era_note": "no-era-difference-recalled"
+},
+{
+"pattern_name": "Validating and Defending Multicycle Paths for Handshake Protocols",
+"situation": "Constraining multi-cycle data paths controlled by a validated enable signal or state machine handshake (e.g., data bus stable for N clock cycles).",
+"derivation": "Identify data path driven by enable pulse active every N cycles (e.g. N=2). Derive setup multicycle: `set_multicycle_path 2 -setup -from [get_cells src_reg] -to [get_cells dst_reg]`. Derive hold multicycle: because setup shift implicitly moves hold capture edge forward by N-1 cycles, explicitly reset hold capture edge to launch edge via `set_multicycle_path 1 -hold -from [get_cells src_reg] -to [get_cells dst_reg]` (N-1 cycles relative to setup).",
+"wrong_way": "Applying `set_multicycle_path 2 -setup` without the corresponding `-hold 1` exception. Synthesis/STA engines will evaluate hold timing against cycle N-1 instead of cycle 0, causing the tool to insert massive streams of unnecessary hold buffers.",
+"defense": "Formal verification proof or RTL assertion proving the enable generator guarantees data stability for N cycles before capture edge, attached directly to the constraint review record.",
+"signoff_risk": "If too tight (or left unconstrained as 1-cycle): tool over-optimizes combinatorial logic at expense of area/power. If too loose (e.g., N set to 3 when enable allows 2): functional hold or setup race occurs in silicon, causing data corruption.",
+"provenance": "recalled-from-practice",
+"recall_confidence": 0.95,
+"node_era_note": "no-era-difference-recalled"
+},
+{
+"pattern_name": "Gray-Code Bus Asynchronous Clock Domain Crossing Exception",
+"situation": "Constraining an asynchronous FIFO pointer or Gray-coded multi-bit bus crossing between completely asynchronous clock domains.",
+"derivation": "Because clocks are asynchronous, standard period-based setup/hold checks are invalid. Apply false path: `set_clock_groups -asynchronous` or `set_false_path -from [get_clocks clk_a] -to [get_clocks clk_b]`. To prevent the router from placing bits of the Gray-code bus arbitrarily far apart (which invalidates single-bit transition assumptions), add a maximum delay constraint: `set_max_delay -from [get_cells ptr_reg[*]] -to [get_cells synchronizer_reg[*]] T_dest_period` with `-ignore_clock_latency` to bound skew across bus bits (e.g., max skew <= 0.5 * T_dest_period, confidence 0.85).",
+"wrong_way": "Applying `set_false_path` without a corresponding `set_max_delay` or `set_bus_skew` constraint. The router treats the net as unconstrained and may route one bit across the chip, causing multi-bit transitions at the synchronizer and FIFO pointer corruption.",
+"defense": "CDC structural check report (e.g., SpyGlass CDC) confirming synchronizer cell presence plus STA report verifying max-delay and bus-skew constraints on CDC bits.",
+"signoff_risk": "If too tight: routing engine chokes trying to achieve tight absolute latency across asynchronous domains. If too loose (or false path only): pointer skew causes multi-bit transitions at receiver synchronizers, causing FIFO data corruption or system deadlock.",
+"provenance": "recalled-from-practice",
+"recall_confidence": 0.9,
+"node_era_note": "At 7nm and below, explicit `set_bus_skew` constraints are mandatory alongside `set_max_delay` due to large local wire variation across parallel bit tracks."
+},
+{
+"pattern_name": "Phased Over-Constraining Derate Strategy during Synthesis/Placement",
+"situation": "Preventing downstream timing degradation during physical design by applying deliberate margin during early synthesis and placement steps.",
+"derivation": "In early synthesis/place, actual clock tree latency, wire RC, and OCV variations are unknown. Add deliberate setup clock uncertainty or clock period derate: `set_clock_uncertainty -setup U_synth clk` where U_synth = T_clk * 0.15 (15% of period, confidence 0.8). During post-CTS / detailed routing, remove the synthetic over-constraint and apply real signoff OCV/POCV derates + actual clock tree jitter/skew numbers: `set_clock_uncertainty -setup U_signoff clk` (e.g., 3-5% of period, confidence 0.85).",
+"wrong_way": "Applying full signoff POCV derates and final low clock uncertainty during early RTL synthesis. Synthesis produces undersized gates and tight logic depth; once routing capacitance and CTS skew appear post-layout, the design fails timing catastrophically.",
+"defense": "Historical floorplan correlation data showing typical timing degradation from synthesis to post-route for the given node and implementation flow.",
+"signoff_risk": "If too tight at signoff: design bloats in power and area trying to meet artificial margin. If too loose during synthesis: physical design cannot converge post-route without major logic restructuring.",
+"provenance": "recalled-from-practice",
+"recall_confidence": 0.85,
+"node_era_note": "At 28nm, a uniform 10% clock uncertainty over-constraint worked well; at 7nm and below, over-constraining must be done via tight path-based margin / distance-based wire models rather than pure global clock uncertainty to avoid tool divergence."
+},
+{
+"pattern_name": "Synchronous Divide-by-N Generated Clock Derivation",
+"situation": "Constraining an internal clock generated by a flip-flop divider circuit driven by a master clock.",
+"derivation": "Define the generated clock on the output pin of the divider register: `create_generated_clock -name clk_div2 -source [get_pins div_reg/CP] -divide_by 2 [get_pins div_reg/Q]`. STA automatically derives phase relationship, frequency, and edge alignments relative to the master clock source pin. For setup/hold between master and generated clock, STA checks the most restrictive edge combination (e.g., launch on master at t=0ns, capture on div2 at t=T_master).",
+"wrong_way": "Defining the output clock using `create_clock -period (2*T_master)` instead of `create_generated_clock`. STA treats the two clocks as completely independent with unmanaged phase relationships, masking real clock-path latency and skew correlations.",
+"defense": "Schematic/RTL inspection showing register-based clock divider topology and STA clock-network report confirming traced source pin connection.",
+"signoff_risk": "If misconfigured as primary clock: STA misses phase correlation and clock tree latency sharing between master and child clocks, causing severe false setup/hold violations or masking real timing errors.",
+"provenance": "textbook-standard",
+"recall_confidence": 0.95,
+"node_era_note": "no-era-difference-recalled"
+}
+]

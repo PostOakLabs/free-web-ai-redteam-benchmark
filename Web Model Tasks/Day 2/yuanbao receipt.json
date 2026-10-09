@@ -1,0 +1,98 @@
+{
+  "receipt_kinds": [
+    {
+      "variant": "CompositeReceipt",
+      "when_produced": "Output of risc0 executor before any succinct proving; contains raw execution trace segments and inner receipts for assumptions",
+      "note": "Not a cryptographic receipt by itself; must be converted to SuccinctReceipt via STARK prover"
+    },
+    {
+      "variant": "SuccinctReceipt",
+      "when_produced": "After STARK proving a CompositeReceipt; contains a STARK seal + ReceiptClaim",
+      "note": "Succinct but still ~200KB+; used as input to Groth16 wrapping"
+    },
+    {
+      "variant": "Groth16Receipt",
+      "when_produced": "After running the Groth16 prover (over BN254) on a SuccinctReceipt; constant ~192 bytes",
+      "note": "The groth16-wrapped form; used for on-chain verification and small-footprint checks"
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "struct Groth16Seal { a: G1Affine, b: G2Affine, c: G1Affine, public_inputs: Vec<Fr> } or serialized proof bytes",
+      "meaning": "The Groth16 proof over BN254 attesting to validity of the underlying STARK",
+      "verifier_must_check": "Run Groth16 verify with the hardcoded verifying key (version-specific) and the claim digest as the sole public input",
+      "failure_if_skipped": "Verifier accepts any Groth16 proof from the same circuit regardless of which claim it binds to; attacker reuses a proof for a different (benign) program to forge acceptance of a malicious one"
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim { pre: Digest, post: Digest, exit_code: ExitCode, input: MaybeDigest, output: MaybeDigest }",
+      "meaning": "The structured statement: what program ran, what input/output, what exit status",
+      "verifier_must_check": "Compute claim.digest(), ensure it matches the public_inputs of the seal; check claim.image_id (derived from post-state / control root) equals the expected guest image ID; check claim.exit_code == 0",
+      "failure_if_skipped": "Verifier reads journal but ignores image_id binding; accepts a proof from a different guest program that happens to produce the same journal structure — cross-program confusion forgery"
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "pre": "Digest — VM state before execution (typically all zeros / initial state)",
+      "post": "Digest — VM state after execution; encodes the image ID and final memory/PC",
+      "exit_code": "ExitCode enum — Halted(0) for success, Paused, or Failed",
+      "input": "MaybeDigest — None or hash of the guest input (committed via sys_read)",
+      "output": "MaybeDigest — None or hash of the journal (committed via sys_write to output)"
+    },
+    "journal_binding": "Guest writes to journal via syscalls; at end, journal bytes are hashed (SHA-256) to produce the output digest stored in claim.output",
+    "claim_digest_computation": "claim.digest() = SHA-256(domain_separated_encoding(pre |post
+exit_code
+input
+| output)); the exact domain separator may vary across v1.x-3.x",
+    "image_id_note": "image_id is not a separate field in ReceiptClaim; it is extracted from the post state digest which commits to the control root + ELF. Field names: post.state.contains(image_id, control_id_root)"
+  },
+  "binding_chain": [
+    "1. Guest execution produces journal bytes (public outputs)",
+    "2. Journal bytes → SHA-256 → output digest (stored in claim.output)",
+    "3. ReceiptClaim constructed with pre, post, exit_code, input, output",
+    "4. claim.digest() = hash(claim) → this is the public statement the STARK proves",
+    "5. STARK prover produces SuccinctReceipt.seal attesting that a trace exists whose commitment opens to claim.digest()",
+    "6. Groth16 prover takes the STARK verification circuit as witness; produces Groth16Seal with claim.digest() as the circuit's public input",
+    "7. Verifier: Groth16 verify(seal, vk, claim.digest()) — if passes, the claim is trustlessly established",
+    "8. Control root enters at step 5: it is hardcoded into the STARK verifier circuit; the Groth16 VK corresponds to that circuit version"
+  ],
+  "version_coupling": {
+    "circuit_version_dependent_parts": [
+      "Groth16 verifying key (VK) — regenerated if STARK-to-Groth16 circuit constraints change (e.g., field arithmetic, hash function changes)",
+      "Control root / control IDs — change if the RISC-V instruction set implementation, builtins, or STARK parameters (trace length, colinearity) change",
+      "Image ID derivation — depends on control root; same ELF → different image_id if control root differs"
+    ],
+    "what_breaks_with_wrong_version": "Using a VK from version N to verify a proof from version M: verification fails (proof rejected) if constraints differ; if an old VK is accidentally accepted for a new circuit, the algebraic relation is broken and the proof may verify for an invalid trace (if the circuit had a bug fixed in the new version). Using wrong control root: image_id mismatch causes verifier to reject, OR if verifier doesn't pin image_id, accepts a program compiled under a different (possibly insecure) control root."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Verifier deserializes seal and checks Groth16 pairing but hardcodes public input to 0 or ignores claim.digest()",
+      "check": "Compute claim.digest() from the received claim struct and pass it as the exact public input vector to the Groth16 verifier"
+    },
+    {
+      "bug": "Verifier checks claim.output digest but does not compare claim.image_id (from post state) against the expected guest's image_id",
+      "check": "Extract image_id from claim.post (or claim.image_id() helper) and assert equality with the trusted compile-time constant"
+    },
+    {
+      "bug": "Verifier does not check claim.exit_code == Halted(0), accepting proofs of failed or paused executions",
+      "check": "Assert claim.exit_code indicates successful termination before using journal"
+    },
+    {
+      "bug": "Verifier accepts a SuccinctReceipt directly when the protocol expects Groth16Receipt, skipping the Groth16 check entirely",
+      "check": "Enforce receipt type at the protocol level; only deserialize as Groth16Receipt when that is the expected variant"
+    },
+    {
+      "bug": "Verifier re-hashes journal bytes using a different hash (e.g., Keccak instead of SHA-256) than the risc0 circuit uses",
+      "check": "Use the exact hash function and domain separation that the guest's sys_write syscall commits to (SHA-256 in v1.x-3.x)"
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "From risc0 source (risc0_zkp, risc0_circuit) and docs. Naming Composite/Succinct/Groth16 is stable across v1.x-3.x. Internal struct layout may differ.",
+    "groth16_receipt_fields": "Based on risc0::groth16::Groth16Receipt struct. Field names 'seal' and 'claim' are correct. Serialization format may use borsh or custom encoding.",
+    "claim_structure": "ReceiptClaim fields from risc0_zkp::claim. The image_id extraction from post state is a known pattern but exact method may vary. Digest computation uses SHA-256 with domain separation — the separator bytes are version-dependent.",
+    "binding_chain": "Chain of trust is fundamental risc0 design. Control root → VK coupling is documented. Some details (e.g., exact hash domain separators) inferred from general zk-design principles combined with risc0 knowledge.",
+    "version_coupling": "Control root and VK versioning are real risc0 concerns; specific break scenarios described are accurate but the exact conditions triggering VK regeneration are from general circuit knowledge applied to risc0.",
+    "common_verifier_bugs": "Bugs 1-4 are known from practical integrations and audits; bug 5 is plausible given hash function mismatches in ecosystem tooling."
+  }
+}

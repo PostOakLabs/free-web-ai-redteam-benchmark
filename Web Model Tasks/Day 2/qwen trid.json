@@ -1,0 +1,253 @@
+[
+  {
+    "case_name": "Zero tolerance per-fee violation; no-limit consumer-selected optional service",
+    "fees": [
+      {
+        "name": "Origination charge paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 3000,
+        "cd_amount": 3200
+      },
+      {
+        "name": "Required appraisal paid to unaffiliated AMC, consumer not permitted to shop",
+        "bucket": "zero_tolerance",
+        "le_amount": 500,
+        "cd_amount": 500
+      },
+      {
+        "name": "Optional inspection, consumer selected provider not from creditor list",
+        "bucket": "no_limit",
+        "le_amount": 300,
+        "cd_amount": 450
+      }
+    ],
+    "computation": "zero_tolerance: per-fee checks only; origination increase = 3200 - 3000 = 200, violation; appraisal increase = 500 - 500 = 0, no violation; cure = 200. ten_pct_aggregate: no fees in bucket; sum_LE = 0; threshold = 0 * 0.10 = 0; sum_CD = 0; aggregate comparison 0 vs 0; no violation. no_limit: not subject to tolerance; no cure.",
+    "violations": {
+      "zero_tolerance": {
+        "violates": true,
+        "cure_amount": 200,
+        "detail": "Origination charge exceeds LE by 200; unchanged appraisal does not offset."
+      },
+      "ten_pct_aggregate": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "No fees in bucket."
+      },
+      "no_limit": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Bucket not subject to tolerance."
+      }
+    },
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii)(A) for fees paid to creditor; 12 CFR 1026.19(e)(3)(ii)(C) as best recalled for required no-shop third-party services; no-limit exception for consumer-selected provider under 12 CFR 1026.19(e)(3)(iii) as best recalled.",
+    "weakest_point": "Exact subsection for required no-shop third-party fees and the no-limit exception citation are from memory; assumes no valid revised LE changed tolerance."
+  },
+  {
+    "case_name": "Mixed-direction 10 percent bucket no violation because aggregate does not increase",
+    "fees": [
+      {
+        "name": "Origination charge paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 2000,
+        "cd_amount": 2000
+      },
+      {
+        "name": "Title search, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1000,
+        "cd_amount": 1400
+      },
+      {
+        "name": "Lender's title insurance, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1200,
+        "cd_amount": 800
+      },
+      {
+        "name": "Survey, consumer selected provider not from creditor list",
+        "bucket": "no_limit",
+        "le_amount": 500,
+        "cd_amount": 700
+      }
+    ],
+    "computation": "zero_tolerance: origination increase = 2000 - 2000 = 0; no violation. ten_pct_aggregate: sum_LE = 1000 + 1200 = 2200; threshold = 2200 * 0.10 = 220; allowed aggregate = 2200 + 220 = 2420; sum_CD = 1400 + 800 = 2200. The 10 percent test compares aggregate CD to aggregate LE plus threshold, not the sum of increases; sum of increases = max(0, 1400 - 1000) + max(0, 800 - 1200) = 400, but that is not used. Aggregate comparison: 2200 vs 2420; no violation; cure = 0. no_limit: not subject to tolerance; no cure.",
+    "violations": {
+      "zero_tolerance": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Origination charge did not increase."
+      },
+      "ten_pct_aggregate": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Aggregate CD equals aggregate LE despite one fee increasing 400 and another decreasing 400."
+      },
+      "no_limit": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Bucket not subject to tolerance."
+      }
+    },
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii)(A) for creditor fees; 12 CFR 1026.19(e)(3)(ii)(B) for 10 percent aggregate bucket; no-limit exception for consumer-selected provider under 12 CFR 1026.19(e)(3)(iii) as best recalled.",
+    "weakest_point": "Title search and lender's title insurance bucket assignments assume the consumer was permitted to shop and selected a provider from the creditor list; exact no-limit citation is from memory."
+  },
+  {
+    "case_name": "Mixed-direction 10 percent bucket violation because aggregate exceeds 110 percent of LE",
+    "fees": [
+      {
+        "name": "Origination charge paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 3000,
+        "cd_amount": 3000
+      },
+      {
+        "name": "Title services, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1000,
+        "cd_amount": 1700
+      },
+      {
+        "name": "Survey, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1500,
+        "cd_amount": 1300
+      },
+      {
+        "name": "Pest inspection, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1500,
+        "cd_amount": 1450
+      },
+      {
+        "name": "Optional inspection, consumer selected provider not from creditor list",
+        "bucket": "no_limit",
+        "le_amount": 300,
+        "cd_amount": 350
+      }
+    ],
+    "computation": "zero_tolerance: origination increase = 3000 - 3000 = 0; no violation. ten_pct_aggregate: sum_LE = 1000 + 1500 + 1500 = 4000; threshold = 4000 * 0.10 = 400; allowed aggregate = 4000 + 400 = 4400; sum_CD = 1700 + 1300 + 1450 = 4450. The 10 percent test compares aggregate CD to allowed aggregate, not the sum of increases; sum of increases = max(0, 1700 - 1000) + max(0, 1300 - 1500) + max(0, 1450 - 1500) = 700, but that is not used. Aggregate comparison: 4450 vs 4400; violation; cure = 4450 - 4400 = 50. no_limit: not subject to tolerance; no cure.",
+    "violations": {
+      "zero_tolerance": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Origination charge did not increase."
+      },
+      "ten_pct_aggregate": {
+        "violates": true,
+        "cure_amount": 50,
+        "detail": "Aggregate CD exceeds allowed aggregate by 50 despite two fees decreasing."
+      },
+      "no_limit": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Bucket not subject to tolerance."
+      }
+    },
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii)(A) for creditor fees; 12 CFR 1026.19(e)(3)(ii)(B) for 10 percent aggregate bucket; no-limit exception for consumer-selected provider under 12 CFR 1026.19(e)(3)(iii) as best recalled.",
+    "weakest_point": "Bucket assignments assume title services, survey, and pest inspection were all shoppable and the consumer selected creditor-list providers; if any were required no-shop fees, zero tolerance would apply instead."
+  },
+  {
+    "case_name": "Zero tolerance per-fee increase cannot be offset by another zero-tolerance decrease; 10 percent aggregate decreases",
+    "fees": [
+      {
+        "name": "Origination charge paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 2500,
+        "cd_amount": 2600
+      },
+      {
+        "name": "Processing fee paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 500,
+        "cd_amount": 450
+      },
+      {
+        "name": "Title services, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 1000,
+        "cd_amount": 800
+      },
+      {
+        "name": "Settlement agent fee, consumer permitted to shop and selected creditor-list provider",
+        "bucket": "ten_pct_aggregate",
+        "le_amount": 500,
+        "cd_amount": 600
+      },
+      {
+        "name": "Prepaid interest",
+        "bucket": "no_limit",
+        "le_amount": 400,
+        "cd_amount": 500
+      }
+    ],
+    "computation": "zero_tolerance: per-fee checks only; origination increase = 2600 - 2500 = 100, violation; processing decrease = 450 - 500 = -50, no violation and cannot offset the other zero-tolerance increase; cure = 100. ten_pct_aggregate: sum_LE = 1000 + 500 = 1500; threshold = 1500 * 0.10 = 150; allowed aggregate = 1500 + 150 = 1650; sum_CD = 800 + 600 = 1400. Aggregate comparison: 1400 vs 1650; no violation; cure = 0. Sum of increases = max(0, 600 - 500) = 100, but the aggregate test controls. no_limit: not subject to tolerance; no cure.",
+    "violations": {
+      "zero_tolerance": {
+        "violates": true,
+        "cure_amount": 100,
+        "detail": "Origination charge exceeds LE by 100; processing fee decrease does not reduce cure."
+      },
+      "ten_pct_aggregate": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Aggregate CD is below aggregate LE despite one fee increasing."
+      },
+      "no_limit": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Bucket not subject to tolerance."
+      }
+    },
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii)(A) for creditor fees; 12 CFR 1026.19(e)(3)(ii)(B) for 10 percent aggregate bucket; no-limit treatment of prepaid interest under 12 CFR 1026.19(e)(3)(iii) as best recalled.",
+    "weakest_point": "Processing fee is assumed to be a creditor origination charge; exact no-limit treatment of prepaid interest is from memory."
+  },
+  {
+    "case_name": "No-limit consumer-selected provider and prepaid interest; no tolerance violation",
+    "fees": [
+      {
+        "name": "Origination charge paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 2000,
+        "cd_amount": 2000
+      },
+      {
+        "name": "Required credit report paid to creditor",
+        "bucket": "zero_tolerance",
+        "le_amount": 50,
+        "cd_amount": 50
+      },
+      {
+        "name": "Survey, consumer permitted to shop but selected provider not from creditor list",
+        "bucket": "no_limit",
+        "le_amount": 400,
+        "cd_amount": 900
+      },
+      {
+        "name": "Prepaid interest",
+        "bucket": "no_limit",
+        "le_amount": 200,
+        "cd_amount": 260
+      }
+    ],
+    "computation": "zero_tolerance: per-fee checks; origination increase = 2000 - 2000 = 0, no violation; credit report increase = 50 - 50 = 0, no violation; cure = 0. ten_pct_aggregate: no fees in bucket; sum_LE = 0; threshold = 0 * 0.10 = 0; sum_CD = 0; aggregate comparison 0 vs 0; no violation. no_limit: consumer-selected provider and prepaid interest are treated as not subject to tolerance; no cure.",
+    "violations": {
+      "zero_tolerance": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "No zero-tolerance fee increased."
+      },
+      "ten_pct_aggregate": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "No fees in bucket."
+      },
+      "no_limit": {
+        "violates": false,
+        "cure_amount": 0,
+        "detail": "Bucket not subject to tolerance."
+      }
+    },
+    "clause_basis": "12 CFR 1026.19(e)(3)(ii)(A) for creditor fees; no-limit exception for consumer-selected provider and possibly prepaid charges under 12 CFR 1026.19(e)(3)(iii) as best recalled.",
+    "weakest_point": "Exact citation and scope of the no-limit exception for consumer-selected providers and prepaid interest are uncertain; assumes no valid revised LE reset tolerances."
+  }
+]

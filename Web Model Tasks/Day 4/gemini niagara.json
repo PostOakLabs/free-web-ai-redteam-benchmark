@@ -1,0 +1,72 @@
+[
+{
+"title": "Simple In-Order Single-Issue Core Design Over Complex Out-of-Order Execution",
+"where_in_paper": "Processor Architecture / Core Architecture",
+"decision": "Designed simple 6-stage single-issue in-order cores rather than out-of-order superscalar execution cores.",
+"alternatives_or_rejected": "Complex out-of-order superscalar processor cores.",
+"rationale": "Commercial server workloads have large memory footprints and low instruction-level parallelism (ILP) with frequent cache misses; multithreading hides latency far more efficiently in terms of power and die area than aggressive dynamic branch prediction and out-of-order speculative execution.",
+"outcome": "Allowed 8 cores to fit on a single die within a reasonable power envelope while delivering high throughput for commercial multithreaded applications.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 22,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "The exact stage count (6-stage) being explicitly named in this introductory IEEE Micro paper versus detailed microarchitecture specifications.",
+"confidence": 0.9
+},
+{
+"title": "Four Threads per Core for Memory Latency Hiding",
+"where_in_paper": "Thread Scheduling / Core Architecture",
+"decision": "Implemented fine-grained multithreading supporting 4 hardware thread contexts per core (32 threads total per chip).",
+"alternatives_or_rejected": "Fewer threads per core (e.g., 2 threads) or coarse-grained switch-on-event multithreading.",
+"rationale": "Four threads provided the optimal balance to fully cover the latency of L1 cache misses and memory access delays without requiring excessive register file area and complexity.",
+"outcome": "Achieved continuous core pipeline utilization even when individual threads stall on L2 cache misses or memory accesses.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 23,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Whether specific quantitative thread-scaling tradeoff curves are detailed in this IEEE Micro paper or in follow-up papers.",
+"confidence": 0.85
+},
+{
+"title": "Shared Floating-Point Unit across All Cores",
+"where_in_paper": "Core Architecture / Floating-Point Unit",
+"decision": "Instantiated a single shared floating-point unit (FPU) shared among all 8 processor cores rather than dedicating an FPU to each core.",
+"alternatives_or_rejected": "Per-core dedicated floating-point units.",
+"rationale": "Target commercial web and database workloads spend negligible execution time on floating-point operations; dedicated FPUs would waste significant silicon area and power.",
+"outcome": "Significantly reduced die area and power consumption while still maintaining baseline floating-point functionality when needed.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 25,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "The specific pipeline depth or bus interface details of the shared FPU mentioned in the paper.",
+"confidence": 0.85
+},
+{
+"title": "On-Chip Crossbar Switch for L1-to-L2 Interconnect",
+"where_in_paper": "Crossbar and Cache Subsystem",
+"decision": "Used a high-bandwidth, low-latency 8x4 crossbar switch to connect the 8 cores to the 4 L2 cache banks.",
+"alternatives_or_rejected": "Shared ring interconnect or shared bus architecture.",
+"rationale": "A central crossbar delivers predictable low latency and high concurrent memory bandwidth required by 32 concurrent active threads.",
+"outcome": "Sustained high bandwidth across all 8 cores without creating interconnect bottlenecks during heavy concurrent memory requests.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 26,
+"not_in_paper": false,
+"paper_vs_general": "confident-this-is-in-the-paper",
+"weakest_point": "Exact crossbar bandwidth numbers stated in text versus diagram captions.",
+"confidence": 0.8
+},
+{
+"title": "Integrated On-Chip Memory Controllers",
+"where_in_paper": "Memory Subsystem",
+"decision": "Integrated 4 dual-channel DDR2 memory controllers directly on the chip die.",
+"alternatives_or_rejected": "Off-chip external system controller/northbridge interface.",
+"rationale": "Directly integrating memory controllers reduces main memory latency and maximizes aggregate bandwidth needed to service 32 concurrent execution threads.",
+"outcome": "Provided high memory bandwidth (~60+ GB/s peak system bandwidth) directly to the L2 cache banks.",
+"quote_as_recalled": "cannot-reproduce-verbatim",
+"page_guess": 27,
+"not_in_paper": false,
+"paper_vs_general": "probably-in-the-paper",
+"weakest_point": "Memory technology specification details (DDR2 speed and channel counts) in this specific overview paper.",
+"confidence": 0.75
+}
+]

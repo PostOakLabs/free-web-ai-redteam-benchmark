@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmark: Days 1-6 | AINumbers Research</title>
+<style>
+:root{--bg:#080E1A;--bg2:#0D1627;--bg3:#111E35;--bd:#1E2F4A;--mut:#3A5270;--body:#6888A8;--txt:#A8C4DE;--brt:#D4E8F8;--wht:#EEF6FD;--teal:#14B8A6;--gold:#D4A847;--fb:sans-serif;--fh:'DM Serif Display',serif;--fm:monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--body);font:15px/1.6 var(--fb)}
+a{color:var(--teal);text-decoration:none}
+.c{max-width:1100px;margin:0 auto;padding:0 1.5em}
+header{background:var(--bg2);border-bottom:1px solid var(--bd);padding:.8em 0}
+header .c{display:flex;align-items:center;gap:1.2em}
+.wm{font-family:'DM Serif Display',serif;font-size:1.3em;color:var(--wht)}.wm span{color:var(--teal)}
+nav{display:flex;gap:1.5em;margin-left:auto}
+nav a{font-size:.85em;color:var(--body);text-transform:uppercase;letter-spacing:.06em}
+nav a:hover{color:var(--teal)}
+h1{font-family:var(--fh);font-size:2em;color:var(--wht);font-weight:400;margin:1.5em 0 .5em}
+h2{font-family:var(--fh);font-size:1.3em;color:var(--wht);margin:1.5em 0 .6em;font-weight:400}
+h3{font-size:.95em;color:var(--teal);margin:1em 0 .4em;text-transform:uppercase;letter-spacing:.04em}
+p{margin:.6em 0}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:1.2em;margin:.8em 0}
+table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.88em;font-family:var(--fm)}
+th{background:var(--bg3);color:var(--txt);padding:.5em .7em;text-align:left;font-size:.85em}
+td{border:1px solid var(--bd);padding:.4em .6em;color:var(--body)}
+.tag{display:inline-block;padding:.15em .5em;border-radius:4px;font-size:.82em;font-family:var(--fm)}
+.t-ok{background:rgba(74,222,128,.12);color:#4ade80}
+.t-warn{background:rgba(251,191,36,.12);color:#fbbf24}
+.t-fail{background:rgba(255,107,107,.12);color:#ff6b6b}
+.t-info{background:rgba(96,165,250,.08);color:#60a5fa}
+footer{border-top:1px solid var(--bd);margin-top:3em;padding:2em 0;text-align:center;font-size:.82em;color:var(--mut)}
+.models{display:flex;flex-wrap:wrap;gap:.4em;margin:.5em 0}
+.models span{background:var(--bg3);border:1px solid var(--bd2);border-radius:4px;padding:.15em .5em;font-size:.82em;font-family:var(--fm);color:var(--txt)}
+</style>
+</head>
+<body>
+<header><div class="c">
+<span class="wm">AI<span style="color:var(--teal)">Numbers</span> <span style="font-size:.6em;color:var(--mut)">Research</span></span>
+<nav><a href="report-benchmark.html">Benchmark</a><a href="report-redteam.html">Red-Team</a></nav>
+</div></header>
+
+<div class="c">
+<h1>Benchmark: Days 1–6</h1>
+<p>Six instruments across sixteen models, measuring exact arithmetic, canonicalization
+conformance, formula shape, citation honesty, and browser-deployment facts against
+ground truth the estate built itself.</p>
+
+<div class="card">
+<h3>Participating models (16)</h3>
+<div class="models">
+<span>chatgpt</span><span>deepseek</span><span>gemini</span><span>glm 5.3 flash</span><span>grok</span><span>kimi</span><span>longcat</span><span>meta</span><span>mimo</span><span>minara</span><span>minimax 2.7</span><span>minimax m3</span><span>mistral</span><span>qwen</span><span>solar</span><span>sonnet</span><span>yuanbao</span>
+</div>
+</div>
+
+<div class="card">
+<h3>How these responses were collected</h3>
+<p>Every response in this benchmark was produced by a human pasting a structured
+prompt into the free web chat interface of each service — chatgpt.com, claude.ai,
+gemini.google.com, kimi.moonshot.cn, grok.com, and the rest. No APIs, no harnesses,
+no automated scripts, no system-prompt overrides. One prompt per fresh chat. The
+human saved the reply verbatim, including formatting artifacts, refusals, and
+errors. This means the results reflect what a real person gets when they open
+these services in a browser and type a prompt — not what a tuned API integration
+produces.</p>
+</div>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-08-31 (single day)</div>
+<p>The widest net. Nineteen prompt suffixes (A through T plus dispatch rounds),
+seventeen-plus model names including nemotron and opus 5. This wave mapped the
+territory: which prompts produce usable output, which models follow instructions,
+which domains have enough public data to mine.</p>
+<p><span class="tag t-info">231 files</span> <span class="tag t-info">19 prompts</span> <span class="tag t-info">17+ models</span></p>
+<p style="color:var(--mut);font-size:.85em">Screened by the Day-1 digest. Not re-screened through the current pipeline.</p>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-09-01 (single day)</div>
+<p>Ten financial-regulation instrument families: APPJ, CCD2, FRTB, Globe, IRB, MICA,
+OFAC, Receipt, TRID, JCS. Fifteen models. This wave produced the
+compliance-calculation findings and the verdict-severity data.</p>
+<p><span class="tag t-info">141 files</span> <span class="tag t-info">15 models</span> <span class="tag t-info">10 families</span></p>
+<p style="color:var(--mut);font-size:.85em">Screened by the Day-2 digest.</p>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-09-02 to 2026-09-04</div>
+<p>APRC, boundary, library, patterns, power4. Fifteen models. Seventy of seventy-one
+files covered by the digest scope correction.</p>
+<p><span class="tag t-info">71 files</span> <span class="tag t-info">15 models</span> <span class="tag t-info">5 families</span></p>
+<p style="color:var(--mut);font-size:.85em">Status: screened. One harness file excluded.</p>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-09-04 and 2026-09-08</div>
+<p>Six families covering Alpha 21264, Niagara, Pentium 4, POWER4 system, POWER4
+circuit/physical, and LVS mismatch classes. Sixteen models including solar and
+longcat (first appearance).</p>
+<p><span class="tag t-ok">73 files</span> <span class="tag t-ok">16 models</span> <span class="tag t-ok">6 families</span></p>
+<p style="color:var(--mut);font-size:.85em">Status: screened by the d6 digest. Produced the source-recall data and the novel-source candidates.</p>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-09-08 to 2026-09-09</div>
+<p>The digested wave: Reg Z (exact arithmetic), strings (JCS conformance), e (HW-safety
+calculations), red1 + red3 (calibration blocks). Seventeen model names including
+minara and minaria (later resolved as one model).</p>
+<p><span class="tag t-ok">80 files</span> <span class="tag t-ok">17 model names</span> <span class="tag t-ok">5 instruments</span></p>
+<p style="color:var(--mut);font-size:.85em">Status: fully digested and vetted. The digest survived a two-station adversarial review.</p>
+
+<div style="font-family:var(--fm);font-size:.82em;color:var(--mut);margin-top:.3em">Collected 2026-09-11 (single day)</div>
+<p>C-v5 citation anchors (14 gradable models) + B-v8 deployment matrix (27 rows,
+16 models, zero collapsing). Twelve of fourteen pass citation anchors. Eight assert
+the falsified timestamp-query claim. The sharpened b3 discriminator split the field.</p>
+<p><span class="tag t-ok">32 files</span> <span class="tag t-ok">16 models</span> <span class="tag t-ok">2 instruments</span></p>
+<p style="color:var(--mut);font-size:.85em">Status: harvested by the Flash station. 100% schema-compliant, zero parse failures, zero collapsing.</p>
+
+<h2>Model reliability (truth-anchored instruments, Days 4–6)</h2>
+
+<table>
+<tr><th>model</th><th>regz /9</th><th>strings /4</th><th>C-v5 anchors</th><th>B-v8 b2</th><th>B-v8 b3</th><th>notes</th></tr>
+<tr><td>kimi</td><td>9</td><td>4</td><td>pass</td><td>correct</td><td>pass-mech</td><td>strongest record</td></tr>
+<tr><td>sonnet</td><td>9</td><td>4</td><td>pass</td><td>correct</td><td>pass-mech</td><td>most permissive</td></tr>
+<tr><td>deepseek</td><td>8</td><td>3</td><td>pass</td><td>correct</td><td>pass-mech</td><td>strongest b3 note</td></tr>
+<tr><td>yuanbao</td><td>9</td><td>3</td><td>pass</td><td>correct</td><td>pass-mech</td><td>honest tier-2</td></tr>
+<tr><td>mimo</td><td>9</td><td>2</td><td>pass</td><td>correct</td><td>pass-mech</td><td></td></tr>
+<tr><td>minara</td><td>9</td><td>4</td><td>pass</td><td>correct</td><td>PARTIAL</td><td>declares "Minara (Dmind)"</td></tr>
+<tr><td>chatgpt</td><td>9</td><td>—</td><td>pass</td><td>WRONG</td><td>PARTIAL</td><td>format canary</td></tr>
+<tr><td>grok</td><td>9</td><td>4</td><td>pass</td><td>correct</td><td>falsified</td><td>strong mechanics, weak calibration</td></tr>
+<tr><td>gemini</td><td>9</td><td>2</td><td>pass</td><td>WRONG</td><td>pass-mech</td><td>bare-SOUND miscalibrated</td></tr>
+<tr><td>meta</td><td>9</td><td>4</td><td>pass</td><td>correct</td><td>falsified</td><td>bare-SOUND miscalibrated</td></tr>
+<tr><td>longcat</td><td>9</td><td>3</td><td>pass</td><td>WRONG</td><td>falsified</td><td>highest novelty yield</td></tr>
+<tr><td>qwen</td><td>9</td><td>2</td><td>WRONG-CORRECTION</td><td>WRONG</td><td>falsified</td><td>bare-SOUND miscalibrated</td></tr>
+<tr><td>solar</td><td>—</td><td>3</td><td>WRONG-CORRECTION</td><td>WRONG</td><td>pass-mech</td><td>regime change from Day-2 leader</td></tr>
+<tr><td>minimax 2.7</td><td>5</td><td>2</td><td>pass</td><td>WRONG</td><td>falsified</td><td>schema anomaly on red1</td></tr>
+<tr><td>mistral</td><td>2</td><td>1</td><td>pass</td><td>WRONG</td><td>falsified</td><td>inverted SPFM on record</td></tr>
+</table>
+
+<p style="color:var(--mut);font-size:.85em">Regz: Day-5 exact-arithmetic score out of 9. Strings: JCS cases
+correct out of 4. C-v5 anchors: citation verification against the owned paper set. B-v8 b2: whether the
+model's b2 answer matches the measured timestamp-query exposure. B-v8 b3: whether the model correctly
+rejects the falsified module-validation claim. "—" means the instrument was not run for that model.</p>
+
+<h2>The pattern</h2>
+<p>kimi, sonnet, and deepseek are the strongest performers across every truth-anchored
+instrument. yuanbao and mimo are close behind. The middle tier gets the mechanics right
+but the calibration wrong. The bottom tier fails on both. The falsified-belief stability
+finding is the most actionable: eight models hold the same false belief about
+timestamp-query exposure, and six hold the same false belief about module validation.</p>
+
+</div>
+
+<footer><div class="c">
+<p>AINumbers Research · Benchmark: Days 1–6 · 2026-09</p>
+<p>465 raw responses · 16 models · 6 days · 6 instruments</p>
+<p>Static snapshot. No scripts, no network calls, no tracking.</p>
+<p><a href="report-redteam.html">Red-Team Report: Days 7–8 →</a></p>
+</div></footer>
+</body>
+</html>

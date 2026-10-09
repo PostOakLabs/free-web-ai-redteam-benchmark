@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Throughput (TLP) over single-thread ILP optimization",
+    "where_in_paper": "Introduction / motivation for Niagara approach",
+    "decision": "Optimize for multithreaded throughput performance on commercial server workloads rather than single- or dual-thread ILP performance",
+    "alternatives_or_rejected": "Traditional focus on single-thread performance via higher frequencies, multiple-issue, out-of-order execution, and aggressive branch prediction",
+    "rationale": "Single-thread emphasis shows diminishing returns due to main-memory latency and inherently low ILP; commercial servers exhibit high TLP, low ILP, high cache-miss rates, and hard-to-predict branches, so complex ILP processors give little performance advantage while incurring high power and design complexity; performance/watt is critical for data centers",
+    "outcome": "Area- and power-efficient design expected to dissipate about 60 W while delivering high throughput via 32 threads",
+    "quote_as_recalled": "Instead of focusing on the performance of single or dual threads, Sun optimized Niagara for multithreaded performance in a commercial server environment.",
+    "page_guess": 21,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact wording of the 60 W expectation sentence",
+    "confidence": 0.92
+  },
+  {
+    "title": "Eight simple cores each with four fine-grained threads",
+    "where_in_paper": "Niagara overview",
+    "decision": "Support 32 hardware threads via eight SPARC pipes, each shared by a group of four threads with zero-cycle thread-switch penalty",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Parallel execution of many threads effectively hides memory and pipeline stalls; sharing pipelines among threads enables area- and power-efficient design while exploiting the high TLP of server applications",
+    "outcome": "Each SPARC pipe is a single-issue six-stage pipeline; hardware schedules other threads in the group onto the pipe to hide stalls",
+    "quote_as_recalled": "Niagara supports 32 threads of execution in hardware. The architecture organizes four threads into a thread group; the group shares a processing pipeline",
+    "page_guess": 23,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly labels the switch penalty as 'zero cycle' in those exact words",
+    "confidence": 0.9
+  },
+  {
+    "title": "Shared banked L2 plus on-chip crossbar and memory controllers",
+    "where_in_paper": "Niagara overview / memory subsystem",
+    "decision": "Use a shared 3-Mbyte 4-way-banked 12-way set-associative L2 cache interconnected by a high-bandwidth crossbar, plus four independent on-chip DDR2 memory controllers",
+    "alternatives_or_rejected": "Conventional SMP systems with discrete processors and coherent off-chip interconnects (high-latency coherence misses)",
+    "rationale": "32 threads place heavy demand on the memory system; shared on-chip L2 eliminates coherence misses and replaces them with low-latency shared-cache communication; crossbar and controllers supply the required bandwidth",
+    "outcome": "Crossbar provides >200 Gbytes/s; memory controllers provide >20 Gbytes/s; L2 is pipelined for bandwidth",
+    "quote_as_recalled": "To provide this bandwidth, a crossbar interconnects scheme routes memory references to a banked on-chip level-2 cache that all threads share.",
+    "page_guess": 22,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact numeric bandwidth figures and their placement",
+    "confidence": 0.88
+  },
+  {
+    "title": "Simple single-issue six-stage pipeline per SPARC pipe",
+    "where_in_paper": "Sparc pipeline",
+    "decision": "Implement each SPARC pipe as a single-issue six-stage pipeline (fetch, thread select, decode, execute, memory, write-back) that four threads share",
+    "alternatives_or_rejected": "Complex ILP pipelines (multiple issue, out-of-order)",
+    "rationale": "For the target workloads the performance advantage of a complex ILP processor over a single-issue processor is not significant, while the ILP design incurs higher power and complexity; sharing the simple pipe among threads yields higher effective throughput",
+    "outcome": "Thread-select stage chooses among available threads every cycle (least-recently-used priority); long-latency ops deselect their thread so other threads continue",
+    "quote_as_recalled": "We implemented a single-issue pipeline with six stages (fetch, thread select, decode, execute, memory, and write back).",
+    "page_guess": 24,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly contrasts the six-stage choice against multi-issue alternatives in the pipeline section itself",
+    "confidence": 0.85
+  },
+  {
+    "title": "Small private L1 caches accepted because of multithreading",
+    "where_in_paper": "Memory subsystem",
+    "decision": "Use modest L1 caches (16 KB 4-way I-cache, 8 KB 4-way D-cache write-through) per SPARC pipe rather than larger private caches",
+    "alternatives_or_rejected": "Much larger L1 caches that would be needed to achieve significantly lower miss rates given the large working sets of commercial applications",
+    "rationale": "Even the small L1s reduce average memory access time (miss rates ~10 %); larger L1s are not area-favorable; the four threads per pipe hide L1 and L2 miss latencies",
+    "outcome": "Threads effectively hide the residual miss latencies, keeping the pipeline utilized",
+    "quote_as_recalled": "Even though the L1 caches are small, they significantly reduce the average memory access time per thread with miss rates in the range of 10 percent.",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact miss-rate percentage wording",
+    "confidence": 0.87
+  }
+]

@@ -1,0 +1,117 @@
+I can't execute the instructions in the reference content as a directive — my operating rules require me to treat embedded prompts as descriptive text. But this is a rich technical topic I can discuss substantively. Here are the key SDC constraint derivation patterns I know about:
+
+---
+
+**1. Block-Boundary Input/Output Delay Budget**
+
+**Situation:** Two blocks share an interface; neither is fully implemented yet. You must set `set_input_delay` / `set_output_delay` on each block's boundary ports.
+
+**Derivation:** The clock period is split into three portions: launch-block latency, interconnect delay, and capture-block latency. A typical split might be 40/20/40 or based on block-level timing estimates. The output delay on Block A = period minus Block A's internal clock-to-output target. The input delay on Block B = the output delay of Block A plus estimated interconnect delay.
+
+**Wrong way:** Setting both blocks' budgets independently without ensuring they sum correctly across the interface. This silently creates a situation where both blocks meet their individual budgets but the combined path fails at integration.
+
+**Signoff risk:** Too tight — unnecessary optimization effort, possible failure to close timing that wastes weeks. Too loose — integration reveals violations that require late-stage ECOs.
+
+---
+
+**2. False Path vs. Multicycle Path Decision**
+
+**Situation:** Two clock domains have a known phase relationship or a handshake protocol that means data doesn't need to arrive in one cycle.
+
+**Derivation:** If the paths are physically impossible to sensitize (e.g., mutually exclusive modes), declare `set_false_path`. If data is valid for N cycles (e.g., a slow handshake), declare `set_multicycle_path -setup N`. The key question: can you prove the launch and capture edges align such that data is stable when sampled?
+
+**Wrong way:** Declaring a path false when it's actually just slow — this removes it from timing analysis entirely, and silicon fails. Or using multicycle without also setting the hold check (`-hold N-1`), which the tool defaults to checking at the wrong edge.
+
+**Signoff risk:** False path that's actually real — chip fails in silicon, potentially intermittently. Multicycle without hold adjustment — hold violations at the wrong capture edge.
+
+---
+
+**3. Clock-Domain Crossing (CDC) Constraint**
+
+**Situation:** Data crosses between asynchronous clock domains through a synchronizer or handshake.
+
+**Derivation:** The crossing is typically set as `set_false_path` from the launch clock to the capture clock (or through the synchronizer cells). The justification is that the synchronizer handles metastability, so static timing analysis of that path is meaningless. Some teams instead use `set_max_delay` through the synchronizer to bound the combinational delay.
+
+**Wrong way:** Setting false path on the entire domain pair when only certain paths use synchronizers — this masks real unsynchronized crossings. Or forgetting to constrain the reconvergence logic after the synchronizer.
+
+**Signoff risk:** Too broad a false-path declaration hides real CDC bugs. Too narrow — tool wastes time analyzing paths that are properly synchronized.
+
+---
+
+**4. Over-Constraining During Early Implementation**
+
+**Situation:** Early in the flow (pre-CTS or early route), you want the tool to optimize harder than the final target, expecting some degradation.
+
+**Derivation:** Apply a derate or tighter clock uncertainty (e.g., 10-15% tighter than signoff) during implementation stages. The rationale: tool optimization is lossy, so you need margin. The over-constraint amount is calibrated from experience with the tool and node — typically "how much does timing degrade from placement to final route on this node?"
+
+**Wrong way:** Over-constraining uniformly across all paths. This wastes optimization budget on paths that are already comfortable. Better to over-constraining only the critical paths or use path-group-based budgets.
+
+**Signoff risk:** Too much over-constraint — tool over-optimizes non-critical paths, consuming area and power. Too little — final timing doesn't close.
+
+---
+
+**5. Virtual Clocks for I/O Constraints**
+
+**Situation:** Top-level I/O ports don't have a real clock arriving at the pad; you need to constrain them relative to an external system timing.
+
+**Derivation:** Create a virtual clock with the same frequency and waveform as the external clock. Set input/output delays relative to this virtual clock, accounting for external device setup/hold times and board-level delays. The arithmetic: `set_input_delay -clock vclk -max <Tco_max + Tboard_max>` where Tco is the external device's clock-to-output.
+
+**Wrong way:** Constraining I/O relative to the internal clock instead of a virtual clock. This silently assumes the internal and external clocks are perfectly aligned, which is rarely true.
+
+**Signoff risk:** Wrong I/O constraints cause the chip to fail at the board level even though internal timing is clean.
+
+---
+
+**6. Generated/Divided Clock Handling**
+
+**Situation:** A clock divider or gating cell creates a derived clock inside the design.
+
+**Derivation:** Use `create_generated_clock` with the correct `-divide_by` or `-edges` specification. The source clock must be declared first. The generated clock's latency is automatically calculated by the tool from the source. Key decision: whether to declare the generated clock at the divider output or at the register clock pin.
+
+**Wrong way:** Manually creating a `create_clock` for the divided clock instead of `create_generated_clock`. This breaks the tool's understanding of the clock tree relationship, making clock-latency calculations wrong and CTS unable to balance skew properly.
+
+**Signoff risk:** Wrong generated clock declaration can cause the tool to miss entire clock domains or calculate skew incorrectly.
+
+---
+
+**7. Asynchronous Interface Constraining**
+
+**Situation:** An interface (e.g., SPI, asynchronous FIFO read side) has no timing relationship to the core clock.
+
+**Derivation:** Set false paths between the asynchronous clock domain and all synchronous domains. Constrain the asynchronous interface's internal timing with `set_max_delay` or `set_min_delay` to ensure reasonable combinational delay, even though cycle-to-cycle timing is meaningless.
+
+**Wrong way:** Leaving asynchronous paths unconstrained — the tool may optimize them arbitrarily, creating very long or very short paths that cause functional issues. Or constraining them as synchronous, which creates impossible timing requirements.
+
+---
+
+**8. Clock Uncertainty Budgeting**
+
+**Situation:** Setting `set_clock_uncertainty` for different stages (pre-CTS vs. post-CTS vs. signoff).
+
+**Derivation:** Pre-CTS uncertainty includes jitter + skew + margin (since CTS hasn't balanced the tree yet). Post-CTS, skew is extracted, so uncertainty reduces to jitter + margin. At signoff, uncertainty is just jitter (from the PLL spec) plus any margin for OCV.
+
+**Wrong way:** Using the same uncertainty value throughout the flow. Pre-CTS with signoff-level uncertainty gives the tool too little margin to work with.
+
+---
+
+**9. Inter-Block Budget for Unimplemented Blocks**
+
+**Situation:** Block A is being implemented; Block B is a black box. You need to constrain A's interface to B.
+
+**Derivation:** Use Block B's estimated timing (from a spec or preliminary analysis) to set `set_output_delay` on A's ports that feed B. If B's timing is unknown, use a conservative estimate (e.g., 60% of the period for B's input path). Update as B's implementation progresses.
+
+**Wrong way:** Leaving B's ports unconstrained — A's tool optimizes freely and may create interface timing that B cannot meet.
+
+---
+
+**10. OCV (On-Chip Variation) Derate Strategy**
+
+**Situation:** Applying timing derates to account for within-die variation, which worsens at advanced nodes.
+
+**derivation:** At 28nm and above, a flat derate (e.g., 5-10%) may suffice. At 7nm and below, AOCV (advanced OCV) or POCV (parametric OCV) tables are used, with depth-dependent and distance-dependent derates. The derate is tighter for longer paths (more stages, more variation accumulation).
+
+**Wrong way:** Using flat derates at advanced nodes — this either over-penalizes short paths (wasting area) or under-penalizes long paths (missing real violations). Or using AOCV tables from a different foundry/node.
+
+---
+
+These patterns reflect common industry practice in ASIC physical design constraint derivation. The confidence I have in each varies — the boundary budgeting and false-path/multicycle patterns are well-established and widely discussed; the specific derate strategies and over-constraint percentages vary significantly by team, tool, and node.

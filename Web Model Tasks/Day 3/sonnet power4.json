@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Clock frequency vs. chip design philosophy",
+    "where_in_paper": "Guiding principles / introduction section",
+    "decision": "POWER4 was designed with high clock frequency as a primary goal, achieved through deep pipelining and circuit/custom design rather than relying solely on architectural features.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper argues frequency alone doesn't determine performance, but that combining frequency with a balanced, well-architected system (memory bandwidth, multiple cores) yields greater overall system throughput than chasing frequency in isolation.",
+    "outcome": "POWER4 achieved multi-GHz frequencies while maintaining a balanced system design intended to avoid bottlenecks elsewhere.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall the general theme (frequency is not the only goal, balance matters) but cannot confirm exact framing or that it's called out this way structurally.",
+    "confidence": 0.45
+  },
+  {
+    "title": "Single-chip module vs. multi-chip module (MCM) packaging",
+    "where_in_paper": "Chip/module packaging discussion",
+    "decision": "The paper describes packaging four POWER4 chips (eight cores total) together on a multi-chip module to form a larger SMP building block.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Packaging multiple chips together allowed fast, low-latency chip-to-chip communication for building larger symmetric multiprocessor systems without going through slower off-module paths.",
+    "outcome": "The MCM approach enabled systems scaling from a single chip up to 32-way (four MCMs) configurations reportedly discussed in the paper.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 10,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact numbers (four chips per MCM, resulting core/way counts) may be slightly misremembered; this is somewhat general POWER4 knowledge blended with paper-specific recall.",
+    "confidence": 0.4
+  },
+  {
+    "title": "On-chip dual-core design with shared L2",
+    "where_in_paper": "Chip overview / core and cache hierarchy section",
+    "decision": "POWER4 placed two processor cores on a single chip sharing an on-chip L2 cache.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Sharing L2 between two cores was intended to improve efficiency of cache usage and inter-core communication compared to giving each core a private, non-shared L2.",
+    "outcome": "This became a defining architectural feature of POWER4, described as enabling efficient chip-level multiprocessing.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am fairly confident of the dual-core-shared-L2 fact from general knowledge, but less sure how the paper frames it as a 'decision with rationale' versus a plain description.",
+    "confidence": 0.4
+  },
+  {
+    "title": "RAS (Reliability, Availability, Serviceability) design approach",
+    "where_in_paper": "RAS section",
+    "decision": "The paper describes building RAS features (such as error checking/correction, dynamic deallocation of faulty resources) directly into the POWER4 microarchitecture rather than treating reliability as an afterthought.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Enterprise/server customers require high availability; the designers state RAS must be designed in from the start rather than added later, since retrofitting reliability into a design is less effective.",
+    "outcome": "POWER4 included various RAS mechanisms integrated into the chip and system design.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 20,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall this theme exists in POWER4-related IBM literature broadly but am not fully certain of its specific placement or exact wording in this particular paper.",
+    "confidence": 0.35
+  }
+]

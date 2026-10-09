@@ -1,0 +1,77 @@
+[
+  {
+    "case_name": "Basic Single-Drawdown Annuity",
+    "annex_basis": "Directive 2008/48/EC Annex I (General Formula Example)",
+    "inputs": {
+      "credit_amount_eur": 1000,
+      "schedule": "4 equal annual payments of 315.47 EUR",
+      "charges": "None"
+    },
+    "equation_setup": "1000 = 315.47 * [ (1+X)^-1 + (1+X)^-2 + (1+X)^-3 + (1+X)^-4 ]",
+    "computation": "Solve for X where the present value of an ordinary annuity of 315.47 for 4 periods equals 1000. The annuity factor is 1000 / 315.47 = 3.16987. Testing X = 0.10 yields an annuity factor of (1 - 1.1^-4) / 0.1 = 3.169865. Thus X = 0.10.",
+    "result_aprc": "10.0%",
+    "assumptions_applied": "Intervals between drawdown and repayments are exactly one year; no upfront fees; full drawdown at t=0.",
+    "doc_vs_general": "confident-this-example-is-in-an-annex",
+    "weakest_point": "Assumes exact 1-year intervals; any deviation in actual calendar days would require the daily precision equation rather than the simplified annual integer exponents."
+  },
+  {
+    "case_name": "Upfront Fee Deduction",
+    "annex_basis": "Directive 2008/48/EC Annex I (Charges included in total cost of credit)",
+    "inputs": {
+      "credit_amount_eur": 1000,
+      "schedule": "4 equal annual payments of 316.09 EUR",
+      "charges": "50 EUR upfront administrative fee"
+    },
+    "equation_setup": "(1000 - 50) = 316.09 * [ (1+X)^-1 + (1+X)^-2 + (1+X)^-3 + (1+X)^-4 ]",
+    "computation": "Net amount drawn by consumer is 950 EUR. The annuity factor is 950 / 316.09 = 3.00547. Testing X = 0.125 yields an annuity factor of (1 - 1.125^-4) / 0.125 = 3.0055. Thus X = 0.125.",
+    "result_aprc": "12.5%",
+    "assumptions_applied": "The 50 EUR fee is treated as a mandatory cost of credit and deducted from the initial drawdown side of the equation; intervals are exactly one year.",
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "If the 50 EUR fee were paid to a third party (e.g., a broker) and not required by the creditor, it might be excluded from the APRC under specific national implementations, though the Directive generally includes all mandatory costs."
+  },
+  {
+    "case_name": "Irregular Intervals",
+    "annex_basis": "Directive 2008/48/EC Annex I (General Equation with fractional exponents)",
+    "inputs": {
+      "credit_amount_eur": 1000,
+      "schedule": "Payment 1: 500.00 EUR at 6 months (0.5 years); Payment 2: 603.69 EUR at 18 months (1.5 years)",
+      "charges": "None"
+    },
+    "equation_setup": "1000 = 500 * (1+X)^-0.5 + 603.69 * (1+X)^-1.5",
+    "computation": "Let z = (1+X)^0.5. The equation becomes 1000 = 500 / z + 603.69 / z^3. Testing X = 0.10 gives z = 1.1^0.5 = 1.0488088. Substituting yields 500 / 1.0488088 + 603.69 / 1.15369 = 476.73 + 523.27 = 1000.00. Thus X = 0.10.",
+    "result_aprc": "10.0%",
+    "assumptions_applied": "Intervals are measured in exact fractions of a standard year (0.5 and 1.5); no leap year day-count adjustments applied.",
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "Real-world irregular intervals require exact day counts divided by 365 (or 366), which introduces minor rounding discrepancies compared to clean fractional year exponents."
+  },
+  {
+    "case_name": "Constructed Standard Annuity Example",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount_eur": 1000,
+      "schedule": "2 equal annual payments of 537.80 EUR",
+      "charges": "None"
+    },
+    "equation_setup": "1000 = 537.80 * [ (1+X)^-1 + (1+X)^-2 ]",
+    "computation": "Solve for X where the present value of an ordinary annuity of 537.80 for 2 periods equals 1000. The annuity factor is 1000 / 537.80 = 1.85942. Testing X = 0.05 yields an annuity factor of (1 - 1.05^-2) / 0.05 = 1.85941. Thus X = 0.05.",
+    "result_aprc": "5.0%",
+    "assumptions_applied": "Intervals between drawdown and repayments are exactly one year; no upfront fees.",
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "While mathematically exact for a 5% APRC, actual annex examples often use messier real-world dates requiring day-count conventions (e.g. 365-day denominators) rather than clean integer exponents."
+  },
+  {
+    "case_name": "Overdraft with Upfront Fee and Full Drawdown Assumption",
+    "annex_basis": "Directive 2008/48/EC Annex I (Overdraft / Assumption of full drawdown)",
+    "inputs": {
+      "credit_amount_eur": 1000,
+      "schedule": "Repaid in full with 8% interest at 1 year (1080 EUR)",
+      "charges": "20 EUR upfront administrative fee"
+    },
+    "equation_setup": "(1000 - 20) = 1080 * (1+X)^-1",
+    "computation": "Net amount drawn by consumer is 980 EUR. Total repayment at t=1 is 1080 EUR. 980 = 1080 / (1+X) => 1+X = 1080 / 980 = 1.10204. Thus X = 0.10204.",
+    "result_aprc": "10.2%",
+    "assumptions_applied": "The annex assumption that the full credit amount is drawn down immediately and remains outstanding for the entire 1-year period; upfront fee deducted from the drawdown side.",
+    "doc_vs_general": "confident-this-example-is-in-an-annex",
+    "weakest_point": "If the consumer repays earlier than 1 year, the effective APRC would be significantly higher, but the Directive requires calculating based on the stated or assumed full duration if no other term is specified."
+  }
+]

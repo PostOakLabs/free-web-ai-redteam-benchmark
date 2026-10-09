@@ -1,0 +1,81 @@
+```json
+{
+  "receipt_kinds": [
+    "CompositeReceipt: A receipt containing a vector of SegmentReceipts representing execution segments without recursive aggregation, produced directly by the prover when recursion is disabled or not requested.",
+    "SuccinctReceipt: A single STARK-based receipt produced by passing a segment or composite receipt through the recursive prover (lift/join/resolve) to aggregate execution into a single succinct proof.",
+    "Groth16Receipt: A compressed receipt produced by running the succinct STARK proof through the STARK-to-Groth16 recursion circuit, yielding a Groth16 proof over the BN254 curve suitable for low-cost on-chain verification (e.g. EVM)."
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Bytes / [u8; 256] or 8x U255/U256 group elements (a, b, c points on BN254)",
+      "meaning": "The raw Groth16 cryptographic proof (pairing elements pi_a, pi_b, pi_c over BN254 curves).",
+      "verifier_must_check": "Perform the Groth16 pairing check e(a, b) = e(alpha, beta) + e(L, gamma) + e(c, delta) against the verifying key (vk) and public inputs.",
+      "failure_if_skipped": "Attacker can supply an arbitrary invalid seal byte array and forge verification without executing a valid zkVM trace."
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim struct (containing ImageID, PostState, ExitCode, Output/Journal Digest)",
+      "meaning": "The statement of execution that the proof attests to, defining what program ran and what output was committed.",
+      "verifier_must_check": "Hash the claim into a claim digest (using Poseidon2 / SHA-256) and ensure it matches the public inputs encoded in the Groth16 proof/seal.",
+      "failure_if_skipped": "Attacker can swap the execution claim (e.g., replace ImageID with a malicious program or swap output journal) while reusing a valid proof for an unrelated claim."
+    },
+    {
+      "field": "journal",
+      "type_shape": "Bytes (Vec<u8>)",
+      "meaning": "The committed public output written by the guest program during execution via env::commit.",
+      "verifier_must_check": "Hash the journal bytes using SHA-256 and verify that SHA-256(journal) matches the journal digest specified inside the ReceiptClaim.",
+      "failure_if_skipped": "Attacker can replace public journal output bytes (e.g., alter recipient address or token amount) while keeping the original valid claim digest intact."
+    }
+  ],
+  "claim_structure": {
+    "components": {
+      "input_digest": "Digest (32 bytes) of the initial input provided to the guest.",
+      "pre_state_digest": "Digest (32 bytes) representing the initial image ID / Merkle root of the ELF memory before execution.",
+      "post_state_digest": "Digest (32 bytes) representing the final execution state / Merkle root after guest halt.",
+      "output_digest": "Digest (32 bytes) of the Output struct containing the journal digest and assumptions digest.",
+      "exit_code": "Enum (e.g. Halted(u32), Paused(u32), SystemSplit) indicating guest termination condition."
+    },
+    "claim_digest_computation": "The ReceiptClaim digest is computed by serializing the claim components into field elements/words and hashing them using the STARK/Recursion hash function (Poseidon2 in v1.x+ or SHA-256 depending on recursion tier) in a canonical struct layout."
+  },
+  "binding_chain": {
+    "step_1": "Guest program writes bytes to journal -> hashed via SHA-256 to yield journal_digest.",
+    "step_2": "journal_digest is combined with assumptions_digest into Output struct -> hashed to yield output_digest.",
+    "step_3": "output_digest + pre_state_digest (Image ID) + post_state_digest + exit_code + input_digest form the ReceiptClaim.",
+    "step_4": "ReceiptClaim is canonically hashed to produce claim_digest.",
+    "step_5": "claim_digest is combined with the control_root / control_id (identifying the valid recursion circuits) to construct the public inputs of the Groth16 circuit.",
+    "step_6": "Public inputs (split into 32-byte field elements / 16-bit words suitable for BN254 scalar field) + VK + seal are verified via Groth16 pairing evaluation."
+  },
+  "version_coupling": {
+    "circuit_version_dependent_parts": "Groth16 Verifying Key (vk), Recursion Control Root / Control IDs (identifying allowed STARK recursive circuits), Poseidon hash constants.",
+    "failure_on_version_mismatch": "If a verifier uses a VK or Control Root from a different RISC Zero version (e.g. v0.18 vs v1.0), the public input transformation or pairing evaluation fails, rejecting valid proofs, or if a generic/dummy VK is used, allows forged proofs that satisfy an unconstrained circuit."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Failing to check journal digest against SHA-256(journal)",
+      "check_that_catches_it": "Asserting sha256(receipt.journal) == receipt.claim.output.journal_digest."
+    },
+    {
+      "bug": "Ignoring exit_code check and accepting non-Halted executions",
+      "check_that_catches_it": "Asserting receipt.claim.exit_code == ExitCode::Halted(0)."
+    },
+    {
+      "bug": "Not validating the pre_state_digest / Image ID against expected guest binary",
+      "check_that_catches_it": "Asserting receipt.claim.pre_state_digest == EXPECTED_IMAGE_ID."
+    },
+    {
+      "bug": "Truncating or improperly endian-swapping BN254 scalar field elements when converting claim digest to Groth16 public inputs",
+      "check_that_catches_it": "Testing proof verification against a known test-vector receipt with fixed public input bit layout."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High certainty: Composite, Succinct, and Groth16 receipt variants are fundamental to RISC Zero v0.18–v1.x architecture.",
+    "groth16_receipt_fields": "High certainty: Field breakdown (seal, claim, journal) matches canonical risc0 Rust SDK and EVM verifier interfaces.",
+    "claim_structure": "Medium-High certainty: Component names (pre/post state, exit code, output digest) match RISC Zero v1.x ReceiptClaim layout.",
+    "binding_chain": "High certainty: The cascade from journal bytes -> SHA-256 -> ReceiptClaim -> claim digest -> Groth16 public inputs is exact.",
+    "version_coupling": "High certainty: Control IDs and Groth16 VKs change per release and strictly govern recursion acceptance.",
+    "common_verifier_bugs": "High certainty: Standard attack vectors identified in zkVM verifier audits."
+  }
+}
+
+```

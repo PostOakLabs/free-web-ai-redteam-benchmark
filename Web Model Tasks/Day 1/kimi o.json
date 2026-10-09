@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Throughput-optimized many-core over few complex cores",
+    "where_in_paper": "Introduction / Architecture overview",
+    "decision": "Design eight simple in-order cores on a single die instead of fewer large out-of-order cores, optimizing for aggregate throughput",
+    "alternatives_or_rejected": "The industry trend of building fewer, wider, more aggressively speculative out-of-order cores targeting high single-thread performance",
+    "rationale": "Commercial server workloads exhibit abundant thread-level parallelism but poor instruction-level parallelism and are memory-latency-bound; many simple cores deliver higher aggregate throughput and better power efficiency for these workloads",
+    "outcome": "32 threads on one die with significantly higher throughput on commercial benchmarks than contemporary high-frequency single-thread processors, at the cost of lower single-thread performance",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Fine-grained multithreading with four threads per core",
+    "where_in_paper": "Core microarchitecture / Threading",
+    "decision": "Implement fine-grained multithreading with four hardware threads per core, switching threads on a cycle-by-cycle basis",
+    "alternatives_or_rejected": "Coarse-grained multithreading, simultaneous multithreading on a wide out-of-order core, or single-threaded in-order cores",
+    "rationale": "Fine-grained switching hides cache miss and memory latency effectively without requiring complex out-of-order execution hardware; with four threads, the simple in-order pipeline can almost always find a ready instruction to execute",
+    "outcome": "High pipeline utilization and effective latency tolerance on memory-bound workloads, enabling the use of a simple in-order core",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "In-order execution pipeline",
+    "where_in_paper": "Core microarchitecture / Pipeline",
+    "decision": "Use a simple in-order execution pipeline rather than an out-of-order superscalar design",
+    "alternatives_or_rejected": "Out-of-order execution with register renaming, dynamic scheduling, and speculative execution",
+    "rationale": "Out-of-order logic consumes substantial die area and power for issue queues, rename registers, and bypass networks; for memory-bound commercial workloads, multithreading hides latency more efficiently than out-of-order speculation, and the area savings enable more cores",
+    "outcome": "Small, power-efficient cores that fit eight instances on the die, with aggregate throughput exceeding complex OOO designs on target workloads",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Single shared floating-point unit",
+    "where_in_paper": "Core microarchitecture / Floating point",
+    "decision": "Provide only one floating-point unit shared among all eight cores, rather than one per core",
+    "alternatives_or_rejected": "A dedicated floating-point unit in each core, or no FPU at all",
+    "rationale": "Commercial server workloads are overwhelmingly integer-dominated, making per-core FPUs an inefficient use of die area; a single shared FPU provides adequate throughput for the rare FP operations while saving substantial area for additional integer cores and caches",
+    "outcome": "Sufficient floating-point performance for target workloads with major die area savings, though FP-intensive codes perform poorly",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "On-chip memory controllers with crossbar interconnect",
+    "where_in_paper": "Memory system",
+    "decision": "Integrate memory controllers on-chip and connect cores to multiple L2 cache banks via a non-blocking crossbar",
+    "alternatives_or_rejected": "Off-chip memory controllers accessed via a front-side bus, or a shared bus connecting cores to memory",
+    "rationale": "32 concurrent threads generate enormous memory bandwidth demand that would saturate an off-chip or shared-bus solution; on-chip controllers reduce latency and the crossbar provides non-blocking concurrent access to independent L2 banks and memory channels",
+    "outcome": "Sustained memory bandwidth matching the throughput of 32 threads, without the bottlenecks of traditional front-side bus architectures",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  }
+]

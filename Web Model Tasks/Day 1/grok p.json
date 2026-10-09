@@ -1,0 +1,57 @@
+[
+  {
+    "title": "Embracing high clock frequency alongside complex design",
+    "where_in_paper": "Introduction (speed demons vs. braniacs discussion)",
+    "decision": "Opted to also embrace the speed-demon (high clock rate) approach while retaining complex high-IPC design elements.",
+    "alternatives_or_rejected": "Remaining solely in the traditional IBM UNIX 'braniac' camp that emphasized higher instructions-per-cycle over high clock rate.",
+    "rationale": "To maintain leadership position and deliver best-of-breed operating frequencies; the design was introduced at 1.1–1.3 GHz and surpassed other 64-bit microprocessors on key benchmarks.",
+    "outcome": "High-frequency operation together with superscalar out-of-order execution capable of up to eight-issue and sustained five-instruction completion.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact introductory frequency numbers (1.1/1.3 GHz) may be recalled with slight imprecision.",
+    "confidence": 0.93
+  },
+  {
+    "title": "RAS philosophy beyond ECC and reliable parts",
+    "where_in_paper": "Guiding principles (Leadership in reliability, availability, and serviceability)",
+    "decision": "Require an approach that eliminates outages and provides redundancy where errors cannot be eliminated; transform hard machine stops (checkstops) into synchronous machine interrupts to software where possible.",
+    "alternatives_or_rejected": "Achieving high reliability only by choosing reliable parts and incorporating ECC into major arrays.",
+    "rationale": "Servers have evolved toward continuous operation; outages of any kind are not tolerated; build on mainframe-like RAS attributes already being introduced.",
+    "outcome": "Pervasive RAS features integrated throughout the system (further detailed in a companion paper).",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Precise wording of the 'transform checkstops' clause.",
+    "confidence": 0.92
+  },
+  {
+    "title": "Full-system co-design from the outset",
+    "where_in_paper": "Guiding principles (Full-system design approach)",
+    "decision": "Begin with the full design in mind; design the entire system together from processor to memory and I/O bridge chips; treat POWER4 as an architecture for interconnecting chips, not merely a chip.",
+    "alternatives_or_rejected": "Designing the processor in isolation and later attaching a subsystem.",
+    "rationale": "A new high-performance processor needs a new subsystem to feed it effectively; marriage of process technology, packaging, and microarchitecture allows software to exploit the whole system.",
+    "outcome": "Distributed-switch interconnect supporting up to 32-way SMP; buses that scale with processor frequency to preserve balance.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact description of the interconnect topology name ('distributed switch').",
+    "confidence": 0.9
+  },
+  {
+    "title": "Single design addressing both technical and commercial workloads",
+    "where_in_paper": "Guiding principles (Balanced technical and commercial performance)",
+    "decision": "A single design satisfying both high-bandwidth technical/HPC requirements and commercial data-sharing/SMP-scaling requirements, supporting both pSeries and iSeries.",
+    "alternatives_or_rejected": "Separate designs optimized only for technical (prior POWER3 lineage) or only for commercial (prior RS64 lineage).",
+    "rationale": "As e-business evolves, data-intensive and commercial demands merge; one design meets both pSeries and iSeries needs.",
+    "outcome": "POWER4 used across both commercial and technical systems while remaining binary-compatible with prior PowerPC/PowerPC AS software.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly names the prior RS64/POWER3 split as the rejected alternative.",
+    "confidence": 0.88
+  },
+  {
+    "title": "Dual-core chip with shared L2 and frequency-scalable fabric",
+    "where_in_paper": "POWER4 chip section and system interconnect discussion",
+    "decision": "Place two identical processors on one chip sharing a unified L2 via a CIU crossbar; implement a scalable chip-to-chip and MCM-to-MCM fabric whose buses run at fractions of processor frequency and scale with it.",
+    "alternatives_or_rejected": "Treating POWER4 solely as a single-processor chip; fixed-frequency system buses that would unbalance as processor frequency rose.",
+    "rationale": "SMP optimization for high-throughput multitasking; preserve system balance as technology improves frequencies; leverage packaging (four chips per module, four modules for 32-way).",
+    "outcome": "174-million-transistor chip presenting a two-way SMP to software; systems up to 32-way with balanced bandwidth.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact bus-width and frequency-ratio numbers (e.g., 2:1, 3:1) may mix paper text with general recollection.",
+    "confidence": 0.87
+  }
+]

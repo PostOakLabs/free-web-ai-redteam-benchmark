@@ -1,0 +1,105 @@
+[
+  {
+    "case_name": "reserve_coverage_test_full_backing",
+    "inputs": {
+      "token_supply": {"value": 100000000, "unit": "tokens"},
+      "par_or_claim_value_per_token": {"value": 1.00, "unit": "EUR"},
+      "aggregate_claims": {"value": 100000000, "unit": "EUR"},
+      "reserve_asset_market_values": [
+        {"asset": "EUR_cash_deposits", "value": 45000000, "unit": "EUR"},
+        {"asset": "short_term_gov_bonds", "value": 42000000, "unit": "EUR"},
+        {"asset": "other_highly_liquid", "value": 14000000, "unit": "EUR"}
+      ],
+      "aggregate_reserve_value": {"value": 101000000, "unit": "EUR"}
+    },
+    "computation": [
+      "Step 1: Aggregate claims = token_supply × claim_value_per_token = 100000000 × 1.00 = 100000000 EUR",
+      "Step 2: Aggregate reserve value = sum of marked-to-market reserve assets = 45000000 + 42000000 + 14000000 = 101000000 EUR",
+      "Step 3: Coverage ratio = aggregate_reserve_value / aggregate_claims = 101000000 / 100000000 = 1.01",
+      "Step 4: Test against full-backing requirement: coverage_ratio >= 1.0 ?"
+    ],
+    "result": {
+      "coverage_ratio": 1.01,
+      "regulatory_verdict": "adequate against full-backing test (coverage >= 1.0)",
+      "excess_reserve": 1000000
+    },
+    "article_basis": "Article 36(7) MiCA (aggregate value of reserve of assets at least equal to aggregate value of claims)",
+    "tail_convention": "Coverage is a higher-is-better metric; the adverse tail is the LOW tail. This case examines the realised point estimate (no stress); adverse outcomes are those driving coverage below 1.0.",
+    "weakest_point": "Reliance on mark-to-market of the bond and liquid-asset sleeves; any simultaneous adverse price move not captured in the point estimate would erode the 1% buffer."
+  },
+  {
+    "case_name": "own_funds_computation_art35",
+    "inputs": {
+      "average_reserve_assets_6m": {"value": 250000000, "unit": "EUR"},
+      "fixed_overheads_preceding_year": {"value": 1200000, "unit": "EUR"},
+      "is_significant": false,
+      "pct_of_average_reserve_non_significant": {"value": 0.02, "unit": "fraction", "note": "Art 35(1)(b)"},
+      "pct_of_average_reserve_significant": {"value": 0.03, "unit": "fraction", "note": "Art 45(5)"},
+      "fixed_minimum": {"value": 350000, "unit": "EUR"}
+    },
+    "computation": [
+      "Step 1: Component A (fixed floor) = 350000 EUR",
+      "Step 2: Component B (percentage of average reserve) = 0.02 × 250000000 = 5000000 EUR (non-significant)",
+      "Step 3: Component C (quarter of fixed overheads) = 0.25 × 1200000 = 300000 EUR",
+      "Step 4: Required own funds = max(A, B, C) = max(350000, 5000000, 300000) = 5000000 EUR"
+    ],
+    "result": {
+      "required_own_funds": 5000000,
+      "binding_component": "2% of average reserve assets",
+      "regulatory_verdict": "adequate if actual CET1 own funds >= 5000000 EUR against Art 35(1) highest-of test; inadequate otherwise"
+    },
+    "article_basis": "Article 35(1) MiCA (highest of EUR 350 000; 2% of average reserve of assets; quarter of fixed overheads); Article 45(5) raises the percentage to 3% for significant ARTs",
+    "tail_convention": "Own-funds requirement is a lower-bound threshold (higher own funds better); adverse tail for the metric 'own-funds surplus' is the LOW tail. This case is a deterministic point calculation, not a stress distribution.",
+    "weakest_point": "Average reserve is itself an estimate over six months of daily EOD values; any structural decline in reserve size after the averaging window immediately raises the effective percentage burden relative to current reserve."
+  },
+  {
+    "case_name": "stressed_coverage_haircut_retest",
+    "inputs": {
+      "baseline_aggregate_claims": {"value": 100000000, "unit": "EUR"},
+      "baseline_reserve_components": [
+        {"asset_class": "EUR_cash", "value": 45000000, "haircut": 0.00},
+        {"asset_class": "short_term_gov_bonds", "value": 42000000, "haircut": 0.05},
+        {"asset_class": "other_highly_liquid", "value": 14000000, "haircut": 0.15}
+      ],
+      "baseline_aggregate_reserve": {"value": 101000000, "unit": "EUR"}
+    },
+    "computation": [
+      "Step 1: Apply haircuts to each sleeve: cash remains 45000000 × (1-0) = 45000000; bonds 42000000 × (1-0.05) = 39900000; other 14000000 × (1-0.15) = 11900000",
+      "Step 2: Stressed aggregate reserve = 45000000 + 39900000 + 11900000 = 96800000 EUR",
+      "Step 3: Stressed coverage ratio = 96800000 / 100000000 = 0.968",
+      "Step 4: Retest full-backing: 0.968 < 1.0 → fails"
+    ],
+    "result": {
+      "stressed_coverage_ratio": 0.968,
+      "regulatory_verdict": "inadequate against full-backing test (Art 36) under the applied haircuts; baseline was adequate, stressed is not"
+    },
+    "article_basis": "Article 36 (reserve value >= claims at all times, mark-to-market); stress testing obligations under Art 35(5) and liquidity management under Art 36/45",
+    "tail_convention": "Coverage is higher-is-better; the adverse tail is the LOW tail. This case deliberately applies adverse (price-declining) haircuts and examines the resulting low coverage outcome.",
+    "weakest_point": "The 15% haircut sleeve and the simultaneous application across correlated liquid assets; the residual buffer after stress is negative, leaving no margin for further adverse moves or redemption spikes."
+  },
+  {
+    "case_name": "redemptions_at_par_obligation_math",
+    "inputs": {
+      "tokens_presented_for_redemption": {"value": 5000000, "unit": "tokens"},
+      "referenced_assets_market_value_per_token": {"value": 1.00, "unit": "EUR"},
+      "redemption_mode": "funds_equivalent_to_market_value",
+      "current_aggregate_reserve": {"value": 101000000, "unit": "EUR"},
+      "current_aggregate_claims_pre": {"value": 100000000, "unit": "EUR"}
+    },
+    "computation": [
+      "Step 1: Redemption obligation amount = tokens_presented × market_value_per_token = 5000000 × 1.00 = 5000000 EUR (payable in funds other than e-money, or by delivery of referenced assets)",
+      "Step 2: Post-redemption aggregate claims = 100000000 - 5000000 = 95000000 EUR",
+      "Step 3: Post-redemption aggregate reserve (assuming exact matching decrease) = 101000000 - 5000000 = 96000000 EUR",
+      "Step 4: Post-redemption coverage = 96000000 / 95000000 ≈ 1.0105 (still >= 1.0)",
+      "Step 5: Issuer must ensure corresponding decrease in reserve assets (Art 36) and settle per the redemption policy (Art 39)"
+    ],
+    "result": {
+      "redemption_payout": 5000000,
+      "post_redemption_coverage_ratio": 1.0105263157894737,
+      "regulatory_verdict": "adequate provided reserve is reduced commensurately and settlement occurs per Art 39 policy; obligation is permanent and must be met at market value of referenced assets"
+    },
+    "article_basis": "Article 39 MiCA (permanent right of redemption at market value of referenced assets or by delivery; corresponding reserve adjustment under Art 36)",
+    "tail_convention": "Post-redemption coverage remains higher-is-better; adverse tail is LOW coverage after the simultaneous reduction of reserve and claims. This case examines a matched par redemption (neutral to coverage ratio).",
+    "weakest_point": "Liquidity of the reserve sleeves that must be monetised to fund the cash redemption; if the assets sold realise less than the mark used for the obligation, coverage erodes."
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Execution Trace Cache",
+    "where_in_paper": "Front End / Execution Trace Cache",
+    "decision": "Replace the conventional L1 instruction cache with an Execution Trace Cache that stores decoded micro-operations in dynamic execution order",
+    "alternatives_or_rejected": "A conventional instruction cache storing raw x86 instruction bytes that must be decoded on every fetch",
+    "rationale": "x86 instruction decode is complex and limits how many instructions can be fetched and decoded per cycle; caching already-decoded micro-ops in execution order removes the decode bottleneck and increases effective fetch bandwidth",
+    "outcome": "The front end can deliver multiple decoded micro-ops per cycle without decode latency, though with added complexity in trace line construction and branch handling within traces",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.85
+  },
+  {
+    "title": "Hyper-Pipelined Technology",
+    "where_in_paper": "Pipeline / Hyper-Pipelined Technology",
+    "decision": "Implement a deeply pipelined architecture with on the order of 20 pipeline stages to maximize clock frequency",
+    "alternatives_or_rejected": "A shorter pipeline similar to the Pentium III (P6 microarchitecture) that would incur lower branch misprediction penalties but achieve a lower peak clock frequency",
+    "rationale": "Process technology trends and performance requirements favored maximizing clock frequency; a deeper pipeline reduces the amount of logic per stage, allowing higher operating frequencies",
+    "outcome": "Initial products operated at 1.4–1.5 GHz with architectural headroom toward higher frequencies, but with a branch misprediction penalty of roughly 20 cycles",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Rapid Execution Engine",
+    "where_in_paper": "Integer Execution / Rapid Execution Engine",
+    "decision": "Run the primary integer ALUs at twice the core clock frequency (double-pumped) so they can execute simple integer operations at an effective rate of two per clock cycle",
+    "alternatives_or_rejected": "Adding more single-pumped ALUs to increase issue width, or accepting lower integer throughput",
+    "rationale": "Simple integer operations such as add, compare, and branch are extremely common; double-pumping achieves higher throughput without the die area and power cost of duplicating full execution units",
+    "outcome": "High integer performance for simple operations, with the constraint that more complex operations still require a full clock cycle",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Branch prediction investment for deep pipeline",
+    "where_in_paper": "Branch Prediction",
+    "decision": "Invest in a large Branch Target Buffer and aggressive branch prediction logic to minimize mispredictions given the deep pipeline",
+    "alternatives_or_rejected": "A smaller predictor or less aggressive speculation that would be insufficient given the ~20 cycle misprediction penalty",
+    "rationale": "With a deeply pipelined design, each branch misprediction costs many cycles of wasted execution; accurate prediction is therefore critical to achieving good overall performance despite the frequency benefits of the deep pipeline",
+    "outcome": "Prediction accuracy high enough to make the deep pipeline profitable on typical code, though mispredictions remain a significant performance limiter",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.65
+  },
+  {
+    "title": "Large out-of-order execution window",
+    "where_in_paper": "Execution Core / Out-of-Order Execution",
+    "decision": "Implement a large out-of-order execution window with a substantial reorder buffer and many in-flight instructions to tolerate latencies",
+    "alternatives_or_rejected": "A smaller instruction window that would stall more frequently on cache misses and branch resolution in the deep pipeline",
+    "rationale": "The deep pipeline and high clock frequency make cache miss latencies (in cycles) appear much larger; a large window is necessary to keep execution units busy during long-latency memory operations",
+    "outcome": "Sustained execution throughput despite cache misses and branch resolution delays",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.6
+  }
+]

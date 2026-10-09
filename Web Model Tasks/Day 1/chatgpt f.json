@@ -1,0 +1,338 @@
+[
+{
+"failure_class": "FAIL_CONGESTION",
+"symptoms": [
+"A global-route congestion map shows localized overflow concentrated in a narrow region, macro edge, or channel while most of the block remains comfortably under capacity; a broad utilization increase would not explain that spatially sharp hotspot.",
+"Horizontal overflow is materially worse than vertical, or vice versa, with the bad direction aligned to a particular macro channel, pin-facing edge, or routing-layer restriction; this distinguishes directional resource starvation from generic excessive cell density.",
+"Congestion follows pin-density or high-connectivity regions more tightly than cell-density contours; a region can have modest placement utilization but severe routing demand because many pins or nets must enter and leave through it.",
+"Congestion appears or jumps after CTS even though pre-CTS placement was acceptable; the new hotspots spatially correlate with clock buffers, clock routes, or the regions through which the clock tree is being built."
+],
+"candidate_causes": [
+{
+"cause": "Local placement density / insufficient whitespace",
+"distinguishing_check": "Overlay the global-route overflow map with local placement-density bins and run a controlled density-screen or partial-blockage experiment in only the hotspot. If overflow falls substantially without changing macro geometry or routing-layer rules, local cell packing is the primary cause; if overflow barely moves, look elsewhere.",
+"check_cost": "minutes",
+"typical_fix": "Reduce local density with cell spreading, density screens, partial blockages, or a modest utilization reduction rather than lowering utilization globally.",
+"fix_cost": "hours"
+},
+{
+"cause": "Macro placement, narrow channels, halos, or macro-edge pin funneling",
+"distinguishing_check": "Inspect the hotspot against macro boundaries and perform a small macro displacement/halo/channel what-if. If the overflow moves with the channel or macro edge, especially with the same directional signature, the floorplan geometry is causal.",
+"check_cost": "hours",
+"typical_fix": "Move or resize macro channels/halos, change macro orientation or relative placement, and reserve routing space where interconnect actually crosses the floorplan.",
+"fix_cost": "days"
+},
+{
+"cause": "Pin-access / pin-density concentration",
+"distinguishing_check": "Compare pin-density maps and detailed-route or pin-access failures with the congestion hotspot. If the hotspot tracks a narrow pin-dense edge rather than cell density and remains after modest cell spreading, the limiting resource is access to pins/vias rather than ordinary track capacity.",
+"check_cost": "hours",
+"typical_fix": "Spread or repattern the affected cells, change cell architecture or orientation where legal, add padding near pin-dense regions, or adjust layer/access strategy.",
+"fix_cost": "hours"
+},
+{
+"cause": "High-fanout, bus-heavy, or logic-connectivity concentration",
+"distinguishing_check": "Rank nets crossing the hottest global-routing cells and inspect whether a small set of high-fanout nets or wide bus structures accounts for a disproportionate share of crossings. If removing or buffering/restructuring one connectivity cluster in a what-if substantially collapses the hotspot, the connectivity pattern is causal.",
+"check_cost": "hours",
+"typical_fix": "Restructure logic or hierarchy, replicate selected drivers, repartition connectivity, or optimize the physical implementation of the offending high-connectivity nets.",
+"fix_cost": "days"
+},
+{
+"cause": "Reduced routing capacity from power grid, blockages, layer restrictions, or excessive special routing",
+"distinguishing_check": "Compare routing demand and available capacity by layer/direction in the hotspot, including blocked tracks and tracks consumed by power/clock routing. If demand is ordinary but available signal capacity is anomalously low, it is a supply-side problem rather than placement demand.",
+"check_cost": "hours",
+"typical_fix": "Relax unnecessary blockages, rebalance layer usage, revise the power-grid or special-route strategy where feasible, or reserve/reallocate routing resources.",
+"fix_cost": "hours"
+},
+{
+"cause": "Clock-tree or optimization-buffer growth",
+"distinguishing_check": "Compare pre-CTS and post-CTS cell/net counts and congestion maps, then identify whether newly inserted clock or optimization buffers and their connecting nets overlap the new overflow regions. A temporal jump plus spatial correlation points to implementation growth rather than the original floorplan.",
+"check_cost": "hours",
+"typical_fix": "Constrain buffer growth, improve CTS topology, reduce unnecessary optimization buffering, or create local whitespace before CTS/routing.",
+"fix_cost": "hours"
+}
+],
+"ordering_rationale": "A veteran starts with the cheapest spatial correlations and reversible local experiments, then moves upstream to macro/floorplan changes only after proving that the hotspot is not simply a local resource imbalance.",
+"classic_trap": "Treating the reported congestion percentage or average utilization as the diagnosis and globally lowering utilization, when the real failure is often a narrow macro channel, pin-access wall, directional capacity shortage, or a few connectivity-heavy regions.",
+"confidence": 0.95
+},
+{
+"failure_class": "FAIL_TIMING (setup)",
+"symptoms": [
+"Worst setup paths cluster in one timing group and have large data-path delay while launch/capture clock arrival is relatively ordinary; this points toward logic depth, cell delay, or data interconnect rather than a clock problem.",
+"Many failing paths share the same launch-to-capture physical corridor or hierarchy and show unusually large net-delay fractions, often with long/high-capacitance nets and poor slew; this is a physical data-path problem rather than a broad constraint problem.",
+"Setup violations occur across many unrelated paths but predominantly in one mode/corner, with nearly uniform slack loss and suspiciously similar clock uncertainty or derating terms; this suggests constraint, library, variation, or corner-definition issues.",
+"The same endpoints move from passing to failing mainly when clocks become propagated or after extraction, with setup degradation correlating with capture-minus-launch clock latency or post-route parasitic/SI deltas; this points to CTS/physical effects rather than synthesis logic depth."
+],
+"candidate_causes": [
+{
+"cause": "Incorrect or incomplete timing constraints",
+"distinguishing_check": "Run a constraint audit for clocks, generated clocks, clock groups, IO delays, false/multicycle paths, uncertainty, and mode-specific exceptions, then compare the failing path set against unconstrained or differently constrained endpoints. If the failure disappears or changes class when the intended constraints are corrected, it is not a physical closure problem.",
+"check_cost": "minutes",
+"typical_fix": "Correct clocks, exceptions, operating conditions, uncertainties, and path definitions before making physical ECOs.",
+"fix_cost": "hours"
+},
+{
+"cause": "Excessive combinational logic depth or undersized cells",
+"distinguishing_check": "Break the worst paths into cell-delay versus net-delay contributions. If cell delay dominates and the same logical stages recur across many failing paths despite reasonable wire lengths, compare equivalent larger drive-strength cells or logic restructuring in a what-if.",
+"check_cost": "minutes",
+"typical_fix": "Upsize critical cells, restructure logic, use faster threshold-voltage options where allowed, or reduce unnecessary logic depth.",
+"fix_cost": "hours"
+},
+{
+"cause": "Placement / wirelength / fanout-driven data delay",
+"distinguishing_check": "Compare the failing path's placed versus synthesized or pre-placement estimate and inspect physical coordinates, fanout, transition, and net RC. If a small physical move or trial placement materially reduces net delay while cell delay is stable, placement is causal.",
+"check_cost": "hours",
+"typical_fix": "Re-place critical logic, improve locality, buffer or split excessive fanout, and protect critical paths from congestion-driven detours.",
+"fix_cost": "hours"
+},
+{
+"cause": "CTS latency/skew causing unfavorable setup relationship",
+"distinguishing_check": "Decompose the setup equation into launch clock arrival, data arrival, capture clock arrival, uncertainty, and required time. If failing paths share an anomalous capture-minus-launch skew signature while data delay itself is normal, the clock tree is the primary lever.",
+"check_cost": "minutes",
+"typical_fix": "Rebalance CTS, alter useful skew, improve clock topology or buffering, and recheck the simultaneous hold impact.",
+"fix_cost": "hours"
+},
+{
+"cause": "Post-route RC, crosstalk, or extraction effects",
+"distinguishing_check": "Compare the identical endpoint paths at placed/global-route, post-CTS, extracted, and signoff analyses. If slack loss appears predominantly at extraction and decomposes into net RC and/or crosstalk delta-delay while topology is unchanged, the route is causal.",
+"check_cost": "hours",
+"typical_fix": "Improve routing, shorten or widen critical nets where permitted, reduce coupling, change layer assignment, or perform targeted buffering/repeater insertion.",
+"fix_cost": "hours"
+},
+{
+"cause": "Advanced-node variation / library / derate sensitivity",
+"distinguishing_check": "Compare the same logical path across PVT, OCV/AOCV/POCV-style derating, and SI scenarios. If the violation is highly corner-specific and the dominant delta comes from variation or library arc assumptions rather than physical geometry, treat it as signoff-model sensitivity rather than ordinary placement.",
+"check_cost": "hours",
+"typical_fix": "Use the approved variation methodology, selectively strengthen cells or topology on the sensitive paths, and correct characterization/setup only where an actual signoff-model issue is proven.",
+"fix_cost": "days"
+}
+],
+"ordering_rationale": "Veterans first eliminate constraint and path-definition errors, then read the timing equation to determine whether cell delay, data interconnect, clock skew, or extracted effects dominate before spending ECO effort.",
+"classic_trap": "Upsizing cells on every failing setup path without first separating clock skew, net delay, and constraint problems, which can worsen congestion and create hold failures without addressing the real bottleneck.",
+"confidence": 0.96
+},
+{
+"failure_class": "FAIL_TIMING (hold)",
+"symptoms": [
+"Hold failures are concentrated on very short data paths with small logic depth and unusually small data delay; the minimum-delay paths are failing while longer paths are mostly clean.",
+"Many failures share one capture/launch clock pair and have similar negative slack even though their data paths are unrelated; the common signature is clock skew/latency rather than a shared data cone.",
+"Violations explode after CTS and track a specific region or clock-tree branch, with capture-minus-launch arrival differences changing sharply; this is characteristic of a clock-topology/skew problem.",
+"Hold becomes much worse in only one fast/minimum-delay corner while setup remains reasonable, and the path's data delay is dominated by very fast cells or short wires; this points to minimum-delay design margin rather than a general timing failure."
+],
+"candidate_causes": [
+{
+"cause": "Adverse clock skew / CTS arrival relationship",
+"distinguishing_check": "Decompose the hold report into launch clock arrival, capture clock arrival, data arrival, and hold requirement. If unrelated failing paths share the same skew signature and the data delays are not anomalously small, the common clock relationship is causal.",
+"check_cost": "minutes",
+"typical_fix": "Rebalance the clock tree or intentionally alter useful skew, while checking setup and all interacting clock branches.",
+"fix_cost": "hours"
+},
+{
+"cause": "Too-short or too-fast data path",
+"distinguishing_check": "Rank failing paths by data-path delay and logic depth. If the failing set contains very short paths with low net/cell delay and the hold deficit disappears when a delay element is inserted in a controlled what-if, it is a genuine minimum-delay problem.",
+"check_cost": "minutes",
+"typical_fix": "Add delay buffers, use slower cells or threshold-voltage options, or otherwise lengthen the minimum-delay path.",
+"fix_cost": "hours"
+},
+{
+"cause": "Placement-induced short data interconnect",
+"distinguishing_check": "Compare failing path physical distance and minimum-delay estimates before and after placement. If endpoints or logic stages have become unusually close and net delay is a major negative-margin contributor, test controlled spreading or local detour.",
+"check_cost": "hours",
+"typical_fix": "Introduce targeted placement separation or routing delay rather than globally degrading placement quality.",
+"fix_cost": "hours"
+},
+{
+"cause": "Post-route minimum RC / extracted timing shift",
+"distinguishing_check": "Compare the same hold path pre-route versus extracted signoff and identify whether the data path became materially faster or the clock path changed. A large extracted-stage-only delta localized to a set of nets indicates an RC/route effect.",
+"check_cost": "hours",
+"typical_fix": "Add targeted route delay, detour where legal, alter layer assignment, or add physical delay elements.",
+"fix_cost": "hours"
+},
+{
+"cause": "Incorrect min-delay constraints, generated-clock relationships, or uncertainty",
+"distinguishing_check": "Audit the minimum-delay scenario and compare failing endpoints against the intended clock relationship and hold uncertainty. If unrelated paths fail with an identical requirement-side offset, or the path relationship is not the intended one, the problem is the timing setup rather than the datapath.",
+"check_cost": "minutes",
+"typical_fix": "Correct the clock relationship, generated-clock definition, uncertainty, or exception before inserting physical delay.",
+"fix_cost": "hours"
+},
+{
+"cause": "Fast-corner library / variation sensitivity",
+"distinguishing_check": "Compare the path across all required minimum-delay PVT/variation scenarios. If one fast corner drives the failure and the sensitivity tracks cell minimum arcs/variation assumptions rather than physical topology, the mitigation should target the sensitive cells or approved variation treatment.",
+"check_cost": "hours",
+"typical_fix": "Use suitable slower cells, threshold-voltage choices, or targeted buffering while preserving setup and power.",
+"fix_cost": "hours"
+}
+],
+"ordering_rationale": "Hold is usually debugged by first separating a common clock-skew signature from genuinely too-fast data paths, because a shared clock cause can explain thousands of violations and is far cheaper to fix than individual delay insertion.",
+"classic_trap": "Blindly adding hold buffers to every violating path when the common signature is actually one CTS branch or incorrect clock relationship; this can create unnecessary area, congestion, power, and setup damage.",
+"confidence": 0.96
+},
+{
+"failure_class": "FAIL_IR_DROP",
+"symptoms": [
+"The IR-drop map shows a broad, relatively stationary depression around a weak or resistive power-grid region under low-switching/static analysis; this spatial pattern differs from narrow activity-correlated dynamic hotspots.",
+"Dynamic IR is strongly scenario- or vector-dependent, with voltage droop appearing in compact regions containing many simultaneously switching cells; moving or changing the activity pattern moves the hotspot.",
+"The worst IR locations correlate with long power paths, sparse straps, macro boundaries, insufficient via connectivity, or power-grid bottlenecks rather than simply with the highest logic density.",
+"Timing degradation is spatially correlated with IR hotspots: cells in the low-voltage region show slower delays or setup degradation, while timing recovers when analyzed with the nominal supply assumption."
+],
+"candidate_causes": [
+{
+"cause": "Insufficient or resistive power-grid topology",
+"distinguishing_check": "Run a structural power-grid check and trace the worst voltage-drop locations backward to strap width, pitch, resistance, grid discontinuities, and distance to supply entry. If the same locations remain hot under multiple activity assumptions, the topology is causal.",
+"check_cost": "hours",
+"typical_fix": "Strengthen or rebalance the power grid, add or widen straps where allowed, reduce excessive path resistance, and improve connectivity to robust power sources.",
+"fix_cost": "days"
+},
+{
+"cause": "Via bottleneck or weak layer transition",
+"distinguishing_check": "Cross-probe the worst-drop region onto the power-network geometry and inspect via count/current density at layer transitions. A localized voltage discontinuity at a sparse via stack that improves when redundant vias are added identifies the bottleneck.",
+"check_cost": "hours",
+"typical_fix": "Add redundant vias, improve via arrays, or redistribute current across more parallel power paths.",
+"fix_cost": "hours"
+},
+{
+"cause": "Excessive local current demand / cell-density or power-density hotspot",
+"distinguishing_check": "Overlay IR drop with cell power/current maps. If voltage drop peaks coincide with concentrated switching/leakage demand and the hotspot weakens when cells are spread or activity is reduced, local demand is a major contributor.",
+"check_cost": "hours",
+"typical_fix": "Spread high-power cells, repartition power density, adjust cell choices, add appropriate decoupling where applicable, or redistribute switching load.",
+"fix_cost": "hours"
+},
+{
+"cause": "Macro/power-domain placement or power-entry proximity",
+"distinguishing_check": "Compare the hotspot to macro power pins, domain boundaries, power switches, and distances to supply entry points. A hotspot that remains tied to a macro edge or domain topology across activity scenarios indicates a power-distribution geometry problem.",
+"check_cost": "hours",
+"typical_fix": "Improve macro power connectivity, alter macro placement where necessary, strengthen domain-local distribution, or revise power-switch/grid topology.",
+"fix_cost": "days"
+},
+{
+"cause": "Dynamic simultaneous-switching event",
+"distinguishing_check": "Compare static/DC-like analysis with dynamic analysis using controlled activity scenarios. If static voltage is acceptable but dynamic droop appears only when a specific group switches simultaneously and the hotspot moves with the switching group, the failure is transient demand rather than static grid resistance alone.",
+"check_cost": "hours",
+"typical_fix": "Reduce coincident switching where architecturally possible, strengthen local grid paths, add suitable decoupling, or change placement/power distribution around the switching cluster.",
+"fix_cost": "days"
+},
+{
+"cause": "IR-induced timing feedback being mistaken for a standalone timing problem",
+"distinguishing_check": "Correlate signoff timing degradation with an IR-aware timing run and spatially match the affected cells to the voltage-drop map. If the same endpoints improve substantially when nominal voltage replaces drooped voltage, the timing failure is downstream of power integrity.",
+"check_cost": "hours",
+"typical_fix": "Fix the underlying IR weakness rather than performing isolated timing ECOs; re-run timing because the IR fix can alter both congestion and delay.",
+"fix_cost": "days"
+}
+],
+"ordering_rationale": "Veterans first distinguish static grid weakness from dynamic activity-driven droop, then trace the spatial signature to resistance, vias, demand, or domain topology before changing logic.",
+"classic_trap": "Treating every IR hotspot as insufficient metal width or every timing degradation near an IR hotspot as a pure timing problem, while the real cause may be transient activity or a localized via/grid bottleneck.",
+"confidence": 0.94
+},
+{
+"failure_class": "FAIL_CTS (clock tree)",
+"symptoms": [
+"Clock latency and skew are poor together across a broad set of sinks, with large insertion-delay spread and inconsistent branch depths; this looks like a topology/distribution problem rather than one isolated sink.",
+"Many setup and hold failures appear simultaneously after CTS, but setup and hold changes have opposite skew signatures on the same clock pair; this indicates clock-arrival movement rather than independent data-path regressions.",
+"Clock transition or capacitance violations are concentrated on a specific branch or sink cluster, while other branches are healthy; the spatially localized signature points to fanout, buffering, routing, or a difficult sink region.",
+"CTS timing is acceptable pre-route but degrades after clock routing, with added latency/skew or transition problems concentrated where clock routes traverse congested, blocked, or long physical regions."
+],
+"candidate_causes": [
+{
+"cause": "Bad sink clustering / clock topology",
+"distinguishing_check": "Inspect sink spatial distribution and CTS branch topology. If one branch spans an unusually large physical distance or mixes geographically separated sink clusters while nearby sinks are balanced, compare a controlled clustering/topology change; improvement in the same branch identifies topology as causal.",
+"check_cost": "hours",
+"typical_fix": "Recluster sinks, change CTS topology, add balanced intermediate stages, or revise clock-root/branch structure.",
+"fix_cost": "hours"
+},
+{
+"cause": "Excessive clock fanout / buffer sizing or transition violations",
+"distinguishing_check": "Trace violating branches and compare fanout, capacitance, transition, buffer count, and cell drive against healthy branches. A branch with materially higher fanout/capacitance and corresponding transition degradation is a local load problem.",
+"check_cost": "minutes",
+"typical_fix": "Insert or resize clock buffers, split fanout, improve load distribution, and re-optimize the affected branch.",
+"fix_cost": "hours"
+},
+{
+"cause": "Routing congestion / clock-route resource limitation",
+"distinguishing_check": "Overlay CTS branches and clock-routing DRC/congestion results. If a clock branch has repeated detours, excessive vias, constrained layers, or poor access exactly where congestion is high, routing resources are limiting the achievable tree.",
+"check_cost": "hours",
+"typical_fix": "Reserve clock routing resources, reduce local congestion, revise nondefault clock-routing rules, or alter topology to avoid the bottleneck.",
+"fix_cost": "hours"
+},
+{
+"cause": "Clock gating / generated-clock boundary or hierarchy issue",
+"distinguishing_check": "Group failing sinks by clock-gating cell, generated-clock source, or hierarchical clock domain. If a large fraction of violations share one common gating/root point while unrelated branches remain healthy, inspect that clock boundary rather than globally retuning CTS.",
+"check_cost": "minutes",
+"typical_fix": "Correct clock-gating recognition, generated-clock definitions, buffering, or local CTS constraints at the boundary.",
+"fix_cost": "hours"
+},
+{
+"cause": "Over-optimization for skew causing latency, hold, power, or congestion problems",
+"distinguishing_check": "Compare CTS solutions by skew, insertion delay, buffer count, route length, power, and downstream setup/hold rather than skew alone. If a low-skew solution has materially worse insertion delay or creates a correlated hold/setup shift, the optimization objective is misbalanced.",
+"check_cost": "hours",
+"typical_fix": "Retune CTS objectives/constraints to optimize the full clock-quality tradeoff rather than minimizing skew in isolation.",
+"fix_cost": "hours"
+},
+{
+"cause": "Node-era-specific clock architecture constraints",
+"distinguishing_check": "For advanced nodes, compare clock failures against allowed routing layers, NDR/shielding requirements, multi-height/placement restrictions, and increased variation sensitivity; for older nodes such as 28nm, test whether the same failures persist without those advanced-node constraints. A strong dependence on these rules identifies the era-specific limitation.",
+"check_cost": "hours",
+"typical_fix": "Adapt clock topology and routing rules to the node-specific restrictions rather than applying a legacy CTS recipe unchanged.",
+"fix_cost": "days"
+}
+],
+"ordering_rationale": "A veteran first finds the common clock signature—root, branch, sink cluster, fanout, or constraint—because one CTS defect can explain thousands of downstream setup/hold failures and is usually cheaper than path-by-path ECOs.",
+"classic_trap": "Trying to minimize skew as a single scalar objective and declaring CTS successful, while ignoring insertion latency, transition, power, hold impact, congestion, and the physical difficulty of the routed clock branches.",
+"confidence": 0.95
+},
+{
+"failure_class": "FAIL_DRC (routing DRCs)",
+"symptoms": [
+"Violations are dominated by repeated minimum-spacing, minimum-width, or enclosure markers concentrated around dense routing corridors; the same geometric rule and layer recur, indicating a systemic routing-rule/resource problem.",
+"Short/open violations cluster around pin-dense cells, macro edges, or via transitions, while ordinary wire spacing elsewhere is clean; this distinguishes access/enclosure failures from generic routing congestion.",
+"Antenna-type violations are strongly correlated with long partially connected metal segments and specific layer/net topologies, often appearing even where spacing and shorts are otherwise clean; this is a process/layer-connectivity issue rather than ordinary track crowding.",
+"DRC count rises sharply only after detailed routing and the violations form compact clusters exactly where the router was forced into detours, via stacks, or narrow channels; this points to detailed-routing resource pressure rather than a fundamental logical error."
+],
+"candidate_causes": [
+{
+"cause": "Insufficient local routing resources / congestion-driven geometry",
+"distinguishing_check": "Map each DRC marker by layer and coordinate onto the global-route congestion and detailed-route demand. If the same areas have directional overflow, excessive via demand, or repeated detours, rerun with a controlled increase in local routing capacity/whitespace and check whether the DRC family collapses.",
+"check_cost": "hours",
+"typical_fix": "Relieve local congestion, add whitespace or blockages strategically, change layer allocation, or alter macro/placement geometry before attempting large numbers of individual DRC fixes.",
+"fix_cost": "hours"
+},
+{
+"cause": "Pin-access / via-access failure",
+"distinguishing_check": "Cluster DRC markers by standard-cell pin, macro pin, orientation, and via location. If errors repeatedly occur at the same access geometries and correlate with pin density rather than broad routing overflow, test cell spreading/orientation or an alternative access pattern.",
+"check_cost": "hours",
+"typical_fix": "Improve local placement, cell orientation/access, pin-friendly spacing, or via strategy; at advanced nodes, use the node-qualified access methodology rather than legacy assumptions.",
+"fix_cost": "hours"
+},
+{
+"cause": "Routing-rule violation or incorrect layer/NDR assumptions",
+"distinguishing_check": "Group violations by exact DRC rule, layer, and net class, then compare the actual route geometry against the technology rule deck and intended routing constraints. If one rule dominates and the geometry is systematically too narrow/close or otherwise inconsistent, the routing policy is the likely cause.",
+"check_cost": "hours",
+"typical_fix": "Correct routing constraints, layer ranges, width/spacing rules, shielding/NDR use, or technology-rule interpretation and reroute the affected classes.",
+"fix_cost": "hours"
+},
+{
+"cause": "Via stack, enclosure, or redundant-via geometry",
+"distinguishing_check": "Inspect whether violations are centered on vias and whether the same via type/stack repeatedly appears. Compare a controlled reroute using a less aggressive via topology; if enclosure/spacing violations disappear without changing logical connectivity, the via construction is causal.",
+"check_cost": "minutes",
+"typical_fix": "Change via type/stacking, add legal redundant vias, or alter local routing geometry while maintaining required current and reliability constraints.",
+"fix_cost": "hours"
+},
+{
+"cause": "Antenna due to long metal connected before a protective discharge path",
+"distinguishing_check": "Filter for antenna violations and inspect net topology, metal area/length by layer, diode or protection presence, and where the violating segment is connected during manufacturing. If the marker follows long unprotected metal and clears when an approved protection or layer-break strategy is applied, it is an antenna problem rather than spacing congestion.",
+"check_cost": "minutes",
+"typical_fix": "Insert approved antenna protection, add layer jumps/breaks, or otherwise modify the manufacturing-safe connectivity per the technology rules.",
+"fix_cost": "hours"
+},
+{
+"cause": "Node-specific advanced routing interactions",
+"distinguishing_check": "At advanced nodes, classify the failure by rule family and inspect whether it is tied to restrictive cut spacing, multi-patterning/coloring-related constraints, local pattern-density effects, or tighter via/cut rules; compare with the same route under the node-qualified routing methodology. If the violation is absent under an older-node rule model, do not apply an old-node fix blindly.",
+"check_cost": "hours",
+"typical_fix": "Use the technology-specific routing decomposition, legal layer/via choices, and qualified post-route repair strategy.",
+"fix_cost": "days"
+}
+],
+"ordering_rationale": "Veterans first classify the DRCs by rule, layer, and spatial clustering, then attack the dominant systemic family before touching individual markers because hundreds of violations often share one upstream routing-resource or access cause.",
+"classic_trap": "Fixing DRC markers one by one with local route edits while leaving the underlying congestion, pin-access, layer-allocation, or via-strategy problem intact, causing the router to recreate the same violations elsewhere.",
+"confidence": 0.95
+}
+]

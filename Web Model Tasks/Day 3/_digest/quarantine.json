@@ -1,0 +1,348 @@
+{
+  "_schema": "day3-quarantine/v1",
+  "_authored": "2026-09-04",
+  "_authority": "Day 3 digest pass (_digest/00-corpus-and-harness.md .. 05-patterns.md). Every entry below was verified against file bytes; each carries the check that reproduces it.",
+  "_contract": "Any consumer of Web Model Tasks/Day 3/*.json MUST read this file first. EXCLUDE rows are not model output and must never be scored, counted in a denominator, or folded. REPAIR rows are structural-only normalisations: apply the stated transform, never edit content. FLAG rows are scored normally but must carry the flag into any report.",
+  "_non_repair_rule": "No entry here authorises content repair. A file whose content cannot be recovered structurally is EXCLUDE, not partially reconstructed.",
+  "exclude": [
+    {
+      "file": "meta aprc.json",
+      "family": "aprc",
+      "model": "meta",
+      "reason": "WRONG-CONTENT DUPLICATE. Byte-identical to 'Web Model Tasks/Day 2/meta receipt.json' (23651 chars both, both end '}[2]'). Top-level keys are the risc0 receipt-anatomy schema (receipt_kinds, groth16_receipt_fields, claim_structure, binding_chain, version_coupling, common_verifier_bugs, certainty_notes). Contains no 'case', no 'equation', no 'aprc_pct'.",
+      "reproduce": "cmp 'Day 3/meta aprc.json' 'Day 2/meta receipt.json'  -> identical",
+      "consequence": "meta has NO aprc response. APRC denominators are 13, not 14. Do not record meta as a non-responder either: this is a collection-step file-placement defect."
+    },
+    {
+      "file": "minimax m3 patterns.json",
+      "family": "patterns",
+      "model": "minimax m3",
+      "reason": "WILL NOT PARSE. Mid-string splice at char 2051: the literal '...at system integration the path fails' runs directly into 'ew/jitter/OCV) = 10-15% of T (confidence 0.5)\",' -- a string is cut mid-word and content from a later array element is joined to it, destroying its closing quote. json.loads fails: Expecting ':' delimiter at char 2161 (line 9 col 49).",
+      "reproduce": "python -c \"import json;json.load(open('minimax m3 patterns.json',encoding='utf-8-sig'))\"",
+      "not_truncation": "File's last non-space char is ']'. An object-boundary scan finds 8 complete top-level objects after the seam, but element 0 is unrecoverable and the boundaries of the remainder cannot be attributed to intended pattern edges.",
+      "consequence": "patterns denominators are 13, not 14. Re-collect; do not salvage into counts."
+    }
+  ],
+  "truncated": [
+    {
+      "file": "longcat library.json",
+      "family": "library",
+      "model": "longcat",
+      "bytes": 17520,
+      "recovered_items": 4,
+      "prompt_expects": 10,
+      "damage": "File ends mid-string inside a discriminating_experiments entry; no closing bracket.",
+      "rule": "Report as '4 of 10 recovered, truncated at collection'. MUST NOT be read as a short or sparse answer. The model's actual output length is UNKNOWN."
+    },
+    {
+      "file": "minimax m3 library.json",
+      "family": "library",
+      "model": "minimax m3",
+      "bytes": 17528,
+      "recovered_items": 5,
+      "prompt_expects": 10,
+      "damage": "File ends mid-string inside a common_root_causes entry; no closing bracket.",
+      "rule": "Report as '5 of 10 recovered, truncated at collection'. Actual output length UNKNOWN."
+    },
+    {
+      "file": "minimax m3 aprc.json",
+      "family": "aprc",
+      "model": "minimax m3",
+      "bytes": 9575,
+      "recovered_items": 1,
+      "prompt_expects": 4,
+      "damage": "NOT truncation: two case objects fused with no '},{' -- '\"aprc_pct\": 30.5' is followed directly by '\"case\": 3'. json.loads fails: Expecting ',' delimiter at char 4699.",
+      "partial_content_note": "The value 30.5 for the second case IS present in the bytes near char 4690 but sits inside a malformed fused object. Record as present-but-unparseable; do not lift it into a score without a human decision.",
+      "rule": "Report as '1 of 4 parseable'."
+    }
+  ],
+  "transport_signature": {
+    "claim": "All four damaged files belong to exactly two models, and three terminate within 92 bytes of each other: minimax m3 library 17528, longcat library 17520, minimax m3 patterns 17436.",
+    "control": "Undamaged files from other models far exceed that length: minimax 2.7 library.json 54686, mimo library.json 46983, glm 5.3 flash library.json 39660, qwen library.json 36112.",
+    "conclusion": "There is no corpus-wide length cap. The ~17.4-17.5 KB ceiling is specific to the longcat and minimax m3 collection surfaces. dispatch-state.json records 'minimax-m3 (gmi)' as a raw-API control at console.gmicloud.ai; longcat appears nowhere in that file.",
+    "rule": "Damage is upstream of the model. Do not attribute it to model behaviour in any leaderboard or scorecard."
+  },
+  "repair_structural_only": [
+    {
+      "file": "minimax 2.7 power4.json",
+      "family": "power4",
+      "transform": "unwrap-double-array",
+      "detail": "File is [[{...}x5]] -- opens '[[{\"title\": \"Out-of-', closes '\"confidence\": 0.5}]]'. All 12 required fields are PRESENT at [0][n], not absent. A loader expecting [n] reads one item with no recognised fields.",
+      "also": "Field is named 'quote_as_recall_verbatim', not 'quote_as_recalled'. Alias required."
+    },
+    {
+      "file": "deepseek boundary.json",
+      "family": "boundary",
+      "transform": "unnest",
+      "detail": "Rules are under {\"rules\": [...]} rather than a bare list."
+    },
+    {
+      "file": "minimax m3 boundary.json",
+      "family": "boundary",
+      "transform": "unnest + pair-in-array",
+      "detail": "Rules under {\"rules\": [...]}; additionally a \"key\": \"value\" pair sits inside an array. 8 rules recover."
+    },
+    {
+      "file": "mistral boundary.json",
+      "family": "boundary",
+      "transform": "coerce-rule-key",
+      "detail": "'rule' values are JSON strings (\"1\",\"2\",...) where all 12 other boundary files use integers. A numeric key join drops the whole file. Its 9th list element is {\"weakest_point\":..., \"reason\":...} folded into the rules list -- a rule iterator will hit it."
+    },
+    {
+      "file": "mimo aprc.json",
+      "family": "aprc",
+      "transform": "read-trailing-fence",
+      "detail": "Leading prose (~300 chars) before the array, and a SECOND fenced block after it containing {\"weakest_point\": ...}. The weakest_point IS in the bytes but outside the parsed JSON value; a naive loader reports it ABSENT."
+    },
+    {
+      "file": "chatgpt boundary.json",
+      "family": "boundary",
+      "transform": "strip-trailing-nonjson",
+      "detail": "Trailing reference-link footer: '[1]: https://www.consumerfinance.gov/rul...'"
+    },
+    {
+      "file": "meta aprc.json",
+      "family": "aprc",
+      "transform": "NONE - see exclude",
+      "detail": "Trailing '[2]'. Listed here only so a loader author does not treat the trailer as the sole defect."
+    },
+    {
+      "note": "20 files across all families are wrapped in ```json fences and parse after fence strip. Not itemised; fence-strip is unconditional in the loader."
+    }
+  ],
+  "field_contamination": [
+    {
+      "file": "mimo library.json",
+      "family": "library",
+      "extra_fields": [
+        "not_in_paper",
+        "paper_vs_general",
+        "weakest_point"
+      ],
+      "extent": "10 of 10 items",
+      "evidence": "First occurrence char 3840. Every paper_vs_general value is the literal POWER4-recall enum string 'from-general-POWER4-knowledge-not-necessarily-this-paper'.",
+      "rule": "STRIP the three fields; do not reject the file. All required F-schema fields are present and the content is on-topic for the diagnosis-library task. Critical: a field-name-keyed extractor would otherwise read these library items as paper-recall claims."
+    },
+    {
+      "file": "glm 5.3 flash library.json",
+      "family": "library",
+      "extra_fields": [
+        "not_in_paper"
+      ],
+      "extent": "10 of 10 items, all false",
+      "evidence": "First occurrence char 3741.",
+      "rule": "STRIP; do not reject."
+    },
+    {
+      "file": "chatgpt library.json",
+      "family": "library",
+      "extra_fields": [
+        "no_era_difference_recalled",
+        "no-era-difference_recalled",
+        "no-era-difference-recalled"
+      ],
+      "extent": "10 occurrences, 3 spellings, each valued with the escape token itself",
+      "evidence": "chars 3204, 6395, 9287, 12329 (+6 more)",
+      "rule": "IGNORE. Each sits beside a populated node_era_note containing real prose -- the escape and its negation are asserted in the same object. The prose is the value."
+    }
+  ],
+  "verdict_token_map_boundary": {
+    "why": "The boundary verdict vocabulary is unnormalised and polarity-INVERTS between models and between rules of the same model. PASS and FAIL are each used by different models to mean 'the trigger does not fire'. String-match grading silently inverts verdicts.",
+    "worked_example_rule_1_all_mean_DOES_NOT_FIRE": {
+      "chatgpt": "PASS",
+      "deepseek": "PASS",
+      "mistral": "PASS",
+      "mimo": "PASS - 1.99% is not 'more than' 2%; trigger does not fire.",
+      "glm 5.3 flash": "NO FIRE",
+      "kimi": "NO FIRE",
+      "minimax m3": "NO FIRE",
+      "minimax 2.7": "NO FIRE (1.99% <= 2.00%, not more than)",
+      "grok": "NO",
+      "qwen": "NO",
+      "meta": "NO_FIRE at 1.99%",
+      "gemini": "does not fire",
+      "yuanbao": "FAIL"
+    },
+    "inversion_within_a_file": "minimax 2.7 uses NO FIRE/FIRE polarity on rule 1 and PASS polarity on rule 3.",
+    "self_describing_rows": [
+      "meta",
+      "mimo",
+      "minimax 2.7",
+      "minimax m3"
+    ],
+    "self_describing_note": "These four inline the input value or a domain word with the verdict (e.g. 'NO_FIRE at 1.99%', 'SAFE HARBOUR'), so their rows survive normalisation unchanged. The bare PASS/FAIL/NO rows do not.",
+    "genuinely_missing_cell": {
+      "file": "minimax m3 boundary.json",
+      "path": "rule 3 -> verdicts.at",
+      "status": "ABSENT",
+      "rule": "1 of 312 cells is genuinely missing. Do not fill it, do not infer it from below/above."
+    },
+    "precedent": "BOUNDARY-GRADING-1-REPORT.md resolved this by hand ('PASS-as-negative reading ... confirmed per-row against each model's own reasoning -- never assumed'). This map persists that work so the next grader does not re-derive it."
+  },
+  "ledger_defects": [
+    {
+      "artifact": "Web Model Tasks/RUN-MANIFEST.tsv",
+      "defect": "STALE - 43 Day-3 files unmanifested",
+      "detail": "Manifest holds 14 aprc + 13 boundary Day-3 rows (401 data rows total). It has ZERO rows for power4 (14 files), library (15), patterns (14).",
+      "cause": "Manifest mtime 2026-09-04 08:21; the three families landed 09:46-10:28 the same day. Stale, not wrong-at-the-time.",
+      "fix": "Regenerate. 401 -> 444."
+    },
+    {
+      "artifact": "RUN-MANIFEST-REGEN-1-REPORT.md",
+      "defect": "WRONG PREMISE - 14 aprc rows left UNMAPPED on a false basis",
+      "detail": "The report states the 14 aprc rows are UNMAPPED because 'no APRC prompt file exists on disk'. prompts/C1-CCD2-APRC.md exists with mtime 2026-09-01 20:01 -- 2.5 days BEFORE the 09-04 08:21 regen. The prompt was on disk when the claim was written.",
+      "fix": "Map the 14 aprc rows to C1-CCD2-APRC. This is a discharging finding against the manifest's UNMAPPED-honesty line, not a staleness artifact."
+    }
+  ],
+  "denominators_after_quarantine": {
+    "aprc": {
+      "files": 14,
+      "scoreable": 13,
+      "fully_parseable": 12,
+      "note": "meta EXCLUDE; minimax m3 1-of-4"
+    },
+    "boundary": {
+      "files": 13,
+      "scoreable": 13,
+      "fully_parseable": 13,
+      "note": "sonnet ABSENT from disk, corroborated by dispatch-state.json SKIPPED-NOTAB; 1 cell ABSENT"
+    },
+    "power4": {
+      "files": 14,
+      "scoreable": 14,
+      "fully_parseable": 14,
+      "note": "mistral ABSENT from disk, no dispatch record explains it; minimax 2.7 needs unwrap"
+    },
+    "library": {
+      "files": 15,
+      "scoreable": 15,
+      "fully_parseable": 13,
+      "note": "longcat 4/10, minimax m3 5/10 truncated at collection"
+    },
+    "patterns": {
+      "files": 14,
+      "scoreable": 13,
+      "fully_parseable": 13,
+      "note": "minimax m3 EXCLUDE"
+    }
+  },
+  "_scope_correction_2026_09_08": {
+    "status": "THIS GATE COVERS 5 OF 10 DAY-3 PROMPT FAMILIES",
+    "covered": [
+      "aprc",
+      "boundary",
+      "power4",
+      "library",
+      "patterns"
+    ],
+    "covered_files": 70,
+    "corpus_files": 143,
+    "uncovered": {
+      "alpha": 14,
+      "niagara": 14,
+      "p4": 15,
+      "pphysical": 14,
+      "lvs": 15,
+      "power(misfiled)": 1
+    },
+    "detail": "The commissioning brief named five families. Five more were on disk dated 2026-09-04 14:39-14:42, a day before this gate was built. digest/_verify/load.py emitted 'SKIP unrecognised family' 73 times; the output was read through a head/sed truncation and the warnings were cut.",
+    "misfiled_file": "'Day 4/yuanbao power.json' (moved 2026-09-08) is yuanbao's ALPHA answer under a truncated name (page_guess 24/28/30 inside Alpha's 24-36 range; Ebox / clustered integer execution; yuanbao is the only model with no alpha.json). The alpha family is 15 models, not 14.",
+    "consequence": "denominators_after_quarantine is correct FOR THE FIVE COVERED FAMILIES ONLY. It is not a corpus census. The five uncovered families have no quarantine entries and have never been parse-checked.",
+    "see": [
+      "Web Model Tasks/Day 3/_digest/00-corpus-and-harness.md (scope-correction block)",
+      "DAY3-FOLD-NORMALIZE-1.md (corrected ledger arithmetic: 444 -> 517)"
+    ],
+    "moved_2026_09_08": "The five uncovered families (73 files) were MOVED to 'Web Model Tasks/Day 4/' on 2026-09-08, undigested. See Day 3/MOVED-TO-DAY4.md and Day 4/README.md."
+  },
+  "_day4_extension_2026_09_09": {
+    "status": "GATE NOW COVERS 10 OF 10 PROMPT FAMILIES ACROSS DAY 3 AND DAY 4",
+    "as_of": "2026-09-09T01:41:45Z",
+    "day3_families": [
+      "aprc",
+      "boundary",
+      "power4",
+      "library",
+      "patterns"
+    ],
+    "day4_families": [
+      "alpha",
+      "niagara",
+      "p4",
+      "pphysical",
+      "lvs"
+    ],
+    "day4_location": "Web Model Tasks/Day 4/ (moved from Day 3 on 2026-09-08, undigested at that time; digested 2026-09-09)",
+    "day4_census": {
+      "files": 73,
+      "loaded": 73,
+      "skipped": 0,
+      "halted": 0,
+      "command": "python digest/_verify/d4load.py",
+      "gate": "G1 CENSUS ASSERT ... -> PASS"
+    },
+    "day4_exclude": [
+      {
+        "file": "glm 5.3 flash p4.json",
+        "family": "p4",
+        "reason": "WILL NOT PARSE. Dropped closing quotes at four sites (L7,L12,L13,L14) with spliced content ('double-pbroken', '\"decision\": \" object fields'). json.loads: Invalid control character at char 772 -- the parser reaches a newline because the string was never closed. Both elementwise and harvest recovery return 0 entries.",
+        "consequence": "p4 denominators are 14 of 15 assessable. NOT repaired, no content reconstructed."
+      }
+    ],
+    "day4_partial": [
+      {
+        "file": "minimax m3 alpha.json",
+        "family": "alpha",
+        "recovered": 4,
+        "parse": "harvest-skip-broken-element",
+        "detail": "Delimiter break at char 2863 destroys element 0; later elements intact. Forward harvest recovers 4 where elementwise recovers 2 -- recorded on the record as recovery_compare."
+      }
+    ],
+    "day4_misfiled": [
+      {
+        "file": "yuanbao power.json",
+        "as_collected_family": "power",
+        "real_family": "alpha",
+        "rule": "DIGESTED AS alpha, 15th file. NOT RENAMED -- the as-collected filename is the evidence of the collection defect. Provenance carried on the loader record as misfile_provenance.",
+        "evidence": "page_guess values fall in Alpha 21264's 24-36 journal range; content is Alpha (Ebox, clustered integer execution, integer issue queue); yuanbao is the only model with no alpha.json."
+      }
+    ],
+    "day4_model_absences": {
+      "niagara": [
+        "longcat",
+        "minimax m3"
+      ],
+      "pphysical": [
+        "chatgpt"
+      ],
+      "note": "Recorded as findings, never absorbed. lvs is the only complete family (15/15)."
+    },
+    "day4_ground_truth": {
+      "alpha": "sources/Alpha21264-pagemarked.txt",
+      "niagara": "sources/Niagara-pagemarked.txt",
+      "p4": "sources/Pentium4-pagemarked.txt",
+      "pphysical": "sources/POWER4-cpd-pagemarked.txt",
+      "lvs": "NONE - no paper. Graded on schema and convergence only; see Day 4/_digest/05-lvs.md."
+    },
+    "day4_hand_confirmed_findings": [
+      "deepseek pphysical entry 2: T3 CONTRADICTS-PAPER. Quote claims 1.5 GHz; paper says 1.3 GHz throughout, and 1.5 appears only as 1.5 V supply voltage. Other three elements of the quote verify.",
+      "glm 5.3 flash pphysical: 5/5 quotes not in paper at any fragment length (60/40/25 chars).",
+      "longcat p4: 5/5 quotes not in paper at any fragment length."
+    ],
+    "checker_defects_found_and_fixed": [
+      "wrap-hyphen-only collapse produced a false T3 against meta p4 (paper writes 8k-byte, model wrote 8Kbyte) -- hyphen-insensitive rescue pass added",
+      "plural-only unit matching produced false NOT-FOUND on 20 stages (6/15 models) and 80 entries (3/15) -- paper writes 20-stage, 80-entry",
+      "numeral-only matching produced false NOT-FOUND on 4 threads (3/14) -- paper writes 'four threads'",
+      "PDF-vs-journal page units scored every non-Pentium4 family at 0 page guesses; documented offsets (Alpha -23, Niagara -20, POWER4-cpd -26) applied. After the fix chatgpt/grok/kimi/meta score 5/5 within +-2 pages."
+    ],
+    "tooling": {
+      "scripts": [
+        "digest/_verify/d4load.py",
+        "digest/_verify/d4grade.py",
+        "digest/_verify/d4xcheck.py"
+      ],
+      "manifest": "digest/_verify/MANIFEST-D4.sha256",
+      "determinism": "G4 PASS - full chain re-run, all 3 derived JSONs byte-identical"
+    },
+    "needs_retrieval": "NONE in the four paper families -- ground truth is local and every claim was graded. Survives only for lvs, which has no paper."
+  }
+}

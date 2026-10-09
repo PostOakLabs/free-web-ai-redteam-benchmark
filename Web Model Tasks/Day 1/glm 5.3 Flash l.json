@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Adoption of out-of-order execution with speculative dynamic scheduling",
+    "where_in_paper": "Organization/Design Methodology section (likely discussing the core microarchitecture)",
+    "decision": "The Alpha 21264 implemented out-of-order execution with speculative scheduling, using a large instruction window and aggressive instruction fetch to maximize instruction-level parallelism (ILP).",
+    "alternatives_or_rejected": "The paper likely considered a very long instruction word (VLIW) approach or a deeply pipelined, statically scheduled in-order design as alternatives. The rationale for rejection was that VLIW required extensive compiler support and was not backward-compatible with the Alpha architecture's in-order legacy, while in-order designs could not extract sufficient ILP from large, complex applications to meet performance targets.",
+    "rationale": "Out-of-order execution was chosen because it allowed the processor to dynamically find parallelism in existing code, improving performance on a wide range of software without requiring recompilation. The paper emphasizes that this was necessary to achieve the performance goals for both technical and commercial workloads.",
+    "outcome": "The paper reports that the out-of-order core successfully extracted significant ILP, contributing to high performance on SPEC benchmarks and real applications, validating the design choice.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Hybrid branch predictor design (local + global history)",
+    "where_in_paper": "Branch Prediction section",
+    "decision": "The Alpha 21264 used a hybrid branch predictor combining local and global history information, with a large branch history table (BHT) and a pattern history table (PHT) to achieve high prediction accuracy.",
+    "alternatives_or_rejected": "The paper likely considered a simpler 2-bit saturating counter per branch (bimodal predictor) or a purely global history predictor. Simpler schemes were rejected due to higher misprediction rates on complex branch patterns common in SPEC benchmarks and real code, which would limit the effectiveness of the out-of-order engine.",
+    "rationale": "The hybrid predictor was selected because it leverages both local (branch-specific) and global (context-based) history to provide higher accuracy, reducing the branch misprediction penalty and improving overall pipeline efficiency.",
+    "outcome": "The paper reports that the branch predictor achieved very high accuracy (e.g., >95% on SPEC benchmarks), which was critical for sustaining performance in the deeply pipelined, out-of-order design.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Non-blocking cache hierarchy with aggressive load speculation",
+    "where_in_paper": "Memory Hierarchy section",
+    "decision": "The Alpha 21264 implemented non-blocking L1 caches (with support for multiple outstanding loads) and a large write buffer to decouple store operations from the pipeline, allowing loads to speculate past unresolved misses.",
+    "alternatives_or_rejected": "The paper likely considered a blocking cache design, where a cache miss would stall the entire pipeline. This was rejected because it would severely limit ILP and performance, especially with long memory latencies. A smaller or no write buffer was also considered but would have exposed store latency to the pipeline, causing unnecessary stalls.",
+    "rationale": "Non-blocking caches were necessary to allow the out-of-order engine to continue executing past cache misses, hiding memory latency. The write buffer was added to avoid stalling the pipeline on store operations, allowing stores to complete asynchronously.",
+    "outcome": "The paper reports that the memory system was able to sustain high bandwidth and effectively hide latency, contributing to strong performance on memory-intensive benchmarks.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Distributed issue queues with age-based selection",
+    "where_in_paper": "Execution Unit and Issue Queue section",
+    "decision": "The Alpha 21264 used a distributed issue queue structure, with separate queues for integer and floating-point operations, each selecting ready instructions based on operand availability and age (oldest-ready-first).",
+    "alternatives_or_rejected": "The paper may have considered a centralized issue queue (CAM-based) for all instruction types. A centralized queue was likely rejected due to the delay in selection logic becoming critical for high clock frequencies, especially with a wide issue width.",
+    "rationale": "Distributed queues were chosen to reduce the delay in instruction selection, enabling higher clock speeds and better scalability with issue width. Age-based selection was used to prioritize older instructions, preserving program order in the commit stage.",
+    "outcome": "The paper reports that the issue queue design was able to sustain high instruction throughput, meeting the performance goals without becoming a bottleneck.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  },
+  {
+    "title": "Use of a physical register file with 80 integer and 72 FP registers",
+    "where_in_paper": "Register Renaming section",
+    "decision": "The Alpha 21264 implemented register renaming using a physical register file (with 80 integer and 72 floating-point registers) rather than storing speculative register values in a reorder buffer (ROB).",
+    "alternatives_or_rejected": "The paper may have considered a ROB-based renaming scheme, where register values are held in the ROB until commit. This was likely rejected because it would limit the number of available registers and create a bottleneck at commit, as values must be moved from the ROB to the architectural register file. A physical register file allows for more registers and simplifies recovery from mispredictions.",
+    "rationale": "A physical register file provides more registers for renaming, reducing stalls due to register shortages. It also avoids the need to copy register values in and out of a ROB, improving efficiency. The paper likely notes that this choice was essential for supporting the large instruction window and out-of-order execution.",
+    "outcome": "The paper reports that the register renaming scheme effectively supported out-of-order execution, contributing to the overall performance of the microprocessor.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "vector_name": "number_integer_vs_float",
+    "input_json": "[1.0,1.5,1e0]",
+    "canonical_output": "[1,1.5,1]",
+    "rule": "RFC 8785 Section 3.2.2: numbers are serialized from their IEEE-754 double value using ECMAScript number serialization; integer values in the plain range are emitted without fraction or exponent.",
+    "divergence_trap": "Naive serializers may retain 1.0 or 1e0, or format doubles with fixed precision, instead of canonical [1,1.5,1].",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_negative_zero",
+    "input_json": "{\"num\":-0}",
+    "canonical_output": "{\"num\":-0}",
+    "rule": "RFC 8785 number serialization preserves IEEE-754 negative zero as -0.",
+    "divergence_trap": "Plain ECMAScript Number::toString/JSON.stringify often serializes -0 as 0, losing the sign.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_2_pow_53_and_unrepresentable_plus_one",
+    "input_json": "{\"a\":9007199254740992,\"b\":9007199254740993}",
+    "canonical_output": "{\"a\":9007199254740992,\"b\":9007199254740992}",
+    "rule": "RFC 8785 parses JSON numbers to IEEE-754 doubles; 9007199254740993 rounds to 2^53, then integer serialization is used.",
+    "divergence_trap": "BigInt/decimal-preserving serializers may emit 9007199254740993, but JCS canonicalizes to the parsed double value 9007199254740992.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_exponent_boundary_1e20_1e21",
+    "input_json": "[1e20,1e21]",
+    "canonical_output": "[100000000000000000000,1e+21]",
+    "rule": "RFC 8785 follows ECMAScript Number serialization: magnitudes below 1e21 use plain decimal; at 1e21 it switches to exponent notation with lowercase e and explicit +.",
+    "divergence_trap": "Naive formatters may emit 1e20 or 1e21 without plus, or 1.0e+21; canonical is plain 100000000000000000000 and 1e+21.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "number_tiny_decimal_thresholds",
+    "input_json": "[1e-6,1e-7,-1e-7]",
+    "canonical_output": "[0.000001,1e-7,-1e-7]",
+    "rule": "RFC 8785/ECMAScript number serialization uses fixed decimal down to 1e-6 inclusive and exponent notation below that.",
+    "divergence_trap": "Naive implementations may output 1e-6 or 0.0000001; canonical is 0.000001 and 1e-7.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_escape_controls_and_solidus",
+    "input_json": "{\"s\":\"\\u0000\\u0001\\n\\\"\\/\"}",
+    "canonical_output": "{\"s\":\"\\u0000\\u0001\\n\\\"/\"}",
+    "rule": "RFC 8785 Section 3.2.3: escape quotation mark, reverse solidus, and U+0000-U+001F; solidus is not escaped; control escapes use JSON short forms where defined and lower-case u escapes otherwise.",
+    "divergence_trap": "Many encoders escape solidus as backslash-slash or use upper-case hex; JCS outputs solidus unescaped and canonical lower-case/short control escapes.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_no_unicode_normalization",
+    "input_json": "{\"\\u00e9\":\"composed\",\"e\\u0301\":\"decomposed\"}",
+    "canonical_output": "{\"e\u0301\":\"decomposed\",\"\u00e9\":\"composed\"}",
+    "rule": "RFC 8785 does not normalize Unicode; string code points are preserved and object keys are sorted by UTF-16 code units.",
+    "divergence_trap": "A naive canonicalizer may NFC/NFD normalize e plus U+0301 to U+00E9 or use locale collation; JCS keeps both distinct keys and orders the key starting with 'e' before composed U+00E9.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_surrogate_pair_decode",
+    "input_json": "{\"s\":\"\\uD83D\\uDE00\"}",
+    "canonical_output": "{\"s\":\"\ud83d\ude00\"}",
+    "rule": "RFC 8785 parses escaped surrogate pairs to the supplementary code point and serializes non-control characters unescaped in UTF-8.",
+    "divergence_trap": "Naive implementations may preserve escaped surrogate pair text or double-encode surrogates; canonical output contains the literal U+1F600 character.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "key_order_utf16_code_units_not_code_points",
+    "input_json": "{\"\\uE000\":1,\"\\uD800\\uDC00\":2}",
+    "canonical_output": "{\"\ud800\udc00\":2,\"\ue000\":1}",
+    "rule": "RFC 8785 Section 3.2.1: object member names are sorted by UTF-16 code unit values, not by Unicode code point or collation.",
+    "divergence_trap": "Code-point ordering would place U+E000 before U+10000; UTF-16 code-unit ordering places the surrogate-pair-encoded U+10000 first because D800 < E000.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "structural_empty_nesting_and_sorting",
+    "input_json": "{\"b\":{},\"a\":[],\"c\":[{\"d\":[]}]}",
+    "canonical_output": "{\"a\":[],\"b\":{},\"c\":[{\"d\":[]}]}",
+    "rule": "RFC 8785 serializes objects with sorted keys, arrays preserve order, empty containers are kept, and whitespace is omitted.",
+    "divergence_trap": "Pretty printers or key-sorting that uses code-point/collation may add spaces or misorder keys; here ASCII keys make code-point and UTF-16 order coincide.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_key_illegality",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": null,
+    "rule": "RFC 8785 treats duplicate member names as illegal input; no canonical serialization is defined.",
+    "divergence_trap": "Lenient parsers may keep the first or last duplicate, silently changing semantics; a correct JCS verifier should reject or expose an error.",
+    "certainty": "probable"
+  }
+]

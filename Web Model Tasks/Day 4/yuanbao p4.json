@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Trace cache replaces conventional L1 instruction cache",
+    "where_in_paper": "Execution Trace Cache section",
+    "decision": "Store decoded IA-32 micro-ops in a 12K-µop trace cache rather than a conventional L1 instruction cache; the IA-32 decoder is used only on trace-cache miss.",
+    "alternatives_or_rejected": "Conventional L1 I-cache holding x86 instruction bytes — not-stated-in-paper whether explicitly argued against",
+    "rationale": "Eliminates decode latency from the main execution loop and stores µops in program-flow (trace) order, increasing delivered instruction bandwidth to the execution core and aiding recovery from mispredicted branches.",
+    "outcome": "Trace cache achieves hit rate comparable to an 8–16 KB I-cache while bypassing decode; on miss, instructions are fetched from L2 and decoded.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 3,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact wording of the hit-rate comparison and whether the paper explicitly frames a conventional I-cache as a rejected alternative",
+    "confidence": 0.7
+  },
+  {
+    "title": "Very deep (20-stage) pipeline to maximize clock frequency",
+    "where_in_paper": "Overview of the NetBurst Microarchitecture / Hyper-Pipelined Technology",
+    "decision": "Deepen pipeline to ~20 stages (vs. ~10 in P6) by simplifying each stage's work, trading higher branch-mispredict penalty for substantially higher achievable clock frequency.",
+    "alternatives_or_rejected": "Shallower pipeline with more work per stage — not-stated-in-paper whether explicitly weighed",
+    "rationale": "Simplified stage logic enables much higher clock rates; at 0.18 µm this allowed Pentium 4 to reach 1.5 GHz at introduction versus ~1 GHz limits for P6-based designs at the same process.",
+    "outcome": "Pentium 4 introduced at 1.5 GHz (November 2000); deep pipeline combined with enhanced branch prediction to mitigate mispredict penalty.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 2,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly states the pipeline depth as a weighed decision against a shallower alternative, or simply describes it as a feature",
+    "confidence": 0.65
+  },
+  {
+    "title": "Double-pumped (2× clocked) ALUs — Rapid Execution Engine",
+    "where_in_paper": "Rapid Execution Engine / Execution Core",
+    "decision": "Implement two ALUs and two AGUs that operate at twice the core clock frequency, executing one µop per half-cycle (rising and falling edge).",
+    "alternatives_or_rejected": "Single-speed ALUs running at core clock — not-stated-in-paper whether explicitly considered",
+    "rationale": "To compensate for the longer pipeline's per-instruction latency and deliver high integer throughput; at 1.5 GHz core clock the ALUs effectively operate at 3 GHz, providing up to 6 µops/cycle peak issue bandwidth.",
+    "outcome": "Four double-speed execution ports enable up to 6 µops per cycle to be dispatched; this offsets the IPC penalty of the deep pipeline for integer-heavy code.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 4,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Exact distribution of double-speed vs slow ALU and whether the paper frames this explicitly as a trade-off decision",
+    "confidence": 0.6
+  },
+  {
+    "title": "400 MHz system bus via quad-pumping",
+    "where_in_paper": "System Bus section",
+    "decision": "Use a 100 MHz external bus clock quad-pumped to deliver 400 MHz effective data rate, paired with dual-channel PC800 RDRAM for 3.2 GB/s peak bandwidth.",
+    "alternatives_or_rejected": "Traditional single-data-rate front-side bus synchronized to memory clock — not-stated-in-paper",
+    "rationale": "Existing FSB speeds could not satisfy the bandwidth demands of the high-frequency core; quad-pumping decouples effective bus frequency from the physical pin clock.",
+    "outcome": "400 MHz system bus delivers ~3× the bandwidth of the 133 MHz Pentium III FSB (1.06 GB/s → 3.2 GB/s).",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether the paper explicitly presents this as a design decision with rejected alternatives, or as a feature description",
+    "confidence": 0.55
+  }
+]

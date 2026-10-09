@@ -1,0 +1,92 @@
+[
+  {
+    "pattern_name": "Block-boundary I/O delay budget split",
+    "situation": "Constraining a hierarchical block whose external launch and capture logic is not yet implemented or is owned by another team; need set_input_delay / set_output_delay numbers that leave realistic residual for the outside.",
+    "derivation": "Available period T = clock period at the boundary. Allocate: (1) external launch/capture flop uncertainty + clock skew budget (typically 5-15% of T), (2) external combinational logic estimate (from previous silicon or floorplan wire-load), (3) board/package delay if chip-level. Residual becomes the block's set_input_delay or set_output_delay. Example arithmetic: T=2.0 ns, external clock uncertainty 0.15 ns, external logic 0.6 ns, package 0.1 ns → block input_delay max = 0.85 ns (so internal path must close in 1.15 ns).",
+    "wrong_way": "Blindly taking 50% of period for the block (or copying a number from an unrelated design) without an external estimate; downstream the external team discovers they have no margin and the interface never closes.",
+    "defense": "Show the allocation table (period breakdown) and the source of the external estimate (prior silicon, floorplan RC, or agreed interface budget document); both teams sign the residual.",
+    "signoff_risk": "Too tight: block is over-designed (area/power) while external still fails. Too loose: block meets its SDC but the full chip fails setup at the interface; late ECOs or frequency reduction.",
+    "confidence": 0.9
+  },
+  {
+    "pattern_name": "False-path vs multicycle-path decision",
+    "situation": "A path exists in the netlist (or is structurally possible) but functionally never occurs in the same cycle, or is allowed N cycles by protocol.",
+    "derivation": "Ask: (1) Can the launch and capture flops ever be enabled in consecutive cycles under any legal software/hardware sequence? If no → false_path. (2) If yes but protocol guarantees the data is stable for N cycles → set_multicycle_path -setup N -hold N-1 (or the precise hold adjustment required by the tool). Evidence is the FSM, the software handshake, or the interface specification.",
+    "wrong_way": "Declaring false_path on a path that is merely 'rare' or 'slow in practice'; or using multicycle without adjusting hold. Downstream a rare corner or a software change activates the path and the chip fails in the field.",
+    "defense": "Point to the exact protocol clause or FSM state that proves mutual exclusion or the N-cycle guarantee; show that simulation/formal coverage never exercises a single-cycle transfer.",
+    "signoff_risk": "False_path when it should have been multicycle: silicon fails when the path is exercised. Multicycle when it should be single-cycle: tool under-optimizes, path is slow, and a future protocol change exposes the bug. Missing hold adjustment on multicycle: hold violations appear only after CTS.",
+    "confidence": 0.92
+  },
+  {
+    "pattern_name": "Synchronous clock-domain crossing with known phase",
+    "situation": "Two clocks that are derived from the same source (or locked PLLs) with a static, known phase relationship; paths between them must be timed.",
+    "derivation": "Create a generated or virtual relationship that captures the phase offset. set_max_delay / set_min_delay (or a generated clock with the exact edge relationship) equal to the available time after subtracting the known phase difference and both clocks' uncertainties. If the phase is 0 and periods are identical, ordinary single-cycle timing applies; if phase is fixed but non-zero, the available window is period ± phase.",
+    "wrong_way": "Treating the domains as asynchronous (set_clock_groups -asynchronous) and relying only on synchronizers; the tool ignores real timing paths that could have been optimized, and a phase-related setup/hold hole is left unexamined.",
+    "defense": "Show the PLL configuration or divider diagram that proves the static phase; show STA that the relationship is modeled and that the residual path delay fits inside the computed window.",
+    "signoff_risk": "Too tight (under-estimating available phase window): unnecessary buffering and power. Too loose or missing relationship: silent setup/hold failure when the actual phase occurs on silicon.",
+    "confidence": 0.88
+  },
+  {
+    "pattern_name": "Asynchronous CDC constraint (synchronizer path)",
+    "situation": "True asynchronous clocks; data crosses through a dual-rank (or multi-rank) synchronizer.",
+    "derivation": "set_clock_groups -asynchronous between the two clocks (or set_false_path between the domains except through the synchronizer). On the synchronizer flops themselves: set_max_delay from async input to first synchronizer flop equal to a fraction of the receiving clock period (often ½ or ⅔) to force a reasonably short path and reduce MTBF impact; set_false_path or set_max_delay on the second-stage path if the tool still times it. No multicycle on the gray-code or handshake signals unless the protocol is proven.",
+    "wrong_way": "Omitting the max_delay on the first synchronizer stage (tool may leave a multi-ns path) or applying a full false_path that also disables the max_delay check; or treating the entire CDC as a normal timed path.",
+    "defense": "Show the synchronizer cell (or RTL) and the MTBF calculation that justifies the max_delay budget; show that no other paths between the domains exist outside the synchronizer.",
+    "signoff_risk": "Missing max_delay: long first-stage path → poor MTBF → field metastability failures. Over-constraining the second stage: unnecessary logic and hold problems. Incomplete clock-group: tool reports thousands of false violations that hide real ones.",
+    "confidence": 0.9
+  },
+  {
+    "pattern_name": "Early-implementation over-constraint with planned relaxation",
+    "situation": "Block is in floorplan / early placement; final clock uncertainty, OCV, and external delays are still soft.",
+    "derivation": "Start with a deliberately tighter clock uncertainty (e.g., +30-50 ps extra) and a tighter I/O budget than the final target. After CTS and when external numbers harden, relax the uncertainty and I/O delays to the final values in a controlled ECO. The extra margin forces the tool to keep paths short while the design is still fluid.",
+    "wrong_way": "Using the final optimistic uncertainty from day one; the design grows long paths that become unfixable once real OCV and external delays appear, forcing late architectural changes.",
+    "defense": "Document the 'implementation uncertainty' delta and the date/condition under which it will be removed; show that the final SDC is the one that matches the sign-off corners.",
+    "signoff_risk": "Never relaxing: over-designed block (area/power). Relaxing too early or too much: late timing failures that require major ECOs after freeze.",
+    "confidence": 0.85
+  },
+  {
+    "pattern_name": "Virtual clock for pure I/O timing",
+    "situation": "Chip-level or block-level ports that are timed relative to an external clock that does not exist inside the design.",
+    "derivation": "create_clock -name virt_clk -period T on a virtual source (or on a port that is only a timing reference). set_input_delay / set_output_delay -clock virt_clk with the external board/package + external flop numbers. The virtual clock never drives any internal sequential element; it only provides the reference edge for the I/O delays.",
+    "wrong_way": "Creating a real clock on an input port that is only data, or forgetting to declare the virtual clock and using a real internal clock for board-level I/O; the tool then times non-existent internal paths or applies wrong uncertainty.",
+    "defense": "Show that the virtual clock has no sinks inside the design and that all I/O paths reference it; show the board timing budget that produced the delay numbers.",
+    "signoff_risk": "Wrong period or missing virtual clock: I/O paths timed against an internal clock with different jitter/uncertainty → either false failures or missed board-level violations. Too tight I/O delay: internal over-design; too loose: board fails.",
+    "confidence": 0.9
+  },
+  {
+    "pattern_name": "Generated / divided clock modeling",
+    "situation": "An internal clock is produced by a divider, clock gate with enable, or PLL output that is a rational multiple of a source clock.",
+    "derivation": "create_generated_clock -source <master> -divide_by N (or -multiply_by / -edges) on the divider output pin. If the divider is not a library cell the tool understands, add -combinational or explicit edge list. Propagate the generated clock only through the intended network; use set_clock_sense or physical exclusivity if both edges are used.",
+    "wrong_way": "Omitting create_generated_clock and relying on the tool to infer a clock from a combinational divider; or creating the generated clock on the wrong pin so that the latency of the divider itself is double-counted or ignored.",
+    "defense": "Show the divider schematic and the exact pin where the generated clock is defined; show that STA latency from master to generated matches the expected divider delay.",
+    "signoff_risk": "Missing generated clock: paths downstream are timed at the master period (too tight) or not timed at all. Incorrect divide ratio: setup/hold windows are wrong by a factor of N → either over-design or silicon failure.",
+    "confidence": 0.87
+  },
+  {
+    "pattern_name": "Inter-block budget when both blocks are still soft",
+    "situation": "Two blocks A and B that will eventually be timed together, but neither has final placement or CTS yet; need a temporary interface constraint so each can proceed independently.",
+    "derivation": "Agree a shared interface clock and a total path budget = period − (A uncertainty + B uncertainty + expected wire delay). Split the residual combinational budget 50/50 or by relative logic depth (e.g., 60/40 if A is known deeper). Each block receives a set_output_delay / set_input_delay that reflects its share. Revisit the split after both have real placement.",
+    "wrong_way": "Each team assumes the entire period is available for its own block; the interface then has zero residual and fails when the blocks are integrated.",
+    "defense": "Published interface budget spreadsheet signed by both block owners and the chip integrator; show that the sum of the two budgets plus wire estimate equals the period minus uncertainties.",
+    "signoff_risk": "Sum of budgets > available time: integration fails, late negotiation. One side too tight: that block burns area while the other has unused margin; frequency cannot be raised.",
+    "confidence": 0.86
+  },
+  {
+    "pattern_name": "Clock uncertainty composition",
+    "situation": "Need a single number (or set of numbers) for set_clock_uncertainty that covers PLL jitter, duty-cycle distortion, OCV, and margin for later CTS.",
+    "derivation": "Add in quadrature or conservatively: PLL period jitter (from PLL spec) + duty-cycle error + clock-tree OCV estimate (from AOCV tables or prior silicon) + explicit design margin (10-30 ps). For setup use the full sum; for hold use a smaller subset (often only local OCV + small margin) because global jitter is common-mode. Update the number after real CTS when actual skew is known.",
+    "wrong_way": "Using a single flat 100 ps for every clock regardless of period or PLL quality, or forgetting to reduce uncertainty for hold analysis; hold becomes artificially hard or setup is under-protected.",
+    "defense": "Show the jitter/DCD numbers from the PLL datasheet and the OCV table version; show the arithmetic that produced the final uncertainty value.",
+    "signoff_risk": "Too small: real silicon has less margin than STA predicted → field timing failures under voltage/temperature. Too large: over-constrained design, extra buffers, higher power, possible failure to close at target frequency.",
+    "confidence": 0.88
+  },
+  {
+    "pattern_name": "Point-to-point max/min delay for non-clocked interfaces",
+    "situation": "A pure combinational path between two blocks or between a block and a pad that is not captured by a regular clock edge (e.g., asynchronous handshakes, source-synchronous with its own strobe, or feed-through).",
+    "derivation": "set_max_delay <budget> -from <launch pins> -to <capture pins> and a corresponding set_min_delay. Budget = required external window − external setup/hold − board delay. The max_delay forces the tool to keep the path short; the min_delay prevents it from becoming so short that external hold is violated.",
+    "wrong_way": "Relying only on a false_path (tool does nothing) or on a clocked I/O delay that does not match the actual external strobe timing; the path is either ignored or timed to the wrong edge.",
+    "defense": "Show the external timing diagram that defines the available window and the arithmetic that produced the max/min numbers; show that the path is covered by those exceptions and no other clocked constraint.",
+    "signoff_risk": "Max too tight: internal over-design. Max too loose or missing: external setup fails. Min too large: tool inserts delay that violates external hold or creates unnecessary area. Min missing: path collapses and external hold fails.",
+    "confidence": 0.84
+  }
+]

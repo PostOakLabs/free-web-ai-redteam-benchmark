@@ -1,0 +1,99 @@
+[
+  {
+    "case_name": "Reserve coverage test – full backing",
+    "inputs": {
+      "token_supply": "1,000,000 tokens",
+      "claim_per_token": "1.00 EUR",
+      "total_claims": "1,000,000 EUR",
+      "reserve_asset_value": "1,000,000 EUR"
+    },
+    "computation": {
+      "coverage_ratio": "1,000,000 / 1,000,000 = 1.0000 (100.00%)",
+      "pass_if_coverage_ge_1": true,
+      "coverage_shortfall": "0.00 EUR"
+    },
+    "result": {
+      "coverage_ratio_pct": 100.00,
+      "regulatory_verdict": "adequate – reserve fully covers outstanding claims",
+      "test_applied": "Article 36(7) – aggregate reserve value ≥ aggregate value of token holders' claims"
+    },
+    "article_basis": "MiCA Article 36(7) – reserve assets must at all times have an aggregate value at least equal to the aggregate value of the claims of the holders of the asset-referenced tokens.",
+    "tail_convention": "coverage: LOW tail is adverse – a ratio < 1.00 indicates insufficient backing. This test examines the adverse tail (coverage ratio falls below 100%).",
+    "weakest_point": "assumes constant 1:1 peg and no valuation mismatches; does not incorporate liquidity or concentration requirements of Article 36(4–5)"
+  },
+  {
+    "case_name": "Own funds requirement – non‑significant ART issuer",
+    "inputs": {
+      "average_reserve_assets_6m": "50,000,000 EUR",
+      "fixed_overheads_prior_year": "1,200,000 EUR",
+      "fixed_floor": "350,000 EUR"
+    },
+    "computation": {
+      "2_pct_of_reserve": "0.02 × 50,000,000 = 1,000,000 EUR",
+      "quarter_of_overheads": "1,200,000 / 4 = 300,000 EUR",
+      "fixed_floor": "350,000 EUR",
+      "own_funds_required": "max(1,000,000, 300,000, 350,000) = 1,000,000 EUR"
+    },
+    "result": {
+      "own_funds_required_eur": 1000000,
+      "regulatory_verdict": "adequate if own funds ≥ 1,000,000 EUR",
+      "test_applied": "Article 35(1) – highest of (a) EUR 350,000, (b) 2% of average reserve, (c) quarter of fixed overheads"
+    },
+    "article_basis": "MiCA Article 35(1) – own funds shall be at least the highest of: (a) EUR 350,000; (b) 2% of the average amount of the reserve of assets (Article 36); (c) one quarter of the fixed overheads of the preceding year.",
+    "tail_convention": "own funds requirement: LOW tail is adverse – own funds below the required minimum fail the test. This test examines the adverse tail (insufficient own funds).",
+    "weakest_point": "significant token issuers are subject to 3% (Article 45(5)), and competent authorities may impose up to 20% add‑ons (Article 35(3)) – this case assumes no such uplifts"
+  },
+  {
+    "case_name": "Stressed coverage – reserve asset haircut",
+    "inputs": {
+      "token_supply": "1,000,000 tokens",
+      "claim_per_token": "1.00 EUR",
+      "total_claims": "1,000,000 EUR",
+      "reserve_asset_value": "1,050,000 EUR",
+      "haircut_pct": 5.0,
+      "stress_scenario": "severe but plausible market decline"
+    },
+    "computation": {
+      "pre_stress_coverage": "1,050,000 / 1,000,000 = 1.0500 (105.00%)",
+      "haircut_loss": "1,050,000 × 0.05 = 52,500 EUR",
+      "stressed_reserve_value": "1,050,000 − 52,500 = 997,500 EUR",
+      "stressed_coverage_ratio": "997,500 / 1,000,000 = 0.9975 (99.75%)",
+      "post_stress_shortfall": "1,000,000 − 997,500 = 2,500 EUR",
+      "stress_test_outcome": "FAIL – coverage falls below 100%"
+    },
+    "result": {
+      "pre_stress_coverage_pct": 105.00,
+      "stressed_coverage_pct": 99.75,
+      "regulatory_verdict": "inadequate – stressed reserve fails to fully back claims",
+      "test_applied": "Article 35(5) stress testing – severe but plausible financial and non‑financial scenarios"
+    },
+    "article_basis": "MiCA Article 35(5) – issuers shall conduct regular stress testing that takes into account severe but plausible financial stress scenarios (e.g. interest rate shocks) and non‑financial stress scenarios. Based on outcomes, competent authorities may require additional own funds (up to 40% under Article 35(3) and (5)).",
+    "tail_convention": "stressed coverage: LOW tail is adverse – coverage ratio declines under stress. The test examines the adverse tail (coverage after haircut) and flags any shortfall.",
+    "weakest_point": "haircut assumption is illustrative; actual haircuts are asset‑class‑specific and defined in regulatory technical standards (e.g. EBA RTS on reserve asset composition)"
+  },
+  {
+    "case_name": "Redemptions at par – obligation math",
+    "inputs": {
+      "redemption_request": "50,000 tokens",
+      "redemption_price_per_token": "1.00 EUR",
+      "reserve_assets_available": "1,050,000 EUR",
+      "total_outstanding_tokens": "1,000,000 tokens"
+    },
+    "computation": {
+      "redemption_obligation": "50,000 × 1.00 = 50,000 EUR",
+      "remaining_reserve_after_redemption": "1,050,000 − 50,000 = 1,000,000 EUR",
+      "remaining_outstanding_tokens": "1,000,000 − 50,000 = 950,000 tokens",
+      "post_redemption_coverage": "1,000,000 / 950,000 = 1.05263 (105.26%)",
+      "redemption_execution": "obligation met in full at par"
+    },
+    "result": {
+      "redemption_obligation_eur": 50000,
+      "post_redemption_coverage_pct": 105.26,
+      "regulatory_verdict": "adequate – reserve sufficient to meet redemption request and maintain full backing",
+      "test_applied": "Article 36(1) and Article 39 – reserve must cover redemption rights; redemption at par without delay"
+    },
+    "article_basis": "MiCA Articles 36(1) and 39 – reserve of assets must be constituted and maintained to cover the risks and the permanent redemption rights of holders; redemptions must be executed at par and without undue delay.",
+    "tail_convention": "redemption adequacy: LOW tail is adverse – insufficient reserve to meet redemption obligations. This test examines the adverse tail (reserve falls below redemption amount).",
+    "weakest_point": "assumes no operational delays, no redemption fees, and no liquidity haircuts; actual redemption timing and asset liquidation costs could affect outcomes"
+  }
+]

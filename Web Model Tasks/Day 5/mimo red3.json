@@ -1,0 +1,40 @@
+```json
+{
+  "verdict": "SOUND-WITH-RESERVATIONS",
+  "objections": [
+    {
+      "claim_attacked": "section_or_page_locator: 'page 1 (introduction)'",
+      "objection": "The cited journal pages are 21–29. IEEE Micro papers do not carry 'page 1' footers on article reprints in the way IEEE proceedings papers sometimes do. 'Page 1' is either the reprint footer (imprecise for a journal citation) or a mistake. Should reference journal page 21 or a specific section heading like 'Motivation' or 'Processor Overview'.",
+      "severity": "minor",
+      "confidence": 0.8
+    },
+    {
+      "claim_attacked": "alternatives_or_rejected: includes 'simply running ILP processors at lower clock frequencies to save power'",
+      "objection": "The paper's framing (recalled plausibility) compares throughput-optimized designs against latency-oriented designs with high ILP extraction. The explicit rejection of 'lower clock frequency for power saving' as a design alternative sounds like an industry discussion point rather than something this specific IEEE Micro article argues against. The paper may discuss power efficiency as a benefit of the chosen approach, but I am not confident it names clock-frequency reduction as a considered-and-rejected alternative. This could be a general-knowledge transplant of the power-is-wall narrative into the paper's mouth.",
+      "severity": "major",
+      "confidence": 0.6
+    },
+    {
+      "claim_attacked": "rationale: 'inherently low ILP of applications'",
+      "objection": "The paper likely presents a table or figure (Table 1 is explicitly referenced in 'gaps') showing ILP versus TLP across workload categories. The paper probably argues that server/commercial workloads have high TLP but does NOT necessarily claim ILP is inherently low across all applications — it may note that non-server workloads have reasonable ILP. The word 'inherently' overstates what the paper likely says. A more accurate framing: 'low ILP of the target server applications' not 'applications' generically.",
+      "severity": "minor",
+      "confidence": 0.55
+    },
+    {
+      "claim_attacked": "outcome: 'Niagara supports 32 hardware threads in hardware; application performance is increased by improving throughput'",
+      "objection": "This is correct but so thin as to be nearly vacuous. The paper almost certainly reports specific throughput gains (e.g., throughput benchmarks, SPECrate, web-serving metrics) and names the 8-core × 4-thread topology. Omitting the 8×4 structure from the 'outcome' field is a missed opportunity — it is one of the most citable facts in the paper.",
+      "severity": "minor",
+      "confidence": 0.75
+    }
+  ],
+  "direction_check": "The DECISION DIRECTION is correct and matches what this paper is overwhelmingly known for: throughput-over-single-thread is the Niagara thesis. No reversal detected. The paper's entire framing is 'exploit TLP, simplify cores, maximize thread count.' The draft captures this direction faithfully.",
+  "quote_plausibility": "The quote reads like plausible IEEE Micro prose — it is a complete sentence, uses 'throughput' with an inline definition ('the total amount of work done across multiple threads of execution'), and has the explanatory-parenthetical style characteristic of Olukotun's writing. It is not a paraphrase dressed as a quote. VERIFIED as byte-verbatim against the pagemarked source per build note.",
+  "missing_from_story": [
+    "The 8-core × 4-thread-per-core topology as the specific embodiment of '32 threads' — this is a concrete architectural decision with its own trade-offs (why 4 threads per core and not 2 or 8?).",
+    "The role of the simple pipeline (6-stage, in-order, single-issue) as an enabler of the throughput approach — the decision to simplify cores is inseparable from the decision to maximize thread count.",
+    "Any mention of the memory subsystem (shared L2, crossbar) that makes 32 threads viable — without bandwidth to feed them, threads stall on memory and the throughput thesis fails.",
+    "The SPARC ISA choice as a contextual constraint (Sun's existing ecosystem) rather than a free architectural decision."
+  ],
+  "most_defensible_part": "The decision field itself: 'Design Niagara to optimize for multithreaded throughput in a commercial server environment rather than for single- or dual-thread performance.' This is unambiguously the paper's central claim and is correctly stated."
+}
+```

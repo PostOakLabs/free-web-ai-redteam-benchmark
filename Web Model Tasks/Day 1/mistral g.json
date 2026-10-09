@@ -1,0 +1,94 @@
+```json
+[
+  {
+    "pattern_name": "Block-Boundary Budget Split",
+    "situation": "Deriving input/output delay constraints between hierarchical blocks during early timing closure when blocks are implemented separately",
+    "derivation": "Total available time = T_period - (T_setup + T_clock_uncertainty). Allocate to launch block A: T_A = Total * (L_A / (L_A + L_B + W)), where L_A/L_B are estimated FO4 logic depths and W = wireload_model_delay * distance. Capture block B gets T_B = Total - T_A - interconnect_margin (typically 10-15% of Total). Convert to SDC: set_output_delay -max T_A -clock [A_clk] [A/outputs], set_input_delay -max T_B -clock [B_clk] [B/inputs].",
+    "wrong_way": "Assign equal delay to all blocks regardless of logic depth, or use the full period as budget. This silently causes the deep-logic block to fail timing closure while the shallow block has excessive margin, but the violation only appears after both blocks are implemented.",
+    "defense": "Show a spreadsheet with FO4 depth counts from RTL synthesis estimates and wireload model calculations for each block-to-block path. Correlate with physical distance from early floorplan.",
+    "signoff_risk": "Too tight: Blocks cannot close timing even with optimal implementation, forcing late-stage re-budgeting. Too loose: Interface paths fail in silicon because the real delay exceeds the budget, but the failure is masked until full-chip integration.",
+    "confidence": 0.95
+  },
+  {
+    "pattern_name": "False Path vs Multicycle Decision",
+    "situation": "A path fails timing and the team debates whether it is a false path (structurally impossible) or a multicycle path (intentionally taking N cycles)",
+    "derivation": "False path if data cannot arrive within one clock cycle by construction: e.g., reset domain to functional domain, scan chain, or power-up initialization paths. Multicycle if the data is valid only after N cycles: e.g., a 2-cycle path through a synchronous FIFO where data is written on cycle N and read on cycle N+2. Verify by checking if there exists any combinational path from launch to capture flop in the RTL. If yes, it is multicycle; if no, it is false. SDC: set_false_path for false, set_multicycle_path N for multicycle.",
+    "wrong_way": "Marking a true multicycle path as false_path, or marking a real functional path as multicycle_path. The first silently removes a real timing check; the second over-constrains by allowing N cycles when only N-1 are needed.",
+    "defense": "Provide RTL code snippets showing the absence/presence of combinational logic between flops, and a timing diagram illustrating when data is valid. For multicycle, show the architectural spec stating the N-cycle requirement.",
+    "signoff_risk": "Too tight (false_path on real path): Missed timing failures in silicon. Too loose (multicycle on false path): Over-constraining other paths, causing unnecessary buffering that increases power and area.",
+    "confidence": 0.98
+  },
+  {
+    "pattern_name": "Clock-Domain Crossing (CDC) Constraint",
+    "situation": "Data crosses between two clock domains with either no phase relationship (asynchronous) or a known phase relationship (mesochronous/synchronous)",
+    "derivation": "Asynchronous: set_clock_groups -asynchronous -group {clk_A} -group {clk_B}. Add set_false_path -from [clk_A_domain] -to [clk_B_domain] -setup and -hold for direct paths, then constrain only the synchronization flops with set_max_delay = T_sync (typically 1-2 cycles). Mesochronous: set_clock_groups -asynchronous is insufficient; instead use set_max_delay -from [get_clocks clk_A] -to [get_clocks clk_B] [expr ($T_period/2) - $T_skew] where T_skew is measured worst-case skew between domains.",
+    "wrong_way": "Treating asynchronous domains as synchronous by omitting clock groups, which causes the tool to assume a 1-cycle relationship. This produces false timing violations for CDC paths while missing real metastability risks at the synchronizers.",
+    "defense": "Provide the clock domain diagram, measured skew data from the clock tree, and the synchronization protocol spec (e.g., 2-flop synchronizer). Show that direct CDC paths are false paths and only the synchronizer paths have real timing constraints.",
+    "signoff_risk": "Too tight: False CDC violations prevent timing closure. Too loose: Real metastability issues are not caught, leading to silicon failures that are hard to debug.",
+    "confidence": 0.94
+  },
+  {
+    "pattern_name": "Virtual Clocks for IO Interfaces",
+    "situation": "Constraining IO pins where the clock is generated externally (e.g., DDR interface, PCIe), so the internal clock is not the reference",
+    "derivation": "Create a virtual clock matching the external clock: create_clock -name ext_clk -period $T_ext. Then set_input_delay -clock ext_clk -max [expr ($T_ext/2) - $T_setup_internal - $T_uncertainty] [get_ports data_in], and set_output_delay -clock ext_clk -max [expr ($T_ext/2) - $T_hold_external - $T_uncertainty] [get_ports data_out]. The delays are derived from the external clock's half-period minus internal setup/hold requirements and uncertainties.",
+    "wrong_way": "Using the internal system clock for IO timing, which ignores the external clock's phase and timing. This causes the tool to check IO timing against the wrong clock edge, producing incorrect setup/hold margins.",
+    "defense": "Show the IO timing diagram with the external clock waveform, the internal clock waveform, and the data valid windows. Provide the external clock period and the calculated input/output delays with arithmetic.",
+    "signoff_risk": "Too tight: IO fails in silicon due to insufficient setup/hold time at the pin. Too loose: IO timing is not properly verified, leading to silicon failures under PVT variations.",
+    "confidence": 0.96
+  },
+  {
+    "pattern_name": "Generated/Divided Clock Constraint",
+    "situation": "A clock is derived from a primary clock (e.g., divided by 2, gated, or phase-shifted), and the generation logic has its own latency",
+    "derivation": "First, define the relationship: create_generated_clock -name div_clk -source [get_pins divider/CLKOUT] -divide_by 2 -master_clk sys_clk. Then account for generation latency: set_clock_latency -source -max $T_gen_latency [get_clocks div_clk], where T_gen_latency is the measured or estimated delay through the divider/gate logic. For phase-shifted clocks, use -add_delay or -subtract_delay in create_generated_clock.",
+    "wrong_way": "Treating the generated clock as a primary clock, which ignores the latency through the generation logic. This causes the tool to assume the generated clock arrives at the same time as the primary clock, producing incorrect timing for paths using the generated clock.",
+    "defense": "Provide the clock generation RTL and the timing report for the divider/gate logic, showing the measured latency. Show the clock tree diagram with the generated clock's path.",
+    "signoff_risk": "Too tight: False timing violations due to unaccounted generation latency. Too loose: Real timing issues in the generated clock domain are missed, leading to silicon failures.",
+    "confidence": 0.93
+  },
+  {
+    "pattern_name": "Early-Stage Over-Constraining Strategy",
+    "situation": "During early RTL or floorplanning, when wireload models, placement, and routing are uncertain, but timing constraints must be written to start implementation",
+    "derivation": "Start with conservative margins: set_clock_uncertainty -setup [expr 0.15 * $T_period] -hold [expr 0.1 * $T_period] [get_clocks *]. For inter-block paths, set_max_delay -from [A] -to [B] [expr 0.7 * $T_period]. As the design matures (wireload models refined, placement done, routing estimated), relax margins in steps: reduce clock uncertainty by 50% after placement, remove inter-block max_delay constraints after routing estimates are available.",
+    "wrong_way": "Using final, tight margins from the start, which causes the tool to report thousands of false timing violations. Alternatively, never relaxing margins, leading to over-buffered, high-power designs.",
+    "defense": "Show a margin relaxation schedule tied to project milestones (e.g., '15% uncertainty until placement complete, then 7%, then 3%'). Provide data showing how wireload models improve over time.",
+    "signoff_risk": "Too tight: Wasted engineering time chasing false violations; may lead to unnecessary architecture changes. Too loose: Late-stage timing surprises when margins are removed, potentially requiring a respin.",
+    "confidence": 0.92
+  },
+  {
+    "pattern_name": "Asynchronous Interface Constraint",
+    "situation": "Interfacing with a block or IP that has no clock relationship to the current domain (e.g., a sensor interface, a separate power domain)",
+    "derivation": "First, isolate the domains: set_clock_groups -asynchronous -group {clk_async} -group {clk_sync}. Then, for any synchronization logic (e.g., 2-flop synchronizer), constrain only the synchronizer paths: set_max_delay -from [get_pins sync_flop1/Q] -to [get_pins sync_flop2/D] $T_sync, where T_sync is the synchronization time (typically 1-2 cycles). Add set_false_path for all direct paths from async to sync domain to prevent the tool from checking impossible timing.",
+    "wrong_way": "Using synchronous constraints (e.g., set_max_delay with full period) between async domains, which causes the tool to assume a clock relationship where none exists. This produces meaningless timing reports and can mask real synchronization issues.",
+    "defense": "Provide the interface specification stating the domains are asynchronous, and the synchronization protocol (e.g., 2-flop sync with 10ns MTBF). Show that no clock relationship exists in the design.",
+    "signoff_risk": "Too tight: False timing violations prevent convergence. Too loose: Metastability issues at the synchronizers are not caught, leading to silent data corruption in silicon.",
+    "confidence": 0.91
+  },
+  {
+    "pattern_name": "Unimplemented Block Budgeting",
+    "situation": "Deriving timing budgets for interfaces between blocks that have not been implemented yet (e.g., during top-level SDC creation before block-level RTL is complete)",
+    "derivation": "Estimate total path delay budget: T_total = $T_period - ($T_setup + $T_clock_uncertainty). Allocate based on expected logic depth: T_A = T_total * ($L_A / ($L_A + $L_B + $L_wire)), where L_A and L_B are estimated FO4 logic depths for blocks A and B, and L_wire is estimated wire delay (from early floorplan). Use conservative estimates: assume L_wire = 0.2 * T_total for long paths. SDC: set_input_delay -max T_B [B/inputs], set_output_delay -max T_A [A/outputs].",
+    "wrong_way": "Using arbitrary splits (e.g., 50/50) without justification, or basing splits on final netlist logic depths when blocks are not yet implemented. This leads to budgets that are either impossible to meet or too loose to be useful.",
+    "defense": "Show a table with estimated logic depths for each block (from RTL synthesis of similar blocks or early synthesis of partial RTL) and wire delay estimates from the early floorplan. Provide the arithmetic for each budget split.",
+    "signoff_risk": "Too tight: Blocks cannot meet timing even with optimal implementation, requiring late-stage budget reallocation. Too loose: Interface paths fail in silicon because the real delay exceeds the budget, but the failure is only discovered after both blocks are implemented.",
+    "confidence": 0.89
+  },
+  {
+    "pattern_name": "Clock Network Latency Inclusion/Exclusion",
+    "situation": "Deciding whether to include clock network latency in setup and hold timing checks, which affects the reported slack values",
+    "derivation": "For setup checks, include clock network latency: set_clock_network_latency -max -include. The arithmetic is: Slack_setup = Data_arrival_time - (Clock_arrival_time + Setup_time). Including clock latency reduces the available time. For hold checks, exclude clock network latency: set_clock_network_latency -min -exclude. The arithmetic is: Slack_hold = Clock_arrival_time + Hold_time - Data_arrival_time. Clock latency does not affect hold time because it cancels out in the hold check formula.",
+    "wrong_way": "Including clock network latency in both setup and hold checks, or excluding it from both. Including in hold causes false hold violations because the clock latency appears as extra delay on the clock path. Excluding from setup may miss real setup violations due to clock network delays.",
+    "defense": "Show the slack equations for setup and hold, demonstrating that clock latency cancels out in hold checks but not in setup checks. Provide a timing report snippet showing the difference in slack values when latency is included/excluded.",
+    "signoff_risk": "Too tight (including in hold): False hold violations that require unnecessary hold buffers, increasing power and area. Too loose (excluding from setup): Real setup violations missed, leading to silicon failures.",
+    "confidence": 0.97
+  },
+  {
+    "pattern_name": "Multi-Mode Case Analysis",
+    "situation": "A design has multiple operating modes (e.g., high-performance, low-power) with different timing requirements, and constraints must be applied conditionally",
+    "derivation": "Define case analysis: set_case_analysis 010 [list mode_high_perf mode_low_power]. Then apply mode-specific constraints: set_max_delay -from A -to B 3.0 -case 010 (high-perf mode), set_max_delay -from A -to B 5.0 -case 100 (low-power mode). For clock constraints: set_clock_uncertainty -setup 0.05 -case 010, set_clock_uncertainty -setup 0.15 -case 100. Ensure that all paths are covered by at least one case.",
+    "wrong_way": "Creating a single constraint set that must satisfy all modes, typically by using the loosest constraints. This silently allows paths to fail in high-performance mode while meeting timing in low-power mode.",
+    "defense": "Provide the mode analysis table showing different timing requirements for each mode (e.g., high-perf: 1GHz, low-power: 500MHz). Show that the constraints are applied conditionally and that all modes are covered.",
+    "signoff_risk": "Too tight: Constraints impossible to meet in some modes, causing false failures. Too loose: Mode-specific timing failures are missed, leading to silicon failures in certain operating modes.",
+    "confidence": 0.90
+  }
+]
+```

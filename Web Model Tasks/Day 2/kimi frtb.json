@@ -1,0 +1,110 @@
+ [
+  {
+    "case_name": "parametric_ES_97.5pct_normal",
+    "inputs": {
+      "confidence_level": "97.5%",
+      "distribution": "standard normal N(0,1)",
+      "z_0_975": "1.9600",
+      "phi_1_9600": "0.05844",
+      "tail_probability": "0.025"
+    },
+    "computation": {
+      "step_1_tail_probability": "1 - 0.975 = 0.025",
+      "step_2_VaR_multiplier": "z_0.975 = 1.9600",
+      "step_3_ES_multiplier_formula": "phi(z) / (1 - alpha) = 0.05844 / 0.025",
+      "step_4_ES_multiplier": "2.3376",
+      "step_5_ES_over_VaR_ratio": "2.3376 / 1.9600 = 1.1927",
+      "step_6_ES_value": "2.3376 (for sigma = 1)",
+      "step_7_VaR_value": "1.9600 (for sigma = 1)"
+    },
+    "result": {
+      "ES": "2.3376 sigma units",
+      "VaR": "1.9600 sigma units",
+      "ES_multiplier": "2.3376",
+      "VaR_multiplier": "1.9600",
+      "ES_over_VaR_ratio": "1.1927"
+    },
+    "formula_basis": "ES_alpha = sigma * phi(z_{1-alpha}) / (1-alpha) for P&L ~ N(mu,sigma^2); VaR_alpha = mu + sigma * z_{1-alpha} where Phi(z_{1-alpha}) = 1-alpha; MAR33 anchor: parametric normal ES is the theoretical benchmark for the 97.5% ES standard.",
+    "weakest_point": "Implementation defect: conflating ES multiplier (2.3376) with VaR multiplier (1.9600) understates tail-risk capital by 16.2% (ratio VaR/ES = 0.8385)."
+  },
+  {
+    "case_name": "parametric_ES_99pct_normal",
+    "inputs": {
+      "confidence_level": "99%",
+      "distribution": "standard normal N(0,1)",
+      "z_0_99": "2.3263",
+      "phi_2_3263": "0.02665",
+      "tail_probability": "0.01"
+    },
+    "computation": {
+      "step_1_tail_probability": "1 - 0.99 = 0.01",
+      "step_2_VaR_multiplier": "z_0.99 = 2.3263",
+      "step_3_ES_multiplier_formula": "phi(z) / (1 - alpha) = 0.02665 / 0.01",
+      "step_4_ES_multiplier": "2.6650",
+      "step_5_ES_over_VaR_ratio": "2.6650 / 2.3263 = 1.1456",
+      "step_6_ES_value": "2.6650 (for sigma = 1)",
+      "step_7_VaR_value": "2.3263 (for sigma = 1)"
+    },
+    "result": {
+      "ES": "2.6650 sigma units",
+      "VaR": "2.3263 sigma units",
+      "ES_multiplier": "2.6650",
+      "VaR_multiplier": "2.3263",
+      "ES_over_VaR_ratio": "1.1456"
+    },
+    "formula_basis": "ES_alpha = sigma * phi(z_{1-alpha}) / (1-alpha) for P&L ~ N(mu,sigma^2); VaR_alpha = mu + sigma * z_{1-alpha} where Phi(z_{1-alpha}) = 1-alpha; MAR33 anchor: the 99% ES is used for stress testing and model validation comparisons.",
+    "weakest_point": "Implementation defect: conflating ES multiplier (2.6650) with VaR multiplier (2.3263) understates tail-risk capital by 12.7% (ratio VaR/ES = 0.8729)."
+  },
+  {
+    "case_name": "liquidity_horizon_scaled_ES",
+    "inputs": {
+      "risk_factor_category": "Credit spread — investment grade",
+      "base_horizon": "10 days",
+      "liquidity_horizon": "40 days",
+      "base_ES_10d": "100.00 currency units"
+    },
+    "computation": {
+      "step_1_scale_factor_formula": "sqrt(LH / 10)",
+      "step_2_ratio": "40 / 10 = 4.0000",
+      "step_3_sqrt_ratio": "sqrt(4.0000) = 2.0000",
+      "step_4_scaled_ES": "100.00 * 2.0000 = 200.00"
+    },
+    "result": {
+      "scaled_ES": "200.00 currency units",
+      "scale_factor": "2.0000"
+    },
+    "formula_basis": "ES_LH = ES_10d * sqrt(LH / 10); MAR33 section 33.3: ES scaled by square root of liquidity horizon over 10-day base horizon for modellable risk factors.",
+    "weakest_point": "The sqrt(LH/10) rule assumes i.i.d. returns with constant volatility; autocorrelation or volatility clustering in credit spreads invalidates the scaling."
+  },
+  {
+    "case_name": "historical_simulation_ES_20obs",
+    "inputs": {
+      "sample_size": "20 observations",
+      "confidence_level": "97.5%",
+      "PnL_convention": "positive = gain, negative = loss",
+      "PnL_values_currency_units": [5.2, -3.1, 1.8, -8.5, 2.4, -1.3, 4.1, -2.7, 6.3, -0.5, 3.2, -7.1, 1.9, -4.2, 5.8, -3.6, 2.1, -1.8, 4.7, -6.4]
+    },
+    "computation": {
+      "step_1_sorted_PnL_ascending": [-8.5, -7.1, -6.4, -4.2, -3.6, -3.1, -2.7, -1.8, -1.3, -0.5, 1.8, 1.9, 2.1, 2.4, 3.2, 4.1, 4.7, 5.2, 5.8, 6.3],
+      "step_2_tail_probability": "1 - 0.975 = 0.025",
+      "step_3_tail_count_formula": "n * (1 - alpha) = 20 * 0.025",
+      "step_4_tail_count": "0.5",
+      "step_5_fractional_treatment_convention": "Acerbi-Tasche fractional order statistic: ES = [sum_{i=1}^{floor(k)} L_(i) + (k - floor(k)) * L_(ceil(k))] / k",
+      "step_6_floor_k": "0",
+      "step_7_ceil_k": "1",
+      "step_8_tail_observations": "0.5 units of observation ranked 1 (value -8.5)",
+      "step_9_ES_numerator": "0.5 * (-8.5) = -4.25",
+      "step_10_ES_denominator": "0.5",
+      "step_11_ES": "-4.25 / 0.5 = -8.5",
+      "step_12_VaR_975": "-8.5 (ceiling convention at rank 1)"
+    },
+    "result": {
+      "ES": "-8.50 currency units",
+      "VaR_975": "-8.50 currency units",
+      "tail_observations_count": "0.5 (fractional)",
+      "tail_observation_value": "-8.50"
+    },
+    "formula_basis": "ES_alpha = (1/k) * [sum_{i=1}^{floor(k)} L_(i) + (k - floor(k)) * L_(ceil(k))] where k = n(1-alpha) and L_(i) are ascending-sorted P&L; MAR33 section 33.2: ES is the average of P&L in the tail beyond the VaR quantile.",
+    "weakest_point": "With n=20 and alpha=97.5%, the tail contains k=0.5 observations, so ES equals the single worst observation (-8.5) under standard interpolation conventions; the estimate has zero statistical robustness and is entirely sample-dependent."
+  }
+]

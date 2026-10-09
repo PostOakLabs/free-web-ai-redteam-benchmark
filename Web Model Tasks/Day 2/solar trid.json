@@ -1,0 +1,87 @@
+[
+  {
+    "case_name": "Case 1 — Baseline: all buckets represented, 10% bucket mixed but within tolerance",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1000.00, "cd_amount": 1000.00},
+      {"name": "Appraisal fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 500.00, "cd_amount": 500.00},
+      {"name": "Credit report fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 50.00, "cd_amount": 50.00},
+      {"name": "Title insurance (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 1000.00, "cd_amount": 1050.00},
+      {"name": "Survey (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 300.00, "cd_amount": 290.00},
+      {"name": "Pest inspection (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 150.00, "cd_amount": 160.00},
+      {"name": "Recording fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 120.00, "cd_amount": 125.00},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 800.00, "cd_amount": 850.00},
+      {"name": "Homeowner's insurance", "bucket": "no_limit", "le_amount": 600.00, "cd_amount": 600.00}
+    ],
+    "computation": "Zero tolerance bucket:\n  Origination charge: CD $1,000.00 ≤ LE $1,000.00 → OK, no increase\n  Appraisal fee: CD $500.00 ≤ LE $500.00 → OK\n  Credit report fee: CD $50.00 ≤ LE $50.00 → OK\n  Zero-tolerance violations: none\n\n10% aggregate bucket:\n  Sum of LE amounts = $1,000.00 + $300.00 + $150.00 + $120.00 = $1,570.00\n  10% threshold = $1,570.00 × 0.10 = $157.00\n  Sum of CD amounts = $1,050.00 + $290.00 + $160.00 + $125.00 = $1,625.00\n  Aggregate increase = $1,625.00 − $1,570.00 = $55.00\n  Since $55.00 ≤ $157.00, the 10% tolerance is not exceeded → no violation\n\nNo-limit bucket:\n  Prepaid interest: LE $800.00 → CD $850.00 (increase $50.00); no tolerance limit applies → no cure required\n  Homeowner's insurance: LE $600.00 → CD $600.00 → no change\n\nOverall: no bucket exceeds its tolerance; no cure amount owed.",
+    "violations": "None. Zero-tolerance fees unchanged; 10% aggregate increase $55.00 is within the $157.00 threshold; no-limit fees have no tolerance.",
+    "clause_basis": "Zero-tolerance: 12 CFR §1026.19(e)(3)(i) (fees paid to creditor/affiliate or to a provider the creditor requires the borrower to use, where the borrower cannot shop; also transfer taxes). 10% aggregate tolerance: §1026.19(e)(3)(ii) (aggregate of charges for third-party services where the borrower may shop and the creditor does not require a particular provider; the amount in the Closing Disclosure may not exceed the Loan Estimate amount by more than 10% of the sum of those Loan Estimate charges). No tolerance limit: §1026.19(e)(3)(iv) (charges not subject to tolerance, such as prepaid interest, property insurance premiums, escrow account deposits). Cure obligation: §1026.19(e)(3)(iii) (if the 10% tolerance is exceeded, the creditor must pay the excess to the consumer).",
+    "weakest_point": "Bucket assignments rest on whether the borrower can shop and whether the creditor requires a particular provider; I assumed the borrower can shop for title, survey, pest, and recording, and that the creditor selected the appraisal and credit report provider, but the specific facts of a real transaction could change those assignments (e.g., a recording fee could be zero-tolerance if the creditor selected the provider). The dollar amounts are constructed and do not come from a specific published example. The arithmetic is exact as shown."
+  },
+  {
+    "case_name": "Case 2 — Mixed directions in 10% bucket; aggregate well within tolerance; illustrates aggregate vs. sum-of-increases distinction",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1200.00, "cd_amount": 1200.00},
+      {"name": "Appraisal fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 450.00, "cd_amount": 450.00},
+      {"name": "Title insurance (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 900.00, "cd_amount": 980.00},
+      {"name": "Survey (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 350.00, "cd_amount": 300.00},
+      {"name": "Pest inspection (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 200.00, "cd_amount": 220.00},
+      {"name": "Recording fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 100.00, "cd_amount": 95.00},
+      {"name": "Escrow/settlement fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 250.00, "cd_amount": 260.00},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 1000.00, "cd_amount": 1050.00},
+      {"name": "Homeowner's insurance", "bucket": "no_limit", "le_amount": 500.00, "cd_amount": 500.00}
+    ],
+    "computation": "Zero tolerance bucket:\n  Origination charge: $1,200.00 = $1,200.00 → OK\n  Appraisal fee: $450.00 = $450.00 → OK\n  Zero-tolerance violations: none\n\n10% aggregate bucket:\n  ΣLE = $900.00 + $350.00 + $200.00 + $100.00 + $250.00 = $1,800.00\n  10% threshold = $1,800.00 × 0.10 = $180.00\n  ΣCD = $980.00 + $300.00 + $220.00 + $95.00 + $260.00 = $1,855.00\n  Aggregate increase = ΣCD − ΣLE = $1,855.00 − $1,800.00 = $55.00\n  Since $55.00 ≤ $180.00, the 10% tolerance is not exceeded → no violation\n\nNote on method — the 10% test is an aggregate comparison (ΣCD vs ΣLE), NOT a sum of the individual increases:\n  Individual changes: Title +$80, Survey −$50, Pest +$20, Recording −$5, Escrow +$10\n  Sum of increases (ignoring decreases) = $80 + $20 + $10 = $110\n  Sum of decreases = −$55\n  Net change = $55\n  Even the incorrect sum-of-increases figure ($110) is below the $180 threshold here, so no violation would be flagged under either approach in this particular case; the distinction matters when the sum of increases would exceed the threshold but the net aggregate does not (see Case 3).\n\nNo-limit bucket:\n  Prepaid interest: LE $1,000.00 → CD $1,050.00 (increase $50.00); no tolerance limit → no cure\n  Homeowner's insurance: no change\n\nOverall: no violation; no cure.",
+    "violations": "None. Zero-tolerance fees unchanged; 10% aggregate increase $55.00 ≤ $180.00 threshold; no-limit fees not subject to tolerance.",
+    "clause_basis": "Zero-tolerance: §1026.19(e)(3)(i). 10% aggregate tolerance: §1026.19(e)(3)(ii) — the rule measures the aggregate amount of the charges in the Closing Disclosure against the aggregate amount in the Loan Estimate, not against a sum of individual increases. No tolerance limit: §1026.19(e)(3)(iv).",
+    "weakest_point": "Bucket assignments depend on whether the borrower could shop and whether the creditor required a particular provider; I assumed shopping was permitted for title, survey, pest, recording, and escrow, and that the creditor selected the appraisal provider. The dollar amounts are constructed. The arithmetic is exact. The key distinction — aggregate vs sum-of-increases — is correctly applied, but in this case both approaches yield no violation, so the case does not by itself demonstrate a wrong result; that is shown in Case 3."
+  },
+  {
+    "case_name": "Case 3 — Mixed directions; sum-of-increases would exceed 10% but aggregate does not (illustrates the defect this suite catches)",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1000.00, "cd_amount": 1000.00},
+      {"name": "Appraisal fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 400.00, "cd_amount": 400.00},
+      {"name": "Title insurance (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 1000.00, "cd_amount": 1250.00},
+      {"name": "Survey (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 400.00, "cd_amount": 300.00},
+      {"name": "Pest inspection (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 200.00, "cd_amount": 180.00},
+      {"name": "Recording fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 100.00, "cd_amount": 95.00},
+      {"name": "Escrow/settlement fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 300.00, "cd_amount": 350.00},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 900.00, "cd_amount": 950.00}
+    ],
+    "computation": "Zero tolerance bucket:\n  Origination charge: $1,000.00 = $1,000.00 → OK\n  Appraisal fee: $400.00 = $400.00 → OK\n  Zero-tolerance violations: none\n\n10% aggregate bucket (CORRECT method — aggregate vs aggregate):\n  ΣLE = $1,000.00 + $400.00 + $200.00 + $100.00 + $300.00 = $2,000.00\n  10% threshold = $2,000.00 × 0.10 = $200.00\n  ΣCD = $1,250.00 + $300.00 + $180.00 + $95.00 + $350.00 = $2,175.00\n  Aggregate increase = ΣCD − ΣLE = $2,175.00 − $2,000.00 = $175.00\n  Since $175.00 ≤ $200.00, the 10% tolerance is NOT exceeded → no violation, no cure\n\nINCORRECT method — sum of increases (ignoring decreases):\n  Increases: Title +$250.00, Escrow +$50.00 → sum of increases = $300.00\n  Decreases: Survey −$100.00, Pest −$20.00, Recording −$5.00 → sum of decreases = −$125.00\n  A flawed implementation that compares only the sum of increases ($300.00) to the 10% threshold ($200.00) would (wrongly) conclude a violation and demand a cure of $100.00, even though the correct aggregate method shows no violation.\n  This case exists to expose that defect: the rule's text requires the aggregate comparison, and a sum-of-increases approach is the error this suite is designed to catch.\n\nNo-limit bucket:\n  Prepaid interest: LE $900.00 → CD $950.00 (increase $50.00); no tolerance limit → no cure\n\nOverall: under the correct aggregate method, no violation and no cure; a sum-of-increases implementation would incorrectly flag a violation.",
+    "violations": "Under the correct aggregate method: none. Zero-tolerance fees unchanged; 10% aggregate increase $175.00 ≤ $200.00 threshold; no-limit fee increase not subject to tolerance. A sum-of-increases approach would incorrectly report a 10% violation with a $100.00 cure; that result is the defect this case exposes.",
+    "clause_basis": "Zero-tolerance: §1026.19(e)(3)(i). 10% aggregate tolerance: §1026.19(e)(3)(ii) — the rule compares the aggregate amount of the charges in the Closing Disclosure to the aggregate amount in the Loan Estimate, and the tolerance is 10% of the sum of the Loan Estimate charges; it does not compare each fee individually or sum only the increases. No tolerance limit: §1026.19(e)(3)(iv).",
+    "weakest_point": "Bucket assignments (borrower-can-shop for title, survey, pest, recording, escrow) are assumed; if any of those fees were actually zero-tolerance because the creditor required a particular provider, the analysis and result would change. The numbers are constructed. The aggregate-vs-sum-of-increases distinction is the central point and is correctly drawn, but I am not certain the specific fee amounts match any published example; they are illustrative."
+  },
+  {
+    "case_name": "Case 4 — 10% aggregate tolerance violation with cure; mixed directions",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1500.00, "cd_amount": 1500.00},
+      {"name": "Appraisal fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 400.00, "cd_amount": 400.00},
+      {"name": "Title insurance (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 1200.00, "cd_amount": 1600.00},
+      {"name": "Survey (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 500.00, "cd_amount": 450.00},
+      {"name": "Pest inspection (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 250.00, "cd_amount": 260.00},
+      {"name": "Recording fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 150.00, "cd_amount": 140.00},
+      {"name": "Escrow/settlement fee (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 350.00, "cd_amount": 400.00},
+      {"name": "Homeowner's insurance", "bucket": "no_limit", "le_amount": 600.00, "cd_amount": 620.00}
+    ],
+    "computation": "Zero tolerance bucket:\n  Origination charge: $1,500.00 = $1,500.00 → OK\n  Appraisal fee: $400.00 = $400.00 → OK\n  Zero-tolerance violations: none\n\n10% aggregate bucket:\n  ΣLE = $1,200.00 + $500.00 + $250.00 + $150.00 + $350.00 = $2,450.00\n  10% threshold = $2,450.00 × 0.10 = $245.00\n  ΣCD = $1,600.00 + $450.00 + $260.00 + $140.00 + $400.00 = $2,850.00\n  Aggregate increase = ΣCD − ΣLE = $2,850.00 − $2,450.00 = $400.00\n  Amount exceeding the 10% tolerance = $400.00 − $245.00 = $155.00\n  → The 10% tolerance is exceeded by $155.00; this is a violation.\n  Cure amount owed by creditor to consumer = $155.00\n\nNote on mixed directions:\n  Increases: Title +$400.00, Pest +$10.00, Escrow +$50.00 → sum of increases = $460.00\n  Decreases: Survey −$50.00, Recording −$10.00 → sum of decreases = −$60.00\n  Net change = $400.00\n  The correct aggregate method uses the net change ($400.00) against the threshold, not the gross increases. Because the net exceeds the threshold, a cure is required; the decreases do not eliminate the violation but reduce the cure amount.\n\nNo-limit bucket:\n  Homeowner's insurance: LE $600.00 → CD $620.00 (increase $20.00); no tolerance limit → no cure\n\nOverall: 10% bucket violation; cure = $155.00; zero-tolerance and no-limit buckets have no violations.",
+    "violations": "10% aggregate bucket: tolerance exceeded by $155.00; cure amount = $155.00 per §1026.19(e)(3)(iii). Zero-tolerance bucket: no violation. No-limit bucket: no violation.",
+    "clause_basis": "Zero-tolerance: §1026.19(e)(3)(i). 10% aggregate tolerance: §1026.19(e)(3)(ii) — the excess over 10% of the sum of the Loan Estimate charges must be cured. Cure obligation: §1026.19(e)(3)(iii). No tolerance limit: §1026.19(e)(3)(iv).",
+    "weakest_point": "Bucket assignments for survey, pest, recording, escrow are based on the assumption that the borrower can shop; if the creditor instead required a particular provider, those fees would move to zero tolerance and the result would change. The dollar amounts are constructed. The arithmetic is exact as shown."
+  },
+  {
+    "case_name": "Case 5 — Zero-tolerance violation with cure; 10% bucket flat; no-limit increase",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1000.00, "cd_amount": 1100.00},
+      {"name": "Appraisal fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 400.00, "cd_amount": 400.00},
+      {"name": "Credit report fee (creditor-selected provider)", "bucket": "zero_tolerance", "le_amount": 50.00, "cd_amount": 50.00},
+      {"name": "Title insurance (borrower can shop)", "bucket": "ten_pct_aggregate", "le_amount": 900.00, "cd_amount": 900.00},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 800.00, "cd_amount": 900.00},
+      {"name": "Homeowner's insurance", "bucket": "no_limit", "le_amount": 500.00, "cd_amount": 500.00}
+    ],
+    "computation": "Zero tolerance bucket:\n  Origination charge: CD $1,100.00 > LE $1,000.00 → increase of $100.00 → violation of zero tolerance\n  Appraisal fee: $400.00 = $400.00 → OK\n  Credit report fee: $50.00 = $50.00 → OK\n  Zero-tolerance violation: Origination charge increased by $100.00; cure amount = $100.00 (the full increase must be paid by the creditor)\n\n10% aggregate bucket:\n  ΣLE = $900.00 (only title insurance in this bucket)\n  10% threshold = $900.00 × 0.10 = $90.00\n  ΣCD = $900.00 → increase = $0.00 ≤ $90.00 → no violation\n\nNo-limit bucket:\n  Prepaid interest: LE $800.00 → CD $900.00 (increase $100.00); no tolerance limit → no cure\n  Homeowner's insurance: no change\n\nOverall: zero-tolerance violation for origination charge, cure = $100.00; 10% bucket no violation; no-limit bucket no violation.",
+    "violations": "Zero-tolerance bucket: origination charge increased $100.00 → violation; cure amount = $100.00 (creditor must pay the full increase to the consumer). 10% bucket: no violation. No-limit bucket: no violation.",
+    "clause_basis": "Zero-tolerance: §1026.19(e)(3)(i) — origination charge is a fee paid to the creditor, subject to zero tolerance; any increase must be cured in full. Cure obligation: §1026.19(e)(3)(iii) (the creditor must pay the amount of the increase). 10% aggregate tolerance: §1026.19(e)(3)(ii) — no violation here because the aggregate did not increase. No tolerance limit: §1026.19(e)(3)(iv) — prepaid interest is expressly excluded from tolerance and may increase without cure.",
+    "weakest_point": "Origination charge is clearly a zero-tolerance fee under §1026.19(e)(3)(i); I am confident in that assignment. The other assignments (title insurance in 10% bucket, prepaid interest in no-limit bucket) follow the usual treatment. The dollar amounts are constructed. The arithmetic is exact."
+  }
+]

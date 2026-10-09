@@ -1,0 +1,88 @@
+```json
+[
+  {
+    "rule": 1,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "does not fire",
+      "at": "does not fire",
+      "above": "fires"
+    },
+    "reasoning": "The operative trigger language 'exceed … more than 2 percent' uses a strict inequality (> 2.00%), so a penalty of exactly 2.00% does not breach the threshold."
+  },
+  {
+    "rule": 2,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "does not fire",
+      "at": "does not fire",
+      "above": "fires"
+    },
+    "reasoning": "The phrase 'more than 36 months' establishes a strict greater-than threshold (> 36), meaning a 36-month duration does not trigger the restriction."
+  },
+  {
+    "rule": 3,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "does not fire",
+      "at": "fires",
+      "above": "fires"
+    },
+    "reasoning": "The statutory test 'by 1.5 or more percentage points' includes the boundary value (>= 1.50), causing the HPCT classification to trigger at exactly 1.50."
+  },
+  {
+    "rule": 4,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "passes",
+      "at": "passes",
+      "above": "fails"
+    },
+    "reasoning": "The pass condition 'does not exceed … by 2.25 or more' negates an inclusive trigger (<= 2.25), meaning a spread of exactly 2.25 percentage points passes."
+  },
+  {
+    "rule": 5,
+    "phrase_inclusivity": "strict",
+    "verdicts": {
+      "below": "fails",
+      "at": "fails",
+      "above": "passes"
+    },
+    "reasoning": "Both underlying tests use strict less-than conditions ('less than 10M' and 'less than 1M'), requiring revenue < 10.0M and income < 1.0M simultaneously."
+  },
+  {
+    "rule": 6,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "fails",
+      "at": "passes",
+      "above": "passes"
+    },
+    "reasoning": "The safe harbour rule explicit phrase 'equal to or greater than' makes the 16.00% threshold inclusive (>= 16.00%)."
+  },
+  {
+    "rule": 7,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "fails",
+      "at": "passes",
+      "above": "passes"
+    },
+    "reasoning": "The eligibility floor phrase 'at least equal to' creates an inclusive boundary (>= 50.00%), satisfying the requirement at exactly 50.00%."
+  },
+  {
+    "rule": 8,
+    "phrase_inclusivity": "inclusive",
+    "verdicts": {
+      "below": "does not fire",
+      "at": "fires",
+      "above": "fires"
+    },
+    "reasoning": "The framing 'equal to or greater than' sets an inclusive lower bound (>= threshold), triggering the incident reporting obligation at exactly the threshold value."
+  },
+  {
+    "weakest_point": "Rule 8 (NIS2 significant incident - users leg): The exact wording in NIS2 primary text (Article 23) uses broad qualitative criteria, whereas specific numerical thresholds are defined in the EU Implementing Regulation (2024/2690) across varying digital service sub-sectors rather than a single universal constant."
+  }
+]
+
+```

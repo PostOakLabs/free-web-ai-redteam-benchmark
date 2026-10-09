@@ -1,0 +1,173 @@
+[
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "ASIL B boundary case",
+    "inputs": {
+      "lambda_SPF": "100 FIT",
+      "lambda_RF": "10 FIT",
+      "lambda_MPF_latent": "50 FIT",
+      "lambda_safe": "850 FIT",
+      "total": "1000 FIT"
+    },
+    "computation": "SPFM = 1 - (lambda_RF / lambda_SPF) = 1 - (10 / 100) = 1 - 0.10 = 0.90. ASIL B target is >= 0.90. ASIL C target is >= 0.97. ASIL D target is >= 0.99.",
+    "expected_output": {
+      "SPFM": 0.90,
+      "ASIL_B_met": true,
+      "ASIL_C_met": false,
+      "ASIL_D_met": false
+    },
+    "discriminates": "Tests the exact boundary condition for ASIL B compliance (0.90), ensuring the calculator handles threshold-exact equality correctly without floating-point drift causing a false failure.",
+    "known_uncertainty": "The formula SPFM = 1 - (lambda_RF / lambda_SPF) assumes lambda_SPF represents the total single-point fault rate and lambda_RF represents the residual/uncovered single-point faults. ISO 26262-5 Annex B uses more detailed summation notation across all hardware elements, but this aggregate ratio is mathematically equivalent for a single block."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "ASIL D boundary case",
+    "inputs": {
+      "lambda_SPF": "1000 FIT",
+      "lambda_RF": "10 FIT",
+      "lambda_MPF_latent": "200 FIT",
+      "lambda_safe": "8790 FIT",
+      "total": "10000 FIT"
+    },
+    "computation": "SPFM = 1 - (lambda_RF / lambda_SPF) = 1 - (10 / 1000) = 1 - 0.01 = 0.99. ASIL D target is >= 0.99.",
+    "expected_output": {
+      "SPFM": 0.99,
+      "ASIL_B_met": true,
+      "ASIL_C_met": true,
+      "ASIL_D_met": true
+    },
+    "discriminates": "Tests the exact boundary condition for ASIL D compliance (0.99), which is the strictest architectural metric and requires high diagnostic coverage of single-point faults.",
+    "known_uncertainty": "Same as above regarding aggregate vs element-wise summation in the standard."
+  },
+  {
+    "calculation": "ISO 26262 SPFM",
+    "vector_name": "Degenerate zero-fault case",
+    "inputs": {
+      "lambda_SPF": "1 FIT",
+      "lambda_RF": "0 FIT",
+      "lambda_MPF_latent": "100 FIT",
+      "lambda_safe": "899 FIT",
+      "total": "1000 FIT"
+    },
+    "computation": "SPFM = 1 - (lambda_RF / lambda_SPF) = 1 - (0 / 1) = 1 - 0 = 1.0. If lambda_SPF were 0, the denominator would be 0, requiring the calculator to define a convention (typically SPFM = 1.0 when no single-point faults exist).",
+    "expected_output": {
+      "SPFM": 1.0,
+      "ASIL_B_met": true,
+      "ASIL_C_met": true,
+      "ASIL_D_met": true
+    },
+    "discriminates": "Tests the boundary where residual faults are zero. Ensures the calculator does not fail due to division by zero if lambda_SPF were also zero, and correctly returns 1.0 (100% coverage) when all single-point faults are detected.",
+    "known_uncertainty": "The exact handling of lambda_SPF = 0 is a calculator implementation choice; the standard implies perfect coverage if the fault class does not exist."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Zero-failure standard HTOL",
+    "inputs": {
+      "r": 0,
+      "N": 1000,
+      "t_stress": "1000 h",
+      "Ea": "0.7 eV",
+      "T_use": "328.15 K (55 C)",
+      "T_stress": "398.15 K (125 C)",
+      "CL": 0.60,
+      "k": "8.61733e-5 eV/K"
+    },
+    "computation": "AF = exp((0.7 / 8.61733e-5) * (1/328.15 - 1/398.15)) = exp(8123.16 * 0.00053577) = exp(4.3521) = 77.64. Device-hours = 1000 * 1000 = 1,000,000. Equivalent use-hours = 1,000,000 * 77.64 = 77,640,000. chi2(0.60, 2*(0+1)=2) = 1.83258. FIT = (1.83258 * 10^9) / (2 * 77,640,000) = 11.80 FIT.",
+    "expected_output": {
+      "AF": 77.64,
+      "FIT_CL": "11.80 FIT"
+    },
+    "discriminates": "Standard zero-failure JEDEC qualification test. Tests the correct application of the chi-square quantile for 60% confidence and 2 degrees of freedom, ensuring the calculator does not return 0 FIT for zero failures.",
+    "known_uncertainty": "Assumes a single dominant failure mechanism with Ea=0.7eV. If multiple mechanisms exist, this single-AF calculation underestimates the true FIT rate."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Multiple failures high confidence",
+    "inputs": {
+      "r": 2,
+      "N": 500,
+      "t_stress": "2000 h",
+      "Ea": "0.7 eV",
+      "T_use": "328.15 K (55 C)",
+      "T_stress": "398.15 K (125 C)",
+      "CL": 0.90,
+      "k": "8.61733e-5 eV/K"
+    },
+    "computation": "AF = 77.64 (same temperatures and Ea as vector 1). Device-hours = 500 * 2000 = 1,000,000. Equivalent use-hours = 77,640,000. chi2(0.90, 2*(2+1)=6) = 10.6446. FIT = (10.6446 * 10^9) / (2 * 77,640,000) = 68.55 FIT.",
+    "expected_output": {
+      "AF": 77.64,
+      "FIT_CL": "68.55 FIT"
+    },
+    "discriminates": "Tests the chi-square quantile lookup for non-zero failures (df=6) and higher confidence level (90%), ensuring the degrees of freedom formula 2*r+2 is correctly applied.",
+    "known_uncertainty": "None for the math; the physical assumption of constant failure rate (exponential distribution) may not hold if the failures were early-life infant mortality rather than intrinsic wearout."
+  },
+  {
+    "calculation": "JEDEC FIT from accelerated test",
+    "vector_name": "Low activation energy short test",
+    "inputs": {
+      "r": 0,
+      "N": 100,
+      "t_stress": "168 h",
+      "Ea": "0.3 eV",
+      "T_use": "298.15 K (25 C)",
+      "T_stress": "358.15 K (85 C)",
+      "CL": 0.60,
+      "k": "8.61733e-5 eV/K"
+    },
+    "computation": "AF = exp((0.3 / 8.61733e-5) * (1/298.15 - 1/358.15)) = exp(3481.35 * 0.00056189) = exp(1.9561) = 7.07. Device-hours = 100 * 168 = 16,800. Equivalent use-hours = 16,800 * 7.07 = 118,776. chi2(0.60, 2) = 1.83258. FIT = (1.83258 * 10^9) / (2 * 118,776) = 7714.5 FIT.",
+    "expected_output": {
+      "AF": 7.07,
+      "FIT_CL": "7714.5 FIT"
+    },
+    "discriminates": "Tests a low acceleration factor scenario typical of package-level or moisture-sensitive mechanisms (Ea=0.3eV) with a short test duration, resulting in a very high FIT upper bound due to low equivalent device-hours.",
+    "known_uncertainty": "Arrhenius model may be invalid for moisture-driven mechanisms which often require Peck or Lawson models incorporating humidity, not just temperature."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "INT8 aggregate performance",
+    "inputs": {
+      "MacTOPS": 100,
+      "B": "8 bits",
+      "T_TPP_THRESHOLD": "UNKNOWN_CURRENT_VALUE"
+    },
+    "computation": "TPP = MacTOPS * B = 100 * 8 = 800.",
+    "expected_output": {
+      "TPP": 800,
+      "classification": "Falls below T_TPP_THRESHOLD if T_TPP_THRESHOLD > 800; falls above or equal if T_TPP_THRESHOLD <= 800."
+    },
+    "discriminates": "Tests the basic TPP multiplication for a common integer data type, establishing the baseline regulatory units.",
+    "known_uncertainty": "The exact regulatory definition of MacTOPS aggregation across heterogeneous compute units (e.g., mixing INT8 and FP16) is complex; this vector assumes a homogeneous INT8 peak."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "FP16 aggregate performance",
+    "inputs": {
+      "MacTOPS": 50,
+      "B": "16 bits",
+      "T_TPP_THRESHOLD": "UNKNOWN_CURRENT_VALUE"
+    },
+    "computation": "TPP = MacTOPS * B = 50 * 16 = 800.",
+    "expected_output": {
+      "TPP": 800,
+      "classification": "Falls below T_TPP_THRESHOLD if T_TPP_THRESHOLD > 800; falls above or equal if T_TPP_THRESHOLD <= 800."
+    },
+    "discriminates": "Tests the bit-length multiplier effect. A processor with half the raw operation rate but double the bit-width yields the exact same TPP, demonstrating the regulation's weighting of precision.",
+    "known_uncertainty": "Whether the regulation counts FP16 as 16 bits or applies a different weighting factor for floating-point vs integer operations in the specific ECCN 3A090 text."
+  },
+  {
+    "calculation": "EAR TPP",
+    "vector_name": "INT4 sub-byte performance",
+    "inputs": {
+      "MacTOPS": 200,
+      "B": "4 bits",
+      "T_TPP_THRESHOLD": "UNKNOWN_CURRENT_VALUE"
+    },
+    "computation": "TPP = MacTOPS * B = 200 * 4 = 800.",
+    "expected_output": {
+      "TPP": 800,
+      "classification": "Falls below T_TPP_THRESHOLD if T_TPP_THRESHOLD > 800; falls above or equal if T_TPP_THRESHOLD <= 800."
+    },
+    "discriminates": "Tests the lower bound of bit-length. High-throughput sub-byte inference accelerators can have massive MacTOPS but lower TPP due to the small B multiplier, potentially keeping them below export thresholds.",
+    "known_uncertainty": "Whether the regulation defines a minimum bit-length floor (e.g., B cannot be less than 8) for the TPP calculation, which would change the result for INT4 operations."
+  }
+]

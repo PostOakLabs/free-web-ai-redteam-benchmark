@@ -1,0 +1,248 @@
+[
+{
+"failure_class": "FAIL_CONGESTION",
+"symptoms": [
+"Global route GRC overflow exceeding 5% localized entirely within narrow inter-macro channels, while surrounding core utilization is under 70%.",
+"Detailed route DRC count exploding (>10,000 shorts and spacing errors) on lower metal layers (M1–M3) within high-density standard cell regions.",
+"Pin access congestion report showing >1.5 unreachable pin access points per cell in dense 7nm FinFET standard cell clusters."
+],
+"candidate_causes": [
+{
+"cause": "Over-dense standard cell placement around macro boundaries.",
+"distinguishing_check": "Query local placement density in a 10x10 GRC window; check if local utilization exceeds 85% near macro corners.",
+"check_cost": "minutes",
+"typical_fix": "Apply partial placement blockages (50–60% max density limit) in inter-macro channels.",
+"fix_cost": "hours"
+},
+{
+"cause": "CTS buffer insertion inflating local cell density in narrow routing channels.",
+"distinguishing_check": "Filter instance list in congested GRCs by cell type; check if clock buffers/inverters constitute >30% of local cell area.",
+"check_cost": "minutes",
+"typical_fix": "Define CTS buffer exclusion zones inside narrow channels and incremental-route clock nets.",
+"fix_cost": "hours"
+},
+{
+"cause": "High-fanout or bus routing traversing low-layer metal tracks across a narrow bottleneck.",
+"distinguishing_check": "Generate net flightline density report crossing the congested GRC boundary sorted by assigned metal layer.",
+"check_cost": "minutes",
+"typical_fix": "Assign layer path constraints (e.g., target M5–M7) for long high-fanout bus nets.",
+"fix_cost": "hours"
+},
+{
+"cause": "Sub-optimal macro floorplanning creating narrow channels and convergent signal paths.",
+"distinguishing_check": "Examine macro pin orientations relative to opposite core logic; verify available track count vs required cross-channel net count.",
+"check_cost": "hours",
+"typical_fix": "Shift macro positions to widen channels by 15–30um or rotate macros to face pins toward open core.",
+"fix_cost": "days"
+}
+],
+"ordering_rationale": "Triage proceeds from fast static density queries to full net track analysis, prioritizing low-cost non-disruptive placement keepouts over expensive floorplan re-spins.",
+"classic_trap": "Treating macro channel routing track exhaustion as a global placement problem and lowering overall block utilization, which degrades timing across the entire block without solving the localized channel bottleneck.",
+"confidence": 0.95
+},
+{
+"failure_class": "FAIL_TIMING (setup)",
+"symptoms": [
+"Massive uniform timing failures (hundreds to thousands of paths failing by near-identical magnitude matching half or full clock period).",
+"Single-path topological failure where WNS is dominated by combinational logic depth (>25–30 logic levels).",
+"Physical path detour failure where net delay accounts for >70% of total path delay across wide floorplan spans."
+],
+"candidate_causes": [
+{
+"cause": "Missing or incorrect SDC constraint (e.g., missing clock groups or false path).",
+"distinguishing_check": "Inspect failure report profile: if thousands of failing paths originate across un-grouped clock domains and fail by near-identical large magnitudes, check SDC.",
+"check_cost": "minutes",
+"typical_fix": "Correct SDC (add set_clock_groups -asynchronous or adjust multicycle path settings).",
+"fix_cost": "minutes"
+},
+{
+"cause": "Excessive combinational logic depth in synthesized gate netlist.",
+"distinguishing_check": "Sort timing report by logic depth; cell delay dominates path delay (>60%) with >20 stages.",
+"check_cost": "minutes",
+"typical_fix": "Insert pipeline stages in RTL or re-synthesize with tighter timing constraints.",
+"fix_cost": "days"
+},
+{
+"cause": "Physical floorplan detachment (long wire placement detours between driver and load).",
+"distinguishing_check": "Report physical net length and pin placement coordinates; net delay exceeds 60% of total delay due to placement split across die.",
+"check_cost": "minutes",
+"typical_fix": "Apply regional placement bounds, group constraints, or align partition boundary port locations.",
+"fix_cost": "hours"
+},
+{
+"cause": "High clock skew or late capture clock arrival caused by CTS imbalance.",
+"distinguishing_check": "Inspect launch vs capture clock tree latency in path timing report; capture clock latency significantly lags launch clock.",
+"check_cost": "minutes",
+"typical_fix": "Re-balance clock tree branches, adjust clock target latency, or apply useful skew.",
+"fix_cost": "hours"
+}
+],
+"ordering_rationale": "Triage starts with diagnostic report inspection to immediately separate simple SDC errors from real physical or RTL logic bottlenecks before running physical optimization loops.",
+"classic_trap": "Assuming a massive block-wide setup WNS failure requires heavy physical re-optimization or buffer sizing when it is actually caused by a single unconstrained asynchronous clock domain crossing.",
+"confidence": 0.96
+},
+{
+"failure_class": "FAIL_TIMING (hold)",
+"symptoms": [
+"Hold violations widespread across thousands of short paths (0–1 logic levels) with minimal launch clock delay.",
+"Hold failures concentrated exclusively at cross-clock domain or cross-corner signoff interfaces.",
+"Severe hold violations post-CTS caused by large negative clock skew between adjacent registers."
+],
+"candidate_causes": [
+{
+"cause": "Extreme clock skew between launch and capture registers within the same clock branch.",
+"distinguishing_check": "Inspect timing report clock paths: launch clock latency is significantly shorter than capture clock latency (skew exceeds path data delay).",
+"check_cost": "minutes",
+"typical_fix": "Re-buffer clock tree branches or adjust CTS skew targets.",
+"fix_cost": "hours"
+},
+{
+"cause": "Fast-path zero-logic connections between registers placed in close physical proximity.",
+"distinguishing_check": "Check timing report for zero combinational gates and driver Q to load D physical distance under 5um.",
+"check_cost": "minutes",
+"typical_fix": "Allow P&R tool to auto-insert delay buffers during post-CTS/route hold fixing.",
+"fix_cost": "minutes"
+},
+{
+"cause": "Mismatched PVT operating conditions across multi-corner signoff (e.g., fast-corner hold vs slow-corner setup).",
+"distinguishing_check": "Compare timing reports across signoff corners; hold violations exist strictly in fast/min-voltage corner.",
+"check_cost": "minutes",
+"typical_fix": "Optimize hold fixing explicitly in the fast corner while monitoring slow corner setup slack.",
+"fix_cost": "hours"
+},
+{
+"cause": "Unconstrained or improperly budgeted cross-clock domain interface paths.",
+"distinguishing_check": "Check launch/capture clock domain names in hold report; verify if false_path or min_delay constraints are applied.",
+"check_cost": "minutes",
+"typical_fix": "Add explicit set_false_path or set_min_delay constraints for asynchronous crossings.",
+"fix_cost": "minutes"
+}
+],
+"ordering_rationale": "Checks prioritize rapid inspection of path topology and clock skew in timing reports to distinguish benign fast paths (fixed automatically) from structural CTS skew or SDC errors.",
+"classic_trap": "Manually inserting hold delay buffers on short data paths before verifying CTS clock skew, which leads to area bloat and setup timing degradation if the clock tree is later re-balanced.",
+"confidence": 0.95
+},
+{
+"failure_class": "FAIL_IR_DROP",
+"symptoms": [
+"Static voltage drop exceeding signoff threshold (>3–5% VDD) concentrated in central floorplan regions distant from power pads.",
+"Dynamic IR drop spikes (>10–15% VDD) temporally aligned with simultaneous clock edge switching events.",
+"Setup timing degradation or intermittent functional errors localized to high-density logic clusters during dynamic simulation."
+],
+"candidate_causes": [
+{
+"cause": "Insufficient static power grid mesh density or missing top-layer power straps.",
+"distinguishing_check": "Run static IR drop analysis; voltage drop contour forms a smooth spatial gradient peaking in the die center away from PG pads.",
+"check_cost": "minutes",
+"typical_fix": "Add top-layer (M7/M8/RDL) power/ground straps and increase PG VIA density.",
+"fix_cost": "hours"
+},
+{
+"cause": "Localized dynamic switching current surge (high local dynamic power density).",
+"distinguishing_check": "Run dynamic vector-based IR analysis; drop correlates strictly with simultaneous clock edge switching of dense register banks.",
+"check_cost": "hours",
+"typical_fix": "De-cluster register placement, stagger clock tree arrival times (clock skewing), or add decap cells.",
+"fix_cost": "hours"
+},
+{
+"cause": "Inadequate Decoupling Capacitor (Decap) cell allocation around high-toggle logic.",
+"distinguishing_check": "Map decap cell density against dynamic IR peak locations; confirm decap coverage is under 5% in high-drop regions.",
+"check_cost": "minutes",
+"typical_fix": "Insert physical decap cells in available filler spaces around high-toggle cells and macro boundaries.",
+"fix_cost": "minutes"
+},
+{
+"cause": "Macro power pin starvation (insufficient PG pin VIAs to power grid).",
+"distinguishing_check": "Perform PG resistance extraction on macro pins; check for high-resistance path from grid to macro VDD/VSS pins.",
+"check_cost": "minutes",
+"typical_fix": "Add dedicated power rings or increase PG pin drop VIA density directly onto macro power tracks.",
+"fix_cost": "hours"
+}
+],
+"ordering_rationale": "Triage begins with quick static grid resistance and decap density checks before investing in computationally heavy dynamic vector-based IR simulations.",
+"classic_trap": "Attempting to solve high dynamic IR drop by simply adding more static power straps, ignoring local simultaneous switching current surges that require decap allocation or clock edge staggering.",
+"confidence": 0.94
+},
+{
+"failure_class": "FAIL_CTS (clock tree)",
+"symptoms": [
+"Excessive clock skew (>200–500ps on a sub-nanosecond period) across sinks within the same clock domain.",
+"Unusually high clock insertion delay (latency) accompanied by deep clock buffer trees (>15–20 buffer levels).",
+"Severe clock power bloat where clock tree buffers consume >30–40% of total block dynamic power."
+],
+"candidate_causes": [
+{
+"cause": "Unconstrained clock sinks or missing clock definition (non-register pins included in CTS).",
+"distinguishing_check": "Report CTS sink list; check if non-register pins, memory control inputs, or combinational logic pins are listed as sinks.",
+"check_cost": "minutes",
+"typical_fix": "Update CTS specification to mark non-clock pins as stop pins or ignore pins.",
+"fix_cost": "minutes"
+},
+{
+"cause": "Placement blockages or macro obstacles blocking CTS trunk routing corridors.",
+"distinguishing_check": "Overlay clock buffer placement and routing against macro floorplan; observe long buffer detours around hard blockages.",
+"check_cost": "minutes",
+"typical_fix": "Adjust placement blockages, create dedicated clock routing corridors, or relocate clock root pins.",
+"fix_cost": "hours"
+},
+{
+"cause": "Over-constrained CTS targets (unrealistically tight target skew forcing tool over-buffering).",
+"distinguishing_check": "Review CTS constraint file; check if target skew is set extremely tight (e.g., <10ps on a large FinFET block).",
+"check_cost": "minutes",
+"typical_fix": "Relax target skew to realistic signoff limits (e.g., 50–80ps) and enable useful skew.",
+"fix_cost": "minutes"
+},
+{
+"cause": "High clock pin density or severe localized load imbalance.",
+"distinguishing_check": "Examine fanout and sink capacitance distribution per clock branch in CTS report; locate branches with >5x load disparity.",
+"check_cost": "minutes",
+"typical_fix": "Clone clock buffers, restructure clock tree topology using H-Tree or mesh structures.",
+"fix_cost": "hours"
+}
+],
+"ordering_rationale": "Triage checks CTS spec and constraint definitions first (which take minutes to inspect and fix) before re-synthesizing clock topologies or modifying physical corridors.",
+"classic_trap": "Trying to force tight clock skew by letting the CTS engine insert endless buffer stages, which dramatically increases clock latency, power, and dynamic IR drop.",
+"confidence": 0.95
+},
+{
+"failure_class": "FAIL_DRC (routing DRCs)",
+"symptoms": [
+"High-density DRC clusters (hundreds of short/spacing errors) confined within localized standard cell regions.",
+"Off-grid pin access DRCs (pin connection unreachable without violating minimum line-end/spacing rules in 7nm/5nm FinFET).",
+"Metal width, enclosure, or antenna DRC violations occurring systematically along long top-layer routing nets."
+],
+"candidate_causes": [
+{
+"cause": "Cell pin access blockage in high-density FinFET nodes (insufficient hit points for M1/M2 routing).",
+"distinguishing_check": "Filter DRC report by violation type (Pin Access / Line-End Spacing); check if >80% occur on M1/M2 at standard cell boundaries.",
+"check_cost": "minutes",
+"typical_fix": "Apply cell pin keepouts, use track-aligned cell placement, or reduce localized standard cell utilization.",
+"fix_cost": "hours"
+},
+{
+"cause": "Post-route manual ECO or uncoordinated net modification creating net overlaps.",
+"distinguishing_check": "Check DRC error log timestamps and net names against recent ECO netlists or manual wire edits.",
+"check_cost": "minutes",
+"typical_fix": "Re-run incremental detailed route on modified nets with DRC-guided ECO router.",
+"fix_cost": "minutes"
+},
+{
+"cause": "Inconsistent LEF/TECH LEF rule files between P&R tool and signoff DRC engine (e.g., Calibre vs P&R).",
+"distinguishing_check": "Compare signoff DRC rule deck version against P&R tech file; run a 1-net test route to verify if P&R router considers geometry legal.",
+"check_cost": "hours",
+"typical_fix": "Update P&R technology files and LEF definitions to match signoff DRC deck.",
+"fix_cost": "hours"
+},
+{
+"cause": "Antenna rule violations on long nets traversing metal layers without diode protection.",
+"distinguishing_check": "Report antenna ratio violations from signoff report; identify nets with high metal area-to-gate area ratio lacking antenna diodes.",
+"check_cost": "minutes",
+"typical_fix": "Auto-insert antenna diodes near load pins or force layer hopping to top metal layers.",
+"fix_cost": "minutes"
+}
+],
+"ordering_rationale": "Triage identifies whether DRCs are systematic rule/setup mismatches or localized physical pin-access issues before initiating full detailed route passes.",
+"classic_trap": "Repeatedly running detailed routing iterations expecting the P&R engine to resolve pin access DRCs in a 95% dense FinFET block, when the fundamental cause is pin grid misalignment requiring cell density reduction.",
+"confidence": 0.95
+}
+]

@@ -1,0 +1,389 @@
+
+### chatgpt | alpha  (chatgpt alpha.json, parse=clean)
+   [0] T1-verbatim                guess=26 found=3       Choose a large out-of-order window despite its implement
+   [1] T1-verbatim                guess=30 found=7       Cluster the integer register file and execution pipes in
+   [2] T2-paraphrase-consistent   guess=25 found=2       Use line-and-way prediction to get associative-cache ben
+   [3] T2-paraphrase-consistent   guess=30 found=7       Accept one-cycle inter-cluster communication to make fou
+   [4] T1-verbatim                guess=35 found=12      Use speculative load-hit/miss execution with a targeted 
+
+### chatgpt | niagara  (chatgpt niagara.json, parse=clean)
+   [0] T1-verbatim                guess=21 found=1       Optimize throughput rather than single-thread speed
+   [1] T1-verbatim                guess=22 found=3       Simple cores versus complex ILP processors
+   [2] T1-verbatim                guess=23 found=3       Share each pipeline among four threads
+   [3] T1-verbatim                guess=27 found=7       Keep L1 caches small and rely on TLP to hide misses
+   [4] T1-verbatim                guess=23 found=3       Scale the memory system for thread-rich throughput
+
+### chatgpt | p4  (chatgpt p4.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=5 found=5        Replace the conventional L1 instruction cache with an Ex
+   [1] T1-verbatim                guess=3 found=3        Deepen the pipeline aggressively to pursue much higher c
+   [2] T1-verbatim                guess=8 found=8        Run the critical ALU execution loop at twice the main pr
+   [3] T1-verbatim                guess=8 found=8        Optimize common cases rather than making every execution
+   [4] T2-paraphrase-consistent   guess=8 found=7        Allow execution bandwidth to exceed front-end and retire
+
+### deepseek | alpha  (deepseek alpha.json, parse=clean)
+   [0] T0-declined                guess=None             Clustered Integer Execution Core with Replicated Registe
+   [1] T0-declined                guess=None             Out-of-Order and Speculative Execution Pipeline
+   [2] T0-declined                guess=None             High-Bandwidth Memory System with Parallel Cache Access
+   [3] T0-declined                guess=None             Aggressive 600 MHz Cycle Time in 0.35 µm CMOS
+   [4] T0-declined                guess=None             Integration of Advanced Branch Prediction (Tournament Pr
+
+### deepseek | niagara  (deepseek niagara.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=21 found=1       Throughput-oriented design over single-thread performanc
+   [1] T2-paraphrase-consistent   guess=23 found=3       Use of fine-grained multithreading per core
+   [2] T0-declined                guess=23               Rejection of out-of-order execution in favor of multithr
+   [3] T4-not-found               guess=25               Shared L2 cache organization with crossbar interconnect
+   [4] T4-not-found               guess=27               Power efficiency as a primary design constraint
+
+### deepseek | p4  (deepseek p4.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=None found=5     Trace Cache over Conventional Instruction Cache
+   [1] T0-declined                guess=None             Deep Pipelining / Hyper Pipelined Technology
+   [2] T1-verbatim                guess=None found=1     Double-Pumped (2x Core Frequency) ALU
+   [3] T1-verbatim                guess=None found=1     Low-Latency Level 1 Data Cache (2-cycle access)
+   [4] T4-not-found               guess=None             Rapid Execution Engine with ALUs at 2x Core Frequency
+
+### deepseek | pphysical  (deepseek pphysical.json, parse=clean)
+   [0] T1-verbatim                guess=35 found=9       Predominant use of complementary static CMOS circuits
+   [1] T0-declined                guess=28               Hierarchical design methodology for concurrent engineeri
+   [2] T3-contradicts-CANDIDATE   guess=40 found=5       Clock distribution network design
+        numeric not in window: ['4 ', '1.5 ghz', '15', '200 ']
+        quote : the clock distribution on the power4 dual-processor chip supplies a single critical 1.5 ghz clock from one soi-optimized pll to 15,200 pins on a large
+        window: ially challenging for such a large and complex chip because of the longer wires and gain needed to drive the large distributed clock load. an soi-spec
+   [3] T1-verbatim                guess=35 found=9       Limits on effective beta ratio (p-to-n strength)
+   [4] T2-paraphrase-consistent   guess=42 found=13      Power distribution design to limit voltage drop
+
+### gemini | alpha  (gemini alpha.json, parse=clean)
+   [0] T0-declined                guess=28               Clustered Integer Execution Pipeline vs. Centralized Reg
+   [1] T0-declined                guess=26               Dual-Bank Instruction Cache Duplication for Multi-Read B
+   [2] T0-declined                guess=27               Out-of-Order Instruction Scheduling Window Sizing vs Clo
+   [3] T0-declined                guess=31               Speculative Execution with Hardware Memory Orientation /
+   [4] T0-declined                guess=30               Out-of-Order Memory Access Engine with On-Chip L1 Data C
+
+### gemini | niagara  (gemini niagara.json, parse=clean)
+   [0] T0-declined                guess=22               Simple In-Order Single-Issue Core Design Over Complex Ou
+   [1] T0-declined                guess=23               Four Threads per Core for Memory Latency Hiding
+   [2] T0-declined                guess=25               Shared Floating-Point Unit across All Cores
+   [3] T0-declined                guess=26               On-Chip Crossbar Switch for L1-to-L2 Interconnect
+   [4] T0-declined                guess=27               Integrated On-Chip Memory Controllers
+
+### gemini | p4  (gemini p4.json, parse=clean)
+   [0] T0-declined                guess=3                Execution Trace Cache vs. Conventional Instruction L1 Ca
+   [1] T0-declined                guess=6                Double-Pumped Fast ALU Execution Engine
+   [2] T0-declined                guess=2                Deep Pipeline Strategy for High Frequency (Hyper Pipelin
+   [3] T0-declined                guess=4                Advanced Branch Prediction Engine Architecture
+   [4] T0-declined                guess=7                Point-to-Point 400 MHz Quad-Pumped System Bus
+
+### gemini | pphysical  (gemini pphysical.json, parse=clean)
+   [0] T0-declined                guess=33               Grid-based Clock Distribution Network Design
+   [1] T0-declined                guess=29               Dynamic Circuit Family Selection (Dynamic vs. Static Log
+   [2] T0-declined                guess=42               Timing Closure and Static Timing Analysis Methodology
+   [3] T0-declined                guess=38               On-Die Power Distribution and Decoupling Capacitance
+
+### glm 5.3 flash | alpha  (glm 5.3 flash alpha.json, parse=clean)
+   [0] T0-declined                guess=29               Clustered integer execution: replicated register file an
+   [1] T0-declined                guess=31               Duplicated data cache instead of multi-porting
+   [2] T0-declined                guess=25               Frequency-first philosophy combined with out-of-order ex
+   [3] T0-declined                guess=32               No on-chip second-level cache; external L2 with window-b
+   [4] T0-declined                guess=30               Aggressive memory-dependence speculation for loads
+
+### glm 5.3 flash | niagara  (glm 5.3 flash niagara.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=23 found=8       Adoption of Fine-Grained Multithreading
+   [1] T4-not-found               guess=22               Choice of Core Complexity and Count
+   [2] T4-not-found               guess=24               Shared L2 Cache Architecture
+   [3] T4-not-found               guess=26               Focus on Memory Bandwidth over Latency
+   [4] T2-paraphrase-consistent   guess=28 found=9       Aggressive Voltage/Frequency Scaling for Power Efficienc
+
+### glm 5.3 flash | pphysical  (glm 5.3 flash pphysical.json, parse=clean)
+   [0] T4-not-found               guess=35               Hierarchical Clock Distribution Network
+   [1] T4-not-found               guess=38               Power Grid Design with Decoupling Capacitors
+   [2] T4-not-found               guess=42               Timing Closure via Static Timing Analysis (STA)
+   [3] T4-not-found               guess=32               Dominance of Static CMOS over Dynamic Logic
+   [4] T4-not-found               guess=45               Floorplanning with Pre-Placed Macro Blocks
+
+### grok | alpha  (grok alpha.json, parse=clean)
+   [0] T1-verbatim                guess=29 found=7       Clustered integer execution units with duplicated regist
+   [1] T1-verbatim-hyphen-variant guess=25 found=2       Line and way prediction for set-associative instruction 
+   [2] T1-verbatim                guess=26 found=3       Tournament branch predictor combining local and global h
+   [3] T1-verbatim                guess=25 found=2       Out-of-order execution with map stage and larger in-flig
+   [4] T1-verbatim                guess=30 found=8       Larger two-way associative on-chip data cache
+
+### grok | niagara  (grok niagara.json, parse=clean)
+   [0] T1-verbatim                guess=21 found=1       Throughput (TLP) over single-thread ILP optimization
+   [1] T1-verbatim                guess=23 found=3       Eight simple cores each with four fine-grained threads
+   [2] T1-verbatim                guess=22 found=2       Shared banked L2 plus on-chip crossbar and memory contro
+   [3] T1-verbatim                guess=24 found=3       Simple single-issue six-stage pipeline per SPARC pipe
+   [4] T1-verbatim                guess=27 found=7       Small private L1 caches accepted because of multithreadi
+
+### grok | p4  (grok p4.json, parse=clean)
+   [0] T1-verbatim                guess=3 found=3        Deep pipeline for high clock rate
+   [1] T1-verbatim                guess=2 found=2        Execution Trace Cache instead of conventional L1I
+   [2] T1-verbatim                guess=1 found=1        Double-pumped (2x) ALUs for low-latency integer executio
+   [3] T1-verbatim-hyphen-variant guess=None found=9     Small low-latency L1 data cache backed by large L2
+   [4] T1-verbatim                guess=None found=6     Deeper buffering for out-of-order window
+
+### grok | pphysical  (grok pphysical.json, parse=clean)
+   [0] T1-verbatim                guess=33 found=7       Primarily static circuit design strategy
+   [1] T1-verbatim                guess=31 found=5       Single chip-wide global clock domain without skew feedba
+   [2] T1-verbatim                guess=33 found=7       Global signal slew-rate limit of one-third cycle time
+   [3] T1-verbatim                guess=41 found=15      Fourteen-wiring-track power-grid image for common-mode n
+   [4] T1-verbatim                guess=28 found=2       Hierarchical four-level design methodology with contract
+
+### kimi | alpha  (kimi alpha.json, parse=clean)
+   [0] T2-paraphrase-consistent   guess=28 found=5       80-instruction out-of-order window at 500–600MHz
+   [1] T1-verbatim                guess=30 found=7       Two-cluster integer execution with local register-file c
+   [2] T1-verbatim-hyphen-variant guess=25 found=2       Predicted line-and-way access for a large two-way instru
+   [3] T1-verbatim                guess=34 found=12      Speculative load consumers with a two-cycle minirestart
+   [4] T1-verbatim                guess=34 found=11      Adaptive load-wait training for store-to-load hazards
+
+### kimi | niagara  (kimi niagara.json, parse=clean)
+   [0] T0-declined                guess=21               Optimize server throughput rather than single-thread per
+   [1] T0-declined                guess=22               Use many simple in-order cores instead of a few complex 
+   [2] T0-declined                guess=23               Four-way fine-grained multithreading per core
+   [3] T0-declined                guess=24               Shared L2, crossbar, and integrated memory controllers o
+   [4] T0-declined                guess=25               Spend area and power on integer throughput, not per-core
+
+### kimi | p4  (kimi p4.json, parse=clean)
+   [0] T1-verbatim                guess=5 found=5        Decoded-uop Execution Trace Cache as the L1 instruction 
+   [1] T1-verbatim                guess=3 found=3        About 2x P6 pipeline depth in pursuit of frequency
+   [2] T1-verbatim                guess=8 found=8        Double-pumped, staggered integer ALU only for frequent o
+   [3] T1-verbatim                guess=9 found=9        Small 8KB, two-clock L1 data cache with hit speculation 
+   [4] T1-verbatim                guess=10 found=10      Simplified second FP/SSE port instead of two full units
+
+### kimi | pphysical  (kimi pphysical.json, parse=clean)
+   [0] T0-declined                guess=30               Hybrid custom/synthesized implementation strategy for a 
+   [1] T0-declined                guess=33               X-Y grid-tree / tunable clock distribution instead of sk
+   [2] T0-declined                guess=37               Design-in SOI floating-body/history-effect tolerance rat
+   [3] T0-absent                  guess=42               Power integrity handled as a physical-design closure ite
+   [4] T0-declined                guess=48               Timing closure by design: early static-timing budgets, l
+
+### longcat | alpha  (longcat alpha.json, parse=clean)
+   [0] T0-declined                guess=28               Clustered integer execution
+   [1] T0-declined                guess=26               Instruction cache replication
+   [2] T0-declined                guess=27               Out-of-order window size vs. clock frequency
+   [3] T0-declined                guess=32               Wire-delay-driven floorplanning
+   [4] T0-declined                guess=30               Data cache double-pumped structure
+
+### longcat | p4  (longcat p4.json, parse=clean)
+   [0] T4-not-found               guess=None             Trace Cache vs Conventional L1 Instruction Cache
+   [1] T4-not-found               guess=None             Double-Pumped ALUs (Rapid Execution Engine)
+   [2] T4-not-found               guess=None             Hyper-Pipelined Technology (Deep Pipeline)
+   [3] T4-not-found               guess=None             Advanced Dynamic Execution Engine (Large Out-of-Order Wi
+   [4] T4-not-found               guess=None             Quad-Pumped Bus (QDR) Front-Side Bus
+
+### longcat | pphysical  (longcat pphysical.json, parse=clean)
+   [0] T0-declined                guess=30               Clock distribution topology selection
+   [1] T0-declined                guess=35               Power delivery and on-die decoupling strategy
+   [2] T0-declined                guess=40               Timing closure methodology with OCV derating
+   [3] T0-declined                guess=32               Macro placement and floorplan for the dual cores and cac
+   [4] T0-declined                guess=45               I/O and signal integrity for high-speed off-chip interfa
+
+### meta | alpha  (meta alpha.json, parse=clean)
+   [0] T1-verbatim                guess=29 found=7       Clustered integer execution with duplicated 80-entry reg
+   [1] T1-verbatim                guess=25 found=2       Line and way prediction to keep I-cache off critical fet
+   [2] T1-verbatim-hyphen-variant guess=31 found=8       Double-pumped 64KB data cache to provide two ports
+   [3] T1-verbatim                guess=35 found=12      Speculative issue of load consumers with minirestart and
+   [4] T1-verbatim                guess=27 found=3       Tournament branch predictor plus store-wait/load-wait dy
+
+### meta | niagara  (meta niagara.json, parse=clean)
+   [0] T0-declined                guess=22               Throughput-oriented 8 simple in-order cores instead of f
+   [1] T0-declined                guess=23               Four-way fine-grained multithreading per core to hide st
+   [2] T0-declined                guess=24               Single shared pipelined floating-point unit for all 8 co
+   [3] T0-declined                guess=25               Small write-through private L1s with large shared banked
+   [4] T0-declined                guess=26               On-chip crossbar, four integrated DRAM controllers and J
+
+### meta | p4  (meta p4.json, parse=clean)
+   [0] T1-verbatim                guess=4 found=5        Execution Trace Cache as primary L1I storing decoded uop
+   [1] T1-verbatim                guess=3 found=3        Deep pipeline for frequency target about 2x P6
+   [2] T1-verbatim                guess=8 found=8        Double-pumped Rapid Execution ALUs with staggered 16-bit
+   [3] T1-verbatim-hyphen-variant guess=9 found=9        Small 8KB low-latency L1 data cache with replay and deep
+   [4] T1-verbatim                guess=10 found=10      Optimized FP/SSE cluster with one full port plus move/st
+
+### meta | pphysical  (meta pphysical.json, parse=clean)
+   [0] T0-declined                guess=33               Hybrid H-tree driving sector buffers that drive global c
+   [1] T0-declined                guess=36               Predominantly static CMOS implementation with restricted
+   [2] T0-declined                guess=30               SOI history effect bounded by early/late timing corners 
+   [3] T0-declined                guess=37               Pulsed L1/L2 LSSD latches with local clock choppers for 
+
+### mimo | alpha  (mimo alpha.json, parse=clean)
+   [0] T0-declined                guess=27               Clustered Integer Execution for Clock Frequency
+   [1] T0-declined                guess=28               Out-of-Order Execution Window Size
+   [2] T0-declined                guess=26               Wire-Delay-Driven Physical Partitioning
+   [3] T0-declined                guess=32               Cache Size and Single-Cycle Access
+   [4] T0-declined                guess=29               Large Physical Register File with Register Renaming for 
+
+### mimo | niagara  (mimo niagara.json, parse=clean)
+   [0] T0-declined                guess=22               Eight simple cores over fewer complex cores
+   [1] T0-declined                guess=23               Four hardware threads per core via fine-grained multithr
+   [2] T0-declined                guess=24               Simple single-issue in-order pipeline
+   [3] T0-declined                guess=25               Shared L2 cache with crossbar interconnect
+   [4] T0-declined                guess=27               Power efficiency as primary optimization target
+
+### mimo | p4  (mimo p4.json, parse=clean)
+   [0] T0-declined                guess=5                Trace Cache vs Conventional L1 Instruction Cache
+   [1] T0-declined                guess=4                Deep Pipeline for Clock Frequency Scaling
+   [2] T0-declined                guess=7                Rapid Execution Engine with Double-Pumped ALUs
+   [3] T0-declined                guess=8                256KB Unified L2 Cache
+   [4] T0-declined                guess=6                Improved Branch Prediction for Deep Pipeline Compensatio
+
+### mimo | pphysical  (mimo pphysical.json, parse=clean)
+   [0] T0-declined                guess=28               Copper interconnect process selection for POWER4
+   [1] T0-declined                guess=34               Hierarchical clock distribution using a global clock gri
+   [2] T0-declined                guess=38               Power distribution and decoupling strategy for a large-d
+   [3] T0-declined                guess=42               Timing methodology and physical design closure approach
+   [4] T0-declined                guess=30               Integration of multiple cores and L2 cache on a single d
+
+### minimax 2.7 | alpha  (minimax 2.7 alpha.json, parse=clean)
+   [0] T0-declined                guess=28               Two-clustered integer execution architecture
+   [1] T0-declined                guess=30               Large reorder buffer (80 entries) for deep out-of-order 
+   [2] T0-declined                guess=26               Instruction cache replication (Icache and Jcache split)
+   [3] T0-declined                guess=29               Four-way superscalar issue with explicit cluster assignm
+   [4] T0-declined                guess=32               Exceeding sequential execution CPI via high-issue-width 
+
+### minimax 2.7 | niagara  (minimax 2.7 niagara.json, parse=clean)
+   [0] T0-declined                guess=23               Simple in-order cores over complex out-of-order cores fo
+   [1] T0-declined                guess=25               8-core, 4-threads-per-core organization (32 total thread
+   [2] T0-declined                guess=21               Throughput-over-single-thread-performance as the primary
+   [3] T0-declined                guess=27               Shared L2 cache across all cores rather than private L2 
+
+### minimax 2.7 | p4  (minimax 2.7 p4.json, parse=clean)
+   [0] T0-declined                guess=4                Trace cache over conventional L1 instruction cache
+   [1] T0-declined                guess=6                Double-pumped ALUs in the Rapid Execution Engine
+   [2] T0-declined                guess=8                Very deep pipeline as clock-frequency-first microarchite
+   [3] T0-declined                guess=5                Branch target buffer with 4K-entry BTB
+   [4] T0-declined                guess=7                Issue and retirement bandwidth matching for out-of-order
+
+### minimax 2.7 | pphysical  (minimax 2.7 pphysical.json, parse=clean)
+   [0] T0-declined                guess=35               Latch-based clock distribution architecture for POWER4
+   [1] T0-declined                guess=30               ASIC-style design methodology adoption for physical desi
+   [2] T0-declined                guess=42               Conservative wire load models for synthesis timing corre
+   [3] T0-declined                guess=38               Structured power grid for power distribution at large di
+
+### minimax m3 | alpha  (minimax m3 alpha.json, parse=harvest-skip-broken-element)
+   [0] T0-declined                guess=24               Instruction window / reorder buffer size selection under
+   [1] T0-declined                guess=28               Clustered integer execution units with inter-cluster com
+   [2] T0-declined                guess=33               Wire-delay-driven floorplanning with timing-driven place
+   [3] T0-declined                guess=25               Frequency / IPC trade-off positioning
+
+### minimax m3 | p4  (minimax m3 p4.json, parse=clean)
+   [0] T0-declined                guess=None             Trace cache replaces conventional L1 instruction cache
+   [1] T0-declined                guess=None             Double-pumped ALUs for rapid execution engine
+   [2] T0-declined                guess=None             Deep pipeline (20 stages) chosen over shorter pipeline
+   [3] T0-declined                guess=None             Bypass between trace cache miss and decode (μops deliver
+
+### mistral | alpha  (mistral alpha.json, parse=clean)
+   [0] T0-declined                guess=None             Out-of-Order Window Size vs Clock Cycle Trade-off
+   [1] T0-declined                guess=None             Clustered Integer Execution Units
+   [2] T0-declined                guess=None             Instruction Cache Replication for Bandwidth
+   [3] T0-declined                guess=None             Wire-Delay-Driven Floorplanning Methodology
+
+### mistral | niagara  (mistral niagara.json, parse=clean)
+   [0] T0-declined                guess=21               Throughput-first design philosophy
+   [1] T0-declined                guess=22               32-way multithreading via 8 cores with 4-way SMT
+   [2] T0-declined                guess=24               Shared L2 cache among all cores
+   [3] T0-declined                guess=23               Small per-core L1 caches
+   [4] T0-declined                guess=26               Power-aware design for server workloads
+
+### mistral | p4  (mistral p4.json, parse=clean)
+   [0] T0-declined                guess=None             Trace Cache vs Conventional L1 Instruction Cache
+   [1] T0-declined                guess=None             Double-Pumped ALU Implementation
+   [2] T0-declined                guess=None             20-Stage Pipeline Depth Selection
+   [3] T0-declined                guess=None             Rapid Execution Engine Design
+   [4] T0-declined                guess=None             Memory Hierarchy Optimization for High Frequency
+
+### mistral | pphysical  (mistral pphysical.json, parse=clean)
+   [0] T0-declined                guess=30               Hierarchical H-tree global clock distribution topology
+   [1] T0-declined                guess=34               Copper interconnect for upper metal layers in power grid
+   [2] T0-declined                guess=40               Corner-based static timing analysis with OCV derating
+   [3] T0-declined                guess=28               Symmetrical floorplan for L2 cache and processor cores
+   [4] T0-declined                guess=45               Shielding and spacing rules for critical signal nets
+
+### qwen | alpha  (qwen alpha.json, parse=clean)
+   [0] T0-declined                guess=27               Out-of-order window sized for clock frequency
+   [1] T0-declined                guess=29               Clustered integer execution
+   [2] T0-declined                guess=31               Instruction-cache replication for fetch timing
+   [3] T0-declined                guess=34               Wire-delay-driven floorplanning
+
+### qwen | niagara  (qwen niagara.json, parse=clean)
+   [0] T0-declined                guess=22               Core Complexity vs. Core Count Trade-off
+   [1] T0-declined                guess=23               Number of Threads per Core and Multithreading Style
+   [2] T0-declined                guess=25               Floating Point Unit Sharing
+   [3] T0-declined                guess=26               L2 Cache Interconnect and Bandwidth
+   [4] T0-declined                guess=21               Target Workload and Power Optimization Philosophy
+
+### qwen | p4  (qwen p4.json, parse=clean)
+   [0] T0-declined                guess=8                Execution Trace Cache vs Conventional L1 Instruction Cac
+   [1] T0-declined                guess=12               Rapid Execution Engine with Double-Pumped ALUs
+   [2] T0-declined                guess=6                20-Stage Hyper Pipelined Technology
+   [3] T0-declined                guess=14               On-Die Advanced Transfer Cache
+   [4] T0-declined                guess=16               Quad-Pumped System Bus
+
+### qwen | pphysical  (qwen pphysical.json, parse=clean)
+   [0] T0-declined                guess=29               Hybrid Custom and Synthesized Logic Methodology
+   [1] T0-declined                guess=32               Hierarchical Partitioning for Timing Closure
+   [2] T0-declined                guess=38               Global and Local Clock Distribution Grid
+   [3] T0-declined                guess=41               Dense Power Grid for di/dt Noise Mitigation
+   [4] T0-declined                guess=35               Wire Delay Modeling and Repeater Insertion
+
+### solar | niagara  (solar niagara.json, parse=clean)
+   [0] T0-declined                guess=22               Throughput-oriented design philosophy
+   [1] T0-declined                guess=24               8 cores × 4 threads configuration
+   [2] T0-declined                guess=26               Simple in-order core design
+   [3] T0-declined                guess=27               Fine-grained thread interleaving (zero-overhead multithr
+   [4] T0-declined                guess=28               Shared L2 cache structure
+
+### solar | pphysical  (solar pphysical.json, parse=clean)
+   [0] T0-declined                guess=28               Single-die dual-core integration
+   [1] T0-declined                guess=38               Clock distribution network architecture
+   [2] T0-declined                guess=43               Power delivery and electrical design strategy
+   [3] T0-declined                guess=47               SRAM array / cache macro design approach
+
+### sonnet | alpha  (sonnet alpha.json, parse=clean)
+   [0] T0-declined                guess=28               Clustered integer execution units
+   [1] T0-declined                guess=27               Out-of-order issue window size vs. clock frequency trade
+   [2] T0-declined                guess=26               Instruction cache replication for register-mapping/renam
+   [3] T0-declined                guess=25               Wire-delay-aware floorplanning as a first-order design c
+
+### sonnet | niagara  (sonnet niagara.json, parse=clean)
+   [0] T0-declined                guess=21               Throughput over single-thread performance
+   [1] T0-declined                guess=22               Simple, short pipeline cores rather than complex cores
+   [2] T0-declined                guess=23               Fine-grained multithreading per core to hide memory late
+   [3] T0-declined                guess=25               Shared L2 cache and single floating-point unit design
+   [4] T0-declined                guess=27               Power efficiency as a first-order design constraint
+
+### sonnet | p4  (sonnet p4.json, parse=clean)
+   [0] T0-declined                guess=None             Trace cache instead of conventional L1 instruction cache
+   [1] T0-declined                guess=None             Deep pipeline for high clock frequency
+   [2] T0-declined                guess=None             Double-pumped (double-speed) ALUs for integer execution
+   [3] T0-declined                guess=None             Prioritizing frequency headroom over IPC (instructions p
+
+### sonnet | pphysical  (sonnet pphysical.json, parse=clean)
+   [0] T0-declined                guess=33               Global clock distribution approach
+   [1] T0-declined                guess=30               Use of custom circuit design in critical macros
+   [2] T0-declined                guess=35               Latch/pipeline circuit style for timing closure
+   [3] T0-declined                guess=40               Hierarchical floorplanning and timing closure methodolog
+   [4] T0-declined                guess=45               Power/density management via circuit and physical design
+
+### yuanbao | alpha  (yuanbao power.json, parse=clean)
+   [0] T0-declined                guess=28               Clustered integer execution with duplicated integer regi
+   [1] T0-declined                guess=24               Performance leadership via high clock speed + out-of-ord
+   [2] T0-declined                guess=30               20-entry integer issue queue bounded by pick-2 arbitrati
+   [3] T0-declined                guess=26               64 KB primary I- and D-caches with line/way prediction t
+
+### yuanbao | niagara  (yuanbao niagara.json, parse=clean)
+   [0] T0-declined                guess=21               Design for throughput on commercial server workloads ins
+   [1] T0-declined                guess=23               Four threads per core, eight cores, 32 threads; each thr
+   [2] T0-declined                guess=24               Simple single-issue, in-order, short-pipeline core with 
+   [3] T0-declined                guess=26               Shared, banked L2 reached through a crossbar, with small
+   [4] T0-declined                guess=27               Moderate clock frequency and aggressive clock gating to 
+
+### yuanbao | p4  (yuanbao p4.json, parse=clean)
+   [0] T0-declined                guess=3                Trace cache replaces conventional L1 instruction cache
+   [1] T0-declined                guess=2                Very deep (20-stage) pipeline to maximize clock frequenc
+   [2] T0-declined                guess=4                Double-pumped (2× clocked) ALUs — Rapid Execution Engine
+   [3] T0-declined                guess=5                400 MHz system bus via quad-pumping
+
+### yuanbao | pphysical  (yuanbao pphysical.json, parse=clean)
+   [0] T0-declined                guess=42               One global clock domain for the cores and on-chip L2, wi
+   [1] T0-declined                guess=34               Full-chip static-timing sign-off with unit-level timing 
+   [2] T0-declined                guess=46               Power distribution, IR drop and power density treated as
+   [3] T0-declined                guess=29               0.18 μm bulk CMOS with copper interconnect as the techno
+   [4] T0-declined                guess=None             Two out-of-order cores plus shared on-chip L2, off-chip 

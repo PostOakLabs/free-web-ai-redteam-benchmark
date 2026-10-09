@@ -1,0 +1,65 @@
+TRACK D - red-team calibration wave (red1 + red3)
+
+=== red1: RUNSHEET-34 Block 01 (BoomTile) - J-v1's own exemplar, known-imperfect ===
+  models: 16   gradable: 16
+
+  model           verdict    obj fatal major minor  calibration
+  chatgpt         S-W-RES      4     0     2     2  consistent
+  deepseek        S-W-RES      3     0     1     2  consistent
+  gemini          S-W-RES      1     0     0     1  consistent
+  glm 5.3 flash   S-W-RES      3     0     1     2  consistent
+  grok            S-W-RES      2     0     1     1  consistent
+  kimi            S-W-RES      3     0     3     0  consistent
+  meta            S-W-RES      1     0     0     1  consistent
+  mimo            S-W-RES      4     0     1     3  consistent
+  minara          S-W-RES      1     0     0     1  consistent
+  minimax 2.7     S-W-RES      0     0     0     0  SCHEMA-ANOMALY-reservations-without-objections
+  mistral         S-W-RES      2     0     1     1  consistent
+  qwen            S-W-RES      1     0     0     1  consistent
+  solar           S-W-RES      3     0     1     2  consistent
+  sonnet          S-W-RES      3     0     0     3  consistent
+  yuanbao         S-W-RES      6     0     4     2  consistent
+  longcat         SUSPECT      2     0     1     1  consistent
+  verdict spread: {'S-W-RES': 15, 'SUSPECT': 1}
+  bare-SOUND (miscalibrated per the prompt's own BUILD NOTE): 0 []
+  schema anomalies: 1 [('minimax 2.7', 'SCHEMA-ANOMALY-reservations-without-objections')]
+  models omitting a required review field: 0 {}
+  most-attacked claim tokens: ['layer', 'hypothesis', 'adjustment', 'chosen_intervention', 'routing', 'post_state', 'complete', 'reported']
+
+=== red3: RUNSHEET-42 Block 08 (Niagara) - J-v3's own exemplar, known-SOUND ===
+  models: 16   gradable: 15
+
+  model           verdict    obj fatal major minor  calibration
+  chatgpt         S-W-RES      7     0     1     5  consistent
+  deepseek        S-W-RES      3     0     0     3  consistent
+  glm 5.3 flash   S-W-RES      3     0     1     2  consistent
+  kimi            S-W-RES      4     0     1     3  consistent
+  mimo            S-W-RES      4     0     1     3  consistent
+  minara          S-W-RES      1     0     1     0  consistent
+  mistral         S-W-RES      3     0     1     2  consistent
+  sonnet          S-W-RES      3     0     1     2  consistent
+  yuanbao         S-W-RES      4     0     1     3  consistent
+  gemini          SOUND        0     0     0     0  MISCALIBRATED-bare-SOUND
+  grok            SOUND        0     0     0     0  MISCALIBRATED-bare-SOUND
+  longcat         SOUND        2     0     0     2  SCHEMA-ANOMALY-SOUND-with-objections
+  meta            SOUND        0     0     0     0  MISCALIBRATED-bare-SOUND
+  minimax 2.7     SOUND        0     0     0     0  MISCALIBRATED-bare-SOUND
+  qwen            SOUND        0     0     0     0  MISCALIBRATED-bare-SOUND
+  solar           NOT GRADABLE                        parse=elementwise-truncation
+  verdict spread: {'S-W-RES': 9, 'SOUND': 6}
+  bare-SOUND (miscalibrated per the prompt's own BUILD NOTE): 5 ['gemini', 'grok', 'meta', 'minimax 2.7', 'qwen']
+  schema anomalies: 1 [('longcat', 'SCHEMA-ANOMALY-SOUND-with-objections')]
+  models omitting a required review field: 0 {}
+  most-attacked claim tokens: ['thread', 'clock', 'rationale', 'performance', 'target', 'state', 'frequency', 'hardware']
+
+=== SCOPE NOTES, on every page that uses this wave ===
+  * direction_check is OUT OF SCOPE on a single-block wave: one block gives no
+    direction spread to grade. The column is not left blank-and-unexplained.
+  * Both blocks are the prompts' OWN exemplars, so these waves measure reviewer
+    calibration, not corpus quality. They are not evidence about the episodes.
+  * The topic-anchor fabrication probe (commission 3.4) does not apply here:
+    these families carry no recalled quotes to test for fabrication.
+  * Contradiction detection elsewhere in this digest is numeric-only, so a
+    direction reversal would pass silently.
+
+wrote d5permodel.json: 16 models x 5 tracks

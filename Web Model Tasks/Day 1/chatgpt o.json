@@ -1,0 +1,54 @@
+[
+{
+"title": "Optimize for throughput rather than single-thread performance",
+"where_in_paper": "Introduction / Design philosophy",
+"decision": "Niagara was designed to maximize aggregate throughput across many concurrent threads rather than maximize the performance of one or two threads.",
+"alternatives_or_rejected": "The paper contrasts this with the prevailing approach of increasing frequency and exploiting instruction-level parallelism through multiple issue, out-of-order execution, and aggressive branch prediction.",
+"rationale": "The authors argue that single-thread optimization was encountering diminishing returns because commercial server applications have low ILP, large working sets, poor memory locality, and difficult-to-predict data-dependent branches. They also identify increasing design complexity and power dissipation as consequences of the conventional approach. Server workloads instead expose substantial thread-level parallelism, so throughput is a better target.",
+"outcome": "Niagara combined many relatively simple execution resources with fine-grained multithreading and supported 32 hardware threads, targeting high throughput and low power for commercial server workloads. ([Stanford Pervasive Parallelism Lab][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.99
+},
+{
+"title": "Use many simple cores instead of fewer complex cores",
+"where_in_paper": "Processor architecture / Core organization",
+"decision": "The design chose eight simple SPARC cores, with four hardware threads per core, rather than using fewer more sophisticated cores.",
+"alternatives_or_rejected": "The paper contrasts the Niagara approach with conventional high-performance processors that devote substantial die area and power to mechanisms for improving single-thread ILP, such as out-of-order execution and aggressive speculation.",
+"rationale": "The target workloads contain enough thread-level parallelism that additional threads can hide memory latency. Simpler cores reduce hardware complexity and power, allowing more cores/threads and therefore greater aggregate throughput within the power envelope.",
+"outcome": "The processor integrated eight SPARC pipelines and four hardware threads per pipeline, providing 32 hardware threads on one die. The resulting architecture was aimed specifically at highly threaded server workloads rather than peak single-thread speed. ([Stanford Pervasive Parallelism Lab][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.98
+},
+{
+"title": "Use fine-grained multithreading with four threads per core",
+"where_in_paper": "SPARC pipeline / Multithreading",
+"decision": "Each SPARC core supports four hardware threads and switches among them on a fine-grained basis, with the four threads sharing the core's execution pipeline.",
+"alternatives_or_rejected": "The paper presents fine-grained multithreading as an alternative to trying to extract more instruction-level parallelism from each individual thread. It does not, however, give a detailed quantitative comparison of every possible number of threads per core in the paper.",
+"rationale": "A thread whose instruction encounters a long-latency event, especially a cache miss, can be replaced by another ready thread. This allows memory latency to be hidden with thread-level parallelism while avoiding the complexity and power cost of large out-of-order execution machinery.",
+"outcome": "Four threads are grouped onto each SPARC pipeline, and eight such groups provide the processor's 32 hardware threads. The paper describes the resulting architecture as exploiting the thread-level parallelism inherent in commercial server applications. ([Stanford Pervasive Parallelism Lab][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.97
+},
+{
+"title": "Use a relatively small private L1 cache with a shared on-chip L2",
+"where_in_paper": "Memory subsystem / Cache",
+"decision": "The architecture uses private L1 caches associated with the SPARC pipelines and a shared L2 cache connected to the cores through the on-chip crossbar.",
+"alternatives_or_rejected": "The paper does not describe a detailed set of rejected cache organizations. Its stated architecture instead emphasizes a shared L2 and highly integrated memory subsystem capable of serving the large number of hardware threads.",
+"rationale": "Thirty-two hardware threads place heavy demands on the memory system. A shared on-chip L2 and crossbar provide the cores with access to shared cache capacity and high-bandwidth connections to the memory controllers, while the multithreaded cores can tolerate memory latency by switching among threads.",
+"outcome": "The implemented memory subsystem consisted of an on-chip crossbar, L2 cache, and memory controllers, forming an integrated system capable of supporting the processor's many concurrent threads. ([Stanford Pervasive Parallelism Lab][1])",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.95
+},
+{
+"title": "Spend the power budget on parallel threads and memory bandwidth rather than aggressive single-thread machinery",
+"where_in_paper": "Power / Overall architecture",
+"decision": "Niagara was explicitly designed around a low-power target, using the available power budget to support many simple processing threads and a high-bandwidth integrated memory subsystem.",
+"alternatives_or_rejected": "The paper contrasts this with conventional designs whose increasing complexity and power dissipation arise from techniques intended to improve single-thread performance. It does not provide a full numerical design-space table of alternative power allocations.",
+"rationale": "Commercial server deployments are constrained by power and cooling. Because the target workloads offer abundant thread-level parallelism and relatively little ILP, the authors argue that simple cores plus multithreading can deliver better throughput per watt than complex single-thread-optimized cores.",
+"outcome": "The resulting Niagara architecture integrated 32 hardware threads, eight simple SPARC pipelines, an on-chip crossbar, L2 cache, and memory controllers while targeting low power consumption. Secondary descriptions of the paper report a 60 W power target. ([Stanford Pervasive Parallelism Lab][1])",
+"paper_vs_general": "probably-in-the-paper",
+"confidence": 0.88
+}
+]
+
+[1]: https://ppl.stanford.edu/papers/niagara_micro.pdf?utm_source=chatgpt.com "Niagara: A 32-Way Multithreaded Sparc Processor"

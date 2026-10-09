@@ -1,0 +1,58 @@
+Here is the answer in English, with each task shown step by step.
+
+**1. Implied 2023→2024 adjustment factor per tier (to 6 decimals)**
+
+Formula used: factor = 2024 value ÷ 2023 value.
+
+| Tier | 2023 value | 2024 value | Division | Factor (6 dp) |
+|------|------------|------------|----------|----------------|
+| A | $124,331 | $130,461 | 130,461 / 124,331 = 1.049273… | 1.049273 |
+| B | $3,730 | $3,914 | 3,914 / 3,730 = 1.049330… | 1.049330 |
+| C | $24,866 | $26,092 | 26,092 / 24,866 = 1.049305… | 1.049305 |
+| D | $1,243 | $1,305 | 1,305 / 1,243 = 1.049879… | 1.049879 |
+
+Mutation-check against stated 4.9 percent:
+- 4.9% implies a uniform factor of 1.049.
+- Tier factors: 1.049273, 1.049330, 1.049305, 1.049879.
+- Central three tiers are within ~0.0003 of 1.049; tier B and C are very close. Tier A and especially tier D drift higher in decimal terms, but all are within 0.1 percentage points of 4.9% (the tier D implied growth is ~4.988%).
+
+Mutual consistency: No single uniform factor exactly reproduces all four 2024 values from the four 2023 values at 6 decimals. They are consistent with a single ~4.9% increase only at low precision, with small tier-specific differences (likely rounding of the published 2023/2024 values before publication).
+
+**2. 2025 projection from 2024 values at 3.4%**
+
+Inferred rounding rule: 2023→2024 values are whole-dollar figures and the published 2024 values end in 0 or 5 at tier level; I infer that the published 2024 tier value was rounded to the dollar (nearest dollar), and that the 3.4% CPI index change is applied to the unrounded 2024 figure then rounded to the nearest dollar for publication. Because I do not have unrounded 2024 values, I apply the 3.4% to the published 2024 values and then round to the nearest dollar. I note this is a necessary inference from the data given.
+
+Projection = round(2024 × 1.034) to nearest dollar.
+
+- Tier A: 130,461 × 1.034 = 134,897.474 → $134,897 (rounded up)
+- Tier B: 3,914 × 1.034 = 4,047.276 → $4,047 (rounded up)
+- Tier C: 26,092 × 1.034 = 26,979.128 → $26,979 (rounded up)
+- Tier D: 1,305 × 1.034 = 1,349.37 → $1,349 (rounded up)
+
+If the inferred rule were “round 3.4% to one decimal, i.e., 1.034, applied to a final value rounded to the nearest dollar”, the numbers above are the mechanical result.
+
+If instead the official practice rounds the percentage to an integer cent or applies a different rounding direction, results shift by a few dollars. Given the 2025 actual tier A is $134,841, this discrepancy is confirmed below.
+
+**3. Comparison with actual 2025 tier A = $134,841**
+
+My projected tier A: $134,897.  
+Actual: $134,841.  
+Difference: 134,897 − 134,841 = $56 below projection.
+
+Exact factor that reproduces $134,841 from $130,461:
+factor = 134,841 / 130,461 = 1.03357809…
+
+Change as percent: 3.357809% → 3.3578% (4 dp).
+
+Discrepancy vs. 3.4%:
+- 3.4% = 0.03400000
+- Actual implied = 0.03357809
+- Difference = 0.00042191 = 0.042191 percentage points = 42.19 basis points (where 1 bp = 0.01%).
+
+So the official 2025 figure corresponds to a factor of about 3.3578% rather than 3.4%, i.e., ~42 bp lower than the stated 3.4%.
+
+**4. Weakest point — single strongest reason the projection could differ from the official figure**
+
+A concrete mechanism: the official 2025 value is scaled from a CPI-U vest year value (not 2024 value) using the finalized, rounded annual CPI-U increase specific to the regulatory table’s index vintage and rounding convention, which can differ from a simple 2024×1.034 computation. The difference observed (≈42 bp, ~56 dollars) is exactly what you would expect if the published 3.4% is a rounded summary, and the actual applied index change is 3.3578%, with the table then rounded to the nearest dollar.
+
+That is the one strongest, falsifiable mechanism: the stated 3.4% is a rounded decimal; the underlying index adjustment and table conventions (percent rounding, base year, and dollar rounding) produce the published 2025 figure exactly.

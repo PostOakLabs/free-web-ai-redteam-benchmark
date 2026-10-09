@@ -1,0 +1,94 @@
+```json
+[
+  {
+    "delta_name": "Wire Delay Dominates Timing Closure",
+    "at_28nm": "Cell delay dominated (60–70% of path delay). Timing closure focused on cell sizing, Vt mixing, and buffering. Wire delay was secondary and often recovered with late-stage buffering.",
+    "at_7nm_5nm": "Wire delay dominates (50–70% of path delay). FinFETs improved cell delay but resistance scaling made wire RC the primary bottleneck. Wire planning and placement-driven optimization are now critical path to closure.",
+    "why_it_changed": "Resistance scales superlinearly with node shrinkage (R ∝ 1/width²), while FinFETs only partially offset cell delay. Smaller wire pitches increase capacitance, making wire RC the dominant factor.",
+    "what_breaks": "A 28nm-trained engineer focuses optimization on cell sizing and Vt swapping, but WNS/TNS barely improve. Symptom: Timing reports show wire delay contributes >60% of negative slack on critical paths, yet cell-based optimizations have diminishing returns.",
+    "workflow_impact": "Early wire-aware placement and wirelength-driven synthesis become mandatory. Post-route timing optimization shifts from cell-centric to wire-centric (e.g., layer assignment, shielding).",
+    "confidence": 0.98
+  },
+  {
+    "delta_name": "Congestion Shift: Channel Routing → Pin Access",
+    "at_28nm": "Congestion was primarily in routing channels between macros. Fixes involved widening channels, adjusting macro placement, or adding feedthroughs.",
+    "at_7nm_5nm": "Pin access congestion dominates. FinFETs require more pins (multiple fins per cell) and tighter pitches, while multi-patterning (LELE/SAQP) adds coloring constraints that block pin access. Even wide channels can be unroutable due to pin access DRCs.",
+    "why_it_changed": "FinFETs have 2–4× more pin access requirements per standard cell. 7nm metal pitches (~30–40nm) and multi-patterning reduce available tracks, making pin access the first DRC to fail during placement.",
+    "what_breaks": "A 28nm-trained engineer widens the congested channels, but DRC violations persist because the root cause is pin access, not channel width. Symptom: Thousands of pin access DRCs (e.g., M1 enclosure, via-to-pin spacing) remain after channel widening.",
+    "workflow_impact": "Pin access analysis becomes a first-class placement check, with tools flagging pin access hotspots before detailed routing. Placement legalization must respect pin access constraints.",
+    "confidence": 0.96
+  },
+  {
+    "delta_name": "Via and Pin-Access DRCs Become Show-Stoppers",
+    "at_28nm": "DRC was dominated by metal spacing/width and shorts. Via/pin access DRCs were rare, easily fixed with minor detours or via doubling.",
+    "at_7nm_5nm": "Via enclosure, pin access, and cut spacing DRCs are now major blockers. These are harder to fix late because they often require cell movement, pin reordering, or via insertion, which can ripple through placement.",
+    "why_it_changed": "Shrinking dimensions make via and pin access DRCs more likely to fail (e.g., M1 enclosure <20nm at 7nm vs <40nm at 28nm). FinFETs’ complex pin structures and multi-patterning add new via/pin constraints.",
+    "what_breaks": "A 28nm-trained engineer defers via/pin DRC fixes to post-route, causing late-stage congestion. Symptom: Tens of thousands of via/pin DRCs that cannot be resolved without re-placement.",
+    "workflow_impact": "Via/pin access DRCs are checked during placement (not just after routing). Placement tools include via/pin-aware legalization and hotspot detection.",
+    "confidence": 0.95
+  },
+  {
+    "delta_name": "Power-Grid vs Routing-Resource Tension",
+    "at_28nm": "Power grid used 1–2 mid-layer metals (e.g., M4/M5) with straps every 100–200µm. Signal routing had ample resources, and power grid adjustments were made late without major impact.",
+    "at_7nm_5nm": "Power grid competes directly with signal routing. Denser grids (straps every 50–100µm on M3–M5) are needed due to higher current density and IR drop concerns, but multi-patterning reduces effective routing tracks. Power grid design must be co-optimized with signal routing from the start.",
+    "why_it_changed": "Higher current densities (due to smaller wires and higher performance) increase IR drop risks. Multi-patterning (e.g., M1–M3 at 7nm) reduces routing resources, forcing power and signal to share layers.",
+    "what_breaks": "A 28nm-trained engineer designs a sparse power grid to preserve routing resources, causing IR drop >50mV in high-toggle regions. Or uses a dense grid but blocks all signal routing, causing unroutable channels. Symptom: IR drop violations or routing overflow in the same regions.",
+    "workflow_impact": "Power grid and signal routing are co-designed in floorplanning. Iterative trade-offs between power grid density and routing congestion are resolved early.",
+    "confidence": 0.94
+  },
+  {
+    "delta_name": "Multi-Patterning and Coloring Constraints Enter Placement",
+    "at_28nm": "Single patterning was sufficient for all layers. Placement focused purely on timing and congestion, with no lithography constraints.",
+    "at_7nm_5nm": "Multi-patterning (LELE for M1/M3, SAQP for M2 at 5nm) introduces coloring constraints. Metal layers must be colored (e.g., odd/even tracks), and standard cells must be placed on specific colors to avoid conflicts. Placement legalization must respect color constraints.",
+    "why_it_changed": "Lithography at 7nm/5nm cannot resolve dense patterns on a single mask. Multi-patterning splits layers into multiple masks, requiring color-aware placement to avoid conflicts that cause DRC violations.",
+    "what_breaks": "A 28nm-trained engineer places cells without considering coloring, causing systematic DRC violations. Symptom: Thousands of coloring conflicts (e.g., same-color cells adjacent on a colored layer) that require cell movement or swapping.",
+    "workflow_impact": "Placement tools incorporate coloring constraints. Legalization includes color-aware checks, and floorplanning must account for color balance.",
+    "confidence": 0.97
+  },
+  {
+    "delta_name": "Library and Vt-Mixing Strategy Complexity",
+    "at_28nm": "Few Vt options (e.g., SVT, LVT, HVT). Library characterization was simpler, with 3–5 corners. Vt mixing was used sparingly for critical paths.",
+    "at_7nm_5nm": "Many Vt options (e.g., HVH, HVT, SVT, LVT, ULVT) with fine-grained granularity. Library characterization includes 10–20+ corners (OCV, AOCV, LDE, aging). Vt mixing is used aggressively for power/performance optimization, with per-path Vt selection.",
+    "why_it_changed": "FinFETs offer independent gate control, enabling more Vt options. Increased process variation (e.g., LER, fin height variation) requires more corners to capture the design space.",
+    "what_breaks": "A 28nm-trained engineer uses a simple Vt mixing strategy (e.g., LVT for critical paths, SVT for others), missing power/performance targets. Or uses too many Vt variants without considering library characterization overhead. Symptom: Power exceeds budget by >10% or timing fails to close due to unmodeled variation.",
+    "workflow_impact": "Early power/performance trade-off analysis with Vt-aware synthesis. Library characterization must include all variation corners before placement.",
+    "confidence": 0.93
+  },
+  {
+    "delta_name": "Clock Distribution: H-tree → Mesh/Spine",
+    "at_28nm": "H-tree or X-tree clock distribution was standard. Clock skew was managed through buffering and tree balancing. Clock gating was used selectively.",
+    "at_7nm_5nm": "Mesh or spine-based clock distribution is common to handle increased variation and resistance. Clock gating is pervasive but must be carefully placed to avoid skew and latency issues. Clock tree synthesis must account for mesh/spine options early.",
+    "why_it_changed": "Increased resistance and process variation (e.g., LER, fin variation) make traditional trees less effective at maintaining low skew. Mesh/spine distributions provide more robustness against variation and IR drop.",
+    "what_breaks": "A 28nm-trained engineer uses H-tree distribution, resulting in excessive skew (>50ps) due to unmodeled variation. Symptom: Clock skew report shows >50ps between launch and capture flops in the same domain, causing hold violations.",
+    "workflow_impact": "Clock tree synthesis explores mesh/spine topologies. Clock gating placement becomes a first-class optimization problem, with dedicated tools for gating cell insertion and balancing.",
+    "confidence": 0.92
+  },
+  {
+    "delta_name": "Signoff Corner Explosion",
+    "at_28nm": "Signoff used 3–5 corners (typical, best-case, worst-case, RC best/worst). Timing closure was straightforward with these corners.",
+    "at_7nm_5nm": "Signoff requires 10–20+ corners: OCV (on-chip variation), AOCV (advanced OCV), LDE (layout-dependent effects), aging (NBTI/PBTI), and multiple RC corners. All must pass simultaneously.",
+    "why_it_changed": "Process variation increases dramatically at smaller nodes (e.g., LER, fin height variation, well proximity). FinFETs have more complex variation behavior (e.g., independent gate workfunction variation).",
+    "what_breaks": "A 28nm-trained engineer runs only typical/worst-case corners, missing timing issues in OCV or LDE corners. Symptom: Timing passes in signoff but fails in silicon due to unmodeled variation.",
+    "workflow_impact": "Variation-aware timing closure from the start. Early analysis includes all corners, and optimization targets the worst-case across all corners, not just nominal.",
+    "confidence": 0.95
+  },
+  {
+    "delta_name": "IR Drop and EM: Afterthought → First-Class",
+    "at_28nm": "IR drop and EM were checked late in the flow as a final verification. Simple power grid and wire sizing were sufficient. IR drop >100mV was rare.",
+    "at_7nm_5nm": "IR drop and EM are first-class constraints that drive floorplanning, power grid design, and routing. IR drop must be <50mV at typical toggle and <30mV at 100% toggle. EM checks are integrated into early design stages.",
+    "why_it_changed": "Higher current densities (smaller wires, higher performance) and FinFET leakage increase power density. Smaller wires increase resistance, making IR drop and EM more likely. 7nm wires have ~2× the resistance of 28nm, doubling IR drop for the same current.",
+    "what_breaks": "A 28nm-trained engineer designs power grid and routing without early IR/EM analysis, causing late-stage failures. Symptom: IR drop >100mV in high-toggle regions or EM violations that require re-gridding or re-routing.",
+    "workflow_impact": "IR/EM analysis is integrated into floorplanning and placement. Power grid design is iterative with routing, and IR/EM checks are part of every major milestone review.",
+    "confidence": 0.96
+  },
+  {
+    "delta_name": "Hold Closure Becomes Harder",
+    "at_28nm": "Hold closure was relatively easy. Hold margins were large (>50ps), and hold fixing was straightforward (add buffers, increase clock latency). Hold violations were rare and easily resolved.",
+    "at_7nm_5nm": "Hold closure is significantly harder. Hold margins are tighter (<20ps) due to increased variation (OCV, LDE) and shorter paths (smaller cells, tighter placement). Hold violations are common and require careful optimization.",
+    "why_it_changed": "FinFETs and smaller dimensions increase variation, reducing hold margins. Shorter paths (from smaller cells and tighter placement) mean less room for hold fixing. Multi-patterning and coloring can also introduce hold skew.",
+    "what_breaks": "A 28nm-trained engineer underestimates hold closure difficulty, deferring hold fixes to late in the flow. Symptom: Hundreds of hold violations persist through multiple iterations, requiring ECOs or re-placement.",
+    "workflow_impact": "Hold-aware placement and clock tree optimization from the start. Early hold margin analysis with variation-aware timing. Hold fixing is integrated into the main timing closure loop, not an afterthought.",
+    "confidence": 0.94
+  }
+]
+```

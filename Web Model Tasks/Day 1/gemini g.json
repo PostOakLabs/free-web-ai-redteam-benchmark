@@ -1,0 +1,65 @@
+[
+{
+"pattern_name": "Asymmetric Logic-Depth Block Boundary Budgeting",
+"situation": "Deriving set_input_delay and set_output_delay constraints at an un-implemented block boundary between Block A (launch) and Block B (capture) running on a shared clock domain.",
+"derivation": "Target clock period T_clk = 2.0ns. Synthesis estimate reveals Block A contains 10 gate levels (~0.80ns delay) while Block B contains 4 gate levels (~0.32ns delay). Allocating 0.20ns for top-level interconnect leaves 1.80ns for total gate delay. Proportional allocation assigns Block A output budget T_A = 0.80 + 0.10(interconnect) = 0.90ns, leaving Block B input budget T_B = 2.0 - 0.90 = 1.10ns. Apply Block A constraint: set_output_delay -max 1.10 -clock CLK [get_ports OUT_A]. Apply Block B constraint: set_input_delay -max 0.90 -clock CLK [get_ports IN_B].",
+"wrong_way": "Applying a default 50/50 static split (set_output_delay -max 1.0; set_input_delay -max 1.0). Block A (10 logic levels) repeatedly fails block-level setup timing by -100ps during P&R, causing excessive gate sizing and local routing congestion, while Block B has over 680ps of unexploited slack.",
+"defense": "Citing post-synthesis gate-level depth breakdown reports and estimated cell propagation delays, demonstrating structural logic asymmetry prior to floorplanning.",
+"signoff_risk": "Too tight on Block A (e.g. output delay constraint > 1.20ns): creates un-closable block setup violations, wasting engineer-hours on futile buffer insertion. Too loose on Block A (e.g. output delay constraint < 0.70ns): Block A passes block signoff cleanly, but chip-level integration STA fails with setup violations across the inter-block boundary.",
+"confidence": 0.95
+},
+{
+"pattern_name": "Multi-Cycle Path (MCP) Derivation for Synchronous Enable-Pipelined Paths",
+"situation": "Constraining data transfers between registers where control logic guarantees data updates occur only every N clock cycles (e.g., N=4).",
+"derivation": "Clock period T_clk = 1.0ns. Enable logic asserts once every 4 cycles, granting 4.0ns for data propagation. Derivation requires two complementary commands: set_multicycle_path 4 -setup -from [get_pins reg_a/C] -to [get_pins reg_b/D], followed by set_multicycle_path 3 -hold -from [get_pins reg_a/C] -to [get_pins reg_b/D] to move the hold check edge back to launch edge N-1 (edge 0).",
+"wrong_way": "Specifying set_multicycle_path 4 -setup without specifying the corresponding -hold constraint. STA defaults the hold check to 1 cycle prior to the setup capture edge (edge 3), forcing P&R to insert 3.0ns worth of redundant delay buffers on the data path, causing area bloat and routability failure.",
+"defense": "Formal verification proof (RTL assertion) or state-machine waveform trace showing the enable signal cannot assert on intermediate cycles.",
+"signoff_risk": "Too tight (omitting MCP): forces unnecessary logic restructuring, high-drive cell swapping, or pipeline insertion. Too loose (MCP N set higher than real enable interval, or missing hold constraint): functional silicon failure due to hold race conditions or sampling non-settled data.",
+"confidence": 0.98
+},
+{
+"pattern_name": "Virtual Clock Budgeting for System-Synchronous Input/Output Interfaces",
+"situation": "Constraining off-chip primary I/O ports for a synchronous system interface where the external device and local chip share a board-level oscillator reference.",
+"derivation": "Operating clock period T_period = 10.0ns. Define virtual clock VCLK_EXT with period 10.0ns matching internal CLK_CORE. External device output valid delay max = 4.5ns, min = 1.0ns. PCB board trace flight delay max = 1.2ns, min = 0.8ns. Max input delay = T_ext_max + T_board_max = 4.5 + 1.2 = 5.7ns. Min input delay = T_ext_min + T_board_min = 1.0 + 0.8 = 1.8ns. Apply SDC: set_input_delay -max 5.7 -clock VCLK_EXT [get_ports DATA_IN]; set_input_delay -min 1.8 -clock VCLK_EXT [get_ports DATA_IN].",
+"wrong_way": "Constraining DATA_IN relative to internal root clock CLK_CORE instead of virtual clock VCLK_EXT. The P&R tool factors internal clock tree insertion delay (e.g., 2.5ns) into the I/O path calculation, artificially over-constraining the input path by 2.5ns and causing impossible setup closure.",
+"defense": "Board layout trace delay extraction report combined with external peripheral datasheet timing parameters.",
+"signoff_risk": "Too tight: over-constrains I/O pad logic, driving unneeded high-speed buffer insertion and increased I/O power. Too loose: timing failures at board-level test signoff despite 100% clean internal STA reports.",
+"confidence": 0.96
+},
+{
+"pattern_name": "Generated Clock Derivation for Sequential Frequency Dividers",
+"situation": "Constraining the output of a flip-flop based divide-by-2 clock generator circuit within an ASIC clock control block.",
+"derivation": "Master clock CLK_MASTER (period T = 2.0ns, 500MHz) arrives at register div2_reg/C. Define generated clock on register Q pin: create_generated_clock -name CLK_DIV2 -source [get_pins div2_reg/C] -divide_by 2 [get_pins div2_reg/Q]. Tool automatically sets CLK_DIV2 period to 4.0ns and derives latency directly from source pin CLK_MASTER.",
+"wrong_way": "Defining a new primary clock on div2_reg/Q using create_clock -period 4.0 -name CLK_DIV2 [get_pins div2_reg/Q]. This breaks phase correlation and source latency propagation between CLK_MASTER and CLK_DIV2, treating synchronous domain-crossing paths as un-correlated clocks.",
+"defense": "RTL schematic showing structural flip-flop feedback loop forming the divider, proving phase alignment with the master clock.",
+"signoff_risk": "Too tight: redundant buffer insertion on domain-crossing paths. Too loose (using create_clock): STA misses real phase skew on data transfers between CLK_MASTER and CLK_DIV2 domains, leading to silicon setup/hold violations.",
+"confidence": 0.97
+},
+{
+"pattern_name": "Asynchronous Clock Domain Crossing (CDC) Constraint Assignment",
+"situation": "Handling timing checks between completely independent, unsynchronized clock sources (e.g. PCIe reference clock at 100MHz vs Core system clock at 400MHz).",
+"derivation": "Verify structural presence of dual-flop synchronizers or asynchronous FIFO handshakes on all crossing signals. Apply global clock group exclusion: set_clock_groups -asynchronous -group [get_clocks CLK_PCIE] -group [get_clocks CLK_CORE].",
+"wrong_way": "Applying set_false_path manually across individual net lists without checking CDC hardware, OR omitting the constraint entirely. Omitting the constraint causes STA to evaluate random single-cycle setup checks across independent clock edges, creating thousands of false violations.",
+"defense": "Structural CDC audit tool report (e.g., SpyGlass CDC) verifying 100% of signals crossing between CLK_PCIE and CLK_CORE hit verified multi-flop synchronizers.",
+"signoff_risk": "Too tight (omitting constraint): P&R engine wastes runtime trying to close un-closeable cross-domain timing, causing massive placement distortion. Too loose (applying false path to un-synchronized control logic lacking dual-flops): metastability and data corruption in silicon.",
+"confidence": 0.98
+},
+{
+"pattern_name": "Progressive Clock Uncertainty Margin Relaxation",
+"situation": "Managing timing margin targets across design phases (Pre-CTS vs Post-CTS vs Post-Route signoff).",
+"derivation": "Target clock period T = 1.0ns. Pre-CTS estimated skew = 50ps, PLL jitter = 30ps, SI crosstalk margin = 40ps. Pre-CTS uncertainty = 50 + 30 + 40 = 120ps (set_clock_uncertainty 0.120 [get_clocks CLK]). Post-CTS actual measured skew = 42ps; update uncertainty to explicit jitter + SI margin = 30 + 40 = 70ps. Post-route signoff (with SI extraction enabled): reduce uncertainty strictly to PLL jitter = 30ps (set_clock_uncertainty 0.030 [get_clocks CLK]).",
+"wrong_way": "Retaining the pre-CTS uncertainty value (120ps) through final post-route signoff. STA penalizes paths with 120ps artificial margin on top of real propagated clock tree skew and extracted SI delay, forcing unnecessary hold buffer insertion and area bloat.",
+"defense": "Historical P&R flow data showing expected CTS skew variance and post-route SI cross-talk impact for the specific tech node.",
+"signoff_risk": "Too tight at signoff: unnecessary timing iterations and power bloat. Too loose pre-CTS (e.g., using 30ps jitter only): severe setup timing failure explosion post-CTS when real clock tree skew appears.",
+"confidence": 0.95
+},
+{
+"pattern_name": "Source-Synchronous Output Interface Skew Budgeting",
+"situation": "Constraining a source-synchronous output bus where the ASIC outputs both data nets and a forwarded clock to an external DDR memory device.",
+"derivation": "Forwarded clock period T = 2.5ns (400MHz DDR, half-period = 1.25ns). External memory requires setup time T_su = 0.25ns and hold time T_h = 0.25ns. PCB trace skew variance T_board = 0.05ns. Maximum output delay (setup) = T_halfperiod - T_su - T_board = 1.25 - 0.25 - 0.05 = 0.95ns. Minimum output delay (hold) = T_h + T_board = 0.25 + 0.05 = 0.30ns. SDC commands: set_output_delay -max 0.95 -clock [get_clocks CLK_FWD] [get_ports DATA_OUT]; set_output_delay -min -0.30 -clock [get_clocks CLK_FWD] [get_ports DATA_OUT].",
+"wrong_way": "Budgeting output data relative to internal system clock rather than generated forwarded clock CLK_FWD. Internal clock tree latency shifts alter both data and forwarded clock identically; constraining to internal clock forces P&R to eliminate internal delay skew that naturally cancels out at the receiver pin.",
+"defense": "Memory controller PHY specification and board trace constraint requirements.",
+"signoff_risk": "Too tight: impossible P&R closure due to internal latency matching constraints. Too loose: data eye closure at receiver pin causing board-level communication corruption.",
+"confidence": 0.96
+}
+]

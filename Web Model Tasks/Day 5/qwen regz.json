@@ -1,0 +1,29 @@
+[
+  {
+    "task": 1,
+    "steps": "A = 130461 / 124331 = 1 + 6130/124331 = 1.049303874... -> 1.049304\nB = 3914 / 3730 = 1 + 184/3730 = 1.049329759... -> 1.049330\nC = 26092 / 24866 = 1 + 1226/24866 = 1.049304271... -> 1.049304\nD = 1305 / 1243 = 1 + 62/1243 = 1.049879324... -> 1.049879",
+    "answer": "Implied 2023->2024 factors: A 1.049304, B 1.049330, C 1.049304, D 1.049879. The raw per-tier ratios are not identical, so they are not mutually consistent with one exact uniform factor applied independently to each tier. A and C match to six decimals; B is slightly higher; D is higher because small-dollar rounding has a larger proportional effect. A literal 4.9% factor is 1.049000, which is below all four implied ratios, so 4.9% is a rounded description rather than the exact factor. The 2024 values also show that B, C, and D equal rounded 3%, 20%, and 1% of tier A, respectively, so the official structure can still be driven by a single tier-A adjustment factor plus percentage-derived rounding.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 2,
+    "steps": "Inferred rounding rule: compute the dollar amount and round to the nearest whole dollar. Why: 2023 B = round(0.03 * 124331) = round(3729.93) = 3730; C = round(0.20 * 124331) = round(24866.2) = 24866; D = round(0.01 * 124331) = round(1243.31) = 1243. 2024 B = round(0.03 * 130461) = round(3913.83) = 3914; C = round(0.20 * 130461) = round(26092.2) = 26092; D = round(0.01 * 130461) = round(1304.61) = 1305.\nProject with 1.034:\nA = 130461 * 1.034 = 130461 + 4435.674 = 134896.674 -> 134897\nB = 3914 * 1.034 = 3914 + 133.076 = 4047.076 -> 4047\nC = 26092 * 1.034 = 26092 + 887.128 = 26979.128 -> 26979\nD = 1305 * 1.034 = 1305 + 44.370 = 1349.370 -> 1349",
+    "answer": "Projected 2025 values using 3.4% and nearest-dollar rounding: tier A $134,897; tier B $4,047; tier C floor $26,979; tier D $1,349. If B/C/D are recomputed from the rounded projected tier A as 3%, 20%, and 1%, the results are the same: B = round(0.03 * 134897) = round(4046.91) = 4047; C = round(0.20 * 134897) = round(26979.4) = 26979; D = round(0.01 * 134897) = round(1348.97) = 1349.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 3,
+    "steps": "Projected tier A = 134897. Official tier A = 134841. Rounded projection minus official = 134897 - 134841 = 56. Unrounded projection was 134896.674, so unrounded projection minus official = 55.674.\nExact factor that produces official A from 2024 A = 134841 / 130461 = 1 + 4380/130461.\n4380/130461 = 0.0335732518..., so exact factor = 1.0335732518...\nStated 3.4% factor = 1.034000.\nDifference = 1.0335732518 - 1.034000 = -0.0004267482.\nBasis-point discrepancy = -0.0004267482 * 10000 = -4.267482 bp.",
+    "answer": "The projection of $134,897 is $56 higher than the official $134,841. The exact factor that would produce $134,841 from $130,461 is approximately 1.033573252. That is 4.27 basis points lower than the nominal 3.4% factor of 1.034000.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 4,
+    "steps": "The projection treated the announced 3.4% CPI-U increase as the exact multiplier 1.034000. The official tier A value instead implies a multiplier of 1.033573252. The difference, 0.000426748, equals 4.267482 basis points and corresponds to about $55.67 on the 2024 tier A base, which becomes $56 after nearest-dollar rounding.",
+    "answer": "weakest_point below",
+    "evidence_level": "computed"
+  },
+  {
+    "weakest_point": "The concrete weakest point is factor precision: the stated 3.4 percent CPI-U increase is a rounded percentage, while the official table appears to use a more precise index ratio or index vintage before rounding. Treating 3.4% as exactly 1.034000 overstates the official factor by about 0.0004267, or 4.27 basis points, which makes the projected tier A value about $56 too high."
+  }
+]

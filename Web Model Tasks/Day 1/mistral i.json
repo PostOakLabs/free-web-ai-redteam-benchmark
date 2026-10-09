@@ -1,0 +1,262 @@
+```json
+[
+  {
+    "review_gate": "floorplan review",
+    "purpose": "Catch power delivery, macro placement, and congestion issues that would require a full re-floorplan after placement starts — which can cost weeks of schedule and force late-stage re-routing of power and macros.",
+    "checks": [
+      {
+        "question": "Show me the IR drop map at 100% toggle rate for VDD and VSS; what is the maximum drop in any 100×100µm tile?",
+        "evidence_demanded": "Power grid analysis report with IR drop contour map and per-tile max drop values",
+        "red_flag": "Any tile with >50mV drop at 100% toggle, or >30mV drop at typical toggle (70%)",
+        "why_it_matters": "IR drop >50mV causes functional failures in low-Vmin libraries and timing guardband erosion that cannot be recovered post-placement without re-gridding"
+      },
+      {
+        "question": "Show the distance from each hard macro’s I/O ring to its nearest I/O pad; what is the maximum?",
+        "evidence_demanded": "Floorplan visualization with annotated distances from macro I/O rings to pad rings",
+        "red_flag": "Any hard macro I/O ring >50µm from its nearest I/O pad, or >30µm for high-speed interfaces",
+        "why_it_matters": "Long I/O escape routes cause M1-M2 congestion that forces detours through M3+, increasing wirelength and delay for critical I/O paths"
+      },
+      {
+        "question": "Show the global placement congestion map; what is the peak utilization on M1 and M2?",
+        "evidence_demanded": "Global placement tool report with layer-by-layer congestion heatmaps",
+        "red_flag": "Any region with >80% utilization on M1 or M2, or >70% on M3",
+        "why_it_matters": "Congestion hotspots at this stage predictably become unroutable after detailed placement, requiring macro moves or power grid adjustments"
+      },
+      {
+        "question": "Show the spacing between all memory instances; what is the minimum center-to-center distance?",
+        "evidence_demanded": "Floorplan with memory placement and spacing measurements, plus memory compiler DRC report",
+        "red_flag": "Any memory instance with center-to-center spacing <10µm, or <5µm for same-type memories",
+        "why_it_matters": "Insufficient memory spacing causes DRC shorts between memory power rings and forces late-stage memory relocation"
+      },
+      {
+        "question": "Show the pin access report for all hard macros; what is the maximum pin density on any side?",
+        "evidence_demanded": "Pin access analysis report with per-macro, per-side pin density percentages",
+        "red_flag": "Any macro with >70% pin density on one side, or >60% on adjacent sides",
+        "why_it_matters": "High pin density causes pin access DRC violations and forces late-stage macro pin reordering or bump addition"
+      },
+      {
+        "question": "Show the analog/digital isolation; what is the minimum separation between analog blocks and digital logic, and are guard rings present?",
+        "evidence_demanded": "Floorplan with analog and digital regions annotated, plus guard ring verification report",
+        "red_flag": "Any analog block <20µm from digital logic without a guard ring, or any shared power domain",
+        "why_it_matters": "Noise coupling from digital switching into analog blocks causes functional failures that are undetectable until silicon"
+      },
+      {
+        "question": "Show the aspect ratio of each hierarchical block; what is the range?",
+        "evidence_demanded": "Hierarchical block dimensions report with width, height, and AR for each block",
+        "red_flag": "Any block with aspect ratio >2:1 or <0.5:1, or any block where AR forces >30% dead space",
+        "why_it_matters": "Extreme aspect ratios cause placement fragmentation, poor wirelength, and congestion that cannot be fixed without re-floorplanning"
+      },
+      {
+        "question": "Show the clock domain map; are all critical clock domains grouped to minimize clock tree span?",
+        "evidence_demanded": "Clock domain visualization with domain boundaries and critical path overlays",
+        "red_flag": "Any critical clock domain split across >2 hierarchical blocks, or any domain with >50% of its flops outside its primary block",
+        "why_it_matters": "Split clock domains force long clock spines, increasing skew and latency, which cannot be fixed without re-floorplanning"
+      }
+    ],
+    "kill_questions": [
+      "Is there a power grid strap on M4 or M5 every 100µm in both X and Y directions?",
+      "Are all hard macros placed such that no block boundary cuts through a timing-critical path?"
+    ],
+    "waiver_culture": "Floorplan waivers for 'we’ll fix it in placement' are common under schedule pressure, but they always resurface as unroutable congestion or IR drop failures that cost a full re-spin of the floorplan.",
+    "confidence": 0.96
+  },
+  {
+    "review_gate": "pre-CTS review",
+    "purpose": "Ensure placement quality is sufficient for clock tree synthesis to succeed and that timing issues are not so severe that they require re-placement after CTS — which would invalidate the clock tree and force a full re-CTS.",
+    "checks": [
+      {
+        "question": "Show me the setup slack histogram by clock group; where is the wall and what is the tail?",
+        "evidence_demanded": "Timing report with per-clock-group setup slack histograms, showing bins from -500ps to +500ps",
+        "red_flag": "Any clock group with a tail extending below -300ps, or a wall not at 0ps (indicating unbalanced optimization)",
+        "why_it_matters": "A tail below -300ps means placement has failed to converge, and CTS will not recover this; re-placement is required"
+      },
+      {
+        "question": "Show the hold slack histogram; what is the worst-case hold slack?",
+        "evidence_demanded": "Timing report with hold slack histogram, showing bins from -200ps to +200ps",
+        "red_flag": "Any negative hold slack < -50ps, or a distribution with >10% of paths < 0ps",
+        "why_it_matters": "Hold violations are almost impossible to fix after CTS without ECOs, which are expensive and risky"
+      },
+      {
+        "question": "Show the congestion map post-placement; what is the peak utilization on M1-M4?",
+        "evidence_demanded": "Detailed placement congestion report with per-layer, per-region utilization percentages",
+        "red_flag": "Any region with >90% utilization on M1 or M2, or >85% on M3 or M4",
+        "why_it_matters": "Congestion >90% on lower metals will cause CTS to fail to insert buffers or balance the tree, forcing a re-placement"
+      },
+      {
+        "question": "Show the wirelength distribution; what is the 90th and 99th percentile wirelength?",
+        "evidence_demanded": "Placement tool report with wirelength histogram and percentile statistics",
+        "red_flag": "99th percentile wirelength >800µm, or 90th percentile >500µm for non-global nets",
+        "why_it_matters": "Long wires indicate poor placement and will cause excessive buffering in CTS, increasing power and latency"
+      },
+      {
+        "question": "Show the clock gating cell placement; what is the maximum Manhattan distance from any gating cell to its clock spine?",
+        "evidence_demanded": "Clock gating cell placement report with distances to nearest clock spine segment",
+        "red_flag": "Any clock gating cell >30µm from its clock spine, or >20µm for high-frequency domains",
+        "why_it_matters": "Distant gating cells cause excessive clock latency and skew, which cannot be fixed without moving the cells or re-building the clock tree"
+      },
+      {
+        "question": "Show the pin access DRC report for all macros; what is the minimum metal enclosure on M1 for any pin?",
+        "evidence_demanded": "Pin access DRC report with per-pin enclosure measurements on M1 and M2",
+        "red_flag": "Any pin with M1 enclosure <0.05µm (28nm) or <0.02µm (7nm)",
+        "why_it_matters": "Pin access violations will block detailed routing and require late-stage pin reordering or macro modification"
+      },
+      {
+        "question": "Show the placement density map; what is the maximum standard cell density in any 50×50µm tile?",
+        "evidence_demanded": "Placement density heatmap with per-tile standard cell utilization",
+        "red_flag": "Any tile with >85% standard cell density, or >80% with macros present",
+        "why_it_matters": "High density tiles will cause routing congestion and DRC violations that cannot be resolved without re-placement"
+      },
+      {
+        "question": "Show the critical path report; do any top-100 critical paths cross hierarchical block boundaries?",
+        "evidence_demanded": "Timing report with top-N critical paths annotated with hierarchical block information",
+        "red_flag": "Any of the top 100 critical paths crossing >1 hierarchical block boundary",
+        "why_it_matters": "Cross-block critical paths are difficult to optimize in CTS and often require re-placement to group the logic"
+      },
+      {
+        "question": "Show the power rail width in high-current regions; what is the minimum width for VDD and VSS on M1?",
+        "evidence_demanded": "Power grid visualization with rail width measurements in regions with >1mW/µm² power density",
+        "red_flag": "Any VDD or VSS rail <5µm wide in high-current regions (28nm), or <2µm (7nm)",
+        "why_it_matters": "Narrow rails cause IR drop and electromigration failures that require re-gridding, which invalidates placement"
+      }
+    ],
+    "kill_questions": [
+      "Is there any setup violation > -100ps in the worst clock group?",
+      "Is there any region with >95% congestion on M1 or M2?"
+    ],
+    "waiver_culture": "Minor setup violations get waived with promises of post-CTS optimization, but they almost always require expensive ECOs or even re-placement when CTS fails to close timing.",
+    "confidence": 0.97
+  },
+  {
+    "review_gate": "pre-tapeout timing signoff review",
+    "purpose": "Verify that timing closure is real across all corners, modes, and variations, and that no path will fail in silicon — because post-tapeout fixes are limited to metal layers and cannot address logic or clock issues.",
+    "checks": [
+      {
+        "question": "Show the setup slack histogram across all corners; what is the worst-case WNS and TNS?",
+        "evidence_demanded": "Multi-corner timing report with setup slack histograms for best-case, worst-case, RC best, RC worst, and OCV corners",
+        "red_flag": "Worst-case WNS < 0ps, or TNS < -1000ps",
+        "why_it_matters": "Negative WNS at any corner means silicon failure; TNS < -1000ps indicates systemic issues that may escape if only WNS is checked"
+      },
+      {
+        "question": "Show the hold slack histogram across all corners; what is the worst-case HNS?",
+        "evidence_demanded": "Multi-corner timing report with hold slack histograms for all corners, including best-case and worst-case",
+        "red_flag": "Worst-case HNS < 10ps, or any negative hold slack",
+        "why_it_matters": "Hold violations cause functional failures in silicon and cannot be fixed post-tapeout without a respin"
+      },
+      {
+        "question": "Show the clock skew report; what is the maximum skew between any two flip-flops in the same clock domain?",
+        "evidence_demanded": "Clock tree report with per-domain skew matrices and max skew values",
+        "red_flag": "Max skew > 50ps for any clock domain, or > 30ps for high-frequency (>1GHz) domains",
+        "why_it_matters": "Excessive skew reduces the effective clock period and can cause setup/hold failures that are not caught by path-based timing checks"
+      },
+      {
+        "question": "Show the clock latency report; what is the maximum source latency for any clock domain?",
+        "evidence_demanded": "Clock latency report with root-to-leaf latency for each clock domain",
+        "red_flag": "Max source latency > 30% of the clock period, or > 400ps for 1ns clocks",
+        "why_it_matters": "High latency reduces the available time for logic and can cause setup violations that are not apparent in pre-CTS timing"
+      },
+      {
+        "question": "Show the OCV derating applied to all paths; what is the derate factor for setup and hold?",
+        "evidence_demanded": "Timing report with OCV derating factors applied per-path, including setup and hold margins",
+        "red_flag": "Any path with setup derating < 10% or hold derating < 5%, or any path missing OCV derating",
+        "why_it_matters": "Insufficient OCV derating causes silicon failures due to on-chip variation that is not modeled in the timing analysis"
+      },
+      {
+        "question": "Show the aging derating; are all paths derated for NBTI and PBTI effects?",
+        "evidence_demanded": "Timing report with aging derating factors, including NBTI/PBTI models for 10-year lifetime",
+        "red_flag": "Any path missing aging derating, or any path with aging derating < 5% for setup",
+        "why_it_matters": "Aging effects cause timing degradation over the life of the chip; missing derating leads to late-life failures"
+      },
+      {
+        "question": "Show the crosstalk analysis; what is the maximum aggressor count for any victim net, and what derating is applied?",
+        "evidence_demanded": "Crosstalk analysis report with per-net aggressor counts and applied derating factors",
+        "red_flag": "Any victim net with > 5 aggressors and < 5% derating, or > 10 aggressors with < 10% derating",
+        "why_it_matters": "Crosstalk can cause delay variations of 10-20ps per aggressor; insufficient derating leads to silicon failures under worst-case switching"
+      },
+      {
+        "question": "Show the timing closure report for all modes (functional, test, scan); are all modes timing-clean?",
+        "evidence_demanded": "Multi-mode timing report with setup and hold slack for functional, test, and scan modes",
+        "red_flag": "Any mode with WNS < 0ps or HNS < 10ps",
+        "why_it_matters": "Different modes have different timing requirements; a failure in test or scan mode can cause silicon test failures or yield loss"
+      },
+      {
+        "question": "Show the ECO verification report; are all ECOs timing-verified and DRC-clean?",
+        "evidence_demanded": "ECO verification report with timing and DRC checks for each ECO",
+        "red_flag": "Any ECO that is not timing-verified, or any ECO with DRC violations, or any ECO that degrades timing on other paths",
+        "why_it_matters": "Unverified ECOs can introduce new timing or DRC violations that are not caught until silicon"
+      }
+    ],
+    "kill_questions": [
+      "Is worst-case WNS > 0ps at all corners?",
+      "Is worst-case HNS > 10ps at all corners?"
+    ],
+    "waiver_culture": "Timing waivers at signoff are rare and usually limited to obscure corners, but when granted, they require silicon re-verification with margin and can haunt the project for its entire lifetime.",
+    "confidence": 0.98
+  },
+  {
+    "review_gate": "physical verification signoff review",
+    "purpose": "Ensure the layout is manufacturable, functionally correct, and reliable — because any issue found here requires a respin, and some issues (like LVS mismatches) can only be fixed with a full re-layout.",
+    "checks": [
+      {
+        "question": "Show the DRC violation report; are there any shorts, opens, or spacing violations?",
+        "evidence_demanded": "Full DRC deck run with violation count per layer and per rule, including waiver list",
+        "red_flag": "Any non-waived DRC violation, or any short or open on a signal net",
+        "why_it_matters": "DRC violations cause manufacturing failures; shorts and opens are always fatal"
+      },
+      {
+        "question": "Show the LVS report; does the extracted netlist match the schematic netlist exactly?",
+        "evidence_demanded": "LVS verification report with netlist comparison, including device counts and connectivity checks",
+        "red_flag": "Any mismatch between extracted and schematic netlists, or any missing/extra devices or nets",
+        "why_it_matters": "LVS mismatches indicate functional errors that will cause silicon to fail, regardless of timing or DRC cleanliness"
+      },
+      {
+        "question": "Show the antenna violation report; are all antenna violations fixed or waivered with diodes?",
+        "evidence_demanded": "Antenna violation report with per-net antenna ratio and fix status (diode, rule waiver, or routing change)",
+        "red_flag": "Any antenna violation on a gate input with ratio > 200:1 (28nm) or > 500:1 (7nm) without a diode or waiver",
+        "why_it_matters": "Antenna violations cause gate oxide damage during plasma etching, leading to yield loss or functional failures"
+      },
+      {
+        "question": "Show the ERC report; are there any floating nets, unconnected pins, or shorted power domains?",
+        "evidence_demanded": "ERC verification report with floating net list, unconnected pin list, and power domain connectivity checks",
+        "red_flag": "Any floating net on a signal pin, or any unconnected input pin, or any short between different power domains",
+        "why_it_matters": "ERC violations indicate connectivity issues that cause functional failures or power shorts"
+      },
+      {
+        "question": "Show the metal density report; are all metal layers within 5% of the foundry’s density requirements?",
+        "evidence_demanded": "Density analysis report with per-layer, per-region density values and deviation from target",
+        "red_flag": "Any region on any metal layer with density outside ±5% of the foundry’s target, or any region >10% for layers with CMP constraints",
+        "why_it_matters": "Density violations cause CMP dishing or erosion, leading to yield loss or reliability failures"
+      },
+      {
+        "question": "Show the well and implant coverage report; are all transistors properly enclosed by well and implant layers?",
+        "evidence_demanded": "Well/implant coverage report with per-device enclosure checks and minimum enclosure values",
+        "red_flag": "Any transistor with well enclosure < 0.1µm (28nm) or < 0.05µm (7nm), or any implant missing for a device",
+        "why_it_matters": "Improper well/implant enclosure causes device leakage or failure, and cannot be fixed post-tapeout"
+      },
+      {
+        "question": "Show the ESD protection report; are all I/O pins protected with ESD devices?",
+        "evidence_demanded": "ESD protection report with per-pin ESD device verification and ESD current handling capability",
+        "red_flag": "Any I/O pin without an ESD protection device, or any ESD device with insufficient current handling for the pin type",
+        "why_it_matters": "Missing or insufficient ESD protection causes silicon damage from electrostatic discharge events"
+      },
+      {
+        "question": "Show the electromigration (EM) report; are there any EM violations on power or signal nets?",
+        "evidence_demanded": "EM analysis report with per-net current density and lifetime estimates",
+        "red_flag": "Any net with current density > 80% of the foundry’s EM limit, or any net with estimated lifetime < 10 years",
+        "why_it_matters": "EM violations cause open circuits over time, leading to late-life failures"
+      },
+      {
+        "question": "At 7nm: Show the EUV lithography hotspot report; are all hotspots resolved?",
+        "evidence_demanded": "EUV hotspot analysis report with per-hotspot classification and fix status",
+        "red_flag": "Any unresolved EUV hotspot, or any hotspot with pattern density outside foundry limits",
+        "why_it_matters": "EUV hotspots cause lithography failures, leading to yield loss or pattern defects"
+      }
+    ],
+    "kill_questions": [
+      "Are there any non-waived DRC violations?",
+      "Does LVS pass cleanly with no mismatches?"
+    ],
+    "waiver_culture": "DRC waivers are common for minor spacing or density violations, but they always require foundry approval and can delay tapeout by weeks if the foundry rejects them.",
+    "confidence": 0.99
+  }
+]
+```

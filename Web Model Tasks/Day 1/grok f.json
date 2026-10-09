@@ -1,0 +1,310 @@
+[
+  {
+    "failure_class": "FAIL_CONGESTION",
+    "symptoms": [
+      "Global route overflow report shows >5-10% overflow concentrated in 1-2 regions while average overflow is low",
+      "Detail-route completion stalls with remaining vias/shorts clustered in the same GCells as the overflow hotspots",
+      "Congestion map heat is co-located with high cell density or many high-pin cells rather than uniform",
+      "Wirelength histogram has a long tail of nets with >2x expected length only inside the congested bins"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Floorplan macro placement creating narrow channels or pin-access walls",
+        "distinguishing_check": "Overlay congestion map on floorplan; if overflow tracks the edges of large hard macros or narrow corridors between them, and removing/moving one macro drops local overflow >50%, it is floorplan-limited",
+        "check_cost": "minutes",
+        "typical_fix": "Repack macros with larger keep-out or channel spacing; re-floorplan",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Cell density or high-fanout nets forced into a small area by placement constraints",
+        "distinguishing_check": "Density report vs congestion; if peak density >70-80% coincides with overflow and a density-aware re-placement (or temporary density screen) clears most overflow, density is primary",
+        "check_cost": "hours",
+        "typical_fix": "Add density screens, spread high-pin cells, or relax placement blockages",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Insufficient routing tracks / layer assignment (too many nets forced to lower layers)",
+        "distinguishing_check": "Layer-usage histogram; if M1-M3 utilization is near 100% while upper layers are sparse in the same region, force more nets upward or add layer preferences",
+        "check_cost": "minutes",
+        "typical_fix": "Adjust layer directives or increase preferred-direction track availability",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Power-grid or blockage over-subscription of routing resources",
+        "distinguishing_check": "Compare congestion with power-stripe map; if overflow sits exactly under wide straps or dense via arrays and a temporary power-grid thin-out reduces overflow, PG is the limiter",
+        "check_cost": "hours",
+        "typical_fix": "Thin or redistribute power straps / via arrays in the hotspot",
+        "fix_cost": "hours-days"
+      },
+      {
+        "cause": "Clock-tree or scan-chain routing already consuming tracks before signal route",
+        "distinguishing_check": "Route only non-clock nets first; if congestion collapses dramatically, clock/scan pre-routes are the culprit",
+        "check_cost": "hours",
+        "typical_fix": "Re-route CTS with tighter track budgeting or move clock spines",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Cheapest visual overlays (floorplan + density + layer usage) first; only then expensive re-placement or power-grid surgery.",
+    "classic_trap": "Treating global overflow percentage as the primary metric and adding more effort or more layers when the real problem is a single floorplan channel that a 10-minute macro move would fix.",
+    "confidence": 0.85
+  },
+  {
+    "failure_class": "FAIL_TIMING (setup)",
+    "symptoms": [
+      "Setup slack report shows negative slack on paths whose endpoint is a capture flip-flop with data-path delay >> clock-path delay",
+      "Failing endpoints share a common high-fanout net or a long net that appears in many critical paths",
+      "WNS is large but TNS is small (few paths) vs both large (systemic)",
+      "After incremental timing update, the same cell or net remains on the critical path while surrounding logic moves"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Long net / high RC delay on a critical data path",
+        "distinguishing_check": "Path report with net delays broken out; if one or two nets account for >30-40% of data-path delay and their length or via count is anomalous, buffer/size that net",
+        "check_cost": "minutes",
+        "typical_fix": "Insert buffers or upsize drivers on the long net; re-route with higher layer preference",
+        "fix_cost": "minutes-hours"
+      },
+      {
+        "cause": "Insufficient drive strength or cell sizing on combinational path",
+        "distinguishing_check": "Cell delay vs load capacitance; if a cell is driving >3-4x its library target load and is on the critical path, sizing it up improves slack without changing topology",
+        "check_cost": "minutes",
+        "typical_fix": "Upsize the weak cells or insert intermediate buffers",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Clock skew or latency imbalance making the capture edge arrive early relative to launch",
+        "distinguishing_check": "Compare launch vs capture clock path delays on the failing paths; if capture latency is systematically lower by the amount of the slack deficit, CTS adjustment is required",
+        "check_cost": "minutes",
+        "typical_fix": "Useful-skew CTS or local clock buffer insertion to delay capture",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "High-fanout net without adequate buffering (including scan or reset)",
+        "distinguishing_check": "Fanout and transition-time report; if a net with fanout >20-30 appears in multiple failing paths and has slow transition, isolate it by temporary idealization",
+        "check_cost": "minutes",
+        "typical_fix": "Rebuild the high-fanout tree with proper buffering",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "False or multi-cycle path not constrained, or incorrect derate/OCV applied",
+        "distinguishing_check": "Check SDC for the path; if the path is known multi-cycle or false and is being timed as single-cycle, or if derate is applied twice, the failure is constraint-related",
+        "check_cost": "minutes",
+        "typical_fix": "Add false/multi-cycle exceptions or correct derate settings",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Placement of critical path cells far apart after legalization or congestion-driven moves",
+        "distinguishing_check": "Physical path length vs logical depth; if cells that should be adjacent are separated by >10-20 sites and a targeted re-place of the path recovers slack, placement is the cause",
+        "check_cost": "hours",
+        "typical_fix": "Path-based placement or ECO re-place of the critical cone",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Highest-probability and cheapest (net delay, sizing, constraint) first; clock skew and placement only after data-path is clean.",
+    "classic_trap": "Blaming the clock tree for every setup failure when the real problem is a single long data net or an unconstrained false path; engineers then over-constrain CTS and create hold problems.",
+    "confidence": 0.9
+  },
+  {
+    "failure_class": "FAIL_TIMING (hold)",
+    "symptoms": [
+      "Hold slack report shows negative slack on short paths (often launch-capture of the same or adjacent flops) with data-path delay << clock-path delay difference",
+      "Failures appear predominantly at min-corner / fast process while setup is clean at max-corner",
+      "Many hold violations share a common clock-gating or local clock buffer that has large insertion delay variation",
+      "Hold violations concentrate near clock-tree leaves or after recent CTS ECO"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient hold buffering / delay cells on short data paths",
+        "distinguishing_check": "Path report: if data-path cell count is 0-2 and total data delay is smaller than the hold requirement + skew, the path simply needs delay cells",
+        "check_cost": "minutes",
+        "typical_fix": "Insert hold buffers or delay cells on the short paths (ECO)",
+        "fix_cost": "minutes-hours"
+      },
+      {
+        "cause": "Clock skew that makes launch edge arrive late relative to capture (or capture early)",
+        "distinguishing_check": "Launch vs capture latency difference on the violating paths; if the skew alone exceeds the data-path delay, CTS rebalancing or useful skew is needed",
+        "check_cost": "minutes",
+        "typical_fix": "CTS re-optimization for hold or local clock delay insertion on launch",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "OCV / derate / CRPR settings too pessimistic (or missing CRPR)",
+        "distinguishing_check": "Re-run hold analysis with CRPR enabled or with reduced derate; if violations disappear, the margin stack-up was artificial",
+        "check_cost": "minutes",
+        "typical_fix": "Enable CRPR, tune derate, or use AOCV/POCV tables appropriate to the node",
+        "fix_cost": "minutes"
+      },
+      {
+        "cause": "Min-delay cell library characterization or operating-condition mismatch",
+        "distinguishing_check": "Compare reported cell delays against SPICE or library datasheet at the same corner; if library min-delay is unrealistically small, library or corner definition is wrong",
+        "check_cost": "hours",
+        "typical_fix": "Correct library or operating-condition setup",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock-gating cell or integrated clock-gating (ICG) placement creating large local skew",
+        "distinguishing_check": "If all hold fails share one ICG and moving/re-buffering that ICG removes the cluster, the ICG is the source",
+        "check_cost": "minutes",
+        "typical_fix": "Re-place or re-buffer the offending ICG; add delay on the short data side",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Cheapest data-path delay insertion and constraint/derate checks first; only then CTS surgery, because hold ECOs are far cheaper than re-CTS.",
+    "classic_trap": "Inserting large numbers of hold buffers that later create setup problems or congestion, when a modest CTS skew adjustment or correct CRPR would have fixed most of the violations.",
+    "confidence": 0.88
+  },
+  {
+    "failure_class": "FAIL_IR_DROP",
+    "symptoms": [
+      "Static IR map shows voltage drop >5-10% of Vdd in localized regions while average drop is acceptable",
+      "Dynamic IR (or vector-based) peaks coincide with simultaneous switching of large clock or bus domains",
+      "IR hotspots sit under high-activity blocks or under sparse power-grid areas",
+      "Timing paths that pass through the IR hotspot show extra delay only when IR is annotated"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Insufficient power-grid density or missing straps/via arrays in the hotspot",
+        "distinguishing_check": "Overlay IR map on power-grid density; if the hotspot has measurably lower metal/via density and adding a local strap or via farm reduces drop proportionally, grid density is the cause",
+        "check_cost": "hours",
+        "typical_fix": "Add or widen power straps / increase via density in the region",
+        "fix_cost": "hours-days"
+      },
+      {
+        "cause": "High simultaneous switching (clock or large data bus) without local decoupling",
+        "distinguishing_check": "Dynamic IR with activity vectors; if peaks align with clock edges or a specific bus toggle and adding decap cells under the block cuts the peak, activity + missing decap is the issue",
+        "check_cost": "hours",
+        "typical_fix": "Insert decap cells or reduce simultaneous switching (clock gating, staggered enables)",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Package / bump / C4 or power-pad placement creating long resistive paths",
+        "distinguishing_check": "IR from pad/bump to the hotspot; if the majority of the drop is between the package pin and the die edge, package or pad placement is limiting",
+        "check_cost": "hours",
+        "typical_fix": "Add more power pads/bumps or re-assign package pins closer to the hotspot",
+        "fix_cost": "days"
+      },
+      {
+        "cause": "Instance-level current draw higher than expected (wrong activity or library power)",
+        "distinguishing_check": "Compare instance current vs power report; if a few cells show current far above library expectation under the same vector, activity factor or power characterization is wrong",
+        "check_cost": "hours",
+        "typical_fix": "Correct activity annotation or replace anomalous cells",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Via resistance or electromigration-limited via arrays under-sized",
+        "distinguishing_check": "Via current density report co-located with IR hotspot; if vias are at or above EM limit and increasing via count reduces both EM and IR, via sizing is the cause (more critical at advanced nodes)",
+        "check_cost": "hours",
+        "typical_fix": "Increase via multiplicity or widen via arrays",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Local grid density and decap checks are fastest to confirm and cheapest to fix; package and activity annotation come later because they require more data or longer turn-around.",
+    "classic_trap": "Adding blanket decap everywhere when the real problem is a missing power strap or sparse via array under one block; the extra decap then hurts congestion and area without solving the root IR path.",
+    "confidence": 0.82
+  },
+  {
+    "failure_class": "FAIL_CTS (clock tree)",
+    "symptoms": [
+      "Clock latency or skew report shows global skew > target (often >50-100 ps) or local skew outliers on specific leaves",
+      "Clock-tree depth or buffer count is unusually high in one region while other regions are shallow",
+      "Setup/hold failures appear only after CTS and disappear when clocks are idealized",
+      "Clock transition times at leaves exceed library limits or show large variation across corners"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Unbalanced clock-tree topology or uneven sink distribution",
+        "distinguishing_check": "Clock-tree structure browser or latency histogram by region; if one cluster of sinks has 2-3 more buffer levels than the average, re-clustering or forced balancing is needed",
+        "check_cost": "minutes",
+        "typical_fix": "Re-run CTS with tighter skew target or explicit balance constraints on the outlier cluster",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Clock-gating cells or ICGs inserted too deep or with poor placement",
+        "distinguishing_check": "If latency jumps occur exactly at ICG boundaries and moving the ICG closer to the root or leaves removes the jump, ICG placement is the cause",
+        "check_cost": "minutes",
+        "typical_fix": "Re-place ICGs closer to the center of their fanout or promote gating higher in the tree",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Routing blockage or congestion forcing long detours on clock nets",
+        "distinguishing_check": "Clock net length vs Manhattan; if actual routed length is >> Manhattan in a region that also has signal congestion, the clock is detouring",
+        "check_cost": "minutes",
+        "typical_fix": "Reserve clock routing tracks or move blockages; re-route clock with higher priority",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Incorrect clock uncertainty, latency target, or leaf-pin capacitance annotation",
+        "distinguishing_check": "Compare CTS input constraints vs actual leaf capacitance and required uncertainty; if the tool was given wrong leaf C or too aggressive skew, the tree is over-built",
+        "check_cost": "minutes",
+        "typical_fix": "Correct SDC / capacitance annotation and re-CTS",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "OCV / AOCV derates making the tool build an overly conservative tree",
+        "distinguishing_check": "Re-CTS with reduced derate or with CRPR-aware mode; if skew and buffer count drop substantially while still meeting real silicon margin, derate was excessive (especially visible at advanced nodes with large AOCV tables)",
+        "check_cost": "hours",
+        "typical_fix": "Tune AOCV/POCV tables or enable advanced OCV modes",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Constraint and topology visual checks first (minutes); only then re-CTS or blockage surgery, because a full CTS re-run is expensive.",
+    "classic_trap": "Re-running CTS with ever-tighter skew targets when the real problem is a single misplaced ICG or a routing blockage; the tighter target then explodes buffer count and creates new IR and congestion issues.",
+    "confidence": 0.85
+  },
+  {
+    "failure_class": "FAIL_DRC (routing DRCs)",
+    "symptoms": [
+      "DRC report shows remaining shorts, spacing, or via violations after detail route, concentrated in previously congested GCells",
+      "Same net or same via array appears in many DRC markers (systematic) vs random isolated markers",
+      "Violations appear only after metal-fill or after a late ECO that added cells/wires",
+      "Minimum-area or enclosure violations dominate rather than pure spacing/shorts"
+    ],
+    "candidate_causes": [
+      {
+        "cause": "Residual congestion that detail router could not resolve",
+        "distinguishing_check": "Overlay final DRC markers on the last congestion map; if >70% of shorts/spacing sit inside the top-10 overflow GCells, congestion is still the root",
+        "check_cost": "minutes",
+        "typical_fix": "Reduce local density or open more routing tracks, then re-detail-route",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Via or cut-layer rules (enclosure, spacing, min-area) violated by automatic via insertion",
+        "distinguishing_check": "Filter DRC by via/cut type; if the majority are enclosure or min-area on a specific via definition, force via pillars or change via selection rules",
+        "check_cost": "minutes",
+        "typical_fix": "Update via rules or insert multi-cut vias / via pillars (critical at advanced nodes)",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "Metal-fill or dummy-fill creating new spacing or density violations",
+        "distinguishing_check": "Compare DRC before vs after fill; if new markers appear only on fill shapes or at fill-to-signal interfaces, fill rules need adjustment",
+        "check_cost": "minutes",
+        "typical_fix": "Re-run fill with larger keep-out or density-aware constraints",
+        "fix_cost": "hours"
+      },
+      {
+        "cause": "ECO or late cell insertion that ignored existing routes",
+        "distinguishing_check": "If DRC markers sit exactly on the new ECO cells or their newly created pins, and the rest of the design is clean, the ECO is the source",
+        "check_cost": "minutes",
+        "typical_fix": "ECO re-route of the affected nets or legalize the new cells with proper spacing",
+        "fix_cost": "minutes-hours"
+      },
+      {
+        "cause": "Incorrect or incomplete technology LEF / rule deck (missing or wrong spacing tables)",
+        "distinguishing_check": "Same geometry passes in a reference deck or in a pure geometric check but fails in the sign-off deck; or identical patterns elsewhere in the design are clean",
+        "check_cost": "hours",
+        "typical_fix": "Correct the rule deck or LEF and re-verify",
+        "fix_cost": "hours-days"
+      },
+      {
+        "cause": "Antenna or end-of-line rules triggered by long dangling wires or missing diodes",
+        "distinguishing_check": "Antenna report co-located with DRC markers of antenna type; if adding antenna diodes or breaking the long wire clears them, antenna is the cause",
+        "check_cost": "minutes",
+        "typical_fix": "Insert antenna diodes or jumpers; re-route the offending nets",
+        "fix_cost": "hours"
+      }
+    ],
+    "ordering_rationale": "Congestion overlay and via-type filtering are cheapest and highest-probability; technology-deck and antenna checks come later because they are less common once the design is mature.",
+    "classic_trap": "Running endless detail-route iterations or 'fix-DRC' scripts when the underlying problem is still global congestion; the router keeps producing the same shorts because there is simply no space.",
+    "confidence": 0.87
+  }
+]

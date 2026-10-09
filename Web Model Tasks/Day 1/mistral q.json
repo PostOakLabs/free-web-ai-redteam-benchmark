@@ -1,0 +1,143 @@
+{"opening": [
+    "Tell me about a time when an ASIC design problem caught you by surprise and forced you to change course. What made it memorable?",
+    "Can you recall a situation where you had to recover from a failure in physical design? What was at stake?",
+    "Describe a moment when you realized a design assumption was wrong. How did you handle it?"
+],
+
+"decompression": [
+    {
+        "question": "What was the state of the design or project just before you noticed the issue?",
+        "extracts": "prior state",
+        "follow_up_if_vague": "Walk me through the timeline: what were the key parameters or conditions at that point?",
+        "leading_risk": "Assuming the prior state is unimportant. Neutral phrasing: 'Help me understand the context as it was.'"
+    },
+    {
+        "question": "What specific metrics or observations first indicated that something was wrong?",
+        "extracts": "observation (with metrics)",
+        "follow_up_if_vague": "What numbers or data points stood out to you?",
+        "leading_risk": "Suggesting what the metrics might be. Neutral phrasing: 'What did you see that concerned you?'"
+    },
+    {
+        "question": "What was your initial hypothesis about the root cause of the issue?",
+        "extracts": "hypothesis",
+        "follow_up_if_vague": "What led you to that conclusion?",
+        "leading_risk": "Implying the hypothesis should align with common knowledge. Neutral phrasing: 'What did you think was happening?'"
+    },
+    {
+        "question": "What were the first few solutions you considered, even if briefly?",
+        "extracts": "candidates considered",
+        "follow_up_if_vague": "Can you list them in the order you thought of them?",
+        "leading_risk": "Assuming the first solution was the best. Neutral phrasing: 'What options did you weigh?'"
+    },
+    {
+        "question": "Why did you reject each of those initial solutions?",
+        "extracts": "candidates considered WITH why each rejected one was rejected",
+        "follow_up_if_vague": "What was the flaw or limitation for each?",
+        "leading_risk": "Suggesting some reasons might be invalid. Neutral phrasing: 'What made each one unsuitable?'"
+    },
+    {
+        "question": "What intervention did you ultimately choose, and why?",
+        "extracts": "chosen intervention",
+        "follow_up_if_vague": "What criteria did you use to decide?",
+        "leading_risk": "Implying the chosen intervention was obvious. Neutral phrasing: 'How did you settle on that approach?'"
+    },
+    {
+        "question": "How did you measure the outcome of your intervention?",
+        "extracts": "measured outcome",
+        "follow_up_if_vague": "What metrics did you track to confirm success or failure?",
+        "leading_risk": "Assuming the outcome was positive. Neutral phrasing: 'How did you know it worked or didn’t?'"
+    },
+    {
+        "question": "What did you learn from this experience that you carry forward?",
+        "extracts": "lessons",
+        "follow_up_if_vague": "How has this changed your approach to similar problems?",
+        "leading_risk": "Suggesting the lesson should be technical. Neutral phrasing: 'What did this teach you?'"
+    }
+],
+
+"rejected_paths": [
+    {
+        "question": "What other approaches did you consider but dismiss? Let’s list them all, even the ones that seemed far-fetched at the time.",
+        "follow_up_if_vague": "Use the 'alphabet brainstorming' technique: go through the alphabet and name a solution for each letter.",
+        "leading_risk": "Assuming only serious candidates were considered. Neutral phrasing: 'What else crossed your mind?'"
+    },
+    {
+        "question": "Were there any solutions you ruled out because of time or resource constraints?",
+        "follow_up_if_vague": "What would have been required to make those viable?",
+        "leading_risk": "Implying constraints were the only reason for rejection. Neutral phrasing: 'What stopped you from pursuing those?'"
+    },
+    {
+        "question": "Did anyone on the team suggest alternatives that you didn’t pursue? What were they?",
+        "follow_up_if_vague": "How did the team react to those ideas?",
+        "leading_risk": "Assuming team input was minimal. Neutral phrasing: 'What did others bring to the table?'"
+    },
+    {
+        "question": "If you could revisit this problem with no constraints, would you explore any of the rejected paths again?",
+        "follow_up_if_vague": "What would you do differently now?",
+        "leading_risk": "Implying the original decision was flawed. Neutral phrasing: 'How do you see it with hindsight?'"
+    }
+],
+
+"numbers": [
+    {
+        "question": "Can you give me a rough estimate of the scale of the problem? For example, was it a 10% delay, or an order of magnitude worse?",
+        "follow_up_if_vague": "Was it closer to 5%, 50%, or 500%?",
+        "leading_risk": "Pressuring for exact numbers. Neutral phrasing: 'Ballpark is fine—what order of magnitude are we talking about?'"
+    },
+    {
+        "question": "How did you quantify the impact of the issue on the project?",
+        "follow_up_if_vague": "Was it in terms of time, cost, performance, or something else?",
+        "leading_risk": "Assuming impact is always measurable in time. Neutral phrasing: 'How did you assess the damage?'"
+    },
+    {
+        "question": "What metrics did you use to confirm the intervention worked?",
+        "follow_up_if_vague": "Were those metrics already being tracked, or did you have to define new ones?",
+        "leading_risk": "Implying metrics were predefined. Neutral phrasing: 'How did you know it was fixed?'"
+    }
+],
+
+"verification": [
+    {
+        "question": "If I understand correctly, the issue started with [X], and you resolved it by [Y]. Does that match your memory?",
+        "follow_up_if_vague": "Where does that summary align or diverge from what happened?",
+        "leading_risk": "Paraphrasing incorrectly. Neutral phrasing: 'Let me recap to make sure I’ve got this right.'"
+    },
+    {
+        "question": "You mentioned that [metric] improved by [value]. How confident are you in that number?",
+        "follow_up_if_vague": "Is that based on direct measurement or an estimate?",
+        "leading_risk": "Assuming the number is precise. Neutral phrasing: 'How solid is that figure?'"
+    },
+    {
+        "question": "Were there any trade-offs in your chosen solution that might have affected other parts of the design?",
+        "follow_up_if_vague": "How did you balance those trade-offs?",
+        "leading_risk": "Implying trade-offs are always negative. Neutral phrasing: 'What did you give up to make this work?'"
+    }
+],
+
+"closing": [
+    "Is there another instance where you had to pivot like this that we haven’t covered yet?",
+    "What’s another challenge you faced that taught you something new about physical design?"
+],
+
+"anti_patterns": [
+    {
+        "mistake": "Leading the witness with technical jargon or assumptions",
+        "observable_symptom": "The interviewee’s answers parrot the interviewer’s language or assumptions, lacking original detail."
+    },
+    {
+        "mistake": "Asking yes/no questions instead of open-ended ones",
+        "observable_symptom": "Responses are short, unelaborated, and lack depth or examples."
+    },
+    {
+        "mistake": "Interrupting or finishing the interviewee’s sentences",
+        "observable_symptom": "The interviewee’s answers are cut short or redirected, and key details are omitted."
+    },
+    {
+        "mistake": "Focusing only on successes and ignoring failures or near-misses",
+        "observable_symptom": "The record contains only positive outcomes, with no mention of setbacks or lessons from failure."
+    },
+    {
+        "mistake": "Not probing vague answers with follow-ups",
+        "observable_symptom": "Critical details are missing or glossed over, leaving gaps in the story."
+    }
+]}

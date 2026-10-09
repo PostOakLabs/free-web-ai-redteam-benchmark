@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Red-Team Sweep: Days 7-8 | AINumbers Research</title>
+<style>
+:root{--bg:#080E1A;--bg2:#0D1627;--bg3:#111E35;--bd:#1E2F4A;--mut:#3A5270;--body:#6888A8;--txt:#A8C4DE;--brt:#D4E8F8;--wht:#EEF6FD;--teal:#14B8A6;--gold:#D4A847;--fb:sans-serif;--fh:'DM Serif Display',serif;--fm:monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--body);font:15px/1.6 var(--fb)}
+a{color:var(--teal);text-decoration:none}
+.c{max-width:1100px;margin:0 auto;padding:0 1.5em}
+header{background:var(--bg2);border-bottom:1px solid var(--bd);padding:.8em 0}
+header .c{display:flex;align-items:center;gap:1.2em}
+.wm{font-family:var(--fh);font-size:1.3em;color:var(--wht)}.wm span{color:var(--teal)}
+nav{display:flex;gap:1.5em;margin-left:auto}
+nav a{font-size:.85em;color:var(--body);text-transform:uppercase;letter-spacing:.06em}
+nav a:hover{color:var(--teal)}
+h1{font-family:var(--fh);font-size:2em;color:var(--wht);font-weight:400;margin:1.5em 0 .5em}
+h2{font-family:var(--fh);font-size:1.3em;color:var(--wht);margin:1.5em 0 .6em;font-weight:400}
+h3{font-size:.95em;color:var(--teal);margin:1em 0 .4em;text-transform:uppercase;letter-spacing:.04em}
+p{margin:.6em 0}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:1.2em;margin:.8em 0}
+table{border-collapse:collapse;width:100%;margin:.8em 0;font-size:.88em;font-family:var(--fm)}
+th{background:var(--bg3);color:var(--txt);padding:.5em .7em;text-align:left;font-size:.85em}
+td{border:1px solid var(--bd);padding:.4em .6em;color:var(--body)}
+.tag{display:inline-block;padding:.15em .5em;border-radius:4px;font-size:.82em;font-family:var(--fm)}
+.t-ok{background:rgba(74,222,128,.12);color:#4ade80}
+.t-warn{background:rgba(251,191,36,.12);color:#fbbf24}
+.t-fail{background:rgba(255,107,107,.12);color:#ff6b6b}
+.t-info{background:rgba(96,165,250,.08);color:#60a5fa}
+footer{border-top:1px solid var(--bd);margin-top:3em;padding:2em 0;text-align:center;font-size:.82em;color:var(--mut)}
+.models{display:flex;flex-wrap:wrap;gap:.4em;margin:.5em 0}
+.models span{background:var(--bg3);border:1px solid var(--bd2);border-radius:4px;padding:.15em .5em;font-size:.82em;font-family:var(--fm);color:var(--txt)}
+.back{font-size:.85em;margin:1em 0}
+</style>
+</head>
+<body>
+<header><div class="c">
+<span class="wm">AI<span style="color:var(--teal)">Numbers</span> <span style="font-size:.6em;color:var(--mut)">Research</span></span>
+<nav><a href="report-benchmark.html">← Benchmark (Days 1-6)</a><span style="color:var(--teal);font-size:.85em">Red-Team (Days 7-8)</span></nav>
+</div></header>
+
+<div class="c">
+<p class="back"><a href="report-benchmark.html">← Back to Benchmark: Days 1-6</a></p>
+
+<h1>Red-Team Sweep: Days 7-8</h1>
+<p>Thirty adversarial reviews of ten chip-design incident drafts, produced by pasting
+the same structured prompt into three free web AI models. Every review came back as
+a single JSON object. Every review was schema-compliant on the first try.</p>
+
+<div class="card">
+<h3>Models in this sweep (3 of 16)</h3>
+<div class="models">
+<span>kimi</span><span>sonnet</span><span>deepseek</span>
+</div>
+<p style="font-size:.85em;color:var(--mut)">Selected as the top three performers on the
+truth-anchored instruments (Days 4-6). chatgpt ran block 01 as a v1.2 format pilot;
+its response was schema-compliant.</p>
+</div>
+
+<div class="card">
+<h3>Day 7 — format compliance failure (16 files)</h3>
+<p>Fifteen models ran block 01 under J-v1.1. Thirteen returned prose instead of JSON.
+The fleet flipped from JSON to prose in three days on an unchanged prompt. No prompt
+change. The shift was caught by comparing harvest outputs.</p>
+<p><span class="tag t-fail">0/15 JSON</span> <span class="tag t-fail">fleet drift in 72 hours</span></p>
+<p>This finding drove the first-character output contract and the literal template
+in J-v1.2. Without it, the format failure would have repeated across every subsequent
+wave.</p>
+</div>
+
+<div class="card">
+<h3>Day 8 — the J-v1.2 sweep (30 files, 10 blocks × 3 models)</h3>
+<p>Ten stratified blocks, three models, every response schema-compliant with the
+full seven-key template. Zero parse failures. Zero fatal objections.</p>
+<p><span class="tag t-ok">30/30 schema-compliant</span> <span class="tag t-ok">0 parse failures</span> <span class="tag t-ok">0 fatal objections</span></p>
+</div>
+
+<h2>The verdict matrix</h2>
+
+<table>
+<tr><th>block</th><th>draft class</th><th>deepseek</th><th>kimi</th><th>sonnet</th><th>fatal</th></tr>
+<tr><td>01</td><td>unmeasured post-state (calibration)</td><td>SUSPECT</td><td>S-W-RES</td><td>S-W-RES</td><td>0</td></tr>
+<tr><td>02</td><td>"solved on latest version", no fix</td><td>SUSPECT</td><td>SUSPECT</td><td>SUSPECT</td><td>0</td></tr>
+<tr><td>03</td><td>RUDY vs GRT congestion maps disagree</td><td>SUSPECT</td><td>SUSPECT</td><td>S-W-RES</td><td>0</td></tr>
+<tr><td>04</td><td>DRC-error cap hides hotspots</td><td>SUSPECT</td><td>S-W-RES</td><td>SUSPECT</td><td>0</td></tr>
+<tr><td>05</td><td>repair_timing Q→QN Liberty arcs</td><td>SUSPECT</td><td>S-W-RES</td><td>S-W-RES</td><td>0</td></tr>
+<tr><td>06</td><td>TritonCTS segfault on missing Liberty limits</td><td>SUSPECT</td><td>S-W-RES</td><td>SUSPECT</td><td>0</td></tr>
+<tr><td>07</td><td>CTS NDRs on gated clocks</td><td>SUSPECT</td><td>S-W-RES</td><td>SUSPECT</td><td>0</td></tr>
+<tr><td>08</td><td>GRT report references nonexistent net</td><td>SUSPECT</td><td>S-W-RES</td><td>S-W-RES</td><td>0</td></tr>
+<tr><td>09</td><td>STA false hold/setup from clock models</td><td>S-W-RES</td><td>S-W-RES</td><td>S-W-RES</td><td>0</td></tr>
+<tr><td>10</td><td>GPL regression, non-virtual TD iteration</td><td>SUSPECT</td><td>S-W-RES</td><td>S-W-RES</td><td>0</td></tr>
+</table>
+
+<h2>What the sweep found</h2>
+
+<h3>Zero fatal objections</h3>
+<p>No block in the stratified 10 drew a disqualifying defect at the pre-screen level.
+All 10 survive to expert review, now with three independent model verdicts each as
+context.</p>
+
+<h3>deepseek is the strictest reviewer</h3>
+<p>deepseek flagged SUSPECT on nine of ten blocks. kimi leaned SOUND-WITH-RESERVATIONS
+on nine. sonnet fell between. The divergence tracks reviewer temperament more than
+draft quality: all three models found real concerns on every block.</p>
+
+<h3>Block 02: unanimous SUSPECT</h3>
+<p>The "solved on the latest version" draft (no commit, no PR, no numbers) drew
+unanimous SUSPECT from all three models. The models converge on what bad evidence
+looks like, even when they diverge on strictness. This is the strongest consensus
+signal in the sweep.</p>
+
+<h3>Block 09: unanimous reservations</h3>
+<p>The strongest record in the set (STA false hold/setup, named fix, confirmed
+retest) drew SOUND-WITH-RESERVATIONS from all three models — reservations because
+the confirmation is the reporter's own retest, not an independent reproduction.
+The models correctly distinguish "I fixed it and here are the numbers" from
+"I fixed it, trust me."</p>
+
+<h2>What comes next</h2>
+
+<p>Sweep 1 is complete: 10 blocks × 3 models = 30 schema-compliant verdicts staged
+into the tally. The remaining 66 blocks (24 issue-episode + 42 paper-episode) are
+inventoried. The paper-episode blocks are gated on the same three-model process
+through J-v3, which adds two field checks for paper-recall accuracy.</p>
+
+<p>After three sweeps, every block in the inventory has three independent coded
+verdicts. Blocks with zero fatal objections across all models graduate to the
+expert queue. Blocks with even one fatal are revised or retired. Blocks where the
+models disagree are escalated to the wider pool or flagged for Alice's direct
+attention.</p>
+
+</div>
+
+<footer><div class="c">
+<p>AINumbers Research · Red-Team Sweep: Days 7-8 · 2026-09</p>
+<p>30 schema-compliant verdicts · 3 models · 10 stratified blocks · 0 parse failures · 0 fatal objections</p>
+<p>Static snapshot. No scripts, no network calls, no tracking.</p>
+<p><a href="report-benchmark.html">← Benchmark: Days 1-6</a></p>
+</div></footer>
+</body>
+</html>

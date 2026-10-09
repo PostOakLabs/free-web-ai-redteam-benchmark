@@ -1,0 +1,98 @@
+[
+  {
+    "vector_name": "RFC 8785 Appendix B extended test data (numbers, string, literals, whitespace)",
+    "input_json": "{\n  \"numbers\": [333333333.33333329, 1E30, 4.50, 2e-3, 0.000000000000000000000000001],\n  \"string\": \"\\u20ac$\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\\"\\/\",\n  \"literals\": [null, true, false]\n}",
+    "canonical_output": "{\"literals\":[null,true,false],\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27],\"string\":\"€$\\u000f\\nA'B\\\"\\\\\\\\\\\"/\"}",
+    "rule": "RFC 8785 Appendix B (extended test data, expected output as published); mechanics: §3.2.2.2 string escaping (short forms \\b\\t\\n\\f\\r, remaining C0 as lowercase 4-hex, no solidus escape), §3.2.2.3 numbers via ES6 §7.1.12.1 shortest round-trip, §3.2.3 key sorting, no insignificant whitespace.",
+    "divergence_trap": "Python json.dumps(sort_keys=True) escapes € as \\u20ac (ensure_ascii default); literal-preserving serializers keep '4.50' and '1E30' verbatim instead of '4.5'/'1e+30'. JS JSON.stringify with sorted keys happens to match (JCS was modeled on it), which falsely reassures non-JS porters.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Negative zero and zero with fraction",
+    "input_json": "{\"neg_zero\":-0,\"plus_zero\":0.0}",
+    "canonical_output": "{\"neg_zero\":0,\"plus_zero\":0}",
+    "rule": "§3.2.2.3: numbers are IEEE-754 doubles serialized per ES6 Number::toString; ±0 maps to '0', and integral values print without a fractional part.",
+    "divergence_trap": "serde_json emits '-0.0' for -0.0; Python json.dumps(-0.0) → '-0.0'; Go emits '-0'; Python also emits '0.0' for 0.0 — all preserve the sign/dot the canonical form must drop.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "2^53 boundary and first non-representable integer",
+    "input_json": "{\"a\":9007199254740993,\"b\":9007199254740994}",
+    "canonical_output": "{\"a\":9007199254740992,\"b\":9007199254740994}",
+    "rule": "§3.1/§3.2.2.3: all input numbers are converted to IEEE-754 double before canonicalization. 9007199254740993 (2^53+1, odd) is not representable and rounds ties-to-even to 9007199254740992; 9007199254740994 is exactly representable.",
+    "divergence_trap": "Any parser that preserves arbitrary precision — Python json.loads (int), Java BigDecimal, lossless-json — re-emits 9007199254740993 and the 'canonical' bytes differ from the double-conforming form.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "1e20/1e21 fixed-vs-exponential threshold",
+    "input_json": "[1e20,1e21]",
+    "canonical_output": "[100000000000000000000,1e+21]",
+    "rule": "§3.2.2.3 via ES6 §7.1.12.1: fixed notation for 1e-6 ≤ |x| < 1e21, exponential for |x| ≥ 1e21; exponential form is lowercase 'e', carries '+', and has no zero-padded exponent digits.",
+    "divergence_trap": "Python repr and Go strconv emit '1e+20' for 1e20 (they switch to exponential far below ES6's 1e21 threshold); C printf-style emitters pad exponents ('1e+021') or omit the '+' ('1e21').",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Tiny decimal threshold at 1e-6/1e-7",
+    "input_json": "[1e-6,1e-7]",
+    "canonical_output": "[0.000001,1e-7]",
+    "rule": "§3.2.2.3 via ES6 §7.1.12.1: |x| ≥ 1e-6 uses fixed notation ('0.000001'); |x| < 1e-6 switches to exponential with unpadded negative exponent ('1e-7').",
+    "divergence_trap": "Python repr(1e-6)='1e-06' and repr(1e-7)='1e-07' (zero-padded two-digit exponent, wrong threshold); decimal-only formatters emit '0.0000001' for 1e-7.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Integral collapse of 1.0 and exponent-literal 1e2",
+    "input_json": "{\"a\":1.0,\"b\":1e2}",
+    "canonical_output": "{\"a\":1,\"b\":100}",
+    "rule": "§3.2.2.3 via ES6 §7.1.12.1: output is the shortest string that round-trips the double — no trailing '.0', and the input's literal exponent form is never preserved.",
+    "divergence_trap": "serde_json and Python emit '1.0' for 1.0; literal-preserving canonicalizers keep '1e2' or emit '100.0'.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Control characters, short escapes, lowercase hex, and unescaped DEL",
+    "input_json": "{\"ctrl\":\"\\b\\f\\n\\r\\t\\u0000\\u001f\\u007f\"}",
+    "canonical_output": "{\"ctrl\":\"\\b\\f\\n\\r\\t\\u0000\\u001f\u007f\"}",
+    "rule": "§3.2.2.2: only U+0000–U+001F, '\"' and '\\' are escaped; \b \t \n \f \r use short forms, remaining C0 use lowercase 4-hex \\u00xx; U+007F (DEL) is outside the escaped set and is emitted verbatim.",
+    "divergence_trap": "Libraries that escape DEL ('\\u007F') or emit uppercase hex ('\\u001F', '\\u000F') diverge; the canonical output's DEL is a raw 0x7F byte, and any uppercase-hex or DEL-escaping implementation fails byte comparison.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Solidus, non-ASCII, and surrogate pair emitted verbatim",
+    "input_json": "{\"path\":\"a/b\\u20ac\\u00e9\\ud83d\\ude00\"}",
+    "canonical_output": "{\"path\":\"a/b€é😀\"}",
+    "rule": "§3.2.2.2: '/' (solidus) is NOT escaped; non-ASCII characters — including astral-plane characters represented by surrogate pairs — are emitted verbatim as UTF-8, never as \\uXXXX.",
+    "divergence_trap": "PHP json_encode (default flags) and ASP.NET JavaScriptSerializer emit '\\/' for '/' and '\\u20ac'/'\\ud83d\\ude00' escapes for the non-ASCII characters.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "UTF-16 code-unit ordering vs code-point ordering (astral vs U+E000–U+FFFF)",
+    "input_json": "{\"\\uFFFD\":2,\"\\uFB00\":1,\"\\uD83D\\uDE00\":3}",
+    "canonical_output": "{\"😀\":3,\"ﬀ\":1,\" \":2}",
+    "rule": "§3.2.3: object members are sorted lexicographically by UTF-16 code unit values. '😀' = D83D DE00, 'ﬀ' = FB00, ' ' = FFFD; 0xD83D < 0xFB00 < 0xFFFD, so the astral key sorts FIRST even though its code point (U+1F600) is the largest.",
+    "divergence_trap": "Code-point sorting (equivalently UTF-8 byte comparison, e.g. Python sorted(), Rust BTreeMap<&str>) yields ﬀ,  , 😀 — the astral key moves from first position to last; this is the classic JCS-vs-UTF-8-sorter divergence.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "No Unicode normalization: canonically equivalent keys stay distinct (U+03A9 omega vs U+2126 ohm sign)",
+    "input_json": "{\"\\u03A9\":1,\"\\u2126\":2}",
+    "canonical_output": "{\"Ω\":1,\"Ω\":2}",
+    "rule": "§3.2.2.2: strings are serialized verbatim — JCS applies NO Unicode normalization (NFC(U+2126) = U+03A9, but JCS must not perform it); §3.2.3 orders by UTF-16 units: 0x03A9 < 0x2126. First key is U+03A9 (Greek capital omega), second is U+2126 (ohm sign).",
+    "divergence_trap": "An implementation that NFC-normalizes before serializing (a habit from RDF/JSON-LD canonicalization) merges the two canonically equivalent keys into a single member, changing both the key set and the byte output.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Empty containers, nested structures, and array order preservation",
+    "input_json": "{\"empty_obj\":{},\"empty_arr\":[],\"nested\":{\"x\":[{},[]],\"arr\":[3,1,2]}}",
+    "canonical_output": "{\"empty_arr\":[],\"empty_obj\":{},\"nested\":{\"arr\":[3,1,2],\"x\":[{},[]]}}",
+    "rule": "§3.2.3 sorts only object member names ('empty_arr' < 'empty_obj' < 'nested'; 'arr' < 'x'); arrays are ordered values and their element order MUST NOT be sorted; structures serialize compactly with no whitespace; empty containers are preserved.",
+    "divergence_trap": "Pretty-printers inject spaces/newlines; over-eager canonicalizers sort array contents ([3,1,2] → [1,2,3]) or drop empty containers — both produce wrong canonical bytes.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "Duplicate object keys are illegal input",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": "ERROR: duplicate member name 'a' — input rejected; JCS defines no canonical form for duplicate keys",
+    "rule": "§3.1 (JCS input requirements: valid JSON with unique member names; canonicalization presupposes a one-to-one mapping) and Appendix B, which treats duplicate object keys as out-of-scope/undefined rather than defining a winner.",
+    "divergence_trap": "JS JSON.parse silently keeps the last value ({\"a\":2}) while several other parsers keep the first ({\"a\":1}) — both emit a plausible-looking 'canonical' document, so signatures over either form are malleable and canonicalization-based checks can be bypassed; a conforming implementation must reject instead.",
+    "certainty": "probable"
+  }
+]

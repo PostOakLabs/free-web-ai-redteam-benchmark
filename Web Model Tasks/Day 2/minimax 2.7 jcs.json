@@ -1,0 +1,90 @@
+[
+  {
+    "vector_name": "negative_zero",
+    "input_json": "-0",
+    "canonical_output": "-0",
+    "rule": "RFC 8785 Section 4.2.1 / ESMA-262 6th Ed. 20.1.3.6 Number.prototype.toString — signed zero preserved",
+    "divergence_trap": "JSON.stringify(-0) → \"0\" (drops sign) in many engines; JCS mandates \"-0\"",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "integer_beyond_safe_range",
+    "input_json": "9007199254740993",
+    "canonical_output": "9007199254740992",
+    "rule": "RFC 8785 Section 4.2.1 — parse to JSON data model value then re-serialize; precision loss on parse is irreversible",
+    "divergence_trap": "Naive string-preserving impl outputs \"9007199254740993\" (the original lexical token); JCS uses the parsed IEEE 754 value",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "exponent_boundary_1e21",
+    "input_json": "100000000000000000000",
+    "canonical_output": "1e21",
+    "rule": "RFC 8785 Section 4.2.1 / ES6 Number.prototype.toString 'Shortest' decimal algorithm — uses exponent notation at 10^21 boundary",
+    "divergence_trap": "JSON.stringify outputs \"100000000000000000000\" (long decimal); JCS uses exponent form",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "tiny_decimal_1e-7",
+    "input_json": "0.0000001",
+    "canonical_output": "1e-7",
+    "rule": "RFC 8785 Section 4.2.1 / ES6 Number.prototype.toString 'Shortest' decimal — chooses exponent form over long decimal",
+    "divergence_trap": "JSON.stringify outputs \"0.0000001\"; JCS prefers shorter exponent form \"1e-7\"",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "string_escaped_backslash",
+    "input_json": "\"\\\\t\"",
+    "canonical_output": "\"\\\\t\"",
+    "rule": "RFC 8785 Section 4.2.2 — string escaping; backslash is U+005C; input had \\u005C (escaped backslash), parsed as literal backslash; canonical form uses JSON-escaped form \\\\",
+    "divergence_trap": "Impl that copies original escape sequence verbatim keeps \\u005C; JCS normalizes to \\\\ (backslash-escaped backslash)",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "string_solidus_minimal",
+    "input_json": "\"/\"",
+    "canonical_output": "\"/\"",
+    "rule": "RFC 8785 Section 4.2.2 — solidus may be escaped as \\/ but canonical form uses shortest representation (unescaped)",
+    "divergence_trap": "JSON.stringify always escapes solidus as \\/; JCS canonical form is unescaped /",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "control_chars_shorthand",
+    "input_json": "{\"a\":\"\\u0009\\u000A\"}",
+    "canonical_output": "{\"a\":\"\\u0009\\u000A\"}",
+    "rule": "RFC 8785 Section 4.2.2 — control chars U+0000..U+001F serialized as \\u00XX hex escapes; JSON.stringify may use shorthand \\n \\t etc.",
+    "divergence_trap": "JSON.stringify may output \\t\\n for the same logical string; JCS canonical uses \\u0009\\u000A (byte-equivalent but textual divergence)",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "surrogate_pair_emoji",
+    "input_json": "{\"key\":\"\\uD83D\\uDE00\"}",
+    "canonical_output": "{\"key\":\"\\uD83D\\uDE00\"}",
+    "rule": "RFC 8785 Section 4.2.2 / Section 3 — no Unicode normalization applied; surrogate pairs (emoji U+1F600) preserved as UTF-8 code units; no transformation",
+    "divergence_trap": "Impl applying NFKC/NFKC normalization would alter or invalidate the surrogate pair; JCS explicitly does not normalize",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "nested_structure",
+    "input_json": "{\"inner\":{\"a\":1,\"b\":2}}",
+    "canonical_output": "{\"inner\":{\"a\":1,\"b\":2}}",
+    "rule": "RFC 8785 Section 4.1 — no whitespace; Section 4.3 — object members sorted by name; this vector verifies nesting preserves structure (same-order keys happen to be sorted already)",
+    "divergence_trap": "Any whitespace injection or key reordering (if keys differed) would diverge; for this specific input, JSON.stringify produces same output but structure is verified",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_keys_illegal",
+    "input_json": "{\"a\":1,\"a\":2}",
+    "canonical_output": "null",
+    "rule": "RFC 8785 Section 4 — JCS canonical form does not exist for JSON with duplicate names; duplicate-key JSON is not valid canonical JSON",
+    "divergence_trap": "Some parsers accept last-value-wins; others error; JCS has no canonical output — this vector verifies the impl correctly rejects or produces null rather than silently accepting",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "utf16_codeunit_vs_codepoint_order",
+    "input_json": "{\"\\uFDD0\":1,\"\\uD83D\\uDE00\":2}",
+    "canonical_output": "{\"\\uD83D\\uDE00\":2,\"\\uFDD0\":1}",
+    "rule": "RFC 8785 Section 4.3 — object member names sorted by UTF-16 code unit values (ES6 6.1.6.1 String). U+FDD0 = 0xFDD0; U+1F600 first surrogate 0xD83D. 0xD8 < 0xFD so emoji (surrogate-leading) sorts before nonchar in UTF-16. Code-point order (U+FDD0=64976 < U+1F600=128512) would reverse this.",
+    "divergence_trap": "Impls sorting by Unicode code point order (e.g. Python json, naive UTF-8 byte sort) output {\"\\uFDD0\":1,\"\\uD83D\\uDE00\":2}; JCS UTF-16 code unit sort outputs emoji first",
+    "certainty": "rfc-exact"
+  }
+]

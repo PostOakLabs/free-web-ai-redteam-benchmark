@@ -1,0 +1,308 @@
+{
+ "chatgpt": {
+  "classified": 10,
+  "entries": 10,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 7,
+  "gradable": true,
+  "locator_null": 0,
+  "needs_retrieval": 3,
+  "parse": "clean+trailing-content",
+  "shape_bad": 4,
+  "shape_ok": 6
+ },
+ "deepseek": {
+  "classified": 8,
+  "entries": 8,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 4,
+  "gradable": true,
+  "locator_null": 2,
+  "needs_retrieval": 4,
+  "parse": "clean",
+  "shape_bad": 4,
+  "shape_ok": 4
+ },
+ "gemini": {
+  "classified": 9,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "LFM",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 6,
+  "gradable": true,
+  "locator_null": 3,
+  "needs_retrieval": 3,
+  "parse": "clean",
+  "shape_bad": 3,
+  "shape_ok": 6
+ },
+ "glm 5.3 flash": {
+  "classified": 10,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 6,
+  "gradable": true,
+  "locator_null": 3,
+  "needs_retrieval": 4,
+  "parse": "clean+fence-close+fenced",
+  "shape_bad": 2,
+  "shape_ok": 8
+ },
+ "grok": {
+  "classified": 12,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 7,
+  "gradable": true,
+  "locator_null": 3,
+  "needs_retrieval": 5,
+  "parse": "clean",
+  "shape_bad": 5,
+  "shape_ok": 7
+ },
+ "kimi": {
+  "classified": 4,
+  "entries": 6,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 3,
+  "gradable": true,
+  "locator_null": 0,
+  "needs_retrieval": 1,
+  "parse": "clean",
+  "shape_bad": 0,
+  "shape_ok": 4
+ },
+ "longcat": {
+  "classified": 12,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 6,
+  "gradable": true,
+  "locator_null": 2,
+  "needs_retrieval": 6,
+  "parse": "clean",
+  "shape_bad": 5,
+  "shape_ok": 7
+ },
+ "meta": {
+  "classified": 8,
+  "entries": 10,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 4,
+  "gradable": true,
+  "locator_null": 5,
+  "needs_retrieval": 4,
+  "parse": "clean",
+  "shape_bad": 2,
+  "shape_ok": 6
+ },
+ "mimo": {
+  "classified": 6,
+  "entries": 11,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 3,
+  "gradable": true,
+  "locator_null": 1,
+  "needs_retrieval": 3,
+  "parse": "clean",
+  "shape_bad": 2,
+  "shape_ok": 4
+ },
+ "minara": {
+  "classified": 8,
+  "entries": 10,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 4,
+  "gradable": true,
+  "locator_null": 2,
+  "needs_retrieval": 4,
+  "parse": "clean",
+  "shape_bad": 2,
+  "shape_ok": 6
+ },
+ "minimax 2.7": {
+  "classified": 7,
+  "entries": 7,
+  "families": [
+   "Arrhenius",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 4,
+  "gradable": true,
+  "locator_null": 0,
+  "needs_retrieval": 3,
+  "parse": "elementwise-truncation",
+  "shape_bad": 3,
+  "shape_ok": 4
+ },
+ "mistral": {
+  "classified": 7,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 2,
+  "gradable": true,
+  "locator_null": 3,
+  "needs_retrieval": 5,
+  "parse": "clean+fence-close+fenced",
+  "shape_bad": 4,
+  "shape_ok": 3
+ },
+ "qwen": {
+  "classified": 8,
+  "entries": 10,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 3,
+  "gradable": true,
+  "locator_null": 7,
+  "needs_retrieval": 5,
+  "parse": "clean",
+  "shape_bad": 2,
+  "shape_ok": 6
+ },
+ "solar": {
+  "classified": 7,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 3,
+  "gradable": true,
+  "locator_null": 6,
+  "needs_retrieval": 4,
+  "parse": "clean",
+  "shape_bad": 1,
+  "shape_ok": 6
+ },
+ "sonnet": {
+  "classified": 12,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "LFM",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 6,
+  "gradable": true,
+  "locator_null": 9,
+  "needs_retrieval": 6,
+  "parse": "clean+fence-close+fenced",
+  "shape_bad": 4,
+  "shape_ok": 8
+ },
+ "yuanbao": {
+  "classified": 10,
+  "entries": 12,
+  "families": [
+   "Arrhenius",
+   "CHIPS-48D",
+   "DO-254-DAL",
+   "PMHF",
+   "SPFM",
+   "TPP"
+  ],
+  "free_gradable": 5,
+  "gradable": true,
+  "locator_null": 5,
+  "needs_retrieval": 5,
+  "parse": "clean",
+  "shape_bad": 1,
+  "shape_ok": 9
+ }
+}

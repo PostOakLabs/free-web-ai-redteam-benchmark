@@ -1,0 +1,88 @@
+[
+  {
+    "case_name": "Parametric ES 97.5% normal",
+    "inputs": {
+      "confidence": 0.975,
+      "distribution": "standard normal (mean 0, vol 1)",
+      "z_alpha": 1.9600,
+      "density_at_z": 0.05844
+    },
+    "computation": {
+      "quantile_z": 1.9600,
+      "phi_z": 0.05844,
+      "tail_probability_1_minus_alpha": 0.025,
+      "es_multiplier": "phi(z)/(1-alpha) = 0.05844 / 0.025 = 2.3376",
+      "var_multiplier": "z = 1.9600"
+    },
+    "result": {
+      "expected_shortfall_loss": 2.3376,
+      "value_at_risk_loss": 1.9600,
+      "es_vs_var_ratio": 1.1927
+    },
+    "formula_basis": "ES_α = φ(Φ⁻¹(α)) / (1−α) for standard normal loss variable; VaR_α = Φ⁻¹(α). MAR33 parametric ES is this tail mean.",
+    "weakest_point": "density and quantile rounding to 4 decimals (±0.0001 ES)"
+  },
+  {
+    "case_name": "Parametric ES 99% normal",
+    "inputs": {
+      "confidence": 0.99,
+      "distribution": "standard normal (mean 0, vol 1)",
+      "z_alpha": 2.3263,
+      "density_at_z": 0.02665
+    },
+    "computation": {
+      "quantile_z": 2.3263,
+      "phi_z": 0.02665,
+      "tail_probability_1_minus_alpha": 0.01,
+      "es_multiplier": "phi(z)/(1-alpha) = 0.02665 / 0.01 = 2.665",
+      "var_multiplier": "z = 2.3263"
+    },
+    "result": {
+      "expected_shortfall_loss": 2.665,
+      "value_at_risk_loss": 2.3263,
+      "es_vs_var_ratio": 1.1456
+    },
+    "formula_basis": "ES_α = φ(Φ⁻¹(α)) / (1−α) for standard normal loss variable; VaR_α = Φ⁻¹(α).",
+    "weakest_point": "density and quantile rounding to 4 decimals (±0.0001 ES)"
+  },
+  {
+    "case_name": "Liquidity-horizon-scaled ES (LH=20)",
+    "inputs": {
+      "base_es_10d": 2.3376,
+      "liquidity_horizon_days": 20,
+      "reference_horizon": 10,
+      "scale_factor": "sqrt(20/10) = sqrt(2) = 1.41421356"
+    },
+    "computation": {
+      "base_es": 2.3376,
+      "scale_factor": 1.4142,
+      "scaled_es": "2.3376 * 1.4142 = 3.3060"
+    },
+    "result": {
+      "scaled_expected_shortfall_loss": 3.3060
+    },
+    "formula_basis": "ES_scaled = ES_10d × √(LH/10) per BCBS MAR33 (liquidity horizon scaling for risk factor categories).",
+    "weakest_point": "assumes base ES is exactly for 10-day horizon and LH constant"
+  },
+  {
+    "case_name": "Historical-simulation ES from 20 P&L values",
+    "inputs": {
+      "confidence": 0.975,
+      "sample_size": 20,
+      "sorted_pnl_ascending": [-5.2, -4.1, -3.3, -2.8, -2.1, -1.5, -1.0, -0.5, 0.1, 0.5, 0.8, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
+    },
+    "computation": {
+      "tail_probability": "1 - 0.975 = 0.025",
+      "expected_number_of_tail_observations": "0.025 * 20 = 0.5",
+      "convention_chosen": "round up to the nearest integer (ceil) → 1 observation in the tail",
+      "tail_observations": [-5.2],
+      "tail_losses": [5.2],
+      "es_as_average_of_tail_losses": "(5.2) / 1 = 5.2"
+    },
+    "result": {
+      "historical_es_loss": 5.2
+    },
+    "formula_basis": "ES_hist = (1/k) × sum of the k largest losses, where k = ceil(n × (1−α)), with n=20, α=0.975, per the 97.5% tail average definition; MAR33 is silent on fractional treatment, so this convention is stated explicitly.",
+    "weakest_point": "small sample and arbitrary fractional-observation convention; different conventions (e.g., linear interpolation) yield different ES"
+  }
+]

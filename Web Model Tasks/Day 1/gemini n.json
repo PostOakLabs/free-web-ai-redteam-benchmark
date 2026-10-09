@@ -1,0 +1,42 @@
+[
+{
+"title": "Grid-Based Global Clock Distribution with Sector Buffers",
+"where_in_paper": "Clock Distribution Network",
+"decision": "Implemented a hierarchical clock network utilizing a grid of sector buffers driving local clock grids across the dual-core chip.",
+"alternatives_or_rejected": "A pure tree-based clock network without sector grid meshes or an unbuffered global mesh.",
+"rationale": "Pure clock trees are highly vulnerable to localized process, voltage, and temperature (PVT) variations and dynamic IR drop across a large die (>400 mm²), while an unbuffered mesh consumes excessive power. Sector buffers driving local grids provide low clock skew while bounding power dissipation.",
+"outcome": "Achieved tight clock skew control across all core and L2 logic regions at gigahertz operating frequencies.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.92
+},
+{
+"title": "Selective Dynamic Compound Domino Logic in Execution Datapaths",
+"where_in_paper": "Circuit Design Styles / Logic Families",
+"decision": "Applied dynamic compound domino logic selectively to delay-critical execution datapaths (such as fixed-point and floating-point ALUs and rotators), while using static CMOS for non-critical control logic.",
+"alternatives_or_rejected": "Widespread use of dynamic logic throughout control and datapath, or relying exclusively on static CMOS.",
+"rationale": "Static CMOS was insufficient to achieve target single-cycle delay budgets in execution pipelines. However, unconstrained dynamic logic increases noise vulnerability, dynamic power, and verification complexity, making selective application necessary.",
+"outcome": "Met aggressive sub-nanosecond clock cycle targets in core execution paths while controlling chip power and noise margins.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.90
+},
+{
+"title": "SOI Floating-Body History-Effect Delay Modeling Methodology",
+"where_in_paper": "SOI Circuit Design / Timing Methodology",
+"decision": "Developed custom circuit design rules and specialized static timing analysis methods to explicitly bound floating-body history effects in partially depleted SOI (PD-SOI).",
+"alternatives_or_rejected": "Standard bulk-CMOS timing analysis models assuming static threshold voltages.",
+"rationale": "In PD-SOI processes, body voltages fluctuate based on prior switching activity, causing history-dependent threshold voltage shifts. Ignoring these shifts causes unexpected hold time failures or false setup passes in timing analysis.",
+"outcome": "Eliminated history-effect timing race conditions and ensured physical signoff timing accurately reflected hardware silicon behavior.",
+"paper_vs_general": "confident-this-is-in-the-paper",
+"confidence": 0.88
+},
+{
+"title": "Hierarchical Design Partitioning using Custom and Random Logic Macros",
+"where_in_paper": "Physical Design / Floorplanning and Integration",
+"decision": "Partitioned the chip hierarchically into full-custom macros (for datapath/arrays) and Random Logic Macros (RLMs) for control logic, bound by strict timing budgets at macro boundaries.",
+"alternatives_or_rejected": "Flat automated place-and-route flow across the full microprocessor die.",
+"rationale": "Flat implementation tools could not scale to manage 170 million transistors across 400+ mm² die area, nor could automated P&R hit the tight timing bounds required for core execution units.",
+"outcome": "Enabled parallel development across multiple engineering teams and successfully achieved timing closure on a high-frequency dual-core processor.",
+"paper_vs_general": "probably-in-the-paper",
+"confidence": 0.85
+}
+]

@@ -1,0 +1,81 @@
+chatgpt e.json
+chatgpt red1.json
+chatgpt red3.json
+chatgpt regz.json
+chatgpt strings.json
+deepseek e.json
+deepseek red1.json
+deepseek red3.json
+deepseek regz.json
+deepseek strings.json
+draft 3 and 4 prompt.md
+gemini e.json
+gemini red1.json
+gemini red3.json
+gemini regz.json
+gemini strings.json
+glm 5.3 flash e.json
+glm 5.3 flash red1.json
+glm 5.3 flash red3.json
+glm 5.3 flash regz.json
+glm 5.3 flash strings.json
+grok e.json
+grok red1.json
+grok red3.json
+grok regz.json
+grok strings.json
+kimi e.json
+kimi red1.json
+kimi red3.json
+kimi regz.json
+kimi strings.json
+longcat e.json
+longcat red1.json
+longcat red3.json
+longcat regz.json
+longcat strings.json
+meta e.json
+meta red1.json
+meta red3.json
+meta regz.json
+meta strings.json
+mimo e.json
+mimo red1.json
+mimo red3.json
+mimo regz.json
+mimo strings.json
+minara e.json
+minara red1.json
+minara regz.json
+minaria red3.json
+minaria strings.json
+minimax 2.7 e.json
+minimax 2.7 red1.json
+minimax 2.7 red3.json
+minimax 2.7 regz.json
+minimax 2.7 strings.json
+mistral e.json
+mistral red1.json
+mistral red3.json
+mistral regz.json
+mistral strings.json
+qwen e.json
+qwen red1.json
+qwen red3.json
+qwen regz.json
+qwen strings.json
+solar e.json
+solar red1.json
+solar red3.json
+solar regz.json
+solar strings.json
+sonnet e.json
+sonnet red1.json
+sonnet red3.json
+sonnet regz.json
+sonnet strings.json
+yuanbao e.json
+yuanbao red1.json
+yuanbao red3.json
+yuanbao regz.json
+yuanbao strings.json

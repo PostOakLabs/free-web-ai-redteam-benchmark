@@ -1,0 +1,512 @@
+[
+{
+"symptom": "congestion-driven routing DRCs with clean placement density",
+"first_checks": [
+{
+"check": "Check local pin density map and pin access orientation (layer distribution of macro/stdcell pins in the hotspot).",
+"why_first": "Cheapest spatial check that rules out local pin-starvation before blaming routing strategy.",
+"check_cost": "minutes"
+},
+{
+"check": "Check cell area vs pin count (e.g., high-density muxes, AOI/OAI, or multi-bit flip-flops concentrated in one spot).",
+"why_first": "Fastest way to distinguish high net-density from high cell-area density.",
+"check_cost": "minutes"
+},
+{
+"check": "Check layer utilization and routing blockages / direction constraints across M1-M4 in the hotspot.",
+"why_first": "Rules out artificial capacity bottlenecks caused by improper floorplan constraints or blockage settings.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Apply a local placement halo / partial keepout margin (e.g. 20-30% density cap) over the hotspot box and re-run global/detail route.",
+"rules_in": "Pin density / local pin-access bottleneck (DRCs clear when cells are physically spread despite low global cell area density).",
+"rules_out": "Macro placement blockage or global signal feedthrough congestion crossing the region."
+},
+{
+"experiment": "Temporarily disable M1/M2 routing for signal nets or force higher min routing layer for local nets in that region.",
+"rules_in": "Track exhaustion / pin-access blockage on lower metal layers.",
+"rules_out": "High global net-degree/topology interconnect density passing through from adjacent blocks."
+}
+],
+"common_root_causes": [
+{
+"cause": "High pin-density logic clusters (e.g., dense multiplexers or wide AOI/OAI trees) causing pin-access track starvation.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Over-constrained routing track availability due to aggressive PG grid, signal blockages, or macro halo overlap.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+},
+{
+"cause": "Global feedthrough routing tracks passing through a local region due to floorplan macro placement bottlenecks.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Assuming low global cell-density means plenty of routing supply, ignoring that pin count per unit area (pin density) can saturate M1/M2 tracks completely.",
+"node_era_note": "At 7nm and below, unidirectional routing rules and extreme pin-access track offset constraints make local pin-density failures exponentially more frequent than at 28nm."
+},
+{
+"symptom": "setup (max-delay) violations after CTS",
+"first_checks": [
+{
+"check": "Compare pre-CTS vs post-CTS timing reports for the failing paths, specifically checking clock insertion delay and clock skew.",
+"why_first": "Cheapest delta analysis to isolate whether path logic degraded or clock tree inserted latency/skew.",
+"check_cost": "minutes"
+},
+{
+"check": "Check actual extracted RC corner and wire-length model vs estimated virtual-route RC pre-CTS.",
+"why_first": "Rules out routing layer shift or RC estimation mismatch on long data paths.",
+"check_cost": "minutes"
+},
+{
+"check": "Check for holding buffer / delay buffer insertion placed in the data path during early CTS/hold fixing.",
+"why_first": "Identifies if hold-fixing aggressively added data-path delay to a setup-critical path.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Compare launch vs capture clock tree latency for failing paths: if capture clock latency shrank significantly relative to launch.",
+"rules_in": "Unbalanced clock tree insertion delay / negative clock skew created by CTS.",
+"rules_out": "Data-path net wire-length expansion or crosstalk/RC extraction discrepancy."
+},
+{
+"experiment": "Check if failing setup paths share clock gating cells (ICGs) with heavy fanout or excessive clock tree depth.",
+"rules_in": "Clock gating enable path setup failure due to clock-tree delay added upstream of the ICG.",
+"rules_out": "Standard register-to-register data-path timing degradation."
+}
+],
+"common_root_causes": [
+{
+"cause": "Clock latency/skew degradation (capture clock delayed less than launch clock or unexpected negative skew across hierarchies).",
+"recalled_frequency": "common",
+"recall_confidence": 0.95
+},
+{
+"cause": "Excessive hold-buffer insertion along setup-critical paths during aggressive post-CTS hold fixing.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+},
+{
+"cause": "Congestion causing indirect routing detour on long data-path nets during initial trial-routing after CTS.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Sizing up data-path gates repeatedly without checking if CTS inserted unexpected clock skew or delay buffers on the same path.",
+"node_era_note": "At 7nm and below, waveform slews and On-Chip Variation (OCV/POCV) derates on deep clock trees degrade setup far more aggressively than uniform derates at 28nm."
+},
+{
+"symptom": "hold (min-delay) violations after CTS",
+"first_checks": [
+{
+"check": "Check clock tree skew between launch and capture registers (specifically large positive skew: capture clock arriving much later than launch).",
+"why_first": "Cheapest check that isolates the vast majority of post-CTS hold failures.",
+"check_cost": "minutes"
+},
+{
+"check": "Check path topology: fast back-to-back reg-to-reg paths (0-1 logic levels) or cross-corner/cross-domain clock crossings.",
+"why_first": "Identifies structural paths naturally prone to hold violations once real clock edges propagate.",
+"check_cost": "minutes"
+},
+{
+"check": "Check OCV / POCV derate settings and extraction corner used for min-delay analysis.",
+"why_first": "Rules out over-pessimistic timing constraints or incorrect fast-fast/slow-slow corner combinations.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Filter failing hold paths into short physical distance vs long physical distance paths: if failing paths are physically adjacent with zero logic.",
+"rules_in": "Clock skew / clock insertion latency mismatch between neighboring registers.",
+"rules_out": "Data-path wire delay variation or interconnect RC extraction discrepancy."
+},
+{
+"experiment": "Trace failing hold paths across hierarchy boundaries or power domains: if failures disproportionately cluster at voltage/domain interfaces.",
+"rules_in": "Level shifter / isolation cell delay model mismatch or clock tree domain imbalance.",
+"rules_out": "Intra-block standard register-to-register hold timing."
+}
+],
+"common_root_causes": [
+{
+"cause": "Large positive clock skew between communicating flop pairs (capture clock arriving later than launch clock).",
+"recalled_frequency": "common",
+"recall_confidence": 0.95
+},
+{
+"cause": "Short physical distance / zero-logic data paths (e.g. shift registers) with insufficient intrinsic wire delay.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Aggressive POCV derating or fast-corner delay over-estimation on short data paths.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+}
+],
+"classic_trap": "Adding hold buffers manually without realizing the clock tree has a severe skew bug, leading to buffer bloat and subsequent setup failures.",
+"node_era_note": "At 7nm and below, low-voltage operation and severe local variation make hold timing highly sensitive to local layout variation, requiring far more hold buffers than at 28nm."
+},
+{
+"symptom": "IR-drop-induced timing failure",
+"first_checks": [
+{
+"check": "Overlay dynamic and static IR-drop heatmaps with the failing timing paths in the layout viewer.",
+"why_first": "Cheapest spatial correlation check that confirms if failing cells reside in high-drop regions.",
+"check_cost": "minutes"
+},
+{
+"check": "Check cell density, switching activity / clock-gating vector assumptions, and decap cell placement in the failing region.",
+"why_first": "Rules out missing decap or localized simultaneous switching noise (SSN).",
+"check_cost": "minutes"
+},
+{
+"check": "Check PG grid continuity, strap width, and via density on upper metal layers near the failure region.",
+"why_first": "Rules out structural power grid open or high resistance bottlenecks.",
+"check_cost": "hours"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Run vector-based dynamic IR analysis vs vectorless dynamic IR analysis on the failing timing window.",
+"rules_in": "Simultaneous switching activity / peak clock-edge dynamic power draw (if failure appears only in vector-based run).",
+"rules_out": "Static PG grid resistance / DC current delivery bottleneck."
+},
+{
+"experiment": "Add localized decap cells around the failing timing path in trial layout and re-simulate dynamic IR drop.",
+"rules_in": "Local transient dynamic IR drop (decap alleviates voltage dip and recovers gate delay).",
+"rules_out": "Global power grid strap starvation requiring top-level metal grid reinforcement."
+}
+],
+"common_root_causes": [
+{
+"cause": "Localized dynamic IR drop caused by dense simultaneous switching of clock-gated registers or bus drivers.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Insufficient decap cell allocation in high-density or high-frequency clock regions.",
+"recalled_frequency": "common",
+"recall_confidence": 0.85
+},
+{
+"cause": "PG grid structural necking or missing vias between upper global metal straps and lower local rails.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Trying to fix the timing failure by sizing up logic gates, which increases dynamic current demand and worsens the localized IR drop.",
+"node_era_note": "At 7nm and below, lower supply voltages (~0.7V) and higher wire/via resistance make circuit delay non-linearly sensitive to minor millivolt IR drops compared to 28nm."
+},
+{
+"symptom": "clock skew / CTS divergence (sinks missing insertion-delay targets)",
+"first_checks": [
+{
+"check": "Check CTS log for clock tree exceptions, balance groups, or conflicting min/max delay constraints.",
+"why_first": "Cheapest check to see if tool constraints forced contradictory tree building targets.",
+"check_cost": "minutes"
+},
+{
+"check": "Check physical placement distribution of sink pins across the floorplan (macro blocks, far corners, IO regions).",
+"why_first": "Identifies isolated or distant sinks driving extreme insertion latency.",
+"check_cost": "minutes"
+},
+{
+"check": "Check clock cell NDR (Non-Default Routing) rules, shielding settings, and layer allocation.",
+"why_first": "Rules out track availability issues or high RC routing layers used for clock trees.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Isolate failing sinks: test if outlier sinks are located inside hard macros, behind narrow routing channels, or in separate power/voltage domains.",
+"rules_in": "Physical barrier / blockage or macro internal pin-delay bottleneck.",
+"rules_out": "Global clock tree buffer balancing / CTS engine tuning issue."
+},
+{
+"experiment": "Temporarily remove target latency/skew constraints and run unconstrained CTS.",
+"rules_in": "Over-constrained CTS target specs forcing tool into suboptimal buffer topology.",
+"rules_out": "Physical routing track exhaustion or clock pin access failure."
+}
+],
+"common_root_causes": [
+{
+"cause": "Outlier / geometrically isolated clock sinks (e.g. corner macros or IO interface logic) dragging down overall tree latency.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Conflicting CTS constraints, improper balance groups, or explicit ignore/don't-touch attributes on clock pins.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+},
+{
+"cause": "Routing blockage or layer restriction preventing clock tree from using fast top metal layers.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Increasing CTS target max latency to force convergence, which inflates total clock tree power and sensitivity to OCV variation.",
+"node_era_note": "At 7nm and below, CTS relies heavily on multi-corner multi-mode (MCMM) clock tree synthesis and mesh/H-tree topologies rather than traditional flexible trees at 28nm."
+},
+{
+"symptom": "LVS mismatch: missing / shorted / open nets",
+"first_checks": [
+{
+"check": "Check LVS detailed text report for text label alignment, net name mapping errors, and short circuit location coordinates.",
+"why_first": "Cheapest method to locate the exact physical location of open/short markers.",
+"check_cost": "minutes"
+},
+{
+"check": "Inspect power/ground net connectivity and global net connect rules (PG text labels / global PG connectivity script).",
+"why_first": "Rules out top-level PG naming mismatch causing thousands of false open/short errors.",
+"check_cost": "minutes"
+},
+{
+"check": "Check for dangling vias, boundary floating metals, or unrouted net stubs in the detailed router report.",
+"why_first": "Isolates signal net routing incompleteness from schematic structure differences.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Run LVS with power/ground structures ideal or bypassed: if signal net errors clean up completely.",
+"rules_in": "PG network shorting or improper PG pin labeling / global connect statements.",
+"rules_out": "Signal net routing shorts / opens or schematic netlist mismatch."
+},
+{
+"experiment": "Highlight shorted nets in the layout viewer across all metal layers.",
+"rules_in": "Physical metal overlap, macro pin overhang, or filler-cell boundary boundary DRC/LVS rule violation.",
+"rules_out": "Abstract-versus-full-custom GDS boundary text / net name mismatch."
+}
+],
+"common_root_causes": [
+{
+"cause": "Unrouted or partially routed signal nets due to detail routing DRC abort or pin access failure.",
+"recalled_frequency": "common",
+"recall_confidence": 0.95
+},
+{
+"cause": "Inconsistent PG net naming or missing global connect rules in layout verification scripts.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.9
+},
+{
+"cause": "Macro cell abstract (LEF) boundary pin physical overlap or incorrect macro LEF vs GDS layout alignment.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+}
+],
+"classic_trap": "Debugging thousands of signal net shorts individually when a single top-level power net label is misnamed or shorted to ground.",
+"node_era_note": "At 7nm and below, complex color-aware routing (colored metals / multi-patterning) and complex VIA rules significantly increase detail-router induced short/open LVS errors compared to 28nm."
+},
+{
+"symptom": "LVS mismatch: wrong device sizes or extra devices",
+"first_checks": [
+{
+"check": "Check LVS netlist extraction log for parameter scaling units (e.g. micron vs meter, grid scale factors).",
+"why_first": "Cheapest check that instantly resolves global systematic device size discrepancies across the entire chip.",
+"check_cost": "minutes"
+},
+{
+"check": "Check standard cell / macro cell GDS vs spice netlist version consistency.",
+"why_first": "Rules out mismatch between physical layout library (GDS) and logical simulation models (CDL/Spice).",
+"check_cost": "minutes"
+},
+{
+"check": "Identify physical location of extra devices in layout viewer (e.g. inside fill cells, tap cells, or guard rings).",
+"why_first": "Isolates dummy/utility structures from actual functional schematic mismatch.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Check if extra devices belong to decap, filler, or well-tap cells: filter out non-functional cells in LVS run setup.",
+"rules_in": "LVS rule deck missing rule to reduce/ignore dummy filler or decap transistor structures.",
+"rules_out": "Real schematic vs layout gate instantiation or size discrepancy."
+},
+{
+"experiment": "Compare single failing instance across layout vs CDL netlist: check parameter width W and length L multiplier (M/N factors).",
+"rules_in": "ECO/synthesis netlist parameter mismatch or cell swap error during optimization.",
+"rules_out": "Global extraction deck scaling factor misconfiguration."
+}
+],
+"common_root_causes": [
+{
+"cause": "CDL/Spice netlist library version mismatch against physical GDS macro/stdcell library.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "LVS rule deck configuration failing to filter/combine dummy decap or well-tap transistor structures.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+},
+{
+"cause": "ECO netlist update swapped gate variant (e.g. LVT/HVT or size) without updating physical footprint correctly.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Manually editing layout geometries when the issue is a mismatched CDL netlist file or missing device-filter rule in the LVS deck.",
+"node_era_note": "At 7nm and below, FinFET device width is quantized by fin count (nf) rather than continuous W, making parameter mismatches manifest as fin-count discretizations."
+},
+{
+"symptom": "antenna (process-antenna-effect) violations at signoff",
+"first_checks": [
+{
+"check": "Check antenna report for ratio details (metal area to gate oxide area ratio vs foundry limit) and layer where violation occurs.",
+"why_first": "Cheapest check to determine if failure is a long upper-metal trace or long lower-metal pin feedthrough.",
+"check_cost": "minutes"
+},
+{
+"check": "Check if failing net is connected to an input pin without a protective diode or receiver diffusion tie.",
+"why_first": "Identifies missing hardware protection on long routing tracks.",
+"check_cost": "minutes"
+},
+{
+"check": "Check router auto-antenna fixing log to confirm if layer hopping or diode insertion was executed.",
+"why_first": "Rules out tool configuration flag or library diode unavailability during detail routing.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Check metal layer distribution of the failing net: if long track segments exist entirely on long lower metal layers without stepping to top metal.",
+"rules_in": "Detail router layer-hopping strategy failure (failed to bridge to higher metal near receiver).",
+"rules_out": "Inadequate antenna diode availability in the local placement area."
+},
+{
+"experiment": "Manually place a local antenna diode cell near receiver input and re-route local net segment.",
+"rules_in": "Missing antenna diode protection (diode provides required discharge path to ground).",
+"rules_out": "Incorrect antenna rule definitions or cumulative multi-layer antenna calculation bug in DRC deck."
+}
+],
+"common_root_causes": [
+{
+"cause": "Long continuous routing tracks on lower metal layers directly connected to high-impedance gate inputs.",
+"recalled_frequency": "common",
+"recall_confidence": 0.95
+},
+{
+"cause": "Detail router auto-antenna insertion disabled or antenna diode library cell not specified / constrained properly.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.9
+},
+{
+"cause": "High local cell density preventing router from dropping antenna diodes near failing receiver pins.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+}
+],
+"classic_trap": "Trying to fix antenna violations exclusively by manually placing diodes, when simple routing layer-hopping (jumping to upper metal) fixes the ratio automatically.",
+"node_era_note": "At 7nm and below, ultra-thin gate oxides and FinFET structures have tighter cumulative antenna ratio limits, requiring aggressive diode insertion and early layer-hopping."
+},
+{
+"symptom": "detailed-routing DRC hotspots after clean global routing",
+"first_checks": [
+{
+"check": "Overlay DRC hotspot location with local track density, cell pin density, and routing blockage maps.",
+"why_first": "Cheapest spatial correlation to see if global router underestimated local track utilization.",
+"check_cost": "minutes"
+},
+{
+"check": "Check DRC error types in the hotspot (e.g., end-of-line enclosure, minimum area, parallel run length, cut spacing).",
+"why_first": "Distinguishes generic track congestion from complex node-specific design rule violations.",
+"check_cost": "minutes"
+},
+{
+"check": "Check if DRCs cluster around specific macro boundaries, standard cell pin columns, or power grid straps.",
+"why_first": "Isolates pin-access/via-ladder conflicts from free-track routing congestion.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Run local detail routing with reduced cell density (apply a small keepout or 15% density drop over hotspot).",
+"rules_in": "Global router abstraction underestimating local pin access / via-ladder conflicts.",
+"rules_out": "Flawed tech LEF / DRC rule deck definitions or bad standard cell footprint design."
+},
+{
+"experiment": "Inspect via choices in hotspot: check if detail router is forced to use non-preferred single-cut vias instead of multi-cut vias due to track spacing.",
+"rules_in": "Via spacing / via enclosure rule constraints swamping track availability.",
+"rules_out": "Macro boundary track alignment / pin blockage issue."
+}
+],
+"common_root_causes": [
+{
+"cause": "Global router wire-capacity estimation failing to account for complex 2D/3D detail routing constraints (e.g. via rules, EOL spacing).",
+"recalled_frequency": "common",
+"recall_confidence": 0.95
+},
+{
+"cause": "Pin access congestion in high-density stdcell regions where adjacent cell pins align on the same track grid.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Power grid straps or macro blockages creating local track pitch offset mismatches.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+}
+],
+"classic_trap": "Trusting a 100% clean global routing report and blaming the detail router, rather than tightening global router congestion loss factors.",
+"node_era_note": "At 7nm and below, complex multi-patterning, VIA ladders, and line-end spacing rules make global routing estimates much less predictive of detail routing cleanability than at 28nm."
+},
+{
+"symptom": "unroutable placement (global placement diverges or overflows)",
+"first_checks": [
+{
+"check": "Check design total utilization vs available core area, including macro placement footprint and hard blockages.",
+"why_first": "Cheapest sanity check to prove basic physical capacity exists.",
+"check_cost": "minutes"
+},
+{
+"check": "Check placer log for net weight extremes, invalid physical constraints, or unplaced/fixed cell conflicts.",
+"why_first": "Identifies erroneous user constraints forcing placer engine divergence.",
+"check_cost": "minutes"
+},
+{
+"check": "Inspect macro floorplan layout: check for narrow channels, dead ends, or isolated core regions.",
+"why_first": "Rules out floorplan geometry bottlenecks that prevent legal standard cell distribution.",
+"check_cost": "minutes"
+}
+],
+"discriminating_experiments": [
+{
+"experiment": "Reset all timing net weights and high-fanout net constraints to default (1.0) and rerun global placement.",
+"rules_in": "Extreme net weighting / aggressive timing constraints tearing placement apart.",
+"rules_out": "Physical capacity overflow or bad floorplan geometry."
+},
+{
+"experiment": "Temporarily remove all hard/soft placement blockages and macro halos, then run global placement.",
+"rules_in": "Over-constrained placement blockages or excessive macro halo sizes packing cells unroutably.",
+"rules_out": "Real netlist net-degree / hypergraph connectivity explosion (e.g. un-synthesized bus interconnect)."
+}
+],
+"common_root_causes": [
+{
+"cause": "Bad floorplan layout with narrow macro channels or fragmented core area preventing legal placement.",
+"recalled_frequency": "common",
+"recall_confidence": 0.9
+},
+{
+"cause": "Over-aggressive timing net weighting or physical region constraints forcing tool divergence.",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.85
+},
+{
+"cause": "RTL/synthesis structure issue creating massive hypergraph connectivity (e.g. uncollapsed wide crossbars or registers).",
+"recalled_frequency": "occasional",
+"recall_confidence": 0.8
+}
+],
+"classic_trap": "Tuning global placer solver settings for hours when the true cause is an illegal floorplan channel width or runaway net weights from timing constraints.",
+"node_era_note": "At 7nm and below, placement requires strict cell-alignment rules, edge-type compatibility, and power-rail alignment, causing placement solvers to diverge much faster under tight congestion."
+}
+]

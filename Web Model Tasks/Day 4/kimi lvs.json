@@ -1,0 +1,149 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Determine which side owns the discrepancy: read the LVS report to see whether the net is missing from the extracted layout netlist, from the source netlist, or present on both but topologically joined/split differently — and whether the count of discrepancies is stable across reruns.",
+        "why_first": "cheapest discriminator between real layout data errors and tool/merge artefacts before opening any layout",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Scan the extraction log for soft-connect, text-label collision, floating-device, and unrecognized-layer warnings on the affected hierarchy.",
+        "why_first": "rules out the highest-frequency net-level causes (label/seed and soft-connect) with zero layout tracing",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Highlight the affected net(s) in the layout viewer and run a connectivity query between the endpoints (for opens) or between the two shorted nets (for shorts) independent of LVS.",
+        "why_first": "the viewer's own geometric connectivity is ground truth for whether a physical path exists, splitting real errors from deck errors in one step",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Locate whether the discrepancy is isolated to one block/hierarchy boundary or chip-wide.",
+        "why_first": "isolates cell-internal errors from port/label propagation and merge problems at boundaries",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun extraction/LVS with metal fill layers dropped (fill excluded from the connectivity database).",
+        "rules_in": "short or open disappears with fill excluded → fill is bridging adjacent nets or opening a net; inspect fill around the flagged geometry",
+        "rules_out": "mismatch persists identically with fill excluded → fill is not the cause; move to routing/text/deck causes"
+      },
+      {
+        "experiment": "Connectivity-query the two allegedly shorted nets in the layout viewer, then physically trace with all hierarchy expanded.",
+        "rules_in": "a real geometric path exists (overlap, wrong via, fill bridge, ESD/power ring contact) → genuine short in layout data",
+        "rules_out": "no geometric path exists anywhere in the expanded view → the short is virtual: text-label collision, seed-propagation error, or soft-connect through well/substrate; next check label text and layer on each net"
+      },
+      {
+        "experiment": "Temporarily delete or rename the text labels on the two shorted nets at the block boundary (or rerun with text checking disabled for that layer) and rerun LVS.",
+        "rules_in": "short disappears when labels are removed/renamed → label collision or label on wrong metal layer seeding two nets together; fix label placement",
+        "rules_out": "short persists with labels removed → not a text artefact; return to geometric tracing and soft-connect checks"
+      },
+      {
+        "experiment": "Rerun the full-chip LVS twice: once with the suspect parallel/hierarchical run or sibling block excluded, once with a different tool seed; also rerun block-level LVS standalone on the flagged block.",
+        "rules_in": "mismatch count/location changes between runs, seeds, or hierarchical configurations → merge/extraction nondeterminism or boundary artefact, not a physical error; block-level clean but chip-level dirty → port/label propagation across the boundary",
+        "rules_out": "bit-identical mismatch across seeds, configurations, and block-level standalone run → stable real layout error; debug the geometry itself"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Text/label problems: missing labels, labels on the wrong metal layer, or colliding label text at hierarchy boundaries, causing missing nets or virtual shorts",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "True routing errors: incomplete route, missing or misaligned via in a via stack, or router-open on an antenna/di route",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Metal fill bridging adjacent nets (short) or fill splitting a net (open) at high fill density",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Hierarchy/merge artefacts: black-box abstract vs full-block mismatch, missing/incorrect port at a boundary, or parallel-run merge collisions in hierarchical flows",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Extraction deck/data issues: wrong connectivity table entry for a via or intermediate layer, or missing layer mapping, so a real connection is not extracted",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "Treating a stable report as a real layout error and days-tracing geometry that was never broken — the classic version is a phantom short between two nets routed far apart that is actually a text-label collision at a block boundary or a soft-connect through the well/substrate, or an open on a net actually connected through an intermediate layer the deck was never given.",
+    "node_era_note": "at 28nm practice, label/seed errors, well-tie soft-connects, and plain routing errors dominate; at 7nm-and-below, fill-induced bridges/opens and multi-patterning issues (same net split across mask colors without a stitch, color-aware spacing shorts) become first-class causes, while well soft-connect fades with FinFET isolation practice"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Read the device-count and device-parameter comparison tables in the LVS report: identify which parameter differs (W, L, fingers, multiplier) and whether the mismatch is systematic — every instance of a device type in a block — or isolated to one/few instances.",
+        "why_first": "systematic-vs-isolated splits deck/property-mapping causes from layout-data causes immediately, from one report",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check the LVS log for device-merging/combining messages, unrecognized-device warnings, and missing-recognition-layer warnings on the affected device types.",
+        "why_first": "parallel-combination and recognition-layer causes announce themselves in the log before any cross-probing",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "For an isolated flagged device, cross-probe it in the layout viewer and compare drawn gate/OD geometry against both the source value and the extracted value.",
+        "why_first": "locates the fault in the chain: drawn geometry wrong (upstream data error), drawn right but extracted wrong (deck parameter equation), or drawn wrong in the same way as every sibling (systematic bias)",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Compare the source netlist as read by LVS (post-preprocessing input netlist) against the original schematic netlist for one flagged device.",
+        "rules_in": "value already differs at LVS input (e.g., fingers/multiplier expanded or flattened differently, W total vs per-finger) → upstream netlisting bookkeeping error, not extraction; fix the netlist conventions",
+        "rules_out": "values identical at LVS input but extracted parameter differs → extraction-side property computation; move to deck parameter equations and bias rules"
+      },
+      {
+        "experiment": "Rerun with device parallel-combination/merging disabled in extraction.",
+        "rules_in": "'extra device' count collapses to match source when merging is off → the mismatch was a combination artefact (layout fingers combined where source kept them split, or vice versa); reconcile the combination conventions",
+        "rules_out": "extra/missing devices persist with merging off → real recognition-layer problem: extra implant/OD geometry creating a spurious device, or a missing recognition shape dropping a real one"
+      },
+      {
+        "experiment": "Measure the drawn geometry of one flagged instance against the extracted parameter: verify whether the extracted W/L equals drawn geometry, drawn geometry minus bias, or neither.",
+        "rules_in": "extracted equals drawn-minus-bias but source uses drawn (or vice versa) → systematic bias/LOD/etch-offset mapping issue in the deck; one rule fix, not per-instance layout fixes",
+        "rules_out": "drawn geometry itself matches neither source nor extracted value → the layout data is wrong (upstream generation/rounding); fix the source data, not the deck"
+      },
+      {
+        "experiment": "Rerun with property comparison tolerance widened (order of 1%, then order of 5%) for the differing parameter only.",
+        "rules_in": "mismatch disappears at a small tolerance → rounding/representation artefact (e.g., 0.35 vs 0.349999, or unit scaling between source and extracted); set the correct tolerance permanently rather than editing devices",
+        "rules_out": "mismatch persists at 5% tolerance → genuine size difference; return to geometry measurement and bias analysis"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Finger/multiplier bookkeeping: total-width vs per-finger width, m= vs fingers= conventions, or source series/parallel combination differing from extracted combination",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Parameter rounding/tolerance false mismatches: unit scaling or floating representation making electrically identical sizes compare unequal",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Systematic bias mapping: drawn vs effective size (poly/etch bias, LOD/DFM context) applied on one side of the comparison only",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Recognition-layer problems: extra implant/OD recognition geometry creating phantom devices, or missing recognition shapes dropping real devices (often dummies or well/guard-ring devices the source intentionally abstracts)",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "Hierarchy/abstract mismatches: transistor-level block vs LEF-style abstract or behavioral model differing in device content at a boundary",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.4
+      }
+    ],
+    "classic_trap": "Resizing layout to match a bookkeeping mismatch: source says width-per-finger with four fingers, extraction reports total width as one device, and the engineer 'fixes' an electrically identical device — or, symmetrically, editing 400 devices long-by-10nm when every device in the block is offset identically and the real fault is one missing bias entry in the deck.",
+    "node_era_note": "at 28nm planar practice, W/L are continuous and bias/LOD/DFM-offset bookkeeping dominates wrong-size reports; at 7nm-and-below FinFET practice, size is quantized (number of fins/fingers) and source models often describe width-equivalents rather than fin counts, so fin-count/finger convention mismatches replace continuous-width rounding as the dominant false mismatch"
+  }
+]

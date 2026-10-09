@@ -1,0 +1,128 @@
+[
+{
+"case_name": "Mixed-Direction 10% Aggregate Bucket (Compliant)",
+"fees": [
+{
+"name": "Appraisal Fee",
+"bucket": "zero_tolerance",
+"le_amount": 500.00,
+"cd_amount": 500.00
+},
+{
+"name": "Title - Settlement Agent Fee (Shopped - Selected from List)",
+"bucket": "ten_pct_aggregate",
+"le_amount": 1000.00,
+"cd_amount": 1200.00
+},
+{
+"name": "Title - Lender's Title Insurance (Shopped - Selected from List)",
+"bucket": "ten_pct_aggregate",
+"le_amount": 800.00,
+"cd_amount": 650.00
+},
+{
+"name": "Recording Fees",
+"bucket": "ten_pct_aggregate",
+"le_amount": 200.00,
+"cd_amount": 220.00
+},
+{
+"name": "Homeowners Insurance",
+"bucket": "no_limit",
+"le_amount": 1200.00,
+"cd_amount": 1400.00
+}
+],
+"computation": "1. Zero-Tolerance Check: LE = $500.00, CD = $500.00. Variance = $0.00. 2. 10% Aggregate Bucket Check: LE Sum = $1000.00 + $800.00 + $200.00 = $2000.00. Maximum Allowable Threshold (LE Sum * 1.10) = $2200.00. CD Sum = $1200.00 + $650.00 + $220.00 = $2070.00. Note on aggregate rule: Settlement agent fee increased by $200.00, but Title Insurance decreased by $150.00 and Recording increased by $20.00. Under §1026.19(e)(3)(ii), we compare total CD ($2070.00) against total LE ($2000.00), resulting in an aggregate increase of $70.00 (+3.5%), NOT the sum of increases ($220.00 or +11.0%). Since $2070.00 <= $2200.00, there is no violation. 3. No Limit Bucket: Prepaid insurance chosen by borrower, excluded from tolerance calculation.",
+"violations": "None. Cure amount = $0.00.",
+"clause_basis": "12 CFR §1026.19(e)(3)(i) for zero tolerance, 12 CFR §1026.19(e)(3)(ii) for 10% aggregate tolerance, and 12 CFR §1026.19(e)(3)(iii) for unlimited tolerance.",
+"weakest_point": "Assumes the consumer was permitted to shop for title services and selected a provider from the lender's written list of service providers."
+},
+{
+"case_name": "Mixed-Direction 10% Aggregate Bucket (Violation with Cure)",
+"fees": [
+{
+"name": "Origination Fee",
+"bucket": "zero_tolerance",
+"le_amount": 1500.00,
+"cd_amount": 1500.00
+},
+{
+"name": "Title - Abstract Fee (Shopped - Selected from List)",
+"bucket": "ten_pct_aggregate",
+"le_amount": 400.00,
+"cd_amount": 600.00
+},
+{
+"name": "Title - Examination Fee (Shopped - Selected from List)",
+"bucket": "ten_pct_aggregate",
+"le_amount": 500.00,
+"cd_amount": 350.00
+},
+{
+"name": "Recording Fees",
+"bucket": "ten_pct_aggregate",
+"le_amount": 100.00,
+"cd_amount": 180.00
+}
+],
+"computation": "1. Zero-Tolerance Check: LE = $1500.00, CD = $1500.00. Variance = $0.00. 2. 10% Aggregate Bucket Check: LE Sum = $400.00 + $500.00 + $100.00 = $1000.00. Maximum Allowable Threshold (LE Sum * 1.10) = $1100.00. CD Sum = $600.00 + $350.00 + $180.00 = $1130.00. Aggregate Comparison: Total CD ($1130.00) exceeds maximum allowable ($1100.00) by $30.00. (Note: Incorrect sum-of-increases logic would yield ($200 + $80) = $280 increase, overestimating cure as $180; the correct aggregate method netting the $150 decrease yields a $30.00 excess).",
+"violations": "10% Aggregate Bucket violated by $30.00. Lender cure required: $30.00 refund to borrower.",
+"clause_basis": "12 CFR §1026.19(e)(3)(ii) and cure provisions under 12 CFR §1026.19(f)(2)(v).",
+"weakest_point": "Ensuring proper characterization of recording fees under the 10% category."
+},
+{
+"case_name": "Zero-Tolerance Violation with Mixed Bucket Types",
+"fees": [
+{
+"name": "Credit Report Fee",
+"bucket": "zero_tolerance",
+"le_amount": 30.00,
+"cd_amount": 45.00
+},
+{
+"name": "Transfer Taxes",
+"bucket": "zero_tolerance",
+"le_amount": 1200.00,
+"cd_amount": 1250.00
+},
+{
+"name": "Pest Inspection (Shopped - Selected from List)",
+"bucket": "ten_pct_aggregate",
+"le_amount": 150.00,
+"cd_amount": 160.00
+},
+{
+"name": "Initial Escrow Deposit",
+"bucket": "no_limit",
+"le_amount": 800.00,
+"cd_amount": 950.00
+}
+],
+"computation": "1. Zero-Tolerance Check: Credit Report LE = $30.00, CD = $45.00 (Excess = $15.00). Transfer Taxes LE = $1200.00, CD = $1250.00 (Excess = $50.00). Total Zero-Tolerance Cure = $15.00 + $50.00 = $65.00. 2. 10% Aggregate Bucket Check: LE Sum = $150.00. Maximum Allowable Threshold = $165.00. CD Sum = $160.00. Since $160.00 <= $165.00, 10% bucket is compliant. 3. No Limit Bucket: Escrow deposit excluded.",
+"violations": "Zero-tolerance bucket violated by $65.00 ($15.00 on Credit Report + $50.00 on Transfer Taxes). Cure amount = $65.00.",
+"clause_basis": "12 CFR §1026.19(e)(3)(i) for zero-tolerance line items.",
+"weakest_point": "Categorization of Transfer Taxes as zero tolerance relies on absence of changed circumstances."
+},
+{
+"case_name": "Shopped Off-List Reassignment to No Limit",
+"fees": [
+{
+"name": "Title - Closing Fee (Shopped - Off List)",
+"bucket": "no_limit",
+"le_amount": 700.00,
+"cd_amount": 950.00
+},
+{
+"name": "Recording Fees",
+"bucket": "ten_pct_aggregate",
+"le_amount": 150.00,
+"cd_amount": 160.00
+}
+],
+"computation": "1. 10% Aggregate Bucket Check: LE Sum = $150.00. Max Allowable = $165.00. CD Sum = $160.00. Compliant. 2. No Limit Bucket Check: Title Closing Fee was shopped and borrower selected a provider NOT on lender's written list. Thus, service moves from 10% aggregate to no-limit per §1026.19(e)(3)(iii)(A). Increased amount ($950.00 vs $700.00) is permitted.",
+"violations": "None. Cure amount = $0.00.",
+"clause_basis": "12 CFR §1026.19(e)(3)(iii)(A) for services permitted to shop where borrower selects off-list provider.",
+"weakest_point": "Fact-dependent determination that borrower selected provider independently off the written list."
+}
+]

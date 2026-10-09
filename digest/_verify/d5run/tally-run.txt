@@ -1,0 +1,5 @@
+  TALLY-34.md: calibration block WRITTEN (16 models)
+  TALLY-42.md: calibration block WRITTEN (16 models)
+  RUN-MANIFEST: 444 existing rows, 153 to append -> 597
+  RUN-MANIFEST: appended 153 rows
+  dual-spelling rows appended as collected: ['minara e.json', 'minara red1.json', 'minara regz.json', 'minaria red3.json', 'minaria strings.json']

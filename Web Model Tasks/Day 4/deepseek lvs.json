@@ -1,0 +1,104 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Run a hierarchical LVS vs flat LVS on the same database and compare the reported net errors.",
+        "why_first": "Cheapest and fastest; immediately separates global connectivity extraction artifacts from real physical opens/shorts, ruling out extraction-tool misinterpretation.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Examine the specific net names that are missing/shorted in the extracted view vs the schematic, focusing on power/ground nets and wide top-level buses.",
+        "why_first": "Power-ground shorts are the most common high-impact net errors and are often caused by missing power straps or incorrect pin text layers; they expose the highest probability root cause.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Visually inspect the layout at the coordinates flagged by the LVS report, using the extraction tool's 'highlight net' feature to overlay the extracted polygon-to-node assignment.",
+        "why_first": "Visual inspection confirms whether the extraction tool merged nodes through a minimally spaced via or missing silicide block, which is a frequent source of opens.",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Run a 'virtual connect' or 'ERC check' to see if the missing net is tied to a well/substrate node that the extraction tool did not automatically connect.",
+        "why_first": "Substrate/well connection errors are common when the layout lacks explicit taps; this check isolates that class at moderate cost before moving to deep debugging.",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Compare extraction results with and without the 'merge parallel runs' option disabled; if the short disappears when a specific parallel run is excluded, it is a merge artefact; if it persists across runs with different seeds, it is a real layout short.",
+        "rules_in": "Short persists across extraction runs with different seed and run settings -> real physical short.",
+        "rules_out": "Short disappears when parallel-run merging is turned off -> merge artefact in the extraction database."
+      },
+      {
+        "experiment": "Add a dummy metal fill exclusion layer or run the extraction with fill/decap cells excluded; if the open net appears connected after exclusion, it is a fill-induced extraction error.",
+        "rules_in": "Open resolves with fill excluded -> fill insertion broke the connectivity (e.g., fill shorting two adjacent nets).",
+        "rules_out": "Open persists with fill excluded -> real missing via or broken track."
+      },
+      {
+        "experiment": "Manually trace the path of the open net from the LVS report using the layout editor's net-tracing function, comparing against the schematic's expected routing. If the trace fails at a known via array, it is a missing via; if it fails at a cell boundary, it is a boundary text/pin-layer mapping error.",
+        "rules_in": "Trace fails at via array -> missing or undersized via (real or DRC-clean but extraction-threshold excluded).",
+        "rules_out": "Trace completes to all schematic pins without failure, but LVS still reports open -> extraction tool's net naming or text-layer assignment error."
+      }
+    ],
+    "common_root_causes": [
+      {"cause": "Missing or misplaced text/pin labels on top-level ports (extractor fails to assign the net name)", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "Power/ground plane slots or missing straps that isolate a supply rail island (real open)", "recalled_frequency": "common", "recall_confidence": 0.75},
+      {"cause": "Metal fill shapes incorrectly shorting two adjacent signal nets due to spacing rule violation or extraction threshold too low", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "Substrate/well tie connections not properly made (floating n-well or p-sub node)", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "Via arrays that are DRC-clean but too small for the extraction tool's resistance-threshold, causing an effective open (high-resistance not connected)", "recalled_frequency": "rare", "recall_confidence": 0.5}
+    ],
+    "classic_trap": "Assuming the short/open is in the routing layers first and spending hours scanning metal polygons, when 70% of these are actually due to missing or mis-oriented text/pin layers that the extractor uses for net naming — the fix is a layer mapping change, not a layout reroute.",
+    "node_era_note": "At 7nm and below, multi-patterning and self-aligned via rules create many 'fractured' polygons; extraction merge artefacts are much more common, so the parallel-run comparison is often the very first check, whereas at 28nm it was typically the second or third check."
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Run a parametric LVS report that lists device dimensions (W, L, fingers, multipliers) for every mismatched device, sorted by difference magnitude.",
+        "why_first": "Cheapest and directly tells you whether the size error is a systematic scaling (e.g., all devices off by 2x) or a single-instance error; immediately rules out global extraction calibration issues.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check the schematic's device parameter vs the extracted layout's parameter at the exact coordinates reported, paying special attention to diffusion sharing (multi-finger vs single-finger) and source/drain merge.",
+        "why_first": "Diffusion sharing/merge is the most frequent cause of extra/missing devices and size mismatches; it is quick to spot in the layout editor and has a high probability.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Examine the LVS reduction option (e.g., 'series reduction' or 'parallel reduction') settings; turn off all reductions and compare the raw device count.",
+        "why_first": "This discriminates between a real device-count error and a reduction-settings artefact in about 30 minutes, and it rules out a whole class of false positives.",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Verify that the extraction deck correctly recognizes the specific device type (LVT, HVT, native, IO) by checking the implant layer overlay for the mismatched devices.",
+        "why_first": "Layer-recognition errors for different threshold-voltage devices are common in complex multi-Vt processes and cause size mismatches (different Vt has different W/L constraints) — checking is moderate cost but highly diagnostic.",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run the extraction with 'parallel device merging' disabled and then re-run LVS. If the extra devices disappear and the size mismatch shifts to a sum-of-parallels match, the extra devices are actually layout parallel combinations that the schematic has pre-merged.",
+        "rules_in": "Extra devices vanish and the merged extracted size equals the schematic's single device size -> parallel device reduction in schematic vs layout mismatch (correct the schematic or reduction setting).",
+        "rules_out": "Extra devices persist even with merging disabled -> real extra physical devices (e.g., dummy transistors left floating or incorrectly placed)."
+      },
+      {
+        "experiment": "Swap the extraction deck's W/L extraction algorithm from 'polygon envelope' to 'centerline' method for the flagged devices. If the size changes to match the schematic, the mismatch is due to the extraction tool's handling of non-rectangular or tapered polygons.",
+        "rules_in": "Size matches with centerline method -> the layout has slight poly corners or jogged gates that envelope extraction overestimates; adjust layout or extraction rule.",
+        "rules_out": "Size remains off regardless of method -> schematic value is genuinely different from layout drawn dimension."
+      },
+      {
+        "experiment": "Isolate the mismatched device and manually count the number of gates (poly fingers) in the layout vs the schematic's multiplier. If the count matches but the total width is off, it is a per-finger width mismatch; if the count is different, it is a finger-count mismatch.",
+        "rules_in": "Finger count matches but total width differs -> drawn poly width or diffusion extension is wrong (real layout error).",
+        "rules_out": "Finger count differs but total width matches -> schematic multiplier is wrong or layout has dummy fingers merged."
+      }
+    ],
+    "common_root_causes": [
+      {"cause": "Diffusion sharing / abutment causing the extraction tool to merge two adjacent transistors into one larger device (extra devices in schematic, wrong size in extracted)", "recalled_frequency": "common", "recall_confidence": 0.85},
+      {"cause": "Wrong multiplier (M) or fingers (NF) value entered in schematic vs layout (systematic size mismatch)", "recalled_frequency": "common", "recall_confidence": 0.8},
+      {"cause": "Dummy transistors added for matching in the layout but not reflected in the schematic (extra devices)", "recalled_frequency": "occasional", "recall_confidence": 0.75},
+      {"cause": "Parasitic diode or resistor formed by diffusion-to-well junction that the extraction tool reports as an extra device (e.g., vertical PNP)", "recalled_frequency": "occasional", "recall_confidence": 0.7},
+      {"cause": "Incorrect threshold-voltage implant layer assigned to the device in layout (extractor reads it as a different Vt device type, giving wrong effective W/L)", "recalled_frequency": "rare", "recall_confidence": 0.6}
+    ],
+    "classic_trap": "Engineers often immediately re-draw the device in layout to match the schematic's W/L, wasting hours, when the root cause is a reduction-rule mismatch (parallel merging) that can be fixed by simply adjusting the LVS runset option, or by correcting the schematic to explicitly show parallel devices.",
+    "node_era_note": "At 7nm-and-below, multiple patterning creates non-uniform gate pitches and diffusion edge rounding, so the extraction algorithm (envelope vs centerline) choice is a critical first check; at 28nm, drawn shapes were more rectangular and this was a much rarer cause."
+  }
+]

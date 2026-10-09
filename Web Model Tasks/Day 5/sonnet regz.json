@@ -1,0 +1,31 @@
+```json
+[
+  {
+    "task": 1,
+    "steps": "Factor = 2024_value / 2023_value, computed by long division to 6 decimal places.\n\nTier A: 130461 / 124331\n  130461 - 124331 = 6130 (raw increase)\n  6130 / 124331 = 0.049304 (long division: 124331*0.0493=6129.518..., remainder 0.482, 0.482/124331=0.0000039)\n  Factor_A = 1 + 0.049304 = 1.049304\n\nTier B: 3914 / 3730\n  3914 - 3730 = 184\n  184 / 3730 = 92/1865 (reduced)\n  92/1865: 1865*0.0493=91.9445, remainder 0.0555, 0.0555/1865=0.0000298\n  => 0.0493298 ≈ 0.049330\n  Factor_B = 1.049330\n\nTier C: 26092 / 24866\n  26092 - 24866 = 1226\n  1226 / 24866: 24866*0.0493=1225.894, remainder 0.106, 0.106/24866=0.0000043\n  => 0.049304\n  Factor_C = 1.049304\n\nTier D: 1305 / 1243\n  1305 - 1243 = 62\n  62 / 1243: 1243*0.0498=61.9014, remainder 0.0986, 0.0986/1243=0.0000793\n  => 0.049879\n  Factor_D = 1.049879\n\nComparison: Factor_A (1.049304) and Factor_C (1.049304) match to 6 decimal places. Factor_B (1.049330) deviates from A/C by +0.000026 (2.6 bps). Factor_D (1.049879) deviates from A/C by +0.000575 (57.5 bps) — far larger than B's deviation.",
+    "answer": "The four implied factors are NOT mutually consistent with a single uniform multiplier. A and C agree exactly to 6dp (1.049304); B is 2.6 bps higher; D is 57.5 bps higher — an order of magnitude larger discrepancy, consistent with rounding-to-nearest-dollar noise being proportionally larger on D's much smaller base ($1,243). All four round to '4.9%' at one-decimal precision (4.93%, 4.93%, 4.93%, 4.99%), so they are each broadly consistent with the stated 4.9% headline figure, but D's underlying factor (4.99%) sits notably further from 4.9% than A/B/C's (~4.93%).",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 2,
+    "steps": "Inferred rounding rule: all four given 2023 and 2024 values are whole-dollar integers with no cents, and the four 2023->2024 factors are NOT identical (see Task 1) despite presumably originating from one CPI-U ratio. The simplest rule consistent with this pattern is: new_value = round_to_nearest_dollar(prior_value * (1 + CPI_rate)), with per-tier rounding noise explaining the small factor divergences (largest on the smallest-dollar tier D). I apply the same rule for 2025 projection: multiply each 2024 value by 1.034 and round to the nearest whole dollar (round-half-up).\n\nTier A: 130461 * 1.034\n  130461 * 0.034 = 130461*0.03 + 130461*0.004 = 3913.83 + 521.844 = 4435.674\n  130461 + 4435.674 = 134896.674 -> round -> 134897\n\nTier B: 3914 * 1.034\n  3914 * 0.034 = 133.076\n  3914 + 133.076 = 4047.076 -> round -> 4047\n\nTier C: 26092 * 1.034\n  26092 * 0.034 = 887.128\n  26092 + 887.128 = 26979.128 -> round -> 26979\n\nTier D: 1305 * 1.034\n  1305 * 0.034 = 44.37\n  1305 + 44.37 = 1349.37 -> round -> 1349",
+    "answer": "Projected 2025 values (3.4% applied to 2024, rounded to nearest dollar): Tier A = $134,897; Tier B = $4,047; Tier C = $26,979; Tier D = $1,349.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 3,
+    "steps": "Projected Tier A (Task 2) = $134,897. Official Tier A (given) = $134,841.\n  Difference = 134897 - 134841 = 56 (projection is $56 too high)\n\nExact factor that produces 134841 from 130461:\n  factor = 134841 / 130461\n  134841 - 130461 = 4380\n  4380 / 130461: 130461*0.0335 = 4370.4435, remainder = 4380-4370.4435 = 9.5565\n  9.5565/130461 = 0.0000733\n  0.0335 + 0.0000733 = 0.0335733\n  factor = 1.033573 -> implied rate = 3.35733%\n\nDiscrepancy vs stated 3.4%:\n  3.400000% - 3.357326% = 0.042674 percentage points\n  In basis points: 0.042674 * 100 = 4.27 bps (since 1 bp = 0.01 percentage point)\n\nCross-check via dollar overshoot: 56 / 130461 = 0.0004292 = 4.29 bps of the base — consistent with the ~4.27 bps figure above (small difference from double-rounding).",
+    "answer": "My 3.4%-based projection ($134,897) exceeds the official 2025 Tier A value ($134,841) by $56. The exact factor that reproduces the official figure is 1.033573 (an implied 3.3573% increase), which is about 4.27 basis points BELOW the stated headline 3.4% CPI-U adjustment — i.e., the announced 3.4% figure, taken at face value and applied directly, overstates the actual dollar-for-dollar increase applied to Tier A by roughly 4.3 bps.",
+    "evidence_level": "computed"
+  },
+  {
+    "task": 4,
+    "steps": "n/a - qualitative determination based on Task 1 and Task 3 results",
+    "answer": "The single strongest mechanism: the regulator does not apply the rounded, publicly-announced headline percentage (e.g., '3.4 percent') directly to the prior year's already-rounded dollar figure. Internally the adjustment is computed from a full-precision CPI-U index ratio (specific reference month/vintage, unrounded), applied to an unrounded (or differently-rounded) base, and only the FINAL result is rounded to the nearest dollar. The publicly stated 'X.X percent' is itself a rounded summary of that index ratio, not the exact multiplier used in the calculation. This explains both observations here: (1) in Task 1, the four 2023->2024 tiers do not share one exact factor even though they presumably derive from a single CPI-U ratio — because each tier's PRIOR-year rounded dollar value interacts differently with rounding, and the smallest base (Tier D) shows the largest deviation (57.5 bps) since rounding noise is proportionally largest there; (2) in Task 3, applying the rounded '3.4 percent' headline to the rounded 2024 Tier A value misses the official 2025 figure by $56 (~4.3 bps), because the true multiplier was ~3.3573%, not exactly 3.4000%.",
+    "evidence_level": "computed"
+  }
+]
+```
+```json
+{"weakest_point": "The projection assumes the announced one-decimal headline CPI-U percentage (e.g. '3.4 percent') IS the exact multiplier applied to the prior year's rounded dollar figure; in reality the regulator almost certainly applies a full-precision, unrounded CPI-U index ratio (tied to a specific reference-month index vintage) to the base, then rounds only the final dollar output — so double-rounding (rounded input value x rounded headline rate) is the concrete mechanism producing the ~4.3 bp / $56 gap on Tier A and the 57.5 bp outlier on Tier D."}
+```

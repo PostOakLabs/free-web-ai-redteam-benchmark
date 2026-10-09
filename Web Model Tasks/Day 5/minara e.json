@@ -1,0 +1,156 @@
+[
+  {
+    "calculation": "ISO 26262 single-point fault metric (SPFM), and compliance with the ASIL architectural-metric target.",
+    "formula_or_test": "SPFM = 1 − (Σλ_SPF + Σλ_RF) / Σλ_total, where λ_SPF is the rate of single-point faults and λ_RF is the rate of residual faults. Target test: ASIL B SPFM ≥ 90%; ASIL C SPFM ≥ 97%; ASIL D SPFM ≥ 99%.",
+    "inputs": [
+      "Total hardware failure rate Σλ_total",
+      "Single-point-fault failure rates Σλ_SPF",
+      "Residual-fault failure rates Σλ_RF",
+      "Assigned ASIL"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8; Table 4",
+    "publicly_retrievable": false,
+    "volatility": "Low; revised only when ISO 26262 is revised.",
+    "confidence": 0.88
+  },
+  {
+    "calculation": "ISO 26262 latent-fault metric (LFM), and compliance with the ASIL architectural-metric target.",
+    "formula_or_test": "LFM = 1 − Σλ_MPF,latent / (Σλ_total − Σλ_SPF − Σλ_RF), where λ_MPF,latent is the rate of latent multiple-point faults. Target test: ASIL B LFM ≥ 60%; ASIL C LFM ≥ 80%; ASIL D LFM ≥ 90%.",
+    "inputs": [
+      "Total hardware failure rate Σλ_total",
+      "Single-point-fault failure rates Σλ_SPF",
+      "Residual-fault failure rates Σλ_RF",
+      "Latent multiple-point-fault failure rates Σλ_MPF,latent",
+      "Assigned ASIL"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8; Table 5",
+    "publicly_retrievable": false,
+    "volatility": "Low; revised only when ISO 26262 is revised.",
+    "confidence": 0.84
+  },
+  {
+    "calculation": "ISO 26262 probabilistic metric for random hardware failures (PMHF), tested against the applicable ASIL maximum.",
+    "formula_or_test": "Compute the average probability per hour that random hardware failures violate a safety goal, using one of the evaluation methods permitted by ISO 26262-5; target test: ASIL B PMHF < 1×10^-7 h^-1; ASIL C PMHF < 1×10^-7 h^-1; ASIL D PMHF < 1×10^-8 h^-1.",
+    "inputs": [
+      "Random hardware-failure rates",
+      "Fault classifications and diagnostic coverage",
+      "Safety-goal fault paths",
+      "Relevant multiple-point-fault exposure assumptions",
+      "Assigned ASIL"
+    ],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8; Table 6",
+    "publicly_retrievable": false,
+    "volatility": "Low; revised only when ISO 26262 is revised.",
+    "confidence": 0.82
+  },
+  {
+    "calculation": "DO-254 design-assurance-level objective and independence count mapping.",
+    "formula_or_test": "For a selected DAL, count the objectives marked applicable in the Appendix A objective tables and separately count those marked as requiring independence. Commonly tabulated totals are: DAL A = 71 objectives, 33 requiring independence; DAL B = 69, 21; DAL C = 62, 8; DAL D = 26, 5; DAL E = 0, 0.",
+    "inputs": [
+      "Assigned hardware design assurance level: A, B, C, D, or E",
+      "Objective applicability markings in the Appendix A tables",
+      "Independence markings in the Appendix A tables"
+    ],
+    "authority": "RTCA DO-254, Design Assurance Guidance for Airborne Electronic Hardware",
+    "clause_locator": "Appendix A",
+    "publicly_retrievable": false,
+    "volatility": "Very low; changes only through a new RTCA revision.",
+    "confidence": 0.86
+  },
+  {
+    "calculation": "Advanced Manufacturing Investment Credit for qualifying semiconductor facilities.",
+    "formula_or_test": "Credit = 35% × qualified investment. Qualified investment is the taxpayer's basis in qualified property placed in service during the taxable year as part of an advanced manufacturing facility, subject to the statutory definitions, exclusions, recapture provisions, and taxpayer-eligibility restrictions.",
+    "inputs": [
+      "Basis of each item of qualified property placed in service during the taxable year",
+      "Whether the property is part of an advanced manufacturing facility",
+      "Whether the facility is primarily engaged in semiconductor or semiconductor-manufacturing-equipment production",
+      "Applicable exclusions, eligibility conditions, and recapture facts"
+    ],
+    "authority": "Internal Revenue Code, 26 U.S.C. § 48D, Advanced Manufacturing Investment Credit",
+    "clause_locator": "26 U.S.C. § 48D(a) and § 48D(b)",
+    "publicly_retrievable": true,
+    "volatility": "Medium; statutory amendments and effective-date provisions can change the rate or eligibility.",
+    "confidence": 0.91
+  },
+  {
+    "calculation": "Export-control classification test for advanced-computing integrated circuits under ECCN 3A090.a.",
+    "formula_or_test": "Total processing performance (TPP) = 2 × N × O × F, where N is the number of processing units, O is the number of operations per cycle capable of performing 64-bit or larger floating-point multiply-add operations, and F is the clock frequency in GHz. ECCN 3A090.a classification is triggered where the integrated circuit has TPP of 4,800 or more, or performance density of 5.92 or more.",
+    "inputs": [
+      "Number of processing units N",
+      "Operations per cycle O",
+      "Clock frequency F in GHz",
+      "Die area used for the performance-density calculation",
+      "Applicable technical-note definitions and exclusions"
+    ],
+    "authority": "Export Administration Regulations, 15 CFR Part 774, Supplement No. 1 to Part 774, ECCN 3A090",
+    "clause_locator": "ECCN 3A090.a and Technical Note",
+    "publicly_retrievable": true,
+    "volatility": "High; BIS has repeatedly amended advanced-computing controls since 2022.",
+    "confidence": 0.78
+  },
+  {
+    "calculation": "Arrhenius temperature acceleration factor for semiconductor reliability extrapolation.",
+    "formula_or_test": "AF = exp[(E_a / k) × (1/T_use − 1/T_stress)], where temperatures are absolute temperatures in kelvin, E_a is activation energy in eV, and k is Boltzmann's constant, 8.617333262×10^-5 eV/K.",
+    "inputs": [
+      "Activation energy E_a in eV",
+      "Use temperature T_use in K",
+      "Stress-test temperature T_stress in K",
+      "Boltzmann constant k"
+    ],
+    "authority": "JEDEC JESD85A, Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; model form is stable, although JEDEC revisions may update guidance.",
+    "confidence": 0.82
+  },
+  {
+    "calculation": "One-sided upper confidence-limit failure rate in FIT from accelerated life-test data.",
+    "formula_or_test": "λ_FIT = [χ²(CL, 2f + 2) × 10^9] / [2 × t_stress × AF], where f is the observed failure count, t_stress is aggregate device-hours at stress, AF is the stress-to-use acceleration factor, and χ²(CL, 2f+2) is the one-sided chi-square quantile at the selected confidence level.",
+    "inputs": [
+      "Observed failure count f",
+      "Selected one-sided confidence level CL",
+      "Aggregate stress exposure t_stress in device-hours",
+      "Acceleration factor AF"
+    ],
+    "authority": "JEDEC JESD85A, Methods for Calculating Failure Rates in Units of FITs",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Low; revised only when the JEDEC method is revised.",
+    "confidence": 0.84
+  },
+  {
+    "calculation": "Predicted failure rate of a hybrid microcircuit under MIL-HDBK-217F.",
+    "formula_or_test": "λ_p = [Σ(N_c × λ_c)] × (1 + 0.2π_E) × π_F × π_Q × π_L failures per 10^6 hours.",
+    "inputs": [
+      "Count N_c of each constituent component type",
+      "Failure rate λ_c of each constituent component type",
+      "Environmental factor π_E",
+      "Circuit-function factor π_F",
+      "Quality factor π_Q",
+      "Learning factor π_L"
+    ],
+    "authority": "MIL-HDBK-217F, Reliability Prediction of Electronic Equipment, Notice 2",
+    "clause_locator": "Section 5.5",
+    "publicly_retrievable": true,
+    "volatility": "Very low; the handbook is a legacy document and has not been actively maintained as a current DoD design standard.",
+    "confidence": 0.89
+  },
+  {
+    "calculation": "EU RoHS substance-compliance concentration test for a homogeneous material in electrical or electronic equipment.",
+    "formula_or_test": "For each restricted substance, concentration = mass of restricted substance / mass of the homogeneous material × 100%. Test against Annex II maximum concentration values: 0.1% by weight for lead, mercury, hexavalent chromium, PBBs, PBDEs, DEHP, BBP, DBP, and DIBP; 0.01% by weight for cadmium. A valid exemption can alter the result for the specifically exempted application.",
+    "inputs": [
+      "Mass of each restricted substance in the homogeneous material",
+      "Total mass of the homogeneous material",
+      "Applicable Annex III or Annex IV exemption status",
+      "Product scope and category"
+    ],
+    "authority": "Directive 2011/65/EU on the restriction of the use of certain hazardous substances in electrical and electronic equipment (RoHS 2)",
+    "clause_locator": "Article 4(2) and Annex II",
+    "publicly_retrievable": true,
+    "volatility": "Medium; restricted-substance lists, exemptions, and exemption expiries are amended periodically.",
+    "confidence": 0.94
+  }
+]

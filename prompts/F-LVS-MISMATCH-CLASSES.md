@@ -1,0 +1,11 @@
+You are building a differential-diagnosis reference for ASIC physical-design LVS debugging — the two LVS failure classes below. For each, give the ordered diagnostic tree a senior engineer follows: what is checked first, what experiment discriminates between causes, and how often each cause is the real one AS RECALLED from practice.
+
+**Cover exactly these 2 symptoms:** (7) LVS mismatch: missing, shorted, or open nets; (8) LVS mismatch: wrong device sizes or extra devices.
+
+**For each symptom, output one ordered diagnostic tree object:**
+
+{"symptom", "first_checks": [2-4 checks in the order a veteran runs them, each with "check" + "why_first" (one clause: cheapest? rules out the most?) + "check_cost": minutes|hours|days], "discriminating_experiments": [2-4 experiments of {"experiment": the specific report/run/setting that splits two live hypotheses, "rules_in": cause confirmed if this result, "rules_out": cause excluded if this result}], "common_root_causes": [3-5 entries of {"cause", "recalled_frequency": "common" | "occasional" | "rare" AS RECALLED, "recall_confidence": 0.0-1.0 on the frequency label itself}], "classic_trap": the misdiagnosis engineers most commonly make for this symptom, "node_era_note": one clause where 28nm vs 7nm-and-below practice differs, or "no-era-difference-recalled"}
+
+**Hard rules:** the value is in the DISCRIMINATING experiments — "compare the netlists" is worthless; "if the short disappears when one specific parallel run is excluded, it's a merge artefact; if it persists across runs with different seeds, it's a real short" is the level wanted. Frequencies are RECALLED practice patterns, never asserted as data — every one carries its own `recall_confidence`, and a low-confidence frequency beats a confident-sounding invention. No invented tool names or chip names. Numbers only where genuinely typical (say "order of" if approximate). If a symptom is outside what you know, emit it with empty arrays and `"recall_confidence": 0.0` rather than padding. This output is a DRAFT for later verification against real LVS records, not a finished reference. **Output: a single bare JSON array of the 2 objects and NOTHING else.**
+
+[prompt-version: FLVS-v1 2026-09-04 — F-v2 spec scoped to the two RE-ELICIT LVS classes per F-GAPMAP-1]

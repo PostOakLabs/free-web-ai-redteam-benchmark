@@ -1,0 +1,124 @@
+```json
+[
+  {
+    "calculation": "Single-Point Fault Metric (SPFM)",
+    "formula_or_test": "SPFM = 1 - [ (Σλ_SPF + Σλ_RF) / Σλ_total ], where λ_SPF = single-point-fault failure rate, λ_RF = residual-fault failure rate, λ_total = sum of all relevant hardware element failure rates",
+    "inputs": ["λ_SPF (sum of single-point-fault failure rates)", "λ_RF (sum of residual-fault failure rates)", "λ_total (sum of all component failure rates in the item)"],
+    "authority": "ISO 26262-5:2018, Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "stable (formula unchanged since 2011 edition; ISO standard purchase required, revisions roughly every 6-8 years)",
+    "confidence": 0.7
+  },
+  {
+    "calculation": "Latent Fault Metric (LFM)",
+    "formula_or_test": "LFM = 1 - [ Σλ_MPF,latent / (Σλ_total - Σλ_SPF - Σλ_RF) ], where λ_MPF,latent = sum of latent multiple-point-fault failure rates",
+    "inputs": ["λ_MPF,latent", "λ_total", "λ_SPF", "λ_RF"],
+    "authority": "ISO 26262-5:2018, Part 5",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "stable",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "SPFM / LFM target thresholds by ASIL (pass/fail test, not a formula)",
+    "formula_or_test": "Recommended targets (informative, not mandatory pass/fail): ASIL B: SPFM ≥ 90%, LFM ≥ 60%; ASIL C: SPFM ≥ 97%, LFM ≥ 80%; ASIL D: SPFM ≥ 99%, LFM ≥ 90%",
+    "inputs": ["computed SPFM", "computed LFM", "target ASIL of the item"],
+    "authority": "ISO 26262-5:2018, Part 5, Annex (informative target values)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "stable across editions (2011→2018 essentially unchanged); note: values are stated as recommended/informative in the standard, not hard mandatory numeric law",
+    "confidence": 0.55
+  },
+  {
+    "calculation": "Probabilistic Metric for random Hardware Failures (PMHF)",
+    "formula_or_test": "Item-level PMHF (average probability of violating a safety goal per hour) computed by summing single-point, residual, and dual-point (undetected latent, then triggered) failure-rate contributions across the architecture; compared against a numeric target",
+    "inputs": ["λ_SPF, λ_RF per element", "λ_MPF,latent and second-fault probability/exposure", "operating hours / mission profile"],
+    "authority": "ISO 26262-5:2018, Part 5",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "stable; exact summation formula is detailed in the standard's normative annex and I cannot reproduce it exactly from memory",
+    "confidence": 0.35
+  },
+  {
+    "calculation": "PMHF numeric acceptance targets by ASIL",
+    "formula_or_test": "PMHF < 10 FIT (1×10⁻⁸ /h) for ASIL D; PMHF < 100 FIT (1×10⁻⁷ /h) for ASIL C and ASIL B (each item independently, not summed)",
+    "inputs": ["computed item PMHF", "target ASIL"],
+    "authority": "ISO 26262-5:2018, Part 5, Table (informative recommended values)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "stable since 2011 edition; treated by industry as de facto mandatory despite being formally 'recommended'",
+    "confidence": 0.6
+  },
+  {
+    "calculation": "CHIPS Act Advanced Manufacturing Investment Credit percentage",
+    "formula_or_test": "Credit = 25% × qualified investment in an advanced manufacturing facility (property integral to semiconductor or semiconductor-manufacturing-equipment manufacturing)",
+    "inputs": ["qualified investment amount (basis of eligible property placed in service)"],
+    "authority": "Internal Revenue Code §48D (Advanced Manufacturing Investment Credit), enacted by the CHIPS and Science Act of 2022, Div. A",
+    "clause_locator": "26 U.S.C. § 48D(a)",
+    "publicly_retrievable": true,
+    "volatility": "low — statutory percentage fixed by statute unless amended by Congress; phase-out/begin-construction dates are fixed in statute (construction must begin before Jan 1, 2027)",
+    "confidence": 0.8
+  },
+  {
+    "calculation": "ECCN 3A090.a 'Total Processing Performance' (TPP) threshold test for advanced computing ICs",
+    "formula_or_test": "Integrated circuit is controlled under 3A090.a if TPP ≥ 4800 (as defined by the TPP calculation formula in the Note to 3A090.a, based on summed processing element throughput); a secondary Performance Density (PD) threshold also applies for narrower control",
+    "inputs": ["TPP (computed per the regulatory TPP formula from data-type bit-lengths and operations-per-cycle across processing elements)", "die/package area for PD"],
+    "authority": "Export Administration Regulations (EAR), 15 C.F.R. Part 774, Supplement No. 1, Category 3 — ECCN 3A090",
+    "clause_locator": "15 C.F.R. § 774, Supp. 1, ECCN 3A090.a and associated Technical Note",
+    "publicly_retrievable": true,
+    "volatility": "high — thresholds have been revised multiple times (Oct 2022 IFR, Oct 2023 final rule amendments) and are subject to further BIS rulemaking",
+    "confidence": 0.45
+  },
+  {
+    "calculation": "ECCN 4A090.a — computers/systems containing 3A090-controlled ICs, threshold test",
+    "formula_or_test": "A computer or electronic assembly is controlled under 4A090.a if it contains one or more integrated circuits meeting or exceeding the 3A090.a TPP (and/or PD) thresholds",
+    "inputs": ["TPP of constituent ICs", "aggregation rules across multiple chips in a system, per regulatory text"],
+    "authority": "Export Administration Regulations (EAR), 15 C.F.R. Part 774, Supplement No. 1, Category 4 — ECCN 4A090",
+    "clause_locator": "15 C.F.R. § 774, Supp. 1, ECCN 4A090.a",
+    "publicly_retrievable": true,
+    "volatility": "high — same rulemaking cadence as 3A090",
+    "confidence": 0.4
+  },
+  {
+    "calculation": "Device failure rate in FITs (Failures In Time)",
+    "formula_or_test": "FIT = (number of observed failures / total device-hours of test or field exposure) × 10⁹, typically with a chi-square-distribution confidence-interval multiplier applied for a stated confidence level (e.g., 60%)",
+    "inputs": ["number of failures observed", "cumulative device-hours (units × hours, often with an acceleration factor applied)", "confidence level (e.g., 60%, 90%)", "chi-square value for 2×(failures+1) degrees of freedom"],
+    "authority": "JEDEC JESD85, 'Methods for Calculating Failure Rates in Units of FITs'",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low — methodology stable for decades",
+    "confidence": 0.55
+  },
+  {
+    "calculation": "Arrhenius temperature acceleration factor",
+    "formula_or_test": "AF_T = exp[ (Ea/k) × (1/T_use − 1/T_stress) ], where Ea = activation energy (eV), k = Boltzmann constant (8.617×10⁻⁵ eV/K), T in Kelvin",
+    "inputs": ["Ea (activation energy, eV — mechanism-dependent, often assumed e.g. 0.7 eV)", "T_use (use-condition junction temp, K)", "T_stress (accelerated test temp, K)"],
+    "authority": "JEDEC JEP122 ('Failure Mechanisms and Models for Semiconductor Devices') and JESD91 (early-life failure rate estimation guidance)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low — the Arrhenius equation itself is physics, not regulatory; JEDEC docs mainly standardize recommended Ea values per mechanism, which are revised periodically",
+    "confidence": 0.65
+  },
+  {
+    "calculation": "Temperature-Humidity-Bias (THB) combined acceleration factor (Peck model)",
+    "formula_or_test": "AF = (RH_stress / RH_use)^n × exp[ (Ea/k) × (1/T_use − 1/T_stress) ], with n typically ≈ 2.5–3 (mechanism/standard-dependent)",
+    "inputs": ["RH_stress, RH_use (relative humidity, %)", "n (humidity exponent)", "Ea", "T_stress, T_use"],
+    "authority": "JEDEC JESD22-A101 (Steady-State THB test) in conjunction with JEP122 model guidance",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "low; exponent 'n' value guidance has been revised across JEP122 revisions — treat as approximate, not a fixed legal constant",
+    "confidence": 0.4
+  },
+  {
+    "calculation": "DO-254 objective count by Design Assurance Level (DAL)",
+    "formula_or_test": "Pass/fail test: number of applicable process objectives (and whether independence of verification is required) increases monotonically from DAL E (no objectives) through DAL A (most objectives, with independence required), per the objectives table",
+    "inputs": ["assigned DAL (A–E) from the system safety assessment", "objective table row per DAL"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80, 'Design Assurance Guidance for Airborne Electronic Hardware', Appendix A",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "very low — unchanged since original 2000 issue; no revision since",
+    "confidence": 0.3
+  }
+]
+```

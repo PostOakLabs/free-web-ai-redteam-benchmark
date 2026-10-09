@@ -1,0 +1,100 @@
+```json
+[
+  {
+    "vector_name": "negative_zero_number",
+    "input_json": "{\"a\":-0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "RFC 8785 §3.2.2.3 (via ECMAScript Number::toString serialization mandated by §3.2.2): the IEEE 754 value negative zero MUST be rendered as \"0\", losing the sign bit in the canonical text form.",
+    "divergence_trap": "A naive JSON serializer that just calls a generic number-to-string routine without this explicit override may print \"-0\" (e.g. some Python json.dumps configurations, or C printf-style formatting of doubles), producing {\"a\":-0} instead of {\"a\":0}.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "exponent_boundary_1e21_switches_to_exponential",
+    "input_json": "{\"a\":1e21}",
+    "canonical_output": "{\"a\":1e+21}",
+    "rule": "RFC 8785 §3.2.2.3 mandates ECMAScript Number::toString formatting (ECMA-262 Number::toString algorithm): once the decimal-point position n exceeds 21, the number is rendered in exponential form with an explicit '+' sign on a non-negative exponent.",
+    "divergence_trap": "Naive stringifiers (e.g. many non-JS languages' default float formatting, or printf %g with default precision) will typically render this as \"1e21\" (no '+' sign) or as a fully expanded decimal integer \"1000000000000000000000\", both of which diverge from the mandated \"1e+21\".",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "just_under_exponent_boundary_1e20_stays_integer_form",
+    "input_json": "{\"a\":1e20}",
+    "canonical_output": "{\"a\":100000000000000000000}",
+    "rule": "RFC 8785 §3.2.2.3 / ECMAScript Number::toString: for this value the decimal-point position n=21 satisfies k<=n<=21, so it is rendered as a plain digit string with trailing zeroes rather than exponential notation.",
+    "divergence_trap": "An implementation that assumes any number entered in scientific notation must be re-emitted in scientific notation would incorrectly output \"1e+20\" instead of the mandated fully-expanded integer form.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal_below_exponential_threshold",
+    "input_json": "{\"a\":1e-7}",
+    "canonical_output": "{\"a\":1e-7}",
+    "rule": "RFC 8785 §3.2.2.3 / ECMAScript Number::toString: for this value n=-6, which fails the '-6 < n <= 0' condition for plain decimal notation, so exponential form is used, with the exponent written without a leading '+' but with the '-' sign preserved.",
+    "divergence_trap": "A naive serializer might instead print the fully expanded decimal \"0.0000001\", which is numerically equal but not the mandated canonical text, breaking byte-for-byte canonicalization.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal_at_exponential_threshold_stays_plain",
+    "input_json": "{\"a\":0.000001}",
+    "canonical_output": "{\"a\":0.000001}",
+    "rule": "RFC 8785 §3.2.2.3 / ECMAScript Number::toString: for this value n=-5, satisfying '-6 < n <= 0', so plain \"0.\" + zeroes + digits form is used rather than exponential notation — this is the immediate neighbor of the 1e-7 case and the two together bound the exponential-switch threshold.",
+    "divergence_trap": "An implementation with an off-by-one on the exponential threshold (e.g. switching at 1e-5 instead of 1e-6) would incorrectly render this as \"1e-6\".",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "integer_precision_loss_beyond_2_pow_53",
+    "input_json": "{\"a\":9007199254740993}",
+    "canonical_output": "{\"a\":9007199254740992}",
+    "rule": "RFC 8785 §3.2.2.3: all JSON numbers are interpreted as IEEE 754 double-precision values before serialization. 9007199254740993 (2^53+1) is not exactly representable as a double; it round-trips through parsing to the nearest representable double, 9007199254740992 (2^53), which is what gets serialized.",
+    "divergence_trap": "An implementation that preserves arbitrary-precision integers internally (e.g. Python ints, or a JSON library with a BigInteger/decimal number mode) instead of forcing IEEE 754 double semantics would incorrectly emit the exact input value \"9007199254740993\" unchanged.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "trailing_zero_float_shortens",
+    "input_json": "{\"a\":1.50}",
+    "canonical_output": "{\"a\":1.5}",
+    "rule": "RFC 8785 §3.2.2.3: the value is stored as the double 1.5, and ECMAScript Number::toString produces the shortest decimal string that round-trips to that double, which has no trailing zero.",
+    "divergence_trap": "A naive text-preserving or fixed-precision formatter might retain the original literal \"1.50\", or a fixed-decimal-places formatter might produce \"1.500000\", either of which diverges from the mandated \"1.5\".",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "solidus_must_not_be_escaped",
+    "input_json": "{\"a\":\"x\\/y\"}",
+    "canonical_output": "{\"a\":\"x/y\"}",
+    "rule": "RFC 8785 §3.2.2.2 (string serialization per its restricted subset of RFC 8259 escaping): the solidus '/' is not among the characters JCS escapes, regardless of whether the input JSON happened to escape it.",
+    "divergence_trap": "Some JSON encoders (notably several Java/PHP JSON libraries by default) escape '/' as '\\/' when re-serializing; applying that habit here would wrongly reproduce {\"a\":\"x\\/y\"} instead of the un-escaped form.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "control_char_without_short_escape_uses_lowercase_u00xx",
+    "input_json": "{\"a\":\"\\u0001\"}",
+    "canonical_output": "{\"a\":\"\\u0001\"}",
+    "rule": "RFC 8785 §3.2.2.2: characters U+0000–U+001F that do not have one of the dedicated short escapes (\\b \\f \\n \\r \\t \\\" \\\\) MUST be escaped as \\u followed by exactly four lowercase hexadecimal digits.",
+    "divergence_trap": "An implementation using uppercase hex digits (e.g. \\u0001 rendered as \\u0001 is the same here since digits are the same, but for letters A-F it would matter, e.g. U+001B would need \\u001b not \\u001B) — flagged as the general trap class; a naive serializer using uppercase hex would fail on control chars whose hex digits include letters.",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "DEL_0x7f_not_escaped",
+    "input_json": "{\"a\":\"\u007f\"}",
+    "canonical_output": "{\"a\":\"\u007f\"}",
+    "rule": "RFC 8785 §3.2.2.2 only mandates escaping for U+0000–U+001F (plus the dedicated short-escape set and the mandatory quote/backslash escapes); U+007F (DEL) is outside that range and is emitted as a literal (UTF-8-encoded) byte, unescaped.",
+    "divergence_trap": "An overly conservative implementation that treats all ASCII control-adjacent characters (including DEL) as needing escaping would incorrectly emit \\u007f instead of the literal byte.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "utf16_code_unit_ordering_vs_code_point_ordering",
+    "input_json": "{\"\ud83d\ude00\":1,\"\ue000\":2}",
+    "canonical_output": "{\"\ud83d\ude00\":1,\"\ue000\":2}",
+    "rule": "RFC 8785 §3.2.3: object member names MUST be sorted by comparing their UTF-16 code unit sequences. The supplementary-plane character U+1F600 (😀) is represented in UTF-16 as the surrogate pair 0xD83D 0xDE00; its leading code unit 0xD83D (55357) is numerically LESS than the single code unit 0xE000 (57344) for the BMP Private-Use-Area character U+E000, so 😀 sorts BEFORE U+E000 under UTF-16 code-unit comparison — even though by Unicode code-point value U+1F600 (128512) is numerically GREATER than U+E000 (57344).",
+    "divergence_trap": "An implementation that sorts keys by Unicode code-point value instead of UTF-16 code-unit value (e.g. Python's default string comparison, which compares by code point since Python 3 strings are sequences of code points) would order U+E000 before 😀, producing {\"\ue000\":2,\"\ud83d\ude00\":1} — the wrong order per JCS. Note that JavaScript's native string comparison (and thus naive JSON.stringify-with-sorted-keys in JS) already compares by UTF-16 code unit and would coincidentally get this case right.",
+    "certainty": "probable"
+  },
+  {
+    "vector_name": "empty_object_and_empty_array_no_internal_whitespace",
+    "input_json": "{\"a\":{},\"b\":[]}",
+    "canonical_output": "{\"a\":{},\"b\":[]}",
+    "rule": "RFC 8785 §3.2.1 (general serialization) prohibits all insignificant whitespace; empty containers are rendered with no space between the delimiters.",
+    "divergence_trap": "A pretty-printing or default-configured serializer (e.g. some libraries' default indent settings) might render these as \"{ }\" or \"[ ]\" or with newlines, which is disallowed under JCS.",
+    "certainty": "rfc-exact"
+  }
+]
+```

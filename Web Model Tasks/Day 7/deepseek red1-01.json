@@ -1,0 +1,93 @@
+{
+  "draft_id": "OpenROAD issue #6066",
+  "verdict": "reject",
+  "attacks": [
+    {
+      "claim": "20k routing congestion DRCs",
+      "problem": "Conflates global-route congestion with detailed-route DRCs. GRT failure produces overflow/congestion violations, not DRCs.",
+      "correction": "State '20k global-route congestion overflows' or '20k overflowed G-cells'."
+    },
+    {
+      "claim": "routing-layer adjustment of 0.45 is too aggressive",
+      "problem": "Ambiguous/inverted parameter semantics. If it is a capacity-reduction factor, 0.45 removes more capacity than 0.2; lowering it increases resources.",
+      "correction": "Say 'the layer-adjustment factor over-reduced routing resources; lowering it from 0.45 to 0.2 increased available capacity and allowed GRT to complete.'"
+    },
+    {
+      "claim": "routing-layer adjustment (singular) vs 'routing layer adjustments' (plural)",
+      "problem": "Inconsistent number and scope of the parameter.",
+      "correction": "Specify which layer(s) changed, or consistently say 'the layer-adjustment setting'."
+    },
+    {
+      "claim": "Chosen intervention changed layer adjustment and congestion iterations",
+      "problem": "Two variables changed simultaneously; no ablation isolates cause.",
+      "correction": "Report both changes and state that their relative contribution is unknown."
+    },
+    {
+      "claim": "default 30 congestion iterations were also insufficient",
+      "problem": "Weakly supported; 30→35 is small and no isolation shown.",
+      "correction": "State that iterations were increased from default 30 to 35; necessity is not established."
+    },
+    {
+      "claim": "candidates_considered lists iteration increase twice",
+      "problem": "Duplicate candidate entry.",
+      "correction": "Merge into one candidate: 'change congestion/overflow iteration count (default 30; ultimately 35)'."
+    },
+    {
+      "claim": "open space at top of die and congestion at top",
+      "problem": "Tension unless local blockage mechanism is explained.",
+      "correction": "Explain local pin density/macro blockage despite low average density."
+    },
+    {
+      "claim": "placement density 0.24",
+      "problem": "Unclear whether this is global-placement target or measured utilization.",
+      "correction": "Define the density metric precisely."
+    },
+    {
+      "claim": "0.45 originally derived from other asap7 designs",
+      "problem": "No support in provided evidence.",
+      "correction": "Remove or mark as unverified thread context."
+    },
+    {
+      "claim": "direct_quote covers only layer adjustment, but chosen_intervention quotes iteration/complete BoomTile",
+      "problem": "Quotation mismatch.",
+      "correction": "Extend direct quote or add a second direct quote."
+    },
+    {
+      "claim": "We (eder-matheus) note...",
+      "problem": "Conflates reviewer with issue commenter.",
+      "correction": "Use 'eder-matheus notes...' or 'the thread notes...'"
+    },
+    {
+      "claim": "set-global-routing-layer-adjustment",
+      "problem": "Likely wrong command name; OpenROAD uses underscores.",
+      "correction": "Use set_global_routing_layer_adjustment after verification."
+    },
+    {
+      "claim": "whether parameter change was merged as a code change; No PR link for the fix",
+      "problem": "Mis-frames a flow/config parameter change as source-code change.",
+      "correction": "Ask whether the parameter change was adopted into ORFS configuration or remained local."
+    },
+    {
+      "claim": "post_state says GRT completed, but issue later closed stale",
+      "problem": "No maintainer validation or merged fix.",
+      "correction": "State that thread reports local completion; issue closed stale with no merged fix."
+    },
+    {
+      "claim": "Title 'BoomTile/Megaboom'",
+      "problem": "Overstates scope; record says BoomTile (Megaboom-derived).",
+      "correction": "Use 'BoomTile (Megaboom-derived)' or 'BoomTile'."
+    },
+    {
+      "claim": "Reported via run-me-BoomTile-asap7-base.sh gui",
+      "problem": "That is a reproduction/observation command, not a reporting channel.",
+      "correction": "Label it 'reproduction/observation command'."
+    },
+    {
+      "claim": "confidence 0.8",
+      "problem": "Too high given mislabeling, ambiguity, confounding, and missing post-fix measurements.",
+      "correction": "Lower to roughly 0.4–0.6 unless directly supported."
+    }
+  ],
+  "corrected_summary": "BoomTile (Megaboom-derived) in asap7/ORFS reported ~20k global-route congestion overflows at 0.24 placement density; the thread reports GRT completed after changing the global-routing layer adjustment from 0.45 to 0.2 and congestion iterations from 30 to 35, but the changes are confounded and no post-fix overflow count, detailed-route DRC count, or merged fix is reported.",
+  "confidence": 0.95
+}

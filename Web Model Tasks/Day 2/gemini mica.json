@@ -1,0 +1,106 @@
+[
+  {
+    "case_name": "Reserve-Coverage Test (Baseline)",
+    "inputs": {
+      "token_supply_units": 100000000.0,
+      "par_value_per_token_eur": 1.0,
+      "total_token_obligation_eur": 100000000.0,
+      "reserve_assets_market_value_eur": 102000000.0,
+      "units": "EUR"
+    },
+    "computation": {
+      "total_token_obligation": "token_supply_units * par_value_per_token_eur = 100000000.0 * 1.0 = 100000000.0",
+      "coverage_ratio": "reserve_assets_market_value_eur / total_token_obligation_eur = 102000000.0 / 100000000.0 = 1.0200",
+      "coverage_percentage": "1.0200 * 100 = 102.0%",
+      "surplus_deficit_eur": "reserve_assets_market_value_eur - total_token_obligation_eur = 102000000.0 - 100000000.0 = 2000000.0"
+    },
+    "result": {
+      "coverage_ratio": 1.02,
+      "coverage_percentage": "102.0%",
+      "verdict": "ADEQUATE — Passes 100% full-backing reserve requirement under MiCA Article 36(1)."
+    },
+    "article_basis": "Article 36(1)",
+    "tail_convention": "For reserve coverage ratio, the LOW tail (coverage < 1.0) is adverse. This baseline test verifies that the current ratio (1.02) lies safely above the minimum threshold of 1.0.",
+    "weakest_point": "Assumes fair market values of reserve assets reflect real-time liquidatable value without considering execution slippage or liquidation delays."
+  },
+  {
+    "case_name": "Own-Funds Requirement Computation (ART Issuer)",
+    "inputs": {
+      "average_reserve_assets_eur": 100000000.0,
+      "fixed_minimum_capital_eur": 350000.0,
+      "reserve_percentage_parameter": "OWN_FUNDS_RESERVE_PERCENTAGE_PARAM = 0.02",
+      "units": "EUR"
+    },
+    "computation": {
+      "fixed_minimum_test_eur": 350000.0,
+      "variable_reserve_test_eur": "average_reserve_assets_eur * OWN_FUNDS_RESERVE_PERCENTAGE_PARAM = 100000000.0 * 0.02 = 2000000.0",
+      "required_own_funds_eur": "max(fixed_minimum_test_eur, variable_reserve_test_eur) = max(350000.0, 2000000.0) = 2000000.0"
+    },
+    "result": {
+      "required_own_funds_eur": 2000000.0,
+      "verdict": "REQUIREMENT_COMPUTED — Minimum required own funds set to 2,000,000.00 EUR under MiCA Article 35(1) parameterization."
+    },
+    "article_basis": "Article 35(1)",
+    "tail_convention": "For own-funds adequacy, the LOW tail (actual own funds < required own funds) is adverse. This test computes the minimum threshold parameter to define the adverse boundary.",
+    "weakest_point": "Uses a single static percentage parameter (2%) for reserve assets without applying the tiered/scaled bracket structure if additional tiering rules apply."
+  },
+  {
+    "case_name": "Stressed Reserve-Coverage Test (Asset Haircuts)",
+    "inputs": {
+      "token_supply_units": 100000000.0,
+      "par_value_per_token_eur": 1.0,
+      "total_token_obligation_eur": 100000000.0,
+      "reserve_cash_eur": 20000000.0,
+      "reserve_bonds_eur": 50000000.0,
+      "reserve_other_assets_eur": 32000000.0,
+      "haircut_cash": 0.00,
+      "haircut_bonds": 0.05,
+      "haircut_other_assets": 0.20,
+      "units": "EUR"
+    },
+    "computation": {
+      "stressed_cash_eur": "20000000.0 * (1 - 0.00) = 20000000.0",
+      "stressed_bonds_eur": "50000000.0 * (1 - 0.05) = 47500000.0",
+      "stressed_other_assets_eur": "32000000.0 * (1 - 0.20) = 25600000.0",
+      "total_stressed_reserve_assets_eur": "20000000.0 + 47500000.0 + 25600000.0 = 93100000.0",
+      "stressed_coverage_ratio": "total_stressed_reserve_assets_eur / total_token_obligation_eur = 93100000.0 / 100000000.0 = 0.9310",
+      "stressed_coverage_percentage": "0.9310 * 100 = 93.10%",
+      "reserve_deficit_eur": "total_token_obligation_eur - total_stressed_reserve_assets_eur = 100000000.0 - 93100000.0 = 6900000.0"
+    },
+    "result": {
+      "stressed_coverage_ratio": 0.931,
+      "stressed_coverage_percentage": "93.10%",
+      "verdict": "INADEQUATE — Fails 100% full-backing reserve requirement under MiCA Article 36(1) under adverse stressed market conditions."
+    },
+    "article_basis": "Article 36(1)",
+    "tail_convention": "LOW tail is adverse. The stress test specifically evaluates the downward movement (adverse tail) of reserve asset valuations to verify if coverage drops below 1.0.",
+    "weakest_point": "Haircut percentages are static inputs and do not model dynamic correlation shocks or liquidity freezing across asset classes."
+  },
+  {
+    "case_name": "Redemption-at-Par Obligation Math",
+    "inputs": {
+      "redemption_request_tokens": 15000000.0,
+      "par_value_per_token_eur": 1.0,
+      "redemption_fee_policy_eur": 0.0,
+      "pre_redemption_reserve_eur": 102000000.0,
+      "pre_redemption_token_supply": 100000000.0,
+      "units": "EUR"
+    },
+    "computation": {
+      "gross_redemption_value_eur": "redemption_request_tokens * par_value_per_token_eur = 15000000.0 * 1.0 = 15000000.0",
+      "net_payout_to_holder_eur": "gross_redemption_value_eur - redemption_fee_policy_eur = 15000000.0 - 0.0 = 15000000.0",
+      "post_redemption_token_supply": "pre_redemption_token_supply - redemption_request_tokens = 100000000.0 - 15000000.0 = 85000000.0",
+      "post_redemption_obligation_eur": "post_redemption_token_supply * par_value_per_token_eur = 85000000.0 * 1.0 = 85000000.0",
+      "post_redemption_reserve_eur": "pre_redemption_reserve_eur - net_payout_to_holder_eur = 102000000.0 - 15000000.0 = 87000000.0",
+      "post_redemption_coverage_ratio": "post_redemption_reserve_eur / post_redemption_obligation_eur = 87000000.0 / 85000000.0 = 1.023529"
+    },
+    "result": {
+      "net_payout_eur": 15000000.0,
+      "post_redemption_coverage_ratio": 1.023529,
+      "verdict": "ADEQUATE — Full redemption satisfied at par without fee under MiCA Article 39 / Article 49; post-redemption coverage ratio remains above 100% (102.35%)."
+    },
+    "article_basis": "Article 39",
+    "tail_convention": "For redemption execution, the LOW tail of payout ratio (actual payout / guaranteed par value < 1.0) is adverse. This test verifies exact 1:1 redemption (ratio = 1.0).",
+    "weakest_point": "Assumes immediate liquidity availability in reserve assets to fulfill large cash redemptions without forcing fire sales."
+  }
+]

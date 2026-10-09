@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Embrace high clock frequency alongside traditional high-IPC approach",
+    "where_in_paper": "Introduction / Guiding principles (Very-high-frequency design)",
+    "decision": "Adopt a high-frequency (speed-demon) design philosophy in addition to the traditional high-IPC (brainiac) approach for IBM UNIX systems",
+    "alternatives_or_rejected": "Pure brainiac (complex design prioritizing higher instructions-per-cycle at lower frequency), which IBM UNIX systems had traditionally followed",
+    "rationale": "To maintain a leadership position and deliver best-of-breed operating frequencies while still pursuing complex superscalar out-of-order design; system designed so bus frequencies scale with processor frequency to preserve balance as technology improves",
+    "outcome": "POWER4 introduced at 1.1 GHz and 1.3 GHz, surpassing other 64-bit microprocessors in key benchmarks; long pipeline mitigated by heavy investment in multilevel branch prediction",
+    "quote_as_recalled": "In the ongoing debate between the “speed demons” (high clock rate) and the “braniacs” ... IBM opted to also embrace the speed-demon approach.",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact wording of the full quote fragment may have minor punctuation variation",
+    "confidence": 0.92
+  },
+  {
+    "title": "RAS philosophy: eliminate outages and convert checkstops to recoverable interrupts",
+    "where_in_paper": "Guiding principles (Leadership in reliability, availability, and serviceability)",
+    "decision": "Require an approach that eliminates outages, provides redundancy where errors cannot be eliminated, and transforms hard machine stops (checkstops) into synchronous machine interrupts to software whenever possible",
+    "alternatives_or_rejected": "Achieving high reliability merely by choosing reliable parts and incorporating ECC into major arrays",
+    "rationale": "Servers have evolved toward continuous operation; high levels of reliability cannot be achieved only by reliable parts and ECC; system must circumvent problems if possible",
+    "outcome": "RAS attributes previously seen only in mainframes designed into POWER4 systems (detailed further in companion paper by Bossen et al.)",
+    "quote_as_recalled": "we accepted the principle that one does not achieve high levels of reliability only by choosing reliable parts and incorporating error-correction-code (ECC) logic into major arrays.",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Precise length of the quoted fragment",
+    "confidence": 0.90
+  },
+  {
+    "title": "Full-system design and distributed-switch interconnect for scalable SMP",
+    "where_in_paper": "Introduction and Guiding principles (Full-system design approach); later interconnect discussion",
+    "decision": "Design the entire system together (processor, packaging, memory, I/O) from the outset and use a new distributed-switch interconnect topology to form SMPs up to 32-way",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "A new high-performance processor needs a new subsystem to feed it effectively; marriage of process technology, packaging and microarchitecture allows software to exploit them; interconnect appears bus-like to a chip but switch-like to a module and is new to the industry",
+    "outcome": "Four chips form an 8-way MCM; four MCMs form a 32-way SMP; buses scale with processor frequency so system balance is maintained as frequency rises",
+    "quote_as_recalled": "The interconnect topology, referred to as a distributed switch, is new to the industry.",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly contrasts against a pure bus or pure crossbar alternative",
+    "confidence": 0.88
+  },
+  {
+    "title": "Dual cores sharing on-chip unified L2 via CIU crossbar",
+    "where_in_paper": "POWER4 chip section",
+    "decision": "Place two identical processor cores on one chip sharing a unified second-level cache through a core interface unit (CIU) implemented as a crossbar among three autonomous L2 controllers",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "SMP optimization principle: large number of transistors used to improve total system performance in multitasking server environments; provides two-way SMP model to software on a single chip",
+    "outcome": "Each L2 controller can feed 32 bytes per cycle concurrently; chip contains 174 million transistors; four chips packaged on one module yield an 8-way SMP",
+    "quote_as_recalled": "The design features two processors on one chip; ... The two processors share a unified second-level cache ... through a core interface unit (CIU)",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Exact page of the logical-view figure description",
+    "confidence": 0.85
+  },
+  {
+    "title": "Binary compatibility and single design for both commercial and technical workloads",
+    "where_in_paper": "Guiding principles (Binary compatibility; Balanced technical and commercial performance)",
+    "decision": "Maintain absolute binary compatibility for 32-bit and 64-bit applications with prior PowerPC and PowerPC AS systems, and use a single design addressing both technical (high-bandwidth) and commercial (data-sharing/SMP) requirements",
+    "alternatives_or_rejected": "Changing the architecture (rejected because internal task forces found no technical impediment to scaling PowerPC to higher frequencies)",
+    "rationale": "Keep customers’ software investment intact; satisfy high-performance computing bandwidth demands together with commercial data-sharing and SMP scaling needs so that one design serves both pSeries and iSeries",
+    "outcome": "POWER4 implements and extends the 64-bit PowerPC Architecture in a compatible manner; first used in pSeries, later staged into iSeries",
+    "quote_as_recalled": "With no technical reason to change, in order to keep our customers software investment intact, we accepted the absolute requirement of maintaining binary compatibility",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper lists any specific rejected architectural change beyond the general statement",
+    "confidence": 0.87
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Deep hyper-pipelining for high frequency target",
+    "where_in_paper": "Clock rates / pipeline depth discussion",
+    "decision": "Design a much deeper pipeline (approximately 2× the P6 microarchitecture, ~20-stage misprediction pipeline) with fewer gates of logic per stage to enable a >1.6× higher frequency target on the same process technology.",
+    "alternatives_or_rejected": "Shallower pipeline like the P6 family that keeps higher instructions-per-clock efficiency at a given frequency.",
+    "rationale": "Higher clock rates more than compensate for the lower per-clock efficiency caused by longer misprediction and cache-miss penalties; the frequency headroom was the primary performance lever for the NetBurst family.",
+    "outcome": "Industry-leading clock rates (1.5 GHz at introduction) and the highest SPECint_base scores of any processor at the time, despite deeper recovery penalties.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Execution Trace Cache as primary L1 instruction cache",
+    "where_in_paper": "Trace Cache section",
+    "decision": "Replace a conventional instruction cache with an Execution Trace Cache that stores already-decoded uops in program-order traces (up to 12K uops) and delivers up to three uops per clock.",
+    "alternatives_or_rejected": "A traditional IA-32 instruction cache that requires repeated decoding of variable-length instructions on every fetch.",
+    "rationale": "IA-32 instructions are cumbersome to decode (variable length, many options); caching decoded uops bypasses the decoder most of the time, reduces misprediction latency, and allows the decoder itself to be simplified to one instruction per cycle.",
+    "outcome": "Trace Cache hit rate comparable to an 8–16 KB conventional I-cache; decoder is off the critical path for most execution, supporting the deep pipeline.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.95
+  },
+  {
+    "title": "Reduced second FP/SSE execution port",
+    "where_in_paper": "Floating-point / SSE execution resources",
+    "decision": "Provide only one full FP/SSE execution unit plus a simple second port limited to FP/SSE moves and store-data primitives, rather than two full-featured units.",
+    "alternatives_or_rejected": "Two complete FP/SSE execution units (the early design point).",
+    "rationale": "Two full units cost substantial die area and power while delivering only modest extra performance for most FP/SSE applications; the simple second port captured most of the benefit of a second full port at far lower cost. Many FP workloads interleave multiplies and adds and can keep a single complex unit busy.",
+    "outcome": "Most of the performance of a dual full-port design at significantly lower area and power; the cost/performance tradeoff was judged favorable.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Double-clocked (2×) ALUs for rapid integer execution",
+    "where_in_paper": "Rapid Execution Engine / integer execution",
+    "decision": "Clock the basic integer ALUs at twice the core frequency so that simple integer operations can complete in half a processor clock cycle.",
+    "alternatives_or_rejected": "Single-speed ALUs running at the main core clock (as in prior designs).",
+    "rationale": "Basic integer operations are critical to overall IPC; running them at 2× frequency effectively provides higher throughput and lower latency for the most common operations without requiring a still-deeper main pipeline.",
+    "outcome": "Rapid Execution Engine capable of high integer throughput supporting the overall NetBurst performance targets.",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.9
+  },
+  {
+    "title": "Low-latency L1 data cache design",
+    "where_in_paper": "Cache hierarchy / L1 data cache",
+    "decision": "Implement a new low-latency L1 data-cache organization and algorithms optimized for the deep pipeline and high frequency.",
+    "alternatives_or_rejected": "Conventional higher-latency L1 data-cache designs sized or timed as in the P6 family.",
+    "rationale": "With a deeper pipeline, load-to-use latency becomes a larger fraction of the critical path; minimizing L1 data-cache latency was essential to keep dependent integer operations from stalling.",
+    "outcome": "Lower effective load latency that helped preserve IPC despite the longer overall pipeline.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.75
+  }
+]

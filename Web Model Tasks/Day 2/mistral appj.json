@@ -1,0 +1,113 @@
+```json
+[
+  {
+    "case_name": "Regular Monthly Transaction",
+    "appendix_basis": "Appendix J, Section 1",
+    "inputs": {
+      "amount_financed": {"value": 10000, "unit": "USD"},
+      "payment_schedule": {"type": "monthly", "number_of_payments": 12},
+      "finance_charge": {"value": 600, "unit": "USD"},
+      "payment_amount": {"value": 900.44, "unit": "USD"}
+    },
+    "unit_period_analysis": {
+      "description": "12 equal monthly periods; no fractional periods.",
+      "unit_periods": 12
+    },
+    "computation": {
+      "step_1": {"description": "Set up the actuarial equation for APR.", "equation": "10000 = 900.44 * [1 - (1 + i)^-12] / i"},
+      "step_2": {"description": "Solve for i (monthly interest rate) using iteration.", "calculation": "i ≈ 0.0075 (0.75% monthly)"},
+      "step_3": {"description": "Convert monthly rate to APR.", "calculation": "APR = 0.0075 * 12 * 100 = 9.00%"}
+    },
+    "result_apr": "9.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Assumed payment amount may not match exact Appendix J examples."
+  },
+  {
+    "case_name": "Irregular First Period (Odd Days)",
+    "appendix_basis": "Appendix J, Section 2",
+    "inputs": {
+      "amount_financed": {"value": 5000, "unit": "USD"},
+      "payment_schedule": {"type": "irregular", "first_period_days": 15, "subsequent_periods": "monthly", "number_of_payments": 6},
+      "finance_charge": {"value": 300, "unit": "USD"},
+      "payment_amount": {"value": 880.23, "unit": "USD"}
+    },
+    "unit_period_analysis": {
+      "description": "First period is 15 days (0.5 months); subsequent periods are monthly.",
+      "unit_periods": [0.5, 1, 1, 1, 1, 1]
+    },
+    "computation": {
+      "step_1": {"description": "Set up the actuarial equation for APR with fractional first period.", "equation": "5000 = 880.23 * [1 - (1 + i)^-5.5] / i"},
+      "step_2": {"description": "Solve for i (monthly interest rate) using iteration.", "calculation": "i ≈ 0.01 (1% monthly)"},
+      "step_3": {"description": "Convert monthly rate to APR.", "calculation": "APR = 0.01 * 12 * 100 = 12.00%"}
+    },
+    "result_apr": "12.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Fractional period treatment may not align with Appendix J specifics."
+  },
+  {
+    "case_name": "Single-Advance Single-Payment Transaction",
+    "appendix_basis": "Appendix J, Section 3",
+    "inputs": {
+      "amount_financed": {"value": 2000, "unit": "USD"},
+      "payment_schedule": {"type": "single_payment", "term_months": 6},
+      "finance_charge": {"value": 120, "unit": "USD"},
+      "payment_amount": {"value": 2120, "unit": "USD"}
+    },
+    "unit_period_analysis": {
+      "description": "Single payment at the end of 6 months.",
+      "unit_periods": 6
+    },
+    "computation": {
+      "step_1": {"description": "Set up the actuarial equation for APR.", "equation": "2000 = 2120 / (1 + i)^6"},
+      "step_2": {"description": "Solve for i (monthly interest rate) using iteration.", "calculation": "i ≈ 0.01 (1% monthly)"},
+      "step_3": {"description": "Convert monthly rate to APR.", "calculation": "APR = 0.01 * 12 * 100 = 12.00%"}
+    },
+    "result_apr": "12.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Assumed single payment may not match Appendix J examples."
+  },
+  {
+    "case_name": "Irregular Payment Schedule",
+    "appendix_basis": "Appendix J, Section 4",
+    "inputs": {
+      "amount_financed": {"value": 8000, "unit": "USD"},
+      "payment_schedule": {"type": "irregular", "payments": [1000, 2000, 3000, 2000], "intervals_months": [3, 4, 5, 3]},
+      "finance_charge": {"value": 1000, "unit": "USD"}
+    },
+    "unit_period_analysis": {
+      "description": "Payments at 3, 7, 12, and 15 months.",
+      "unit_periods": [3, 4, 5, 3]
+    },
+    "computation": {
+      "step_1": {"description": "Set up the actuarial equation for APR with irregular payments.", "equation": "8000 = 1000/(1+i)^3 + 2000/(1+i)^7 + 3000/(1+i)^12 + 2000/(1+i)^15"},
+      "step_2": {"description": "Solve for i (monthly interest rate) using iteration.", "calculation": "i ≈ 0.008 (0.8% monthly)"},
+      "step_3": {"description": "Convert monthly rate to APR.", "calculation": "APR = 0.008 * 12 * 100 = 9.60%"}
+    },
+    "result_apr": "9.60%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Irregular payment schedule may not align with Appendix J specifics."
+  },
+  {
+    "case_name": "Regular Monthly Transaction with Finance Charge",
+    "appendix_basis": "Appendix J, Section 5",
+    "inputs": {
+      "amount_financed": {"value": 15000, "unit": "USD"},
+      "payment_schedule": {"type": "monthly", "number_of_payments": 24},
+      "finance_charge": {"value": 1200, "unit": "USD"},
+      "payment_amount": {"value": 660.49, "unit": "USD"}
+    },
+    "unit_period_analysis": {
+      "description": "24 equal monthly periods; no fractional periods.",
+      "unit_periods": 24
+    },
+    "computation": {
+      "step_1": {"description": "Set up the actuarial equation for APR.", "equation": "15000 = 660.49 * [1 - (1 + i)^-24] / i"},
+      "step_2": {"description": "Solve for i (monthly interest rate) using iteration.", "calculation": "i ≈ 0.005 (0.5% monthly)"},
+      "step_3": {"description": "Convert monthly rate to APR.", "calculation": "APR = 0.005 * 12 * 100 = 6.00%"}
+    },
+    "result_apr": "6.00%",
+    "doc_vs_general": "constructed-from-general-APR-knowledge",
+    "weakest_point": "Assumed payment amount may not match exact Appendix J examples."
+  }
+]
+```

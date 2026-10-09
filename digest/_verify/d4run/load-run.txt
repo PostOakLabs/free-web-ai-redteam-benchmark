@@ -1,0 +1,85 @@
+G1 CENSUS ASSERT: census=73 loaded=73 skipped=0 halted=0  -> PASS
+
+[alpha] 15 files  prompt=D2-ALPHA21264-RECALL.md  ground_truth=Alpha21264-pagemarked.txt
+   chatgpt alpha.json                 items=  5 clean                       
+   deepseek alpha.json                items=  5 clean                       
+   gemini alpha.json                  items=  5 clean                       
+   glm 5.3 flash alpha.json           items=  5 clean                       
+   grok alpha.json                    items=  5 clean                       
+   kimi alpha.json                    items=  5 clean                       
+   longcat alpha.json                 items=  5 clean                       
+   meta alpha.json                    items=  5 clean                       
+   mimo alpha.json                    items=  5 clean                       
+   minimax 2.7 alpha.json             items=  5 clean                       
+   minimax m3 alpha.json              items=  4 harvest-skip-broken-element   [harvest-skip-broken-element]
+   mistral alpha.json                 items=  4 clean                       
+   qwen alpha.json                    items=  4 clean                       
+   sonnet alpha.json                  items=  4 clean                       
+   yuanbao power.json                 items=  4 clean                         MISFILED-AS-COLLECTED
+
+[lvs] 15 files  prompt=F-LVS-MISMATCH-CLASSES.md  ground_truth=NONE (no paper)
+   chatgpt lvs.json                   items=  2 clean                       
+   deepseek lvs.json                  items=  2 clean                       
+   gemini lvs.json                    items=  2 clean                       
+   glm 5.3 flash lvs.json             items=  2 clean                       
+   grok lvs.json                      items=  2 clean                       
+   kimi lvs.json                      items=  2 clean                       
+   longcat lvs.json                   items=  2 clean                       
+   meta lvs.json                      items=  2 clean                       
+   mimo lvs.json                      items=  2 clean                       
+   minimax 2.7 lvs.json               items=  2 clean                       
+   mistral lvs.json                   items=  2 clean                       
+   qwen lvs.json                      items=  2 clean                       
+   solar lvs.json                     items=  2 clean                       
+   sonnet lvs.json                    items=  2 clean                       
+   yuanbao lvs.json                   items=  2 clean                       
+
+[niagara] 14 files  prompt=D2-NIAGARA-RECALL.md  ground_truth=Niagara-pagemarked.txt
+   chatgpt niagara.json               items=  5 clean                       
+   deepseek niagara.json              items=  5 clean                       
+   gemini niagara.json                items=  5 clean                       
+   glm 5.3 flash niagara.json         items=  5 clean                       
+   grok niagara.json                  items=  5 clean                       
+   kimi niagara.json                  items=  5 clean                       
+   meta niagara.json                  items=  5 clean                       
+   mimo niagara.json                  items=  5 clean                       
+   minimax 2.7 niagara.json           items=  4 clean                       
+   mistral niagara.json               items=  5 clean                       
+   qwen niagara.json                  items=  5 clean                       
+   solar niagara.json                 items=  5 clean                       
+   sonnet niagara.json                items=  5 clean                       
+   yuanbao niagara.json               items=  5 clean                       
+
+[p4] 15 files  prompt=D2-PENTIUM4-RECALL.md  ground_truth=Pentium4-pagemarked.txt
+   chatgpt p4.json                    items=  5 clean                       
+   deepseek p4.json                   items=  5 clean                       
+   gemini p4.json                     items=  5 clean                       
+   glm 5.3 flash p4.json              items=  0 FAILED                        ERROR: Invalid control character at at line 7 col 305 (char 772)
+   grok p4.json                       items=  5 clean                       
+   kimi p4.json                       items=  5 clean                       
+   longcat p4.json                    items=  5 clean                       
+   meta p4.json                       items=  5 clean                       
+   mimo p4.json                       items=  5 clean                       
+   minimax 2.7 p4.json                items=  5 clean                       
+   minimax m3 p4.json                 items=  4 clean                       
+   mistral p4.json                    items=  5 clean                       
+   qwen p4.json                       items=  5 clean                       
+   sonnet p4.json                     items=  4 clean                       
+   yuanbao p4.json                    items=  4 clean                       
+
+[pphysical] 14 files  prompt=D2-POWER4-PHYSICAL-RECALL.md  ground_truth=POWER4-cpd-pagemarked.txt
+   deepseek pphysical.json            items=  5 clean                       
+   gemini pphysical.json              items=  4 clean                       
+   glm 5.3 flash pphysical.json       items=  5 clean                       
+   grok pphysical.json                items=  5 clean                       
+   kimi pphysical.json                items=  5 clean                       
+   longcat pphysical.json             items=  5 clean                       
+   meta pphysical.json                items=  4 clean                       
+   mimo pphysical.json                items=  5 clean                       
+   minimax 2.7 pphysical.json         items=  4 clean                       
+   mistral pphysical.json             items=  5 clean                       
+   qwen pphysical.json                items=  5 clean                       
+   solar pphysical.json               items=  4 clean                       
+   sonnet pphysical.json              items=  5 clean                       
+   yuanbao pphysical.json             items=  5 clean                       
+

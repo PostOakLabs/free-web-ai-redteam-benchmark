@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Execution Trace Cache vs Conventional L1 Instruction Cache",
+    "where_in_paper": "Front End / Execution Trace Cache",
+    "decision": "Implement a 12K-uop Execution Trace Cache that stores decoded micro-ops in dynamic program order instead of a traditional L1 instruction cache.",
+    "alternatives_or_rejected": "Conventional L1 instruction cache storing un-decoded x86 macro-instructions.",
+    "rationale": "x86 variable-length instruction decoding is power-intensive and limits fetch bandwidth; a trace cache supplies pre-decoded uops at high bandwidth and naturally resolves taken branches within a trace.",
+    "outcome": "Enabled high-bandwidth fetch of up to 3 uops per cycle and reduced the fetch/decode power and complexity.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact 12K-uop size and 3 uops/cycle bandwidth might be slightly off, though the trace cache concept is definitely the core of that section.",
+    "confidence": 0.9
+  },
+  {
+    "title": "Rapid Execution Engine with Double-Pumped ALUs",
+    "where_in_paper": "Execution Core / Rapid Execution Engine",
+    "decision": "Clock the basic integer ALUs at twice the core clock frequency (double-pumped).",
+    "alternatives_or_rejected": "Running ALUs at the core clock frequency with a wider issue width or more ALUs to achieve the same throughput.",
+    "rationale": "Reduces the latency of back-to-back dependent integer instructions to a single half-cycle, improving performance without the area and power cost of a much wider out-of-order engine.",
+    "outcome": "Achieved a 2x throughput for basic integer operations and a 1-cycle (half core clock) latency for dependent integer instructions.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 12,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly states the rejected alternative of 'wider issue width' or just frames it as a latency/throughput optimization.",
+    "confidence": 0.85
+  },
+  {
+    "title": "20-Stage Hyper Pipelined Technology",
+    "where_in_paper": "Pipeline / Microarchitecture Overview",
+    "decision": "Implement a 20-stage instruction pipeline, roughly double the depth of the previous P6 microarchitecture.",
+    "alternatives_or_rejected": "A shorter, more traditional pipeline depth with lower misprediction penalty but lower maximum clock frequency.",
+    "rationale": "A deeper pipeline reduces the logic depth per stage, enabling significantly higher clock frequencies which scale performance, while relying on the advanced branch predictor and trace cache to mitigate the increased misprediction penalty.",
+    "outcome": "Allowed the Pentium 4 to reach initial clock speeds of 1.4 GHz and 1.5 GHz, with a clear path to higher frequencies.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The explicit naming of P6's depth as the 'rejected alternative' might be implicit rather than explicitly argued against in those exact terms.",
+    "confidence": 0.85
+  },
+  {
+    "title": "On-Die Advanced Transfer Cache",
+    "where_in_paper": "Memory Subsystem / L2 Cache",
+    "decision": "Integrate a 256KB L2 cache on the same die as the core, running at full core speed with a 256-bit (32-byte) wide data bus.",
+    "alternatives_or_rejected": "Off-die L2 cache on a separate die or substrate, which suffers from latency and bandwidth limits due to pin counts.",
+    "rationale": "The deep pipeline and high clock frequency require a very high bandwidth, low latency memory subsystem to keep the execution units fed; an on-die, wide-bus L2 cache provides this bandwidth without the pin-limit and latency penalties of off-die cache.",
+    "outcome": "Provided 48 GB/s of L2 bandwidth (at 1.5 GHz) and significantly reduced memory access latency compared to previous generations.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 14,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact bandwidth number (48 GB/s) might be calculated from 1.5GHz * 32 bytes, but the paper definitely mentions the 256-bit bus and on-die integration.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Quad-Pumped System Bus",
+    "where_in_paper": "System Interface / Front Side Bus",
+    "decision": "Implement a system bus that transfers data on both edges of the clock and uses a 2x multiplier (quad-pumped) to achieve 4 data transfers per bus clock cycle.",
+    "alternatives_or_rejected": "A traditional single-data-rate or double-data-rate system bus with a higher physical clock frequency.",
+    "rationale": "Increasing the physical clock frequency of the system bus is limited by motherboard trace lengths, signal integrity, and chipset I/O power; quad-pumping allows a 400 MHz effective data rate using a 100 MHz physical bus clock.",
+    "outcome": "Delivered 3.2 GB/s of system bus bandwidth, matching the high data demands of the processor without requiring a 400 MHz physical bus clock on the motherboard.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 16,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Whether the paper explicitly lists 'higher physical clock frequency' as the rejected alternative or just states the benefits of quad-pumping for signal integrity.",
+    "confidence": 0.75
+  }
+]

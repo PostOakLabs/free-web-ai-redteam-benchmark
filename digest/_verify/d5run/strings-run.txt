@@ -1,0 +1,30 @@
+TRACK B - strings, JCS conformance vs the estate canonicalizer (jcs.py)
+  models: 16   gradable: 15
+  reference: jcs.py, 12/12 RFC 8785 self-asserts pass
+  GRADED CASES: 1-4 only. Case 5 is ungradable - see the note below.
+
+  model             correct/4  right-answer-wrong-rule  parse
+  grok                      4  -                        clean+trailing-content
+  kimi                      4  -                        clean+trailing-content
+  meta                      4  -                        clean+trailing-content
+  minara                    4  -                        clean+trailing-content
+  sonnet                    4  -                        clean+fenced+trailing-content
+  deepseek                  3  -                        clean
+  glm 5.3 flash             3  -                        clean+trailing-content
+  longcat                   3  [1]                      clean+fenced+trailing-content
+  solar                     3  -                        clean
+  yuanbao                   3  -                        clean
+  gemini                    2  -                        clean+fence-close+fenced
+  mimo                      2  -                        clean+fence-close+fenced
+  minimax 2.7               2  -                        clean
+  qwen                      2  -                        clean+trailing-content
+  mistral                   1  -                        clean+trailing-content
+  chatgpt         NOT GRADABLE  salvage recovered no case-shaped records  harvest-skip-broken-element
+
+  cases correct corpus-wide: 44 of 60 graded (cases 1-4)
+
+  CASE 5 UNGRADABLE for all 15 responding models. The prompt's input
+  embeds a raw U+0007 (BEL), which chat surfaces strip on paste; every model
+  rendered s5 as a plain space or U+00A0, so none received the character.
+  Scoring it would record a TRANSMISSION LOSS as 14 model failures.
+  s1..s4 prefix correct despite that: 14 of 15.

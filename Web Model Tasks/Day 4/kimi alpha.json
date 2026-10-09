@@ -1,0 +1,72 @@
+[
+  {
+    "title": "80-instruction out-of-order window at 500–600MHz",
+    "where_in_paper": "Out-of-order execution; Instruction retire and exception handling",
+    "decision": "Implement a seven-stage processor with register renaming, separate 20-entry integer and 15-entry floating-point issue queues, and an 80-instruction in-flight window while targeting a 500–600MHz clock.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Out-of-order execution lets critical-path computations begin as soon as possible, executes independent work in parallel, and hides latency while in-order retirement preserves the architectural execution model. The paper emphasizes that the high clock does not need to restrict these dynamic-execution capabilities.",
+    "outcome": "The processor could issue four integer and two floating-point instructions per cycle, keep up to 80 instructions in partial states of completion, and retire up to 11 instructions in one cycle or sustain eight over short periods. The paper reports 50%–200% improvement over the 21164 for many applications from the added units and dynamic techniques.",
+    "quote_as_recalled": "The 21264 offers out-of-order efficiencies with higher clock speeds than competing designs, yet this speed does not restrict the microprocessor's dynamic execution capabilities.",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper does not identify a specific smaller or larger window evaluated against the clock target or quantify that particular trade-off.",
+    "confidence": 0.94
+  },
+  {
+    "title": "Two-cluster integer execution with local register-file copies",
+    "where_in_paper": "Execution engine",
+    "decision": "Split four-way integer execution into two clusters, each containing two pipes and a duplicate 80-entry integer register file. Statically slot instructions to upper or lower arbiters, dynamically select the left or right cluster, and physically place each pipeline above or below its corresponding register file.",
+    "alternatives_or_rejected": "An idealized unclustered four-way integer implementation.",
+    "rationale": "Clustering and simplified issue arbitration make the implementation simpler, faster, and lower risk. Many operations are already restricted to upper or lower pipes, critical-path computations tend to remain in one cluster, and older ready instructions receive priority, reducing cross-cluster dependence.",
+    "outcome": "The design paid one extra cycle to broadcast a result from one integer cluster to the other, but the paper estimates the clustering and arbitration simplifications cost only a few percent or less versus an idealized unclustered implementation in most applications. It retained much of a two-issue machine's simplicity while providing four-way integer issue.",
+    "quote_as_recalled": "Each pipeline is physically placed above or below its corresponding register file.",
+    "page_guess": 30,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "Describing the placement as explicitly wire-delay-driven goes beyond the paper's wording; it states the physical placement, simpler and faster clustering, and cross-cluster cycle cost.",
+    "confidence": 0.97
+  },
+  {
+    "title": "Predicted line-and-way access for a large two-way instruction cache",
+    "where_in_paper": "Instruction pipeline—Fetch; Line and way prediction",
+    "decision": "Use a 64-Kbyte, two-way set-associative instruction cache whose four-instruction fetch blocks carry predictions of both the next line and next way. Fetch uses the predicted way through a wraparound path while tag comparison, decode, and branch prediction complete outside the critical fetch loop.",
+    "alternatives_or_rejected": "The Alpha 21164's 8-Kbyte direct-mapped instruction cache and conventional set-associative access without line-and-way prediction.",
+    "rationale": "The larger two-way organization improves level-one hit rates, while prediction provides direct-mapped-like access speed and eliminates common fetch bubbles. Moving line selection, decode, branch prediction, and tag comparison out of the critical loop avoids making their logic levels part of every access.",
+    "outcome": "Line-and-way predictions were correct 85%–100% of the time for most applications, most mispredictions cost one cycle, and hysteresis counters reduced overtraining. Predictable branches could also be fetched without the usual taken-branch mis-fetch penalty.",
+    "quote_as_recalled": "combines the advantages of set-associative behavior and fetch bubble elimination, together with the fast access time of a direct-mapped cache.",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper contrasts conventional lookup behavior but does not document a separate unpredicated two-way instruction-cache implementation being prototyped or formally rejected.",
+    "confidence": 0.98
+  },
+  {
+    "title": "Speculative load consumers with a two-cycle minirestart",
+    "where_in_paper": "Speculative execution examples—load hit/miss prediction and minispeculation",
+    "decision": "For integer loads predicted to hit, issue consumers before the cache hit or miss is known so they can receive bypassed load data at the earliest possible time. On a miss, squash two integer issue cycles, return those instructions to the issue queue, and add a hit/miss predictor that suppresses this speculation for loads likely to miss.",
+    "alternatives_or_rejected": "Using the general speculative-execution abort mechanism and restarting the entire instruction pipeline; continuing to issue consumers speculatively even for loads predicted to miss.",
+    "rationale": "The minimum three-cycle integer-load latency requires consumers to issue while the cache lookup is still unresolved. A complete pipeline restart is too expensive when misses are frequent; the narrower minirestart is cheaper but can still be costly, so the saturating hit/miss predictor preserves early issue for hit-heavy code and avoids overspeculation in miss-heavy code.",
+    "outcome": "A correctly predicted hit achieved the minimum three-cycle load-to-consumer latency. A miss delayed the schedule by two cycles; a hit incorrectly predicted to miss had five-cycle effective latency but left more slots for unrelated instructions. Floating-point loads were handled differently because their four-cycle latency allowed the exact consuming instruction to be identified.",
+    "quote_as_recalled": "Given that load misses can be frequent in some applications, this technique would be too expensive.",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The exact page boundary is uncertain because the minispeculation discussion begins near the page 33–34 transition and continues through page 35.",
+    "confidence": 0.98
+  },
+  {
+    "title": "Adaptive load-wait training for store-to-load hazards",
+    "where_in_paper": "Speculative execution examples—load-after-store hazard adaptation",
+    "decision": "Issue a load before older stores when the address is unknown; if an older store later resolves to the same address, squash the load and subsequent instructions. Set the corresponding load-wait-table bit so subsequent executions delay that load until all older stores have issued, and periodically clear the table to avoid unnecessary delays.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Register renaming cannot resolve memory read-after-write dependencies because the memory address is unavailable until issue. Attempting the load early minimizes latency; dynamic hazard detection preserves correctness after an incorrect issue, and training converts a recurring misspeculation into a cheaper wait while still allowing speculative store forwarding once the older store has issued.",
+    "outcome": "The first execution could receive wrong data and be squashed, but later executions avoided the violation by delaying the marked load until older stores issued. The paper says this produces the same result as an in-order memory system while retaining the performance advantages of out-of-order execution.",
+    "quote_as_recalled": "After this type of load misspeculation, the 21264 trains to avoid it on subsequent executions by setting a bit in a load wait table.",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "The paper uses an in-order memory system as the correctness and performance baseline but does not explicitly describe it as a separately evaluated rejected implementation.",
+    "confidence": 0.96
+  }
+]

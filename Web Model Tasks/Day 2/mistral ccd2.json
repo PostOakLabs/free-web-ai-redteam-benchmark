@@ -1,0 +1,87 @@
+```json
+[
+  {
+    "case_name": "Basic_Single_Drawdown",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "drawdown_date": "2023-01-01",
+      "repayment_date": "2024-01-01",
+      "repayment_amount": 10500
+    },
+    "equation_setup": "10000 = 10500 / (1 + APRC * 365 / 365)",
+    "computation": {
+      "iteration_method": "Newton-Raphson",
+      "initial_guess": 0.05,
+      "tolerance": 1e-6
+    },
+    "result_aprc": {
+      "aprc": 4.76
+    },
+    "assumptions_applied": [
+      "immediate full drawdown",
+      "one-year interval"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Charges_Paid_at_Conclusion",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "drawdown_date": "2023-01-01",
+      "repayment_date": "2024-01-01",
+      "repayment_amount": 10500,
+      "charges": 100
+    },
+    "equation_setup": "10000 = 10600 / (1 + APRC * 365 / 365)",
+    "computation": {
+      "iteration_method": "Newton-Raphson",
+      "initial_guess": 0.05,
+      "tolerance": 1e-6
+    },
+    "result_aprc": {
+      "aprc": 5.66
+    },
+    "assumptions_applied": [
+      "immediate full drawdown",
+      "one-year interval",
+      "charges at conclusion"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "None"
+  },
+  {
+    "case_name": "Irregular_Intervals",
+    "annex_basis": null,
+    "inputs": {
+      "credit_amount": 10000,
+      "drawdown_date": "2023-01-01",
+      "repayment_dates": [
+        "2023-06-01",
+        "2024-01-01"
+      ],
+      "repayment_amounts": [
+        5000,
+        5500
+      ]
+    },
+    "equation_setup": "10000 = 5000 / (1 + APRC * 151 / 365) + 5500 / (1 + APRC * 365 / 365)",
+    "computation": {
+      "iteration_method": "Newton-Raphson",
+      "initial_guess": 0.05,
+      "tolerance": 1e-6
+    },
+    "result_aprc": {
+      "aprc": 6.8
+    },
+    "assumptions_applied": [
+      "immediate full drawdown",
+      "irregular intervals"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "None"
+  }
+]
+```

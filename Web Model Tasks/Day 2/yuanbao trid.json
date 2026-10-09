@@ -1,0 +1,103 @@
+[
+  {
+    "case_name": "Mixed-direction 10% bucket — aggregate passes despite one large increase",
+    "fees": [
+      {"name": "Origination fee", "bucket": "zero_tolerance", "le_amount": 1500, "cd_amount": 1500},
+      {"name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 800, "cd_amount": 800},
+      {"name": "Lender-required appraisal (cannot shop)", "bucket": "zero_tolerance", "le_amount": 450, "cd_amount": 450},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 120, "cd_amount": 100},
+      {"name": "Title search (shopped, from lender list)", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 480},
+      {"name": "Settlement agent (shopped, from lender list)", "bucket": "ten_pct_aggregate", "le_amount": 500, "cd_amount": 520},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 600, "cd_amount": 640},
+      {"name": "Owner's title insurance (off-list shopped)", "bucket": "no_limit", "le_amount": 400, "cd_amount": 450}
+    ],
+    "computation": "Zero bucket: LE=1500+800+450=2750, CD=1500+800+450=2750, Δ=0 → no violation. 10% bucket: LE_agg=120+300+500=920, 10% threshold=920×1.10=1012. CD_agg=100+480+520=1100. NOTE THE DEFECT THIS SUITE CATCHES: sum of individual increases inside 10% bucket = (100-120=-20)+(480-300=+180)+(520-500=+20) = +180; if you wrongly test 'sum of increases ≤ 10% of LE_agg' you get 180 ≤ 92 → false → spurious violation. Correct test is aggregate-vs-aggregate: CD_agg (1100) vs LE_agg (920); permitted max = 1012; 1100 > 1012 → VIOLATION. The mixed directions (recording fee decreased 20, title increased 180) are exactly why aggregate comparison is required. 10% excess = 1100 − 1012 = 88. No-limit bucket: not tested. Total cure = 88.",
+    "violations": {
+      "zero_tolerance": "none",
+      "ten_pct_aggregate": "VIOLATION — aggregate CD 1100 exceeds permitted 1012 by 88",
+      "cure_amount": 88,
+      "clause_basis": "12 CFR §1026.19(e)(3)(ii) — aggregate of charges for third-party services and recording fees cannot exceed aggregate disclosed by more than 10%; cure per §1026.19(f)(2)(v) refunding excess within 60 days of consummation"
+    },
+    "weakest_point": "Assigned 'Title search' and 'Settlement agent' to 10% bucket on the fact premise that borrower shopped and selected from lender's written list; if no valid written list existed, these would drop to zero_tolerance and cure would be much larger."
+  },
+  {
+    "case_name": "Mixed-direction 10% bucket — aggregate passes (defect-catching countercase)",
+    "fees": [
+      {"name": "Underwriting fee", "bucket": "zero_tolerance", "le_amount": 700, "cd_amount": 700},
+      {"name": "Affiliate title underwriting", "bucket": "zero_tolerance", "le_amount": 250, "cd_amount": 250},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 150},
+      {"name": "Title search (from list)", "bucket": "ten_pct_aggregate", "le_amount": 350, "cd_amount": 420},
+      {"name": "Survey (from list)", "bucket": "ten_pct_aggregate", "le_amount": 180, "cd_amount": 220},
+      {"name": "Pest inspection (from list)", "bucket": "ten_pct_aggregate", "le_amount": 120, "cd_amount": 90},
+      {"name": "Initial escrow deposit", "bucket": "no_limit", "le_amount": 1500, "cd_amount": 1620}
+    ],
+    "computation": "Zero bucket: LE=700+250=950, CD=700+250=950, Δ=0 → no violation. 10% bucket: LE_agg=200+350+180+120=850, threshold=850×1.10=935. CD_agg=150+420+220+90=880. Sum-of-increases test (WRONG) would compute: recording −50, title +70, survey +40, pest −30 → net +30; 30 ≤ 85 → would pass anyway here, but the correct aggregate test is CD_agg vs LE_agg: 880 ≤ 935 → PASS. Mixed directions present (recording ↓50, pest ↓30, title ↑70, survey ↑40) so aggregate comparison is mandatory. No 10% violation. No-limit not tested. Total cure = 0.",
+    "violations": {
+      "zero_tolerance": "none",
+      "ten_pct_aggregate": "PASS — CD aggregate 880 ≤ 935 permitted",
+      "cure_amount": 0,
+      "clause_basis": "12 CFR §1026.19(e)(3)(ii) aggregate-vs-aggregate test"
+    },
+    "weakest_point": "All 10%-bucket fees assumed selected from lender's written list; absence of a compliant list would reclassify them to zero_tolerance."
+  },
+  {
+    "case_name": "Zero-tolerance breach — lender-controlled fees increase",
+    "fees": [
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1200, "cd_amount": 1250},
+      {"name": "Discount points", "bucket": "zero_tolerance", "le_amount": 3000, "cd_amount": 3000},
+      {"name": "Mortgage broker fee", "bucket": "zero_tolerance", "le_amount": 750, "cd_amount": 800},
+      {"name": "Transfer taxes", "bucket": "zero_tolerance", "le_amount": 500, "cd_amount": 500},
+      {"name": "Credit report (cannot shop)", "bucket": "zero_tolerance", "le_amount": 60, "cd_amount": 75},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 110, "cd_amount": 110},
+      {"name": "Title insurance (from list)", "bucket": "ten_pct_aggregate", "le_amount": 900, "cd_amount": 950}
+    ],
+    "computation": "Zero bucket per-item: origination Δ=+50 (violation), discount points Δ=0, broker Δ=+50 (violation), transfer tax Δ=0, credit report Δ=+15 (violation). Zero-bucket total cure = 50+50+15 = 115. 10% bucket: LE_agg=110+900=1010, threshold=1010×1.10=1111. CD_agg=110+950=1060. 1060 ≤ 1111 → PASS. No-limit none. Total cure = 115.",
+    "violations": {
+      "zero_tolerance": "VIOLATION — origination +50, broker +50, credit report +15; each >0",
+      "ten_pct_aggregate": "PASS — 1060 ≤ 1111",
+      "cure_amount": 115,
+      "clause_basis": "12 CFR §1026.19(e)(3)(i) — each zero-tolerance charge cannot exceed amount originally disclosed; cure = sum of each positive variance per §1026.19(f)(2)(v)"
+    },
+    "weakest_point": "Credit report fee treated as zero-tolerance on premise borrower could not shop; if lender gave a written list and borrower selected from it, this fee would move to 10% bucket."
+  },
+  {
+    "case_name": "Clean pass — all buckets within tolerance",
+    "fees": [
+      {"name": "Application fee", "bucket": "zero_tolerance", "le_amount": 100, "cd_amount": 100},
+      {"name": "Origination fee", "bucket": "zero_tolerance", "le_amount": 1400, "cd_amount": 1400},
+      {"name": "Flood determination (cannot shop)", "bucket": "zero_tolerance", "le_amount": 50, "cd_amount": 50},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 90, "cd_amount": 95},
+      {"name": "Settlement fee (from list)", "bucket": "ten_pct_aggregate", "le_amount": 600, "cd_amount": 650},
+      {"name": "Title search (from list)", "bucket": "ten_pct_aggregate", "le_amount": 250, "cd_amount": 270},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 550, "cd_amount": 580},
+      {"name": "Property insurance premium", "bucket": "no_limit", "le_amount": 1200, "cd_amount": 1300}
+    ],
+    "computation": "Zero bucket: LE=100+1400+50=1550, CD=100+1400+50=1550, Δ=0 → no violation. 10% bucket: LE_agg=90+600+250=940, threshold=940×1.10=1034. CD_agg=95+650+270=1015. 1015 ≤ 1034 → PASS (note: even though settlement fee alone rose 50/600≈8.3% and title search rose 20/250=8%, the aggregate test is what governs). No-limit not tested. Total cure = 0.",
+    "violations": {
+      "zero_tolerance": "none",
+      "ten_pct_aggregate": "PASS — 1015 ≤ 1034",
+      "cure_amount": 0,
+      "clause_basis": "12 CFR §1026.19(e)(3)(i) and (ii)"
+    },
+    "weakest_point": "Assumed all 10%-bucket providers were on lender's written list; documentation in file should confirm."
+  },
+  {
+    "case_name": "10% bucket violation with all increases same direction (baseline case)",
+    "fees": [
+      {"name": "Origination fee", "bucket": "zero_tolerance", "le_amount": 1000, "cd_amount": 1000},
+      {"name": "Recording fee", "bucket": "ten_pct_aggregate", "le_amount": 80, "cd_amount": 88},
+      {"name": "Title search (from list)", "bucket": "ten_pct_aggregate", "le_amount": 400, "cd_amount": 470},
+      {"name": "Settlement agent (from list)", "bucket": "ten_pct_aggregate", "le_amount": 500, "cd_amount": 560},
+      {"name": "Survey (from list)", "bucket": "ten_pct_aggregate", "le_amount": 150, "cd_amount": 180},
+      {"name": "Owner's title policy (off-list shopped)", "bucket": "no_limit", "le_amount": 600, "cd_amount": 660}
+    ],
+    "computation": "Zero bucket: LE=CD=1000 → no violation. 10% bucket: LE_agg=80+400+500+150=1130, threshold=1130×1.10=1243. CD_agg=88+470+560+180=1298. 1298 > 1243 → VIOLATION. 10% excess = 1298 − 1243 = 55. Here all items increased, so sum-of-increases (=8+70+60+30=168) and aggregate test agree there is a violation, but the cure amount differs: sum-of-increases would suggest curing 168, but correct cure is the aggregate excess = 55 (the maximum refund needed to bring CD_agg down to 1243). This demonstrates that even when directional signs agree, the aggregate excess — not sum of increases — is the cure. No-limit not tested. Total cure = 55.",
+    "violations": {
+      "zero_tolerance": "none",
+      "ten_pct_aggregate": "VIOLATION — CD aggregate 1298 exceeds permitted 1243 by 55",
+      "cure_amount": 55,
+      "clause_basis": "12 CFR §1026.19(e)(3)(ii) — aggregate cannot exceed disclosed aggregate by more than 10%; cure = CD_agg − 1.10×LE_agg per §1026.19(f)(2)(v)"
+    },
+    "weakest_point": "Cure amount of 55 is the aggregate excess, which is less than the simple sum of line-item increases (168) because the 10% threshold already permits some increase; implementations that cure 'sum of increases' over-refund."
+  }
+]

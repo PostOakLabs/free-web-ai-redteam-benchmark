@@ -1,0 +1,92 @@
+[
+  {
+    "case_name": "Simple aggregate of two SDNs direct 25+25",
+    "entities": [
+      {"id": "SDN1", "blocked": true},
+      {"id": "SDN2", "blocked": true},
+      {"id": "CompanyZ", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN1", "to": "CompanyZ", "pct": 25},
+      {"from": "SDN2", "to": "CompanyZ", "pct": 25}
+    ],
+    "computation": "Path1: SDN1->CompanyZ direct 25% counts. Path2: SDN2->CompanyZ direct 25% counts. No intermediaries, no indirect multiplication. Aggregate per OFAC FAQ 398 aggregate rule: 25+25=50. No majority-owned intermediary chain here. Edge order irrelevant sum is commutative.",
+    "blocked_verdicts": ["SDN1", "SDN2", "CompanyZ"],
+    "guidance_basis": "OFAC FAQ 398 50% aggregate rule - any entity owned 50%+ in aggregate by one or more blocked persons is blocked. Direct aggregation example.",
+    "weakest_point": "Whether 25%+25% from distinct SDNs aggregates is settled yes per 2014 guidance, but threshold exactly 50% = blocked is inclusive per guidance"
+  },
+  {
+    "case_name": "Convergent via two majority-owned intermediaries - classic OFAC Example 1",
+    "entities": [
+      {"id": "SDN", "blocked": true},
+      {"id": "EntityA", "blocked": false},
+      {"id": "EntityB", "blocked": false},
+      {"id": "EntityC", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN", "to": "EntityA", "pct": 50},
+      {"from": "SDN", "to": "EntityB", "pct": 50},
+      {"from": "EntityA", "to": "EntityC", "pct": 25},
+      {"from": "EntityB", "to": "EntityC", "pct": 25}
+    ],
+    "computation": "Step1: EntityA aggregate = 50% from SDN => >=50% => EntityA blocked. Step2: EntityB aggregate = 50% from SDN => EntityB blocked. Step3 indirect treatment: per OFAC Aug 13 2014 FAQs, indirect ownership is ownership through a blocked entity, where blocked entity's holdings count fully, not multiplicatively. So SDN indirect in EntityC via EntityA = EntityA->EntityC 25% * (EntityA is blocked => 100% attribution) = 25%. Via EntityB = 25% similarly. Path contributions: 25+25=50. Aggregate in EntityC = 50% => blocked. If multiplicative treatment (50%*25%=12.5% per path) total would be 25% => not blocked, which is NOT OFAC rule. Convergent: two distinct paths from same SDN summed. Edge order does not affect sum.",
+    "blocked_verdicts": ["SDN", "EntityA", "EntityB", "EntityC"],
+    "guidance_basis": "OFAC FAQ 398-402 Aug 13 2014: indirect ownership is ownership through another blocked entity i.e. entity owned 50%+ by SDNs; example: SDN owns 50% of A and 50% of B, A and B each own 25% of C, C is blocked because 25%+25%=50% indirect. Full attribution through >=50% intermediaries, not multiplication.",
+    "weakest_point": "Certainty on full attribution vs multiplication: OFAC example shows full attribution; some compliance systems incorrectly multiply"
+  },
+  {
+    "case_name": "Convergent direct plus indirect via majority-owned intermediary - 10+40",
+    "entities": [
+      {"id": "SDN", "blocked": true},
+      {"id": "CompanyB", "blocked": false},
+      {"id": "CompanyA", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN", "to": "CompanyA", "pct": 10},
+      {"from": "SDN", "to": "CompanyB", "pct": 50},
+      {"from": "CompanyB", "to": "CompanyA", "pct": 40}
+    ],
+    "computation": "Step1: CompanyB aggregate = 50% direct from SDN => CompanyB blocked. Step2: CompanyA receives direct 10% from SDN. Step3: indirect via CompanyB: CompanyB is blocked, so its 40% holding in CompanyA counts as 40% indirect for SDN per guidance: if SDN has 50% direct ownership of CompanyB then CompanyB is considered subject and its 40% direct ownership of CompanyA is deemed 40% indirect ownership by SDN. So indirect =40%. Total aggregate in CompanyA =10+40=50% => blocked. Convergent: CompanyA reached via direct path and via CompanyB path summed.",
+    "blocked_verdicts": ["SDN", "CompanyB", "CompanyA"],
+    "guidance_basis": "OFAC new FAQs example: SDN has 10% direct in A and 50% in B, B owns 40% of A, then both companies covered because 50% ownership of B results in B's 40% being deemed 40% indirect plus 10% direct =50%",
+    "weakest_point": "Whether direct 10% plus indirect 40% counts as aggregate is yes per FAQ, but whether B's status as blocked is prerequisite for counting its holdings is key"
+  },
+  {
+    "case_name": "Non-blocked despite two paths because one intermediate <50% - OFAC Example 2",
+    "entities": [
+      {"id": "SDN", "blocked": true},
+      {"id": "EntityA", "blocked": false},
+      {"id": "EntityB", "blocked": false},
+      {"id": "EntityC", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN", "to": "EntityA", "pct": 50},
+      {"from": "SDN", "to": "EntityB", "pct": 25},
+      {"from": "EntityA", "to": "EntityC", "pct": 25},
+      {"from": "EntityB", "to": "EntityC", "pct": 25}
+    ],
+    "computation": "Step1: EntityA =50% from SDN => blocked. EntityB =25% from SDN => not blocked (<50%). Step2: EntityC via EntityA: EntityA blocked so 25% counts as 25% indirect. Via EntityB: EntityB not blocked, so SDN is not considered to indirectly own any of EntityC through EntityB per OFAC guidance, contribution =0% (not 25%*25%=6.25%). Total aggregate in EntityC =25+0=25% <50% => not blocked. This demonstrates treatment difference: non-majority intermediate holdings are zeroed, not multiplied. Convergent attempt fails because one leg invalid.",
+    "blocked_verdicts": ["SDN", "EntityA"],
+    "guidance_basis": "OFAC FAQ example: SDN owns 50% of A and 25% of B, A and B each own 25% of C, C is not blocked because B not 50%+ owned so SDN not considered to indirectly own through B, total only 25%",
+    "weakest_point": "Zero attribution for <50% intermediate is OFAC's stated rule; some might expect proportional multiplication 6.25% but guidance says 0%"
+  },
+  {
+    "case_name": "Deep chain through majority-owned intermediaries - 60% chain plus direct 10%",
+    "entities": [
+      {"id": "SDN", "blocked": true},
+      {"id": "X", "blocked": false},
+      {"id": "Y", "blocked": false},
+      {"id": "Z", "blocked": false}
+    ],
+    "edges": [
+      {"from": "SDN", "to": "X", "pct": 60},
+      {"from": "X", "to": "Y", "pct": 60},
+      {"from": "Y", "to": "Z", "pct": 40},
+      {"from": "SDN", "to": "Z", "pct": 10}
+    ],
+    "computation": "Step1: X aggregate =60% from SDN => X blocked. Step2: Y aggregate =60% from X, X is blocked so 60% counts as 60% indirect for SDN (full attribution, not 60%*60%=36%). So Y blocked because 60%>=50%. Step3: Z via Y: Y blocked so Y->Z 40% counts as 40% indirect for SDN. Plus direct SDN->Z 10%. Total =40+10=50% => Z blocked. Chain demonstrates majority-owned intermediary propagation: each >=50% link transmits full holding. Edge order irrelevant. If multiplicative: Y would be 36% not blocked, Z would be 10%+14.4%=24.4% not blocked.",
+    "blocked_verdicts": ["SDN", "X", "Y", "Z"],
+    "guidance_basis": "OFAC 50% Rule full attribution through >=50%-owned intermediaries per Aug 13 2014 guidance FAQ 398-401: blocked entity's holdings deemed indirect ownership in full, not multiplied. Example chain logic extended.",
+    "weakest_point": "Deep chain full attribution is inferred from two-step examples; OFAC guidance does not explicitly state 3+ level chain but logically extends"
+  }
+]

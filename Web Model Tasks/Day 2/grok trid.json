@@ -1,0 +1,73 @@
+[
+  {
+    "case_name": "Pure increases in 10% bucket + zero-tolerance violation",
+    "fees": [
+      {"name": "Appraisal fee (required, creditor-selected, no shop)", "bucket": "zero_tolerance", "le_amount": 500, "cd_amount": 550},
+      {"name": "Credit report", "bucket": "zero_tolerance", "le_amount": 50, "cd_amount": 50},
+      {"name": "Title search (shoppable, unaffiliated)", "bucket": "ten_pct_aggregate", "le_amount": 300, "cd_amount": 350},
+      {"name": "Recording fees", "bucket": "ten_pct_aggregate", "le_amount": 100, "cd_amount": 120},
+      {"name": "Homeowner's insurance premium", "bucket": "no_limit", "le_amount": 1200, "cd_amount": 1350}
+    ],
+    "computation": "Zero-tolerance: Appraisal 550 > 500 → excess 50; Credit report exact. 10% aggregate: ΣLE = 300+100=400; 10% threshold=40; ΣCD=350+120=470; 470-400=70 >40 → aggregate excess 30. No-limit: increase allowed. Distinction: 10% test is aggregate CD sum vs aggregate LE sum (not sum of individual increases).",
+    "violations": "Zero-tolerance violation of 50 (cure required); 10% aggregate violation of 30 (cure required). Total cure 80.",
+    "clause_basis": "§1026.19(e)(3)(i) (zero); §1026.19(e)(3)(ii)(A) aggregate comparison; §1026.19(e)(3)(iii) (no limit)",
+    "weakest_point": "Whether credit-report fee is always zero-tolerance when paid to affiliate (assumed yes)."
+  },
+  {
+    "case_name": "Mixed directions inside 10% bucket (net increase still exceeds)",
+    "fees": [
+      {"name": "Settlement agent fee (shoppable, unaffiliated)", "bucket": "ten_pct_aggregate", "le_amount": 800, "cd_amount": 950},
+      {"name": "Pest inspection (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 150, "cd_amount": 100},
+      {"name": "Survey (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 250, "cd_amount": 275},
+      {"name": "Recording fees", "bucket": "ten_pct_aggregate", "le_amount": 80, "cd_amount": 90},
+      {"name": "Origination charge", "bucket": "zero_tolerance", "le_amount": 1200, "cd_amount": 1200}
+    ],
+    "computation": "Zero-tolerance: Origination exact. 10% aggregate: ΣLE=800+150+250+80=1280; 10% threshold=128; ΣCD=950+100+275+90=1415; 1415-1280=135 >128 → excess 7. Explicit distinction: do NOT sum only the increases (150+25+10=185) then apply 10%; the rule requires aggregate-vs-aggregate comparison of the entire bucket sums. Net of the decrease in pest inspection is already reflected in the ΣCD figure.",
+    "violations": "10% aggregate violation of 7 (cure 7). Zero-tolerance clean.",
+    "clause_basis": "§1026.19(e)(3)(ii)(A) (“the aggregate amount of charges … does not exceed the aggregate amount … by more than 10 percent”); Comment 19(e)(3)(ii)-2",
+    "weakest_point": "Exact classification of pest inspection as shoppable third-party (assumed permitted to shop)."
+  },
+  {
+    "case_name": "Mixed directions inside 10% bucket (net decrease – no violation)",
+    "fees": [
+      {"name": "Title insurance (lender’s policy, shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 600, "cd_amount": 720},
+      {"name": "Courier fee (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 40, "cd_amount": 25},
+      {"name": "Notary fee (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 100, "cd_amount": 75},
+      {"name": "Recording fees", "bucket": "ten_pct_aggregate", "le_amount": 120, "cd_amount": 110},
+      {"name": "Appraisal (creditor affiliate)", "bucket": "zero_tolerance", "le_amount": 450, "cd_amount": 450}
+    ],
+    "computation": "Zero-tolerance: Appraisal exact. 10% aggregate: ΣLE=600+40+100+120=860; 10% threshold=86; ΣCD=720+25+75+110=930; 930-860=70 ≤86 → within tolerance. Again, mixed directions (title up 120, others down) are netted inside the single aggregate comparison; sum-of-increases alone would have been 120, but that is not the test.",
+    "violations": "None. All buckets compliant.",
+    "clause_basis": "§1026.19(e)(3)(ii)(A) aggregate test; §1026.19(e)(3)(i) zero-tolerance exact match",
+    "weakest_point": "Whether lender’s title policy is treated as shoppable under the written list (assumed yes for this illustration)."
+  },
+  {
+    "case_name": "Zero-tolerance only violation; 10% clean; no-limit large increase",
+    "fees": [
+      {"name": "Loan origination fee", "bucket": "zero_tolerance", "le_amount": 900, "cd_amount": 950},
+      {"name": "Processing fee (affiliate)", "bucket": "zero_tolerance", "le_amount": 300, "cd_amount": 300},
+      {"name": "Title search (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 210},
+      {"name": "Recording fees", "bucket": "ten_pct_aggregate", "le_amount": 75, "cd_amount": 80},
+      {"name": "Prepaid interest", "bucket": "no_limit", "le_amount": 400, "cd_amount": 650},
+      {"name": "Property taxes escrow", "bucket": "no_limit", "le_amount": 1800, "cd_amount": 2100}
+    ],
+    "computation": "Zero-tolerance: Origination 950>900 → excess 50; Processing exact. 10% aggregate: ΣLE=200+75=275; threshold=27.5; ΣCD=210+80=290; 290-275=15 ≤27.5 → OK. No-limit: both increases permitted if based on best information reasonably available.",
+    "violations": "Zero-tolerance violation of 50 (cure 50). 10% and no-limit clean.",
+    "clause_basis": "§1026.19(e)(3)(i) (zero); §1026.19(e)(3)(ii) (10%); §1026.19(e)(3)(iii) (prepaid interest, property taxes)",
+    "weakest_point": "Whether processing fee paid to affiliate is correctly zero-tolerance (yes per rule)."
+  },
+  {
+    "case_name": "Mixed 10% with omitted fee appearing at CD + zero clean",
+    "fees": [
+      {"name": "Appraisal (required, no shop)", "bucket": "zero_tolerance", "le_amount": 525, "cd_amount": 525},
+      {"name": "Settlement fee (shoppable)", "bucket": "ten_pct_aggregate", "le_amount": 700, "cd_amount": 650},
+      {"name": "Recording fees", "bucket": "ten_pct_aggregate", "le_amount": 90, "cd_amount": 95},
+      {"name": "Flood certification (shoppable, omitted on LE)", "bucket": "ten_pct_aggregate", "le_amount": 0, "cd_amount": 45},
+      {"name": "Homeowner’s insurance", "bucket": "no_limit", "le_amount": 1100, "cd_amount": 1100}
+    ],
+    "computation": "Zero-tolerance: Appraisal exact. 10% aggregate: ΣLE=700+90+0=790; threshold=79; ΣCD=650+95+45=790; 790-790=0 ≤79 → within tolerance. Omitted fee is included in the aggregate CD sum (Comment 19(e)(3)(ii)-2). Mixed directions (settlement down, recording up, new fee) net to zero change.",
+    "violations": "None.",
+    "clause_basis": "§1026.19(e)(3)(ii)(A) and Comment 19(e)(3)(ii)-2 (omitted charges still enter the aggregate); §1026.19(e)(3)(i)",
+    "weakest_point": "Whether flood certification was required and shoppable (assumed yes and therefore 10% bucket)."
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "calculation": "Single-Point Fault Metric (SPFM)",
+    "formula_or_test": "SPFM = 1 - (Σλ_SPF + Σλ_RF) / Σλ",
+    "inputs": ["Σλ_SPF: Sum of single-point failure rates", "Σλ_RF: Sum of residual failure rates", "Σλ: Sum of all safety-related failure rates"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4.3",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions; target values in Table 12 may be updated in future editions",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Latent Fault Metric (LFM)",
+    "formula_or_test": "LFM = 1 - Σλ_MPF,L / (Σλ - Σλ_SPF - Σλ_RF)",
+    "inputs": ["Σλ_MPF,L: Sum of latent multiple-point failure rates", "Σλ: Sum of all safety-related failure rates", "Σλ_SPF: Sum of single-point failure rates", "Σλ_RF: Sum of residual failure rates"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 8.4.4",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions; target values in Table 12 may be updated in future editions",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Probabilistic Metric for Hardware Failures (PMHF)",
+    "formula_or_test": "PMHF = Σλ_SPF + Σλ_RF + Σ(λ_MPF,DP × λ_MPF,L × T_lifetime)",
+    "inputs": ["Σλ_SPF: Sum of single-point failure rates", "Σλ_RF: Sum of residual failure rates", "λ_MPF,DP: Sum of detected multiple-point failure rates", "λ_MPF,L: Sum of latent multiple-point failure rates", "T_lifetime: Vehicle lifetime in hours"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Clause 9.4.2.2",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions; target values in Table 12 may be updated in future editions",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "ASIL Hardware Architectural Metrics Targets",
+    "formula_or_test": "Lookup table mapping ASIL to minimum SPFM/LFM and maximum PMHF targets",
+    "inputs": ["ASIL level (A/B/C/D)"],
+    "authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+    "clause_locator": "Table 12",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "Total Processing Performance (TPP) for Export Control",
+    "formula_or_test": "TPP = 2 × MacTOPS × bit_length_of_operation, aggregated over all processing units",
+    "inputs": ["MacTOPS: Theoretical peak multiply-accumulate operations per second in tera (10¹²) ops", "bit_length_of_operation: Largest bit-length of inputs to multiply operation", "Number of processing units on IC"],
+    "authority": "Export Administration Regulations (EAR) — ECCN 3A090 Technical Notes",
+    "clause_locator": "15 CFR § 774, Supplement No. 1, ECCN 3A090 Technical Note 1",
+    "publicly_retrievable": true,
+    "volatility": "Updated frequently; see BIS Federal Register notices for latest thresholds",
+    "confidence": 0.98
+  },
+  {
+    "calculation": "Performance Density (PD) for Export Control",
+    "formula_or_test": "PD = TPP / die_area_mm2",
+    "inputs": ["TPP: Total Processing Performance", "die_area_mm2: Die area in square millimeters including all logic areas"],
+    "authority": "Export Administration Regulations (EAR) — ECCN 3A090 Technical Notes",
+    "clause_locator": "15 CFR § 774, Supplement No. 1, ECCN 3A090 Technical Note 2",
+    "publicly_retrievable": true,
+    "volatility": "Updated frequently; see BIS Federal Register notices for latest thresholds",
+    "confidence": 0.98
+  },
+  {
+    "calculation": "ECCN 3A090 Classification Threshold Test",
+    "formula_or_test": "Classify as 3A090.a if: TPP ≥ 4800 OR (TPP ≥ 1600 AND PD ≥ 5.92); Classify as 3A090.b if: (2400 ≤ TPP < 4800 AND 1.6 ≤ PD < 5.92) OR (TPP ≥ 1600 AND 3.2 ≤ PD < 5.92)",
+    "inputs": ["TPP: Total Processing Performance", "PD: Performance Density"],
+    "authority": "Export Administration Regulations (EAR) — ECCN 3A090",
+    "clause_locator": "15 CFR § 774, Supplement No. 1, ECCN 3A090.a and 3A090.b",
+    "publicly_retrievable": true,
+    "volatility": "Updated frequently; see BIS Federal Register notices for latest thresholds",
+    "confidence": 0.98
+  },
+  {
+    "calculation": "Temperature Acceleration Factor (Arrhenius Model)",
+    "formula_or_test": "AF = exp[(Ea / k) × (1/T_use - 1/T_stress)]",
+    "inputs": ["Ea: Activation energy in eV", "k: Boltzmann constant (8.617×10⁻⁵ eV/K)", "T_use: Use temperature in Kelvin", "T_stress: Stress temperature in Kelvin"],
+    "authority": "JEDEC JESD22-A110 Highly-Accelerated Temperature and Humidity Stress Test (HAST)",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Stable; model parameters (Ea) vary by failure mechanism",
+    "confidence": 0.90
+  },
+  {
+    "calculation": "FIT Rate Calculation from Test Data",
+    "formula_or_test": "FIT = (Number of failures × 10⁹) / (Total device test hours × Acceleration Factor)",
+    "inputs": ["Number of failures observed", "Total device test hours (sample size × test duration)", "Acceleration Factor (from Arrhenius or other model)"],
+    "authority": "JEDEC JESD22-A110 / JESD47 Integrated Circuit Stress Test Qualification",
+    "clause_locator": null,
+    "publicly_retrievable": false,
+    "volatility": "Stable methodology",
+    "confidence": 0.85
+  },
+  {
+    "calculation": "CHIPS Act Investment Tax Credit Percentage",
+    "formula_or_test": "Credit = 25% of qualified investment in qualified property placed in service",
+    "inputs": ["Qualified investment amount in semiconductor manufacturing equipment", "Qualified property definition per CHIPS Act"],
+    "authority": "CHIPS and Science Act of 2022 (Public Law 117-167)",
+    "clause_locator": "26 U.S.C. § 48D (Advanced Manufacturing Investment Credit)",
+    "publicly_retrievable": true,
+    "volatility": "Statutory rate fixed; implementation rules may be updated by Treasury",
+    "confidence": 0.95
+  },
+  {
+    "calculation": "DO-254 Design Assurance Level Objectives Count",
+    "formula_or_test": "Lookup table mapping DAL (A/B/C/D/E) to number of objectives and independence requirements",
+    "inputs": ["Design Assurance Level (A/B/C/D/E)"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80 Design Assurance Guidance for Airborne Electronic Hardware",
+    "clause_locator": "Appendix B",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions",
+    "confidence": 0.80
+  },
+  {
+    "calculation": "DO-254 DAL A/B Additional Verification Objectives",
+    "formula_or_test": "DAL A requires 35 objectives; DAL B requires 30 objectives (including independence requirements)",
+    "inputs": ["Design Assurance Level (A or B)"],
+    "authority": "RTCA DO-254 / EUROCAE ED-80 Design Assurance Guidance for Airborne Electronic Hardware",
+    "clause_locator": "Appendix B, Table B.1",
+    "publicly_retrievable": false,
+    "volatility": "Stable across editions",
+    "confidence": 0.75
+  }
+]

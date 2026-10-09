@@ -1,0 +1,453 @@
+[
+{
+"calculation": "ISO 26262 SPFM",
+"vector_name": "ASIL B threshold boundary at exactly 90%",
+"inputs": {
+"lambda_SPF": {
+"value": 50,
+"units": "FIT"
+},
+"lambda_RF": {
+"value": 50,
+"units": "FIT"
+},
+"lambda_MPF_latent": {
+"value": 100,
+"units": "FIT"
+},
+"lambda_safe": {
+"value": 800,
+"units": "FIT"
+},
+"lambda_total": {
+"value": 1000,
+"units": "FIT"
+},
+"ASIL_B_target": {
+"value": 90,
+"units": "%"
+},
+"ASIL_C_target": {
+"value": 97,
+"units": "%"
+},
+"ASIL_D_target": {
+"value": 99,
+"units": "%"
+}
+},
+"computation": "STEP 1: Check the fault distribution: 50 + 50 + 100 + 800 = 1000 FIT. STEP 2: SPFM = 1 - (lambda_SPF + lambda_RF) / lambda_total. STEP 3: SPFM = 1 - (50 + 50) / 1000. STEP 4: SPFM = 1 - 100/1000 = 0.90. STEP 5: SPFM = 90%. STEP 6: 90% >= 90%, so ASIL B is met. STEP 7: 90% < 97% and 90% < 99%, so ASIL C and D are not met.",
+"expected_output": {
+"SPFM": {
+"value": 90,
+"units": "%"
+},
+"ASIL_targets_met": [
+"ASIL B"
+]
+},
+"discriminates": "THRESHOLD-BOUNDARY case: lands exactly on the ASIL B SPFM target of 90%. ISO 26262-5 Table 4 gives ≥90% for B, ≥97% for C, and ≥99% for D. ([Kekaoxing][1])",
+"known_uncertainty": "The arithmetic and SPFM expression are high confidence. The test vector treats the supplied total as the sum of the four supplied fault-rate categories; that consistency assumption is explicit here."
+},
+{
+"calculation": "ISO 26262 SPFM",
+"vector_name": "ASIL C threshold boundary at exactly 97%",
+"inputs": {
+"lambda_SPF": {
+"value": 20,
+"units": "FIT"
+},
+"lambda_RF": {
+"value": 10,
+"units": "FIT"
+},
+"lambda_MPF_latent": {
+"value": 50,
+"units": "FIT"
+},
+"lambda_safe": {
+"value": 920,
+"units": "FIT"
+},
+"lambda_total": {
+"value": 1000,
+"units": "FIT"
+},
+"ASIL_B_target": {
+"value": 90,
+"units": "%"
+},
+"ASIL_C_target": {
+"value": 97,
+"units": "%"
+},
+"ASIL_D_target": {
+"value": 99,
+"units": "%"
+}
+},
+"computation": "STEP 1: Check the fault distribution: 20 + 10 + 50 + 920 = 1000 FIT. STEP 2: SPFM = 1 - (20 + 10) / 1000. STEP 3: SPFM = 1 - 30/1000 = 0.97. STEP 4: SPFM = 97%. STEP 5: 97% >= 90%, so ASIL B is met. STEP 6: 97% >= 97%, so ASIL C is met. STEP 7: 97% < 99%, so ASIL D is not met.",
+"expected_output": {
+"SPFM": {
+"value": 97,
+"units": "%"
+},
+"ASIL_targets_met": [
+"ASIL B",
+"ASIL C"
+]
+},
+"discriminates": "THRESHOLD-BOUNDARY case: lands exactly on the ASIL C SPFM target of 97%. ISO 26262-5 Table 4 gives ≥90% for B, ≥97% for C, and ≥99% for D. ([Kekaoxing][1])",
+"known_uncertainty": "The arithmetic is exact. The vector assumes the four fault categories exhaust the stated total."
+},
+{
+"calculation": "ISO 26262 SPFM",
+"vector_name": "ASIL D threshold boundary at exactly 99%",
+"inputs": {
+"lambda_SPF": {
+"value": 5,
+"units": "FIT"
+},
+"lambda_RF": {
+"value": 5,
+"units": "FIT"
+},
+"lambda_MPF_latent": {
+"value": 20,
+"units": "FIT"
+},
+"lambda_safe": {
+"value": 970,
+"units": "FIT"
+},
+"lambda_total": {
+"value": 1000,
+"units": "FIT"
+},
+"ASIL_B_target": {
+"value": 90,
+"units": "%"
+},
+"ASIL_C_target": {
+"value": 97,
+"units": "%"
+},
+"ASIL_D_target": {
+"value": 99,
+"units": "%"
+}
+},
+"computation": "STEP 1: Check the fault distribution: 5 + 5 + 20 + 970 = 1000 FIT. STEP 2: SPFM = 1 - (5 + 5) / 1000. STEP 3: SPFM = 1 - 10/1000 = 0.99. STEP 4: SPFM = 99%. STEP 5: 99% >= 90%, 97%, and 99%. STEP 6: ASIL B, C, and D targets are all met.",
+"expected_output": {
+"SPFM": {
+"value": 99,
+"units": "%"
+},
+"ASIL_targets_met": [
+"ASIL B",
+"ASIL C",
+"ASIL D"
+]
+},
+"discriminates": "THRESHOLD-BOUNDARY case: lands exactly on the ASIL D SPFM target of 99%, distinguishing equality handling from a strict-greater-than implementation. ([Kekaoxing][1])",
+"known_uncertainty": "The arithmetic is exact. The vector assumes the four fault categories sum to the stated total."
+},
+{
+"calculation": "JEDEC FIT from accelerated test",
+"vector_name": "15 failures, 60% confidence, 0.7 eV Arrhenius case",
+"inputs": {
+"device_hours": {
+"value": 1000000,
+"units": "device-hours"
+},
+"failures": {
+"value": 15,
+"units": "failures"
+},
+"confidence_level": {
+"value": 60,
+"units": "%"
+},
+"activation_energy": {
+"value": 0.7,
+"units": "eV"
+},
+"use_temperature": {
+"value": 55,
+"units": "degrees C"
+},
+"stress_temperature": {
+"value": 125,
+"units": "degrees C"
+},
+"Boltzmann_constant": {
+"value": 8.6e-5,
+"units": "eV/K"
+},
+"chi_square_quantile": {
+"value": 33.4,
+"units": "dimensionless"
+},
+"chi_square_degrees_of_freedom": {
+"value": 32,
+"units": "degrees"
+}
+},
+"computation": "STEP 1: Convert temperatures: T_use = 55 + 273 = 328 K; T_stress = 125 + 273 = 398 K. STEP 2: Arrhenius acceleration factor AF = exp[(Ea/k) × (1/T_use - 1/T_stress)]. STEP 3: AF = exp[(0.7/8.6e-5) × (1/328 - 1/398)] = 78.615. STEP 4: Point FIT estimate = failures × 10^9 / (device-hours × AF) = 15 × 10^9 / (1,000,000 × 78.615) = 190.803 FIT. STEP 5: At 60% confidence with 15 failures, the JESD85 chi-square upper-bound calculation uses χ² = 33.4 and 2f+2 = 32 degrees of freedom. STEP 6: FIT_60% = 33.4 × 10^9 / (2 × 1,000,000 × 78.615) = 212.306 FIT. STEP 7: Rounded values are 190.8 FIT point estimate and 212.3 FIT upper confidence bound.",
+"expected_output": {
+"acceleration_factor": {
+"value": 78.615,
+"units": "dimensionless"
+},
+"point_estimate": {
+"value": 190.803,
+"units": "FIT"
+},
+"upper_confidence_bound": {
+"value": 212.306,
+"units": "FIT at 60% confidence"
+}
+},
+"discriminates": "Realistic mid-range JESD85-style case using the standard's published 0.7 eV, 55 degrees C use, 125 degrees C stress example and a substantial 1,000,000 device-hour exposure. The reproduced JESD85A material reports AF approximately 78.6 for these Arrhenius inputs. ([Scribd][2])",
+"known_uncertainty": "The Arrhenius calculation is sensitive to the temperature convention and activation energy. JESD85A notes that junction temperature may need to replace ambient temperature when self-heating is material. ([Scribd][2])"
+},
+{
+"calculation": "JEDEC FIT from accelerated test",
+"vector_name": "15 failures, 90% confidence, same exposure with higher confidence bound",
+"inputs": {
+"device_hours": {
+"value": 1000000,
+"units": "device-hours"
+},
+"failures": {
+"value": 15,
+"units": "failures"
+},
+"confidence_level": {
+"value": 90,
+"units": "%"
+},
+"activation_energy": {
+"value": 0.7,
+"units": "eV"
+},
+"use_temperature": {
+"value": 55,
+"units": "degrees C"
+},
+"stress_temperature": {
+"value": 125,
+"units": "degrees C"
+},
+"Boltzmann_constant": {
+"value": 8.6e-5,
+"units": "eV/K"
+},
+"chi_square_quantile": {
+"value": 42.6,
+"units": "dimensionless"
+},
+"chi_square_degrees_of_freedom": {
+"value": 32,
+"units": "degrees"
+}
+},
+"computation": "STEP 1: T_use = 55 + 273 = 328 K; T_stress = 125 + 273 = 398 K. STEP 2: AF = exp[(0.7/8.6e-5) × (1/328 - 1/398)] = 78.615. STEP 3: Point FIT = 15 × 10^9 / (1,000,000 × 78.615) = 190.803 FIT. STEP 4: For 90% confidence and 15 failures, use χ² = 42.6 with 2f+2 = 32 degrees of freedom. STEP 5: FIT_90% = 42.6 × 10^9 / (2 × 1,000,000 × 78.615) = 270.844 FIT. STEP 6: Rounded values are 190.8 FIT point estimate and 270.8 FIT upper confidence bound.",
+"expected_output": {
+"acceleration_factor": {
+"value": 78.615,
+"units": "dimensionless"
+},
+"point_estimate": {
+"value": 190.803,
+"units": "FIT"
+},
+"upper_confidence_bound": {
+"value": 270.844,
+"units": "FIT at 90% confidence"
+}
+},
+"discriminates": "Confidence-level case: the physical test exposure and acceleration factor are unchanged from the first vector, so only the confidence-bound calculation changes. The JESD85A example uses the same Arrhenius setup and gives the corresponding chi-square method. ([Scribd][2])",
+"known_uncertainty": "The exact chi-square quantile depends on the standard's stated degrees-of-freedom convention and confidence convention. The value 42.6 is the rounded value used in the reproduced JESD85A worked material."
+},
+{
+"calculation": "JEDEC FIT from accelerated test",
+"vector_name": "Zero-failure statistical boundary with 90% confidence",
+"inputs": {
+"device_hours": {
+"value": 2000000,
+"units": "device-hours"
+},
+"failures": {
+"value": 0,
+"units": "failures"
+},
+"confidence_level": {
+"value": 90,
+"units": "%"
+},
+"activation_energy": {
+"value": 0.5,
+"units": "eV"
+},
+"use_temperature": {
+"value": 55,
+"units": "degrees C"
+},
+"stress_temperature": {
+"value": 125,
+"units": "degrees C"
+},
+"Boltzmann_constant": {
+"value": 8.6e-5,
+"units": "eV/K"
+},
+"chi_square_quantile": {
+"value": 4.60517,
+"units": "dimensionless"
+},
+"chi_square_degrees_of_freedom": {
+"value": 2,
+"units": "degrees"
+}
+},
+"computation": "STEP 1: T_use = 55 + 273 = 328 K; T_stress = 125 + 273 = 398 K. STEP 2: AF = exp[(0.5/8.6e-5) × (1/328 - 1/398)] = 22.591. STEP 3: Point FIT = 0 × 10^9 / (2,000,000 × 22.591) = 0 FIT. STEP 4: With zero failures, 2f+2 = 2 degrees of freedom. STEP 5: The 90% chi-square quantile for 2 degrees of freedom is 4.60517. STEP 6: FIT_90% = 4.60517 × 10^9 / (2 × 2,000,000 × 22.591) = 50.963 FIT. STEP 7: Thus zero observed failures gives a zero point estimate but a nonzero upper confidence bound.",
+"expected_output": {
+"acceleration_factor": {
+"value": 22.591,
+"units": "dimensionless"
+},
+"point_estimate": {
+"value": 0,
+"units": "FIT"
+},
+"upper_confidence_bound": {
+"value": 50.963,
+"units": "FIT at 90% confidence"
+}
+},
+"discriminates": "Degenerate statistical boundary: zero failures. It tests that the calculator does not confuse a zero point estimate with a zero upper confidence bound. The Arrhenius setup is also a published JESD85A example for 0.5 eV, for which AF is approximately 22.6. ([Scribd][2])",
+"known_uncertainty": "JEDEC FIT calculations are statistical rather than regulatory-threshold calculations; unlike ISO SPFM and EAR TPP, there is no regulatory FIT limit in this vector. The confidence-bound convention should be implemented exactly as specified by the selected JESD85 revision."
+},
+{
+"calculation": "EAR TPP",
+"vector_name": "Exact 3A090.a TPP threshold at 4800",
+"inputs": {
+"reported_TOPS": {
+"value": 600,
+"units": "tera operations/second"
+},
+"bit_width": {
+"value": 8,
+"units": "bits"
+},
+"TPP_threshold_3A090_a1": {
+"value": 4800,
+"units": "TPP"
+}
+},
+"computation": "STEP 1: Under the EAR Technical Note, TPP = 2 × MacTOPS × bit length, and 2 × MacTOPS may correspond to reported TOPS. Therefore for reported TOPS = 600 at 8 bits, TPP = 600 × 8. STEP 2: TPP = 4800. STEP 3: Compare 4800 with the 3A090.a.1 threshold of 4800. STEP 4: 4800 >= 4800, so the vector is on the controlled side of the 3A090.a.1 threshold.",
+"expected_output": {
+"TPP": {
+"value": 4800,
+"units": "EAR TPP"
+},
+"threshold": {
+"value": 4800,
+"units": "EAR TPP"
+},
+"threshold_side": "at 3A090.a.1 threshold; meets the >=4800 condition"
+},
+"discriminates": "THRESHOLD-BOUNDARY case: exactly reaches the current 3A090.a.1 TPP threshold of 4800. BIS's Technical Note gives 600 tera integer operations at 8 bits as an example producing TPP 4800. ([Federal Register Public Inspection][3])",
+"known_uncertainty": "This vector assumes the supplied TOPS figure corresponds to 2 × MacTOPS as contemplated by the EAR Technical Note. The regulation also requires the maximum theoretically possible MacTOPS and, where multiple bit lengths apply, evaluation of the highest TPP. ([Eccn][4])"
+},
+{
+"calculation": "EAR TPP",
+"vector_name": "Just below 3A090.a.1 TPP threshold",
+"inputs": {
+"reported_TOPS": {
+"value": 599,
+"units": "tera operations/second"
+},
+"bit_width": {
+"value": 8,
+"units": "bits"
+},
+"TPP_threshold_3A090_a1": {
+"value": 4800,
+"units": "TPP"
+}
+},
+"computation": "STEP 1: TPP = reported TOPS × bit width = 599 × 8. STEP 2: TPP = 4792. STEP 3: Compare 4792 with 4800. STEP 4: 4792 < 4800, so this vector is 8 TPP below the 3A090.a.1 threshold.",
+"expected_output": {
+"TPP": {
+"value": 4792,
+"units": "EAR TPP"
+},
+"threshold": {
+"value": 4800,
+"units": "EAR TPP"
+},
+"threshold_side": "below 3A090.a.1 threshold by 8 TPP"
+},
+"discriminates": "ADJACENT-THRESHOLD case: changes only one TOPS unit from the preceding vector and moves from exactly 4800 to 4792, testing strict versus inclusive threshold handling. The current 3A090.a.1 threshold is 4800 or more. ([Federal Register Public Inspection][3])",
+"known_uncertainty": "The arithmetic is exact under the reported-TOPS interpretation. Actual ECCN classification can require applying the other 3A090 notes and definitions, so this vector tests the numerical TPP parameter rather than complete export-control classification."
+},
+{
+"calculation": "EAR TPP",
+"vector_name": "Realistic mid-range multi-bit processor with highest TPP selected",
+"inputs": {
+"processing_mode_1_TOPS": {
+"value": 300,
+"units": "tera operations/second"
+},
+"processing_mode_1_bit_width": {
+"value": 16,
+"units": "bits"
+},
+"processing_mode_2_TOPS": {
+"value": 200,
+"units": "tera operations/second"
+},
+"processing_mode_2_bit_width": {
+"value": 8,
+"units": "bits"
+},
+"TPP_threshold_3A090_a1": {
+"value": 4800,
+"units": "TPP"
+},
+"TPP_threshold_3A090_a2": {
+"value": 1600,
+"units": "TPP"
+},
+"performance_density_threshold_3A090_a2": {
+"value": 5.92,
+"units": "TPP/mm^2"
+}
+},
+"computation": "STEP 1: Mode 1 TPP = 300 × 16 = 4800. STEP 2: Mode 2 TPP = 200 × 8 = 1600. STEP 3: Select the highest applicable TPP = max(4800, 1600) = 4800. STEP 4: Compare highest TPP with the 3A090.a.1 threshold: 4800 >= 4800. STEP 5: The numerical TPP therefore reaches the 3A090.a.1 threshold. The EAR Technical Note explicitly states that when multiple bit lengths produce different TPP values, the highest TPP value should be evaluated. ([Eccn][4])",
+"expected_output": {
+"TPP_mode_1": {
+"value": 4800,
+"units": "EAR TPP"
+},
+"TPP_mode_2": {
+"value": 1600,
+"units": "EAR TPP"
+},
+"highest_TPP": {
+"value": 4800,
+"units": "EAR TPP"
+},
+"threshold_side": "highest TPP is exactly at the 3A090.a.1 threshold"
+},
+"discriminates": "Multi-bit-width case: tests aggregation/selection of the highest TPP rather than evaluating only a nominal operating mode. The EAR Technical Note says the highest TPP should be evaluated when multiple bit lengths achieve different TPP values. ([Eccn][4])",
+"known_uncertainty": "The vector deliberately tests only the TPP parameter. Complete 3A090 treatment can additionally depend on performance density and the applicable notes; the 3A090.a.2 threshold is TPP ≥1600 together with performance density ≥5.92. ([Federal Register Public Inspection][3])"
+}
+]
+
+[1]: https://www.kekaoxing.com/wp-content/uploads/standard/ISO26262-2018/ISO-26262-5-2018.pdf?utm_source=chatgpt.com "INTERNATIONAL"
+[2]: https://www.scribd.com/document/967922230/JESD-85A-Calculation-Failure?utm_source=chatgpt.com "Failure Rate Calculation Methods in FITs | PDF"
+[3]: https://public-inspection.federalregister.gov/2025-00636.pdf?utm_source=chatgpt.com "a.2. A 'total processing performance' of 1600 or more and a 'performance density' of 5.92 or more."
+[4]: https://eccn.dev/eccn/3A090?utm_source=chatgpt.com "ECCN 3A090: Integrated circuits as follows (see List of Items Controlled)."

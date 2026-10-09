@@ -1,0 +1,21 @@
+{"verdict": "SUSPECT",
+ "objections": [
+   {"claim_attacked": "confidence: 0.4 stated for an episode where chosen_intervention is explicitly 'Not stated' and the issue closed with 0 comments",
+    "objection": "The record itself says the issue was closed as completed with zero comments and no maintainer reply describing an implemented change — meaning there is no evidence of any resolution at all, only a closed status. A confidence of 0.4 implies some residual support for a causal story that, per the record, was never even asserted by a participant, let alone measured.",
+    "severity": "major",
+    "confidence": 0.65},
+   {"claim_attacked": "post_state: 'Only the issue was closed' framed as a post_state alongside a title implying the cap 'hides' hotspots as an established defect",
+    "objection": "The title asserts the 10000-cap behavior as a confirmed defect ('hides congestion hotspots and macro-overlap errors'), but the body shows this was the reporter's suspicion/hypothesis rather than a confirmed mechanism — the reporter explicitly notes the vertical-line-as-cutoff theory is undercut by an analogous line appearing in the placement heatmap. The title states as fact what the thread itself leaves unresolved.",
+    "severity": "minor",
+    "confidence": 0.55}
+ ],
+ "mechanism_check": "N-D — no intervention was ever stated or adopted in the thread, so there is no mechanism linking any change to a post_state to evaluate.",
+ "evidence_check": "ASSERT — the only post_state is that the issue was closed as completed, which is a status change, not a measurement; no report on whether the 10000-cap behavior was altered or whether the macro-overlap detection issue was resolved is given.",
+ "attribution_check": "N-D — the record provides no direct_quote field at all, so there is no attributed statement to check for a named participant, date, and locator supporting chosen_intervention.",
+ "missing_from_story": [
+   "Any maintainer comment or decision on the proposed remedies (random-cap sampling vs. 'most interesting' error selection), since the thread reportedly had zero comments before closing.",
+   "Confirmation of whether the vertical-line artifact was ever explained, given the reporter's own note that an analogous line appears in the unrelated placement heatmap.",
+   "Whether closing 'as completed' reflected an actual code change or just triage/staleness, since a 0-comment closure is unusual for a completed status.",
+   "Any resolution of the macro-overlap detection gap that deltaDebug.py was needed to expose, since this seems like the more actionable defect described in the thread."
+ ],
+ "most_defensible_part": "The gaps field, which correctly flags that no fix, PR, or before/after measurement exists and that even the implementation of the proposed random-cap behavior is unknown."}

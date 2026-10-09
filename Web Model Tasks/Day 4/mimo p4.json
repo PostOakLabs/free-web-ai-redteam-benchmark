@@ -1,0 +1,74 @@
+```json
+[
+  {
+    "title": "Trace Cache vs Conventional L1 Instruction Cache",
+    "where_in_paper": "Section discussing the Trace Cache (dedicated section in the paper)",
+    "decision": "Replace the conventional L1 instruction cache with a trace cache that stores decoded micro-ops in execution order rather than instruction bytes in program order",
+    "alternatives_or_rejected": "A conventional large L1 instruction cache with wider and deeper decode pipeline to handle x86 variable-length decoding at high clock rates",
+    "rationale": "The trace cache avoids the x86 instruction-length decoding bottleneck at high frequencies. It also reduces the effective branch penalty because it fetches from the branch target directly rather than requiring decode from the branch target address. Storing decoded micro-ops eliminates the need for wide decoders at high frequency. The paper argues that conventional instruction cache bandwidth is limited by decode complexity as clock frequency rises.",
+    "outcome": "The trace cache delivers a trace throughput that scales better with clock frequency than a conventional decoded path, and reduces fetch/decode pipeline stages for the common case of straight-line code execution.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 5,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am not fully certain whether the paper explicitly frames the alternative as a 'conventional large L1I with wide decoders' or whether it more implicitly presents the trace cache without naming a specific rejected alternative architecture. The paper definitely discusses the trace cache rationale in depth.",
+    "confidence": 0.85
+  },
+  {
+    "title": "Deep Pipeline for Clock Frequency Scaling",
+    "where_in_paper": "Section on Hyper-Pipelined Technology / pipeline depth philosophy",
+    "decision": "Implement a very deep pipeline (20 stages) to enable significantly higher clock frequencies compared to the Pentium III (P6) which had roughly 10 stages",
+    "alternatives_or_rejected": "A shallower pipeline (like P6) with wider execution to increase IPC instead of frequency",
+    "rationale": "The paper argues that clock frequency is a more effective lever for sustained performance on real workloads than IPC improvements, especially given x86 instruction set complexity. The deeper pipeline reduces the logic depth per stage, enabling faster clock speeds. The paper acknowledges the increased branch misprediction penalty and addresses it with improved branch prediction and the trace cache.",
+    "outcome": "The Pentium 4 launched at 1.5 GHz significantly faster than the Pentium III's ~1 GHz, validating the frequency-oriented approach for the initial launch. However, the paper acknowledges the need for strong branch prediction to mitigate the deeper pipeline's misprediction cost.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 4,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am uncertain whether the paper explicitly states a rejected alternative of 'wider execution at shallower depth' or whether it more implicitly presents the deep pipeline as a positive design direction. The paper definitely discusses pipeline depth philosophy, but the framing of alternatives may be softer than I present here.",
+    "confidence": 0.8
+  },
+  {
+    "title": "Rapid Execution Engine with Double-Pumped ALUs",
+    "where_in_paper": "Section on the Rapid Execution Engine / ALU organization",
+    "decision": "Implement double-pumped arithmetic logic units that operate on both the rising and falling edges of the clock, effectively executing at twice the core clock frequency for simple integer ALU operations",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The deep pipeline creates many stages that could leave execution resources underutilized. Double-pumping the ALUs allows the rapid execution engine to deliver two integer ALU operations per core clock cycle in the common case of simple operations. This compensates for the IPC penalty of the deep pipeline by providing very fast execution for basic operations.",
+    "outcome": "Simple integer ALU operations (add, subtract, logical) execute at effectively double the core clock frequency, meaning a 1.5 GHz Pentium 4 completes simple ALU operations at an effective 3 GHz rate.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 7,
+    "not_in_paper": false,
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "weakest_point": "I am not certain whether the paper states an explicit rejected alternative for this design choice or simply presents double-pumping as the chosen approach. I marked alternatives as not-stated-in-paper because I cannot recall the paper naming an alternative ALU design it argued against. The 'two ALU operations per cycle' claim for simple ops I believe is in the paper but am not 100% certain of the exact characterization.",
+    "confidence": 0.75
+  },
+  {
+    "title": "256KB Unified L2 Cache",
+    "where_in_paper": "Section on cache subsystem / L2 cache",
+    "decision": "Implement a 256KB unified L2 cache that is inclusive of the trace cache contents",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper discusses the L2 cache as essential for feeding the trace cache and sustaining the high-throughput execution pipeline. A 256KB cache balances die area against miss rate for the target workloads. The inclusive property simplifies coherency and allows the L2 to serve as a victim cache effectively for the trace cache.",
+    "outcome": "The L2 cache sustains reasonable miss rates for the targeted desktop workloads while fitting within the die budget for the initial Pentium 4 process node.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 8,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am less confident about this entry than the others. The paper definitely discusses the L2 cache, but I am uncertain whether it presents the 256KB size as a deliberate engineering trade-off with explicit alternatives, or whether it simply states the size as a given. The inclusiveness detail I believe is mentioned but am not certain it is in this specific paper versus later NetBurst documentation.",
+    "confidence": 0.6
+  },
+  {
+    "title": "Improved Branch Prediction for Deep Pipeline Compensation",
+    "where_in_paper": "Section on branch prediction / execution core",
+    "decision": "Implement a significantly improved branch prediction unit to reduce the high misprediction penalty inherent in the 20-stage deep pipeline",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "With a pipeline roughly twice as deep as P6, a branch misprediction costs roughly twice as many pipeline flush cycles. Without improved prediction accuracy, the deep pipeline's frequency advantage would be negated by misprediction-driven pipeline bubbles. The paper describes improved prediction structures as a necessary companion to the hyper-pipeline design.",
+    "outcome": "The improved branch predictor reduces the effective misprediction rate sufficiently that the deep pipeline delivers net performance gains despite the higher per-misprediction penalty.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 6,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I am confident the paper discusses branch prediction as a necessary component for the deep pipeline strategy, but I am less certain about whether the paper gives detailed technical specifics of the prediction structures (like the exact table sizes or algorithms) versus treating it at a higher architectural level. The weakest point is whether the paper frames this as an 'engineering decision with alternatives considered' or simply as a design requirement for the deep pipeline.",
+    "confidence": 0.7
+  }
+]
+```

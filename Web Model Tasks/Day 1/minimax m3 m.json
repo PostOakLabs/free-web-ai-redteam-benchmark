@@ -1,0 +1,51 @@
+[
+  {
+    "title": "Deep pipeline (20 stages / Rapid Execution Engine) vs. shorter pipeline",
+    "where_in_paper": "Introduction / pipeline description",
+    "decision": "Adopt a very deep pipeline 'Rapid Execution Engine' / NetBurst with ~20 stages, with the double-clocked integer ALUs running at 2x core frequency) in pursuit of high clock frequency, rather than a shorter, lowerency pipeline as used in the Pentium III.",
+    "alternatives_or_rejectedhorter pipelines inherited from the P6/PIII microarchitecture (which would have limited achievable clock) and even deeper pipelines; the paper argues for a particular depth as the right trade of frequency gain vs. misprediction penalty per branch.",
+    "rationale": "A deep pipeline allows higher clock rates at the cost of more stages lost per branch misprediction and per cache miss; the paper explicitly frames frequency as the primary lever for throughput and accepts the misprediction-cost penalty as the trade.",
+    "outcome": "The paper reports the resulting pipeline enables high-frequency operation with double-clocked ALUs at 2x the core clock; it also acknowledges that mispredict penalties (and later, the L2 latency) limited real-world gains.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  },
+  {
+    "title": "Trace cache (micro-op trace cache) vs. conventional decoded-µop cache",
+    "where_in_paper": "Front end / trace cache section",
+    "decision": "Use a trace stores decoded micro-ops in the dynamic order they were fetched (including branches), rather than a conventional line-based µop cache that mirrors x86 instruction cache lines.",
+    "alternatives_or_rejected": "A conventional decoded-µop cache (one per x86 line), and decoding every from the L1 instruction cache every time; the paper argues re-decoding on every fetch because x86 decode is on the critical path and benefits from path-based storage of decoded traces.",
+    "rationale": "Storing in trace form lets the front end pre-resolve branches-fold repeated branch patterns, hiding decode cost and avoiding repeated x86 decode of the same code; it also benefits branches that would otherwise be poorly aligned with cache lines.",
+    "outcome": "The trace cache delivers up to ~6 µops/cycle of pre-decoded µ, offloading work from the decoders; the paper reports this as the central front-end innovation.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.5
+  },
+  {
+    "title": "Branch predictor: choice of a global-history predictor with path/history scheme",
+    "where_in_paper": "Branch prediction section",
+    "decision": "Use a large global-history-based branch predictor (with associated history tables and a return-address stack), rather than a small local-history predictor carried over from P6.",
+    "alternatives_or_rejected": "Local-history predictors (insufficient accuracy at the target branch counts), and very large monolithic correlating tables; the paper argues for a predictor sized and indexed to hit the accuracy targets the deep pipeline demands.",
+    "rationale": "Deep pipelines make every misprediction expensive, so higher predictor accuracy is worth the area on bigger history tables; the global-history scheme captures correlation that local predictors miss on important branch classes.",
+    "outcome": "Higher prediction accuracy than the prior generation, with the paper explicitly trading area for accuracy to compensate for the deep pipeline's misprediction penalty.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.4
+  },
+  {
+    "title": "On-die L2 cache and choice of 256-bit / wide internal path vs. smaller L2 + wider system bus",
+    "where_in_paper": "Memory subsystem / on-die L2 section",
+    "decision": "Move the L2 cache on-die and give, high-bandwidth internal path to the core, rather than keeping an off-die L2 as on earlier processors.",
+    "alternatives_or_rejected": "An off-die L2 (as on Pentium III) — the paper argues this leaves too much L2 latency on the critical path for a frequency-target design; a smaller on-die L2 with extra pins spent on the front-side bus was the other pole of the trade.",
+    "rationale": "On-die integration cuts L2 access latency, which is critical because the pipeline is so deep; spending die area on L2 pays back in latency and bandwidth that an off-die L2 cannot deliver at the target frequency.",
+    "outcome": "An on-die L2 cache with a 256-bit (or wider) internal datapath to the core, at the cost of die area and yield; the paper reports lower L2 latency and higher bandwidth than the off-die predecessor.",
+    "paper_vs_general": "",
+    "confidence": 0.35
+  },
+  {
+    "title": "Double-clocked (2x ALU) integer execution units vs. single-clock wide issue",
+    "where_in_paper": "Execution units / Rapid Execution Engine",
+    "decision": "Run the two integer ALUs at twice the core clock frequency so they can each retire one simple integer op per core cycle (effectively a 'Rapid Execution Engine'), rather than doubling the number of integer ALU ports at the core clock.",
+    "alternatives_or_rejected": "Adding more parallel ALU pipes at the core clock (more area, longer wire delays) and keeping single-speed ALUs (lower peak integer throughput). The paper explicitly considers each simple integer op is bandwidth-limited and that latency matters more than throughput for common ALU.",
+    "rationale": "Most simple integer ops have latency-limited dependencies (not throughput-limited), so doubling ALU speed shortens critical paths for dependent operations while spending less area and wire budget than doubling port count.",
+    "outcome": "Two simple integer ALUs at 2x the core clock, providing two simple integer ops per core cycle with 1/2-cycle effective latency; the paper reports this as a key contributor to per-clock integer performance but flags port pressure on complex ops_vs_general": "probably-in-the-paper",
+    "confidence": 0.45
+  }
+]

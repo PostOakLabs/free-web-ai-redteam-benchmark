@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Deep pipeline optimized for high clock frequency",
+    "where_in_paper": "Design goals / pipeline overview, often associated with the NetBurst or Hyper Pipelined Technology discussion",
+    "decision": "Use a much deeper pipeline than prior IA-32 microarchitectures, reducing the amount of work per pipeline stage so the processor can reach high clock frequencies.",
+    "alternatives_or_rejected": "The implicit rejected alternative is a shorter, higher-IPC pipeline that tries to do more useful work per cycle. The paper’s reasoning is that high frequency is a primary performance lever, and a deep pipeline is chosen to enable that frequency even at the cost of larger branch-misprediction penalties.",
+    "rationale": "Shorter logic stages can be clocked faster. The paper presents the deep pipeline as a way to obtain large frequency gains, with front-end and branch-prediction mechanisms used to mitigate the resulting branch penalty.",
+    "outcome": "The deep pipeline is presented as the architectural basis for the Pentium 4’s high clock rates, while the larger misprediction cost creates pressure for a strong front end and prediction scheme.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.6
+  },
+  {
+    "title": "Execution Trace Cache stores decoded micro-ops",
+    "where_in_paper": "Front-end / trace-cache discussion",
+    "decision": "Use a trace cache that stores decoded IA-32 instructions as traces of micro-ops, allowing the processor to supply already-decoded work to the pipeline on trace-cache hits.",
+    "alternatives_or_rejected": "The conventional alternative is repeatedly fetching raw instruction bytes and decoding them in the normal fetch/decode path. The paper treats that conventional path as a front-end bottleneck at high frequency, though it may not enumerate every alternative implementation.",
+    "rationale": "Removing repeated instruction decode from the common path reduces front-end latency and helps keep the deep pipeline supplied with useful micro-ops.",
+    "outcome": "On trace-cache hits, the processor can avoid the byte-fetch and decode path, improving front-end bandwidth and helping sustain the deep pipeline.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.62
+  },
+  {
+    "title": "Aggressive branch prediction to protect the deep pipeline",
+    "where_in_paper": "Front-end / branch-prediction discussion, likely near the trace-cache section",
+    "decision": "Use aggressive branch prediction and branch-target mechanisms, integrated with the trace cache, to keep the deep pipeline filled with correctly predicted work.",
+    "alternatives_or_rejected": "Simpler branch prediction or relying on later resolution would be inadequate because the deep pipeline makes each misprediction expensive. The paper may not name a specific rejected predictor, but the trade-off is clear: a deep pipeline requires stronger prediction.",
+    "rationale": "The deeper the pipeline, the more stages are wasted on a mispredict. Better prediction reduces wasted work and improves effective throughput.",
+    "outcome": "The paper presents branch prediction as part of the mechanism that allows the Pentium 4 to maintain performance despite its deep pipeline.",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.55
+  }
+]

@@ -1,0 +1,78 @@
+{
+  "prompt": "C-v5",
+  "model": "Grok 4.5",
+  "date": "2026-09-11",
+  "anchors": {
+    "a1": "exists-exactly",
+    "a2": "exists-exactly",
+    "a3": "exists-but-citation-wrong: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, \"The Microarchitecture of the Pentium 4 Processor,\" Intel Technology Journal, Q1 2001 (also appeared in IEEE J. Solid-State Circuits, vol. 36, no. 11, pp. 1617-1627, Nov. 2001); not IEEE Micro vol. 21, 2007"
+  },
+  "sources": [
+    {
+      "title": "Debugging post-silicon fails in the IBM POWER8 bring-up lab",
+      "venue_or_publication": "IBM Journal of Research and Development",
+      "year": 2015,
+      "what_it_covers": "Techniques and mechanisms for post-silicon validation of the POWER8 processor, including detailed descriptions of several functional bugs found during bring-up and the debug processes used to identify root causes.",
+      "why_relevant": "Directly provides real silicon bring-up failure-and-recovery stories for a major microprocessor, including physical/functional interactions.",
+      "confidence": 0.95,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "Debugging post-silicon fails in the IBM POWER8 bring-up lab IBM J. Res. Dev",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Post-silicon validation: It's the unique fails that hurt you",
+      "venue_or_publication": "IEEE International Test Conference (ITC)",
+      "year": 2009,
+      "what_it_covers": "Account of a particularly difficult intermittent post-silicon bug (SSEL) encountered during microprocessor bring-up at Sun, including failure characteristics, experiments, mitigation, fix, and root cause.",
+      "why_relevant": "Classic named post-silicon failure recovery story focused on hard-to-reproduce silicon issues beyond pure logic bugs.",
+      "confidence": 0.9,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "\"Post-silicon validation: It's the unique fails that hurt you\" Ahuja ITC 2009",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The circuit and physical design of the POWER4 microprocessor",
+      "venue_or_publication": "IBM Journal of Research and Development",
+      "year": 2002,
+      "what_it_covers": "Detailed account of POWER4 circuit/physical design methodology, clock distribution, power, integration, and timing challenges faced by the multi-site team and how they were met to achieve schedule and frequency goals.",
+      "why_relevant": "Owned set already has the companion microarchitecture paper; this is the circuit/physical companion that discusses design-closure aspects including clocking and timing.",
+      "confidence": 0.98,
+      "knowledge_basis": "recalled-citation",
+      "verification_hint": "Warnock \"circuit and physical design of the POWER4\" IBM JRD 2002",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Clocking design and analysis for a 600-MHz Alpha microprocessor",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits",
+      "year": 1998,
+      "what_it_covers": "Design and analysis of the clock distribution network for the Alpha 21264, including grid/H-tree hybrid, skew targets, power, and implementation challenges in a high-frequency design.",
+      "why_relevant": "Concrete physical-design/CTS war-story material from a landmark high-performance microprocessor known for aggressive clocking.",
+      "confidence": 0.85,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "\"Clocking design and analysis for a 600-MHz Alpha microprocessor\" JSSC 1998",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "A Case Study – Crosstalk role in delaying full-chip closure",
+      "venue_or_publication": "eInfochips technical blog / case study",
+      "year": 0,
+      "what_it_covers": "Real design case where a path met timing at block level but failed at full-chip due to crosstalk delta differences; describes diagnosis, metal-layer ECO fix, and verification of recovery.",
+      "why_relevant": "Named engineering postmortem of a classic full-chip timing-closure failure caused by crosstalk after physical integration.",
+      "confidence": 0.75,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "\"A Case Study – Crosstalk role in delaying full-chip closure\" eInfochips",
+      "access_guess": "free"
+    },
+    {
+      "title": "SMIC 55nm Tape-out Timing Issue: When Clean STA Reports Failed in Silicon",
+      "venue_or_publication": "VLSI Shuttle case study",
+      "year": 0,
+      "what_it_covers": "Post-silicon timing failure on a mixed-signal SoC where STA was clean at signoff; root cause traced to consecutive delay-cell clustering from CTS/optimization; ECO recovery and lessons.",
+      "why_relevant": "Explicit silicon-vs-signoff timing failure and recovery story involving CTS-related physical design decisions.",
+      "confidence": 0.7,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "SMIC 55nm Tape-out Timing Issue When Clean STA Reports Failed in Silicon VLSI Shuttle",
+      "access_guess": "free"
+    }
+  ]
+}

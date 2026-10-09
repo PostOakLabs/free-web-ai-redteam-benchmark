@@ -1,0 +1,72 @@
+[
+  {
+    "title": "One global clock domain for the cores and on-chip L2, with skew treated as a budgeted resource",
+    "where_in_paper": "Clock distribution section (a 'Clock distribution' / 'Clocking' topic area, later in the paper)",
+    "decision": "Distribute a single global clock across the chip so that the two processor cores and the on-chip L2 operate synchronously at the same frequency, with clock skew budgeted and controlled in the distribution network, rather than bridging separately clocked islands with synchronizers or locally generated clocks.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "My recollection of the thrust of the argument: the core-to-L2 bandwidth is so high that synchronizer latency and clock-crossing uncertainty could not be afforded, and a single domain makes the entire chip timeable against one cycle; skew is then an engineering budget managed by balancing/tuning the distribution network.",
+    "outcome": "The paper reports hardware that ran at/near its target frequency with measured skew within budget; I cannot recall specific ps or GHz figures stated here.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 42,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "The network topology detail (balanced tree vs. grid, tuned segments, 'local clock buffers') is general IBM/POWER4 practice, not something I can tie to this paper's text; and if the paper instead emphasizes multiple clock domains (e.g. L2 or the fabric interface at a divided frequency), my 'single domain' direction is reversed. I am only ~70% confident cores and L2 ran at the same frequency.",
+    "confidence": 0.3
+  },
+  {
+    "title": "Full-chip static-timing sign-off with unit-level timing budgets / interface contracts",
+    "where_in_paper": "Timing methodology (design methodology / chip integration and timing-closure discussion)",
+    "decision": "Close timing using static timing analysis at the full-chip level, with each macro/unit carrying timing budgets or boundary timing contracts (arrival/required-time assertions) that could be renegotiated between units as the design converged, rather than signing off on the basis of simulated critical paths.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "As far as I can recall the thrust: simulation of a design this large cannot cover the path space, whereas STA gives complete coverage and explicit budgets let units be designed and closed somewhat independently and then integrated.",
+    "outcome": "The paper reports the flow converged to tape-out and that first hardware met its frequency target; no quantitative closure results recalled.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 34,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether tool names (e.g. IBM's EinsTimer) or the phrase 'timing assertions' actually appear here, and whether the paper frames this as a weighed decision at all — it may simply describe the flow. Very likely I am reconstructing a rationale the paper states differently.",
+    "confidence": 0.22
+  },
+  {
+    "title": "Power distribution, IR drop and power density treated as first-class physical-design constraints",
+    "where_in_paper": "Power distribution / power and thermal topic area (possibly overlapping packaging-module discussion)",
+    "decision": "Design the on-chip power grid and its module/package connection against explicit IR-drop and current-density limits, i.e. treat power delivery and power density as design constraints during physical design rather than as a post-layout verification check.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Recollection of thrust only: at this power level supply noise directly consumes timing margin and electromigration/current density bound the grid, so the grid had to be designed to a drop budget up front.",
+    "outcome": "The paper reports a very high chip power/dissipation figure (I believe in the ~100–120 W class) with measured drop within budget; I cannot recall the numbers as stated in this paper.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 46,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Whether power/IR-drop has its own section in THIS paper or is mostly in the packaging/module companion material; the ~115 W number is general POWER4 knowledge and may not be stated here at all.",
+    "confidence": 0.22
+  },
+  {
+    "title": "0.18 μm bulk CMOS with copper interconnect as the technology base for the design",
+    "where_in_paper": "Technology / process description (early section of the paper)",
+    "decision": "Implement the chip in IBM's 0.18 μm-class bulk CMOS with copper wiring and multiple metal levels (I do not recall the count), and size the wiring resource accordingly for a >1 GHz two-processor chip. I do not recall this being presented as a weighed choice with named rejected options.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "Recollection of thrust: copper's lower resistance (and improved current-carrying capability) was what made the global wiring and power delivery feasible at this frequency and density — but I may be supplying this reasoning myself rather than recalling the paper's.",
+    "outcome": "The paper reports a very large transistor count (POWER4 is commonly cited at ~174 M transistors) on a single die; I cannot reliably recall the die size as given here.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 29,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Everything quantitative: process name/generation, number of metal levels, whether low-k dielectric was used (I believe it was not at POWER4), and the die area (~267 mm²?) are all uncertain and drawn from general POWER4 knowledge rather than the paper text.",
+    "confidence": 0.3
+  },
+  {
+    "title": "Two out-of-order cores plus shared on-chip L2, off-chip L3 and fabric bus",
+    "where_in_paper": "This belongs to the companion 'POWER4 system microarchitecture' paper (same issue, pp. 5–25), not to this circuit/physical-design paper — included only to mark the boundary",
+    "decision": "Integrate two processor cores with a shared multi-banked on-chip L2 (with multiple L2 controllers) and an off-chip L3/fabric interface; the physical-design paper would only inherit this as a floorplanning input.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "This is microarchitecture rationale (throughput per chip, shared-L2 bandwidth), i.e. the companion paper's territory — I flag it rather than presenting it as content of this paper.",
+    "outcome": "Not reported as an outcome in this paper.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": null,
+    "not_in_paper": true,
+    "paper_vs_general": "from-general-POWER4-knowledge-not-necessarily-this-paper",
+    "weakest_point": "I cannot rule out that this paper's floorplan/integration section restates the core/L2 floorplan, in which case a floorplan-level version of it IS legitimately here — but the organizational description itself is the companion paper's.",
+    "confidence": 0.25
+  }
+]

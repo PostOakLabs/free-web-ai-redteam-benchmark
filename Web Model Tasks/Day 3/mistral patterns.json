@@ -1,0 +1,112 @@
+[
+  {
+    "pattern_name": "block_boundary_io_delay_budgeting",
+    "situation": "Deriving input/output delay budgets between two blocks with unknown internal timing, during top-level integration",
+    "derivation": "Split the available clock period (T_clock) minus clock skew (T_skew, assumes 10% of T_clock confidence 0.7) and margin (T_margin, assumes 15% of T_clock confidence 0.6) between the launch block (T_launch), interconnect (T_interconnect), and capture block (T_capture) proportionally to their expected logic depth. Formula: T_launch + T_interconnect + T_capture ≤ T_clock - T_skew - T_margin. Allocate based on historical logic depth ratios from similar blocks.",
+    "wrong_way": "Assuming an equal 33/33/33 split between launch, interconnect, and capture without considering block complexity, leading to one block being over-constrained while another has excessive slack",
+    "defense": "Present historical data from similar blocks showing typical logic depth distributions and justify the proportional split based on gate count and pipeline depth",
+    "signoff_risk": "Too tight: impossible timing closure for one block; Too loose: timing failures at integration when interconnect delay exceeds budget",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "7nm-and-below: interconnect delay variability increases, requiring larger margins in T_interconnect"
+  },
+  {
+    "pattern_name": "false_path_vs_multicycle_decision",
+    "situation": "Determining whether a path that cannot meet single-cycle timing should be constrained as a false path or a multicycle path",
+    "derivation": "Analyze the path's logical feasibility: if the path is structurally impossible (e.g., mutually exclusive enables, reset conditions), mark as false path. If the path is functionally valid but requires multiple cycles (e.g., multi-stage data transfer), mark as multicycle path with appropriate -setup and -hold values. For multicycle N: effective period = N * T_clock.",
+    "wrong_way": "Marking a false path as multicycle (wastes cycles and may hide real timing issues), or marking a multicycle path as false (causes functional failure due to missing data latching)",
+    "defense": "Review RTL code for logical impossibility (e.g., gated clocks, enable conditions) or multi-cycle requirements (e.g., pipeline stages, handshake protocols). Use formal verification to confirm.",
+    "signoff_risk": "False path mislabeled as multicycle: unnecessary timing relaxation may hide real issues; Multicycle mislabeled as false: functional failure due to missing data capture",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.9,
+    "node_era_note": "7nm-and-below: more complex clock gating increases false path opportunities but also risk of mislabeling"
+  },
+  {
+    "pattern_name": "clock_domain_crossing_cdc_constraint",
+    "situation": "Constraining data transfer between asynchronous clock domains to prevent metastability",
+    "derivation": "Insert synchronizer flops (typically 2-3 stages) in the receiving domain. Constrain the path from launch flop to first synchronizer flop as false or multicycle. Calculate setup/hold requirements based on clock frequencies: T_su = T_clock_receiver - T_skew - T_synchronizer_delay (assumes T_skew is 5% of T_clock confidence 0.8). Use set_clock_groups -asynchronous for the two domains.",
+    "wrong_way": "Not constraining CDC paths at all, or using insufficient synchronizer stages (e.g., only 1 stage), leading to metastability propagation",
+    "defense": "Reference CDC design guidelines and synchronizer verification reports. Show that synchronizer depth matches the required MTBF (mean time between failures) for the design.",
+    "signoff_risk": "Too loose: metastability propagates to functional logic causing system failure; Too tight: impossible to implement due to excessive synchronizer delay",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "7nm-and-below: higher clock frequencies require more synchronizer stages for same MTBF"
+  },
+  {
+    "pattern_name": "early_implementation_overconstraining",
+    "situation": "Setting initial timing constraints during early implementation when block timing is unknown",
+    "derivation": "Start with tight constraints: set clock period to 80% of target (confidence 0.7), add 20% margin (confidence 0.6) on all paths. Gradually relax constraints as implementation matures, using actual timing data from block-level runs.",
+    "wrong_way": "Starting with final relaxed constraints, missing early timing issues that could have been caught with tighter constraints",
+    "defense": "Demonstrate iterative constraint relaxation: show progression (e.g., Week 1: 0.8*T, Week 2: 0.85*T, Week 3: 0.9*T) with corresponding implementation data.",
+    "signoff_risk": "Too tight: unnecessary optimization effort and potential over-design; Too loose: late-stage timing failures when blocks cannot meet relaxed constraints",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "node_era_note": "7nm-and-below: more aggressive initial constraints needed due to higher process variability"
+  },
+  {
+    "pattern_name": "virtual_clocks_for_io_interfaces",
+    "situation": "Constraining IO interfaces where the actual clock is external and not part of the design",
+    "derivation": "Create a virtual clock with the same period as the external IO clock. Use set_clock_groups -asynchronous for asynchronous IOs. Derive input delay as: T_input_delay = T_external_clock_period * 0.5 - T_setup_external (assumes T_external_clock_period confidence 0.9, T_setup_external confidence 0.7). Derive output delay as: T_output_delay = T_clock - T_hold_external - T_skew (assumes T_skew confidence 0.8).",
+    "wrong_way": "Using the actual internal clock for IO timing instead of a virtual clock, causing incorrect timing checks at the IO boundary",
+    "defense": "Reference IO timing specifications from the external system and show that virtual clock period matches the external clock specification.",
+    "signoff_risk": "Wrong virtual clock period: IO timing failures at system integration; Incorrect delay calculation: setup/hold violations at IO boundaries",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.9,
+    "node_era_note": "7nm-and-below: IO timing margins tighter due to higher operating frequencies"
+  },
+  {
+    "pattern_name": "generated_divided_clock_constraint",
+    "situation": "Constraining a clock that is derived from another clock (e.g., divided, gated, or multiplied)",
+    "derivation": "Use create_generated_clock -source [master_clock_pin] -divide_by N -name derived_clock. Add clock uncertainty: T_uncertainty = T_jitter_master + T_jitter_derived + margin (assumes T_jitter_master confidence 0.8, T_jitter_derived confidence 0.7, margin 10% of derived period confidence 0.6). Set clock latency based on divider logic delay.",
+    "wrong_way": "Treating the derived clock as an independent primary clock, ignoring its relationship to the master clock, leading to incorrect timing analysis",
+    "defense": "Show the clock tree structure and the divider logic. Reference the clock generation RTL and synthesis reports to confirm the division ratio and latency.",
+    "signoff_risk": "Incorrect division ratio: wrong timing analysis for all paths using this clock; Missing uncertainty: setup/hold failures due to unaccounted jitter",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.9,
+    "node_era_note": "7nm-and-below: clock dividers more commonly implemented as part of clock network, requiring tighter uncertainty modeling"
+  },
+  {
+    "pattern_name": "asynchronous_interface_constraint",
+    "situation": "Constraining an interface between two blocks with no clock relationship (asynchronous)",
+    "derivation": "Use set_clock_groups -asynchronous -group {clock1} -group {clock2}. For data transfer, insert handshake logic (e.g., request/acknowledge) and constrain the paths as false or multicycle. For synchronizers: use N-stage synchronizers with MTBF calculation: MTBF = (T_clock * 2^N) / (2 * T_metastability * T_frequency) (assumes T_metastability confidence 0.7).",
+    "wrong_way": "Not using asynchronous clock groups, causing the timer to check paths between the domains and report false violations or miss real metastability issues",
+    "defense": "Reference interface specification documenting the asynchronous nature. Show handshake RTL and synchronizer design that ensures safe data transfer.",
+    "signoff_risk": "Missing asynchronous group: false timing errors and wasted optimization effort; Incorrect synchronizer constraints: metastability in functional logic",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "7nm-and-below: higher operating frequencies require more robust handshake and synchronizer designs"
+  },
+  {
+    "pattern_name": "inter_block_timing_budgeting_pre_implementation",
+    "situation": "Allocating timing budgets between two blocks that have not been implemented yet, during architecture phase",
+    "derivation": "Calculate available time: T_available = T_clock - T_skew (assumes 10% of T_clock confidence 0.7) - T_margin (assumes 20% of T_clock confidence 0.6). Allocate to blocks based on complexity: T_block1 = T_available * (complexity_block1 / total_complexity), where complexity is estimated from gate count and logic depth (assumes complexity estimation confidence 0.7).",
+    "wrong_way": "Allocating equal timing budgets to both blocks regardless of their complexity, leading to one block being impossible to implement while the other has excessive slack",
+    "defense": "Present block complexity estimates based on architectural specifications and historical data from similar designs. Justify the proportional allocation with expected gate counts and pipeline depths.",
+    "signoff_risk": "Too tight for complex block: impossible timing closure; Too loose for simple block: wasted power and area due to over-optimization",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.75,
+    "node_era_note": "7nm-and-below: more accurate early complexity estimates possible due to better synthesis correlation"
+  },
+  {
+    "pattern_name": "clock_latency_budgeting",
+    "situation": "Accounting for clock network delay when deriving path timing constraints",
+    "derivation": "Measure clock latency (T_latency) from clock tree synthesis. Derive available time for data path: T_data = T_clock - T_latency - T_skew (assumes T_skew confidence 0.8) - T_margin (assumes 10% of T_clock confidence 0.7). Allocate T_data to combinational logic based on path criticality.",
+    "wrong_way": "Ignoring clock latency in timing budget, or double-counting it by including it in both clock and data path constraints, leading to incorrect timing analysis",
+    "defense": "Reference clock tree synthesis reports showing actual latency values. Show that clock latency is only subtracted once from the clock period in the timing budget.",
+    "signoff_risk": "Underestimated latency: setup violations due to insufficient time for data path; Overestimated latency: unnecessary pessimism leading to over-constrained design",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.85,
+    "node_era_note": "7nm-and-below: clock network latency more predictable due to better modeling, but more sensitive to process variations"
+  },
+  {
+    "pattern_name": "uncertainty_allocation_in_derived_clocks",
+    "situation": "Allocating clock uncertainty budgets for clocks with jitter and margin requirements",
+    "derivation": "For a derived clock: T_uncertainty = T_jitter_source + T_jitter_derived + T_margin (assumes T_jitter_source confidence 0.8, T_jitter_derived confidence 0.7, T_margin 15% of clock period confidence 0.6). Subtract T_uncertainty from available time: T_available = T_clock - T_uncertainty - T_skew. Allocate remaining to data path.",
+    "wrong_way": "Using the same uncertainty value for all clocks regardless of their source and derivation, leading to either over- or under-constrained paths",
+    "defense": "Reference clock source specifications (e.g., PLL jitter specs) and jitter measurements from silicon data. Show that uncertainty values are specific to each clock domain.",
+    "signoff_risk": "Too little uncertainty: timing failures due to unaccounted jitter; Too much uncertainty: over-constrained design with unnecessary power/area overhead",
+    "provenance": "recalled-from-practice",
+    "recall_confidence": 0.8,
+    "node_era_note": "7nm-and-below: clock jitter more significant due to higher frequencies, requiring more precise uncertainty modeling"
+  }
+]

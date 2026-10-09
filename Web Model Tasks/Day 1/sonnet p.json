@@ -1,0 +1,61 @@
+```json
+[
+  {
+    "title": "Maintaining full binary compatibility with prior PowerPC/PowerPC AS systems instead of adopting a new instruction set",
+    "where_in_paper": "Guiding principles section",
+    "decision": "POWER4 was designed to maintain full binary compatibility for both 32-bit and 64-bit applications with prior PowerPC and PowerPC AS systems, rather than introducing a new or revised instruction set architecture.",
+    "alternatives_or_rejected": "The paper describes that internal IBM task forces in the early 1990s had evaluated whether the PowerPC architecture had technical impediments preventing it from scaling to significantly higher frequencies with good performance, implying a change of architecture was a considered path.",
+    "rationale": "The paper states the task forces concluded there was no technical impediment to scaling PowerPC to higher frequencies, so 'with no technical reason to change, in order to keep our customers software investment intact,' the team accepted binary compatibility as an absolute requirement.",
+    "outcome": "The paper reports POWER4 was delivered maintaining this compatibility requirement from a hardware perspective, alongside its performance and schedule goals.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "This is grounded in the October 2001 IBM technical white paper of the same title and same authors rather than a direct read of the January 2002 IBM J. Res. & Dev. journal paper itself, so I cannot be certain the journal version retains this exact framing or wording.",
+    "provenance_note": "Content verified by fetching the freely available October 2001 IBM technical white paper 'POWER4 System Microarchitecture' by Tendler, Dodson, Fields, Le, and Sinharoy — same authors and title as the journal paper this task names, and almost certainly its direct source material, but not confirmed to be identical text to the January 2002 journal publication."
+  },
+  {
+    "title": "Tracking in-flight instructions by group rather than individually to limit out-of-order tracking logic",
+    "where_in_paper": "Decode, Crack and Group Formation section",
+    "decision": "POWER4 tracks in-flight instructions in groups of up to five internal instructions (IOPs), preserving machine state at group boundaries rather than at individual instruction boundaries.",
+    "alternatives_or_rejected": "The implicit alternative, named directly in the text's own reasoning, is tracking program order and machine state at the granularity of each individual in-flight instruction.",
+    "rationale": "The paper states this grouping was done 'in order to minimize the logic necessary to track a large number of instructions in flight' — any exception restores the machine to the state of the oldest group prior to the exception, rather than requiring per-instruction state tracking.",
+    "outcome": "The paper describes that dispatch, completion, and flush/recovery mechanisms all operate at group granularity (e.g., only one group can complete per cycle, and exceptions flush and re-dispatch at the group level), consistent with this design choice.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Same venue caveat as above — this is confirmed content from the closely related October 2001 technical white paper, not a direct read of the exact January 2002 journal text.",
+    "provenance_note": "Verified from the October 2001 IBM technical white paper by the same authors/title; treated as strong evidence for, but not literal confirmation of, the journal paper's wording."
+  },
+  {
+    "title": "Restricting instructions to at most 2 register reads / 1 register write (with an explicit FMA exception) to enable high-frequency operation",
+    "where_in_paper": "Decode, Crack and Group Formation section",
+    "decision": "To achieve high-frequency operation, internal instructions were restricted to reading at most two registers and writing at most one register; instructions that don't fit this shape (e.g., load-with-update) are split ('cracked') into multiple internal instructions.",
+    "alternatives_or_rejected": "The alternative — executing wider-operand instructions directly without splitting — is explicitly named as rejected for the general case, though the paper also explicitly carves out an exception: fused multiply-add floating-point instructions are handled directly despite requiring three sources, 'for performance reasons.'",
+    "rationale": "The stated rationale is directly frequency-driven: limiting register port requirements per internal instruction was necessary 'in order to achieve high frequency operation,' with the FMA exception justified specifically because splitting it would have cost too much performance.",
+    "outcome": "The paper reports specific mechanics resulting from this choice: e.g., load-with-update is split into a load and an add instruction ('cracking'), and load-multiple-word is implemented via multiple load-word instructions ('millicoding'), each with defined group-formation rules.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Same venue caveat — confirmed from the October 2001 white paper text, not a direct read of the January 2002 journal paper.",
+    "provenance_note": "Verified from the October 2001 IBM technical white paper by the same authors/title."
+  },
+  {
+    "title": "Single-ported instruction cache to save area, accepting a small fetch-versus-fill contention cost",
+    "where_in_paper": "Instruction Fetch section",
+    "decision": "The instruction cache was designed with a single port (usable for either one read or one write per cycle) rather than a dual-ported design that could read and write simultaneously.",
+    "alternatives_or_rejected": "The implicit rejected alternative is a dual-ported (or multi-ported) instruction cache that would allow simultaneous read (fetch) and write (line-fill) access.",
+    "rationale": "The paper states this was done 'since I-cache misses are infrequent, to save area' — i.e., the area cost of a second port wasn't justified given how rarely fills would actually contend with fetches.",
+    "outcome": "The paper describes the resulting mechanism: writes to the I-cache from L2 reloads happen only during cycles when fetch logic isn't using the cache (e.g., during another concurrent miss), so 'writes to the I-cache are hidden and do not interfere with normal instruction fetching.'",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Same venue caveat as the others in this set.",
+    "provenance_note": "Verified from the October 2001 IBM technical white paper by the same authors/title."
+  },
+  {
+    "title": "L3 cache uses a fixed address-decode-at-snoop-time rule (T vs. Trem state) instead of a memory address range decode at castout time",
+    "where_in_paper": "L3 Cache section",
+    "decision": "When an L2 castout causes the L3 to transition into a modified state, the L3 determines at snoop time (via address decode) whether the line maps to memory behind that L3 or elsewhere in the system, entering either the T (local) or Trem (remote) state accordingly — rather than performing a memory address range decode at the time of the actual castout operation.",
+    "alternatives_or_rejected": "The paper explicitly names the rejected alternative: performing a memory address range decode when the L3 executes the castout operation itself.",
+    "rationale": "The paper states plainly: 'This design point was chosen to avoid the need for a memory address range decode when the L3 performs a castout operation' — deciding the local/remote distinction earlier (at snoop time) instead.",
+    "outcome": "The paper reports this lets the L3 use the T/Trem distinction later to determine whether castout data can be written directly to its attached memory controller or must instead be issued as a Fabric Bus transaction.",
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "Same venue caveat — grounded in the October 2001 white paper's text, not a confirmed direct read of the January 2002 journal version.",
+    "provenance_note": "Verified from the October 2001 IBM technical white paper by the same authors/title; this is the strongest-worded explicit design-choice statement found in the fetched text, with a directly named rejected alternative."
+  }
+]
+```
+
+I fetched the full text this time (a freely available October 2001 IBM technical white paper, same title and same five authors as the January 2002 journal paper this task names) and grounded every episode in passages I actually read, rather than reconstructing from memory. I've kept `paper_vs_general` at "probably-in-the-paper" rather than "confident" across the board, and added a `provenance_note` on each entry, because the source I fetched is very likely the direct basis for the journal paper but isn't confirmed to be word-for-word identical to it — that's a real, honest gap rather than a guess I should paper over.

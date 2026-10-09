@@ -1,0 +1,154 @@
+[
+  {
+    "symptom": "LVS mismatch: missing, shorted, or open nets",
+    "first_checks": [
+      {
+        "check": "Rerun extraction and LVS from a clean scratch directory, clearing cached netlists and databases.",
+        "why_first": "Cheapest way to rule out stale data or a partial run before deeper debugging.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Isolate the failing net or net pair and identify whether the mismatch is inside one block, at a block port, or across a physical boundary.",
+        "why_first": "Quickly separates local layout/extraction issues from hierarchy or port-mapping issues.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect pin labels, port layers, and via/contact layers for the failing nets, including off-grid or missing labels.",
+        "why_first": "Missing opens and artificial shorts are very often caused by label or via-layer mapping problems.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review hierarchy, parallel partitioning, or net-merge logs for the failing area, especially net renaming, port tying, or block-boundary reduction.",
+        "why_first": "Rules out merge artifacts that can look like real shorts or opens.",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Run full-chip LVS and then rerun LVS on the failing block alone after re-extracting only that block.",
+        "rules_in": "If the failure changes to a boundary/port mismatch or disappears, hierarchy, port mapping, or merge behavior is likely the cause.",
+        "rules_out": "If the exact same net pair fails identically in the isolated block, hierarchy merge is less likely and local geometry or layer extraction is still live."
+      },
+      {
+        "experiment": "Repeat extraction/LVS with hierarchy flattening changed, or with one parallel partition excluded, or with a different partition seed if available.",
+        "rules_in": "If the short or open disappears or moves when one partition or merge step is excluded, it is likely a merge/partition artifact.",
+        "rules_out": "If the failure persists across different hierarchy/partition choices, it is more likely a real geometric short/open or an extractor layer-mapping issue."
+      },
+      {
+        "experiment": "Toggle extraction inclusion or connectivity treatment of the suspect via/contact layer for the failing net.",
+        "rules_in": "If an open disappears when a via/contact layer is included or its connectivity option is changed, the root cause is likely missing via/contact extraction.",
+        "rules_out": "If the open remains despite correct via-layer inclusion, the likely causes shift to missing route, missing label, or source-netlist mismatch."
+      },
+      {
+        "experiment": "Cross-probe the failing net in layout and extract only a minimal bounding box around the net and its immediate connections.",
+        "rules_in": "If adding, moving, or correcting one local pin label fixes the minimal extraction, the cause is local labeling.",
+        "rules_out": "If the minimal extraction still shows the same short or open, local physical geometry or layer mapping is the more likely cause."
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Missing or mis-mapped via/contact layer in extraction setup.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Missing, off-grid, wrong-layer, or ambiguous pin label causing an apparent open.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.8
+      },
+      {
+        "cause": "Hierarchy or parallel merge artifact tying, renaming, or truncating nets.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Stale schematic, netlist, or block-level database not matching the layout revision.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "Real layout bridge, spacing violation, broken geometry, or unconnected route.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Chasing a reported short as if it must be a real metal bridge before checking whether a missing via, missing label, or hierarchy merge has artificially tied nets together.",
+    "node_era_note": "At 7nm and below, missing/short/open debugging shifts more toward color/cut/via-stack and complex layer-mapping effects, while at 28nm it is more often simple pin, via, or label issues."
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Confirm the extractor device-class definition and parameter options for the failing device type, including W/L, fingers, parallel multiple, and threshold/implant classification.",
+        "why_first": "Cheapest way to rule out a global extraction-model problem before inspecting individual layout shapes.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Cross-probe one mismatched device and compare schematic instance parameters against extracted device parameters: width, length, fingers, parallel multiple, and terminal nets.",
+        "why_first": "Shows whether the mismatch is a systematic parameter transform or a single local device issue.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare the failing device family against a known-good cell or variant using the same device class.",
+        "why_first": "Splits global tech-file or device-model problems from local layout or local schematic edits.",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect local layout context around extra devices: dummy fill, endcaps, implant boundaries, taps, wells, and abutment effects.",
+        "why_first": "Extra devices are often context-generated structures rather than unwanted active transistors.",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Disable or enable parallel-device merging, finger merging, or parallel-multiple reduction in extraction.",
+        "rules_in": "If the reported size changes in integer multiples or parallel-multiple steps, the mismatch is likely due to merging or m-factor convention differences.",
+        "rules_out": "If the exact width/length mismatch is unchanged, merging is less likely and geometry, schematic parameter, or device-class mismatch remains live."
+      },
+      {
+        "experiment": "Rerun extraction with dummy/fill/endcap device recognition disabled or with those layers excluded if the flow supports it.",
+        "rules_in": "If extra devices disappear, they are likely dummy, fill, endcap, or other non-schematic structures being extracted as active devices.",
+        "rules_out": "If extra devices remain, they are more likely real active devices, parasitic device formation, or schematic omission."
+      },
+      {
+        "experiment": "Build or extract a minimal test structure containing one failing device and one known-good reference device of the same family.",
+        "rules_in": "If the minimal device also extracts with the wrong size or class, the likely cause is device geometry transformation, device class, or tech-file mapping.",
+        "rules_out": "If the minimal device extracts correctly but the full block fails, context-dependent hierarchy, merge, implant, well, or local proximity effects are more likely."
+      },
+      {
+        "experiment": "Change only the device-class or parameter mapping for the failing device type while leaving geometry unchanged.",
+        "rules_in": "If the mismatch flips to correct size or correct device type, device classification or parameter mapping was the cause.",
+        "rules_out": "If the mismatch remains, layout geometry or schematic instance parameters are more likely wrong."
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "Parallel multiple, finger count, or device merging convention mismatch between schematic and extraction.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "Dummy, fill, endcap, or implant-defined structures extracted as extra devices.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Wrong device class due to threshold, implant, well, or device-flavor layer misclassification.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Layout generator or PCell effective width/length/finger transformation differs from schematic expectation.",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "Stale schematic device parameters or manual schematic edits not reflected in the current netlist.",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      }
+    ],
+    "classic_trap": "Editing layout to delete apparent extra transistors before checking whether they are dummy, fill, or endcap structures that should be excluded, bound out, or matched by extraction rules.",
+    "node_era_note": "At 7nm and below, size mismatches more often involve fin count, effective width, cut/implant layers, and device-class mapping, while at 28nm planar debugging is usually more direct width/length and simpler dummy-fill handling."
+  }
+]

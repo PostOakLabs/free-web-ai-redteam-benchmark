@@ -1,0 +1,156 @@
+{"family": "ISO 26262-5 hardware architectural metrics",
+ "formulas": [
+     {
+         "name": "SPFM (Single Point Fault Metric)",
+         "expression": "SPFM = λ_SP / (λ_SP + λ_MP + λ_SF)",
+         "variables": [
+             {"symbol": "λ_SP", "meaning": "Single-point fault rate", "units": "FIT"},
+             {"symbol": "λ_MP", "meaning": "Multiple-point fault rate", "units": "FIT"},
+             {"symbol": "λ_SF", "meaning": "Safe fault rate", "units": "FIT"}
+         ],
+         "worked_example": "Given λ_SP = 10 FIT, λ_MP = 2 FIT, λ_SF = 8 FIT: SPFM = 10 / (10 + 2 + 8) = 10 / 20 = 0.5 (50%)",
+         "authority": "ISO 26262-5:2018",
+         "clause_locator": "7.4.4",
+         "known_uncertainty": "Clause locator may vary by edition; exact ASIL target values may require verification"
+     },
+     {
+         "name": "LFM (Latent Fault Metric)",
+         "expression": "LFM = λ_LF / (λ_LF + λ_SP + λ_MP + λ_SF)",
+         "variables": [
+             {"symbol": "λ_LF", "meaning": "Latent fault rate", "units": "FIT"},
+             {"symbol": "λ_SP", "meaning": "Single-point fault rate", "units": "FIT"},
+             {"symbol": "λ_MP", "meaning": "Multiple-point fault rate", "units": "FIT"},
+             {"symbol": "λ_SF", "meaning": "Safe fault rate", "units": "FIT"}
+         ],
+         "worked_example": "Given λ_LF = 5 FIT, λ_SP = 10 FIT, λ_MP = 2 FIT, λ_SF = 8 FIT: LFM = 5 / (5 + 10 + 2 + 8) = 5 / 25 = 0.2 (20%)",
+         "authority": "ISO 26262-5:2018",
+         "clause_locator": "7.4.5",
+         "known_uncertainty": "Clause locator may vary by edition"
+     },
+     {
+         "name": "PMHF (Probabilistic Metric for Hardware Failure)",
+         "expression": "PMHF = Σ(λ_DU,i * t_mission) for all dangerous undetected faults i, where λ_DU,i is the failure rate of dangerous undetected fault i, and t_mission is the mission time",
+         "variables": [
+             {"symbol": "λ_DU,i", "meaning": "Failure rate of dangerous undetected fault i", "units": "FIT"},
+             {"symbol": "t_mission", "meaning": "Mission time", "units": "hours"}
+         ],
+         "worked_example": "Given λ_DU,1 = 1 FIT, λ_DU,2 = 2 FIT, t_mission = 10,000 hours: PMHF = (1 + 2) * 10,000 / 10^9 = 30,000 / 10^9 = 3e-5 (30 FIT)",
+         "authority": "ISO 26262-5:2018",
+         "clause_locator": "7.4.6",
+         "known_uncertainty": "ASIL target values for PMHF may require verification; exact interpretation of mission time may vary"
+     }
+ ],
+ "edge_cases": [
+     "Division by zero if all fault rates (λ_SP, λ_MP, λ_SF, λ_LF) are zero",
+     "SPFM or LFM > 1 or < 0 indicates invalid input fault rates",
+     "PMHF calculation undefined if t_mission is zero"
+ ]
+},
+
+{
+ "family": "JEDEC FIT-rate math (JESD85-class)",
+ "formulas": [
+     {
+         "name": "FIT calculation from accelerated-test data (χ²-based point estimate)",
+         "expression": "FIT = (χ²(α, 2) / (2 * AF * t)) * 10^9, where χ²(α, 2) is the chi-square value for confidence level α with 2 degrees of freedom, AF is the acceleration factor, and t is the test time in hours",
+         "variables": [
+             {"symbol": "χ²(α, 2)", "meaning": "Chi-square value for confidence level α and 2 degrees of freedom", "units": "unitless"},
+             {"symbol": "AF", "meaning": "Acceleration factor", "units": "unitless"},
+             {"symbol": "t", "meaning": "Test time", "units": "hours"}
+         ],
+         "worked_example": "Given α = 0.90 (χ² = 4.605), AF = 100, t = 1,000 hours: FIT = (4.605 / (2 * 100 * 1000)) * 10^9 = (4.605 / 200,000) * 10^9 = 23,025 FIT",
+         "authority": "JEDEC JESD85",
+         "clause_locator": null,
+         "known_uncertainty": "Chi-square table values may vary slightly by source; confidence level interpretation may differ"
+     },
+     {
+         "name": "Arrhenius acceleration factor",
+         "expression": "AF = exp[(E_a / k) * (1/T_use - 1/T_test)], where E_a is activation energy (eV), k is Boltzmann’s constant (8.617333262145e-5 eV/K), T_use and T_test are use and test temperatures in Kelvin",
+         "variables": [
+             {"symbol": "E_a", "meaning": "Activation energy", "units": "eV"},
+             {"symbol": "k", "meaning": "Boltzmann’s constant", "units": "eV/K"},
+             {"symbol": "T_use", "meaning": "Use temperature", "units": "Kelvin"},
+             {"symbol": "T_test", "meaning": "Test temperature", "units": "Kelvin"}
+         ],
+         "worked_example": "Given E_a = 0.7 eV, k = 8.617333262145e-5 eV/K, T_use = 358 K, T_test = 473 K: AF = exp[(0.7 / 8.617333262145e-5) * (1/358 - 1/473)] ≈ exp[8122.6 * (0.000368)] ≈ exp[3.0] ≈ 20.0855",
+         "authority": "JEDEC JESD85",
+         "clause_locator": null,
+         "known_uncertainty": "Activation energy values are material-specific; typical values range from 0.3 eV to 1.0 eV"
+     }
+ ],
+ "edge_cases": [
+     "Division by zero if AF or t is zero",
+     "AF becomes 1 if T_use = T_test, making FIT calculation invalid for acceleration",
+     "Negative or zero activation energy (E_a) is physically meaningless"
+ ]
+},
+
+{
+ "family": "EAR advanced-computing parameters (ECCN 3A090)",
+ "formulas": [
+     {
+         "name": "Total Processing Performance (TPP)",
+         "expression": "TPP = N * P * U, where N is the number of processors, P is the performance per processor in GFLOPS, and U is the utilization factor (0 ≤ U ≤ 1)",
+         "variables": [
+             {"symbol": "N", "meaning": "Number of processors", "units": "unitless"},
+             {"symbol": "P", "meaning": "Performance per processor", "units": "GFLOPS"},
+             {"symbol": "U", "meaning": "Utilization factor", "units": "unitless"}
+         ],
+         "worked_example": "Given N = 100 processors, P = 10 GFLOPS, U = 0.8: TPP = 100 * 10 * 0.8 = 800 GFLOPS",
+         "authority": "U.S. Department of Commerce, Bureau of Industry and Security (BIS), EAR § 734.3",
+         "clause_locator": "ECCN 3A090",
+         "known_uncertainty": "Current threshold values for TPP may require verification; units are as defined in EAR"
+     },
+     {
+         "name": "Performance-density",
+         "expression": "Performance-density = TPP / A, where A is the die area in mm²",
+         "variables": [
+             {"symbol": "TPP", "meaning": "Total Processing Performance", "units": "GFLOPS"},
+             {"symbol": "A", "meaning": "Die area", "units": "mm²"}
+         ],
+         "worked_example": "Given TPP = 800 GFLOPS, A = 200 mm²: Performance-density = 800 / 200 = 4 GFLOPS/mm²",
+         "authority": "U.S. Department of Commerce, Bureau of Industry and Security (BIS), EAR § 734.3",
+         "clause_locator": "ECCN 3A090",
+         "known_uncertainty": "Current threshold values for performance-density may require verification"
+     }
+ ],
+ "edge_cases": [
+     "Division by zero if die area A is zero",
+     "Utilization factor U outside [0, 1] is invalid",
+     "Negative values for N, P, or A are physically meaningless"
+ ]
+},
+
+{
+ "family": "CHIPS Act incentives math (48D)",
+ "formulas": [
+     {
+         "name": "Investment Tax Credit (ITC) Percentage",
+         "expression": "ITC = 25% of qualified investment",
+         "variables": [
+             {"symbol": "ITC", "meaning": "Investment Tax Credit", "units": "%"},
+             {"symbol": "Qualified Investment", "meaning": "Eligible capital expenditure", "units": "USD"}
+         ],
+         "worked_example": "Given qualified investment = $100,000,000: ITC = 0.25 * $100,000,000 = $25,000,000",
+         "authority": "U.S. Internal Revenue Code",
+         "clause_locator": "26 U.S. Code § 48D",
+         "known_uncertainty": "Statutory eligibility thresholds and exact percentage may require verification"
+     },
+     {
+         "name": "Eligibility Threshold for Manufacturing Investment",
+         "expression": "Eligibility requires a minimum investment of UNKNOWN-CURRENT-VALUE in a qualified facility",
+         "variables": [
+             {"symbol": "Minimum Investment", "meaning": "Minimum capital expenditure to qualify", "units": "USD"}
+         ],
+         "worked_example": "N/A (threshold value UNKNOWN-CURRENT-VALUE)",
+         "authority": "U.S. CHIPS Act of 2022",
+         "clause_locator": null,
+         "known_uncertainty": "Exact statutory eligibility thresholds are UNKNOWN-CURRENT-VALUE"
+     }
+ ],
+ "edge_cases": [
+     "ITC calculation undefined if qualified investment is negative",
+     "Eligibility threshold of zero would imply all investments qualify, which is unlikely",
+     "ITC percentage cannot exceed 100%"
+ ]
+}]

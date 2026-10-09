@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Adoption of out-of-order execution",
+    "where_in_paper": "Overview / Microarchitecture",
+    "decision": "Implement aggressive out-of-order execution with a large instruction window, breaking from the strictly in-order design of the 21164",
+    "alternatives_or_rejected": "Continuing with in-order execution and relying on the compiler to statically schedule instructions and hide latencies",
+    "rationale": "Compiler scheduling alone could not adequately hide memory and branch latencies in the face of cache misses and unpredictable run-time behavior; dynamic out-of-order execution was necessary to extract more instruction-level parallelism",
+    "outcome": "Higher performance on irregular and memory-intensive code, at the cost of significantly increased design complexity, die area, and power",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.8
+  },
+  {
+    "title": "Tournament (hybrid) branch predictor",
+    "where_in_paper": "Instruction fetch / Branch prediction",
+    "decision": "Use a tournament predictor that dynamically selects between a local-history predictor and a global-history predictor on a per-branch basis",
+    "alternatives_or_rejected": "A simple bimodal predictor, or relying exclusively on either pure local-history or pure global-history prediction alone",
+    "rationale": "No single prediction mechanism is best for all programs; some branches are best predicted by local patterns while others benefit from global correlation, so an adaptive chooser yields higher overall accuracy",
+    "outcome": "Improved prediction accuracy that helped mitigate the penalty of the deep pipeline on mispredicted branches",
+    "paper_vs_general": "confident-this-is-in-the-paper",
+    "confidence": 0.75
+  },
+  {
+    "title": "Deep pipeline optimized for clock frequency",
+    "where_in_paper": "Pipeline / Physical design",
+    "decision": "Employ a deep seven-stage integer pipeline (and deeper floating-point pipes) targeting very high clock frequency rather than maximizing IPC in a shallow pipeline",
+    "alternatives_or_rejected": "A shorter pipeline with fewer stages that would achieve better CPI at a more modest clock rate",
+    "rationale": "Process technology trends and competitive pressure favored raw clock speed; simpler, shorter-latency pipe stages allowed initial operation at 600 MHz with headroom toward 1 GHz and beyond",
+    "outcome": "Industry-leading clock frequency at introduction, though with a larger branch-misprediction penalty due to the greater number of stages to flush",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.7
+  },
+  {
+    "title": "Large physical register files for renaming",
+    "where_in_paper": "Integer and floating-point execution / Register files",
+    "decision": "Provide 80 physical integer registers and 72 physical floating-point registers to support register renaming and speculative execution",
+    "alternatives_or_rejected": "Smaller physical register files that would limit the number of in-flight instructions, or avoiding register renaming altogether",
+    "rationale": "Four-wide integer issue, two-wide floating-point issue, and aggressive out-of-order speculation require many physical registers to hold temporary results and checkpointed architectural state across branches",
+    "outcome": "Enough register capacity and bandwidth to sustain high instruction throughput and deep speculation windows",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.65
+  },
+  {
+    "title": "Off-chip L2 cache with on-chip controller",
+    "where_in_paper": "Memory hierarchy / Cache",
+    "decision": "Move the L2 cache data arrays off-chip (using external SRAMs controlled by an on-chip tag and controller) rather than integrating L2 SRAMs on the processor die as in the 21164",
+    "alternatives_or_rejected": "Retaining an on-chip L2 cache in the same manner as the Alpha 21164",
+    "rationale": "The die area consumed by out-of-order logic, large register files, and wide issue left insufficient room for on-chip L2 SRAMs; external SRAMs also permitted larger, flexible L2 sizes and leveraged commodity memory technology",
+    "outcome": "Support for large L2 configurations (up to 16 MB) but with higher access latency than an on-die L2",
+    "paper_vs_general": "probably-in-the-paper",
+    "confidence": 0.6
+  }
+]

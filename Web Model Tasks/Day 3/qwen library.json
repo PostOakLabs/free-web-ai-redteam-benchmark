@@ -1,0 +1,757 @@
+[
+  {
+    "symptom": "congestion-driven routing DRCs with clean placement density",
+    "first_checks": [
+      {
+        "check": "Overlay detailed-routing DRC hotspots on fine-grid routing-resource and congestion maps",
+        "why_first": "cheapest way to see whether failures track local resource deficit rather than global density",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Audit routing blockages, layer restrictions, macro halos, and boundary pin keepouts",
+        "why_first": "artificially removed resources are a common and cheap-to-fix mismatch",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Identify high-fanout, bundled, shielded, or clock-root nets crossing hotspot areas",
+        "why_first": "logical congestion can exist even when placement density looks clean",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check pin-access layers, via/cut rules, and track assignment constraints at hotspot pins",
+        "why_first": "pin-access DRCs masquerade as congestion and are ruled out by inspection",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Temporarily allow routing on suspected blocked or restricted layers and rerun detailed routing on the hotspot region",
+        "rules_in": "blocked-layer or over-reserved-resource cause if DRCs clear",
+        "rules_out": "blocked-layer cause is excluded if DRCs remain unchanged"
+      },
+      {
+        "experiment": "Rip up only the failing nets and reroute them with extra layer or spacing freedom",
+        "rules_in": "net-specific topology or pin-access problem if the same nets still fail",
+        "rules_out": "net-specific problem is excluded if DRCs move to different nets as capacity shifts"
+      },
+      {
+        "experiment": "Reduce high-fanout net loads by trial buffer/driver splitting or fanout cloning and reroute",
+        "rules_in": "high-fanout logical congestion if hotspots disappear",
+        "rules_out": "high-fanout cause is excluded if hotspot geometry and DRCs are unchanged"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "routing blockages, layer restrictions, or macro halos removing local tracks",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "pin-access or via/cut rule bottlenecks at dense pins",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "high-fanout or bundled nets demanding more local resources than density shows",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "coarse placement-density metric hiding local routing-resource demand",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "late ECO nets routed through already saturated regions",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "blaming the detailed router and rerunning it while a blockage, pin rule, or high-fanout net is the real capacity thief",
+    "node_era_note": "at 7nm-and-below, cut/via and pin-access rules create local DRCs more often than pure metal-track congestion at 28nm"
+  },
+  {
+    "symptom": "setup (max-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Group failing endpoints by clock root, clock tree branch, region, and generated clock",
+        "why_first": "rules out local CTS skew/branch problems before chasing data paths",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare pre-CTS and post-CTS slack and launch/capture insertion delays on the same paths",
+        "why_first": "isolates violations introduced by clock tree from pre-existing long paths",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect clock tree buffer count, insertion delay, max transition, and useful-skew changes",
+        "why_first": "overbuilt or poorly balanced clock trees directly alter setup slack",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check generated clocks, clock-gating enables, and clock uncertainty settings",
+        "why_first": "constraint mistakes on gated/generated clocks are cheap to verify and common",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun timing with ideal clocks or zero skew and the same data delays",
+        "rules_in": "clock-tree skew/latency issue if setup violations largely clear",
+        "rules_out": "clock-tree skew/latency issue is excluded if the same paths still fail by similar amounts"
+      },
+      {
+        "experiment": "Report launch versus capture insertion delay for each failing path and flag paths where launch delay grew after CTS",
+        "rules_in": "CTS-induced launch skew if failing paths systematically have excessive launch insertion delay",
+        "rules_out": "CTS launch skew is excluded if launch/capture deltas are small and unrelated to failures"
+      },
+      {
+        "experiment": "Disable useful skew or revert to pre-CTS clock targets and rerun timing",
+        "rules_in": "useful-skew over-optimization if failures disappear or move to known optimized branches",
+        "rules_out": "useful-skew over-optimization is excluded if failures are unchanged across unrelated paths"
+      },
+      {
+        "experiment": "Temporarily reduce clock uncertainty/jitter in a trial timing run",
+        "rules_in": "over-pessimistic or mis-applied uncertainty if slack recovers by order of the uncertainty value",
+        "rules_out": "uncertainty pessimism is excluded if slack change is small compared with the violation"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "pre-existing long data paths exposed by real clock latency",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "excessive launch insertion delay or adverse skew from CTS",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "useful skew optimized for placement but invalidated by later CTS/routing",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "generated clock or clock-gating constraint/latency error",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "clock max-transition/cap violations causing slow clock edges",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "adding more clock buffers to fix setup, which can worsen skew, hold, and power without fixing the long path",
+    "node_era_note": "below 28nm, on-chip variation and clock uncertainty dominate more of the setup margin than at 28nm"
+  },
+  {
+    "symptom": "hold (min-delay) violations after CTS",
+    "first_checks": [
+      {
+        "check": "Group hold failures by common clock branch, clock-gating cell, or CTS buffer chain",
+        "why_first": "a shared branch points to skew imbalance rather than scattered min-delay paths",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare pre-CTS and post-CTS launch/capture insertion delays and skew for failing pairs",
+        "why_first": "CTS skew changes are the most direct hold driver",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check hold corner, clock uncertainty removal, and min-delay constraints",
+        "why_first": "wrong corner or pessimism can create mass hold failures cheaply",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Look for short-path structures: scan chains, reset paths, clock gating, and same-cycle paths",
+        "why_first": "these are the usual victims when hold fails",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Force matched launch/capture insertion delay or zero skew for a trial hold run",
+        "rules_in": "CTS skew imbalance if the majority of hold violations clear",
+        "rules_out": "CTS skew imbalance is excluded if violations persist with matched clock delays"
+      },
+      {
+        "experiment": "Insert a small number of delay cells on a representative failing branch and rerun hold",
+        "rules_in": "local minimum-delay deficit if that branch clears without moving failures elsewhere",
+        "rules_out": "purely local deficit is excluded if new hold failures appear on neighboring branches"
+      },
+      {
+        "experiment": "Run hold across multiple corners and compare the set of failing endpoints",
+        "rules_in": "corner/library pessimism or min-corner selection if failures are limited to one corner",
+        "rules_out": "corner-only issue is excluded if the same endpoints fail at all hold corners"
+      },
+      {
+        "experiment": "Disable automatic hold fixing and compare raw violations to post-fix violations",
+        "rules_in": "hold-fixing iteration problem if previous fixes created new violations downstream",
+        "rules_out": "hold-fixing iteration problem is excluded if raw and fixed violations are essentially the same structural set"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "clock skew where launch clock arrives too early relative to capture clock",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "short same-cycle paths with insufficient minimum delay",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "hold-fixing adding buffers that create adjacent hold violations",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "incorrect hold uncertainty or min-delay constraints",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "clock-gating/reset/scan enable paths with special skew behavior",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "blindly inserting hold buffers until the report is clean while creating new hold or setup problems elsewhere",
+    "node_era_note": "advanced nodes need more hold corners and variation-aware skew margins than 28nm"
+  },
+  {
+    "symptom": "IR-drop-induced timing failure",
+    "first_checks": [
+      {
+        "check": "Overlay failing timing endpoints on static and dynamic IR-drop maps for the same scenario",
+        "why_first": "spatial correlation is the cheapest confirmation that supply droop matters",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check power-net connectivity, missing straps/rings/vias, and supply setpoints in the failing region",
+        "why_first": "gross power-delivery opens explain large local drop quickly",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Review activity vectors, clock enable, and simultaneous switching assumptions used for IR analysis",
+        "why_first": "dynamic droop failures can appear only under specific high-current windows",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Compare timing slack with nominal supply versus annotated supply voltage",
+        "why_first": "quantifies how much slack loss is directly due to IR annotation",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun timing with IR-drop annotation disabled or with nominal voltage and compare failing paths",
+        "rules_in": "IR-drop-caused timing if the same endpoints clear or gain significant slack",
+        "rules_out": "IR-drop cause is excluded if slack and failing endpoints are essentially unchanged"
+      },
+      {
+        "experiment": "Reduce activity or gate clocks in the suspect region and rerun dynamic IR and timing",
+        "rules_in": "dynamic current spike if local droop and failures drop sharply",
+        "rules_out": "dynamic spike is excluded if droop and failures persist under reduced activity"
+      },
+      {
+        "experiment": "Add local decap or strengthen a nearby power strap in a trial floorplan/power mesh and reanalyze",
+        "rules_in": "local power-delivery deficit if local IR and timing improve",
+        "rules_out": "local power-delivery deficit is excluded if IR map changes little and failures remain"
+      },
+      {
+        "experiment": "Run the same timing at a higher voltage corner with similar constraints",
+        "rules_in": "voltage-margin-sensitive IR if failures disappear at higher voltage",
+        "rules_out": "IR margin sensitivity is excluded if failures persist with similar slack loss"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "insufficient local power mesh or decap near high-current logic",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "dynamic current spike from simultaneous clock/data activity",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "missing or broken power via/strap connection",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "overly optimistic activity/vector set for IR analysis",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "power-domain crossing or isolation cell supply modeling error",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "debugging timing constraints path-by-path while all failing endpoints sit in one supply-droop neighborhood",
+    "node_era_note": "7nm-and-below has tighter voltage margins and more dynamic-IR sensitivity than 28nm"
+  },
+  {
+    "symptom": "clock skew / CTS divergence (sinks missing insertion-delay targets)",
+    "first_checks": [
+      {
+        "check": "Sort failing sinks by insertion delay error, clock branch, buffer depth, and distance from root",
+        "why_first": "shows whether divergence is branch-local or global",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify clock latency/skew targets, max transition/cap, and useful-skew allowances",
+        "why_first": "unachievable targets are a common non-physical cause",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect routing blockages, macro corridors, NDRs, and pin access along failing clock branches",
+        "why_first": "physical detours are a direct cause of late sinks",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Check clock buffer load/fanout and whether oversized/undersized buffers were chosen",
+        "why_first": "load-driven delay is cheap to spot in the clock report",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun CTS with relaxed max transition/cap and relaxed skew targets while keeping floorplan fixed",
+        "rules_in": "over-constrained targets if most sinks then meet insertion delay",
+        "rules_out": "over-constrained targets are excluded if sinks still diverge similarly"
+      },
+      {
+        "experiment": "Temporarily remove clock-routing blockages or allow additional layers for clock trial",
+        "rules_in": "blockage/detour congestion if insertion-delay spread collapses",
+        "rules_out": "blockage/detour congestion is excluded if the same branches still miss targets"
+      },
+      {
+        "experiment": "Rebuild only the failing clock branches while freezing the clock root and good branches",
+        "rules_in": "local branch topology/load issue if rebuilt branches meet targets",
+        "rules_out": "local branch issue is excluded if global root/source mismatch remains across branches"
+      },
+      {
+        "experiment": "Plot insertion delay versus Manhattan distance for sinks",
+        "rules_in": "routing detour/blockage if delay grows sharply with distance in specific corridors",
+        "rules_out": "detour problem is excluded if delay error is scattered independent of distance"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "insertion-delay/skew targets too aggressive for floorplan and library",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "clock branch detours around macros, blockages, or routing restrictions",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "overloaded clock buffers or unbalanced fanout",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "poor root location or topology choice",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "library/buffer delay model mismatch with CTS assumptions",
+        "recalled_frequency": "rare",
+        "recall_confidence": 0.5
+      }
+    ],
+    "classic_trap": "tuning skew targets repeatedly while ignoring that floorplan obstacles make the target physically unreachable",
+    "node_era_note": "advanced nodes have stricter clock NDRs and variation, so insertion-delay spread is harder to close than at 28nm"
+  },
+  {
+    "symptom": "LVS mismatch: missing / shorted / open nets",
+    "first_checks": [
+      {
+        "check": "Find the first divergence point in the connectivity comparison and identify the mismatched net/port boundary",
+        "why_first": "cheapest way to separate netlist, layout, and extraction boundary issues",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify netlist and layout versions, ECO history, and whether the compared sources are synchronized",
+        "why_first": "version mismatch is extremely common and cheap to rule out",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect physical shapes, pins, vias/cuts, and abutment around the mismatched net",
+        "why_first": "real opens/shorts are confirmed visually at the first mismatch",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Review extraction options for short resolution, power/ground recognition, and floating shapes",
+        "why_first": "extraction settings can falsely merge or drop nets",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Extract with short-detection sensitivity relaxed or with specific net merging disabled and rerun LVS",
+        "rules_in": "extraction-rule false short if the reported short disappears",
+        "rules_out": "extraction-rule false short is excluded if the same short remains"
+      },
+      {
+        "experiment": "Manually trace/connect the suspect net in a small layout window and re-extract",
+        "rules_in": "real open or missing via if connectivity follows the corrected shapes",
+        "rules_out": "real open is excluded if mismatch remains despite correct visible connectivity"
+      },
+      {
+        "experiment": "Compare against the previous known-good layout/netlist pair",
+        "rules_in": "late ECO/version mismatch if mismatch appears only after the recent change",
+        "rules_out": "recent change is excluded if the same mismatch existed before the change"
+      },
+      {
+        "experiment": "Run a small-window connectivity extraction with pin/via recognition debug enabled",
+        "rules_in": "pin/via recognition issue if shapes are connected but the net remains open",
+        "rules_out": "recognition issue is excluded if the shapes are visibly disconnected or missing"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "netlist/layout version mismatch after ECO",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "missing via/cut or open contact causing an open net",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "accidental metal overlap or spacing violation causing a short",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "extraction rule/options misconfiguration",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "port/pin name or boundary mismatch between blocks",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "assuming the extractor is wrong before checking version sync and the actual shapes at the first mismatch",
+    "node_era_note": "below 28nm, cut/via rules and multi-patterning make real opens/shorts and extraction sensitivity more likely"
+  },
+  {
+    "symptom": "LVS mismatch: wrong device sizes or extra devices",
+    "first_checks": [
+      {
+        "check": "Inspect the first mismatched device instance and compare drawn geometry with netlist parameters",
+        "why_first": "directly shows whether the mismatch is physical or parameter interpretation",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check device parameter extraction: W, L, fingers, multipliers, and parallel devices",
+        "why_first": "size mismatches often come from equivalent but differently represented parameters",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Verify whether dummy devices, fill transistors, well taps, or guard-ring devices are being extracted",
+        "why_first": "extra devices are commonly non-functional extraction artifacts",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Compare PDK library definitions and LVS rule deck device classes for both sources",
+        "why_first": "device class or property mapping errors cause systematic size/extra-device mismatches",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Dump extracted device parameters for one mismatched instance from layout and netlist sides",
+        "rules_in": "parameter equivalence issue if W/L/fingers/multipliers differ only by folding or parallel representation",
+        "rules_out": "parameter equivalence issue is excluded if the drawn device geometry itself differs from the netlist intent"
+      },
+      {
+        "experiment": "Disable extraction of dummy/fill/tap devices or tag them as non-electrical and rerun LVS",
+        "rules_in": "dummy/fill recognition if extra devices disappear",
+        "rules_out": "dummy/fill recognition is excluded if extra devices remain and are electrically connected"
+      },
+      {
+        "experiment": "Regenerate the netlist from the latest schematic and rerun against unchanged layout",
+        "rules_in": "stale netlist/ECO mismatch if mismatches clear",
+        "rules_out": "stale netlist is excluded if mismatches persist with a fresh netlist"
+      },
+      {
+        "experiment": "Run the same layout through another rule deck or PDK version",
+        "rules_in": "rule deck/device definition issue if only one deck reports mismatches",
+        "rules_out": "rule deck issue is excluded if all decks report the same device mismatches"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "stale netlist or unpropagated ECO",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "dummy/fill/guard devices extracted but absent from netlist",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "device multiplier/finger/parallel parameter interpretation mismatch",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "PDK or rule-deck device class/property mapping error",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "manual layout edit changing device geometry",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "treating every extra extracted device as a real circuit transistor instead of checking dummy/fill/tap extraction",
+    "node_era_note": "advanced nodes have more required dummy/fill and device-array rules, so extra-device LVS noise is more common than at 28nm"
+  },
+  {
+    "symptom": "antenna (process-antenna-effect) violations at signoff",
+    "first_checks": [
+      {
+        "check": "Group antenna violations by net, layer, and connected gate count",
+        "why_first": "antenna is ratio-based, so clustering identifies systematic routing or rule issues",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check antenna rule calculation mode, layer-specific limits, and signoff options",
+        "why_first": "wrong calculation mode can create broad false failures",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Identify long routes on lower metal layers feeding small gates",
+        "why_first": "that pattern is the classic physical antenna cause",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review jumper, layer-hop, and diode insertion strategy for failing nets",
+        "why_first": "fix strategy availability determines whether violations are design or flow gaps",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun antenna signoff with alternate calculation mode or temporary rule relaxation",
+        "rules_in": "rule/signoff-setup issue if most violations disappear",
+        "rules_out": "rule/signoff-setup issue is excluded if the same nets fail under reasonable rule modes"
+      },
+      {
+        "experiment": "Insert layer jumpers or reroute a sample of failing nets to higher metal and recheck",
+        "rules_in": "route-layer antenna collection if sample violations clear",
+        "rules_out": "route-layer collection is excluded if violations persist despite legal layer hops"
+      },
+      {
+        "experiment": "Add protection diodes or enable diode insertion on a sample of failing gates and recheck",
+        "rules_in": "gate protection deficit if diode insertion clears violations",
+        "rules_out": "gate protection deficit is excluded if violations remain after diodes are legal and connected"
+      },
+      {
+        "experiment": "Compare antenna report before and after late routing ECOs",
+        "rules_in": "late ECO routing if new violations trace to recently changed nets",
+        "rules_out": "late ECO cause is excluded if violations existed before the ECOs"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "long lower-metal routes collecting charge on small gates",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "missing jumpers or layer hops in routing strategy",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "high-fanout nets with large metal-to-gate area ratios",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "antenna signoff rules or calculation mode set too strictly",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      },
+      {
+        "cause": "late ECO routes creating new antenna patterns",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "treating antenna violations like ordinary spacing DRCs and clearing metal without fixing the collected charge/gate ratio",
+    "node_era_note": "advanced nodes with thinner oxides and stricter antenna limits need more jumpers/diodes than 28nm"
+  },
+  {
+    "symptom": "detailed-routing DRC hotspots after clean global routing",
+    "first_checks": [
+      {
+        "check": "Map hotspots to pins, vias/cuts, blockages, NDRs, and layer boundaries",
+        "why_first": "detailed DRCs usually originate at access and rule boundaries, not global capacity",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Check local track utilization and layer-specific demand at the hotspot grids",
+        "why_first": "global routing can miss layer-local track exhaustion",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review via/cut spacing, end-of-line, min-area, and patterning/coloring constraints",
+        "why_first": "advanced rules create hotspots even with enough nominal tracks",
+        "check_cost": "hours"
+      },
+      {
+        "check": "Inspect pin shapes, pin layers, and allowed access directions",
+        "why_first": "pin access choices often dictate detailed-route legality",
+        "check_cost": "minutes"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Rerun detailed routing with additional pin-access layers/directions or slightly enlarged legal pin shapes",
+        "rules_in": "pin-access bottleneck if hotspot DRCs clear",
+        "rules_out": "pin-access bottleneck is excluded if DRCs remain with more access freedom"
+      },
+      {
+        "experiment": "Temporarily relax one suspected rule class, such as via/cut spacing or NDR shielding, in a trial run",
+        "rules_in": "rule-specific bottleneck if that hotspot class disappears",
+        "rules_out": "rule-specific bottleneck is excluded if hotspots remain despite the relaxed rule"
+      },
+      {
+        "experiment": "Rip up and reroute only hotspot nets with different layer bias or spacing",
+        "rules_in": "local net interaction if only those nets clear",
+        "rules_out": "local net interaction is excluded if DRCs shift to adjacent nets, indicating shared capacity"
+      },
+      {
+        "experiment": "Compare global-routing congestion estimate with detailed DRC locations at the same grids",
+        "rules_in": "global-underestimation/pin-access modeling gap if global is clean but detailed DRCs cluster at pins",
+        "rules_out": "global-underestimation is excluded if both global estimate and detailed DRCs show the same congestion"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "pin-access or via/cut rule conflicts",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "local track exhaustion near macros, pins, or blockages",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "advanced patterning/coloring or spacing rules",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "global routing resource model underestimating detailed-route demand",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "NDR/shielding constraints consuming local routing resources",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "assuming clean global routing means no congestion and rerunning detailed routing without changing access, rules, or layer bias",
+    "node_era_note": "at 7nm-and-below, detailed DRCs are often cut/coloring/pattern-rule driven rather than simple metal-spacing driven as at 28nm"
+  },
+  {
+    "symptom": "unroutable placement (global placement diverges or overflows)",
+    "first_checks": [
+      {
+        "check": "Check fine-grid placement density and overflow by region, not just total utilization",
+        "why_first": "local density above legal capacity is the most direct placer divergence cause",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Audit macro locations, halos, keepouts, placement blockages, and well/tap rule areas",
+        "why_first": "unusable reserved area can make legal placement impossible even at moderate total density",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Review cell inflation factors from congestion, timing, or useful-skew optimization",
+        "why_first": "inflation can silently turn a legal density into an unroutable one",
+        "check_cost": "minutes"
+      },
+      {
+        "check": "Inspect fixed pins, IO/IP boundaries, and channel widths between macros",
+        "why_first": "narrow corridors are common sources of overflow and routing failure",
+        "check_cost": "hours"
+      }
+    ],
+    "discriminating_experiments": [
+      {
+        "experiment": "Lower the placement density target or allow temporary overflow in a trial global placement",
+        "rules_in": "density/inflation pressure if placement converges at lower target",
+        "rules_out": "density pressure is excluded if it still diverges with ample nominal slack"
+      },
+      {
+        "experiment": "Relax or shrink macro halos/keepouts in a trial floorplan and rerun placement",
+        "rules_in": "halo/keepout over-reservation if overflow clears",
+        "rules_out": "halo/keepout over-reservation is excluded if overflow remains in the same regions"
+      },
+      {
+        "experiment": "Freeze macros and disable timing-driven inflation/useful skew, then place standard cells only",
+        "rules_in": "macro/floorplan bottleneck if standard cells place cleanly with macros moved or constraints relaxed",
+        "rules_out": "macro/floorplan bottleneck is excluded if standard cells still overflow with realistic fixed macros"
+      },
+      {
+        "experiment": "Run global placement with routing-resource demand deflated or routing congestion optimization disabled",
+        "rules_in": "over-aggressive congestion/timing objectives if placement converges",
+        "rules_out": "congestion objective issue is excluded if placement still overflows with deflated demand"
+      }
+    ],
+    "common_root_causes": [
+      {
+        "cause": "local placement density exceeding legal capacity",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.75
+      },
+      {
+        "cause": "macro halos/keepouts/blockages removing usable area",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.7
+      },
+      {
+        "cause": "poor macro placement creating narrow channels",
+        "recalled_frequency": "common",
+        "recall_confidence": 0.65
+      },
+      {
+        "cause": "over-aggressive cell inflation for congestion or timing",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.6
+      },
+      {
+        "cause": "insufficient routing layers/tracks for the net demand in advanced nodes",
+        "recalled_frequency": "occasional",
+        "recall_confidence": 0.55
+      }
+    ],
+    "classic_trap": "iterating placer/router options while the floorplan still contains a local density or macro-corridor impossibility",
+    "node_era_note": "below 28nm, lower usable density targets and more well/tap/coloring keepouts make placement overflow appear earlier"
+  }
+]

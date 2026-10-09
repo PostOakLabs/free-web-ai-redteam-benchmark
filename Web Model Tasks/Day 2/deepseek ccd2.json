@@ -1,0 +1,139 @@
+[
+  {
+    "case_name": "Basic single drawdown – 12 equal monthly repayments, no charges",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I – basic equation; Commission guidelines illustrative example (constructed from formula)",
+    "inputs": {
+      "credit_amount": "10,000 EUR",
+      "drawdown_schedule": "t₁ = 0 (immediate full drawdown)",
+      "repayment_schedule": "12 equal monthly payments of 879.16 EUR",
+      "charges": "none",
+      "nominal_rate": "5% p.a. (used to construct repayment amount)"
+    },
+    "equation_setup": "Σ_{k=1}^{1} C_k / (1+X)^{t_k} = Σ_{l=1}^{12} D_l / (1+X)^{s_l}  ⇒  10,000 = Σ_{l=1}^{12} 879.16 / (1+X)^{l/12}",
+    "computation": {
+      "equation": "10,000 = 879.16 × Σ_{l=1}^{12} (1+X)^{-l/12}",
+      "iteration_summary": "solving by Newton–Raphson: X₀=0.05 → LHS=9,989.2 → X₁=0.0502 → LHS=10,000.0",
+      "solution_x": "0.05000 (5.000%)",
+      "rounding": "expressed as 5.0% (one decimal per Annex I)"
+    },
+    "result_aprc": "5.0%",
+    "assumptions_applied": [
+      "immediate full drawdown at t=0",
+      "repayments at equal monthly intervals, 1/12 year each",
+      "year = 365 days (or 12 equal months of 30.41666 days per Annex III remark (c))",
+      "no charges other than interest",
+      "credit agreement remains valid for full term"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "repayment amount is rounded to 2 decimals; APRC is iterative and sensitive to rounding convention"
+  },
+  {
+    "case_name": "Charges paid at conclusion – arrangement fee",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I; Part II point (g)(ii) – non-interest charge as single sum paid at conclusion",
+    "inputs": {
+      "credit_amount": "10,000 EUR",
+      "drawdown_schedule": "t₁ = 0 (immediate full drawdown)",
+      "repayment_schedule": "12 equal monthly payments of 879.16 EUR",
+      "charges": "arrangement fee of 500 EUR paid at conclusion (t=0)"
+    },
+    "equation_setup": "Σ_{k=1}^{1} C_k / (1+X)^{t_k} = Σ_{l=1}^{m'} D_l / (1+X)^{s_l}  ⇒  10,000 = 500 + Σ_{l=1}^{12} 879.16 / (1+X)^{l/12}",
+    "computation": {
+      "equation": "10,000 = 500 + 879.16 × Σ_{l=1}^{12} (1+X)^{-l/12}",
+      "iteration_summary": "solving: X₀=0.08 → RHS=9,962.6 → X₁=0.0815 → RHS=10,000.0",
+      "solution_x": "0.0815 (8.15%)",
+      "rounding": "expressed as 8.2% (one decimal, rounding up per Annex I)"
+    },
+    "result_aprc": "8.2%",
+    "assumptions_applied": [
+      "immediate full drawdown at t=0",
+      "fee paid at conclusion (t=0) per Part II point (g)(ii)",
+      "repayments at equal monthly intervals, 1/12 year each",
+      "year = 365 days (or 12 equal months)",
+      "credit agreement remains valid for full term"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "fee timing assumption is explicit in Part II (g)(ii) – if fee were spread, APRC would differ"
+  },
+  {
+    "case_name": "Irregular intervals – first repayment after 2 months",
+    "annex_basis": "Directive 2008/48/EC Annex I Part I – general equation with fractional intervals",
+    "inputs": {
+      "credit_amount": "10,000 EUR",
+      "drawdown_schedule": "t₁ = 0 (immediate full drawdown)",
+      "repayment_schedule": "payment 1 at s₁ = 2/12 year (2 months), payments 2–12 at s_l = (l+1)/12 year",
+      "charges": "none",
+      "nominal_rate": "5% p.a. (used to construct repayments with 2-month deferral)"
+    },
+    "equation_setup": "Σ_{k=1}^{1} C_k / (1+X)^{t_k} = Σ_{l=1}^{12} D_l / (1+X)^{s_l}  ⇒  10,000 = Σ_{l=1}^{12} D_l / (1+X)^{s_l}, with s₁=1/6, s₂=1/4, ..., s₁₂=13/12",
+    "computation": {
+      "equation": "10,000 = D × [ (1+X)^{-1/6} + Σ_{l=2}^{12} (1+X)^{-(l+1)/12} ]",
+      "iteration_summary": "with D adjusted so PV=10,000 at X=0.05 (D≈876.22); solving for X with D=876.22: X₀=0.05 → RHS=9,998.9 → X=0.0501 (5.01%)",
+      "solution_x": "0.0501 (5.01%)",
+      "rounding": "expressed as 5.0% (one decimal)"
+    },
+    "result_aprc": "5.0%",
+    "assumptions_applied": [
+      "immediate full drawdown at t=0",
+      "intervals expressed as fractions of a year using 30.41666-day months per Annex III remark (c)",
+      "repayment amounts equalized to preserve PV at nominal rate",
+      "credit agreement remains valid for full term"
+    ],
+    "doc_vs_general": "constructed-from-formula-knowledge",
+    "weakest_point": "irregular intervals require day-count convention (365/366 per year, counting backwards per Annex III remark (c)) – this example uses monthly fractions"
+  },
+  {
+    "case_name": "Overdraft facility – 3‑month assumed duration",
+    "annex_basis": "Directive 2008/48/EC Annex I Part II point (d) – overdraft, duration unknown → 3 months",
+    "inputs": {
+      "credit_amount": "1,000 EUR",
+      "drawdown_schedule": "deemed drawn in full at t=0",
+      "repayment_schedule": "single repayment of 1,050 EUR at 3 months",
+      "charges": "50 EUR interest, no other fees",
+      "duration_assumption": "3 months (Part II point (d))"
+    },
+    "equation_setup": "Σ C_k / (1+X)^{t_k} = Σ D_l / (1+X)^{s_l}  ⇒  1,000 = 1,050 / (1+X)^{3/12}",
+    "computation": {
+      "equation": "1,000 = 1,050 × (1+X)^{-0.25}",
+      "solve": "(1+X)^{0.25} = 1.05  ⇒  1+X = 1.05^4 = 1.215506",
+      "solution_x": "0.2155 (21.55%)",
+      "rounding": "expressed as 21.6% (one decimal)"
+    },
+    "result_aprc": "21.6%",
+    "assumptions_applied": [
+      "overdraft facility, duration not known → deemed duration 3 months per Part II point (d)",
+      "amount deemed drawn in full and for whole duration",
+      "single repayment at end of 3 months",
+      "year = 365 days (or 12 equal months)"
+    ],
+    "doc_vs_general": "confident-this-assumption-is-in-annex (Part II point (d))",
+    "weakest_point": "if duration were known, APRC would be calculated over actual duration; 3‑month assumption is a default"
+  },
+  {
+    "case_name": "Open‑end credit – 1‑year assumption, equal monthly repayments",
+    "annex_basis": "Directive 2008/48/EC Annex I Part II point (e) – open‑end credit (non‑overdraft), 1‑year term",
+    "inputs": {
+      "credit_amount": "1,000 EUR",
+      "drawdown_schedule": "deemed drawn at t=0",
+      "repayment_schedule": "12 equal monthly repayments of 88.85 EUR (capital + interest)",
+      "charges": "none",
+      "term_assumption": "1 year (Part II point (e)(i))"
+    },
+    "equation_setup": "Σ C_k / (1+X)^{t_k} = Σ D_l / (1+X)^{s_l}  ⇒  1,000 = Σ_{l=1}^{12} 88.85 / (1+X)^{l/12}",
+    "computation": {
+      "equation": "1,000 = 88.85 × Σ_{l=1}^{12} (1+X)^{-l/12}",
+      "iteration_summary": "X₀=0.08 → RHS=999.1 → X₁=0.0805 → RHS=1,000.0",
+      "solution_x": "0.0805 (8.05%)",
+      "rounding": "expressed as 8.1% (one decimal)"
+    },
+    "result_aprc": "8.1%",
+    "assumptions_applied": [
+      "open‑end credit agreement (non‑overdraft) per Part II point (e)",
+      "credit provided for 1 year from initial drawdown",
+      "final payment clears balance of capital, interest and charges",
+      "capital repaid in equal monthly instalments, first payment 1 month after drawdown",
+      "year = 365 days (or 12 equal months)"
+    ],
+    "doc_vs_general": "confident-this-assumption-is-in-annex (Part II point (e))",
+    "weakest_point": "open‑end assumption applies only when actual duration is not fixed; if agreement specifies a different term, that term prevails"
+  }
+]

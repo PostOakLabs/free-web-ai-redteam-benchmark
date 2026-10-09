@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Clustered integer execution units",
+    "where_in_paper": "Integer execution unit / clustering discussion",
+    "decision": "The 21264 splits its integer execution resources into two clusters, each with its own set of integer ALUs, with results needing an extra cycle to move between clusters.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The paper's reasoning is that a single, fully unified integer issue/execution structure with full bypassing across all ALUs does not scale well with clock frequency, so splitting into clusters reduces wire lengths and bypass complexity, trading off an extra inter-cluster latency for higher achievable clock speed.",
+    "outcome": "This clustered design allowed the integer execution units to run at high frequency, at the cost of a one-cycle penalty for results needed by the opposite cluster.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 28,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall the clustering concept and extra-cycle penalty as a real 21264 feature discussed in Kessler's paper, but I'm not fully certain of exact wording or whether alternatives are explicitly named as rejected.",
+    "confidence": 0.45
+  },
+  {
+    "title": "Out-of-order issue window size vs. clock frequency trade-off",
+    "where_in_paper": "Out-of-order execution / instruction queue section",
+    "decision": "The paper describes sizing the out-of-order instruction issue queues (integer and floating point) to specific depths chosen to balance instruction-level parallelism extraction against the clock-cycle-time impact of larger, more complex issue logic.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The stated reasoning is that larger issue windows can find more parallelism but the associated wakeup/select logic grows in complexity and delay, so the queue depth was chosen as a balance that could still support the target clock frequency.",
+    "outcome": "The 21264 achieved a relatively deep out-of-order window for its era while still reaching high clock rates.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 27,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I recall this trade-off theme as characteristic of the paper's discussion but I'm not confident of specific queue-depth numbers or precise framing as an explicit rejected alternative.",
+    "confidence": 0.35
+  },
+  {
+    "title": "Instruction cache replication for register-mapping/rename purposes",
+    "where_in_paper": "Instruction fetch / line predictor section",
+    "decision": "The paper describes replicating certain instruction-related structures (such as line prediction or pre-decode information) to support fast, high-bandwidth instruction fetch without creating a bottleneck.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The rationale given is that a single shared structure feeding fetch/decode/rename would become a critical-path bottleneck as clock frequency increased, so replication or duplication of key fetch-related structures allowed parallel access and kept the front end from limiting overall pipeline throughput.",
+    "outcome": "The fetch mechanism (including a line predictor, a departure from a traditional branch predictor accessed at fetch time) supported high fetch bandwidth aligned with the processor's aggressive clock targets.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 26,
+    "not_in_paper": false,
+    "paper_vs_general": "from-general-Alpha-knowledge-not-necessarily-this-paper",
+    "weakest_point": "This entry blends recollection of 21264's line predictor (a well-known but possibly imprecise memory) with an assumed 'replication' framing that I am not confident is explicitly discussed this way in this specific paper; direction of the actual decision is uncertain to me.",
+    "confidence": 0.25
+  },
+  {
+    "title": "Wire-delay-aware floorplanning as a first-order design constraint",
+    "where_in_paper": "Introduction / design overview discussing physical design challenges",
+    "decision": "The paper describes designing the 21264's microarchitecture with explicit attention to physical wire delay and floorplan layout, rather than treating physical implementation as a downstream concern after microarchitectural specification.",
+    "alternatives_or_rejected": "not-stated-in-paper",
+    "rationale": "The reasoning given is that at the target clock frequency, wire delays between functional units become a significant fraction of the cycle time, so microarchitectural decisions (like clustering) needed to account for physical placement and communication distances from early in the design process.",
+    "outcome": "This physically-aware design approach is presented as necessary to achieve the processor's aggressive frequency goals.",
+    "quote_as_recalled": "cannot-reproduce-verbatim",
+    "page_guess": 25,
+    "not_in_paper": false,
+    "paper_vs_general": "probably-in-the-paper",
+    "weakest_point": "I believe this theme (wire-delay-driven design) is discussed in the paper given it's a well-known aspect of Kessler's writeup, but I cannot confirm precise phrasing or exact section placement.",
+    "confidence": 0.4
+  }
+]

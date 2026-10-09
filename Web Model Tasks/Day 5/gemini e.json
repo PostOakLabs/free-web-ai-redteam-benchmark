@@ -1,0 +1,173 @@
+[
+{
+"calculation": "Single-Point Fault Metric (SPFM)",
+"formula_or_test": "SPFM = 1 - (sum(lambda_SPF + lambda_RF) / sum(lambda_SR)) = sum(lambda_SR_safe + lambda_MPF_lat + lambda_MPF_det) / sum(lambda_SR)",
+"inputs": [
+"lambda_SR (failure rate of safety-related elements)",
+"lambda_SPF (single-point fault rate)",
+"lambda_RF (residual fault rate)",
+"lambda_MPF_lat (latent multiple-point fault rate)",
+"lambda_MPF_det (detected multiple-point fault rate)",
+"lambda_SR_safe (safe fault rate of safety-related elements)"
+],
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.5",
+"publicly_retrievable": "paywalled",
+"volatility": "static",
+"confidence": 1.0
+},
+{
+"calculation": "Latent Fault Metric (LFM)",
+"formula_or_test": "LFM = 1 - (sum(lambda_MPF_lat) / (sum(lambda_SR) - sum(lambda_SPF) - sum(lambda_RF))) = sum(lambda_MPF_det + lambda_SR_safe) / (sum(lambda_SR) - sum(lambda_SPF) - sum(lambda_RF))",
+"inputs": [
+"lambda_SR (failure rate of safety-related elements)",
+"lambda_SPF (single-point fault rate)",
+"lambda_RF (residual fault rate)",
+"lambda_MPF_lat (latent multiple-point fault rate)",
+"lambda_MPF_det (detected multiple-point fault rate)",
+"lambda_SR_safe (safe fault rate of safety-related elements)"
+],
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.6",
+"publicly_retrievable": "paywalled",
+"volatility": "static",
+"confidence": 1.0
+},
+{
+"calculation": "ISO 26262 Hardware Architectural Metrics Target Thresholds by ASIL",
+"formula_or_test": "ASIL B: SPFM >= 90%, LFM >= 60%, PMHF < 10^-7 h^-1; ASIL C: SPFM >= 97%, LFM >= 80%, PMHF < 10^-7 h^-1; ASIL D: SPFM >= 99%, LFM >= 90%, PMHF < 10^-8 h^-1",
+"inputs": [
+"Target ASIL (B, C, or D)"
+],
+"authority": "ISO 26262-5:2018 Road vehicles — Functional safety — Part 5: Product development at the hardware level",
+"clause_locator": "Clause 8.4.3",
+"publicly_retrievable": "paywalled",
+"volatility": "static",
+"confidence": 0.95
+},
+{
+"calculation": "Arrhenius Temperature Acceleration Factor (AF_T)",
+"formula_or_test": "AF_T = exp((E_a / k) * ((1 / T_use) - (1 / T_stress)))",
+"inputs": [
+"E_a (activation energy in eV)",
+"k (Boltzmann constant = 8.617333262e-5 eV/K)",
+"T_use (use temperature in Kelvin)",
+"T_stress (stress temperature in Kelvin)"
+],
+"authority": "JEDEC JESD91A (Critical Failure Method - Temperature Acceleration Factor)",
+"clause_locator": null,
+"publicly_retrievable": "free with registration",
+"volatility": "static",
+"confidence": 0.95
+},
+{
+"calculation": "Failures In Time (FIT) Rate",
+"formula_or_test": "FIT = (Failures / (N * t * AF)) * 10^9",
+"inputs": [
+"Failures (number of failed units or chi-square statistically adjusted failure count)",
+"N (sample size)",
+"t (test duration in hours per unit)",
+"AF (total acceleration factor)"
+],
+"authority": "JEDEC JESD85 (Methods for Calculating Failure Rates in Units of FITs)",
+"clause_locator": null,
+"publicly_retrievable": "free with registration",
+"volatility": "static",
+"confidence": 0.95
+},
+{
+"calculation": "Eyring Voltage-Temperature Acceleration Factor (AF_VT)",
+"formula_or_test": "AF_VT = exp((E_a / k) * ((1 / T_use) - (1 / T_stress)) + gamma * (V_stress - V_use))",
+"inputs": [
+"E_a (activation energy in eV)",
+"k (Boltzmann constant in eV/K)",
+"T_use (operating temperature in Kelvin)",
+"T_stress (stress temperature in Kelvin)",
+"gamma (voltage acceleration exponent/coefficient)",
+"V_use (operating voltage)",
+"V_stress (stress voltage)"
+],
+"authority": "JEDEC System-Level Reliability and Acceleration Standards (JESD74A)",
+"clause_locator": null,
+"publicly_retrievable": "free with registration",
+"volatility": "static",
+"confidence": 0.9
+},
+{
+"calculation": "Total Processing Performance (TPP) for Export Control Determination",
+"formula_or_test": "TPP = 2 * MacTOPS * bit_length (where MacTOPS is the theoretical peak MAC operations per second; test evaluates if TPP >= 4800 or Total Processing Performance density criteria under 3A090.a)",
+"inputs": [
+"MacTOPS (Theoretical peak Multiply-Accumulate operations per second)",
+"bit_length (Bit length of the operation, e.g., 8 for INT8, 16 for FP16)"
+],
+"authority": "US Export Administration Regulations (EAR) 15 CFR Part 774, Supplement No. 1, Category 3",
+"clause_locator": "ECCN 3A090.a Note 1",
+"publicly_retrievable": "free",
+"volatility": "subject to regulatory revision",
+"confidence": 0.95
+},
+{
+"calculation": "Performance Density Threshold for Advanced Integrated Circuits Control",
+"formula_or_test": "Performance Density = TPP / die_area_mm2 (test evaluates if TPP >= 1600 and Performance Density >= threshold specified in ECCN 3A090.a)",
+"inputs": [
+"TPP (Total Processing Performance)",
+"die_area_mm2 (Total die area in square millimeters including logic and memory components integrated in single package)"
+],
+"authority": "US Export Administration Regulations (EAR) 15 CFR Part 774, Supplement No. 1, Category 3",
+"clause_locator": "ECCN 3A090.a",
+"publicly_retrievable": "free",
+"volatility": "subject to regulatory revision",
+"confidence": 0.9
+},
+{
+"calculation": "Advanced Manufacturing Investment Credit (CHIPS Act Section 48D Tax Credit Rate)",
+"formula_or_test": "Credit Amount = 0.25 * Qualified_Investment_Basis",
+"inputs": [
+"Qualified_Investment_Basis (Basis of qualified property placed in service for advanced semiconductor manufacturing facilities)"
+],
+"authority": "Internal Revenue Code (26 U.S.C.) Section 48D as enacted by CHIPS Act of 2022",
+"clause_locator": "26 U.S.C. 48D(a)",
+"publicly_retrievable": "free",
+"volatility": "static until statutory sunset",
+"confidence": 1.0
+},
+{
+"calculation": "CHIPS Act Expansion Transaction Threshold (Guardrail Clause)",
+"formula_or_test": "Significant Expansion Test = (Added_Production_Capacity >= 0.05 * Pre_Existing_Capacity) in a Foreign Country of Concern",
+"inputs": [
+"Added_Production_Capacity (Production volume/wafer capacity added via transaction)",
+"Pre_Existing_Capacity (Baseline operational facility capacity)"
+],
+"authority": "15 CFR Part 231 - Preventing the Unlawful Use of CHIPS Act Funding (DOC/BIS Final Rule)",
+"clause_locator": "15 CFR 231.101 / 15 CFR 231.202",
+"publicly_retrievable": "free",
+"volatility": "subject to regulatory revision",
+"confidence": 0.9
+},
+{
+"calculation": "CHIPS Act Legacy Technology Node Thresholds for Logic Chips",
+"formula_or_test": "Legacy Logic Threshold Test = Non-planar transistor architecture (e.g., planar MOSFET) AND gate length >= 28 nm",
+"inputs": [
+"Transistor Architecture (Planar vs. FinFET/GAA)",
+"Production Node Feature Size / Gate Length (nm)"
+],
+"authority": "15 CFR Part 231 - Preventing the Unlawful Use of CHIPS Act Funding",
+"clause_locator": "15 CFR 231.102",
+"publicly_retrievable": "free",
+"volatility": "subject to regulatory revision",
+"confidence": 0.9
+},
+{
+"calculation": "CoFDM / Black-Box Blackout Mean Time To Failure (MTTF) under Exponential Failure Distribution",
+"formula_or_test": "MTTF = 1 / sum(lambda_i) where lambda_i = FIT_i * 10^-9",
+"inputs": [
+"lambda_i (individual component failure rate per hour)",
+"FIT_i (Failures In Time for individual chip components)"
+],
+"authority": "MIL-HDBK-217F Reliability Prediction of Electronic Equipment",
+"clause_locator": "Section 5.1",
+"publicly_retrievable": "free",
+"volatility": "static",
+"confidence": 0.95
+}
+]

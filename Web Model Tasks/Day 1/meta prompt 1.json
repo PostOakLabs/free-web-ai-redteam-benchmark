@@ -1,0 +1,172 @@
+[
+  {
+    "title": "Late routing congestion at top-level pin field after CTS",
+    "design_context": "7nm, 1.2M placeable instances, 87 macros (mostly SRAM), 2 clocks: 800MHz core and 400MHz IO, commercial P&R",
+    "prior_state": "Utilization 77%, GRC overflow 2.3%, peak bin overflow 12%, 0 DRC at placement, post-CTS WNS -45ps, TNS -0.8ns",
+    "observation": "Detailed routing stalled at 93% with 1840 opens/shorts, 88% of overflow concentrated in 400um x 400um channel between two macro rows, pin density 620 pins per 100um on M2/M3. severity: HIGH",
+    "hypothesis": "High pin density from two mirrored SRAM banks facing each other created M2 pin-access conflict compounded by M2/M3 power strap alignment blocking track access, not global routing resource shortage.",
+    "candidates_considered": [
+      {
+        "action": "Increase die area 3% to drop utilization to 72%",
+        "rejected_because": "Requires top-level floorplan re-signoff and bump map invalidation, 2-week schedule hit, impacts all blocks."
+      },
+      {
+        "action": "Flip every other SRAM macro 180deg to stagger pins",
+        "rejected_because": "Risk of timing regression on 87 macros, requires full CTS rerun, estimated IR increase +8mV on flipped orientation."
+      },
+      {
+        "action": "Lower utilization 5% via placement blockage in channel",
+        "rejected_because": "Pushes cells into already congested periphery, adds 5% area penalty and does not solve pin-access root cause."
+      },
+      {
+        "action": "Apply non-default routing rule widening M2 pitch in channel",
+        "rejected_because": "Widening pitch reduces available tracks further and worsens pin access, increases overflow to 3.1% in trial run."
+      }
+    ],
+    "chosen_intervention": "Kept floorplan, added 2.5um placement halo around macro pins in channel, swapped 14% of high-pin-density cells in hotspot from 9T to 10.5T variants with double-row pin access, created routing guide blocking 50% of M2/M3 in first 2um above macro pins forcing escape to M4, reran detailed route honoring halo.",
+    "post_state": "GRC overflow 0.18%, peak overflow 2.1%, detailed route 100% complete with 42 DRCs fixed in second pass, effective utilization 76.5%, WNS -78ps, TNS -1.1ns",
+    "expert_assessment": "Right call for schedule - pin-access spreading plus selective M2/M3 blockage addresses root cause without top-level churn. Lesson: distinguish global vs pin-access congestion by overflow clustering and pin density. Would not transfer if hotspot were due to power-mesh blockage or high-fanout global nets.",
+    "confidence": 0.72,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The 2.5um halo value is an estimate that must be tuned to the specific library pin-access width and should be verified with pin-access checker."
+  },
+  {
+    "title": "Input-delay overconstraint masquerading as logic depth failure",
+    "design_context": "28nm, 650k placeable instances, 12 macros, 1 clock 500MHz (2ns period), commercial synthesis and P&R",
+    "prior_state": "Utilization 68%, GRC overflow 0.4%, WNS -420ps, TNS -18.3ns, 12400 failing endpoints at post-route STA, no DRCs",
+    "observation": "Slack histogram shows 11800 endpoints failing -10ps to -80ps, all startpoints from 3 input ports data_bus[31:0], all endpoints within 2 logic levels of input flops, 92% share same clock uncertainty and same input delay group, worst path -420ps outlier from one input with large delay. severity: MODERATE",
+    "hypothesis": "Failures are due to unrealistic input delay budget 0.7*clock applied to slow board trace, not insufficient cell drive or placement distance; shape of many small failures sharing same input indicates constraint problem.",
+    "candidates_considered": [
+      {
+        "action": "Upsize drivers on failing paths and add useful skew",
+        "rejected_because": "Would add 12% area and 18mW leakage for no benefit since root is input arrival, and increases IR drop in dense input cluster."
+      },
+      {
+        "action": "Re-place input flops closer to pads",
+        "rejected_because": "Requires IO movement risking DRC, 3-day schedule cost, does not fix 0.7*clock input delay which remains unrealistic."
+      },
+      {
+        "action": "Insert pipeline stage after inputs",
+        "rejected_because": "Changes latency visible to system, requires RTL change and re-verification, not allowed in ECO window."
+      }
+    ],
+    "chosen_intervention": "Audited SDC, input delay was 1.4ns derived from early board estimate. Corrected to measured 0.65ns per IO spec, updated set_input_delay for data_bus group to 0.65ns max / 0.15ns min, added set_input_transition 120ps, re-ran STA without netlist change.",
+    "post_state": "WNS -28ps, TNS -0.12ns, 180 failing endpoints remaining (true logic paths), utilization unchanged, no area change",
+    "expert_assessment": "Correct triage - signature of many small shared-startpoint failures is classic constraint issue. General lesson: check slack distribution and startpoint commonality before physical fix. Would not transfer if failures were spread across logic cones with large negative slack and no common startpoint.",
+    "confidence": 0.81,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The corrected 0.65ns input delay value is plausible but would need board-level SI validation from IO timing spec."
+  },
+  {
+    "title": "Cross-block output budget allocation between encryption core and fabric",
+    "design_context": "7nm, block A 1.1M instances 48 macros, block B 0.9M instances 22 macros, interface 256-bit data at 1GHz (1ns), commercial P&R and STA",
+    "prior_state": "Top-level budget 1ns, initially 50/50 split: 0.5ns for block A clock-to-out and 0.5ns for block B in-to-reg. Block A WNS -110ps, TNS -1.2ns, Block B WNS +180ps.",
+    "observation": "Block A output paths failing 80-110ps, all share last 3 stages of ECC logic, Block B has 180ps positive slack on same interface. severity: MODERATE",
+    "hypothesis": "50/50 split over-constrains block A which contains deeper logic before output; budget should be weighted by logic depth 60/40 to avoid unnecessary upsizing in A while leaving margin for B routing.",
+    "candidates_considered": [
+      {
+        "action": "Keep 50/50 and upsize Block A output logic",
+        "rejected_because": "Costs 4% area in A and +22mW dynamic power for marginal benefit, creates IR hotspot near output pins."
+      },
+      {
+        "action": "Move to 40/60 giving more to B (0.4ns A, 0.6ns B)",
+        "rejected_because": "Makes A WNS worse to -210ps requiring floorplan change, no benefit as B already has slack."
+      },
+      {
+        "action": "Add false path between blocks and rely on top-level closure",
+        "rejected_because": "Hides real timing, risk of silicon failure at 1GHz, violates methodology and would be caught in top-level STA."
+      }
+    ],
+    "chosen_intervention": "Derived budget from logic depth: counted avg 14 FO4 stages in A after last flop vs 6 in B before first flop, allocated 0.62ns to A and 0.38ns to B, encoded as set_output_delay 0.38ns on A and set_input_delay 0.62ns on B with 40ps uncertainty margin, documented in SDC header.",
+    "post_state": "Block A WNS +15ps, TNS +0.02ns, Block B WNS +55ps, top-level combined interface slack +22ps, no area change",
+    "expert_assessment": "Right trade - budgets should follow logic depth not arbitrary 50/50. Lesson: measure depth and document alternative splits. 50/50 is safe default but wastes power when asymmetry is large. Would not transfer if interface had CDC or multicycle intent requiring different exception handling.",
+    "confidence": 0.76,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "The 14 vs 6 FO4 depth split is illustrative and would need extraction from real STA path-length report in practice."
+  }
+]
+[
+  {
+    "cell": "1 SharedArrayBuffer + cross-origin isolation COOP/COEP requirements",
+    "claim": "All major browsers still require secure context + COOP same-origin + COEP require-corp or credentialless for SharedArrayBuffer and Wasm threads; postMessage throws for SAB unless crossOriginIsolated true",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+    "retrieved": "2026-08-31",
+    "confidence": 0.92,
+    "notes": "Verified from MDN: To use shared memory your document must be in a secure context and cross-origin isolated. When cross-origin isolated postMessage no longer throws for SAB."
+  },
+  {
+    "cell": "1b COOP/COEP details and no 2026 change",
+    "claim": "Requirement unchanged in 2026: COOP same-origin + COEP require-corp or credentialless needed for cross-origin isolation; Permissions-Policy cross-origin-isolated must not block; no spec change found for 2026",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy",
+    "retrieved": "2026-08-31",
+    "confidence": 0.9,
+    "notes": "MDN COOP page states certain features such as SharedArrayBuffer only available if document is cross-origin isolated, need COOP same-origin and COEP require-corp credentialless. No 2026 change document found, claim UNVERIFIED for change."
+  },
+  {
+    "cell": "2 WebGPU compute shader availability Chrome/Edge/Firefox/Safari",
+    "claim": "WebGPU stable in Chrome/Edge 113+ (May 2023), Safari 26+ Sep 2025 macOS Tahoe/iOS, Firefox Windows 141+ Jul 2025, Firefox macOS Apple Silicon 145+ Oct 2025, other platforms behind flag expecting 2026 GA. Compute shaders are core to WebGPU, availability follows WebGPU support.",
+    "url": "https://github.com/dedperdedev/speedrungg/blob/HEAD/skills/webgpu-readiness/SKILL.md",
+    "retrieved": "2026-08-31",
+    "confidence": 0.88,
+    "notes": "Snapshot April 2026 table from skill md; corroborated by jax-js platform table showing same versions."
+  },
+  {
+    "cell": "2b WebGPU timestamp-query feature exposure",
+    "claim": "timestamp-query is optional WebGPU feature, must be requested via requiredFeatures, not enabled by default. Chrome quantizes timestamps to 100us for security due to timing attack concerns; requires Unsafe WebGPU flag for unquantized in earlier versions.",
+    "url": "https://developer.chrome.com/blog/new-in-webgpu-120",
+    "retrieved": "2026-08-31",
+    "confidence": 0.86,
+    "notes": "Chrome blog says WebGPU spec makes timestamp queries optional due to timing attack concerns, quantizing to 100 microseconds. MDN writeTimestamp also says timestamp-query feature must be enabled."
+  },
+  {
+    "cell": "3a WASM threads SIMD128 status",
+    "claim": "WASM threads and SIMD128 supported in Chrome-based browsers, Firefox, Safari per web.dev feature detection table. Detection via wasm-feature-detect library.",
+    "url": "https://web.dev/articles/webassembly-feature-detection",
+    "retrieved": "2026-08-31",
+    "confidence": 0.84,
+    "notes": "web.dev article lists browser support: Chrome-based: Threads, SIMD, exception handling supported; Firefox Thread and SIMD supported; Safari Threads supported."
+  },
+  {
+    "cell": "3b WASM WasmGC memory64 relaxed-SIMD Wasm 3.0",
+    "claim": "WebAssembly 3.0 became W3C standard Sep 2025 standardizing WasmGC, exception handling, tail calls, multi-memory, 64-bit memory (memory64) and 128-bit SIMD. Relaxed-SIMD part of 3.0 era.",
+    "url": "https://www.javacodegeeks.com/2026/04/webassembly-in-2026-three-years-of-almost-ready.html",
+    "retrieved": "2026-08-31",
+    "confidence": 0.82,
+    "notes": "Article states Wasm 3.0 standardized nine features including WasmGC, exception handling, tail calls, 64-bit memory, 128-bit SIMD."
+  },
+  {
+    "cell": "3c WASM JSPI browser status 2026",
+    "claim": "JSPI (WebAssembly.Suspending / promising) enabled by default in Chrome 137+, Firefox 153+, Node 25+, Safari TP 238+ as of May 2026. Firefox 139-152 flagged.",
+    "url": "https://github.com/wasm-bindgen/wasm-bindgen/pull/5193",
+    "retrieved": "2026-08-31",
+    "confidence": 0.89,
+    "notes": "PR description says JSPI enabled by default in Chrome 137+, Firefox 153+, Node 25+ (24 behind flag); Safari support landed in TP 238."
+  },
+  {
+    "cell": "4a cross-origin iframe WebGPU delegation",
+    "claim": "webgpu Permissions-Policy defaults to self, blocking cross-origin and sandboxed iframes from navigator.gpu. Requires parent iframe allow=webgpu and Permissions-Policy header webgpu=* to delegate.",
+    "url": "https://github.com/yusufkaraaslan/play-more/commit/2ab2d39c68b0a7dc07e9e4e2d0c6143a11a77975",
+    "retrieved": "2026-08-31",
+    "confidence": 0.87,
+    "notes": "Commit message explains webgpu policy defaults to self, blocks game iframes, fix via allow=webgpu and webgpu=* header."
+  },
+  {
+    "cell": "4b cross-origin iframe cross-origin isolation",
+    "claim": "Cross-origin iframe cannot achieve crossOriginIsolated for SAB unless both top and iframe serve COOP/COEP and parent allows; many implementations fall back to top-level page instead of iframe because GitHub Pages cannot set headers. So wallet embedding requiring isolation+WebGPU is blocked in iframe by default.",
+    "url": "https://github.com/yusufkaraaslan/play-more",
+    "retrieved": "2026-08-31",
+    "confidence": 0.68,
+    "notes": "Inferred from multiple issues: demo uses multithreading so must be cross-origin isolated, launches as own page rather than iframe. Verified weaker source, not authoritative spec."
+  },
+  {
+    "cell": "5 2026 in-browser proving measurements",
+    "claim": "UNVERIFIED - no published 2026 measurements with reproducible harness found in authoritative docs. Only vendor repos claim client-side proving in browser using WebGPU with real-time benchmark UI but no methodology published.",
+    "url": "https://github.com/SoundnessLabs/pqchain",
+    "retrieved": "2026-08-31",
+    "confidence": 0.35,
+    "notes": "Repo mentions client-side proving in browser using WebGPU and real-time benchmarks but does not provide measured numbers, hardware, or harness. No 2026 paper found. Cell remains to be measured, not researched."
+  }
+]

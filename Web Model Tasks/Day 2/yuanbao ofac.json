@@ -1,0 +1,91 @@
+[
+  {
+    "case_name": "Convergent graph — parallel blocked paths sum to 50% (FAQ 401 Example 2 family)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 50},
+      {"from": "A", "to": "C", "pct": 25},
+      {"from": "B", "to": "C", "pct": 25}
+    ],
+    "computation": "Step 1: Direct ownership test. X owns A 50% -> A is blocked. X owns B 50% -> B is blocked. Step 2: Indirection through blocked intermediaries. Because A is blocked and owns 25% of C, A's 25% counts toward C's blocked-ownership aggregate. Because B is blocked and owns 25% of C, B's 25% counts toward C's blocked-ownership aggregate. Step 3: Aggregate for C = 25% (via A) + 25% (via B) = 50%. Step 4: 50% >= 50% threshold => C is blocked. Treatment applied: full attribution through >=50%-owned (hence blocked) intermediaries, then sum across all blocked owners — NOT multiplicative path products. This matches FAQ 401 Example 2.",
+    "blocked_verdicts": ["A", "B", "C"],
+    "guidance_basis": "OFAC FAQ 401 (Example 2) and FAQ 399 (aggregation of multiple blocked persons' ownership). 'Indirectly' means ownership through another entity that is itself 50% or more owned in the aggregate by blocked person(s).",
+    "weakest_point": "Certainty is high: this is essentially the published Example 2. Edge order does not affect the aggregate."
+  },
+  {
+    "case_name": "Convergent graph — mixed direct + indirect converging on same target",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 10},
+      {"from": "A", "to": "B", "pct": 40}
+    ],
+    "computation": "Step 1: Direct test. X owns A 50% -> A is blocked. X owns B only 10% directly (not enough alone). Step 2: Indirection. A is blocked and owns 40% of B, so X indirectly owns 40% of B through A. Step 3: Aggregate X ownership of B = direct 10% + indirect 40% = 50%. Step 4: 50% >= 50% => B is blocked. Also A (blocked) owns 40% of B and X (blocked) owns 10% of B; combined blocked ownership of B = 40% + 10% = 50% >= 50% => B blocked (alternative aggregation route, same result). Treatment: indirect interest credited ONLY because the intermediate (A) is itself >=50% blocked-owned; the 40% flows fully, not multiplied by X's 50%. Matches FAQ 401 Example 3.",
+    "blocked_verdicts": ["A", "B"],
+    "guidance_basis": "OFAC FAQ 401 Example 3: X owns 50% of A and 10% of B; A owns 40% of B; B is blocked because X indirectly owns 40% through A plus 10% directly = 50%.",
+    "weakest_point": "High certainty; reproduces published example. Demonstrates that the indirect contribution is the intermediary's full holding (40%), not 50% x 40% = 20%."
+  },
+  {
+    "case_name": "Chain through >=50%-owned intermediary — three-tier cascade",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "A", "to": "B", "pct": 50},
+      {"from": "B", "to": "C", "pct": 50}
+    ],
+    "computation": "Step 1: X owns A 50% -> A blocked. Step 2: A (blocked) owns B 50% -> B blocked (and X indirectly owns 50% of B through A). Step 3: B (blocked) owns C 50% -> C blocked (and X indirectly owns 50% of C through the A->B chain). At each tier the full 50% holding of the blocked intermediary is attributed downward; not 50% x 50% x 50% = 12.5%. Step 4: C aggregate blocked ownership = 50% (via B) >= 50% => C blocked. Matches FAQ 401 Example 1 logic extended one tier.",
+    "blocked_verdicts": ["A", "B", "C"],
+    "guidance_basis": "OFAC FAQ 401 Example 1: X owns 50% of A, A owns 50% of B => B blocked because X indirectly owns 50% of B. Extended to a third tier using the same full-attribution-through-blocked-intermediary treatment.",
+    "weakest_point": "High certainty on the full-attribution treatment; the three-tier extension is mechanically consistent with FAQ 401 Example 1 but the exact three-tier wording is constructed, not quoted."
+  },
+  {
+    "case_name": "Convergent graph — chain breaks when intermediary <50% blocked-owned (negative case)",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "A", "blocked": false},
+      {"id": "B", "blocked": false},
+      {"id": "C", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 50},
+      {"from": "X", "to": "B", "pct": 25},
+      {"from": "A", "to": "C", "pct": 25},
+      {"from": "B", "to": "C", "pct": 25}
+    ],
+    "computation": "Step 1: Direct. X owns A 50% -> A blocked. X owns B 25% -> B NOT blocked (below 50%). Step 2: Indirection. A is blocked and owns 25% of C, so 25% counts. B is NOT blocked, so B's 25% ownership of C does NOT count toward X's indirect ownership (the chain through B is broken because B is not >=50% blocked-owned). Step 3: Aggregate blocked ownership of C = 25% (via A) + 0% (via B, not blocked) = 25%. Also X direct ownership of C = 0. Step 4: 25% < 50% => C NOT blocked. This is FAQ 401 Example 4. It shows the multiplicative/parallel intuition fails: X 'controls' both A and B in a sense, yet C is not blocked because the B path does not qualify.",
+    "blocked_verdicts": ["A"],
+    "guidance_basis": "OFAC FAQ 401 Example 4: X owns 50% of A and 25% of B; A and B each own 25% of C; C is NOT blocked because only the A path counts (25%), the B path does not (B not blocked).",
+    "weakest_point": "High certainty; reproduces published negative case that exposes the most common implementation error (summing all paths regardless of intermediary blocked status)."
+  },
+  {
+    "case_name": "Two blocked persons aggregate to 50% — convergent, distinct blocked owners",
+    "entities": [
+      {"id": "X", "blocked": true},
+      {"id": "Y", "blocked": true},
+      {"id": "A", "blocked": false}
+    ],
+    "edges": [
+      {"from": "X", "to": "A", "pct": 25},
+      {"from": "Y", "to": "A", "pct": 25}
+    ],
+    "computation": "Step 1: Direct. X owns A 25% (not enough alone). Y owns A 25% (not enough alone). Neither X-only nor Y-only reaches 50%. Step 2: Aggregation across blocked persons per FAQ 399. X 25% + Y 25% = 50% in the aggregate. Step 3: 50% >= 50% => A is blocked. Treatment: ownership interests of all blocked persons are aggregated; they need not be related parties or acting in concert. Matches FAQ 399 illustration.",
+    "blocked_verdicts": ["A"],
+    "guidance_basis": "OFAC FAQ 399: 'if Blocked Person X owns 25 percent of Entity A, and Blocked Person Y owns another 25 percent of Entity A, Entity A is considered to be blocked... the ownership interests of persons blocked under different OFAC sanctions programs are aggregated.'",
+    "weakest_point": "High certainty; direct reproduction of FAQ 399. This case tests pure aggregation without indirection."
+  }
+]

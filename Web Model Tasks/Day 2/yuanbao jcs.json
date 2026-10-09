@@ -1,0 +1,98 @@
+[
+  {
+    "vector_name": "number_beyond_2pow53",
+    "input_json": "{\"a\": 9007199254740993}",
+    "canonical_output": "{\"a\":9007199254740992}",
+    "rule": "RFC 8785 Section 3.2.2.2 (numbers serialized per ES6 Number.prototype.toString; 9007199254740993 is not exactly representable, rounds to 9007199254740992)",
+    "divergence_trap": "Naive implementation that re-emits input number literals without reparsing outputs 9007199254740993",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "negative_zero",
+    "input_json": "{\"a\": -0}",
+    "canonical_output": "{\"a\":0}",
+    "rule": "RFC 8785 Section 3.2.2.2 (ES6 toString of -0 yields \"0\")",
+    "divergence_trap": "Naive implementation might preserve \"-0\" in output",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "tiny_decimal",
+    "input_json": "{\"a\": 0.0000001}",
+    "canonical_output": "{\"a\":1e-7}",
+    "rule": "RFC 8785 Section 3.2.2.2 (ES6 toString shortest decimal representation)",
+    "divergence_trap": "Naive implementation might output 0.0000001",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "solidus_escaping",
+    "input_json": "{\"a\": \"hello\\/world\"}",
+    "canonical_output": "{\"a\":\"hello/world\"}",
+    "rule": "RFC 8785 Section 3.2.2.3 (solidus MAY be escaped but not required; canonical output uses unescaped)",
+    "divergence_trap": "Naive implementation might output {\"a\":\"hello\\/world\"} preserving the escape",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "control_character_escaping",
+    "input_json": "{\"a\": \"\\u0000\"}",
+    "canonical_output": "{\"a\":\"\\u0000\"}",
+    "rule": "RFC 8785 Section 3.2.2.3 (characters U+0000 must be escaped as \\u0000)",
+    "divergence_trap": "None if compliant",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "surrogate_pair",
+    "input_json": "{\"a\": \"\\uD83D\\uDE00\"}",
+    "canonical_output": "{\"a\":\"\\uD83D\\uDE00\"}",
+    "rule": "RFC 8785 Section 3.2.2.3 (strings serialized per ES6 JSON.stringify, preserving surrogate pairs)",
+    "divergence_trap": "No divergence; ES6 compliant stringify produces same",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "utf16_key_ordering",
+    "input_json": "{\"\\uD83D\\uDE00\": 1, \"\\uE000\": 2}",
+    "canonical_output": "{\"\\uD83D\\uDE00\":1,\"\\uE000\":2}",
+    "rule": "RFC 8785 Section 3.2.3 (keys sorted by UTF-16 code unit values; D83D < E000)",
+    "divergence_trap": "Naive implementation sorting by Unicode code points would output {\"\\uE000\":2,\"\\uD83D\\uDE00\":1}",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_object",
+    "input_json": "{}",
+    "canonical_output": "{}",
+    "rule": "RFC 8785 Section 3.2 (general structure)",
+    "divergence_trap": "None",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "empty_array",
+    "input_json": "[]",
+    "canonical_output": "[]",
+    "rule": "RFC 8785 Section 3.2",
+    "divergence_trap": "None",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "nesting",
+    "input_json": "{\"a\": {\"b\": 1}}",
+    "canonical_output": "{\"a\":{\"b\":1}}",
+    "rule": "RFC 8785 Section 3.2",
+    "divergence_trap": "None",
+    "certainty": "rfc-exact"
+  },
+  {
+    "vector_name": "duplicate_keys",
+    "input_json": "{\"a\": 1, \"a\": 2}",
+    "canonical_output": "{\"a\":1}",
+    "rule": "RFC 8785 does not define behavior for duplicate keys; implementations may reject or choose first occurrence",
+    "divergence_trap": "Naive implementation might output {\"a\":2} (last wins) or reject",
+    "certainty": "unsure-flagged"
+  },
+  {
+    "vector_name": "integer_vs_float",
+    "input_json": "{\"a\": 1, \"b\": 1.0}",
+    "canonical_output": "{\"a\":1,\"b\":1}",
+    "rule": "RFC 8785 Section 3.2.2.2 (both serialize to 1)",
+    "divergence_trap": "Naive implementation might keep 1.0 as 1.0",
+    "certainty": "probable"
+  }
+]

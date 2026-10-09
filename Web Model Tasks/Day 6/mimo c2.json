@@ -1,0 +1,47 @@
+```json
+{
+  "prompt": "C-v5",
+  "model": "MiMo",
+  "date": "2026-09-12",
+  "anchors": {
+    "a1": "exists-exactly",
+    "a2": "exists-exactly",
+    "a3": "exists-but-citation-wrong: G. Hinton, D. Sager, M. Upton, D. Boggs, D. Carmean, A. Kyker, P. Roussel, \"The Microarchitecture of the Pentium 4 Processor,\" Intel Technology Journal, Q1 2001 (not IEEE Micro vol. 21, 2007)"
+  },
+  "sources": [
+    {
+      "title": "The Pentium Chronicles: The People, Passion, and Politics Behind Intel's Landmark Chips",
+      "venue_or_publication": "Wiley-IEEE Computer Society Press (book)",
+      "year": 2006,
+      "what_it_covers": "First-person account of the Pentium Pro and Pentium 4 design programs from a lead architect, covering routing congestion crises, timing-closure iteration spirals, power-delivery challenges, schedule slips, and recovery strategies across two landmark Intel processor generations.",
+      "why_relevant": "Rare book-length physical-design war story told by the architect who lived through it; traces the full arc from failure through recovery on both Pentium Pro and Pentium 4 physical-design closure.",
+      "confidence": 0.9,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "site:wiley.com OR site:ieee.org \"Pentium Chronicles\" Colwell",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "Clock Generation and Distribution for the First IA-64 Microprocessor",
+      "venue_or_publication": "IEEE Journal of Solid-State Circuits, vol. 35, no. 11, November 2000",
+      "year": 2000,
+      "what_it_covers": "Clock-tree design, skew budgeting, and distribution-network implementation for the Intel Itanium (Merced) processor, documenting CTS methodology challenges and recovery from clock-related closure failures on a large high-frequency die.",
+      "why_relevant": "The first Itanium was infamously delayed partly due to physical-design difficulties; this paper documents the clock-domain closure problems directly, making it a canonical CTS war story.",
+      "confidence": 0.7,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "\"Clock Generation and Distribution\" \"IA-64\" Tam IEEE JSSC 2000",
+      "access_guess": "paywalled"
+    },
+    {
+      "title": "The Design and Implementation of a First-Generation CELL Processor",
+      "venue_or_publication": "IEEE International Solid-State Circuits Conference (ISSCC), 2005",
+      "year": 2005,
+      "what_it_covers": "Physical-design implementation of the 90 nm Cell Broadband Engine—a 234M-transistor heterogeneous multi-core chip co-developed by IBM, Sony, and Toshiba—covering layout partitioning, timing closure across heterogeneous processing elements, interconnect planning, and power-grid design.",
+      "why_relevant": "One of the largest and most architecturally complex chips of its era; the multi-vendor heterogeneous design created unique physical-design closure challenges (congestion, timing, power grid) not seen in conventional homogeneous processors.",
+      "confidence": 0.6,
+      "knowledge_basis": "training-recall",
+      "verification_hint": "\"First-Generation CELL Processor\" Pham ISSCC 2005 site:ieee.org",
+      "access_guess": "paywalled"
+    }
+  ]
+}
+```

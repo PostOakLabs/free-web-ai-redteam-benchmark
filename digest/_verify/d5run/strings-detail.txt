@@ -1,0 +1,130 @@
+REFERENCE JCS (computed by jcs.py from the prompt's own inputs)
+  case 1: {"C":3,"a":2,"b":1}
+  case 2: {"outer":{"a":[{"x":2,"y":1},{"k":null}],"z":true}}
+  case 3: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+  case 4: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+  case 5: {"s1":"line\nbreak","s2":"tab\there","s3":"quote\"inside","s4":"unicode é","s5":"control \u0007"}   [PROMPT DEFECT: input embeds a raw control character (illegal in JSON)]
+
+### chatgpt          NOT GRADABLE - harvest-skip-broken-element produced no case-shaped records
+### deepseek         [clean]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e21,"n2":0.0000001,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.33333329}
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### gemini           [clean+fence-close+fenced]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":1e+20,"n5":0,"n6":333333333.3333333}
+    case 4: BAD  rule_stated=y
+        expected: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+        got     : {"$":"dollar","aa":"double","€":"euro","ü":"umlaut"}
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### glm 5.3 flash    [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: BAD  rule_stated=y
+        expected: {"outer":{"a":[{"x":2,"y":1},{"k":null}],"z":true}}
+        got     : {"outer":{"a":[{"x":2,"y":1},{"k":null}]}}
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### grok             [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### kimi             [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### longcat          [clean+fenced+trailing-content]
+    case 1: OK   rule_stated=n
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.33333329}
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### meta             [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=n
+### mimo             [clean+fence-close+fenced]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":-0,"n6":333333333.3333333}
+    case 4: BAD  rule_stated=y
+        expected: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+        got     : {"$":"dollar","aa":"double","€":"euro","ü":"umlaut"}
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### minara           [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### minimax 2.7      [clean]
+    case 1: OK   rule_stated=y
+    case 2: BAD  rule_stated=y
+        expected: {"outer":{"a":[{"x":2,"y":1},{"k":null}],"z":true}}
+        got     : {"outer":{"a":[{"k":null},{"x":2,"y":1}],"z":true}}
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e21,"n2":1e-7,"n3":1e-6,"n4":100000000000000000000,"n5":-0,"n6":333333333.333333}
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### mistral          [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: BAD  rule_stated=y
+        expected: {"outer":{"a":[{"x":2,"y":1},{"k":null}],"z":true}}
+        got     : {"outer":{"a":[{"k":null,"x":2,"y":1}],"z":true}}
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1E+21,"n2":1E-7,"n3":1E-6,"n4":1E+20,"n5":0,"n6":333333333.33333329}
+    case 4: BAD  rule_stated=y
+        expected: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+        got     : {"$":"dollar","€":"euro","aa":"double","ü":"umlaut"}
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### qwen             [clean+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1E+21,"n2":1E-7,"n3":0.000001,"n4":1E+20,"n5":0,"n6":333333333.3333333}
+    case 4: BAD  rule_stated=y
+        expected: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+        got     : {"$":"dollar","aa":"double","€":"euro","ü":"umlaut"}
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### solar            [clean]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: BAD  rule_stated=y
+        expected: {"n1":1e+21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":0,"n6":333333333.3333333}
+        got     : {"n1":1e21,"n2":1e-7,"n3":0.000001,"n4":100000000000000000000,"n5":-0.0,"n6":333333333.33333329}
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### sonnet           [clean+fenced+trailing-content]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: OK   rule_stated=y
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y
+### yuanbao          [clean]
+    case 1: OK   rule_stated=y
+    case 2: OK   rule_stated=y
+    case 3: OK   rule_stated=y
+    case 4: BAD  rule_stated=y
+        expected: {"$":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+        got     : {"":"dollar","aa":"double","ü":"umlaut","€":"euro"}
+    case 5: UNGRADABLE (input did not survive transmission)  s1-s4_correct=y

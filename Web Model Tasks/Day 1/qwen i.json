@@ -1,0 +1,242 @@
+[
+  {
+    "review_gate": "floorplan review",
+    "purpose": "Catch macro, pin, power, density, and partition mistakes that placement and CTS cannot cheaply repair once the floorplan is frozen.",
+    "checks": [
+      {
+        "question": "Do macro channels have capacity for estimated feedthrough plus pin escape, not just macro abutment?",
+        "evidence_demanded": "Floorplan snapshot with macro locations, pin-side orientations, per-channel estimated net count, and channel width table.",
+        "red_flag": "A hot channel is at minimum width while feedthrough estimate exceeds routable track count, or macro pins face a narrow channel.",
+        "why_it_matters": "If channel capacity is wrong, detailed route fails locally, CTS detours become unavoidable, and later macro moves may invalidate placement."
+      },
+      {
+        "question": "What is standard-cell utilization after macros, blockages, and power straps are deducted?",
+        "evidence_demanded": "Utilization report by tile or region, density heatmap, and list of reserved or blocked areas.",
+        "red_flag": "Average utilization is above the project target or local density exceeds order 95 percent without an owned waiver.",
+        "why_it_matters": "Overdense regions create placement congestion, legalization failures, buffer insertion loss, and late timing hotspots."
+      },
+      {
+        "question": "Are block boundary pins matched to the neighboring block pin strategy and intended routing layers?",
+        "evidence_demanded": "Pin assignment table, boundary net list, layer plan for interface nets, and top-level alignment drawing.",
+        "red_flag": "Pins are on the wrong layer, on opposite sides from their mates, or force long feedthroughs across dense logic.",
+        "why_it_matters": "Bad pin placement converts a local interface problem into block-crossing congestion and timing failures that are painful to fix after placement."
+      },
+      {
+        "question": "Is the power mesh sized for estimated current while leaving enough layers for signal and clock routing?",
+        "evidence_demanded": "Power grid plan, strap layers and pitches, estimated current density map, and layer usage table.",
+        "red_flag": "Mesh is removed under a high-current region with no replacement straps, or power straps consume layers needed for critical interfaces.",
+        "why_it_matters": "At 28nm a late power fix may be absorbable with modest routing cost; at 7nm, tighter design rules and electromigration limits make late power-grid changes very expensive."
+      },
+      {
+        "question": "Are placement blockages, macro halos, and keepouts consistent with macro abstracts and routing access?",
+        "evidence_demanded": "Blockage list, halo table, macro abstract sources, and access checks around macro pins.",
+        "red_flag": "Missing halo around macros, hard blockage over pin access, or blockages that orphan legal placement sites.",
+        "why_it_matters": "Incorrect blockages cause legalization failures, placement holes, macro-pin congestion, and last-minute blockage changes that disturb timing."
+      },
+      {
+        "question": "Are clock entry points and clock-grid reservations defined for every clock domain?",
+        "evidence_demanded": "Clock source list, entry coordinates, domain list, and planned clock routing layer region.",
+        "red_flag": "Multiple unrelated clocks enter through the same narrow edge, or no buffer space is reserved near clock entry.",
+        "why_it_matters": "Clock entry congestion becomes skew, clock DRCs, and forced detours that are hard to fix after placement and CTS begin."
+      },
+      {
+        "question": "Does the hierarchy partition keep interface net count and coupling bounded?",
+        "evidence_demanded": "Hierarchy boundary net counts, high-fanout net list across boundaries, and estimated interface density.",
+        "red_flag": "One block boundary carries thousands of tightly coupled nets or a critical bus is split across distant partitions.",
+        "why_it_matters": "Poor partitioning creates boundary congestion, long critical paths, and repeated cross-block timing rework."
+      },
+      {
+        "question": "Are DFT pins, scan chain insertion points, and test-mode resources represented in the floorplan?",
+        "evidence_demanded": "DFT specification, test pin list, estimated chain count, and any test-macro placement.",
+        "red_flag": "No test pin placement, scan chains forced across forbidden boundaries, or test structures missing from floorplan.",
+        "why_it_matters": "Late DFT additions after placement can change pins, add logic, and disturb timing in ways that are much more expensive than early floorplan inclusion."
+      }
+    ],
+    "kill_questions": [
+      "Show channel capacity versus estimated feedthrough for the two hottest macro channels; if capacity is not comfortably above demand, why is this floorplan approved?",
+      "What is the worst local standard-cell density after macros and blockages, and who owns the waiver if it exceeds target?"
+    ],
+    "waiver_culture": "Density and channel-width waivers are commonly accepted under schedule pressure, and the later cost usually appears as localized congestion, CTS detours, and late blockage or pin changes.",
+    "confidence": 0.85
+  },
+  {
+    "review_gate": "pre-CTS review",
+    "purpose": "Catch placement, congestion, constraint, and clock-planning problems before CTS spends effort building a clock tree on a bad foundation.",
+    "checks": [
+      {
+        "question": "What is the setup slack shape by clock group before CTS?",
+        "evidence_demanded": "Setup slack histogram by clock group, worst path list, and classification of top failing path groups.",
+        "red_flag": "A healthy pre-CTS review has the wall near zero; a long tail of paths failing by order one clock period or more suggests logic-depth, constraint, or partition problems.",
+        "why_it_matters": "CTS cannot fix fundamentally under-budgeted paths, and building clock skew on top of them hides the real cause."
+      },
+      {
+        "question": "Does global route congestion show localized hotspots or uniform overload?",
+        "evidence_demanded": "Global route overflow map, hotspot table, and top congested edges with net counts.",
+        "red_flag": "Overflow concentrated in macro channels, clock entry corridors, or block boundaries, especially with failing pre-CTS timing nearby.",
+        "why_it_matters": "Localized congestion predicts CTS buffer placement loss, clock DRCs, and post-route timing degradation; uniform overload predicts utilization or layer-plan problems."
+      },
+      {
+        "question": "Are all clock definitions, generated clocks, exclusions, and latency targets consistent with the intended architecture?",
+        "evidence_demanded": "Clock definition report, generated clock list, clock latency targets, and exception summary.",
+        "red_flag": "A divider, mux, or gated clock lacks a generated-clock definition, or two definitions conflict on the same net.",
+        "why_it_matters": "CTS optimizes the wrong frequency or phase relationships if clock definitions are wrong, causing false urgency or missed real paths."
+      },
+      {
+        "question": "Which clock-gating cells have the highest enable fanout, and are their loads clustered?",
+        "evidence_demanded": "ICG fanout report, load placement density around each large ICG, and banking plan if used.",
+        "red_flag": "A single ICG drives order thousands of flops with no banking plan or with loads scattered across the block.",
+        "why_it_matters": "At 28nm a large single-bit ICG may still be fixable with buffering; at 7nm and below, multibit ICG planning and local skew control are usually needed to avoid hold, power, and congestion problems."
+      },
+      {
+        "question": "Is there legal whitespace for clock buffers near entry points and sink clusters?",
+        "evidence_demanded": "Whitespace map by tile, estimated clock buffer count, and placement density near clock entry.",
+        "red_flag": "Clock entry regions or large sink clusters are fully dense with no buffer sites or no plan to reserve them.",
+        "why_it_matters": "Without buffer sites, CTS produces long detours, high skew, transition violations, and hold problems that are expensive to repair after routing."
+      },
+      {
+        "question": "Are useful-skew opportunities identified, and are their hold consequences bounded?",
+        "evidence_demanded": "Useful-skew candidate list, estimated setup benefit, and min-delay impact estimate for affected clock branches.",
+        "red_flag": "Useful skew is proposed or already applied without a hold analysis or without identifying the affected capture clocks.",
+        "why_it_matters": "Useful skew can buy setup margin while creating hold violations or clock-tree instability if the receiving branch is not controlled."
+      },
+      {
+        "question": "Are scan chains balanced and are lockup requirements visible before CTS?",
+        "evidence_demanded": "Chain preview report, chain-length imbalance estimate, lockup-flop requirements, and clock-domain crossing list for chains.",
+        "red_flag": "Chain imbalance is much larger than the project target, or chains cross opposite-phase or asynchronous domains without lockup planning.",
+        "why_it_matters": "Poor scan balance becomes test-mode timing failures, and missing lockups become hold failures that cannot be fixed by ordinary timing optimization."
+      },
+      {
+        "question": "What is the min-delay shape before CTS?",
+        "evidence_demanded": "Hold slack histogram by clock group, shortest path list, and scan-chain min-delay preview.",
+        "red_flag": "Large numbers of hold violations already exist before clock insertion delay is added, especially on scan or short local paths.",
+        "why_it_matters": "If hold is already bad before CTS, CTS may amplify it; later hold fixing may require buffers, spacing, and rerouting that disturb setup and congestion."
+      }
+    ],
+    "kill_questions": [
+      "Show the setup slack histogram by clock group; if there is a long negative tail rather than a wall near zero, what logic, constraint, or partition waiver explains it?",
+      "Show the congestion overlay for clock entry and macro channels; if CTS cannot get buffer sites where it needs them, why should CTS proceed?"
+    ],
+    "waiver_culture": "Pre-CTS setup waivers for known RTL pipeline issues are common, but the cost is often late RTL change, forced useful skew, or post-CTS timing repair that could have been avoided earlier.",
+    "confidence": 0.88
+  },
+  {
+    "review_gate": "pre-tapeout timing signoff review",
+    "purpose": "Confirm that timing results match silicon operating conditions, that exceptions are defensible, and that no unbounded waiver hides a functional failure.",
+    "checks": [
+      {
+        "question": "Are all clocks, generated clocks, exceptions, and cases validated against every functional and test mode?",
+        "evidence_demanded": "Constraint audit report, mode matrix, exception list, and signoff records for each exception.",
+        "red_flag": "A false path, clock group, or multicycle exception lacks an RTL trace, mode coverage, or owner signoff.",
+        "why_it_matters": "An unjustified exception silently removes timing coverage and can become a silicon failure on a path that was never analyzed."
+      },
+      {
+        "question": "Has every timing-critical corner and mode been run with the correct derates, voltages, and temperatures?",
+        "evidence_demanded": "Corner matrix, signoff corner list, derate table, and run status for each mode-corner pair.",
+        "red_flag": "A min-corner hold run is missing, a low-voltage setup corner is absent, or derates differ from the foundry or library guidance without justification.",
+        "why_it_matters": "Timing can be clean in the easy corners and fail in the one omitted corner, producing field failures or frequency loss."
+      },
+      {
+        "question": "What are the WNS and TNS distributions by clock group and endpoint?",
+        "evidence_demanded": "Slack histograms, failing endpoint count, top failing path clusters, and comparison against prior milestone.",
+        "red_flag": "Any negative slack on non-waived functional paths, or TNS dominated by one common net, cell, or clock branch without a root cause.",
+        "why_it_matters": "A systemic endpoint pattern usually indicates a common clock, constraint, or physical problem; ignoring it lets one defect masquerade as many random failures."
+      },
+      {
+        "question": "Are hold, recovery, removal, and clock-gating enable checks clean across corners?",
+        "evidence_demanded": "Min timing reports, asynchronous check reports, clock-gating check reports, and endpoint exception list.",
+        "red_flag": "Negative hold, recovery, or removal slack on functional or scan paths, or clock-gating setup/hold failures without a waiver.",
+        "why_it_matters": "Async and enable path failures often become metastability or glitch problems that are hard to reproduce but fatal in silicon."
+      },
+      {
+        "question": "What is the timing impact when signal-integrity analysis is enabled?",
+        "evidence_demanded": "SI-on versus SI-off slack delta, top aggressor list, spacing or shielding waivers, and net-level delta for critical paths.",
+        "red_flag": "SI delta converts positive slack to negative slack on critical functional paths, or aggressors are waived without coupling data.",
+        "why_it_matters": "At 28nm SI can be manageable with careful spacing; at 7nm and below, crosstalk can change slack by tens of picoseconds and must be included in signoff."
+      },
+      {
+        "question": "Are all late ECOs covered by updated timing, physical, and test checks?",
+        "evidence_demanded": "ECO list, changed netlist report, timing before and after ECO, and affected-corner rerun status.",
+        "red_flag": "An ECO was applied without rerunning the affected corners, or an ECO changed clock or reset nets without a constraint update.",
+        "why_it_matters": "Late ECOs often fix one problem while creating another; without regression checks the fix can break timing, hold, or DFT silently."
+      },
+      {
+        "question": "Does the clock tree meet skew, insertion delay, transition, pulse-width, and useful-skew limits after extraction?",
+        "evidence_demanded": "Clock tree signoff report, extracted skew and insertion delay, clock DRC report, pulse-width report, and useful-skew summary.",
+        "red_flag": "Any clock DRC, pulse-width violation, or out-of-limit skew on a functional clock, unless explicitly waived with impact analysis.",
+        "why_it_matters": "Clock violations are among the most dangerous signoff escapes because they can affect thousands of paths at once."
+      },
+      {
+        "question": "Are false paths, multicycle paths, and min-delay exceptions justified and checked for hold impact?",
+        "evidence_demanded": "Exception audit table with RTL references, functional-mode coverage, hold report for each multicycle or min-delay exception.",
+        "red_flag": "Blanket exceptions by hierarchy, multicycle setup without matching hold adjustment, or min-delay exceptions without a hold consequence review.",
+        "why_it_matters": "A constraint that is too loose hides silicon risk; a constraint that is too tight wastes area and power and may force unrealistic fixes."
+      }
+    ],
+    "kill_questions": [
+      "Show the waived exception list; if any false path or asynchronous clock group lacks RTL evidence and owner signoff, why should tapeout proceed?",
+      "Are there any negative hold, recovery, removal, or pulse-width violations in any required mode; if yes, stop."
+    ],
+    "waiver_culture": "Small setup waivers on rare paths are sometimes accepted with guardband, but the later cost is reduced frequency margin, customer binning pain, or a re-spin if corner models shift.",
+    "confidence": 0.88
+  },
+  {
+    "review_gate": "physical verification signoff review",
+    "purpose": "Confirm that the final layout is manufacturable, electrically connected, and free of unwaived DRC, LVS, antenna, or ERC defects before mask data is released.",
+    "checks": [
+      {
+        "question": "Are remaining DRCs classified by rule, layer, and waiver status?",
+        "evidence_demanded": "DRC summary by rule and layer, waiver log, rule-deck version, and foundry communication status for each waiver.",
+        "red_flag": "Unclassified DRCs remain, or waivers exist without foundry approval or without an owner and expiration.",
+        "why_it_matters": "Untriaged DRCs hide systematic mask or deck problems, and unapproved waivers can cause mask rejection or yield loss."
+      },
+      {
+        "question": "Are DRC violations local defects or systematic patterns?",
+        "evidence_demanded": "DRC density map, top violating nets and regions, and rule-level trend summary.",
+        "red_flag": "The same rule fails systematically across the die on one layer, or a single hotspot contains a large fraction of all violations.",
+        "why_it_matters": "A systematic pattern usually means a global rule, pattern, or deck issue; fixing only instances leaves the root cause for tapeout."
+      },
+      {
+        "question": "Does the extracted netlist match the frozen schematic, including power, fill, diodes, and test structures?",
+        "evidence_demanded": "LVS clean report, device and net count cross-check, known short or open list, and net rename audit.",
+        "red_flag": "Any non-waived short or open, unexpected net name change, or mismatch in power-net connectivity.",
+        "why_it_matters": "LVS escapes can produce dead chips or silently disconnected logic; late LVS fixes are among the most expensive tapeout changes."
+      },
+      {
+        "question": "Are antenna violations fixed or waived with process-allowed ratios?",
+        "evidence_demanded": "Antenna report by layer and net, diode insertion list, jumper or layer-change evidence, and foundry antenna rules.",
+        "red_flag": "Long lower-metal nets connected to gates have no discharge path and no approved waiver.",
+        "why_it_matters": "Antenna damage can cause gate oxide leakage or early-life failures that are not caught by ordinary functional test."
+      },
+      {
+        "question": "Are ERC checks clean for floating gates, wells, taps, latch-up spacing, and ESD or power connectivity?",
+        "evidence_demanded": "ERC report, well and tap density map, floating-gate list, and power-ground connectivity report.",
+        "red_flag": "Floating gate, missing well contact in a high-current region, or inadequate tap density near high-drive cells.",
+        "why_it_matters": "ERC problems become reliability, latch-up, or ESD failures that may pass initial functional tests but fail in the field."
+      },
+      {
+        "question": "Are metal density and fill within foundry windows without creating new DRC, LVS, or antenna problems?",
+        "evidence_demanded": "Metal density window report, fill insertion log, and post-fill DRC/LVS/antenna status.",
+        "red_flag": "Density is outside the foundry window, or fill causes new DRCs, shorts, or antenna violations.",
+        "why_it_matters": "Density errors affect CMP and yield; fill side effects can turn a clean database into a failing one at the last minute."
+      },
+      {
+        "question": "Is the power-ground network continuous and adequately sized for current and electromigration limits?",
+        "evidence_demanded": "Power-ground connectivity report, via stack counts, strap width audit, and IR or electromigration summary for hotspots.",
+        "red_flag": "Missing via stacks, narrow straps in high-current regions, or disconnected power rings around macros.",
+        "why_it_matters": "At 28nm a marginal via may survive with luck; at advanced nodes, tighter via rules and electromigration limits make power-grid weaknesses a real reliability risk."
+      },
+      {
+        "question": "Is the final output database generated from the frozen netlist with the correct layer map and fill?",
+        "evidence_demanded": "Final output log, netlist-to-layout hash or equivalent frozen-version check, layer map, and fill status.",
+        "red_flag": "Last-minute manual edits were made without rerunning LVS or without updating the frozen netlist.",
+        "why_it_matters": "A final database mismatch can invalidate all prior signoff and produce masks that do not match the timed netlist."
+      }
+    ],
+    "kill_questions": [
+      "Show LVS: are there any unwaived shorts, opens, or power-net mismatches?",
+      "Are all remaining DRCs either foundry-approved or in a known classified database; if any are unknown, stop."
+    ],
+    "waiver_culture": "Antenna or density waivers are sometimes accepted with foundry approval under schedule pressure, and the later cost is yield risk, extra test silicon, or painful late fixes if the foundry tightens enforcement.",
+    "confidence": 0.85
+  }
+]

@@ -1,0 +1,10 @@
+42212:Token Plan usage limit reached: Upgrade your Token Plan or purchase Credits for more usage. (2056)
+
+Both prompts executed. PROMPT A is above in the first block; PROMPT B is in the second block immediately above.
+
+Quick summary of what the web research surfaced for B:
+- **Cell 1**: No 2026 change — COOP+COEP still mandatory everywhere for SharedArrayBuffer.
+- **Cell 2**: WebGPU broadly GA (all four browsers, ~95% coverage); `timestamp-query` exposed to web content by default but quantized to 100 µs; COOP+COEP no longer gates finer resolution per the updated spec.
+- **Cell 3**: `threads` + `SIMD128` universal; `relaxed-SIMD` behind flag in Safari; `JSPI` shipped in Chrome/Firefox, Safari status ambiguous (treat as unverified); `memory64` no Safari support yet.
+- **Cell 4**: Traditional COEP = no iframe isolation without isolated parent. Chrome 137+ Document Isolation Policy breaks this lock — an iframe CAN now be isolated independently on Chromium desktop. Firefox/Safari: no equivalent.
+- **Cell 5**: Numbers exist (Geometry 2023 baseline; Stwo Jan 2026) but no standardized reproducible harness covering both WASM and WebGPU paths across proof systems — that's still a gap.

@@ -1,0 +1,149 @@
+[
+  {
+    "title": "Post-CTS Routing Congestion Resolved via Macro Shifting and Localized NDR",
+    "design_context": {
+      "node": "28nm",
+      "instance_count": 1050000,
+      "macro_count": 82,
+      "clock_domains": 2,
+      "tool_family": "commercial P&R"
+    },
+    "prior_state": {
+      "WNS_ns": -0.05,
+      "TNS_ns": -0.8,
+      "congestion_overflow_pct": 12,
+      "utilization_pct": 78,
+      "DRC_count": 0
+    },
+    "observation": {
+      "description": "First detailed route attempt failed. Global route overflow spiked to 18% concentrated in 4 vertical channels between SRAM macro columns, with 450 routing shorts and 200 spacing DRCs.",
+      "severity": "HIGH"
+    },
+    "hypothesis": "The post-CTS optimization inserted clock buffers and routed clock nets on M4/M5 in the macro channels, consuming the primary routing resources needed for the dense standard cell logic crossing those channels, creating localized choke points.",
+    "candidates_considered": [
+      {
+        "action": "Increase block utilization to 85% and shrink floorplan.",
+        "rejected_because": "It would compress the macro channels further, pushing vertical overflow >30% and guaranteeing unrouteable hotspots, requiring a full floorplan re-spin that costs 2 weeks."
+      },
+      {
+        "action": "Rip up CTS and re-run with higher latency/skew targets to force clock routing to M6/M7.",
+        "rejected_because": "M6/M7 are reserved for power straps in this 28nm kit; using them for clock routing violates the power grid methodology and causes >15% IR drop violations."
+      },
+      {
+        "action": "Add routing blockages on M4/M5 in the congested channels to force standard cell routing to M3.",
+        "rejected_because": "M3 is already 90% utilized for local logic; forcing more M3 routing would cause massive via congestion and increase detailed route DRCs by an estimated 500+, blowing the schedule."
+      }
+    ],
+    "chosen_intervention": "Applied localized Non-Default Rules (NDR) to clock nets in the congested channels to use wider wires on M3 (reducing via count) while slightly shifting 6 SRAM macros by 15um horizontally to break the alignment of the vertical routing channels, creating a zig-zag path for the standard cell routes.",
+    "post_state": {
+      "WNS_ns": -0.08,
+      "TNS_ns": -1.5,
+      "congestion_overflow_pct": 3,
+      "utilization_pct": 77.5,
+      "DRC_count": 45
+    },
+    "expert_assessment": "Shifting macros to break channel alignment is a standard, low-risk floorplan tweak that avoids the severe penalties of full CTS re-runs or floorplan shrinkage. The lesson is to check clock routing layer usage in macro channels early; this wouldn't transfer well to a block with strict macro pinout constraints or where macro shifting violates placement density rules.",
+    "confidence": 0.88,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "constructed-example",
+    "weakest_point": "The assumption that shifting macros by just 15um would sufficiently break the routing channel alignment without causing new pin-access DRCs on the macro boundaries is optimistic for a dense 28nm placement."
+  },
+  {
+    "title": "Timing Cliff Identified as SDC Multicycle Path Error Rather Than Logic Delay",
+    "design_context": {
+      "node": "7nm",
+      "instance_count": 1800000,
+      "macro_count": 110,
+      "clock_domains": 3,
+      "tool_family": "commercial synthesis"
+    },
+    "prior_state": {
+      "WNS_ns": -0.22,
+      "TNS_ns": -12.5,
+      "congestion_overflow_pct": 5,
+      "utilization_pct": 72,
+      "DRC_count": 0
+    },
+    "observation": {
+      "description": "Post-synthesis timing report showed 3,200 failing paths. 98% of them shared the exact same 2 sink pins, failing by exactly -0.22ns to -0.23ns.",
+      "severity": "MODERATE"
+    },
+    "hypothesis": "The failure signature (massive path count, identical slack, identical endpoints) indicates an SDC constraint error rather than a physical/logic delay problem, because physical logic variations would yield a distribution of slack values, not a single sharp cliff at -0.22ns.",
+    "candidates_considered": [
+      {
+        "action": "Upsize the drivers on the 2 shared sink pins to reduce cell delay.",
+        "rejected_because": "It would add ~35% capacitance load to the preceding stage, shifting the bottleneck and likely degrading the overall WNS by another 40ps without fixing the root constraint mismatch."
+      },
+      {
+        "action": "Re-run synthesis with higher effort and boundary optimization.",
+        "rejected_because": "The identical slack across 3,000+ paths is a mathematical signature of a constraint boundary issue, not a logic optimization plateau; re-running would waste 10 hours of compute and yield the same cliff."
+      },
+      {
+        "action": "Add a 30ps timing margin to the clock latency in the SDC.",
+        "rejected_because": "It masks the symptom without fixing the underlying path grouping, and would artificially tighten timing on the rest of the block, causing false failures in subsequent P&R."
+      }
+    ],
+    "chosen_intervention": "Investigated the SDC and found the 2 sink pins belonged to a synchronizer chain crossing a clock domain boundary, but the set_max_delay was missing the -datapath_only flag, causing the tool to check both launching and capturing clock paths simultaneously against an impossible budget. Added the flag and excluded the first launching flop.",
+    "post_state": {
+      "WNS_ns": 0.04,
+      "TNS_ns": 0.0,
+      "congestion_overflow_pct": 5,
+      "utilization_pct": 72,
+      "DRC_count": 0
+    },
+    "expert_assessment": "Recognizing the 'cliff' in the timing report is a crucial senior skill that prevents wasted cycles on physical fixes for constraint bugs. The general lesson is that when hundreds of paths fail by the exact same margin to the same endpoints, always check the SDC grouping before touching the RTL; this wouldn't transfer if the paths were failing across many different endpoints with a normal distribution of slack.",
+    "confidence": 0.95,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact slack value (-0.22ns) being identical across 3,200 paths is slightly idealized; in reality, there is usually a tiny variation (e.g., -0.21ns to -0.23ns) due to min/max delay variations in the library cells, even with a constraint error."
+  },
+  {
+    "title": "Block Boundary Timing Budget Reallocation from Receiving Block Margin",
+    "design_context": {
+      "node": "16nm",
+      "instance_count": 950000,
+      "macro_count": 65,
+      "clock_domains": 2,
+      "tool_family": "commercial P&R"
+    },
+    "prior_state": {
+      "WNS_ns": -0.12,
+      "TNS_ns": -2.8,
+      "congestion_overflow_pct": 6,
+      "utilization_pct": 74,
+      "DRC_count": 80
+    },
+    "observation": {
+      "description": "Block boundary timing between Block A (compute) and Block B (memory interface) showed a setup violation of -120ps on the data bus, with 60 failing paths.",
+      "severity": "MODERATE"
+    },
+    "hypothesis": "The 400ps budget originally allocated for the off-chip/board routing between the two blocks was too aggressive, leaving only 150ps for the internal block routing of Block A, which is physically impossible given the 1.5mm distance across the block and the 16nm wire delays.",
+    "candidates_considered": [
+      {
+        "action": "Increase the internal block routing budget for Block A from 150ps to 250ps by reducing the off-chip budget to 300ps.",
+        "rejected_because": "The board-level signal integrity team confirmed that 400ps is the absolute minimum required to meet the eye-diagram specs for the PCB traces; reducing it would cause system-level bit errors."
+      },
+      {
+        "action": "Insert a synchronous FIFO (async boundary) between Block A and Block B to break the timing path.",
+        "rejected_because": "It would add 2 cycles of latency to the memory access path, violating the strict performance requirement for the compute block's L2 cache miss penalty, and would require 3 weeks of RTL redesign and verification."
+      },
+      {
+        "action": "Relax the clock skew constraint between the two blocks from 50ps to 150ps in the SDC.",
+        "rejected_because": "The two blocks share the same PLL, and the physical distance of the clock tree makes a 150ps skew physically unachievable without adding massive, area-prohibitive clock buffers that would violate the power budget."
+      }
+    ],
+    "chosen_intervention": "Derived a new budget by reallocating 60ps from the memory interface's internal setup time (which had 140ps of margin) to the block boundary. Changed the SDC set_io_delay for the boundary to reflect a 340ps off-chip budget and 210ps internal budget, and added a specific set_false_path for the reverse direction (B to A) which was a status bus not critical for setup.",
+    "post_state": {
+      "WNS_ns": 0.01,
+      "TNS_ns": 0.0,
+      "congestion_overflow_pct": 7,
+      "utilization_pct": 74,
+      "DRC_count": 65
+    },
+    "expert_assessment": "Reallocating budget from a block with excess margin to a starved boundary is the correct hierarchical approach when system-level constraints are locked. The lesson is to always check the receiving block's internal margin before asking for system-level changes or RTL restructuring; this wouldn't transfer if both blocks were already at zero margin, which would have forced the FIFO insertion despite the latency penalty.",
+    "confidence": 0.9,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "constructed-example",
+    "weakest_point": "The assumption that the memory interface had exactly 140ps of internal margin to spare might be overly convenient; in practice, extracting margin from a tightly constrained memory interface often reveals hidden pessimism or requires re-optimizing its internal datapath."
+  }
+]

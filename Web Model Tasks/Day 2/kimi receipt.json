@@ -1,0 +1,133 @@
+ ```json
+{
+  "receipt_kinds": [
+    {
+      "kind": "composite",
+      "produced_when": "Default output of the local prover (prove / prove_with_ctx) when no compression is requested; contains the full multi-segment STARK proof with continuation proofs linking each execution segment.",
+      "verification": "Requires recursive or direct STARK verification of every segment against the appropriate control IDs."
+    },
+    {
+      "kind": "succinct",
+      "produced_when": "After calling compress() on a composite receipt; recursively composes all segment proofs into a single constant-sized STARK proof that verifies the entire chain.",
+      "verification": "Single STARK verification against a control root that commits to the allowed recursion circuit set."
+    },
+    {
+      "kind": "groth16",
+      "produced_when": "After calling compress_to_groth16() or similar on a succinct receipt; wraps the final STARK verification step in a Groth16 SNARK over the BN254 elliptic curve pairings.",
+      "verification": "Groth16 pairing check on BN254 using a version-specific verifying key; intended for on-chain or constant-time verification."
+    }
+  ],
+  "groth16_receipt_fields": [
+    {
+      "field": "seal",
+      "type_shape": "Byte vector (~192 bytes uncompressed, ~128 bytes compressed in later versions) encoding a Groth16 proof π = (A, B, C) over BN254: A ∈ G1, B ∈ G2, C ∈ G1. Exact point compression flag (compressed vs uncompressed) is version-dependent.",
+      "meaning": "The zero-knowledge argument that the underlying succinct STARK proof correctly verifies the ReceiptClaim encoded in the public inputs.",
+      "verifier_must_check": "1) Parse bytes as valid BN254 curve points (on-curve, not identity, in correct subgroup). 2) Assemble public inputs from claim digest (and control_root if exposed). 3) Evaluate the Groth16 pairing equation e(A,B) = e(α,β)·e(C,δ)·e(public_inputs,γ) using the BN254 pairing-friendly curve and the correct verifying key.",
+      "failure_if_skipped": "Forged proof acceptance: an attacker can craft arbitrary bytes that bypass no verification, producing a valid-looking receipt for any malicious claim (e.g., fake journal, wrong program)."
+    },
+    {
+      "field": "claim",
+      "type_shape": "ReceiptClaim struct (serialized). Field names evolved across v1.x–v3.x; core components are pre_state (SystemState), post_state (SystemState), exit_code (ExitCode enum), input (Digest), output (Digest). In some versions pre/post were flattened and an explicit image_id field was present.",
+      "meaning": "The exact statement the guest execution is asserting: initial memory state (image_id), final memory state, whether the guest halted successfully, and cryptographic digests of the private input buffer and public journal.",
+      "verifier_must_check": "Reconstruct the expected claim from externally known values (image_id, input bytes, journal bytes, expected exit code), compute its digest, and ensure it matches the digest represented by the Groth16 public inputs. Any deviation in any field must cause rejection.",
+      "failure_if_skipped": "Claim substitution: attacker presents a receipt for a different program (different image_id), different journal, or different exit state while reusing a valid seal from an unrelated execution."
+    },
+    {
+      "field": "control_root",
+      "type_shape": "Digest (32 bytes, SHA-256 output). In some versions exposed as control_root; in others as a single control_id or embedded in verifier parameters.",
+      "meaning": "Merkle root (or direct identifier) of the set of allowed STARK circuit control IDs that were used to generate and compress the proof. Binds the receipt to a specific zkVM circuit version and ISA configuration.",
+      "verifier_must_check": "Compare against a hard-coded or governance-approved allowlist for the expected RISC0 circuit version. Reject if the control_root does not match the trusted value for the verifier's expected circuit generation.",
+      "failure_if_skipped": "Circuit confusion / malicious circuit attack: attacker generates a proof using a weakened, buggy, or maliciously parameterized RISC0 circuit (e.g., with disabled opcodes, shorter cycles, or backdoored constraints) that the verifier incorrectly accepts because it never checked which circuit the proof attests to."
+    },
+    {
+      "field": "metadata / version tag",
+      "type_shape": "Optional enum discriminant or version integer (receipt format version, not guest program version).",
+      "meaning": "Distinguishes receipt serialization formats and verification paths across risc0 crate versions.",
+      "verifier_must_check": "Validate that the version is within the supported range and dispatch to the corresponding deserialization logic and verifying key.",
+      "failure_if_skipped": "Version confusion: attacker crafts a receipt exploiting format differences (e.g., changed field order, different hash prefixing) between versions to cause a deserialization or digest-collision bug."
+    }
+  ],
+  "claim_structure": {
+    "components": [
+      {
+        "name": "pre_state (or image_id in flattened forms)",
+        "type": "SystemState { pc: u32, merkle_root: Digest }",
+        "meaning": "Initial system state. The merkle_root of pre_state is the image_id that uniquely identifies the guest ELF/binary loaded into zkVM memory."
+      },
+      {
+        "name": "post_state",
+        "type": "SystemState { pc: u32, merkle_root: Digest }",
+        "meaning": "Final system state after guest execution completes."
+      },
+      {
+        "name": "exit_code",
+        "type": "ExitCode enum (e.g., Halted, Paused, SystemSplit)",
+        "meaning": "Indicates whether the guest terminated normally (Halted) or via another path. Only Halted (or equivalent success variant) should be accepted for most use cases."
+      },
+      {
+        "name": "input",
+        "type": "Digest (32 bytes)",
+        "meaning": "SHA-256 digest of the private input buffer fed to the guest before execution."
+      },
+      {
+        "name": "output (or journal digest)",
+        "type": "Digest (32 bytes)",
+        "meaning": "SHA-256 digest of the public journal bytes committed by the guest via env::commit()."
+      }
+    ],
+    "claim_digest_computation": "Serialize the claim components in a canonical, version-dependent order (typically pre_state, post_state, exit_code, input, output) and compute SHA-256 over the resulting bytes. In some versions the serialization uses a fixed-layout struct; in others a Merkle-tree-like hashing of fields. The digest is the unique identifier of the claim fed into the Groth16 public inputs."
+  },
+  "binding_chain": [
+    "Journal bytes (public output) → SHA-256 → output digest field inside ReceiptClaim.",
+    "Input bytes (private witness) → SHA-256 → input digest field inside ReceiptClaim.",
+    "Guest binary → memory image → Merkle tree → merkle_root in pre_state (image_id) inside ReceiptClaim.",
+    "All claim fields (pre_state, post_state, exit_code, input, output) → canonical serialization → SHA-256 → claim digest.",
+    "Claim digest (256 bits) → decomposed into BN254 scalar field elements (typically 2×128-bit limbs or similar encoding) → Groth16 public inputs.",
+    "Groth16 public inputs + seal + verifying key → BN254 pairing equation. The verifying key is specific to the STARK-to-Groth16 compression circuit tied to the control_root.",
+    "Control_root enters as: either an additional public input to the Groth16 circuit, or as an implicit parameter bound into the verifying key during trusted setup / circuit compilation. The verifier must ensure the control_root matches the circuit the verifying key represents."
+  ],
+  "version_coupling": {
+    "circuit_version_dependent_parts": [
+      "Groth16 verifying key: generated from the STARK-to-Groth16 compression circuit; changes whenever the recursion circuit, STARK parameters (FRI blowup factor, field), or BN254 wrapper logic change.",
+      "Control_root / control IDs: derived from the guest execution circuit (zkVM ISA, memory layout, syscall set). Changes when the RISC0 zkVM version changes the constraints that enforce RISC-V semantics.",
+      "Claim serialization format: the exact byte layout and field order of ReceiptClaim may change across major versions, affecting the claim digest computation.",
+      "Hash-to-field mapping: the method of converting the 256-bit claim digest into BN254 public inputs may vary by version."
+    ],
+    "what_breaks_with_wrong_version": "If a verifier uses a verifying key from a different circuit version: valid receipts from the correct version will fail verification (false negatives), or—if the circuits are structurally similar but parametrically different—an attacker could exploit parameter mismatches to forge proofs (false positives). If the verifier uses the wrong control_root, it accepts proofs generated under weaker or malicious circuit parameters that do not enforce the intended RISC-V semantics. If the verifier uses the wrong claim serialization, the reconstructed claim digest will not match the public inputs, causing universal rejection."
+  },
+  "common_verifier_bugs": [
+    {
+      "bug": "Ignoring exit_code and accepting any variant (including SystemSplit or Panic)",
+      "check_that_catches_it": "Explicitly assert exit_code == Halted (or the version-specific success variant) before accepting the receipt."
+    },
+    {
+      "bug": "Omitting control_root allowlist check and verifying against any control_root",
+      "check_that_catches_it": "Hard-code or governance-update an allowlist of trusted control_root values and reject receipts with non-matching roots."
+    },
+    {
+      "bug": "Reconstructing the claim digest with wrong field order or missing hash prefixing",
+      "check_that_catches_it": "Use the exact same canonical serialization and hash function (SHA-256 in known versions) as the prover, verified against reference test vectors."
+    },
+    {
+      "bug": "Using a single hardcoded Groth16 verifying key across all RISC0 versions without version gating",
+      "check_that_catches_it": "Map each supported control_root / circuit version to its specific verifying key and reject unknown version tags."
+    },
+    {
+      "bug": "Trusting journal bytes without recomputing their digest and comparing to claim.output",
+      "check_that_catches_it": "Hash the provided journal bytes with SHA-256 and assert equality against the output digest in the reconstructed claim."
+    },
+    {
+      "bug": "Accepting unvalidated curve point encodings in the seal (e.g., not checking subgroup membership or allowing arbitrary coordinates)",
+      "check_that_catches_it": "Use a rigorous BN254 point parser that verifies on-curve, not-identity, and subgroup membership for G1 and G2 points before pairing."
+    }
+  ],
+  "certainty_notes": {
+    "receipt_kinds": "High confidence — the three-tier compression pipeline (composite → succinct → groth16) is a documented, stable part of the RISC0 architecture across v1.x–v3.x.",
+    "groth16_receipt_fields": "Field names (control_root vs control_id, exact metadata schema) evolved across versions; the semantic roles (seal, claim, circuit identifier) are stable. The exact byte lengths of compressed vs uncompressed BN254 points are implementation-dependent.",
+    "claim_structure": "Component semantics (pre/post state, exit code, input/output digests) are core to the RISC0 design and well-documented. Exact struct field names and whether image_id is inlined or derived from pre_state.merkle_root vary by version.",
+    "binding_chain": "The conceptual chain (journal → digest → claim → digest → public inputs → seal) is certain. The exact mechanics of BN254 public-input decomposition (2 limbs, bit splitting, etc.) and whether control_root is an explicit public input or implicit in the verifying key are implementation details I infer from general Groth16 practice and RISC0 design patterns rather than from a published specification I can quote verbatim.",
+    "version_coupling": "High confidence — circuit versioning is a known challenge in all zkVMs and explicitly addressed in RISC0 via control IDs/roots and version-gated verifying keys.",
+    "common_verifier_bugs": "These are plausible and known bugs drawn from general zk-circuit verification practice and specific RISC0 documentation/discussion; they align with real vulnerabilities seen in similar systems (e.g., missing exit-code checks, control-root confusion)."
+  }
+}
+```

@@ -1,0 +1,114 @@
+[
+  {
+    "case_name": "PD 0.5%",
+    "inputs": {
+      "pd": 0.005,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.213456,
+      "Phi_inv_PD": -2.575829,
+      "Phi_inv_0999": 3.090232,
+      "inner_Phi_argument": -1.29455,
+      "Phi_inner": 0.097738,
+      "K_before_MA": 0.041732,
+      "b_PD": 0.167086,
+      "MA": 1.334453,
+      "K_after_MA": 0.055689,
+      "risk_weight": 0.696117
+    },
+    "result": {
+      "k_pct": 5.5689,
+      "risk_weight_pct": 69.6117
+    },
+    "formula_basis": "K = [LGD * N((N^-1(PD) + sqrt(R)*N^-1(0.999))/sqrt(1-R)) - PD*LGD] * (1 + (M-2.5)*b) / (1 - 1.5*b); R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1 - (1-exp(-50*PD))/(1-exp(-50))); b = (0.11852 - 0.05478*ln(PD))^2",
+    "known_benchmark": "Benchmark is not strictly standardized in public docs for 0.5% but is typically ~55-70%. Our computed value is 69.61%.",
+    "weakest_point": "Small PDs cause extreme negative N^-1(PD), making the inner argument highly sensitive to R precision."
+  },
+  {
+    "case_name": "PD 1%",
+    "inputs": {
+      "pd": 0.01,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.192784,
+      "Phi_inv_PD": -2.326348,
+      "Phi_inv_0999": 3.090232,
+      "inner_Phi_argument": -1.079095,
+      "Phi_inner": 0.140273,
+      "K_before_MA": 0.058623,
+      "b_PD": 0.137486,
+      "MA": 1.25981,
+      "K_after_MA": 0.073853,
+      "risk_weight": 0.923168
+    },
+    "result": {
+      "k_pct": 7.3853,
+      "risk_weight_pct": 92.3168
+    },
+    "formula_basis": "K = [LGD * N((N^-1(PD) + sqrt(R)*N^-1(0.999))/sqrt(1-R)) - PD*LGD] * (1 + (M-2.5)*b) / (1 - 1.5*b); R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1 - (1-exp(-50*PD))/(1-exp(-50))); b = (0.11852 - 0.05478*ln(PD))^2",
+    "known_benchmark": "Known benchmark is ≈92% risk weight at PD 1% from Basel calibration documents. Our computation gives 92.32%, which matches the benchmark.",
+    "weakest_point": "Precision of Phi_inv(0.999) and exp(-50) can slightly shift the 3rd decimal of RW."
+  },
+  {
+    "case_name": "PD 3%",
+    "inputs": {
+      "pd": 0.03,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.146776,
+      "Phi_inv_PD": -1.880794,
+      "Phi_inv_0999": 3.090232,
+      "inner_Phi_argument": -0.754449,
+      "Phi_inner": 0.22529,
+      "K_before_MA": 0.08788,
+      "b_PD": 0.096478,
+      "MA": 1.169204,
+      "K_after_MA": 0.10275,
+      "risk_weight": 1.284377
+    },
+    "result": {
+      "k_pct": 10.275,
+      "risk_weight_pct": 128.4377
+    },
+    "formula_basis": "K = [LGD * N((N^-1(PD) + sqrt(R)*N^-1(0.999))/sqrt(1-R)) - PD*LGD] * (1 + (M-2.5)*b) / (1 - 1.5*b); R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1 - (1-exp(-50*PD))/(1-exp(-50))); b = (0.11852 - 0.05478*ln(PD))^2",
+    "known_benchmark": "No universally fixed benchmark cited for 3%, but QIS benchmarks often range 125-130%. Our computation gives 128.44%.",
+    "weakest_point": "The term (1-exp(-50*PD))/(1-exp(-50)) approaches 1, making R sensitive to the asymptotic limit precision."
+  },
+  {
+    "case_name": "PD 10%",
+    "inputs": {
+      "pd": 0.1,
+      "lgd": 0.45,
+      "m": 2.5,
+      "ead": 1.0
+    },
+    "computation": {
+      "R": 0.120809,
+      "Phi_inv_PD": -1.281552,
+      "Phi_inv_0999": 3.090232,
+      "inner_Phi_argument": -0.221258,
+      "Phi_inner": 0.412446,
+      "K_before_MA": 0.140601,
+      "b_PD": 0.059856,
+      "MA": 1.098641,
+      "K_after_MA": 0.15447,
+      "risk_weight": 1.930869
+    },
+    "result": {
+      "k_pct": 15.447,
+      "risk_weight_pct": 193.0869
+    },
+    "formula_basis": "K = [LGD * N((N^-1(PD) + sqrt(R)*N^-1(0.999))/sqrt(1-R)) - PD*LGD] * (1 + (M-2.5)*b) / (1 - 1.5*b); R = 0.12*(1-exp(-50*PD))/(1-exp(-50)) + 0.24*(1 - (1-exp(-50*PD))/(1-exp(-50))); b = (0.11852 - 0.05478*ln(PD))^2",
+    "known_benchmark": "Benchmark typically >150% for high PDs. Our computation gives 193.09%.",
+    "weakest_point": "At high PD, expected loss (PD*LGD) subtraction becomes a larger proportion of the unconditional LGD*Phi term."
+  }
+]

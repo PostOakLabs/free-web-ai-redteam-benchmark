@@ -1,0 +1,112 @@
+```json
+{
+  "episode_id": "OpenROAD-issue-6066",
+  "overall_verdict": "multiple-errors",
+  "confidence_after_review": 0.55,
+  "findings": [
+    {
+      "severity": "critical",
+      "field": "direct_quote.by",
+      "draft_claim": "eder-matheus",
+      "evidence": "The quote 'we could finish GRT by changing the routing layer adjustments from 0.45 to 0.2' appears under the heading 'jeffng-or commented on Nov 1, 2024'. eder-matheus's only comment in the thread is dated Nov 15, 2024 and concerns OR/ORFS documentation improvement — it says nothing about layer adjustment or GRT.",
+      "correction": "by: jeffng-or"
+    },
+    {
+      "severity": "critical",
+      "field": "direct_quote.date",
+      "draft_claim": "2024-11-14",
+      "evidence": "The quote text appears in jeffng-or's comment dated Nov 1, 2024, not Nov 14. The Nov 14 comment by jeffng-or discusses #5971 tracking and ORFS variable documentation — it does not contain the fix description.",
+      "correction": "date: 2024-11-01"
+    },
+    {
+      "severity": "critical",
+      "field": "chosen_intervention",
+      "draft_claim": "Per eder-matheus (MEMBER): 'we could finish GRT by changing the routing layer adjustments from 0.45 to 0.2... We also changed the number of congestion iterations to 35 to complete BoomTile.'",
+      "evidence": "This text is from jeffng-or's Nov 1, 2024 comment. eder-matheus is not the author. The '(MEMBER)' role label is also unsupported — the thread does not indicate jeffng-or's or eder-matheus's repo role via badges in the scraped text.",
+      "correction": "Per jeffng-or (Nov 1, 2024): same quoted text."
+    },
+    {
+      "severity": "moderate",
+      "field": "hypothesis",
+      "draft_claim": "the default 30 congestion iterations were also insufficient",
+      "evidence": "The thread shows 30 iterations were tested AT 0.45 layer adjustment and failed to resolve the issue (oharboe/jeffng-or, Oct 31: 'No, I checked'). The combined fix was 0.2 + 35 iterations. There is no evidence that 30 iterations is insufficient at 0.2 layer adjustment — the iteration count alone was never isolated as an independent factor. The hypothesis presents it as a standalone finding when it is not.",
+      "correction": "The default 30 congestion iterations at 0.45 layer adjustment were insufficient (confirmed by oharboe's test on Oct 31). The final fix combined 0.2 layer adjustment with 35 iterations; whether 35 alone (at 0.45) or 30 alone (at 0.2) would have sufficed is unknown."
+    },
+    {
+      "severity": "moderate",
+      "field": "observation",
+      "draft_claim": "Congestion heatmap shows a large region at the top of the die and around the macro.",
+      "evidence": "The initial report (jeffng-or, original issue) says only 'a lot of space especially at the top of the design.' The screenshot alt text is 'routing_congestion' with no mention of macro proximity. 'Around the macro' appears to be borrowed from the Oct 31 global-placement screenshot (oharboe's comment, different design stage) or inferred without direct textual support.",
+      "correction": "Congestion heatmap shows a large region at the top of the die. [Note: macro-adjacent congestion may be visible in the Oct 31 global-placement screenshot but is not stated in the original report.]"
+    },
+    {
+      "severity": "moderate",
+      "field": "gaps[1]",
+      "draft_claim": "The issue was closed automatically as not_planned/Stale in 2026",
+      "evidence": "The thread shows github-actions 'marked as stale' on 2026-05-25 with a warning it 'will be closed in 21 days if no further activity occurs.' The thread does not contain a subsequent closure event. 'Marked stale' is not the same as 'closed.'",
+      "correction": "The issue was marked stale on 2026-05-25; whether it was subsequently closed is not confirmed in the thread."
+    },
+    {
+      "severity": "moderate",
+      "field": "gaps[3]",
+      "draft_claim": "We (eder-matheus) note the layer-adjustment is documented at set-global-routing-layer-adjustment; exact meaning of a high vs low value only explained in prose.",
+      "evidence": "Two problems: (1) The link to set-global-routing-layer-adjustment and the explanation 'we reduce the resources that the global router have to route the design… Using higher values would produce less congested areas in DRT, but values too high can make GRT to not complete' appears in the Nov 1 comment section under jeffng-or, not eder-matheus. (2) The explanation is not vague 'prose only' — it explicitly defines the mechanism and the tradeoff. The gap overstates the documentation deficiency.",
+      "correction": "The layer-adjustment mechanism is explained in the thread by quoting the OR docs (higher value = more resource reduction = stricter constraint, risks GRT failure). The documentation gap is about ORFS variable → OR command cross-linking (eder-matheus, Nov 15), not about the meaning of the parameter itself."
+    },
+    {
+      "severity": "minor",
+      "field": "title",
+      "draft_claim": "BoomTile/Megaboom: 20k routing congestion DRCs at only 0.24 placement density",
+      "evidence": "The issue title is: 'Megaboom: 20k routing congestion DRCs with just 0.24 placement density.' Three differences: prepended 'BoomTile/', 'just'→'only', 'with'→'at'.",
+      "correction": "Megaboom: 20k routing congestion DRCs with just 0.24 placement density"
+    },
+    {
+      "severity": "minor",
+      "field": "prior_state",
+      "draft_claim": "BoomTile (Megaboom-derived) design",
+      "evidence": "The thread says the design is 'related to megaboom' (jeffng-or, Nov 1) and the issue title names 'Megaboom,' but no explicit derivation ('Megaboom-derived') relationship is stated.",
+      "correction": "BoomTile design (related to megaboom) — derivation is inferred, not stated."
+    },
+    {
+      "severity": "minor",
+      "field": "candidates_considered",
+      "draft_claim": "macro-placement improvements (issue #5971)",
+      "evidence": "Issue #5971 is described in the thread as tracking a 'looping path' problem during global routing — a GRT routing-path algorithm issue, not a macro-placement issue. The thread explicitly distinguishes this from placement.",
+      "correction": "GRT routing-path looping around the macro (issue #5971) — this is a routing algorithm issue, not a macro-placement issue."
+    },
+    {
+      "severity": "minor",
+      "field": "confidence",
+      "draft_claim": 0.8,
+      "evidence": "With the misattribution (critical), the misrepresented iteration-count finding (moderate), the unconfirmed closure status (moderate), and the missing post-fix DRC count, 0.8 is too high.",
+      "correction": "0.55 — pending attribution correction and fix-merge confirmation."
+    },
+    {
+      "severity": "minor",
+      "field": "missing_contributor",
+      "draft_claim": "[not mentioned]",
+      "evidence": "oharboe (Øyvind Harboe, GitHub user 2798822) did substantial work: independently confirming the issue, testing 30 iterations (answering maliberty's question with 'No'), creating the `make global_place_issue` reproduction target, and providing a tarball. jeffng-or's Nov 1 comment explicitly thanks @oharboe for confirmation. The episode absorbs all of this without attribution.",
+      "correction": "Add oharboe as a key contributor: independent confirmation of the issue, iteration-count testing, reproduction infrastructure."
+    }
+  ],
+  "corrected_fields": {
+    "title": "Megaboom: 20k routing congestion DRCs with just 0.24 placement density",
+    "chosen_intervention": "Per jeffng-or (Nov 1, 2024): 'we could finish GRT by changing the routing layer adjustments from 0.45 to 0.2... We also changed the number of congestion iterations to 35 to complete BoomTile.'",
+    "hypothesis": "The GRT routing-layer adjustment of 0.45 (derived from other asap7 designs) is too aggressive for this design; 30 iterations at 0.45 confirmed insufficient (oharboe test, Oct 31). The combined fix used 0.2 layer adjustment with 35 iterations; individual contribution of each change is unknown. A separate suspected cause is a global-route path 'looping around the macro' (tracked in issue #5971).",
+    "observation": "20k routing congestion DRCs while placement density is only 0.24. Congestion heatmap shows a large region at the top of the die. Reported via `run-me-BoomTile-asap7-base.sh gui`.",
+    "direct_quote": {
+      "text": "we could finish GRT by changing the routing layer adjustments from 0.45 to 0.2.",
+      "by": "jeffng-or",
+      "date": "2024-11-01",
+      "locator": "https://github.com/The-OpenROAD-Project/OpenROAD/issues/6066"
+    },
+    "gaps": [
+      "No measured post-fix DRC count or runtime is reported.",
+      "The issue was marked stale on 2026-05-25; whether it was subsequently closed is not confirmed. No PR link for the fix was provided.",
+      "The macro-loop root cause (GRT routing-path looping, not macro placement) is tracked separately in #5971 and was not resolved here.",
+      "The ORFS variable → OR command cross-linking is discussed by eder-matheus (Nov 15) as a documentation improvement; the layer-adjustment mechanism itself is explained in-thread (higher value = more resource reduction = stricter constraint)."
+    ],
+    "confidence": 0.55
+  }
+}
+```

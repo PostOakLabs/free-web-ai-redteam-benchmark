@@ -1,0 +1,118 @@
+[
+  {
+    "case_name": "Clean case — no tolerance violations",
+    "fees": [
+      { "name": "Recording fee (county)", "bucket": "zero_tolerance", "le_amount": 125, "cd_amount": 125 },
+      { "name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 1800, "cd_amount": 1800 },
+      { "name": "Appraisal", "bucket": "ten_pct_aggregate", "le_amount": 450, "cd_amount": 475 },
+      { "name": "Credit report", "bucket": "ten_pct_aggregate", "le_amount": 50, "cd_amount": 45 },
+      { "name": "Loan origination fee", "bucket": "ten_pct_aggregate", "le_amount": 800, "cd_amount": 800 },
+      { "name": "Underwriting fee", "bucket": "ten_pct_aggregate", "le_amount": 150, "cd_amount": 140 },
+      { "name": "Prepaid interest (14 days)", "bucket": "no_limit", "le_amount": 233, "cd_amount": 260 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Zero-tolerance bucket: compare LE to CD per fee", "calculation": "Recording 125=125 ✓ | Transfer tax 1800=1800 ✓", "result": "No zero-tolerance violations" },
+      { "step": 2, "description": "10% bucket: sum LE amounts", "calculation": "450+50+800+150", "result": "ΣLE = 1450" },
+      { "step": 3, "description": "10% bucket: sum CD amounts", "calculation": "475+45+800+140", "result": "ΣCD = 1460" },
+      { "step": 4, "description": "10% threshold = ΣLE × 1.10", "calculation": "1450 × 1.10", "result": "1595.00" },
+      { "step": 5, "description": "Aggregate comparison: ΣCD vs threshold", "calculation": "1460 ≤ 1595", "result": "PASS — no violation" },
+      { "step": 6, "description": "No-limit bucket: no tolerance applied", "calculation": "233 → 260", "result": "Document difference; no cure required" }
+    ],
+    "violations": [],
+    "clause_basis": "Zero-tolerance: §1026.19(e)(3)(i); 10% aggregate: §1026.19(e)(3)(ii); no limit: §1026.19(e)(3)(iii)",
+    "weakest_point": "Exact bucket assignments for some fees (e.g., flood certification) can vary by lender implementation; I have used the majority interpretation."
+  },
+  {
+    "case_name": "Zero-tolerance violation — recording fee increased",
+    "fees": [
+      { "name": "Recording fee (county)", "bucket": "zero_tolerance", "le_amount": 125, "cd_amount": 200 },
+      { "name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 1800, "cd_amount": 1800 },
+      { "name": "Appraisal", "bucket": "ten_pct_aggregate", "le_amount": 450, "cd_amount": 450 },
+      { "name": "Credit report", "bucket": "ten_pct_aggregate", "le_amount": 50, "cd_amount": 50 },
+      { "name": "Loan origination fee", "bucket": "ten_pct_aggregate", "le_amount": 800, "cd_amount": 800 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Zero-tolerance check: recording fee", "calculation": "CD 200 ≠ LE 125", "result": "VIOLATION" },
+      { "step": 2, "description": "Cure amount = CD − LE (per fee)", "calculation": "200 − 125", "result": "Cure = $75.00" },
+      { "step": 3, "description": "10% bucket sum LE", "calculation": "450+50+800", "result": "ΣLE = 1300" },
+      { "step": 4, "description": "10% bucket sum CD", "calculation": "450+50+800", "result": "ΣCD = 1300" },
+      { "step": 5, "description": "10% threshold", "calculation": "1300 × 1.10", "result": "1430; CD 1300 ≤ 1430 — PASS" }
+    ],
+    "violations": [
+      { "bucket": "zero_tolerance", "fee": "Recording fee", "cure_amount": 75.00 }
+    ],
+    "clause_basis": "§1026.19(e)(3)(i): government recording charges are in the zero-tolerance bucket; cure = CD − LE for any overage",
+    "weakest_point": "Some lenders may categorize ancillary county fees as ten-pct-aggregate rather than zero-tolerance; the recording fee specifically is the clearest zero-tolerance assignment."
+  },
+  {
+    "case_name": "Mixed direction in 10% bucket — aggregate test PASSES despite two individual increases",
+    "fees": [
+      { "name": "Recording fee", "bucket": "zero_tolerance", "le_amount": 125, "cd_amount": 125 },
+      { "name": "Appraisal", "bucket": "ten_pct_aggregate", "le_amount": 450, "cd_amount": 550 },
+      { "name": "Credit report", "bucket": "ten_pct_aggregate", "le_amount": 50, "cd_amount": 25 },
+      { "name": "Loan origination fee", "bucket": "ten_pct_aggregate", "le_amount": 800, "cd_amount": 600 },
+      { "name": "Processing fee", "bucket": "ten_pct_aggregate", "le_amount": 100, "cd_amount": 150 },
+      { "name": "Underwriting fee", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 200 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Zero-tolerance: recording fee — no change", "calculation": "125=125 ✓", "result": "PASS" },
+      { "step": 2, "description": "10% bucket ΣLE", "calculation": "450+50+800+100+200", "result": "ΣLE = 1600" },
+      { "step": 3, "description": "10% bucket ΣCD", "calculation": "550+25+600+150+200", "result": "ΣCD = 1525" },
+      { "step": 4, "description": "KEY: The 10% test is ΣCD vs (ΣLE × 1.10), NOT sum of individual increases", "calculation": "Note: appraisal +$100 and processing +$50 increase; credit report −$25 and origination −$200 decrease. Net change = −$75.", "result": "Critical distinction — two fees went UP, yet the aggregate went DOWN" },
+      { "step": 5, "description": "10% threshold", "calculation": "1600 × 1.10", "result": "1760" },
+      { "step": 6, "description": "Aggregate comparison", "calculation": "1525 ≤ 1760", "result": "PASS — cure = $0 even though two fees individually increased" }
+    ],
+    "violations": [],
+    "clause_basis": "§1026.19(e)(3)(ii): the test compares aggregate CD to 10% above aggregate LE; this case illustrates that per-fee increases in a mixed-direction scenario do NOT trigger a cure if the aggregate stays below the threshold",
+    "weakest_point": "This mixed-direction scenario is precisely where most implementation errors occur — some systems compute Σ(increases) rather than ΣCD vs (ΣLE×1.10) and falsely flag a cure. The correct test is aggregate-vs-aggregate."
+  },
+  {
+    "case_name": "Mixed direction in 10% bucket — aggregate test FAILS; cure is not the sum of increases",
+    "fees": [
+      { "name": "Transfer tax", "bucket": "zero_tolerance", "le_amount": 1800, "cd_amount": 1800 },
+      { "name": "Appraisal", "bucket": "ten_pct_aggregate", "le_amount": 450, "cd_amount": 900 },
+      { "name": "Credit report", "bucket": "ten_pct_aggregate", "le_amount": 50, "cd_amount": 20 },
+      { "name": "Loan origination fee", "bucket": "ten_pct_aggregate", "le_amount": 800, "cd_amount": 900 },
+      { "name": "Processing fee", "bucket": "ten_pct_aggregate", "le_amount": 100, "cd_amount": 200 },
+      { "name": "Underwriting fee", "bucket": "ten_pct_aggregate", "le_amount": 200, "cd_amount": 200 }
+    ],
+    "computation": [
+      { "step": 1, "description": "10% bucket ΣLE", "calculation": "450+50+800+100+200", "result": "ΣLE = 1600" },
+      { "step": 2, "description": "10% bucket ΣCD", "calculation": "900+20+900+200+200", "result": "ΣCD = 2220" },
+      { "step": 3, "description": "10% threshold = ΣLE × 1.10", "calculation": "1600 × 1.10", "result": "1760" },
+      { "step": 4, "description": "Aggregate comparison", "calculation": "2220 > 1760", "result": "VIOLATION" },
+      { "step": 5, "description": "Wrong method: sum of increases only", "calculation": "+450+100+100 = $650 (ignores the $30 decrease and the $100 origination increase)", "result": "Wrong cure = $650 — this is the common error" },
+      { "step": 6, "description": "Correct cure: ΣCD − threshold", "calculation": "2220 − 1760", "result": "Cure = $460" },
+      { "step": 7, "description": "Verify: LE 1600 + cure 460 = CD 2060; 2060 ≤ threshold 2220? No — cure must bring CD ≤ threshold", "calculation": "Verify: 2220 − 460 = 1760 = threshold ✓", "result": "Cure of $460 brings CD exactly to the 10% threshold" }
+    ],
+    "violations": [
+      { "bucket": "ten_pct_aggregate", "fee": "Aggregate overage", "cure_amount": 460.00 }
+    ],
+    "clause_basis": "§1026.19(e)(3)(ii): cure = ΣCD − (ΣLE × 1.10). This case exposes the wrong approach: computing cure as the sum of individual fee increases ($450+$100+$100=$650) ignores decreases and overstates the cure. The correct cure ($460) reflects the aggregate-vs-threshold methodology.",
+    "weakest_point": "The exact fee categorization for processing and underwriting fees can vary (some lenders place them in zero-tolerance if paid to affiliates); this example assumes the standard third-party / non-affiliate assignment."
+  },
+  {
+    "case_name": "No-limit bucket increase — no cure; zero-tolerance also violated",
+    "fees": [
+      { "name": "Recording fee", "bucket": "zero_tolerance", "le_amount": 125, "cd_amount": 125 },
+      { "name": "Owner's title insurance", "bucket": "no_limit", "le_amount": 900, "cd_amount": 1400 },
+      { "name": "Lender's title insurance", "bucket": "ten_pct_aggregate", "le_amount": 400, "cd_amount": 400 },
+      { "name": "Appraisal", "bucket": "ten_pct_aggregate", "le_amount": 450, "cd_amount": 450 },
+      { "name": "Credit report", "bucket": "ten_pct_aggregate", "le_amount": 50, "cd_amount": 50 },
+      { "name": "Prepaid interest", "bucket": "no_limit", "le_amount": 350, "cd_amount": 410 },
+      { "name": "Homeowner's insurance (escrow)", "bucket": "no_limit", "le_amount": 1200, "cd_amount": 1400 }
+    ],
+    "computation": [
+      { "step": 1, "description": "Zero-tolerance: recording fee — no change", "calculation": "125 = 125 ✓", "result": "PASS" },
+      { "step": 2, "description": "10% bucket ΣLE", "calculation": "400+450+50", "result": "ΣLE = 900" },
+      { "step": 3, "description": "10% bucket ΣCD", "calculation": "400+450+50", "result": "ΣCD = 900" },
+      { "step": 4, "description": "10% threshold", "calculation": "900 × 1.10", "result": "990; CD 900 ≤ 990 — PASS" },
+      { "step": 5, "description": "No-limit bucket: owner's title insurance", "calculation": "CD 1400 vs LE 900; diff = +500", "result": "Document difference; no tolerance applied; no cure" },
+      { "step": 6, "description": "No-limit bucket: prepaid interest", "calculation": "CD 410 vs LE 350; diff = +60", "result": "Document difference; no cure" },
+      { "step": 7, "description": "No-limit bucket: homeowner's insurance", "calculation": "CD 1400 vs LE 1200; diff = +200", "result": "Document difference; no cure" }
+    ],
+    "violations": [],
+    "clause_basis": "§1026.19(e)(3)(iii): prepaid interest, escrow items, and owner's title insurance have no tolerance limit — the CD amount is compared to LE only for disclosure purposes; no cure is required for increases",
+    "weakest_point": "Owner's title insurance placement in the no-limit bucket is contested — some lenders and closing agents treat it as ten-pct-aggregate, and depending on state disclosure requirements its bucket assignment may differ."
+  }
+]

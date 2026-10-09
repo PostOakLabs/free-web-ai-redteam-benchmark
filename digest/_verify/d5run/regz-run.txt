@@ -1,0 +1,25 @@
+TRACK A — regz exact recomputation (C1-REGZ-FACTOR)
+  models: 16   gradable: 15   not gradable: 1
+
+  model             t1/4  t2/4  t3f  t3bp  score/9  parse
+  chatgpt              4     4    Y     Y        9  clean+trailing-content
+  gemini               4     4    Y     Y        9  clean+trailing-content
+  glm 5.3 flash        4     4    Y     Y        9  clean+fence-close+fenced
+  grok                 4     4    Y     Y        9  clean
+  kimi                 4     4    Y     Y        9  clean
+  longcat              4     4    Y     Y        9  clean
+  meta                 4     4    Y     Y        9  clean
+  mimo                 4     4    Y     Y        9  clean+fence-close+fenced
+  minara               4     4    Y     Y        9  clean
+  qwen                 4     4    Y     Y        9  clean
+  sonnet               4     4    Y     Y        9  clean+fenced+trailing-content
+  yuanbao              4     4    Y     Y        9  raw-newline-escape
+  deepseek             4     4    n     Y        8  clean
+  minimax 2.7          1     4    n     Y        5  clean+fence-close+fenced
+  mistral              1     1    n     n        2  raw-newline-escape
+  solar                —     —    —     —NOT GRADABLE  PROSE-NOT-JSON
+
+  exact on all 9 checked values: 12 — ['chatgpt', 'gemini', 'glm 5.3 flash', 'grok', 'kimi', 'longcat', 'meta', 'mimo', 'minara', 'qwen', 'sonnet', 'yuanbao']
+
+  NOTE: this track is pure arithmetic. No overlap floor, no tunable, no
+  paraphrase tier — a value is present at 6dp or it is not.

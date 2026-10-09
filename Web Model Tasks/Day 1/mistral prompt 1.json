@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Late-stage congestion hotspot resolved via localized pin optimization",
+    "design_context": "7nm node, 1.2M placeable instances, 95 macros, 3 clock domains, commercial P&R",
+    "prior_state": {"WNS_ns": -0.32, "TNS_ps": -1800, "congestion_overflow_pct": 14.5, "utilization_pct": 81.2, "DRC_count": 0},
+    "observation": "Congestion overflow of 14.5% in top-left quadrant, 3 metal layers showing >10% overflow, no DRC violations but routing estimated to fail at 12% overflow threshold", 
+    "severity": "HIGH",
+    "hypothesis": "Macro M17 placement created a routing channel bottleneck that global placement couldn't resolve without violating timing",
+    "candidates_considered": [
+      {"action": "Re-run global placement with congestion-aware cost weight increased from 0.3 to 0.8", "rejected_because": "Adds 2 days to schedule with no guarantee the hotspot will resolve given macro positions are fixed"},
+      {"action": "Insert congestion-guided buffers in hotspot region", "rejected_because": "Increases area by 0.4% and degrades IR drop by 3mV, risking hold violations on 12 identified paths"},
+      {"action": "Swap macros M17 and M23 to open routing channel", "rejected_because": "Requires re-running timing for both macro domains (estimated 1.2 days CPU) and risks breaking existing timing closure"}
+    ],
+    "chosen_intervention": "Local pin access optimization on 18 cells in hotspot + 8% halo expansion around M17, followed by incremental detailed routing",
+    "post_state": {"WNS_ns": -0.28, "TNS_ps": -900, "congestion_overflow_pct": 1.2, "utilization_pct": 81.5, "DRC_count": 0},
+    "expert_assessment": "Correct call for schedule constraints. Lesson: congestion hotspots near macros often yield to local pin access changes before resorting to global re-placement. Does not transfer to blocks with >90% utilization where local fixes are insufficient.",
+    "confidence": 0.88,
+    "failure_class": "FAIL_CONGESTION",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact congestion overflow reduction from pin access optimization alone is uncertain without a real tool run"
+  },
+  {
+    "title": "Clock skew signature distinguishes physical problem from constraint issue",
+    "design_context": "28nm node, 800K placeable instances, 60 macros, 2 clock domains, commercial P&R",
+    "prior_state": {"WNS_ns": -0.35, "TNS_ps": -2000, "DRC_count": 0},
+    "observation": "8200 timing paths failing by 20-45ps each, all sharing clock domain CLK_A, slack distribution tightly clustered (std dev 8ps), no common endpoint logic",
+    "severity": "CRITICAL",
+    "hypothesis": "Excessive clock skew on CLK_A network due to unbalanced buffering, creating systematic timing failure across the domain",
+    "candidates_considered": [
+      {"action": "Relax setup constraint on CLK_A by 50ps", "rejected_because": "Would mask real timing issues in paths not affected by skew, risking silicon failure in other domains"},
+      {"action": "Upsize all drivers on failing paths", "rejected_because": "Increases area by 0.6% and power by 2.1%, plus creates new congestion in already-tight regions"},
+      {"action": "Re-synthesize entire CLK_A domain logic", "rejected_because": "Requires 3 days of runtime and could introduce new timing violations while not addressing root cause"}
+    ],
+    "chosen_intervention": "Re-run clock tree synthesis for CLK_A with skew target reduced from 50ps to 25ps, followed by incremental timing optimization on top 100 failing paths",
+    "post_state": {"WNS_ns": -0.05, "TNS_ps": -500, "DRC_count": 0},
+    "expert_assessment": "Excellent diagnosis from signature. The tight slack clustering was the giveaway for clock network issue. Lesson: always plot slack histogram before diving into logic fixes. Would not have worked if the issue was actually a constraint problem.",
+    "confidence": 0.92,
+    "failure_class": "FAIL_TIMING",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The exact skew reduction achievable without area increase is tool-dependent"
+  },
+  {
+    "title": "Async block boundary budget derived from measured clock uncertainty",
+    "design_context": "7nm node, Block Alpha: 1.5M instances, Block Beta: 0.8M instances, async boundary, commercial P&R",
+    "prior_state": {"WNS_ns": -0.25, "TNS_ps": -1200, "boundary_path_count": 210},
+    "observation": "210 paths crossing Alpha-Beta boundary failing by 80-200ps, all failures occur in setup check from Alpha to Beta",
+    "severity": "HIGH",
+    "hypothesis": "Missing or incorrectly derived timing budget at async boundary; current SDC assumes zero skew which is unrealistic for this clock network topology",
+    "candidates_considered": [
+      {"action": "Set fixed budget of 10% of Beta clock period (500ps) for all boundary paths", "rejected_because": "Overly conservative for most paths, would cause unnecessary optimization effort and area increase estimated at 1.2%"},
+      {"action": "Mark all boundary paths as false paths", "rejected_because": "Would break functional timing for real synchronous paths and cause silicon failure on boundary registers"},
+      {"action": "Use clock latency difference only as budget", "rejected_because": "Ignores clock uncertainty and jitter, which account for ~60ps of the observed failures"}
+    ],
+    "chosen_intervention": "Derived budget = measured_clock_skew(120ps) + max_uncertainty(40ps) + 10% margin(16ps) = 176ps; applied as set_clock_uncertainty -setup 176ps on boundary",
+    "post_state": {"WNS_ns": -0.07, "TNS_ps": -300, "boundary_path_count": 210},
+    "expert_assessment": "Textbook budget derivation. The key was measuring actual clock skew rather than relying on theoretical max. Lesson: always verify clock network metrics before deriving boundary budgets. Method fails if clock networks are not yet stable.",
+    "confidence": 0.85,
+    "failure_class": "SDC_BUDGET",
+    "source_basis": "composite-of-common-practice",
+    "weakest_point": "The margin percentage (10%) is arbitrary and tool/flow-dependent"
+  }
+]
