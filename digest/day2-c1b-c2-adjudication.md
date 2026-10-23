@@ -669,6 +669,6 @@ every OFAC case whose verdict turns on the attribution question — all pending 
    Together with the MiCA own-funds figure and the risc0 receipt layout, that is **three retrievals**
    — and they gate the harvest, not the grading.
 
-`TODO(alice): §6 is coverage-and-convergence only. No risc0 source or real receipt was consulted;
+`TODO(expert): §6 is coverage-and-convergence only. No risc0 source or real receipt was consulted;
 the two strongest files (meta, grok) are nominated for verification, not accepted. Do not treat any
 receipt field-role claim in this document as adjudicated.`

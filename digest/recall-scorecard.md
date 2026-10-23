@@ -389,7 +389,7 @@ pitfalls), I (review checklists) and K (node deltas).
 | Model | Why |
 |---|---|
 | **meta** | 25/25 across all five papers. Exact numbers, accurate quotation, full coverage. First call for any extraction or recall task. |
-| **grok** | 23/25, zero inversions, and the single best recall in the collection — POWER4's *"global slew rate limit equal to one third of the cycle time"* and the late-binding low-Vt swap, both verbatim, on the paper closest to Alice's domain. |
+| **grok** | 23/25, zero inversions, and the single best recall in the collection — POWER4's *"global slew rate limit equal to one third of the cycle time"* and the late-binding low-Vt swap, both verbatim, on the paper closest to the expert's domain. |
 | **yuanbao** | 22/24, quotes distinctive phrasing, reproduces exact cache and coherence configurations. One inversion (Alpha register counts) which its own honesty field isolated as its only non-confident entry. |
 | **sonnet, qwen** | Perfect precision, low volume, systematic under-claiming. Use them as **verifiers**, not as primary recall — ask them to check another model's entries rather than to generate. |
 
@@ -447,5 +447,5 @@ of 13 models, retrieved by none), the OFAC indirect-attribution rule (three live
 threshold case that flips between them), and the risc0 Groth16 receipt layout (17 single-source field
 names).
 
-`TODO(alice): the recall tier above is graded against paper text by an agent, not by a domain expert.
+`TODO(expert): the recall tier above is graded against paper text by an agent, not by a domain expert.
 The claim being made is "this model said what the paper says", not "this model said something true".`

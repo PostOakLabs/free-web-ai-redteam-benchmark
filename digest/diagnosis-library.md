@@ -4,7 +4,7 @@
 2026-08-31 under the free-model collection pipeline. Per the integrity rule in
 `../MODEL-TASKS-MASTER.md`, nothing here enters the corpus as an episode; if any of it is used it
 enters as `provenance: synthetic-fixture` with run marker `free-model-harvest/F/2026-08-31`. It
-graduates only through Alice's rewriting or a reproduced flow run.
+graduates only through the expert's rewriting or a reproduced flow run.
 
 **Corpus:** 11 F-files, 9 models producing well-formed 6-class objects
 (chatgpt, deepseek, gemini, grok, meta, minimax 2.7, mistral, qwen, yuanbao), plus 20 salvaged
@@ -20,7 +20,7 @@ orphan cause-objects from a truncated `minimax m3 f.json`, plus one prose-only r
 - *Traps* — the `classic_trap` field, best phrasings kept verbatim.
 - *`disputed:`* — marks substantive disagreement between models. Disagreements are findings.
 
-Every class ends with `TODO(alice): review`.
+Every class ends with `TODO(expert): review`.
 
 ---
 
@@ -96,7 +96,7 @@ highest prior in a macro-dense block"). *Cheapest-reversible-experiment-first* (
 "start with the cheapest spatial correlations and reversible local experiments, then move upstream
 to macro changes only after proving the hotspot is not simply a local resource imbalance"). These
 give different first actions when both a macro channel and a density peak are present. Worth
-putting to Alice as a direct question — it is the kind of ordering judgment that separates a
+putting to the expert as a direct question — it is the kind of ordering judgment that separates a
 practitioner's triage from a checklist.
 
 `disputed:` **Cost of the fix.** deepseek/gemini/qwen imply a good congestion fix also improves
@@ -104,7 +104,7 @@ timing; chatgpt/meta/yuanbao state or imply it costs timing. See `episode-draft-
 finding 1 — the episode data shows this flipped almost universally once the prompt told models a
 congestion fix usually costs timing, which means neither position here is independent evidence.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -178,7 +178,7 @@ mismatch, not cell speed. `models: meta`
 gemini and minimax 2.7 read a uniform wall as *constraint* first; meta and yuanbao read the same
 shape as *OCV/derate/IR pessimism* first. Both are internally consistent — the discriminator neither
 side states is whether the wall's magnitude equals a clock-period fraction (constraint) or scales
-with path length/derate (pessimism). **This gap is a genuine content hole worth asking Alice to
+with path length/derate (pessimism). **This gap is a genuine content hole worth asking the expert to
 fill; it is the single most useful missing check in this class.**
 
 `disputed:` **FPGA contamination.** yuanbao lists "SLR crossing in multi-die (SSI) devices" as a
@@ -186,7 +186,7 @@ setup cause. That is a Xilinx FPGA concept, not ASIC physical design. Excluded f
 above; recorded here because it marks a model whose ASIC/FPGA boundary is porous (see
 `MISSED.md` §4).
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -247,7 +247,7 @@ hold uncertainty as a smaller *positive* subset of the setup number (local OCV o
 jitter is common-mode). deepseek's account is muddled in its own text and is the outlier. Flagged
 rather than resolved — it is a convention question a practitioner settles in one sentence.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -310,7 +310,7 @@ turns on that distinction; chatgpt frames it as an experiment (does the hotspot 
 sequence. The chatgpt framing is the one to keep — it is the only version that yields a decision
 rather than an ordering.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -373,9 +373,9 @@ rather than an ordering.
 `disputed:` **Is CTS failure primarily a CTS problem?** yuanbao and minimax 2.7 argue the class is
 mostly mislabeled placement/constraint failure and the first move is to roll back rather than tune;
 chatgpt/gemini/grok treat it as a genuine CTS-parameter class. This is a framing disagreement with
-real consequences for a triage UI's first question, and it is worth Alice's ruling.
+real consequences for a triage UI's first question, and it is worth the expert's ruling.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -437,10 +437,10 @@ real consequences for a triage UI's first question, and it is worth Alice's ruli
 `disputed:` **First filter — antenna or congestion?** deepseek orders antenna first (cheapest to fix,
 often the bulk); grok/yuanbao/chatgpt order congestion-overlay first (highest prior for a
 non-converging route). Both are defensible and the choice depends on whether the route converged at
-all — a distinction none of the models make explicit. Worth adding as a precondition when Alice
+all — a distinction none of the models make explicit. Worth adding as a precondition when the expert
 reviews.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 

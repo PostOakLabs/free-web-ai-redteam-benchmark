@@ -189,5 +189,5 @@ input/computation mismatch, not an arithmetic failure.
   The vectors test *arithmetic*, and the arithmetic is now checked; they do not test *the regulation*,
   and nothing here has.
 
-`TODO(alice): the SPFM denominator convention (include safe faults? include detected MPF?) determines
+`TODO(expert): the SPFM denominator convention (include safe faults? include detected MPF?) determines
 the expected value of 30-plus fixtures. It is one sentence to settle and it blocks the suite.`

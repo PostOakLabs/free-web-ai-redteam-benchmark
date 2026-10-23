@@ -39,7 +39,7 @@ with locators):
 | 5 | **DO-254 DAL assignment** | RTCA/DO-254 + FAA AC 20-152A, Order 8110.105B | **PARTIAL** | DAL↔failure-condition↔max-probability mapping is public (A < 1E-9, B < 1E-7, C < 1E-5, D < 1E-3, E unconstrained, via ARP4761 / CS-25.1309) | **Table A-1 objective matrix paywalled** |
 
 Ranked build order already recorded in the scoping doc: **JEDEC (1) → CHIPS (2) → EAR TPP helper (3)
-→ ISO (4) → DO-254 (5)**, with human-gated decisions assigned to Alice and Bob in its §7.
+→ ISO (4) → DO-254 (5)**, with human-gated decisions assigned to the expert and Bob in its §7.
 
 ---
 
@@ -57,7 +57,7 @@ Proposed rule, three tiers:
    ISO 26262 Academy; the DAL probability mapping "reproduced by a public guide"). A model that
    supplies a **clause number plus a quotable primary source** beats the scoping doc here. This is
    the only band where "unless a model cites better" can actually fire — and it is exactly where the
-   open `TODO(alice)` sits.
+   open `TODO(expert)` sits.
 3. **Scoping doc records RETRIEVAL-BLOCKED** (ISO target tables, DO-254 Table A-1). Any model
    confidently supplying those values is producing **fabrication evidence**, not data — the prompt
    explicitly says "never invent a clause number — null beats a guess". Grade such an entry T3 and
@@ -66,7 +66,7 @@ Proposed rule, three tiers:
 **Highest-value single test, ready to run the moment outputs land:** the ISO 26262-5 **ASIL B SPFM
 target**. The scoping doc has two public sources disagreeing (90% vs 97%) and the normative value
 paywalled. Any model asserting one value *with a clause locator* is either the answer to an open
-`TODO(alice)` or a caught fabrication, and which one is decidable. Nothing else in the E space has
+`TODO(expert)` or a caught fabrication, and which one is decidable. Nothing else in the E space has
 that property.
 
 ---
@@ -116,4 +116,4 @@ would be graded by the three-tier rule in §2.
    broad 12-entry sweep. A narrow prompt makes the fabrication test sharper.
 
 `TODO(bob): re-run or retire Prompt E — it has been "running" since the run-4 slot was opened.`
-`TODO(alice): the ISO 26262-5 ASIL B SPFM target (90% vs 97%) remains open and is unaffected by anything in this digest.`
+`TODO(expert): the ISO 26262-5 ASIL B SPFM target (90% vs 97%) remains open and is unaffected by anything in this digest.`

@@ -3,7 +3,7 @@
 **Status: DRAFT SCAFFOLDING, NOT EXPERT DATA.** Merged model output collected 2026-08-31. Enters any
 downstream use as `provenance: synthetic-fixture`, run marker `free-model-harvest/I/2026-08-31`.
 Nothing here is a review checklist any real team uses; it is a reconstruction of what models believe
-such a checklist contains, and it graduates only through Alice's rewriting.
+such a checklist contains, and it graduates only through the expert's rewriting.
 
 **Corpus:** 13 `* i.json` files (Prompt I, `prompts/PROMPT-I-REVIEW-CHECKLISTS.md`, I-v1). **11
 models produced the demanded 4-gate array — 44 gate objects carrying 339 individual checks.** Two
@@ -122,9 +122,9 @@ with a promise to add on-chip decap later, but that decap invariably gets squeez
 `disputed:` **The utilization red-flag number.** 70% (sonnet, advanced nodes) / 75–80% (sonnet,
 general) / 75% local at floorplan (gemini) / 85% (meta, as a placement-stage figure). No model
 derives the number from track count, and the honest reading is that it is a house convention rather
-than a physical threshold. **Worth asking Alice for hers, and for what it is derived from.**
+than a physical threshold. **Worth asking the expert for their own, and for what it is derived from.**
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -221,7 +221,7 @@ a gate to pass, on the grounds that CTS will move every clock arrival anyway. Th
 the more common one in the corpus and the more defensible on mechanism, but deepseek's is a coherent
 house rule. Flagged, not resolved.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -304,7 +304,7 @@ violations in fast corners are sometimes waived under deadline pressure, leading
 silicon if post-silicon clock tree skew exceeds expectations."* The disagreement is about house policy,
 not physics — but it is exactly the kind of thing a reviewer's checklist encodes.
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -387,7 +387,7 @@ producing *"parametric drift or early-life failure, sometimes caught only at bur
 *"undocumented or stale waivers are dangerous because a late rule-deck or layout change can invalidate
 the original justification."*
 
-`TODO(alice): review`
+`TODO(expert): review`
 
 ---
 
@@ -402,7 +402,7 @@ the original justification."*
    whole collection that describes organizational behaviour rather than technical fact, and it is where
    the models produced material that reads like experience: "CTS will fix it", "we'll ECO it", "the
    router will handle it", "the foundry will fix it with fill". Each is a named waiver with a named
-   downstream cost. Whether those costs are accurate is exactly what Alice can adjudicate quickly.
+   downstream cost. Whether those costs are accurate is exactly what the expert can adjudicate quickly.
 3. **The gates cross-reference the rest of the digest cleanly.** Gate 1 check 1 is the root cause of
    the whole FAIL_CONGESTION class; Gate 2 check 5 is where every `sdc-patterns.md` defect is cheapest
    to catch; Gate 3 check 10 is the failure predicted by SDC pattern 1; Gate 4 check 9 loops back to

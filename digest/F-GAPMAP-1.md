@@ -44,7 +44,7 @@ RE-ELICIT, 0 PROMOTABLE.**
   frequencies ❌; trap ✅ (5 traps, chatgpt sizing-everything best);
   era ◐ (one threshold with 28nm/7nm split — meta PBA/derate). Content
   hole (merge's own finding): wall-means-constraint vs wall-means-derate
-  discriminator missing — Alice question.
+  discriminator missing — an expert question.
 - **S3 hold-after-CTS:** shapes ✅ (6 shapes, all short-path/clock-signature
   reads); checks ✅◐ (10 causes); experiments ◐ (what-if delay insertion;
   CRPR re-run); frequencies ❌; trap ✅ (yuanbao "Hold fix belongs on the
@@ -60,7 +60,7 @@ RE-ELICIT, 0 PROMOTABLE.**
 - **S5 CTS-divergence:** shapes ✅ (7); checks ✅◐ (12 causes, richest
   table); experiments ◐; frequencies ❌; trap ✅ (yuanbao "80% of CTS
   failures are placement or constraint issues" — keep verbatim);
-  era ❌. Framing dispute (roll-back-first vs tune-knobs) is Alice's
+  era ❌. Framing dispute (roll-back-first vs tune-knobs) is the expert's
   ruling, not re-elicitation material.
 - **S8 antenna:** shapes ◐ (one DRC shape + cause 3 with chatgpt's
   layer-break test); checks ◐; experiments ❌ as standalone tree;
@@ -138,10 +138,10 @@ its model; classic_trap quoting the best phrasing per class with model.)
 Frequencies (no model was asked; counts are consensus, not recall);
 node-era deltas (three fragments do not make a practice map); ordering
 disputes (floorplan-first vs cheapest-first, antenna-vs-congestion
-precondition, CTS framing — practitioner rulings for Alice, and the most
+precondition, CTS framing — practitioner rulings for the expert, and the most
 valuable holes to re-elicit around); single-model thin claims (grok
 wirelength tail, gemini clock-power bloat, deepseek 200µm rule);
 porous-boundary material (yuanbao FPGA SLR — already excluded in merge,
-do not promote). Nothing above graduates without Alice's rewriting or a
+do not promote). Nothing above graduates without the expert's rewriting or a
 reproduced run — per the merge header, promotion-ready content would
 enter as `synthetic-fixture`, never as data.
