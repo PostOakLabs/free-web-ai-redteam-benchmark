@@ -52,7 +52,7 @@ holds five PDFs, covering the entire consensus five:
 | `Niagara-32way-multithreaded-SPARC-IEEEMicro-2005.pdf` | 126 KB | No |
 
 **Consequence for the pipeline.** The bottleneck the run-3 log identified — "source-text acquisition
-+ Alice's review time" — is now half resolved, and the half that resolved is the half an agent can
++ the expert's review time" — is now half resolved, and the half that resolved is the half an agent can
 act on. Prompt D's Task 2 (locator-cited extraction, `gaps` non-empty) has been waiting for source
 text since it was written; the source text is here. See `MISSED.md` §5.2.
 
@@ -248,7 +248,7 @@ rejected the file — see `MISSED.md` §1c):
 **Why this outranks most of the table.** It is (a) the only source any model cited *in support of a
 technical objection* rather than in answer to a source-hunting prompt, (b) on the exact node and exact
 subject matter of the flagship congestion episode, and (c) a complete published case study — the
-genre the project has been trying to find for five runs, in the ASIC-flow-level form Alice actually
+genre the project has been trying to find for five runs, in the ASIC-flow-level form the expert actually
 works in, rather than the processor-retrospective form the D1 genre map keeps returning.
 
 **Caveats before anyone gets excited.** The `utm_source=chatgpt.com` parameter on the URL shows the

@@ -5,7 +5,7 @@ nothing counts toward any corpus number. Everything enters downstream use as
 `provenance: synthetic-fixture` with run marker `free-model-harvest/A/2026-08-31`. The one
 exception the integrity rule allows — locator-cited extraction from a verified public source
 becoming a `retrospective`-candidate — applies to a **small named subset of the D2 recalls in §3**,
-and only pending Alice's technical review.
+and only pending the expert's technical review.
 
 **Contents.** §1 the 78 episode drafts with honesty labels, log tier and a KEEP/SALVAGE/DISCARD
 recommendation. §2 the cross-run findings that only appear when both runs are read together.
@@ -26,7 +26,7 @@ that carry more than three episodes each.
 
 **Recommendation key.**
 - **KEEP** (26) / **KEEP-WITH-CORRECTIONS** (2, E28/E64 — the two red-teamed drafts) — numerically self-consistent on spot-check, honest `weakest_point`, from a model
-  the logs graded T1 or an episode whose specific arithmetic survives recomputation. Worth Alice's
+  the logs graded T1 or an episode whose specific arithmetic survives recomputation. Worth the expert's
   reading time.
 - **SALVAGE** (41) — structure sound, content generic or unverified. The `candidates_considered`
   pairs remain useful (§4) even where the episode body is bland.
@@ -207,10 +207,10 @@ rather than graded on plausibility. Four further consensus-five PDFs are also pr
 producing a genre map instead (gemini — wrong task, 10 entries, folded into
 `source-candidates.md`), one prose refusal (mimo).
 
-### 3.1 Verified TRUE against primary text → `retrospective`-candidates pending Alice
+### 3.1 Verified TRUE against primary text → `retrospective`-candidates pending the expert
 
 These recalls match the paper closely enough to quote. Under the integrity rule's exception they may
-enter as `retrospective`-candidates **only after Alice's technical review**; the locator is given so
+enter as `retrospective`-candidates **only after the expert's technical review**; the locator is given so
 that review is cheap.
 
 | Claim | Models | Primary text (POWER4 microarch paper) |
@@ -285,7 +285,7 @@ recalls, not extractions, and that a `direct_quote` field would have caught it.
   unlike `confidence`.
 - **The single most valuable next action** is running the retired D2-v3 *extraction* schema (with
   `where_in_paper` locators and non-empty `gaps`) against the POWER4 circuit/physical-design paper
-  now on disk — it is the richer target and it is the one Alice's domain actually is.
+  now on disk — it is the richer target and it is the one the expert's domain actually is.
 
 
 
@@ -576,7 +576,7 @@ Convergent `missing_from_story` items, in order of how many models raised them:
 ### 5.8 Adjudication outcome for the episode bank
 
 - **E28 / E64 (opus): recommendation changed from KEEP to KEEP-WITH-CORRECTIONS.** The reasoning and
-  the constraint narrative stand; C1–C4 must be applied before the draft is put in front of Alice, so
+  the constraint narrative stand; C1–C4 must be applied before the draft is put in front of the expert, so
   that her review time is spent on judgment rather than on catching what 13 models already caught.
 - **No other episode was red-teamed.** The J run covers exactly one draft. The other 12 congestion
   episodes in the bank make structurally similar claims — several assert larger DRC collapses than
@@ -765,7 +765,7 @@ says *"20-stage misprediction pipeline"*), and **no 10 GHz target is stated** �
 third of the cycle time was set and enforced for all signals (local and global) across the whole
 chip."* Its *"selective, late-binding use of low-Vt devices"* is equally exact: *"desirable to use
 these low-Vt devices selectively… ground rules allowed swapping from normal Vt to low Vt at the last
-moment."* This is the paper closest to Alice's own domain, and grok recalled it at circuit-designer
+moment."* This is the paper closest to the expert's own domain, and grok recalled it at circuit-designer
 resolution.
 
 **N errors.** gemini's *"selective dynamic compound domino logic in execution datapaths"* — dynamic
@@ -903,7 +903,7 @@ runs: even where an episode's numbers are junk, a rejection that cites a concret
 area, risk, IR, downstream churn) is reusable as differential-diagnosis and annotation scaffolding.
 All 266 are reproduced below with their originating model and run, deduplicated only by exact
 repetition. Bland entries are retained deliberately — the density of *cost types* is part of what
-Alice would be judging.
+The expert would be judging.
 
 Counts by class: FAIL_CONGESTION 91, FAIL_TIMING 89, SDC_BUDGET 86.
 

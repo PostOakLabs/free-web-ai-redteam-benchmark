@@ -161,4 +161,4 @@ clause retrieval and measurement. This slice touches none of them. It becomes va
 human expert agrees to sit down — and on that day, having 44 pre-catalogued interviewer mistakes with
 their record symptoms is worth more than the hour it would take to write them from scratch.
 
-`TODO(alice/bob): unpark only when an interview is actually scheduled.`
+`TODO(expert/bob): unpark only when an interview is actually scheduled.`

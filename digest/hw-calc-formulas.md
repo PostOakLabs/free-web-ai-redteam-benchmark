@@ -127,7 +127,7 @@ models agreeing on 90% is *not* evidence: it is ten draws from the same secondar
 corpus has already demonstrated (twice, on POWER4 coherence) that multi-model agreement tracks a
 shared prior rather than truth.
 
-**Status: NEEDS-RETRIEVAL. The open `TODO(alice)` in the scoping doc stands unchanged.** Every other
+**Status: NEEDS-RETRIEVAL. The open `TODO(expert)` in the scoping doc stands unchanged.** Every other
 number in the table inherits the same status; none was independently verifiable here.
 
 **Clause locators:** most models returned `null` as instructed. Those that guessed offered
@@ -299,6 +299,6 @@ recapture** on an applicable transaction within 10 years. None was independently
    its T vectors, and deepseek's dimensionally-wrong PMHF that visibly collapses mid-example. Both are
    model-level, not incidental, and both are screenable.
 
-`TODO(alice): every NEEDS-RETRIEVAL above, and the PMHF form, need the primary text. The ASIL B SPFM
+`TODO(expert): every NEEDS-RETRIEVAL above, and the PMHF form, need the primary text. The ASIL B SPFM
 question (90% vs 97%) is unchanged from the scoping doc and is still the highest-value single
 retrieval in this space.`

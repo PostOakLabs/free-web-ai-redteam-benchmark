@@ -63,7 +63,7 @@ wire/via and that barely move with cell upsizing."* gemini names the specific un
 states *"R ∝ 1/width²"* (superlinear) against minimax m3's "sub-linear" — those cannot both hold.
 The majority account is the physically orthodox one and minimax m3's is the outlier, but the
 interesting claim is minimax 2.7's, because it is *specific, quantitative and falsifiable against any
-PDK's parasitic tables*. **Ask Alice to arbitrate 1 vs 2; treat 3 as probably wrong but note that its
+PDK's parasitic tables*. **Ask the expert to arbitrate 1 vs 2; treat 3 as probably wrong but note that its
 `what_breaks` — buffer-saturated paths where the remaining slack is variation, not load — describes a
 real situation regardless of whether its mechanism is right.**
 
@@ -197,7 +197,7 @@ target clock period."*
 
 These are not mutually exclusive, but they rank differently and the first two conflict with each
 other on whether the problem is *statistical* (variation, solved by averaging) or *deterministic*
-(trunk RC, solved by topology and shielding). **The cheap discriminator Alice could give in one
+(trunk RC, solved by topology and shielding). **The cheap discriminator the expert could give in one
 sentence: does the 7nm skew problem shrink when you reduce derate, or only when you change topology?**
 
 ⚠ **gemini's title says "Unstructured CTS Trees → H-Tree and Mesh"**, placing H-tree as the *modern*
@@ -358,7 +358,7 @@ systematic pattern?" — is the review-time expression of exactly this delta.
    track arithmetic (0.90), minimax m3's sub-linear BEOL resistance (0.90) against mistral's R ∝ 1/w²
    (0.98), mistral's independent-gate-control account of multi-Vt (0.93), and gemini's inverted
    H-tree/mesh ordering (0.94). Each is decidable in one sentence by anyone who has done the node.
-   **They are the highest-value questions to put to Alice from this slice, because each is cheap to
+   **They are the highest-value questions to put to the expert from this slice, because each is cheap to
    answer and each currently sits in the corpus at high confidence.**
 3. **`what_breaks` delivered what the prompt promised.** It is the field with the least
    model-to-model overlap and the most operational content — the half-track cell shift, the automatic
@@ -376,5 +376,5 @@ systematic pattern?" — is the review-time expression of exactly this delta.
 `mimo k.json` — sixth consecutive refusal-then-answer, same opening sentence. Its prose covers the
 same families and adds nothing unique. See `MISSED.md` §2.
 
-`TODO(alice): review — the four checkable errors in observation 2 first, then the two mechanism
+`TODO(expert): review — the four checkable errors in observation 2 first, then the two mechanism
 disputes in Families 1 and 4.`

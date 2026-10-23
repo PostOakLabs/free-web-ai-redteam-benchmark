@@ -84,7 +84,7 @@ only content-versus-target comparison.
    independently agree on an ASIL B SPFM target the public literature disputes. **Multi-model
    agreement tracks a shared prior, not truth** — three separate demonstrations now.
 9. **grok recalled POWER4's circuit constraints at circuit-designer resolution** — the one-third-cycle
-   global slew limit and the late-binding low-Vt swap, both verbatim, on the paper closest to Alice's
+   global slew limit and the late-binding low-Vt swap, both verbatim, on the paper closest to the expert's
    domain.
 10. **The 266 rejection-rationale pairs** — more than double the logged estimate, merged and grouped.
     The largest reusable artefact, and the one that survives whatever happens to the episode numbers.
@@ -118,7 +118,7 @@ only content-versus-target comparison.
    prompt — a retrieval task. Ten models agree on 90%; the scoping doc shows the public sources
    disagree and the normative value is paywalled. **Every S and T deliverable is blocked on this**, and
    no further model output can resolve it.
-2. **Pin the SPFM denominator convention.** One sentence from Alice decides the expected value of
+2. **Pin the SPFM denominator convention.** One sentence from the expert decides the expected value of
    30-plus fixtures. Three conventions are live in the corpus, all arithmetically self-consistent.
 3. **Back-port the P-v1 package to every factual prompt** — anti-reversal sentence, mandatory
    `weakest_point`, optional `provenance_note`. Evidence: 3 → 0 inversions, 91% field adoption on
@@ -166,6 +166,6 @@ data, nothing pretends to be, and no episode invented a chip, company or person.
    answered the wrong question is indistinguishable from a model that answered badly — and this
    corpus contains eight slices' worth of exactly that.
 
-The bottleneck is unchanged and correctly placed: **primary-text retrieval, and Alice's review time.**
+The bottleneck is unchanged and correctly placed: **primary-text retrieval, and the expert's review time.**
 Collection has not been the constraint for some time; it is now producing slices faster than anything
 records that they exist.

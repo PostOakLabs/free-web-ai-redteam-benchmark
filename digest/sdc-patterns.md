@@ -188,7 +188,7 @@ cannot take a long detour and eat the metastability resolution window.
 does not arrive too fast, which can cause the second flop of the synchronizer to see an illegal
 transition"). No other model proposes this and the stated mechanism is dubious — the second flop is
 protected by the first flop's clock, not by data arrival time. **Flagged as probably wrong; do not
-propagate without Alice's ruling.**
+propagate without the expert's ruling.**
 
 **wrong_way (sharpest, qwen).** "Blanket `set_clock_groups -asynchronous` between all clock pairs
 without auditing whether synchronizers actually exist on every crossing signal. This makes STA pass
@@ -461,8 +461,8 @@ notorious source of escaped bugs."
    ones. Confidence in this corpus predicts fluency, not correctness.
 4. **`set_multicycle_path` hold pairing is the single most repeated substantive claim** (7 models,
    independently phrased, with three different explanations of *why* N−1). If any one thing in this
-   file is safe to treat as consensus practice, it is that — and it is still worth Alice's
+   file is safe to treat as consensus practice, it is that — and it is still worth the expert's
    confirmation for the opposite-edge case, which two drafts flag as an exception and none resolves.
 
-`TODO(alice): review — priority order is pattern 7 (period-squeeze vs uncertainty), pattern 4
+`TODO(expert): review — priority order is pattern 7 (period-squeeze vs uncertainty), pattern 4
 (max_delay on CDC), pattern 1 (the -min omission), then the rest.`

@@ -49,7 +49,7 @@ written from memory instead of run.
 
 **2.1 The asymmetry that upgrades the grading.** Day 3's `library`/`patterns` slices were
 schema-and-convergence only, and RECEIPT went unadjudicated for lack of embedded ground truth
-(`TODO(alice)`, `day2-c1b-c2-adjudication.md:672`). **Day 4 has local ground truth on disk.** Bind
+(`TODO(expert)`, `day2-c1b-c2-adjudication.md:672`). **Day 4 has local ground truth on disk.** Bind
 each family and grade against it:
 
 | family | prompt | ground truth |
@@ -110,7 +110,7 @@ post-paper developments and whatever the LVS prompt genuinely leaves undefined.
 Byte-identity gates on any re-render; salvage with recorded parse classes; failures reported only
 when hand-confirmed (the checker false-positive log is the method's honesty); anchored substring
 edits gated on occurrence-count (memorial-3's discipline that prevented the `5%`-inside-`95%`
-corruption); machine-readable gates; `TODO(alice)`-style candour about anything genuinely
+corruption); machine-readable gates; `TODO(expert)`-style candour about anything genuinely
 unadjudicable.
 
 ## 5. Deliverables
